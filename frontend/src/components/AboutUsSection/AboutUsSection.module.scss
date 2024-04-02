@@ -1,0 +1,40 @@
+.section {
+    background-image: url('./vase.jpg');
+    background-size: 50% 100%;
+    background-position: right;
+    background-repeat: no-repeat;
+    padding: clamp(64px, 3vw, 104px) clamp(12px, 4vw, 210px) clamp(64px, 3vw, 104px);
+    font-size: clamp(14px, 3vw, 36px);
+    text-align: center;
+}
+
+.content {
+    font-family: "Capriola", sans-serif;
+    max-width: min(950px, 94%);
+    margin-inline: auto;
+    text-align: center;
+    margin-bottom: 70px;
+}
+
+.blue {
+    color: var(--blue);
+}
+
+.link {
+    font-size: clamp(12px, 4vw, 20px);
+    color: var(--blue);
+
+    transition: .3s color;
+
+    &:hover {
+        color: purple;
+    }
+}
+
+
+@media screen and (max-width: 250px) {
+    .section {
+        font-size: 10px;
+    }
+
+}

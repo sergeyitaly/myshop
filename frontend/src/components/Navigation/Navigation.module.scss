@@ -1,0 +1,45 @@
+.navigation {
+    display: flex;
+    gap: 100px;
+}
+
+.link {
+    text-decoration: none;
+    color: var(--gray-500);
+    font-size: 20px;
+    position: relative;
+
+    &:active {
+        color: #A8A8A8;
+
+        transition: .3s color;
+
+        &::after {
+            background-color: #A8A8A8;
+        }
+    }
+
+    &::after {
+        content: "";
+        background-color: var(--gray-500);
+        height: 2px;
+        width: 100%;
+        top: 100%;
+        left: 0;
+
+        scale: 0;
+        transition: scale .3s, background-color .3s;
+        position: absolute;
+        transform-origin: left;
+    }
+
+    &:hover::after {
+        scale: 1;
+    }
+}
+
+@media (max-width: 1000px) {
+    .navigation {
+        display: none;
+    }
+}
