@@ -15,4 +15,8 @@ go to main folder:
    - npm run dev (localhost:5173)
 2. If we do not use DEBUG:
    - python manage.py runserver (localhost:8000)
+  
+
+admin panel - localhost:8000/admin/ (admin, pass: admin)
+swagger - localhost:8000/swagger/
 
