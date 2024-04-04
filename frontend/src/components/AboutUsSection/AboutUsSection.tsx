@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import styles from './AboutUsSection.module.scss';
-import { Link } from '@tanstack/react-router';
+import { Link } from 'react-router-dom';
 
 export const AboutUsSection = () => {
     let content =
@@ -8,7 +8,7 @@ export const AboutUsSection = () => {
     const [width, setWidth] = useState(window.innerWidth);
 
     if (width < 515) {
-      content = content.slice(0, 158);
+        content = content.slice(0, 158);
     }
 
     useEffect(() => {
@@ -29,7 +29,12 @@ export const AboutUsSection = () => {
                 <span className={styles.blue}>KOLORYT</span>
                 {content}
             </div>
-            <Link to='/' className={styles.link}>Більше про нас</Link>
+            <Link
+                to="/"
+                className={styles.link}
+            >
+                Більше про нас
+            </Link>
         </section>
     );
 };

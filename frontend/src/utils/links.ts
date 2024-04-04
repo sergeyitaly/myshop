@@ -1,6 +1,6 @@
 export const links = [
     {
-        href: '/',
+        href: '/collection',
         name: 'Колекції',
     },
     {

@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router';
+import { Link } from 'react-router-dom';
 import styles from './Footer.module.scss';
 import VisaImg from './visa.svg';
 

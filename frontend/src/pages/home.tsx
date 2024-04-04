@@ -1,6 +1,6 @@
-import { AboutUsSection } from "../components/AboutUsSection/AboutUsSection";
-import { HeroSection } from "../components/HeroSection/HeroSection";
-import styles from "./home.module.scss"
+import { AboutUsSection } from '../components/AboutUsSection/AboutUsSection';
+import { HeroSection } from '../components/HeroSection/HeroSection';
+import styles from './home.module.scss';
 
 export const Home = () => {
     return (

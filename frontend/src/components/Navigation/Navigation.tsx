@@ -1,6 +1,6 @@
-import { Link } from '@tanstack/react-router';
 import styles from './Navigation.module.scss';
 import { links } from '../../utils/links';
+import {Link} from 'react-router-dom';
 
 export const Navigation = () => {
 
