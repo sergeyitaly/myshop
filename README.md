@@ -14,5 +14,5 @@ go to main folder:
    - python -m manage.py runserver (localhost:8000/debug)
    - npm run dev (localhost:5173)
 2. If we do not use DEBUG:
-   - python -m manage.py runserver (localhost:8000)
+   - python manage.py runserver (localhost:8000)
 
