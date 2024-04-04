@@ -17,7 +17,7 @@ go to main folder:
    - python manage.py runserver (localhost:8000)
   
 
-admin panel - localhost:8000/admin/ (admin, pass: admin)
+admin panel - localhost:8000/admin/ (login: admin, pass: admin)
 
 
 swagger - localhost:8000/swagger/
