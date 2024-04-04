@@ -9,7 +9,7 @@ from django.utils.safestring import mark_safe
 from django.template.defaultfilters import slugify # new
 
 
-class Category(models.Model):
+class Collection(models.Model):
     name = models.CharField(max_length=200, db_index=True)
     slug = models.SlugField(max_length=200, db_index=True, unique=True)
     photo = models.ImageField(upload_to="photos/banner", null=True, blank=True)
@@ -36,7 +36,7 @@ class Category(models.Model):
 
 class Product(models.Model):
 
-    category = models.ForeignKey(Category, on_delete=models.CASCADE,related_name='products')
+    category = models.ForeignKey(Collection, on_delete=models.CASCADE,related_name='products')
     name = models.CharField(max_length=300, db_index=True)
     slug = models.SlugField(max_length=200, db_index=True, unique=True)
     description = models.TextField(blank=True)

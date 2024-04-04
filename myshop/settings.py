@@ -1,26 +1,17 @@
 
-from datetime import timedelta
-import datetime
 import os
 from pathlib import Path
-from django.conf import settings
 from decouple import config
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+from datetime import timedelta
+from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-7yp%33lazy-*44btq1zje9yyqc3+_of(b=&_asvl#f)6b#(nyq'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
 ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 
@@ -38,20 +29,20 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django.contrib.sites',
-    'allauth', # new
-    'allauth.account', # new
-    'allauth.socialaccount', # new
-    'frontend',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
     'knox',
-    'accounts',
     'cart',
+    'accounts',
     'whitenoise.runserver_nostatic',
     'djoser',
+    'react',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    #'rest_framework_jwt',
     'drf_yasg',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -62,9 +53,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    'allauth.account.middleware.AccountMiddleware',  # Add this line
-
-
+    'allauth.account.middleware.AccountMiddleware', 
 ]
 
 ROOT_URLCONF = 'myshop.urls'
@@ -72,13 +61,11 @@ ROOT_URLCONF = 'myshop.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            os.path.join(BASE_DIR, "frontend","dist")
-        ],
+        "DIRS": [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug',
+                'django.template.context_processors.debug',  
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -87,11 +74,8 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'myshop.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
@@ -99,8 +83,39 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+# CORS settings
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+    "localhost",
+]
 
 
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'frontend', 'dist'),
+                    os.path.join(BASE_DIR, 'frontend', 'public'),]
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+#STATIC_ROOT = BASE_DIR / "staticfiles"
+
+ADMIN_URL = config('DJANGO_ADMIN_URL', default='admin')
+APPEND_SLASH = True
+
+#REACT_BASE_TEMPLATE = BASE_DIR / 'templates' / 'base.html'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+#STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+WHITENOISE_INDEX_FILE = True
+WHITENOISE_ROOT = os.path.join(BASE_DIR, 'static')
+
+WHITENOISE_ALLOW_ALL_ORIGINS = True
+
+# Media settings
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
@@ -128,8 +143,9 @@ REST_FRAMEWORK = {
     ],
 }
 
-CORS_ORIGIN_WHITELIST = ['http://localhost:5174',]
-#CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_ORIGIN_ALLOW_ALL = False
+
 CORS_ALLOW_CREDENTIALS = True
 AUTHENTICATION_BACKENDS ={
     "django.contrib.auth.backends.ModelBackend",
@@ -194,34 +210,11 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.0/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+TIME_ZONE = 'Europe/Kiev'
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
-
-REACT_APP_DIR = os.path.join(BASE_DIR, 'frontend')
-
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'frontend', 'dist')]
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-WHITENOISE_INDEX_FILE = True
-WHITENOISE_ROOT = os.path.join(STATIC_ROOT, 'root')
-
-# MEDIA Folder settings
-MEDIA_ROOT = os.path.join(BASE_DIR,'media')
-MEDIA_URL = '/media/'
-
-INTERNAL_IPS = []
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

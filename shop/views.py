@@ -9,6 +9,7 @@ from rest_framework import viewsets, permissions
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.permissions import DjangoObjectPermissions
+from django.shortcuts import render
 
 
 class ProductList(generics.ListCreateAPIView):
@@ -20,13 +21,13 @@ class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProductSerializer
 
 
-class CategoryList(generics.ListCreateAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
+class CollectionList(generics.ListCreateAPIView):
+    queryset = Collection.objects.all()
+    serializer_class = CollectionSerializer
 
-class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
+class CollectionDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Collection.objects.all()
+    serializer_class = CollectionSerializer
 
 
 class ProductView(APIView):

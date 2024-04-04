@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [react()],
   publicDir: './public',
   build: {
-    manifest: "manifest.json",
+    manifest: true,
     rollupOptions: {
       output: {
         assetFileNames: (file) => {
