@@ -18,5 +18,7 @@ go to main folder:
   
 
 admin panel - localhost:8000/admin/ (admin, pass: admin)
+
+
 swagger - localhost:8000/swagger/
 
