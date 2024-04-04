@@ -1,0 +1,109 @@
+.slickPrev,
+.slickNext {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+    cursor: pointer;
+}
+
+.slickPrev {
+    left: 10px;
+}
+
+.slickNext {
+    right: 10px;
+}
+
+.sliderContainer {
+    margin-top: 70px;
+}
+
+.filters {
+    font-size: 26px;
+    font-weight: 500;
+    display: flex;
+    margin-bottom: 30px;
+}
+
+.filters p {
+    margin-right: 15%;
+}
+
+.sale-label {
+
+}
+
+.card {
+    padding-right: 10px;
+}
+
+//.card:first-child {
+//    padding-left: 10px;
+//}
+
+
+.cardImage {
+    /*width: 100%;*/
+    position: relative;
+}
+
+.cardImage .name {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 5px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #000000;
+}
+
+.name {
+    margin-top: 15px;
+    text-align: center;
+
+}
+
+.selected {
+    text-decoration: underline;
+}
+
+.priceContainer {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.price {
+    //text-decoration: line-through;
+    margin-right: 10px;
+    color: gray;
+}
+
+.newPrice {
+
+}
+
+.imageContainer {
+    position: relative;
+}
+
+.saleLabel {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(255, 255, 255, 0.81);
+    border-radius: 15px;
+    color: #000000;
+    padding: 5px;
+}
+
+.strikethrough {
+    text-decoration: line-through;
+}
+
+.category {
+    color: gray;
+    text-align: center;
+}

@@ -1,0 +1,63 @@
+.slickPrev,
+.slickNext {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+    cursor: pointer;
+}
+.customPrevArrow {
+    position: absolute;
+    top: 50%;
+    left: 10px; /* Расстояние 10px от левого края */
+    transform: translateY(-50%);
+    z-index: 1000;
+    cursor: pointer;
+}
+
+.customNextArrow {
+    position: absolute;
+    top: 50%;
+    right: 10px; /* Расстояние 10px от правого края */
+    transform: translateY(-50%);
+    z-index: 1000;
+    cursor: pointer;
+}
+
+.sliderContainer {
+    margin-top: 70px;
+}
+
+.title {
+    font-size: 26px;
+    font-weight: 500;
+    margin: 20px 0
+}
+
+//.card {
+//    padding-right: 10px;
+//}
+
+.card:first-child {
+    padding-left: 5px;
+}
+
+.cardImage {
+    padding-right: 5px;
+}
+
+.name {
+    margin-top: 15px;
+    text-align: center
+}
+
+.imageUrl {
+    max-width: 100%;
+}
+
+.price {
+    margin-top: 15px;
+    color: grey;
+    text-align: center;
+    margin-bottom: 10px;
+}
