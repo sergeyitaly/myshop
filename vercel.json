@@ -17,7 +17,7 @@
     ],
     "routes": [
       {
-        "src": "/(.*)",
+        "src": "frontend(.*)",
         "dest": "myshop/wsgi.py"
       },
       {
