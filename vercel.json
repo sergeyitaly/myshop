@@ -1,4 +1,3 @@
-
 {
     "version": 2,
     "builds": [
@@ -11,13 +10,13 @@
         "src": "build_files.sh",
         "use": "@vercel/static-build",
         "config": {
-          "distDir": "static"
+          "distDir": "staticfiles"
         }
       }
     ],
     "routes": [
       {
-        "src": "/frontend/(.*)",
+        "src": "/(.*)",
         "dest": "myshop/wsgi.py"
       },
       {
@@ -26,4 +25,3 @@
       }
     ]
   }
-  
