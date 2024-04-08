@@ -24,6 +24,9 @@
         "src": "/static/(.*)",
         "dest": "/static/$1"
       }
+    ],
+    "rewrites": [
+        {"source": "/(.*)", "destination": "/"}
     ]
   }
   
