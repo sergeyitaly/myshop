@@ -13,23 +13,22 @@
         "src": "myshop/frontend",
         "use": "@vercel/static-build",
         "config": {
-          "distDir": "dist"  // Adjust 'distDir' based on your frontend build output directory
+          "distDir": "dist"  
         }
       }
     ],
     "routes": [
       {
         "src": "/frontend/(.*)",
-        "dest": "/myshop/frontend/$1"  // Adjust destination based on frontend file structure
+        "dest": "/myshop/frontend/$1" 
       },
       {
         "src": "/static/(.*)",
-        "dest": "/myshop/static/$1"  // Adjust destination for Django static files
+        "dest": "/myshop/static/$1"  
       },
       {
         "src": "/(.*)",
-        "dest": "myshop/wsgi.py"  // Route all other requests to Django backend
-      }
+        "dest": "myshop/wsgi.py"  
     ]
   }
   
