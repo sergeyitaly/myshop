@@ -19,15 +19,15 @@
     ],
     "routes": [
       {
-        "src": "/frontend/(.*)",
+        "src": "/frontend/",
         "dest": "/myshop/frontend/$1"
       },
       {
-        "src": "/static/(.*)",
+        "src": "/static/",
         "dest": "/myshop/static/$1"
       },
       {
-        "src": "/(.*)",
+        "src": "/",
         "dest": "myshop/wsgi.py"
       }
     ]
