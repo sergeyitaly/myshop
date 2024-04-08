@@ -6,6 +6,8 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.contrib import admin
+import debug_toolbar
+
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -30,15 +32,13 @@ urlpatterns = [
     path('auth/', include('djoser.urls.jwt')),
     path('auth/', include('djoser.urls.authtoken')),
     path('', include("accounts.urls")),
-#    re_path(r'^(?:.*)/?', TemplateView.as_view(template_name='base.html')),
-#    path('', TemplateView.as_view(template_name='base.html')),
-    
+    path('debug/', TemplateView.as_view(template_name='base.html')),
+    #path('__debug__/', include(debug_toolbar.urls)),  # Django Debug Toolbar URL
 ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+   # urlpatterns += [re_path(r'^(?:.*)/?', TemplateView.as_view(template_name='base.html')),]
 
-urlpatterns += [path('debug/', TemplateView.as_view(template_name='base.html')),]
-
+#urlpatterns += [path('debug/', TemplateView.as_view(template_name='base.html')),]
 #urlpatterns += [re_path(r'^(?:.*)/?', TemplateView.as_view(template_name='base.html')),]

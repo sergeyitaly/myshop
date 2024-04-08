@@ -97,7 +97,9 @@ INTERNAL_IPS = [
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'frontend', 'dist'),
-                    os.path.join(BASE_DIR, 'frontend', 'public'),]
+                    os.path.join(BASE_DIR, 'frontend', 'public'),
+                    
+                    ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 #STATIC_ROOT = BASE_DIR / "staticfiles"
 

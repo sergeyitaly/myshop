@@ -1,32 +1,36 @@
-{% load static%}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Koloryt Backend</title>
+    <title>Koloryt</title>
 
+    <!-- Load the favicon -->
+    <link rel="icon" type="image/svg+xml" href="{% static 'vite.svg' %}">
+
+    <!-- Load main JavaScript bundle -->
     {% if debug %}
-    <h6>Debug mode</h6>
-    <script type="module" src="http://localhost:5173/@vite/client"></script>
-    <script type="module">
-    import RefreshRuntime from 'http://localhost:5173/@react-refresh'
-    RefreshRuntime.injectIntoGlobalHook(window)
-    window.$RefreshReg$ = () => {}
-    window.$RefreshSig$ = () => (type) => type
-    window.__vite_plugin_react_preamble_installed__ = true
-    </script>
-    <script type="module" src="http://localhost:5173/src/main.tsx"></script>
+        <!-- Debug mode: Load Vite client and main.tsx for development -->
+        <script type="module" src="http://localhost:5173/@vite/client"></script>
+        <script type="module">
+            import RefreshRuntime from 'http://localhost:5173/@react-refresh';
+            RefreshRuntime.injectIntoGlobalHook(window);
+            window.$RefreshReg$ = () => {};
+            window.$RefreshSig$ = () => (type) => type;
+            window.__vite_plugin_react_preamble_installed__ = true;
+        </script>
+        <script type="module" src="http://localhost:5173/src/main.tsx"></script>
     {% else %}
-    <h6>Not debug mode</h6>
-    <script type="module" crossorigin src="{% static '/assets/js/index.min.js' %}"></script>
-    <link rel="stylesheet" href="{% static '/assets/css/index.min4.css' %}">
+        <!-- Production mode: Load compiled assets -->
+        <script type="module" crossorigin src="{% static 'assets/js/index.min.js' %}"></script>
+        <link rel="modulepreload" crossorigin href="{% static 'assets/js/main.min.js' %}">
     {% endif %}
-    
+
+    <!-- Load CSS styles -->
+    <link rel="stylesheet" href="{% static 'assets/css/index.min4.css' %}" crossorigin>
 </head>
 <body>
     <div id="root"></div>
-    
 </body>
 </html>
