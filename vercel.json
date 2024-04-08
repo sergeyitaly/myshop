@@ -13,22 +13,23 @@
         "src": "myshop/frontend",
         "use": "@vercel/static-build",
         "config": {
-          "distDir": "dist"  
+          "distDir": "dist"
         }
       }
     ],
     "routes": [
       {
         "src": "/frontend/(.*)",
-        "dest": "/myshop/frontend/$1" 
+        "dest": "/myshop/frontend/$1"
       },
       {
         "src": "/static/(.*)",
-        "dest": "/myshop/static/$1"  
+        "dest": "/myshop/static/$1"
       },
       {
         "src": "/(.*)",
-        "dest": "myshop/wsgi.py"  
+        "dest": "myshop/wsgi.py"
+      }
     ]
   }
   
