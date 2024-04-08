@@ -1,17 +1,17 @@
 #!/bin/bash
 
-# Navigate to the correct directory
-cd myshop
+# Navigate to the correct directory (replace `/path/to/myshop` with the actual path)
+cd /path/to/myshop
 
-# Install project dependencies
+# Install project dependencies (assuming Python 3.9)
 echo "Installing project dependencies..."
-pip install -r requirements.txt
+python3.9 -m pip install -r requirements.txt
 
 # Make migrations and migrate
 echo "Running migrations..."
-python manage.py makemigrations --noinput
-python manage.py migrate --noinput
+python3.9 manage.py makemigrations --noinput
+python3.9 manage.py migrate --noinput
 
 # Collect static files
 echo "Collecting static files..."
-python manage.py collectstatic --noinput --clear
+python3.9 manage.py collectstatic --noinput --clear
