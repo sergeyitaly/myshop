@@ -1,34 +1,28 @@
+
 {
     "version": 2,
     "builds": [
       {
         "src": "myshop/wsgi.py",
         "use": "@vercel/python",
-        "config": {
-          "maxLambdaSize": "15mb",
-          "runtime": "python3.9"
-        }
+        "config": {"maxLambdaSize": "15mb", "runtime": "python3.9"}
       },
       {
-        "src": "myshop/frontend",
+        "src": "build_files.sh",
         "use": "@vercel/static-build",
         "config": {
-          "distDir": "dist"
+          "distDir": "static"
         }
       }
     ],
     "routes": [
       {
-        "src": "/frontend/",
-        "dest": "/myshop/frontend/dist/$1"
-      },
-      {
-        "src": "/static/",
-        "dest": "/myshop/static/$1"
-      },
-      {
-        "src": "/",
+        "src": "/frontend/(.*)",
         "dest": "myshop/wsgi.py"
+      },
+      {
+        "src": "/static/(.*)",
+        "dest": "/static/$1"
       }
     ]
   }
