@@ -2,7 +2,7 @@
 #!/bin/bash
 
 # Assuming frontend assets are generated into myshop/frontend/dist
-FRONTEND_DIR="myshop/frontend/dist"
+FRONTEND_DIR="myshop/frontend"
 
 # Check if frontend directory exists
 if [ -d "$FRONTEND_DIR" ]; then
