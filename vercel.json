@@ -1,28 +1,34 @@
-
 {
     "version": 2,
     "builds": [
       {
         "src": "myshop/wsgi.py",
         "use": "@vercel/python",
-        "config": {"maxLambdaSize": "15mb", "runtime": "python3.9"}
+        "config": {
+          "maxLambdaSize": "15mb",
+          "runtime": "python3.9"
+        }
       },
       {
-        "src": "build_files.sh",
+        "src": "myshop/frontend",
         "use": "@vercel/static-build",
         "config": {
-          "distDir": "static"
+          "distDir": "dist"  // Adjust 'distDir' based on your frontend build output directory
         }
       }
     ],
     "routes": [
       {
-        "src": "frontend(.*)",
-        "dest": "myshop/wsgi.py"
+        "src": "/frontend/(.*)",
+        "dest": "/myshop/frontend/$1"  // Adjust destination based on frontend file structure
       },
       {
         "src": "/static/(.*)",
-        "dest": "/static/$1"
+        "dest": "/myshop/static/$1"  // Adjust destination for Django static files
+      },
+      {
+        "src": "/(.*)",
+        "dest": "myshop/wsgi.py"  // Route all other requests to Django backend
       }
     ]
   }
