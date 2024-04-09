@@ -1,4 +1,5 @@
-{%load static%}
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,12 +28,9 @@
         <script type="module" crossorigin src="{% static 'assets/js/index.min.js' %}"></script>
         <link rel="modulepreload" crossorigin href="{% static 'assets/js/main.min.js' %}">
         <!-- Example: using static template tag -->
-
+        <link rel="stylesheet" href="{% static 'assets/css/index.min3.css' %}" crossorigin>
     {% endif %}
 
-    <!-- Load CSS styles -->
-    <link rel="stylesheet" href="{% static 'assets/css/index.min4.css' %}" crossorigin>
-    
 </head>
 <body>
     <div id="root"></div>

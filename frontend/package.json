@@ -22,9 +22,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^9.1.0",
-    "sass": "^1.71.1",
-    "vite-plugin-svgr": "^4.2.0",
-    "vite-svg-loader": "^5.1.0"
+    "sass": "^1.71.1"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
@@ -44,6 +42,8 @@
     "rollup": "^4.14.0",
     "typescript": "^5.4.4",
     "vite": "^5.1.4",
-    "vite-plugin-copy": "^0.1.6"
+    "vite-plugin-copy": "^0.1.6",
+    "vite-plugin-svgr": "^4.2.0",
+    "vite-svg-loader": "^5.1.0"
   }
 }

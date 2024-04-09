@@ -80,13 +80,19 @@ TEMPLATES = [
 #WSGI_APPLICATION = 'myshop.wsgi.application'
 WSGI_APPLICATION = 'myshop.wsgi.app'
 
-
+data_directory = BASE_DIR/'postgres_DB'
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-             }
-        }
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'postgres',  # Replace 'your_database_name' with your database name
+        'USER': 'postgres',       # Replace 'your_username' with your database username
+        'PASSWORD': 'postgres',   # Replace 'your_password' with your database password
+        'HOST': 'localhost',           # Replace 'localhost' with your database host if not running locally
+        'PORT': '5432',                    # Replace '' with your database port if not using the default port
+
+    }
+}
+
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
@@ -98,14 +104,15 @@ INTERNAL_IPS = [
     "localhost",
 ]
 
-
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'frontend', 'dist'),
-                    os.path.join(BASE_DIR, 'frontend', 'public'),
-                    
-                    ]
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'frontend', 'dist'),
+    os.path.join(BASE_DIR, 'frontend', 'public'),
+    # Add other directories as needed
+]
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-#STATIC_ROOT = BASE_DIR / "staticfiles"
 
 ADMIN_URL = config('DJANGO_ADMIN_URL', default='admin')
 APPEND_SLASH = True

@@ -1,28 +1,23 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import svgr from "vite-plugin-svgr";
+import svgLoader from 'vite-plugin-svgr';
 import { TanStackRouterVite } from '@tanstack/router-vite-plugin';
 
+const cssFileName = 'index.min.css';
 
-const cssFileName = 'index.min.css'
-
-
-// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), svgr(), TanStackRouterVite(),], 
+  plugins: [
+    react(), svgLoader(), TanStackRouterVite(),
+  ],
   build: {
-    manifest: 'manifest.json',
+    manifest: true, // Generate manifest file
     rollupOptions: {
       input: ['/src/main.tsx', './index.html'],
       output: {
-        assetFileNames: (file) => {
-          return `assets/css/${cssFileName}`
-        },
-        entryFileNames: (file) => {
-          return `assets/js/[name].min.js`
-        }
-      }
-    }
-  }
-
-})
+        entryFileNames: `assets/js/[name].min.js`, // Output path for JS files
+        assetFileNames: `assets/css/${cssFileName}`, // Output path for CSS files
+        chunkFileNames: `assets/js/[name]-[hash].js`, // Output path for chunk files
+      },
+    },
+  },
+});
