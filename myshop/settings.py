@@ -4,6 +4,8 @@ from pathlib import Path
 from decouple import config
 from datetime import timedelta
 from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -13,7 +15,7 @@ SECRET_KEY = 'django-insecure-7yp%33lazy-*44btq1zje9yyqc3+_of(b=&_asvl#f)6b#(nyq
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".vercel.app", ".now.sh"]
+ALLOWED_HOSTS = ["127.0.0.1", ".vercel.app", ".now.sh"]
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
@@ -90,19 +92,28 @@ TEMPLATES = [
 #WSGI_APPLICATION = 'myshop.wsgi.application'
 WSGI_APPLICATION = 'myshop.wsgi.app'
 
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#        'NAME': 'postgres',  # Replace 'your_database_name' with your database name
+#        'USER': 'postgres',       # Replace 'your_username' with your database username
+#        'PASSWORD': 'postgres',   # Replace 'your_password' with your database password
+#        'HOST': 'localhost',           # Replace 'localhost' with your database host if not running locally
+#        'PORT': '5432',                    # Replace '' with your database port if not using the default port
+#
+#    }
+#}
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',  # Replace 'your_database_name' with your database name
-        'USER': 'postgres',       # Replace 'your_username' with your database username
-        'PASSWORD': 'postgres',   # Replace 'your_password' with your database password
-        'HOST': 'localhost',           # Replace 'localhost' with your database host if not running locally
-        'PORT': '5432',                    # Replace '' with your database port if not using the default port
-
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ.get("postgres"),
+        'USER': os.environ.get("postgres"),
+        'PASSWORD': os.environ.get("postges"),
+        'HOST': os.environ.get("localhost"),
+        'PORT': os.environ.get("5432"),
     }
 }
-
-
 
 STATIC_URL = '/static/'
 
