@@ -14,6 +14,16 @@ DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".vercel.app", ".now.sh"]
+# CORS settings
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+    "localhost",
+]
 #ALLOWED_HOSTS = ['*']
 # Application definition
 
@@ -80,10 +90,9 @@ TEMPLATES = [
 #WSGI_APPLICATION = 'myshop.wsgi.application'
 WSGI_APPLICATION = 'myshop.wsgi.app'
 
-data_directory = BASE_DIR/'postgres_DB'
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',  # Replace 'your_database_name' with your database name
         'USER': 'postgres',       # Replace 'your_username' with your database username
         'PASSWORD': 'postgres',   # Replace 'your_password' with your database password
@@ -93,16 +102,7 @@ DATABASES = {
     }
 }
 
-# CORS settings
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
 
-INTERNAL_IPS = [
-    "127.0.0.1",
-    "localhost",
-]
 
 STATIC_URL = '/static/'
 
