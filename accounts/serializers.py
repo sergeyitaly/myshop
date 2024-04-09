@@ -6,7 +6,7 @@ from rest_framework.serializers import Serializer, ModelSerializer, CharField
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from rest_framework import serializers
-from accounts.models import *
+from .models import CustomUser
 
 from django.contrib.auth import authenticate, get_user_model
 from djoser.conf import settings
