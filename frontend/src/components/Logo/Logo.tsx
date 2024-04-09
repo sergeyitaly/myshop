@@ -1,5 +1,5 @@
 import LogoSVG from './logo.svg';
-import styles from './Logo.module.scss';
+import styles from './logo.module.scss';
 export const Logo = ({ className }: { className?: string }) => {
     return (
         <div className={className !== undefined ? className : ''}>
