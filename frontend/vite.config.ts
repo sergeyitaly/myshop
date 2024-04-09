@@ -10,7 +10,7 @@ export default defineConfig({
     react(), svgLoader(), TanStackRouterVite(),
   ],
   build: {
-    manifest: true, // Generate manifest file
+    manifest: 'manifest.json',
     rollupOptions: {
       input: ['/src/main.tsx', './index.html'],
       output: {
