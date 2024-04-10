@@ -39,7 +39,7 @@ urlpatterns = [
     path('debug/', TemplateView.as_view(template_name='base.html'), name='debug'),
 
     # Catch-all URL to serve index.html for frontend routes
-    path('', TemplateView.as_view(template_name='frontend/index.html'), name='frontend'),
+    path('', TemplateView.as_view(template_name='index.html'), name='frontend'),
 ]
 
 if settings.DEBUG:
