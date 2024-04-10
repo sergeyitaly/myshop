@@ -14,7 +14,6 @@ if os.path.isfile(dotenv_file):
     dotenv.load_dotenv(dotenv_file)
     
     
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ['SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -124,7 +123,10 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 #STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 WHITENOISE_INDEX_FILE = True
 WHITENOISE_ROOT = STATIC_ROOT
