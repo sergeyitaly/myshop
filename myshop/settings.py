@@ -23,14 +23,14 @@ DEBUG = os.environ.get("DEBUG") != "False"
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost",".vercel.app", ".now.sh"]
 # CORS settings
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+#CORS_ALLOWED_ORIGINS = [
+#    "http://localhost:5173",
+#    "http://127.0.0.1:5173",
+#]
 
 INTERNAL_IPS = [
-    "127.0.0.1",
-    "localhost",
+#    "127.0.0.1",
+#    "localhost",
 ]
 #ALLOWED_HOSTS = ['*']
 # Application definition
@@ -176,8 +176,7 @@ REST_FRAMEWORK = {
 }
 
 
-CORS_ORIGIN_ALLOW_ALL = False
-
+CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 AUTHENTICATION_BACKENDS ={
     "django.contrib.auth.backends.ModelBackend",
