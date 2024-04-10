@@ -31,8 +31,7 @@ urlpatterns = [
     path('auth/', include('djoser.urls.jwt')),
     path('auth/', include('djoser.urls.authtoken')),
     path('', include('accounts.urls')),
-    path("admin/", include("admin.urls")),  # Include admin URLs
-
+    path('admin/', admin.site.urls),
     path('debug/', TemplateView.as_view(template_name='base.html'), name='debug'),
 ]
 
