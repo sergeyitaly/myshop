@@ -10,6 +10,7 @@ export default defineConfig({
     react(), svgLoader(), TanStackRouterVite(),
   ],
   build: {
+    //outDir: '../../static',
     manifest: 'manifest.json',
     rollupOptions: {
       input: ['/src/main.tsx', './index.html'],

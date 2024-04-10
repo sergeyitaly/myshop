@@ -21,7 +21,7 @@ SECRET_KEY = os.environ['SECRET_KEY']
 DEBUG = os.environ.get("DEBUG") != "False"
 
 
-ALLOWED_HOSTS = ["127.0.0.1", ".vercel.app", ".now.sh"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost",".vercel.app", ".now.sh"]
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
@@ -113,7 +113,7 @@ WSGI_APPLICATION = 'myshop.wsgi.app'
 
 DATABASES = {
     'default': {
-        'ENGINE': "django.db.backends.postgresql_psycopg2",
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ["DB_NAME"],
         'USER': os.environ["DB_USER"],
         'PASSWORD': os.environ["DB_PASSWORD"],
@@ -121,19 +121,25 @@ DATABASES = {
         'PORT': os.environ["DB_PORT"],
     }
 }
-
-
 STATIC_URL = '/static/'
 
-# List of directories where Django will look for static files
+# List of directories where Django will look for additional static files.
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'frontend', 'dist'),
-    os.path.join(BASE_DIR, 'frontend', 'public'),
-    # Add other directories as needed
+    os.path.join(BASE_DIR, 'frontend', 'dist'),  # Path to your frontend build output
 ]
 
-# Directory where Django will collect static files during 'collectstatic'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# Directory where collected static files will be stored.
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
+
+
+#STATIC_URL = '/static/'
+#STATICFILES_DIRS = [
+#    os.path.join(BASE_DIR, 'frontend', 'dist'),
+#    os.path.join(BASE_DIR, 'frontend', 'public'),
+#    # Add other directories as needed
+#]
+
+#STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
 ADMIN_URL = config('DJANGO_ADMIN_URL', default='admin')
