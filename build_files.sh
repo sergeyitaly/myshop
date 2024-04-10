@@ -16,14 +16,3 @@ export DJANGO_SETTINGS_MODULE=myshop.settings
 # Collect static files (use appropriate settings)
 python manage.py collectstatic --noinput
 
-# Ensure the target directory for collected static files exists
-mkdir -p staticfiles_build
-
-# Check if the 'static' directory exists
-if [ -d "static" ]; then
-    # Copy collected static files to the designated directory
-    cp -r static/* staticfiles_build/
-else
-    echo "Error: 'static' directory not found."
-    exit 1
-fi
