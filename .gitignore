@@ -27,3 +27,4 @@ venv
 *.sw?
 
 .env
+__pycache__/
