@@ -122,12 +122,13 @@ DATABASES = {
     }
 }
 STATIC_URL = '/static/'
+STATICFILES_DIRS = os.path.join(BASE_DIR, 'static')
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'frontend', 'dist'),
-    os.path.join(BASE_DIR, 'frontend', 'public'),
-    # Add other directories as needed
-]
+#STATICFILES_DIRS = [
+#    os.path.join(BASE_DIR, 'frontend', 'dist'),
+#    os.path.join(BASE_DIR, 'frontend', 'public'),
+#    # Add other directories as needed
+#]
 
 #STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles", "static")
