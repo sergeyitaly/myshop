@@ -20,27 +20,29 @@ schema_view = get_schema_view(
     public=True,
     permission_classes=(permissions.AllowAny,),
 )
-
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path("admin/", include("admin.urls")),  # Include admin URLs
 
+    # Include API documentation URLs
+    path('swagger<format>/', include('schema_view.without_ui(cache_timeout=0)'), name='schema-json'),
+    path('swagger/', include('schema_view.with_ui('swagger', cache_timeout=0)'), name='schema-swagger-ui'),
+    path('redoc/', include('schema_view.with_ui('redoc', cache_timeout=0)'), name='schema-redoc'),
+
+    # Include app-specific URLs (e.g., shop, accounts, auth)
     path('', include('shop.urls')),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
     path('auth/', include('djoser.urls.authtoken')),
-    path('', include("accounts.urls")),
-    path('debug/', TemplateView.as_view(template_name='base.html')),
-    #path('__debug__/', include(debug_toolbar.urls)),  # Django Debug Toolbar URL
+    path('', include('accounts.urls')),
+
+    # Debug URL
+    path('debug/', TemplateView.as_view(template_name='base.html'), name='debug'),
+
+    # Catch-all URL to serve index.html for frontend routes
+    path('', TemplateView.as_view(template_name='frontend/index.html'), name='frontend'),
 ]
 
 if settings.DEBUG:
+    # Serve static and media files during development
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
-
-   # urlpatterns += [re_path(r'^(?:.*)/?', TemplateView.as_view(template_name='base.html')),]
-
-#urlpatterns += [path('debug/', TemplateView.as_view(template_name='base.html')),]
-#urlpatterns += [re_path(r'^(?:.*)/?', TemplateView.as_view(template_name='base.html')),]
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
