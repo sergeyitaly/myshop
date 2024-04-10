@@ -12,6 +12,10 @@
     {
       "src": "build_files.sh",
       "use": "@vercel/static-build"
+    },
+    {
+      "src": "frontend/dist",
+      "use": "@vercel/static-build"
     }
   ],
   "routes": [
