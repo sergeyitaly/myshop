@@ -36,7 +36,7 @@ class Collection(models.Model):
 
 class Product(models.Model):
 
-    category = models.ForeignKey(Collection, on_delete=models.CASCADE,related_name='products')
+    collection = models.ForeignKey(Collection, on_delete=models.CASCADE,related_name='products')
     name = models.CharField(max_length=300, db_index=True)
     slug = models.SlugField(max_length=200, db_index=True, unique=True)
     description = models.TextField(blank=True)
