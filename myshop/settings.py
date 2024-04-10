@@ -17,8 +17,9 @@ if os.path.isfile(dotenv_file):
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ['SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-TEMPLATE_DEBUG = DEBUG
+#DEBUG = True
+DEBUG = os.environ.get("DEBUG") != "False"
+
 
 ALLOWED_HOSTS = ["127.0.0.1", ".vercel.app", ".now.sh"]
 # CORS settings
@@ -80,8 +81,8 @@ ROOT_URLCONF = 'myshop.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-       # "DIRS": [BASE_DIR / "templates"],
-                'DIRS': [],
+         "DIRS": [BASE_DIR / "templates"],
+          #      'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -128,7 +129,9 @@ STATICFILES_DIRS = [
     # Add other directories as needed
 ]
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+#STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles", "static")
+
 
 ADMIN_URL = config('DJANGO_ADMIN_URL', default='admin')
 APPEND_SLASH = True
@@ -138,8 +141,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 #STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 WHITENOISE_INDEX_FILE = True
-WHITENOISE_ROOT = os.path.join(BASE_DIR, 'static')
-
+WHITENOISE_ROOT = STATIC_ROOT
 WHITENOISE_ALLOW_ALL_ORIGINS = True
 
 # Media settings
