@@ -9,7 +9,7 @@ import dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-dotenv_file = os.path.join(BASE_DIR,'.env')
+dotenv_file = os.path.join(BASE_DIR,'.env.development.local')
 if os.path.isfile(dotenv_file):
     dotenv.load_dotenv(dotenv_file)
     
@@ -101,12 +101,12 @@ WSGI_APPLICATION = 'myshop.wsgi.app'
 
 DATABASES = {
     'default': {        
-        'ENGINE': os.environ["DB_ENGINE"],
-        'NAME': os.environ["DB_NAME"],
-        'USER': os.environ["DB_USER"],
-        'PASSWORD': os.environ["DB_PASSWORD"],
-        'HOST': os.environ["DB_HOST"],
-        'PORT': os.environ["DB_PORT"],
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ["POSTGRES_NAME"],
+        'USER': os.environ["POSTGRES_USER"],
+        'PASSWORD': os.environ["POSTGRES_PASSWORD"],
+        'HOST': os.environ["POSTGRES_HOST"],
+        'PORT': os.environ["POSTGRES_PORT"],
     }
 }
 STATIC_URL = '/static/'
