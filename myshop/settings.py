@@ -81,8 +81,9 @@ ROOT_URLCONF = 'myshop.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-         #"DIRS": [BASE_DIR / "templates"],
-                'DIRS': [],
+         #
+         "DIRS": [BASE_DIR / "templates"],
+         #       'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -112,8 +113,8 @@ WSGI_APPLICATION = 'myshop.wsgi.app'
 #}
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+    'default': {        
+        'ENGINE': os.environ["DB_ENGINE"],
         'NAME': os.environ["DB_NAME"],
         'USER': os.environ["DB_USER"],
         'PASSWORD': os.environ["DB_PASSWORD"],
