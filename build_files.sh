@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Create and activate a virtual environment named 'myenv'
+python3 -m venv myenv
+source myenv/bin/activate
 
 # Upgrade pip inside the virtual environment
 python -m pip install --upgrade pip
