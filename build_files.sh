@@ -16,4 +16,4 @@ pip install -r requirements.txt
 export DJANGO_SETTINGS_MODULE=myshop.settings
 
 # Collect static files (use appropriate settings)
-python manage.py collectstatic --noinput
+python manage.py collectstatic --noinput --clear --verbosity 0
