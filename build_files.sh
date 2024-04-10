@@ -1,7 +1,19 @@
-# build_files.sh
-python3.9 -m venv myenv  # Create a virtual environment named 'myenv'
-source myenv/bin/activate  # Activate the virtual environment
+#!/bin/bash
 
-python3.9 -m pip install --upgrade pip
+# Create a virtual environment named 'myenv'
+python3 -m venv myenv
+
+# Activate the virtual environment
+source myenv/bin/activate
+
+# Upgrade pip inside the virtual environment
+python -m pip install --upgrade pip
+
+# Install requirements from requirements.txt
 pip install -r requirements.txt
-python manage.py collectstatic -l --noinput
+
+# Set Django settings module (replace 'myshop.settings' with your actual settings module)
+export DJANGO_SETTINGS_MODULE=myshop.settings
+
+# Collect static files (use appropriate settings)
+python manage.py collectstatic --noinput
