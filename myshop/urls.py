@@ -25,20 +25,15 @@ urlpatterns = [
 
     # Include API documentation URLs
     path('swagger<format>/', include('schema_view.without_ui(cache_timeout=0)'), name='schema-json'),
-    path('swagger/', include('schema_view.with_ui('swagger', cache_timeout=0)'), name='schema-swagger-ui'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', include('schema_view.with_ui('redoc', cache_timeout=0)'), name='schema-redoc'),
-
-    # Include app-specific URLs (e.g., shop, accounts, auth)
     path('', include('shop.urls')),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
     path('auth/', include('djoser.urls.authtoken')),
     path('', include('accounts.urls')),
 
-    # Debug URL
     path('debug/', TemplateView.as_view(template_name='base.html'), name='debug'),
-
-    # Catch-all URL to serve index.html for frontend routes
     path('', TemplateView.as_view(template_name='index.html'), name='frontend'),
 ]
 
