@@ -15,6 +15,13 @@
       "config": {
         "distDir": "staticfiles_build" 
       }
+    },
+    {
+      "src": "myshop/frontend", 
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist" 
+      }
     }
   ],
   "routes": [
