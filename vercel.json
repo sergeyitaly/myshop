@@ -10,24 +10,24 @@
       }
     },
     {
-      "src": "build_files.sh", 
+      "src": "myshop/frontend",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "staticfiles_build" 
+        "distDir": "frontend/dist"
       }
     },
     {
-      "src": "myshop/frontend", 
+      "src": "build_files.sh",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist" 
+        "distDir": "staticfiles_build"
       }
     }
   ],
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "/static/$1"
+      "dest": "/staticfiles_build/static/$1"
     },
     {
       "src": "/(.*)",
