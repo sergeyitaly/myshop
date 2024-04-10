@@ -10,10 +10,17 @@
       }
     },
     {
-      "src": "myshop/frontend",
+      "src": "myshop/frontend", 
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "myshop/frontend/dist"
+        "distDir": "myshop/frontend/dist" 
+      }
+    },
+    {
+      "src": "build_files.sh", 
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "staticfiles_build" 
       }
     }
   ],
