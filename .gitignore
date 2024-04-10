@@ -26,5 +26,3 @@ venv
 *.sln
 *.sw?
 
-.vercel
-.env
