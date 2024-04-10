@@ -137,9 +137,6 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 #STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
-ADMIN_URL = config('DJANGO_ADMIN_URL', default='admin')
-APPEND_SLASH = True
-
 #REACT_BASE_TEMPLATE = BASE_DIR / 'templates' / 'base.html'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 #STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
