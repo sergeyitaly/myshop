@@ -1,16 +1,8 @@
-#!/bin/bash
-
-# Create a virtual environment named 'myenv'
-python -m venv myenv
-
-# Activate the virtual environment
-source myenv/bin/activate
-
-# Upgrade pip inside the virtual environment
-python -m pip install --upgrade pip
+#!/use/bin/env bash
 
 # Install requirements from requirements.txt
 pip install -r requirements.txt
-
+python3 manage.py makemigrations
+python3 manage.py migrate
 # Collect static files (use appropriate settings)
-python manage.py collectstatic --noinput --clear 
+python3 manage.py collectstatic --noinput --clear 
