@@ -18,8 +18,8 @@ admin.site.register(Collection, CollectionAdmin)
 
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'collection','image_tag', 'price', 'stock',)
-    fields = ['name', 'slug','collection','image_tag', 'photo','image_brand','brandimage','color','price', 'stock','description']
-    readonly_fields = ['slug','image_tag','image_brand']
+    fields = ['name', 'slug','collection','image_tag', 'photo','brandimage','price', 'stock','description']
+    readonly_fields = ['slug','image_tag']
     list_filter = ('collection','available',)
     save_on_top = True      
   
