@@ -21,7 +21,6 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 urlpatterns = [
-    path("admin/", include("admin.urls")),  # Include admin URLs
 
     # Include API documentation URLs
     path('swagger<format>/', include('schema_view.without_ui(cache_timeout=0)'), name='schema-json'),
@@ -32,10 +31,11 @@ urlpatterns = [
     path('auth/', include('djoser.urls.jwt')),
     path('auth/', include('djoser.urls.authtoken')),
     path('', include('accounts.urls')),
+    path("admin/", include("admin.urls")),  # Include admin URLs
 
     path('debug/', TemplateView.as_view(template_name='base.html'), name='debug'),
-    path('', TemplateView.as_view(template_name='index.html'), name='frontend'),
 ]
 
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
