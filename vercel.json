@@ -10,7 +10,7 @@
       }
     },
     {
-      "src": "frontend",
+      "src": "build_files.sh",
       "use": "@vercel/static-build",
       "config": {
         "distDir": "frontend/dist"
@@ -20,7 +20,7 @@
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "/frontend/dist/$1"
+      "dest": "/static/$1"
     },
     {
       "src": "/(.*)",

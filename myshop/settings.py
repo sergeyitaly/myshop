@@ -4,13 +4,18 @@ from pathlib import Path
 from decouple import config
 from datetime import timedelta
 from pathlib import Path
-from dotenv import load_dotenv
-load_dotenv()
+import dotenv
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+dotenv_file = os.path.join(BASE_DIR,'.env')
+if os.path.isfile(dotenv_file):
+    dotenv.load_dotenv(dotenv_file)
+    
+    
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-7yp%33lazy-*44btq1zje9yyqc3+_of(b=&_asvl#f)6b#(nyq'
-
+SECRET_KEY = os.environ('SECRECT_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
@@ -106,12 +111,12 @@ WSGI_APPLICATION = 'myshop.wsgi.app'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get("DB_NAME"),
-        'USER': os.environ.get("DB_USER"),
-        'PASSWORD': os.environ.get("DB_PASSWORD"),
-        'HOST': os.environ.get("DB_HOST"),
-        'PORT': os.environ.get("DB_PORT"),
+        'ENGINE': os.environ("DB_ENGINE"),
+        'NAME': os.environ("DB_NAME"),
+        'USER': os.environ("DB_USER"),
+        'PASSWORD': os.environ("DB_PASSWORD"),
+        'HOST': os.environ("DB_HOST"),
+        'PORT': os.environ("DB_PORT"),
     }
 }
 
