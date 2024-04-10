@@ -126,7 +126,7 @@ STATIC_URL = '/static/'
 
 # List of directories where Django will look for additional static files.
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'frontend', 'dist'),  # Path to your frontend build output
+    os.path.join(BASE_DIR, 'static'),  # Path to your frontend build output
 ]
 
 # Directory where collected static files will be stored.
