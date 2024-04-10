@@ -8,12 +8,19 @@
         "maxLambdaSize": "15mb",
         "runtime": "python3.9"
       }
+    },
+    {
+      "src": "myshop/frontend/dist",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "myshop/frontend/dist"
+      }
     }
   ],
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "myshop/static/$1"
+      "dest": "/myshop/frontend/dist/static/$1"
     },
     {
       "src": "/(.*)",
