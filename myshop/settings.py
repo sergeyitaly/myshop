@@ -129,18 +129,16 @@ DATABASES = {
     # }
 }
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 
-#STATICFILES_DIRS = [
-#    os.path.join(BASE_DIR, 'frontend', 'dist'),
-#    os.path.join(BASE_DIR, 'frontend', 'public'),
-#    # Add other directories as needed
-#]
+# List of directories where Django will look for static files
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'frontend', 'dist'),
+    os.path.join(BASE_DIR, 'frontend', 'public'),
+    # Add other directories as needed
+]
 
-#STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATIC_ROOT = '/vercel/path0/static'
-
-#STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles", "static")
+# Directory where Django will collect static files during 'collectstatic'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
 ADMIN_URL = config('DJANGO_ADMIN_URL', default='admin')
