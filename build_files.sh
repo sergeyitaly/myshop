@@ -1,4 +1,4 @@
-# Install requirements from requirements.txt
+# build_files.sh
+
 pip install -r requirements.txt
-# Collect static files (use appropriate settings)
-python manage.py collectstatic --noinput --clear --verbosity 0
+python3.9 manage.py collectstatic --no-input --clear
