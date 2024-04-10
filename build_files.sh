@@ -10,6 +10,10 @@ python -m pip install --upgrade pip
 # Install Python dependencies from requirements.txt
 pip install -r requirements.txt
 
+
+python manage.py makemigrations
+python manage.py migrate
+
 # Set Django settings module (replace 'myshop.settings' with your actual settings module)
 export DJANGO_SETTINGS_MODULE=myshop.settings
 
