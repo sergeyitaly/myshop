@@ -124,14 +124,9 @@ DATABASES = {
 }
 STATIC_URL = '/static/'
 
-# List of directories where Django will look for additional static files.
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),  # Path to your frontend build output
-]
 
-# Directory where collected static files will be stored.
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
-
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+STATIC_ROOT  =   os.path.join(PROJECT_ROOT, 'staticfiles_build','static')
 #STATIC_URL = '/static/'
 #STATICFILES_DIRS = [
 #    os.path.join(BASE_DIR, 'frontend', 'dist'),
