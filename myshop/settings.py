@@ -248,10 +248,3 @@ CACHES = {
         'LOCATION': os.path.join(BASE_DIR, 'site_cache'),
     }
 }
-
-# Set Django's cache backend to Redis
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-SESSION_CACHE_ALIAS = "default"
-
-# Optionally, configure cache timeout (in seconds)
-CACHE_TTL = 3600  # Example: cache timeout of 1 hour (adjust as needed)
