@@ -6,8 +6,6 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.contrib import admin
-import debug_toolbar
-
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -34,6 +32,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('debug/', TemplateView.as_view(template_name='base.html'), name='debug'),
 ]
-
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
