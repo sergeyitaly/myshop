@@ -13,6 +13,7 @@ dist-ssr
 *.local
 static
 site_cache
+staticfiles_build
 venv
 
 # Editor directories and files
