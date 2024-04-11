@@ -20,7 +20,7 @@ DEBUG = True
 #DEBUG = os.environ.get("DEBUG") != "False"
 
 
-ALLOWED_HOSTS = [".now.sh", ".vercel.app"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost",".vercel.app", ".now.sh"]
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
