@@ -5,23 +5,25 @@ from decouple import config
 from datetime import timedelta
 from pathlib import Path
 import dotenv
+from dotenv import load_dotenv
 
+load_dotenv()
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-dotenv_file = os.path.join(BASE_DIR,'.env.development.local')
-if os.path.isfile(dotenv_file):
-    dotenv.load_dotenv(dotenv_file)
-    
-    
-SECRET_KEY = os.environ['SECRET_KEY']
+
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.getenv('SECRET_KEY')
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-#DEBUG = os.environ.get("DEBUG") != "False"
+DEBUG = os.getenv('DEBUG') == 'True'
 
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost",".vercel.app", ".now.sh"]
-# CORS settings
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
@@ -99,20 +101,21 @@ TEMPLATES = [
 #WSGI_APPLICATION = 'myshop.wsgi.application'
 WSGI_APPLICATION = 'myshop.wsgi.app'
 
+
 DATABASES = {
-    'default': {        
-#       'ENGINE': 'django.db.backends.postgresql_psycopg2',
-       'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ["POSTGRES_DATABASE"],
-        'USER': os.environ["POSTGRES_USER"],
-        'PASSWORD': os.environ["POSTGRES_PASSWORD"],
-        'HOST': os.environ["POSTGRES_HOST"],
-        'PORT': os.environ['POSTGRES_DB_PORT'],
-                'OPTIONS': {
-            'sslmode': 'require',
-        },
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DATABASE'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST'),
+        'PORT': os.getenv('POSTGRES_DB_PORT'),
     }
 }
+
+
+
+
 STATIC_URL = '/static/'
 # Directory where collected static files will be stored.
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
