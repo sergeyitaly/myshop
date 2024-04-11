@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
 import { TanStackRouterVite } from '@tanstack/router-vite-plugin';
+import path from 'path';
 
 const cssFileName = 'index.min.css';
 
@@ -11,7 +12,7 @@ export default defineConfig({
      TanStackRouterVite(),
   ],
   build: {
-    //outDir: '../../static',
+    outDir: path.resolve(__dirname, '../dist'), // Set the output directory to myshop/dist
     manifest: 'manifest.json',
     rollupOptions: {
       input: ['/src/main.tsx', './index.html'],
