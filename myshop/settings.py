@@ -129,7 +129,7 @@ STATICFILES_FINDERS = [
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 #STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 WHITENOISE_INDEX_FILE = True
-WHITENOISE_ROOT = os.path.join(STATIC_ROOT, 'root')
+WHITENOISE_ROOT = STATIC_ROOT
 WHITENOISE_ALLOW_ALL_ORIGINS = True
 
 # Media settings
@@ -230,10 +230,9 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',  # Use a unique identifier for the cache
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
     }
 }
