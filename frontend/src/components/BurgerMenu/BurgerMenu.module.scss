@@ -12,7 +12,7 @@
         .bar1,
         .bar2,
         .bar3 {
-            background-color: #2720f4;
+            background-color: var(--blue);
             width: 25px;
         }
     }
@@ -42,7 +42,7 @@
     bottom: 0;
     min-height: 100vh;
     width: 80%;
-   
+    padding-left: 10px;
 
     display: flex;
     flex-direction: column;
@@ -50,7 +50,6 @@
     gap: 35px;
 
     background-color: white;
-    border: 1px solid black;
     border-left: none;
     opacity: 0;
     translate: -100vw 0;
@@ -58,7 +57,7 @@
     transition: translate .3s, opacity .3s;
     z-index: 100;
 
-    & > * {
+    &>* {
         padding: 10px 15px;
     }
 }
@@ -70,9 +69,9 @@
 
 .logo_container {
     display: flex;
-    justify-content: space-between;
+    justify-content: end;
     align-items: center;
-    border-bottom: 1px solid rgba(0, 0, 0, .4);
+    padding-right: 20px;
 }
 
 .title {
@@ -83,11 +82,25 @@
     text-decoration: none;
     color: var(--gray-500);
     font-size: 20px;
+    border-bottom: 1px solid var(--gray);
+    width: 95%;
+    min-width: fit-content;
+    position: relative;
 
     transition: .3s color;
 
     &:active {
         color: #A8A8A8;
+    }
+
+    &::after {
+        content: url('./arrow.svg');
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        display: block;
+        right: 0;
+        top: 30%;
     }
 }
 

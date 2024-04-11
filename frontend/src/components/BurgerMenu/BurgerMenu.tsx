@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import styles from './BurgerMenu.module.scss';
-import { links } from '../../utils/links';
 import { Link } from 'react-router-dom';
+
+const links = [
+    { name: 'Колекції', href: '/collection' },
+    { name: 'Нові надходження', href: '/' },
+    { name: 'Всі колекції', href: '/' },
+    { name: 'Знижки', href: '/' },
+    { name: 'Про нас', href: '/' },
+    { name: 'Контакти', href: '/' },
+];
 
 export const BurgerMenu = () => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -23,7 +31,6 @@ export const BurgerMenu = () => {
                 className={[styles.menu, isOpen && styles.menu_open].join(' ')}
             >
                 <div className={styles.logo_container}>
-                    <h2 className={styles.title}>Koloryt</h2>
                     <button
                         className={[
                             styles.burger,
@@ -42,6 +49,7 @@ export const BurgerMenu = () => {
                         key={name}
                         className={styles.link}
                         to={href}
+                        onClick={() => setIsOpen((prev) => !prev)}
                     >
                         {name}
                     </Link>
