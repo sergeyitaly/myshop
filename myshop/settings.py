@@ -250,8 +250,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #}
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/tmp/django_cache',  # Use /tmp directory for cache
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'my_cache_table',
     }
 }
 # Set Django's cache backend to Redis
