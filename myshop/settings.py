@@ -73,7 +73,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'allauth.account.middleware.AccountMiddleware', 
-
+]
 
 ROOT_URLCONF = 'myshop.urls'
 
