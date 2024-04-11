@@ -58,7 +58,6 @@ INSTALLED_APPS = [
     'accounts',
     'whitenoise.runserver_nostatic',
     'djoser',
-    'react',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'drf_yasg',
