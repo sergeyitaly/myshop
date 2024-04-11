@@ -23,14 +23,14 @@
             window.__vite_plugin_react_preamble_installed__ = true;
         </script>
         <script type="module" src="http://localhost:5173/src/main.tsx"></script>
+        <link rel="modulepreload" crossorigin href="{% static '/assets/js/main.BX1vg_v5.js' %}">
+
     {% else %}
         <!-- Production mode: Load compiled assets -->
-        <script type="module" crossorigin src="{% static 'assets/js/index.min.js' %}"></script>
-        <link rel="modulepreload" crossorigin href="{% static 'assets/js/main.min.js' %}">
+        <script type="module" crossorigin src="{% static '/assets/js/index.CVK77S1q.js' %}"></script>
+        <link rel="modulepreload" crossorigin href="{% static '/assets/js/main.BX1vg_v5.js' %}">
         <!-- Example: using static template tag -->
-        <img src="{% static 'images/logo.svg' %}" alt="Logo">
-
-        <link rel="stylesheet" href="{% static 'assets/css/index.min4.css' %}" crossorigin>
+        <link rel="stylesheet" href="{% static '/assets/css/main.tWJLTSwI.css' %}" crossorigin>
     {% endif %}
 
 </head>

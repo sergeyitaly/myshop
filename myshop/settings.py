@@ -113,28 +113,29 @@ DATABASES = {
 }
 
 
+
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
 
+# Custom setting to exclude certain file extensions (not built-in)
 STATICFILES_EXCLUDED_EXTENSIONS = ['.pdf', '.zip']
 
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
 
+# Uncomment and adjust STATICFILES_DIRS if you have additional static file directories
+STATICFILES_DIRS = [
+     os.path.join(BASE_DIR, 'frontend','dist'),
+     os.path.join(BASE_DIR, 'frontend','public'),]
+     # Add other directories as needed
+     # ]
 
-#STATICFILES_DIRS = [
-#    os.path.join(BASE_DIR, 'frontend', 'dist'),
-#    os.path.join(BASE_DIR, 'frontend', 'public'),
-#    # Add other directories as needed
-#]
-
-
-#STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+# Use Whitenoise for serving compressed and versioned static files
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-#STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+
+# Additional Whitenoise settings
 WHITENOISE_INDEX_FILE = True
 WHITENOISE_ROOT = STATIC_ROOT
 WHITENOISE_ALLOW_ALL_ORIGINS = True
