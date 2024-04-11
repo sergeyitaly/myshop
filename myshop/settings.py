@@ -108,7 +108,6 @@ DATABASES = {
         'PASSWORD': os.environ["POSTGRES_PASSWORD"],
         'HOST': os.environ["POSTGRES_HOST"],
         'PORT': '5432',
-        'OPTIONS': {'sslmode': 'require', },
     }
 }
 STATIC_URL = '/static/'
