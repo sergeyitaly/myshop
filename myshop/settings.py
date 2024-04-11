@@ -20,7 +20,7 @@ DEBUG = True
 #DEBUG = os.environ.get("DEBUG") != "False"
 
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost",".vercel.app", ".now.sh"]
+ALLOWED_HOSTS = ["127.0.0.1", ".vercel.app"]
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
@@ -107,7 +107,7 @@ DATABASES = {
         'USER': os.environ["POSTGRES_USER"],
         'PASSWORD': os.environ["POSTGRES_PASSWORD"],
         'HOST': os.environ["POSTGRES_HOST"],
-        'PORT': '5432',
+          'PORT': os.environ['POSTGRES_DB_PORT'],
     }
 }
 STATIC_URL = '/static/'
