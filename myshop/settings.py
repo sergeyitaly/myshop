@@ -113,22 +113,24 @@ DATABASES = {
 }
 
 
-
-
 STATIC_URL = '/static/'
-# Directory where collected static files will be stored.
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
+
+STATICFILES_EXCLUDED_EXTENSIONS = ['.pdf', '.zip']
+
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+
 
 #STATICFILES_DIRS = [
 #    os.path.join(BASE_DIR, 'frontend', 'dist'),
 #    os.path.join(BASE_DIR, 'frontend', 'public'),
 #    # Add other directories as needed
 #]
-STATICFILES_FINDERS = [
-    "django.contrib.staticfiles.finders.FileSystemFinder",
-    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-]
+
 
 #STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"

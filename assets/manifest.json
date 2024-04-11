@@ -1,0 +1,60 @@
+{
+  "index.html": {
+    "file": "assets/js/index.min.js",
+    "src": "index.html",
+    "isEntry": true,
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "src/components/AboutUsSection/vase.jpg": {
+    "file": "assets/css/index.min2.css",
+    "src": "src/components/AboutUsSection/vase.jpg"
+  },
+  "src/components/HeroSection/collection.jpg": {
+    "file": "assets/css/index.min3.css",
+    "src": "src/components/HeroSection/collection.jpg"
+  },
+  "src/components/Logo/logo.svg": {
+    "file": "assets/css/index.min.css",
+    "src": "src/components/Logo/logo.svg"
+  },
+  "src/main.tsx": {
+    "file": "assets/js/main.min.js",
+    "src": "src/main.tsx",
+    "isEntry": true,
+    "dynamicImports": [
+      "src/routes/about.lazy.js",
+      "src/routes/index.lazy.js"
+    ],
+    "css": [
+      "assets/css/index.min4.css"
+    ],
+    "assets": [
+      "assets/css/index.min.css"
+    ]
+  },
+  "src/routes/about.lazy.js": {
+    "file": "assets/js/about.lazy-DLh-a47q.js",
+    "src": "src/routes/about.lazy.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "src/routes/index.lazy.js": {
+    "file": "assets/js/index.lazy-Zkt_-YbB.js",
+    "src": "src/routes/index.lazy.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx"
+    ],
+    "css": [
+      "assets/css/index.min5.css"
+    ],
+    "assets": [
+      "assets/css/index.min2.css",
+      "assets/css/index.min3.css"
+    ]
+  }
+}
