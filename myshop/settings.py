@@ -22,14 +22,14 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost",".vercel.app", ".now.sh"]
 # CORS settings
-#CORS_ALLOWED_ORIGINS = [
-#    "http://localhost:5173",
-#    "http://127.0.0.1:5173",
-#]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
 
 INTERNAL_IPS = [
-#    "127.0.0.1",
-#    "localhost",
+    "127.0.0.1",
+    "localhost",
 ]
 #ALLOWED_HOSTS = ['*']
 # Application definition
@@ -100,7 +100,14 @@ TEMPLATES = [
 WSGI_APPLICATION = 'myshop.wsgi.app'
 
 DATABASES = {
-
+    'default': {        
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ["POSTGRES_DATABASE"],
+        'USER': os.environ["POSTGRES_USER"],
+        'PASSWORD': os.environ["POSTGRES_PASSWORD"],
+        'HOST': os.environ["POSTGRES_HOST"],
+        'PORT': '5432',
+    }
 }
 STATIC_URL = '/static/'
 # Directory where collected static files will be stored.

@@ -1,13 +1,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import svgLoader from 'vite-plugin-svgr';
+import svgr from 'vite-plugin-svgr';
 import { TanStackRouterVite } from '@tanstack/router-vite-plugin';
 
 const cssFileName = 'index.min.css';
 
 export default defineConfig({
   plugins: [
-    react(), svgLoader(), TanStackRouterVite(),
+     svgr(), react(),
+     TanStackRouterVite(),
   ],
   build: {
     //outDir: '../../static',
