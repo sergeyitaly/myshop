@@ -99,19 +99,17 @@ TEMPLATES = [
 #WSGI_APPLICATION = 'myshop.wsgi.application'
 WSGI_APPLICATION = 'myshop.wsgi.app'
 
-#DATABASES = {
-#    'default': {        
-#       'ENGINE': 'django.db.backends.postgresql_psycopg2',
+DATABASES = {
+    'default': {        
+       'ENGINE': 'django.db.backends.postgresql_psycopg2',
 #       'ENGINE': 'django.db.backends.postgresql',
-#        'NAME': os.environ["POSTGRES_DATABASE"],
-#        'USER': os.environ["POSTGRES_USER"],
-#        'PASSWORD': os.environ["POSTGRES_PASSWORD"],
-#        'HOST': os.environ["POSTGRES_HOST"],
-#        'PORT': '5432',
-#    }
-#}
-DATABASES ={}
-
+        'NAME': os.environ["POSTGRES_DATABASE"],
+        'USER': os.environ["POSTGRES_USER"],
+        'PASSWORD': os.environ["POSTGRES_PASSWORD"],
+        'HOST': os.environ["POSTGRES_HOST"],
+        'PORT': '5432',
+    }
+}
 STATIC_URL = '/static/'
 # Directory where collected static files will be stored.
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
