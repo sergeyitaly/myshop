@@ -73,6 +73,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'allauth.account.middleware.AccountMiddleware', 
+    'django.middleware.cache.UpdateCacheMiddleware',  # Update cache on each request
+    'django.middleware.cache.FetchFromCacheMiddleware',  # Fetch from cache if available
 ]
 
 ROOT_URLCONF = 'myshop.urls'
@@ -239,3 +241,10 @@ CACHES = {
         },
     }
 }
+
+# Set Django's cache backend to Redis
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
+# Optionally, configure cache timeout (in seconds)
+CACHE_TTL = 3600  # Example: cache timeout of 1 hour (adjust as needed)
