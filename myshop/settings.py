@@ -116,7 +116,7 @@ DATABASES = {
 STATIC_URL = '/static/'
 # Directory where collected static files will be stored.
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 #STATICFILES_DIRS = [
 #    os.path.join(BASE_DIR, 'frontend', 'dist'),
