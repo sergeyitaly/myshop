@@ -242,18 +242,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #    }
 #}
 
-#CACHES = {
-#    'default': {
-#        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-#        'LOCATION': os.path.join(BASE_DIR, 'site_cache'),
-#    }
-#}
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        'LOCATION': 'my_cache_table',
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'tmp','site_cache'),
     }
 }
+
 # Set Django's cache backend to Redis
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
