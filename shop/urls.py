@@ -1,7 +1,7 @@
 from unicodedata import name
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from shop import views
+from . import views
 from rest_framework.urlpatterns import format_suffix_patterns
 
 app_name = "products"
