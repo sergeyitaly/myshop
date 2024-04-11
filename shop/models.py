@@ -1,18 +1,20 @@
-# models.py
-
-import os
-from django.conf import settings
 from django.db import models
-from django.urls import reverse
+from django.utils.text import slugify
+from django.utils.html import mark_safe
 from django.template.defaultfilters import truncatechars 
-from django.utils.safestring import mark_safe
-from django.template.defaultfilters import slugify # new
-
 
 class Collection(models.Model):
     name = models.CharField(max_length=200, db_index=True)
     slug = models.SlugField(max_length=200, db_index=True, unique=True)
-    photo = models.ImageField(upload_to="photos/banner", null=True, blank=True)
+    photo = models.ImageField(upload_to="photos/collection", null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        ordering = ('name',)
+        verbose_name = 'Collection'
+        verbose_name_plural = 'Collections'
 
     @property
     def short_description(self):
@@ -20,23 +22,21 @@ class Collection(models.Model):
     
     def image_tag(self):
         if self.photo:
-            return mark_safe(u'<a href="{0}" target="_blank"><img src="{0}" width="100"/></a>'.format(self.photo.url))
+            return mark_safe(f'<img src="{self.photo.url}" width="100" />')
         else:
             return '(No image)'   
     image_tag.short_description = "Image"
     image_tag.allow_tags = True
-    
-    def __str__(self):
-        return self.name    
 
-    class Meta:
-        ordering = ('name',)
-        verbose_name = 'Collection'
-        verbose_name_plural = 'Collections'
+    def delete(self, *args, **kwargs):
+        # Delete associated photo when collection is deleted
+        if self.photo:
+            self.photo.delete()
+        super().delete(*args, **kwargs)
+
 
 class Product(models.Model):
-
-    collection = models.ForeignKey(Collection, on_delete=models.CASCADE,related_name='products')
+    collection = models.ForeignKey(Collection, on_delete=models.CASCADE, related_name='products')
     name = models.CharField(max_length=300, db_index=True)
     slug = models.SlugField(max_length=200, db_index=True, unique=True)
     description = models.TextField(blank=True)
@@ -46,13 +46,11 @@ class Product(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
    
-    photo = models.ImageField(upload_to="photos", null=True, blank=True)
+    photo = models.ImageField(upload_to="photos/product", null=True, blank=True)
     brandimage = models.FileField(upload_to="photos/svg", null=True, blank=True)
-   
-    def save(self, *args, **kwargs): # new
-        if not self.slug:
-            self.slug = slugify(self.name)
-        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
 
     @property
     def short_description(self):
@@ -60,14 +58,14 @@ class Product(models.Model):
     
     def image_tag(self):
         if self.photo:
-            return mark_safe(u'<a href="{0}" target="_blank"><img src="{0}" width="100"/></a>'.format(self.photo.url))
+            return mark_safe(f'<img src="{self.photo.url}" width="100" />')
         else:
             return '(No image)'    
-    
     image_tag.short_description = "Image"
     image_tag.allow_tags = True
 
-class Order(models.Model):
-    products = models.ManyToManyField(Product)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    # Add more fields as needed
+    def delete(self, *args, **kwargs):
+        # Delete associated photo when product is deleted
+        if self.photo:
+            self.photo.delete()
+        super().delete(*args, **kwargs)
