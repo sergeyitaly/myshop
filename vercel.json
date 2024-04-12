@@ -20,10 +20,6 @@
       "dest": "/staticfiles_build/static/$1"
     },
     {
-      "src": "/media/(.*)", 
-      "dest": "myshop/wsgi.py"
-    },
-    {
       "src": "/(.*)",
       "dest": "myshop/wsgi.py"
     }
