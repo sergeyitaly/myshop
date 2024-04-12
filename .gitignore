@@ -6,15 +6,16 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
-node_modules
 dist-ssr
 *.local
+
+node_modules
 static
 site_cache
 staticfiles_build
 venv
-
+__pycache__/
+__pycache__
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -27,6 +28,5 @@ venv
 *.sw?
 
 .env
-__pycache__/
-__pycache__
+
 tmp
