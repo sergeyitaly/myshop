@@ -108,27 +108,33 @@ DATABASES = {
 }
 #STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build','static')
 
+STORAGE_DESTINATION = config('STORAGE_DESTINATION')
 
-AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+if STORAGE_DESTINATION == 's3':
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+    # static files settings
+    AWS_LOCATION = 'static'
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-# Use Amazon S3 for storing media files
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    # public media settings
+    PUBLIC_MEDIA_LOCATION = 'media'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/'
+    DEFAULT_FILE_STORAGE = 'core.storage_backends.PublicMediaStorage'
 
-# Remove STATIC_ROOT from here - it's not needed when using S3
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+else:
+    STATIC_URL = "static/"
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build','static')
+    STAICFILES_DIRS =[os.path.join(BASE_DIR, 'static')]
 
-# Set static and media file storage classes
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-# Static files settings
-STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
-
-# Media files settings (optional, for file uploads)
-MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
-MEDIA_ROOT = 'media/'  # This is just a placeholder (not used for S3)
+    MEDIA_ROOT = "media/"
+    MEDIA_URL = "media/"
 
 #STATICFILES_FINDERS = [
 #    'django.contrib.staticfiles.finders.FileSystemFinder',
