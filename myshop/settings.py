@@ -22,7 +22,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
@@ -127,10 +127,10 @@ STATICFILES_FINDERS = [
 
 # Uncomment and adjust STATICFILES_DIRS if you have additional static file directories
 STATICFILES_DIRS = [
-     os.path.join(BASE_DIR, 'frontend','dist'),
-     os.path.join(BASE_DIR, 'frontend','public'),]
+     os.path.join(BASE_DIR, 'dist'),
+#     os.path.join(BASE_DIR, 'frontend','public'),]
      # Add other directories as needed
-     # ]
+      ]
 
 # Use Whitenoise for serving compressed and versioned static files
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"

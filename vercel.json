@@ -9,7 +9,6 @@
         "runtime": "python3.9"
       }
     },
-
     {
       "src": "build_files.sh",
       "use": "@vercel/static-build",
@@ -18,6 +17,8 @@
       }
     }
   ],
+  "files": ["frontend"],
+
   "routes": [
     {
       "src": "/static/(.*)",

@@ -11,7 +11,7 @@ export default defineConfig({
     TanStackRouterVite(),
   ],
   build: {
-    outDir: path.resolve(__dirname, 'dist'), // Output directory resolved to myshop/dist
+    outDir: path.resolve(__dirname, '../dist'), // Output directory resolved to myshop/dist
     manifest: 'manifest.json',
     rollupOptions: {
       input: {
