@@ -17,8 +17,7 @@
       }
     }
   ],
-  "files": ["frontend"],
-
+  
   "routes": [
     {
       "src": "/static/(.*)",
