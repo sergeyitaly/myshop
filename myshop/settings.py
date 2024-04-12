@@ -121,9 +121,9 @@ if USE_S3:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
     # S3 static file settings
     WHITENOISE_ROOT = 'static'
+    AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
     AWS_LOCATION = 'static'  # This is the folder name in your S3 bucket
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
-    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 else:
     # Local static file settings
