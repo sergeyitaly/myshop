@@ -106,19 +106,18 @@ DATABASES = {
         'PORT': os.getenv('POSTGRES_DB_PORT'),
     }
 }
+#STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build','static')
+
 
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY = ')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
 
 # Use Amazon S3 for storing media files
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
-#STATIC_URL = '/static/'
-#STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build','static')
-
+# Remove STATIC_ROOT from here - it's not needed when using S3
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
-
 
 # Set static and media file storage classes
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
@@ -126,7 +125,6 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 # Static files settings
 STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
-STATIC_ROOT = 'static/'  # This is just a placeholder (not used for S3)
 
 # Media files settings (optional, for file uploads)
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
