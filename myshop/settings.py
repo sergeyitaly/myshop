@@ -120,13 +120,15 @@ if USE_S3:
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
     
     # S3 static file settings
-    AWS_LOCATION = 'staticfiles_build/static'  # This is the folder name in your S3 bucket
+    WHITENOISE_ROOT = 'static'
+    AWS_LOCATION = 'static'  # This is the folder name in your S3 bucket
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 else:
     # Local static file settings
     STATIC_URL = '/static/'
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
+    WHITENOISE_ROOT = STATIC_ROOT
 
 # Additional static file directories (local or S3)
 STATICFILES_DIRS = (
@@ -148,7 +150,7 @@ VITE_APP_DIR = BASE_DIR/'static'
 
 # Additional Whitenoise settings
 WHITENOISE_INDEX_FILE = True
-#WHITENOISE_ROOT = STATIC_ROOT
+
 WHITENOISE_ALLOW_ALL_ORIGINS = True
 
 #MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
