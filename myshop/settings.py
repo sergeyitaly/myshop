@@ -120,8 +120,7 @@ if USE_S3:
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
     
     # S3 static file settings
-    #AWS_LOCATION = 'static'
-    STATICFILES_LOCATION = 'staticfiles_build/static'  # This is the folder name in your S3 bucket
+    AWS_LOCATION = 'staticfiles_build/static'  # This is the folder name in your S3 bucket
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 else:
