@@ -10,7 +10,6 @@ dist-ssr
 *.local
 
 node_modules
-static
 site_cache
 staticfiles_build
 venv

@@ -1,0 +1,55 @@
+{
+  "src/components/AboutUsSection/vase.jpg": {
+    "file": "assets/vase.jpg",
+    "src": "src/components/AboutUsSection/vase.jpg"
+  },
+  "src/components/HeroSection/collection.jpg": {
+    "file": "assets/collection.jpg",
+    "src": "src/components/HeroSection/collection.jpg"
+  },
+  "src/components/Logo/logo.svg": {
+    "file": "assets/logo.svg",
+    "src": "src/components/Logo/logo.svg"
+  },
+  "src/main.tsx": {
+    "file": "assets/main.js",
+    "name": "main",
+    "src": "src/main.tsx",
+    "isEntry": true,
+    "dynamicImports": [
+      "src/routes/about.lazy.js",
+      "src/routes/index.lazy.js"
+    ],
+    "css": [
+      "assets/main.css"
+    ],
+    "assets": [
+      "assets/logo.svg"
+    ]
+  },
+  "src/routes/about.lazy.js": {
+    "file": "assets/about.lazy.js",
+    "name": "about.lazy",
+    "src": "src/routes/about.lazy.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
+  "src/routes/index.lazy.js": {
+    "file": "assets/index.lazy.js",
+    "name": "index.lazy",
+    "src": "src/routes/index.lazy.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx"
+    ],
+    "css": [
+      "assets/index.css"
+    ],
+    "assets": [
+      "assets/vase.jpg",
+      "assets/collection.jpg"
+    ]
+  }
+}
