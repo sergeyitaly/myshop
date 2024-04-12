@@ -6,6 +6,9 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.contrib import admin
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -42,7 +45,12 @@ urlpatterns = [
     path('index/', TemplateView.as_view(template_name='index.html'), name='index'),
 ]
 
-# Serve media and static files in development mode
-if settings.DEBUG:
+USE_S3 = os.getenv('USE_S3') == 'True'
+
+if settings.DEBUG and USE_S3==False:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+if settings.DEBUG and USE_S3:
+       urlpatterns += static(settings.STATIC_URL, document_root=settings.AWS_LOCATION)
+       
+       
