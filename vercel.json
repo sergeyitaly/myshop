@@ -18,7 +18,11 @@
     {
       "src": "/static/(.*)",
       "dest": "/staticfiles_build/static/$1"
-        },
+    },
+    {
+      "src": "/admin/(.*)",
+      "dest": "myshop/wsgi.py"
+    },
     {
       "src": "/(.*)",
       "dest": "myshop/wsgi.py"
