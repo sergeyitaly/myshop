@@ -108,7 +108,7 @@ DATABASES = {
 }
 #STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build','static')
 
-STORAGE_DESTINATION = config('STORAGE_DESTINATION')
+STORAGE_DESTINATION = os.getenv('STORAGE_DESTINATION')
 
 if STORAGE_DESTINATION == 's3':
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
