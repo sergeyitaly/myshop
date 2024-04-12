@@ -5,4 +5,3 @@ staticfiles_build
 venv
 __pycache__/
 __pycache__
-frontend

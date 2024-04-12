@@ -17,3 +17,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <RouterProvider router={router} />
   </React.StrictMode>,
 )
+
+// This line is important for React Fast Refresh (HMR)
+if (import.meta.hot) {
+  import.meta.hot.accept();
+}

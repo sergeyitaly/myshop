@@ -11,15 +11,7 @@ load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
@@ -45,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'shop.apps.ShopConfig',
+    'shop',
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
@@ -74,6 +66,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'allauth.account.middleware.AccountMiddleware', 
+    'django.middleware.locale.LocaleMiddleware',
 ]
 
 ROOT_URLCONF = 'myshop.urls'
@@ -112,35 +105,24 @@ DATABASES = {
     }
 }
 
-
-
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
-
-# Custom setting to exclude certain file extensions (not built-in)
-STATICFILES_EXCLUDED_EXTENSIONS = ['.pdf', '.zip']
-
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),      ]#
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
-
-# Uncomment and adjust STATICFILES_DIRS if you have additional static file directories
-STATICFILES_DIRS = [
-     os.path.join(BASE_DIR, 'dist'),
-#     os.path.join(BASE_DIR, 'frontend','public'),]
-     # Add other directories as needed
-      ]
+VITE_APP_STATIC_DIR = BASE_DIR/'static/'
+VITE_APP_DIR = BASE_DIR/'static'
 
 # Use Whitenoise for serving compressed and versioned static files
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+#STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Additional Whitenoise settings
 WHITENOISE_INDEX_FILE = True
 WHITENOISE_ROOT = STATIC_ROOT
 WHITENOISE_ALLOW_ALL_ORIGINS = True
 
-# Media settings
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
@@ -248,9 +230,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #    }
 #}
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': os.path.join(BASE_DIR, 'site_cache'),
-    }
-}
+#CACHES = {
+#    'default': {
+#        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+#        'LOCATION': os.path.join(BASE_DIR, 'site_cache'),
+#    }
+#}
