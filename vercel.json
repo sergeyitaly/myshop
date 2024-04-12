@@ -20,6 +20,10 @@
       "dest": "/staticfiles_build/static/$1"
     },
     {
+      "src": "/media/(.*)",
+      "dest": f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/media/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "myshop/wsgi.py"
     }
