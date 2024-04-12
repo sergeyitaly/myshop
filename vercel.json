@@ -21,7 +21,7 @@
     },
     {
       "src": "/media/(.*)",
-      "dest": f"https://kolorytmedia.s3.amazonaws.com/media/$1"
+      "dest": "https://kolorytmedia.s3.amazonaws.com/media/$1"
     },
     {
       "src": "/(.*)",
