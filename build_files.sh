@@ -20,5 +20,4 @@ export DJANGO_SETTINGS_MODULE=myshop.settings
 python manage.py collectstatic --noinput --clear
 pwd
 ls -al
-du -h ./*
-rm -rf frontend
+
