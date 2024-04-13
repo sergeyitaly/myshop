@@ -1,45 +1,21 @@
-.slickPrev,
-.slickNext {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 1;
-    cursor: pointer;
-}
-.customPrevArrow {
-    position: absolute;
-    top: 50%;
-    left: 10px; /* Расстояние 10px от левого края */
-    transform: translateY(-50%);
-    z-index: 1000;
-    cursor: pointer;
-}
-
-.customNextArrow {
-    position: absolute;
-    top: 50%;
-    right: 10px; /* Расстояние 10px от правого края */
-    transform: translateY(-50%);
-    z-index: 1000;
-    cursor: pointer;
-}
-
 .sliderContainer {
     margin-top: 70px;
+    padding: 0 10px;
 }
 
 .title {
-    font-size: 26px;
+    font-size: 32px;
     font-weight: 500;
-    margin: 20px 0
+    margin: 20px 0 20px 5px
 }
-
-//.card {
-//    padding-right: 10px;
-//}
 
 .card:first-child {
     padding-left: 5px;
+}
+
+.card {
+    font-size: 18px;
+    text-align: center;
 }
 
 .cardImage {
@@ -48,16 +24,33 @@
 
 .name {
     margin-top: 15px;
-    text-align: center
 }
 
-.imageUrl {
+.image {
     max-width: 100%;
 }
 
 .price {
-    margin-top: 15px;
-    color: grey;
-    text-align: center;
+    margin-top: 10px;
+    color: #787878;
     margin-bottom: 10px;
+}
+
+
+@media screen and (max-width: 600px) {
+    .sliderContainer {
+        margin-top: 30px; /* Пример изменения свойства только для мобильных экранов */
+    }
+
+    .title {
+        font-size: 26px; /* Пример изменения свойства только для мобильных экранов */
+    }
+
+    .card{
+        font-size: 16px;
+    }
+
+    .price {
+        margin-top: 5px;
+    }
 }

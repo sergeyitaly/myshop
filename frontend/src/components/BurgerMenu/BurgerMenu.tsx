@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import styles from './BurgerMenu.module.scss';
 import { links } from '../../utils/links';
-import { Link } from '@tanstack/react-router';
+import { Link } from 'react-router-dom';
 
 export const BurgerMenu = () => {
     const [isOpen, setIsOpen] = useState<boolean>(false);

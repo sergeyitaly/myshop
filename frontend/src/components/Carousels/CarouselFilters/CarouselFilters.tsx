@@ -5,25 +5,6 @@ import "slick-carousel/slick/slick-theme.css";
 import style from './style.module.scss'
 import {mockDataAllCollection, mockDataDiscount, mockDataPopular} from "../carouselMock";
 
-
-const CustomPrevArrow: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = (props) => {
-    const { onClick } = props;
-    return (
-        <button className="slick-prev" onClick={onClick}>
-            Prev
-        </button>
-    );
-};
-
-const CustomNextArrow: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = (props) => {
-    const { onClick } = props;
-    return (
-        <button className="slick-next" onClick={onClick}>
-            Next
-        </button>
-    );
-};
-
 function CarouselFilters() {
     const [selectedFilter, setSelectedFilter] = useState("popular");
 
@@ -53,35 +34,8 @@ function CarouselFilters() {
         slidesToShow: 4,
         slidesToScroll: 4,
         initialSlide: 0,
-        prevArrow: <CustomPrevArrow />,
-        nextArrow: <CustomNextArrow />,
         arrows: false,
-        responsive: [
-            {
-                breakpoint: 1024,
-                settings: {
-                    slidesToShow: 4,
-                    slidesToScroll: 4,
-                    infinite: true,
-                    dots: true
-                }
-            },
-            {
-                breakpoint: 600,
-                settings: {
-                    slidesToShow: 3,
-                    slidesToScroll: 3,
-                    initialSlide: 3
-                }
-            },
-            {
-                breakpoint: 480,
-                settings: {
-                    slidesToShow: 2,
-                    slidesToScroll: 2
-                }
-            }
-        ]
+
     };
 
     return (
@@ -96,7 +50,7 @@ function CarouselFilters() {
                     <div key={index} className={style.card}>
                         <div className={style.imageContainer}>
                             {selectedFilter === 'discount' && <p className={style.saleLabel}>Sale</p>}
-                            <img src={product.imageUrl} alt={product.name} style={{ maxWidth: '100%' }}/>
+                            <img src={product.imageUrl} alt={product.name} className={style.image} />
                         </div>
                         <p className={style.name}>{product.name}</p>
                         <div className={style.priceContainer}>
@@ -112,3 +66,4 @@ function CarouselFilters() {
 }
 
 export default CarouselFilters;
+

@@ -17,9 +17,22 @@ import image16 from '../../assets/collection/Rectangle 36.svg';
 import image17 from '../../assets/collection/Rectangle 37.svg'
 import image18 from '../../assets/collection/Rectangle 38.svg'
 import image19 from '../../assets/collection/Rectangle 39.svg'
+import image20 from '../../assets/ethno/Rectangle 45.svg'
+import image21 from '../../assets/ethno/Rectangle 46.svg'
+import image22 from '../../assets/ethno/Rectangle 47.svg'
+import image23 from '../../assets/ethno/Rectangle 48.svg'
+import image24 from '../../assets/ethno/Rectangle 49.svg'
+import image25 from '../../assets/ethno/Rectangle 62.svg'
 
+interface Product {
+    name: string;
+    price: string;
+    imageUrl: string;
+    newPrice?: string;
+    category?: string;
+}
 
-export const mockDataProducts = [
+export const mockDataProducts: Product[] = [
     {
         name: 'Цукерниця чорна',
         price: '9700,00 грн',
@@ -74,7 +87,7 @@ export const mockDataCategories = [
     },
 ];
 
-export const mockDataPopular = [
+export const mockDataPopular: Product[] = [
     {
         name: 'Цукерниця чорна',
         price: '9700 грн',
@@ -112,7 +125,7 @@ export const mockDataPopular = [
     },
 ];
 
-export const mockDataAllCollection = [
+export const mockDataAllCollection: Product[] = [
     {
         name: 'Колекція  “Вода”',
         imageUrl: image16,
@@ -169,7 +182,7 @@ export const mockDataAllCollection = [
     }
 ]
 
-export const mockDataDiscount = [
+export const mockDataDiscount: Product[]= [
 
     {
         name: 'Сова',
@@ -203,3 +216,144 @@ export const mockDataDiscount = [
 
     },
 ];
+
+
+export const fullData = {
+    collections: [
+        {
+            id: "1",
+            name: "Колекція “Вода”",
+            imageUrl: image16,
+            category: "скло",
+            items: []
+        },
+        {
+            id: "2",
+            name: "Колекція “Етно-шик”",
+            imageUrl: image17,
+            category: "аксесуари",
+            items: [
+                {
+                    name: "Кольє Інвіда",
+                    price: "10 500,00 грн",
+                    imageUrl: image20
+                },
+                {
+                    name: "Кольє Інвіда",
+                    price: "3000,00 грн",
+                    imageUrl: image21
+                },
+                {
+                    name: "Підвіска Хрест Криж",
+                    price: "2400,00 грн",
+                    imageUrl: image22
+                },
+                {
+                    name: "Каблучка Queen",
+                    price: "7300,00 грн",
+                    imageUrl: image23
+                },
+                {
+                    name: "Шовкова хустинка",
+                    price: "3300,00 грн",
+                    imageUrl: image24
+                },
+                {
+                    name: "Підсвічники",
+                    price: "5000,00 грн",
+                    imageUrl: image25
+                }
+            ]
+        },
+        {
+            id: "3",
+            name: "Колекція “ Керамічний фольклор”",
+            imageUrl: image18,
+            category: "кераміка",
+            items: [
+                {
+                    name: 'Цукерниця чорна',
+                    price: '9700,00 грн',
+                    imageUrl: image
+                },
+                {
+                    name: 'Набір з 2 тарілок',
+                    price: '3000,00 грн',
+                    imageUrl: image2
+                },
+                {
+                    name: 'Керамічний глек',
+                    price: '2400,00 грн',
+                    imageUrl: image3
+                },
+                {
+                    name: '111111111',
+                    price: '500,00 грн',
+                    imageUrl: image4
+                },
+                {
+                    name: '222222222',
+                    price: '2000,00 грн',
+                    imageUrl: image2
+                },
+                {
+                    name: '333333333',
+                    price: '400,00 грн',
+                    imageUrl: image3
+                },
+                {
+                    name: '444444444',
+                    price: '6600,00 грн',
+                    imageUrl: image4
+                },
+                {
+                    name: '55555555',
+                    price: '6600,00 грн',
+                    imageUrl: image4
+                }
+            ]
+        },
+        {
+            id: "4",
+            name: "Колекція “Великдень”",
+            imageUrl: image19,
+            category: "",
+            items: []
+        },
+        {
+            id: "5",
+            name: "Колекція “Дракон””",
+            imageUrl: image11,
+            category: "",
+            items: []
+        },
+        {
+            id: "6",
+            name: "Колекція шовкових хусток",
+            imageUrl: image12,
+            category: "",
+            items: []
+        },
+        {
+            id: "7",
+            name: "Каблучки",
+            imageUrl: image13,
+            category: "",
+            items: []
+        },
+        {
+            id: "8",
+            name: "Сережки",
+            imageUrl: image14,
+            category: "",
+            items: []
+        },
+        {
+            id: "9",
+            name: "Підвіски",
+            imageUrl: image15,
+            category: "",
+            items: []
+        }
+    ]
+}

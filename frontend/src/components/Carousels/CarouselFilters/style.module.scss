@@ -1,37 +1,15 @@
-.slickPrev,
-.slickNext {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 1;
-    cursor: pointer;
-}
-
-.slickPrev {
-    left: 10px;
-}
-
-.slickNext {
-    right: 10px;
-}
-
 .sliderContainer {
-    margin-top: 70px;
+    margin-top: 80px;
+    padding: 0 10px;
 }
 
 .filters {
-    font-size: 26px;
+    font-size: 32px;
     font-weight: 500;
     display: flex;
     margin-bottom: 30px;
-}
-
-.filters p {
-    margin-right: 15%;
-}
-
-.sale-label {
-
+    justify-content: space-between;
+    margin-right: 200px;
 }
 
 .card {
@@ -46,15 +24,27 @@
 .cardImage {
     /*width: 100%;*/
     position: relative;
+    height: 270px;
 }
 
+.imageContainer {
+    //width: 200px;
+    height: 280px;
+    overflow: hidden;
+
+}
+
+.image {
+    width: 100%; /* Сохраняем ширину изображения */
+    height: auto; /* Автоматический расчет высоты для поддержки соотношения сторон */
+}
 .cardImage .name {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     padding: 5px;
-    font-size: 20px;
+    font-size: 24px;
     font-weight: bold;
     color: #000000;
 }
@@ -62,7 +52,7 @@
 .name {
     margin-top: 15px;
     text-align: center;
-
+    font-size: 18px;
 }
 
 .selected {
@@ -78,15 +68,13 @@
 .price {
     //text-decoration: line-through;
     margin-right: 10px;
-    color: gray;
+    color: #787878;
+    font-size: 18px;
 }
 
 .newPrice {
+    font-size: 18px;
 
-}
-
-.imageContainer {
-    position: relative;
 }
 
 .saleLabel {
@@ -106,4 +94,60 @@
 .category {
     color: gray;
     text-align: center;
+    font-size: 18px;
+}
+
+
+@media screen and (max-width: 1000px) {
+    .filters{
+        font-size: 26px;
+    }
+
+    .sliderContainer {
+        margin-top: 50px;     }
+
+    .title {
+        font-size: 26px;     }
+
+    .card{
+        font-size: 16px;
+    }
+
+    .price {
+        font-size: 16px;
+    }
+
+    .newPrice {
+        font-size: 16px;
+
+    }
+
+    .filters {
+        margin-right: 10px;
+        justify-content: space-between;
+    }
+}
+
+@media screen and (max-width: 700px) {
+    .filters{
+        font-size: 22px;
+    }
+
+    .card{
+        text-align: center;
+    }
+
+    .priceContainer {
+        display: inherit;
+        margin-top: 5px;
+    }
+
+    .price {
+        margin-right: 0px;
+         font-size: 14px;
+     }
+
+    .newPrice {
+        font-size: 14px;
+    }
 }
