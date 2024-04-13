@@ -3,6 +3,7 @@
 # Set up and activate virtual environment
 python3.9 -m venv myenv
 source myenv/bin/activate
+python3.9 -m pip install --upgrade pip
 
 # Install Python dependencies from requirements.txt
 pip install -r requirements.txt
