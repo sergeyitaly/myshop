@@ -124,8 +124,6 @@ if USE_S3:
     DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
     STATICFILES_STORAGE = "storages.backends.s3.S3Storage"
     WHITENOISE_ROOT = 'static'
-    AWS_QUERYSTRING_AUTH = False
-    AWS_DEFAULT_ACL = None
     STATICFILES_LOCATION = "static"
     AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
     AWS_LOCATION = 'static'  # This is the folder name in your S3 bucket
