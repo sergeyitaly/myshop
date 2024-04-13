@@ -9,11 +9,10 @@ lerna-debug.log*
 dist-ssr
 *.local
 
-node_modules
-frontend
-site_cache
-staticfiles_build
-venv
+node_modules/
+site_cache/
+staticfiles_build/
+venv/
 __pycache__/
 __pycache__
 # Editor directories and files
@@ -29,4 +28,4 @@ __pycache__
 
 .env
 
-tmp
+tmp/

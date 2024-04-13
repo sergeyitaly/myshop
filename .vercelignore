@@ -1,7 +1,9 @@
-frontend
-node_modules
-site_cache
-staticfiles_build
-venv
+frontend/
+node_modules/
+venv/
 __pycache__/
 __pycache__
+
+site_cache/
+staticfiles_build/
+venv/
