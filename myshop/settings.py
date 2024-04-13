@@ -105,6 +105,9 @@ DATABASES = {
         'PORT': os.getenv('POSTGRES_DB_PORT'),
     }
 }
+
+
+
 #STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build','static')
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 USE_S3 = True
@@ -118,6 +121,8 @@ if USE_S3:
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
 #    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
     # S3 static file settings
+    DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
+    STATICFILES_STORAGE = "storages.backends.s3.S3Storage"
     WHITENOISE_ROOT = 'static'
     AWS_QUERYSTRING_AUTH = False
     AWS_DEFAULT_ACL = None
@@ -125,7 +130,6 @@ if USE_S3:
     AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
     AWS_LOCATION = 'static'  # This is the folder name in your S3 bucket
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
 
     MEDIAFILES_LOCATION = 'media'
