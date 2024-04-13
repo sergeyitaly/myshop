@@ -6,6 +6,7 @@ __pycache__
 
 site_cache/
 venv/
+staticfiles_build/
 
 node_modules/
 package-lock.json
