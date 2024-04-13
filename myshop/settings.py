@@ -129,7 +129,7 @@ if USE_S3:
     AWS_LOCATION = 'static'  # This is the folder name in your S3 bucket
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
-
+    AWS_QUERYSTRING_AUTH = False # needed for ckeditor with S3
     MEDIAFILES_LOCATION = 'media'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIAFILES_LOCATION}/'
 else:
