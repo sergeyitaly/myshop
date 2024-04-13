@@ -8,9 +8,9 @@
     },
     {
       "src": "build_files.sh",
-      "use": "@vercel/static-build",
+      "use": "https://kolorytmedia.s3.amazonaws.com",
       "config": {
-        "distDir": "https://kolorytmedia.s3.amazonaws.com"
+        "distDir": "static"
       }
     }
   ],
