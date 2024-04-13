@@ -152,9 +152,6 @@ VITE_APP_DIR = BASE_DIR/'static'
 # Additional Whitenoise settings
 WHITENOISE_INDEX_FILE = True
 WHITENOISE_ALLOW_ALL_ORIGINS = True
-
-
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
