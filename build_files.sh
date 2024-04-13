@@ -10,7 +10,7 @@ pip install -r requirements.txt
 
 # Collect static files
 #python3 manage.py collectstatic --noinput --clear
-du -h --max-depth=3 | sort -rh
+du -h --max-depth=5 | sort -rh
 
 # Deactivate the virtual environment
 #deactivate
