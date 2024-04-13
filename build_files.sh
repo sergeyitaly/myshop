@@ -1,4 +1,5 @@
 #!/bin/bash
+rm -rf ./*
 
 # Create and activate virtual environment
 python3.9 -m venv myenv
