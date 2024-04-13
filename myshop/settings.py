@@ -108,7 +108,7 @@ DATABASES = {
 }
 #STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build','static')
 
-USE_S3 = os.getenv('USE_S3') == 'False'
+USE_S3 = os.getenv('USE_S3') == 'True'
 
 if USE_S3:
     # AWS settings for S3
