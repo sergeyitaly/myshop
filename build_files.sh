@@ -1,5 +1,4 @@
 #!/bin/bash
-rm -rf ./*
 python3 -m venv myenv
 source myenv/bin/activate
 # Install Python dependencies from requirements.txt
