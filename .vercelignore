@@ -7,3 +7,6 @@ __pycache__
 site_cache/
 staticfiles_build/
 venv/
+
+package.json
+vite.config.ts
