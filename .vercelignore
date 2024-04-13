@@ -5,7 +5,6 @@ __pycache__/
 __pycache__
 
 site_cache/
-staticfiles_build/
 venv/
 
 node_modules/
