@@ -1,6 +1,6 @@
 #!/bin/bash
 # Build the project
-pip install --root-user-action=ignore
+#pip install --root-user-action=ignore
 echo "Building the project..."
 python3.9 -m pip install -r requirements.txt
 
