@@ -3,8 +3,6 @@
 # Set up and activate virtual environment
 python3.9 -m venv myenv
 source myenv/bin/activate
-python3.9 -m pip install --upgrade pip
-
 # Install Python dependencies from requirements.txt
 pip install -r requirements.txt
 
@@ -13,9 +11,6 @@ pip install -r requirements.txt
 
 # Collect static files
 python3.9 manage.py collectstatic --noinput --clear
-
-# List contents and display disk usage
-ls -al
 du -h --max-depth=3 | sort -rh
 
 # Deactivate the virtual environment
