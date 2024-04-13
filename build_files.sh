@@ -11,7 +11,7 @@
 #export DJANGO_SETTINGS_MODULE=myshop.settings
 
 # Collect static files
-#python3.9 manage.py collectstatic --noinput --clear
+python3.9 manage.py collectstatic --noinput --clear
 
 # List contents and display disk usage
 ls -al
