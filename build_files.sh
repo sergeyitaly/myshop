@@ -1,8 +1,8 @@
 #!/bin/bash
-python3 -m venv myenv
+python -m venv myenv
 source myenv/bin/activate
 # Install Python dependencies from requirements.txt
-python pip install -r requirements.txt
+pip install -r requirements.txt
 
 python manage.py makemigrations shop
 python manage.py makemigrations accounts
@@ -19,6 +19,6 @@ export DJANGO_SETTINGS_MODULE=myshop.settings
 # Collect static files (use appropriate settings)
 python manage.py collectstatic --noinput --clear
 ls -al
-du -h --max-depth=1 | sort -rh
+du -h --max-depth=3 | sort -rh
 
 
