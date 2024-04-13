@@ -8,5 +8,6 @@ site_cache/
 staticfiles_build/
 venv/
 
-package.json
-vite.config.ts
+node_modules/
+package-lock.json
+yarn.lock
