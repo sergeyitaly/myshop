@@ -4,7 +4,6 @@ from pathlib import Path
 from decouple import config
 from datetime import timedelta
 from pathlib import Path
-import dotenv
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -29,7 +28,6 @@ INTERNAL_IPS = [
 
 INSTALLED_APPS = [
     'admin_interface',
-    'colorfield',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -47,12 +45,11 @@ INSTALLED_APPS = [
     'knox',
     'cart',
     'accounts',
-    'whitenoise.runserver_nostatic',
+    'colorfield',
+  #  'whitenoise.runserver_nostatic',
     'djoser',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    'drf_yasg',
-    'django_redis',
     'storages',
 ]
 
@@ -65,7 +62,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+ #   'whitenoise.middleware.WhiteNoiseMiddleware',
     'allauth.account.middleware.AccountMiddleware', 
     'django.middleware.locale.LocaleMiddleware',
 ]
@@ -152,8 +149,8 @@ VITE_APP_STATIC_DIR = BASE_DIR/'static/'
 VITE_APP_DIR = BASE_DIR/'static'
 
 # Additional Whitenoise settings
-WHITENOISE_INDEX_FILE = True
-WHITENOISE_ALLOW_ALL_ORIGINS = True
+#WHITENOISE_INDEX_FILE = True
+#WHITENOISE_ALLOW_ALL_ORIGINS = True
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -247,19 +244,19 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://:xuvRxyFZjR6kjCaDiIlOJ5J8tK9ATupQ@redis-12474.c15.us-east-1-4.ec2.cloud.redislabs.com:12474/0',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        },
-    }
-}
-
 #CACHES = {
 #    'default': {
-#        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-#        'LOCATION': os.path.join(BASE_DIR, 'site_cache'),
+#        'BACKEND': 'django_redis.cache.RedisCache',
+#        'LOCATION': 'redis://:xuvRxyFZjR6kjCaDiIlOJ5J8tK9ATupQ@redis-12474.c15.us-east-1-4.ec2.cloud.redislabs.com:12474/0',
+#        'OPTIONS': {
+#            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#        },
 #    }
 #}
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'site_cache'),
+    }
+}
