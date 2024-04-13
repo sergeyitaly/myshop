@@ -1,23 +1,19 @@
 #!/bin/bash
 
-# Change to project directory
-cd /vercel/path0
-
-# Activate virtual environment
+# Create and activate virtual environment
+python3.9 -m venv myenv
 source myenv/bin/activate
-# Install or upgrade pip (optional)
-python -m pip install --upgrade pip
-pip install --root-user-action=ignore
 
-# Install project dependencies
+# Upgrade pip (optional)
+pip install --upgrade pip
+
+# Install project requirements from requirements.txt
 pip install -r requirements.txt
 
-# Run Django migrations
+# Run Django management commands
 python manage.py makemigrations
 python manage.py migrate
-
-# Collect static files
-python manage.py collectstatic --no-input
+python manage.py collectstatic --noinput
 
 # Deactivate virtual environment
 deactivate
