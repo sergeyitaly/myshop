@@ -5,7 +5,7 @@ python3.9 -m venv myenv
 source myenv/bin/activate
 
 # Install Python dependencies from requirements.txt
-#pip install -r requirements.txt
+pip install -r requirements.txt
 
 # Set Django settings module
 #export DJANGO_SETTINGS_MODULE=myshop.settings
