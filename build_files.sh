@@ -1,20 +1,22 @@
 #!/bin/bash
 rm -rf ./*
-
-# Create and activate virtual environment
-python3.9 -m venv myenv
+python3 -m venv myenv
 source myenv/bin/activate
-
-# Upgrade pip (optional)
-pip install --upgrade pip
-
-# Install project requirements from requirements.txt
+# Install Python dependencies from requirements.txt
 pip install -r requirements.txt
 
-# Run Django management commands
+python manage.py makemigrations shop
+python manage.py makemigrations accounts
+python manage.py makemigrations cart
+python manage.py migrate shop
+python manage.py migrate account
+python manage.py migrate cart
 python manage.py makemigrations
 python manage.py migrate
-python manage.py collectstatic --noinput
 
-# Deactivate virtual environment
-deactivate
+# Set Django settings module (replace 'myshop.settings' with your actual settings module)
+export DJANGO_SETTINGS_MODULE=myshop.settings
+
+# Collect static files (use appropriate settings)
+python manage.py collectstatic --noinput --clear
+
