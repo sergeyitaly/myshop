@@ -1,5 +1,5 @@
 #!/bin/bash
-
+rm -rf venv
 # Create a virtual environment
 echo "Creating virtual environment..."
 python3.9 -m venv myenv
