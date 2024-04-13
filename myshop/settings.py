@@ -140,9 +140,6 @@ else:
     # Media file settings (local or S3)
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-# Additional static file directories (local or S3)
-
-
 
 #STATICFILES_FINDERS = [
 #    'django.contrib.staticfiles.finders.FileSystemFinder',
