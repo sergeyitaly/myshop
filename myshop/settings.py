@@ -29,7 +29,7 @@ INTERNAL_IPS = [
 INSTALLED_APPS = [
     #'admin_interface',
      #   'colorfield',
-  #  'whitenoise.runserver_nostatic',
+    'whitenoise.runserver_nostatic',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -47,11 +47,12 @@ INSTALLED_APPS = [
     'knox',
     'cart',
     'accounts',
-
     'djoser',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    'storages',
+    'storages',    
+    'drf_yasg',
+    
 ]
 
 
@@ -63,7 +64,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
- #   'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'allauth.account.middleware.AccountMiddleware', 
     'django.middleware.locale.LocaleMiddleware',
 ]
@@ -108,7 +109,7 @@ DATABASES = {
 
 #STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build','static')
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
-USE_S3 = True
+USE_S3 = False
 if USE_S3:
     # AWS settings for S3
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
@@ -121,10 +122,10 @@ if USE_S3:
     # S3 static file settings
     DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
     STATICFILES_STORAGE = "storages.backends.s3.S3Storage"
-    #WHITENOISE_ROOT = 'static'
+    WHITENOISE_ROOT = 'staticfiles_build/static'
     STATICFILES_LOCATION = "static"
     AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
-    AWS_LOCATION = 'static'  # This is the folder name in your S3 bucket
+    AWS_LOCATION = 'staticfiles_build/static'  # This is the folder name in your S3 bucket
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
     AWS_QUERYSTRING_AUTH = False # needed for ckeditor with S3
@@ -136,7 +137,7 @@ else:
     # Local static file settings
     STATIC_URL = '/static/'
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
-    #WHITENOISE_ROOT = STATIC_ROOT
+    WHITENOISE_ROOT = STATIC_ROOT
     # Media file settings (local or S3)
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -150,8 +151,8 @@ VITE_APP_STATIC_DIR = BASE_DIR/'static/'
 VITE_APP_DIR = BASE_DIR/'static'
 
 # Additional Whitenoise settings
-#WHITENOISE_INDEX_FILE = True
-#WHITENOISE_ALLOW_ALL_ORIGINS = True
+WHITENOISE_INDEX_FILE = True
+WHITENOISE_ALLOW_ALL_ORIGINS = True
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
