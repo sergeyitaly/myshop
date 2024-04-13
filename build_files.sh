@@ -7,7 +7,6 @@ source myenv/bin/activate
 pip install -r requirements.txt
 pip uninstall -y python-dateutil
 pip uninstall -y python3-openid
-pip uninstall -y python-dateutil 
 pip uninstall -y django-node 
 pip uninstall -y social-auth-app-django
 pip uninstall -y urllib3
