@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Set up and activate virtual environment
-#python3.9 -m venv myenv
-#source myenv/bin/activate
+python3.9 -m venv myenv
+source myenv/bin/activate
 
 # Install Python dependencies from requirements.txt
 #pip install -r requirements.txt
@@ -18,4 +18,4 @@ ls -al
 du -h --max-depth=3 | sort -rh
 
 # Deactivate the virtual environment
-#deactivate
+deactivate
