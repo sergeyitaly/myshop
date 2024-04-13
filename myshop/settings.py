@@ -27,7 +27,9 @@ INTERNAL_IPS = [
 # Application definition
 
 INSTALLED_APPS = [
-    'admin_interface',
+    #'admin_interface',
+     #   'colorfield',
+  #  'whitenoise.runserver_nostatic',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,8 +47,7 @@ INSTALLED_APPS = [
     'knox',
     'cart',
     'accounts',
-    'colorfield',
-  #  'whitenoise.runserver_nostatic',
+
     'djoser',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
