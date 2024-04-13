@@ -1,5 +1,5 @@
 #!/bin/bash
-python -m venv myenv
+python3.9 -m venv myenv
 source myenv/bin/activate
 # Install Python dependencies from requirements.txt
 pip install -r requirements.txt
