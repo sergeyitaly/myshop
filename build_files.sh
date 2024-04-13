@@ -5,15 +5,15 @@ python3 -m venv myenv
 source myenv/bin/activate
 # Install Python dependencies from requirements.txt
 pip install -r requirements.txt
-pip uninstall python-dateutil --noinput
-pip uninstall python3-openid --noinput
-pip uninstall python-dateutil --noinput
-pip uninstall jmespath --noinput
-pip uninstall social-auth-app-django --noinput
-pip uninstall urllib3 --noinput
-pip uninstall six --noinput
-pip uninstall idna --noinput
-pip uninstall defusedxml --noinput
+pip uninstall -r python-dateutil
+pip uninstall -r python3-openid
+pip uninstall -r python-dateutil 
+pip uninstall -r jmespath 
+pip uninstall -r social-auth-app-django
+pip uninstall -r urllib3
+pip uninstall -r six
+pip uninstall -r idna
+pip uninstall -r defusedxml
 # Set Django settings module
 #export DJANGO_SETTINGS_MODULE=myshop.settings
 
