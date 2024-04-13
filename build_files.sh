@@ -1,12 +1,17 @@
 #!/bin/bash
+
 # Build the project
-pip install --root-user-action=ignore
 echo "Building the project..."
+
+# Install required packages from requirements.txt
 pip install -r requirements.txt
 
-echo "Make Migration..."
+# Make migrations and migrate database
+echo "Making migrations..."
 python3.9 manage.py makemigrations --noinput
+echo "Applying migrations..."
 python3.9 manage.py migrate --noinput
 
-echo "Collect Static..."
+# Collect static files
+echo "Collecting static files..."
 python3.9 manage.py collectstatic --clear --noinput
