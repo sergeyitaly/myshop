@@ -140,24 +140,19 @@ else:
     # Media file settings (local or S3)
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-#STATICFILES_FINDERS = [
-#    'django.contrib.staticfiles.finders.FileSystemFinder',
-#    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#]
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
 VITE_APP_STATIC_DIR = BASE_DIR/'static/'
 VITE_APP_DIR = BASE_DIR/'static'
 
-# Use Whitenoise for serving compressed and versioned static files
-#STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
 # Additional Whitenoise settings
 WHITENOISE_INDEX_FILE = True
-
 WHITENOISE_ALLOW_ALL_ORIGINS = True
 
-#MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-#MEDIA_URL = '/media/'
 
 
 AUTH_PASSWORD_VALIDATORS = [
