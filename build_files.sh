@@ -13,4 +13,4 @@ pip install -r requirements.txt
 du -h --max-depth=3 | sort -rh
 
 # Deactivate the virtual environment
-deactivate
+#deactivate
