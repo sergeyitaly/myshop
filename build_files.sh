@@ -20,5 +20,5 @@ export DJANGO_SETTINGS_MODULE=myshop.settings
 python manage.py collectstatic --noinput --clear
 pwd
 ls -al
-du -h /vercel/path0/
+du -h ./vercel/path0/
 rm -rf ./frontend
