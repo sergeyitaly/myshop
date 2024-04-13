@@ -5,7 +5,7 @@ cd /vercel/path0
 
 # Activate virtual environment
 source myenv/bin/activate
-
+pip install --root-user-action=ignore
 # Install or upgrade pip (optional)
 python -m pip install --upgrade pip
 

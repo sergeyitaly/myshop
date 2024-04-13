@@ -9,7 +9,6 @@ lerna-debug.log*
 dist-ssr
 *.local
 
-frontend
 node_modules
 site_cache
 staticfiles_build
