@@ -10,14 +10,14 @@
       "src": "build_files.sh",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "static"
+        "distDir": "staticfiles_build"
       }
     }
   ],
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "https://kolorytmedia.s3.amazonaws.com/static/$1"
+      "dest": "static/$1"
     },
     {
       "src": "/(.*)",
