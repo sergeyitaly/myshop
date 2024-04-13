@@ -105,8 +105,6 @@ DATABASES = {
     }
 }
 
-
-
 #STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build','static')
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 USE_S3 = True
