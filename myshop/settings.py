@@ -12,7 +12,7 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
-DEBUG = os.getenv('DEBUG') == 'True'
+DEBUG = os.getenv('DEBUG')
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
@@ -107,8 +107,8 @@ DATABASES = {
     }
 }
 #STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build','static')
-
-USE_S3 = os.getenv('USE_S3') == 'True'
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+USE_S3 = os.getenv('USE_S3')
 
 if USE_S3:
     # AWS settings for S3
@@ -143,7 +143,7 @@ else:
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Additional static file directories (local or S3)
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+
 
 
 #STATICFILES_FINDERS = [
