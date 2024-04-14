@@ -16,7 +16,7 @@ class MediaStorage(S3Boto3Storage):
 
 class Collection(models.Model):
 
-    USE_S3 = os.getenv('USE_S3') == 'True'  # Convert string 'True'/'False' to boolean
+    USE_S3 = os.getenv('USE_S3') == 'TRUE'  # Convert string 'True'/'False' to boolean
     if USE_S3==True:
         photo = models.ImageField(upload_to="photos/collection", storage=MediaStorage(), null=True, blank=True)
     else:    
@@ -53,7 +53,7 @@ class Collection(models.Model):
 
 
 class Product(models.Model):
-    USE_S3 = os.getenv('USE_S3') == 'True'  # Convert string 'True'/'False' to boolean
+    USE_S3 = os.getenv('USE_S3') == 'TRUE'  # Convert string 'True'/'False' to boolean
     if USE_S3==True:
         photo = models.ImageField(upload_to="photos/product", storage=MediaStorage(), null=True, blank=True)
         brandimage = models.FileField(upload_to="photos/svg", storage=MediaStorage(), null=True, blank=True) 

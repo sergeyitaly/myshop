@@ -14,12 +14,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = True
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
-
-
-INTERNAL_IPS = [
-    "127.0.0.1",
-    "localhost",
-]
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_DEFAULT_ACL = 'public-read'
+AWS_QUERYSTRING_AUTH = False # needed for ckeditor with S3
+AWS_S3_FILE_OVERWRITE = True
+AWS_DEFAULT_ACL = None
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
+CORS_ALLOWED_ORIGINS = [ "http://localhost:5173", "http://127.0.0.1:5173",]
+INTERNAL_IPS = ["127.0.0.1","localhost",]
 #ALLOWED_HOSTS = ['*']
 # Application definition
 
@@ -102,36 +108,25 @@ DATABASES = {
     }
 }
 
-USE_S3 = os.getenv('USE_S3') == 'True'  # Convert string 'True'/'False' to boolean
+USE_S3 = os.getenv('USE_S3') == 'TRUE'  # Convert string 'True'/'False' to boolean
 
 if USE_S3==True:
-    # AWS settings for S3
-    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-    AWS_DEFAULT_ACL = 'public-read'
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
-    AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
-#    AWS_LOCATION = 'staticfiles_build/static'  # This is the folder name in your S3 bucket
-#    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
-    AWS_QUERYSTRING_AUTH = False # needed for ckeditor with S3
-    AWS_S3_FILE_OVERWRITE = True
-    AWS_DEFAULT_ACL = None
-  #  DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Storage'
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+
+ #   DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
     #LoadImagesToS3().copy_local_media_to_s3(os.path.join(BASE_DIR, 'media'))
     #WHITENOISE_ROOT = 'staticfiles_build/static'
-    #DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
-    #STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
+    STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
     AWS_MEDIA_LOCATION = os.getenv('AWS_MEDIA', 'media')  # Default to 'media' if not specified
-    
+    #DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Storage'
+
     #STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     AWS_LOCATION = AWS_MEDIA_LOCATION  # Use media location for S3
     # Media URL and Storage
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
-    CORS_ALLOWED_ORIGINS = [ "http://localhost:5173", "http://127.0.0.1:5173", f'https://{AWS_S3_CUSTOM_DOMAIN}']
+
 
 
 
@@ -140,7 +135,6 @@ else:
     # Media file settings (local or S3)
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-    CORS_ALLOWED_ORIGINS = [ "http://localhost:5173", "http://127.0.0.1:5173"]
 
 
 # Static files settings (Vercel deployment)
