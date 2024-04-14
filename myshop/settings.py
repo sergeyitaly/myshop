@@ -122,10 +122,13 @@ if USE_S3:
 #    DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
     #STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
-    WHITENOISE_ROOT = 'staticfiles_build/static'
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
+    #WHITENOISE_ROOT = 'staticfiles_build/static'
     STATICFILES_LOCATION = "static"
+    WHITENOISE_ROOT = STATIC_ROOT
     AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
+
     AWS_LOCATION = 'staticfiles_build/static'  # This is the folder name in your S3 bucket
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
