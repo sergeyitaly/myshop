@@ -117,8 +117,8 @@ if USE_S3==True:
 #    STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
     AWS_MEDIA_LOCATION = os.getenv('AWS_MEDIA', 'media')  # Default to 'media' if not specified
     DEFAULT_FILE_STORAGE ="storages.backends.s3boto3.S3Boto3Storage"
-    AWS_LOCATION = AWS_MEDIA_LOCATION  # Use media location for S3
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/'
+
 else:
     # Local static file settings
     # Media file settings (local or S3)
