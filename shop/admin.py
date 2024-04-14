@@ -12,7 +12,12 @@ class CollectionAdmin(admin.ModelAdmin):
 
     def image_tag(self, obj):
         if obj.photo:
-            return format_html('<img src="{}" style="max-width:200px; max-height:200px"/>'.format(obj.image.url))
+            USE_S3 = settings.USE_S3 == 'True'  # Convert to boolean
+            if USE_S3==True:
+                photo_url = settings.MEDIA_URL + obj.photo.name
+            else:
+                photo_url = obj.photo.url
+            return format_html(f'<img src="{photo_url}" width="100" />')
         else:
             return '(No image)'
 
@@ -27,7 +32,12 @@ class ProductAdmin(admin.ModelAdmin):
 
     def image_tag(self, obj):
         if obj.photo:
-            return format_html('<img src="{}" style="max-width:200px; max-height:200px"/>'.format(obj.image.url))
+            USE_S3 = settings.USE_S3 == 'True'  # Convert to boolean
+            if USE_S3==True:
+                photo_url = settings.MEDIA_URL + obj.photo.name
+            else:
+                photo_url = obj.photo.url
+            return format_html(f'<img src="{photo_url}" width="100" />')
         else:
             return '(No image)'
 
