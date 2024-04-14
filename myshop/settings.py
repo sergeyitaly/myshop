@@ -5,6 +5,48 @@ from decouple import config
 from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
+import boto3
+from botocore.exceptions import NoCredentialsError
+
+def upload_to_s3(local_file_path, s3_key):
+    """
+    Uploads a file to S3.
+    """
+    s3_client = boto3.client(
+        's3',
+        aws_access_key_id=AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_SECRET_ACCESS_KEY
+    )
+
+    try:
+        s3_client.upload_file(local_file_path, AWS_STORAGE_BUCKET_NAME, s3_key)
+        print(f"Uploaded {local_file_path} to S3 bucket {AWS_STORAGE_BUCKET_NAME} with key {s3_key}")
+        return True
+    except FileNotFoundError:
+        print(f"File {local_file_path} not found.")
+        return False
+    except NoCredentialsError:
+        print("AWS credentials not available.")
+        return False
+
+def copy_local_media_to_s3(local_media_dir):
+    """
+    Recursively copies files from a local media directory to S3 under 'media/' prefix.
+    """
+    for root, dirs, files in os.walk(local_media_dir):
+        for file in files:
+            local_file_path = os.path.join(root, file)
+            relative_path = os.path.relpath(local_file_path, local_media_dir)
+
+            # Construct S3 key with 'media/' prefix
+            s3_key = f"media/{relative_path}"
+
+            # Replace backslashes with forward slashes for S3 key (required on Windows)
+            s3_key = s3_key.replace(os.path.sep, '/')
+
+            # Upload the file to S3
+            upload_to_s3(local_file_path, s3_key)
+# Call the function to copy local media to S3
 
 load_dotenv()
 
@@ -130,6 +172,8 @@ if USE_S3:
     AWS_S3_FILE_OVERWRITE = True
     AWS_DEFAULT_ACL = None
     MEDIAFILES_LOCATION = 'media'
+ #   copy_local_media_to_s3(os.path.join(BASE_DIR, 'media'))
+
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIAFILES_LOCATION}/'
 else:
     # Local static file settings
@@ -139,6 +183,7 @@ else:
     # Media file settings (local or S3)
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 STATICFILES_FINDERS = [
