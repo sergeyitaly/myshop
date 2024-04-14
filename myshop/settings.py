@@ -108,7 +108,7 @@ DATABASES = {
 
 USE_S3 = os.getenv('USE_S3') == 'True'  # Convert string 'True'/'False' to boolean
 
-if USE_S3:
+if USE_S3==True:
     # AWS settings for S3
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
@@ -123,7 +123,9 @@ if USE_S3:
     AWS_QUERYSTRING_AUTH = False # needed for ckeditor with S3
     AWS_S3_FILE_OVERWRITE = False
     AWS_DEFAULT_ACL = None
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Storage'
+  #  DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Storage'
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
     #LoadImagesToS3().copy_local_media_to_s3(os.path.join(BASE_DIR, 'media'))
     #WHITENOISE_ROOT = 'staticfiles_build/static'
     #DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
