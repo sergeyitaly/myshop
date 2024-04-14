@@ -25,7 +25,7 @@ AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
 AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
 CORS_ALLOWED_ORIGINS = [ "http://localhost:5173", "http://127.0.0.1:5173",
-#                        f'https://{AWS_S3_CUSTOM_DOMAIN}'
+                        f'https://{AWS_S3_CUSTOM_DOMAIN}'
                         ]
 INTERNAL_IPS = ["127.0.0.1","localhost",]
 #ALLOWED_HOSTS = ['*']
