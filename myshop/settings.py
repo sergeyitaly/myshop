@@ -128,7 +128,6 @@ if USE_S3:
     STATICFILES_LOCATION = "static"
     WHITENOISE_ROOT = STATIC_ROOT
     AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
-
     AWS_LOCATION = 'staticfiles_build/static'  # This is the folder name in your S3 bucket
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
