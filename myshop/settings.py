@@ -125,7 +125,6 @@ if USE_S3:
     AWS_S3_FILE_OVERWRITE = True
     AWS_DEFAULT_ACL = None
     #WHITENOISE_ROOT = 'staticfiles_build/static'
-
     # S3 static file settings
 #    DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
     #STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
@@ -134,7 +133,6 @@ if USE_S3:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
     STATICFILES_LOCATION = "static"
     WHITENOISE_ROOT = STATIC_ROOT
-
     MEDIAFILES_LOCATION = 'media'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIAFILES_LOCATION}/'
 
