@@ -106,7 +106,7 @@ DATABASES = {
     }
 }
 
-USE_S3 = os.getenv('USE_S3')
+USE_S3 = os.getenv('USE_S3') == 'True'  # Convert string 'True'/'False' to boolean
 
 if USE_S3:
     # AWS settings for S3
