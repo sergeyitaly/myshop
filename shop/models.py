@@ -9,12 +9,12 @@ from storages.backends.s3boto3 import S3Boto3Storage
 load_dotenv()
 
 class MediaStorage(S3Boto3Storage):
-    location = os.getenv('AWS_MEDIA')
+    location = os.getenv('AWS_MEDIA', 'media')  # Default to 'media' if not specified
     file_overwrite = True
 
 class Collection(models.Model):
 
-    USE_S3 = os.getenv('USE_S3')
+    USE_S3 = os.getenv('USE_S3') == 'True'  # Convert string 'True'/'False' to boolean
     if USE_S3:
         photo = models.ImageField(upload_to="photos/collection", storage=MediaStorage(), null=True, blank=True)
     else:    
@@ -51,7 +51,7 @@ class Collection(models.Model):
 
 
 class Product(models.Model):
-    USE_S3 = os.getenv('USE_S3')
+    USE_S3 = os.getenv('USE_S3') == 'True'  # Convert string 'True'/'False' to boolean
     if USE_S3:
         photo = models.ImageField(upload_to="photos/product", storage=MediaStorage(), null=True, blank=True)
         brandimage = models.FileField(upload_to="photos/svg", storage=MediaStorage(), null=True, blank=True) 

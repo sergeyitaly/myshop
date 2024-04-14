@@ -107,6 +107,7 @@ DATABASES = {
 }
 
 USE_S3 = os.getenv('USE_S3')
+
 if USE_S3:
     # AWS settings for S3
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
@@ -115,7 +116,7 @@ if USE_S3:
     AWS_DEFAULT_ACL = 'public-read'
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
-    AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
+#    AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
     AWS_LOCATION = 'staticfiles_build/static'  # This is the folder name in your S3 bucket
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
@@ -127,8 +128,11 @@ if USE_S3:
     #WHITENOISE_ROOT = 'staticfiles_build/static'
     #DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
     #STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    MEDIAFILES_LOCATION = os.getenv('AWS_MEDIA')
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIAFILES_LOCATION}/'
+    AWS_MEDIA_LOCATION = os.getenv('AWS_MEDIA', 'media')  # Default to 'media' if not specified
+    AWS_LOCATION = AWS_MEDIA_LOCATION  # Use media location for S3
+    # Media URL and Storage
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
+
 else:
     # Local static file settings
     # Media file settings (local or S3)
