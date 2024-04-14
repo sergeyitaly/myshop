@@ -15,7 +15,6 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = True
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
-CORS_ALLOWED_ORIGINS = ['*']
 
 INTERNAL_IPS = [
     "127.0.0.1",
@@ -116,7 +115,6 @@ if USE_S3==True:
     AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
 #    AWS_LOCATION = 'staticfiles_build/static'  # This is the folder name in your S3 bucket
 #    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
-    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
     AWS_QUERYSTRING_AUTH = False # needed for ckeditor with S3
     AWS_S3_FILE_OVERWRITE = True
     AWS_DEFAULT_ACL = None
@@ -133,12 +131,17 @@ if USE_S3==True:
     AWS_LOCATION = AWS_MEDIA_LOCATION  # Use media location for S3
     # Media URL and Storage
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
+    CORS_ALLOWED_ORIGINS = [ "http://localhost:5173", "http://127.0.0.1:5173", f'https://{AWS_S3_CUSTOM_DOMAIN}']
+
+
 
 else:
     # Local static file settings
     # Media file settings (local or S3)
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    CORS_ALLOWED_ORIGINS = [ "http://localhost:5173", "http://127.0.0.1:5173"]
+
 
 # Static files settings (Vercel deployment)
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
