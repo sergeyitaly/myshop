@@ -19,9 +19,7 @@ USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
 class CollectionAdmin(admin.ModelAdmin):
     list_display = ['name', 'image_tag', 'photo']
     readonly_fields = ['image_tag']
-
     actions = ['delete_selected']
-
     def image_tag(self, obj):
         if obj.photo:
             if USE_S3: photo_url = MEDIA_URL + obj.photo.name
@@ -31,6 +29,8 @@ class CollectionAdmin(admin.ModelAdmin):
         else:
             return '(No image)'    
     image_tag.short_description = "Image"
+    image_tag.allow_tags = True
+
     
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -48,3 +48,5 @@ class ProductAdmin(admin.ModelAdmin):
         else:
             return '(No image)'    
     image_tag.short_description = "Image"
+    image_tag.allow_tags = True
+
