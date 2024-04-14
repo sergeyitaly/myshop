@@ -2,11 +2,27 @@ from django.db import models
 from django.utils.text import slugify
 from django.utils.html import mark_safe
 from django.template.defaultfilters import truncatechars 
+import os
+from dotenv import load_dotenv
+from storages.backends.s3boto3 import S3Boto3Storage
+
+
+load_dotenv()
+
+class MediaStorage(S3Boto3Storage):
+    location = os.getenv('MEDIAFILES_LOCATION', 'media')  # Default to 'media' if not specified in .env
+    file_overwrite = os.getenv('AWS_S3_FILE_OVERWRITE', False)
 
 class Collection(models.Model):
+
+    USE_S3 = os.getenv('USE_S3')
+    if USE_S3:
+        photo = models.ImageField(upload_to="photos/collection", storage=MediaStorage(), null=True, blank=True)
+    else:    
+        photo = models.ImageField(upload_to="photos/collection", null=True, blank=True)
+    
     name = models.CharField(max_length=200, db_index=True)
     slug = models.SlugField(max_length=200, db_index=True, unique=True)
-    photo = models.ImageField(upload_to="photos/collection", null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -36,6 +52,14 @@ class Collection(models.Model):
 
 
 class Product(models.Model):
+    USE_S3 = os.getenv('USE_S3')
+    if USE_S3:
+        photo = models.ImageField(upload_to="photos/product", storage=MediaStorage(), null=True, blank=True)
+        brandimage = models.FileField(upload_to="photos/svg", storage=MediaStorage(), null=True, blank=True) 
+    else:    
+        photo = models.ImageField(upload_to="photos/product", null=True, blank=True)
+        brandimage = models.FileField(upload_to="photos/svg", null=True, blank=True)
+    
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE, related_name='products')
     name = models.CharField(max_length=300, db_index=True)
     slug = models.SlugField(max_length=200, db_index=True, unique=True)
@@ -45,9 +69,6 @@ class Product(models.Model):
     available = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-   
-    photo = models.ImageField(upload_to="photos/product", null=True, blank=True)
-    brandimage = models.FileField(upload_to="photos/svg", null=True, blank=True)
 
     def __str__(self):
         return self.name

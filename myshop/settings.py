@@ -106,9 +106,7 @@ DATABASES = {
     }
 }
 
-#STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build','static')
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
-USE_S3 = True
+USE_S3 = os.getenv('USE_S3')
 if USE_S3:
     # AWS settings for S3
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
@@ -122,38 +120,31 @@ if USE_S3:
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
     AWS_QUERYSTRING_AUTH = False # needed for ckeditor with S3
-    AWS_S3_FILE_OVERWRITE = True
+    AWS_S3_FILE_OVERWRITE = False
     AWS_DEFAULT_ACL = None
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Storage'
+    #LoadImagesToS3().copy_local_media_to_s3(os.path.join(BASE_DIR, 'media'))
     #WHITENOISE_ROOT = 'staticfiles_build/static'
-    # S3 static file settings
-#    DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
+    #DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
     #STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-    STATIC_URL = '/static/'
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
-    STATICFILES_LOCATION = "static"
-    WHITENOISE_ROOT = STATIC_ROOT
     MEDIAFILES_LOCATION = 'media'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIAFILES_LOCATION}/'
-
-    #LoadImagesToS3().copy_local_media_to_s3(os.path.join(BASE_DIR, 'media'))
 else:
     # Local static file settings
-    STATIC_URL = '/static/'
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
-    WHITENOISE_ROOT = STATIC_ROOT
     # Media file settings (local or S3)
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
+# Static files settings (Vercel deployment)
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
+STATIC_URL = '/static/'  # URL to serve static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # Use whitenoise for serving static files
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
-VITE_APP_STATIC_DIR = BASE_DIR/'static/'
-VITE_APP_DIR = BASE_DIR/'static'
+WHITENOISE_ROOT = STATIC_ROOT
 
 # Additional Whitenoise settings
 WHITENOISE_INDEX_FILE = True
