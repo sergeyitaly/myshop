@@ -3,10 +3,12 @@ from django.utils.text import slugify
 from django.utils.html import mark_safe
 from django.template.defaultfilters import truncatechars 
 import os
-from dotenv import load_dotenv
 from storages.backends.s3boto3 import S3Boto3Storage
+from dotenv import load_dotenv
+from django.conf import settings
 
 load_dotenv()
+
 
 class MediaStorage(S3Boto3Storage):
     location = os.getenv('AWS_MEDIA', 'media')  # Default to 'media' if not specified
@@ -37,9 +39,9 @@ class Collection(models.Model):
     
     def image_tag(self):
         if self.photo:
-            return mark_safe(f'<img src="{self.photo.url}" width="100" />')
-        else:
-            return '(No image)'   
+            photo_url = f'{settings.MEDIA_URL}{self.photo.name}'
+            return mark_safe(f'<img src="{photo_url}" width="100" />')
+         
     image_tag.short_description = "Image"
     image_tag.allow_tags = True
 
@@ -78,7 +80,8 @@ class Product(models.Model):
     
     def image_tag(self):
         if self.photo:
-            return mark_safe(f'<img src="{self.photo.url}" width="100" />')
+            photo_url = f'{settings.MEDIA_URL}{self.photo.name}'
+            return mark_safe(f'<img src="{photo_url}" width="100" />')
         else:
             return '(No image)'    
     image_tag.short_description = "Image"
