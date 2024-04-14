@@ -116,12 +116,12 @@ if USE_S3==True:
     AWS_DEFAULT_ACL = 'private'
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
-#    AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
-    AWS_LOCATION = 'staticfiles_build/static'  # This is the folder name in your S3 bucket
-    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
+    AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
+#    AWS_LOCATION = 'staticfiles_build/static'  # This is the folder name in your S3 bucket
+#    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
     AWS_QUERYSTRING_AUTH = False # needed for ckeditor with S3
-    AWS_S3_FILE_OVERWRITE = False
+    AWS_S3_FILE_OVERWRITE = True
     AWS_DEFAULT_ACL = None
   #  DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Storage'
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
