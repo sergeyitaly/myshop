@@ -129,6 +129,9 @@ if USE_S3:
     #DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
     #STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
     AWS_MEDIA_LOCATION = os.getenv('AWS_MEDIA', 'media')  # Default to 'media' if not specified
+    
+    #STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
     AWS_LOCATION = AWS_MEDIA_LOCATION  # Use media location for S3
     # Media URL and Storage
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'

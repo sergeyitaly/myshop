@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.permissions import DjangoObjectPermissions
 from django.shortcuts import render
+from myshop.settings import MEDIA_URL
 
 class ProductList(generics.ListCreateAPIView):
     queryset = Product.objects.all()
@@ -42,7 +43,10 @@ class ProductView(APIView):
     def get(self, request, pk, format=None):
         product = self.get_object(pk)
         serializer = ProductSerializer(product)
-        return Response(serializer.data)
+        data = serializer.data
+        if product.photo:
+            data['photo_url'] = MEDIA_URL + str(product.photo)
+        return Response(data)
 
     def post(self, request):
         product = request.data.get("product")
