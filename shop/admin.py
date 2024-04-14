@@ -3,15 +3,14 @@ from django.utils.html import format_html
 from django.urls import reverse
 from .models import Product, Collection
 from dotenv import load_dotenv
-from .models import MediaStorage
 import os
-
+from django.conf import settings
 
 load_dotenv()
 
 @admin.register(Collection)
 class CollectionAdmin(admin.ModelAdmin):
-    list_display = ['name', 'image_tag']
+    list_display = ['name', 'image_tag','photo']
     readonly_fields = ['image_tag']
 
     actions = ['delete_selected']
@@ -19,9 +18,9 @@ class CollectionAdmin(admin.ModelAdmin):
     def image_tag(self, obj):
         if obj.photo:
             USE_S3 = os.getenv('USE_S3')
-            if USE_S3:  photo_url = MediaStorage().url(obj.photo.name)
+            if USE_S3:  photo_url = settings.MEDIA_URL + obj.photo.name
             else:   photo_url = obj.photo.url
-
+            print(photo_url)
             return format_html(f'<img src="{photo_url}" width="100" />')
         else:
             return '(No image)'   
@@ -29,7 +28,7 @@ class CollectionAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'collection', 'image_tag', 'price', 'stock', 'available')
+    list_display = ('name', 'collection', 'image_tag', 'price', 'stock', 'available','photo')
     readonly_fields = ['image_tag']
 
     actions = ['delete_selected']
@@ -37,8 +36,9 @@ class ProductAdmin(admin.ModelAdmin):
     def image_tag(self, obj):
         if obj.photo:
             USE_S3 = os.getenv('USE_S3')
-            if USE_S3:  photo_url = MediaStorage().url(obj.photo.name)
+            if USE_S3:  photo_url = settings.MEDIA_URL + obj.photo.name
             else:   photo_url = obj.photo.url
+            print(photo_url)
             return format_html(f'<img src="{photo_url}" width="100" />')
         else:
             return '(No image)'    

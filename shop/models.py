@@ -6,12 +6,11 @@ import os
 from dotenv import load_dotenv
 from storages.backends.s3boto3 import S3Boto3Storage
 
-
 load_dotenv()
 
 class MediaStorage(S3Boto3Storage):
-    location = os.getenv('MEDIAFILES_LOCATION', 'media')  # Default to 'media' if not specified in .env
-    file_overwrite = os.getenv('AWS_S3_FILE_OVERWRITE', False)
+    location = os.getenv('AWS_MEDIA')
+    file_overwrite = True
 
 class Collection(models.Model):
 

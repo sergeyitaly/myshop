@@ -127,7 +127,7 @@ if USE_S3:
     #WHITENOISE_ROOT = 'staticfiles_build/static'
     #DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
     #STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    MEDIAFILES_LOCATION = 'media'
+    MEDIAFILES_LOCATION = os.getenv('AWS_MEDIA')
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIAFILES_LOCATION}/'
 else:
     # Local static file settings
