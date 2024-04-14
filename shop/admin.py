@@ -17,7 +17,7 @@ class CollectionAdmin(admin.ModelAdmin):
 
     def image_tag(self, obj):
         if obj.photo:
-            USE_S3 = os.getenv('USE_S3') == True
+            USE_S3 = os.getenv('USE_S3') == 'TRUE'
             if USE_S3:  photo_url = settings.MEDIA_URL + obj.photo.name
             else:   photo_url = obj.photo.url
             print(photo_url)
@@ -35,7 +35,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     def image_tag(self, obj):
         if obj.photo:
-            USE_S3 = os.getenv('USE_S3')==True
+            USE_S3 = os.getenv('USE_S3')=='TRUE'
             if USE_S3:  photo_url = settings.MEDIA_URL + obj.photo.name
             else:   photo_url = obj.photo.url
             print(photo_url)
