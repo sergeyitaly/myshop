@@ -6,7 +6,6 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  //justify-content: space-between;
 }
 
 .title {
@@ -15,7 +14,7 @@
 
 .card {
   width: calc(33.33%);
-  margin-bottom: 70px;
+  margin-bottom: 50px;
 }
 
 .cardImage {
@@ -39,7 +38,35 @@
   color: #A8A8A8;
   font-size: 18px;
   font-weight: 400;
-
 }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+}
+
+
+@media screen and (max-width: 700px) {
+
+  .card {
+    width: calc(50%);
+    margin-bottom: 40px;
+  }
+
+  .name {
+    font-size: 24px;
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .name {
+    font-size: 18px;
+  }
+
+  .category {
+    font-size: 16px;
+  }
+}
+
 
 

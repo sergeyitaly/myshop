@@ -9,8 +9,8 @@ export function AllCollection() {
         dots: true,
         infinite: true,
         speed: 500,
-        slidesToShow: 3,
-        slidesToScroll: 3,
+        slidesToShow: 1,
+        slidesToScroll: 1,
         initialSlide: 0,
         arrows: false,
     };
@@ -21,7 +21,7 @@ export function AllCollection() {
                 {mockDataAllCollection.map((product, index) => (
                     <div key={index} className={style.card}>
                         <div className={style.cardImage}>
-                            <img src={product.imageUrl} alt={product.name} style={{maxWidth:'100%'}}/>
+                            <img src={product.imageUrl} alt={product.name} className={style.imageCollection}/>
                             <p className={style.name}>{product.name}</p>
                             <p className={style.category}>{product.category}</p>
                         </div>

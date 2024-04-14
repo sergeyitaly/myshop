@@ -16,28 +16,22 @@
     padding-right: 10px;
 }
 
-//.card:first-child {
-//    padding-left: 10px;
-//}
-
-
 .cardImage {
-    /*width: 100%;*/
+    ///*width: 100%;*/
     position: relative;
-    height: 270px;
+    //height: 230px;
 }
 
 .imageContainer {
-    //width: 200px;
-    height: 280px;
-    overflow: hidden;
-
+    height: 170px; /* Устанавливаем фиксированную высоту контейнера */
+    overflow: hidden; /* Обрезаем изображение, которое выходит за пределы контейнера */
 }
 
 .image {
-    width: 100%; /* Сохраняем ширину изображения */
+    width: 100%; /* Сохраняем ширину изображения на 100%, чтобы оно автоматически сжималось при изменении размера экрана */
     height: auto; /* Автоматический расчет высоты для поддержки соотношения сторон */
 }
+
 .cardImage .name {
     position: absolute;
     top: 50%;
