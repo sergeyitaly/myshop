@@ -120,7 +120,9 @@ if USE_S3:
 #    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
     # S3 static file settings
 #    DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
-    STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    #STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
     WHITENOISE_ROOT = 'staticfiles_build/static'
     STATICFILES_LOCATION = "static"
     AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
