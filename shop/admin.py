@@ -1,7 +1,15 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import Product, Collection
-from django.conf import settings
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+AWS_MEDIA_LOCATION = os.getenv('AWS_MEDIA', 'media')  # Default to 'media' if not specified
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/'
 
 @admin.register(Collection)
 class CollectionAdmin(admin.ModelAdmin):
@@ -12,14 +20,15 @@ class CollectionAdmin(admin.ModelAdmin):
 
     def image_tag(self, obj):
         if obj.photo:
-            if settings.USE_S3:
-                photo_url = f'https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{settings.AWS_MEDIA_LOCATION}/{obj.photo.name}'
+            USE_S3 = os.getenv('USE_S3')
+            if USE_S3:
+                photo_url = MEDIA_URL + obj.photo.name
             else:
                 photo_url = obj.photo.url
+            print(photo_url)
             return format_html(f'<img src="{photo_url}" width="100" />')
         else:
-            return '(No image)'
-
+            return '(No image)'   
     image_tag.short_description = "Image"
 
 @admin.register(Product)
@@ -31,13 +40,14 @@ class ProductAdmin(admin.ModelAdmin):
 
     def image_tag(self, obj):
         if obj.photo:
-            if settings.USE_S3:
-                photo_url = f'https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{settings.AWS_MEDIA_LOCATION}/{obj.photo.name}'
+            USE_S3 = os.getenv('USE_S3')
+            if USE_S3:
+                photo_url = MEDIA_URL + obj.photo.name
             else:
                 photo_url = obj.photo.url
-                print(photo_url)
+            print(photo_url)
+
             return format_html(f'<img src="{photo_url}" width="100" />')
         else:
-            return '(No image)'
-
+            return '(No image)'    
     image_tag.short_description = "Image"

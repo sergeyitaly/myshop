@@ -15,16 +15,9 @@ class MediaStorage(S3Boto3Storage):
     file_overwrite = True
 
 class Collection(models.Model):
-
-    USE_S3 = os.getenv('USE_S3') == 'TRUE'  # Convert string 'True'/'False' to boolean
-    if USE_S3==True:
-        photo = models.ImageField(upload_to="photos/collection", storage=MediaStorage(), null=True, blank=True)
-    else:    
-        photo = models.ImageField(upload_to="photos/collection", null=True, blank=True)
-    
+    photo = models.ImageField(upload_to="photos/collection", storage=MediaStorage(), null=True, blank=True)
     name = models.CharField(max_length=200, db_index=True)
     slug = models.SlugField(max_length=200, db_index=True, unique=True)
-
     def __str__(self):
         return self.name
     
@@ -39,9 +32,9 @@ class Collection(models.Model):
     
     def image_tag(self):
         if self.photo:
-            photo_url = f'{settings.MEDIA_URL}{self.photo.name}'
-            return mark_safe(f'<img src="{photo_url}" width="100" />')
-         
+            return mark_safe(f'<img src="{self.photo.url}" width="100" />')
+        else:
+            return '(No image)'   
     image_tag.short_description = "Image"
     image_tag.allow_tags = True
 
@@ -53,13 +46,9 @@ class Collection(models.Model):
 
 
 class Product(models.Model):
-    USE_S3 = os.getenv('USE_S3') == 'TRUE'  # Convert string 'True'/'False' to boolean
-    if USE_S3==True:
-        photo = models.ImageField(upload_to="photos/product", storage=MediaStorage(), null=True, blank=True)
-        brandimage = models.FileField(upload_to="photos/svg", storage=MediaStorage(), null=True, blank=True) 
-    else:    
-        photo = models.ImageField(upload_to="photos/product", null=True, blank=True)
-        brandimage = models.FileField(upload_to="photos/svg", null=True, blank=True)
+    photo = models.ImageField(upload_to="photos/product", storage=MediaStorage(), null=True, blank=True)
+    brandimage = models.FileField(upload_to="photos/svg", storage=MediaStorage(), null=True, blank=True) 
+
     
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE, related_name='products')
     name = models.CharField(max_length=300, db_index=True)
@@ -80,10 +69,9 @@ class Product(models.Model):
     
     def image_tag(self):
         if self.photo:
-            photo_url = f'{settings.MEDIA_URL}{self.photo.name}'
-            return mark_safe(f'<img src="{photo_url}" width="100" />')
+            return mark_safe(f'<img src="{self.photo.url}" width="100" />')
         else:
-            return '(No image)'    
+            return '(No image)'   
     image_tag.short_description = "Image"
     image_tag.allow_tags = True
 
