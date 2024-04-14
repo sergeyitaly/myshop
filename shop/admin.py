@@ -20,7 +20,7 @@ class CollectionAdmin(admin.ModelAdmin):
 
     def image_tag(self, obj):
         if obj.photo:
-            USE_S3 = os.getenv('USE_S3')
+            USE_S3 = os.getenv('USE_S3') =='TRUE'
             if USE_S3:
                 photo_url = MEDIA_URL + obj.photo.name
             else:
@@ -40,7 +40,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     def image_tag(self, obj):
         if obj.photo:
-            USE_S3 = os.getenv('USE_S3')
+            USE_S3 = os.getenv('USE_S3') =='TRUE'
             if USE_S3:
                 photo_url = MEDIA_URL + obj.photo.name
             else:
