@@ -111,25 +111,14 @@ DATABASES = {
 USE_S3 = os.getenv('USE_S3') == 'TRUE'  # Convert string 'True'/'False' to boolean
 
 if USE_S3==True:
-
-
- #   DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
     #LoadImagesToS3().copy_local_media_to_s3(os.path.join(BASE_DIR, 'media'))
     #WHITENOISE_ROOT = 'staticfiles_build/static'
     DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
-    STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+#    STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
     AWS_MEDIA_LOCATION = os.getenv('AWS_MEDIA', 'media')  # Default to 'media' if not specified
     #DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Storage'
-
-    #STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     AWS_LOCATION = AWS_MEDIA_LOCATION  # Use media location for S3
-    # Media URL and Storage
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
-
-
-
-
 else:
     # Local static file settings
     # Media file settings (local or S3)
