@@ -26,7 +26,7 @@ function CarouselNewProduct () {
     };
     return (
         <div className={style.sliderContainer}>
-            <p className={style.title}>Нові надходження</p>
+            <p className={style.title}> Нові надходження </p>
             <Slider {...settings}>
                 {mockDataCategories.map((product, index) => (
                     <div key={index} className={style.card}>

@@ -72,20 +72,14 @@ export const mockDataProducts: Product[] = [
         name: '55555555',
         price: '6600,00 грн',
         imageUrl: image4
-    }
-];
-
-
-export const mockDataCategories = [
-    {
-        name: 'Кераміка',
-        imageUrl: image5
     },
     {
-        name: 'Скло',
-        imageUrl: image6
+        name: 'Керамічний глек',
+        price: '2400,00 грн',
+        imageUrl: image3
     },
 ];
+
 
 export const mockDataPopular: Product[] = [
     {
@@ -124,6 +118,19 @@ export const mockDataPopular: Product[] = [
         imageUrl: image4
     },
 ];
+
+
+export const mockDataCategories = [
+    {
+        name: 'Кераміка',
+        imageUrl: image5
+    },
+    {
+        name: 'Скло',
+        imageUrl: image6
+    },
+];
+
 
 export const mockDataAllCollection: Product[] = [
     {
