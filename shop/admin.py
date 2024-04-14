@@ -12,7 +12,11 @@ class CollectionAdmin(admin.ModelAdmin):
 
     def image_tag(self, obj):
         if obj.photo:
-            return format_html('<img src="{}" width="100" />'.format(obj.photo.url))
+            if settings.USE_S3:
+                photo_url = f'https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{settings.AWS_MEDIA_LOCATION}/{obj.photo.name}'
+            else:
+                photo_url = obj.photo.url
+            return format_html(f'<img src="{photo_url}" width="100" />')
         else:
             return '(No image)'
 
@@ -27,8 +31,12 @@ class ProductAdmin(admin.ModelAdmin):
 
     def image_tag(self, obj):
         if obj.photo:
-            print(obj.photo.url)
-            return format_html('<img src="{}" width="100" />'.format(obj.photo.url))
+            if settings.USE_S3:
+                photo_url = f'https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{settings.AWS_MEDIA_LOCATION}/{obj.photo.name}'
+            else:
+                photo_url = obj.photo.url
+                print(photo_url)
+            return format_html(f'<img src="{photo_url}" width="100" />')
         else:
             return '(No image)'
 
