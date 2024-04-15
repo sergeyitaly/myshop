@@ -6,7 +6,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-dist-ssr
 *.local
 
 node_modules/
@@ -24,7 +23,7 @@ __pycache__
 *.njsproj
 *.sln
 *.sw?
-
+dist/
 .env
 
 tmp/

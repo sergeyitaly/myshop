@@ -142,7 +142,7 @@ STATIC_URL = '/static/'  # URL to serve static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
 WHITENOISE_ROOT = STATIC_ROOT
 # Static files settings (Vercel deployment)
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'dist'),)
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',

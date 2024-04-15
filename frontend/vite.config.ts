@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
-import { djangoVitePlugin } from 'django-vite-plugin';
 import { TanStackRouterVite } from '@tanstack/router-vite-plugin';
 import reactRefresh from '@vitejs/plugin-react-refresh';
 import path from 'path';
@@ -19,7 +18,7 @@ export default defineConfig({
     modulePreload: {
       polyfill: false,
     },
-    outDir: path.resolve(__dirname, '../static'), // Output directory resolved to myshop/dist
+    outDir: path.resolve(__dirname, '../dist'), // Output directory resolved to myshop/dist
     manifest: 'manifest.json',
     rollupOptions: {
       input: {
