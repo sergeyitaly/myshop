@@ -128,11 +128,8 @@ if USE_S3:
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
     #DEFAULT_FILE_STORAGE ='storages.backends.s3boto3.S3Boto3Storage'
     STATICFILES_STORAGE = 'storages.backends.s3.S3Storage'
+    STATICFILES_DIRS = [('{AWS_S3_CUSTOM_DOMAIN}/dist'), ('{AWS_S3_CUSTOM_DOMAIN}/dist/assets'),]    
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/'
-    STATICFILES_DIRS = [
-    os.path.join(AWS_S3_CUSTOM_DOMAIN, 'dist'),  # Directory containing main.js and main.css
-    os.path.join(AWS_S3_CUSTOM_DOMAIN, 'dist', 'assets'),  # Directory containing other assets (images, etc.)
-    ]
 
 else:
     # Local static file settings
