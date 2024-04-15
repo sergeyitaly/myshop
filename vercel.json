@@ -24,6 +24,7 @@
       "src": "/assets/(.*)",
       "dest": "https://kolorytmedia.s3.amazonaws.com/dist/assets/$1"
     },    
+    
     {
       "src": "/(.*)",
       "dest": "myshop/wsgi.py"
