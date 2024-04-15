@@ -17,6 +17,10 @@
       "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/$1"
     },
     {
+      "src": "/dist/(.*)",
+      "dest": "https://kolorytmedia.s3.amazonaws.com/dist/$1"
+    },
+    {
       "src": "/media/(.*)",
       "headers": {
         "Access-Control-Allow-Credentials": "true",
@@ -27,10 +31,7 @@
       "continue": true
     },
 
-    {
-      "src": "/dist/(.*)",
-      "dest": "https://kolorytmedia.s3.amazonaws.com/dist/$1"
-    },
+    
     {
       "src": "/(.*)",
       "dest": "myshop/wsgi.py"
