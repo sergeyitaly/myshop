@@ -1,0 +1,147 @@
+.sliderContainer {
+    margin-top: 80px;
+    padding: 0 10px;
+}
+
+.filters {
+    font-size: 32px;
+    font-weight: 500;
+    display: flex;
+    margin-bottom: 30px;
+    justify-content: space-between;
+    margin-right: 200px;
+}
+
+.card {
+    padding-right: 10px;
+}
+
+.cardImage {
+    /*width: 100%;*/
+    position: relative;
+    //height: 230px;
+}
+
+.imageContainer {
+    height: 230px;
+    overflow: hidden;
+}
+
+.image {
+    width: 100%;
+    height: auto;
+}
+///////////////////////////////////////
+.cardImage .name {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 5px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #000000;
+}
+
+.name {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 18px;
+}
+
+.selected {
+    text-decoration: underline;
+}
+
+.priceContainer {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.price {
+    //text-decoration: line-through;
+    margin-right: 10px;
+    color: #787878;
+    font-size: 18px;
+}
+
+.newPrice {
+    font-size: 18px;
+
+}
+
+.saleLabel {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(255, 255, 255, 0.81);
+    border-radius: 15px;
+    color: #000000;
+    padding: 5px;
+}
+
+.strikethrough {
+    text-decoration: line-through;
+}
+
+.category {
+    color: gray;
+    text-align: center;
+    font-size: 18px;
+}
+
+
+@media screen and (max-width: 1000px) {
+    .filters{
+        font-size: 26px;
+    }
+
+    .sliderContainer {
+        margin-top: 50px;     }
+
+    .title {
+        font-size: 26px;     }
+
+    .card{
+        font-size: 16px;
+    }
+
+    .price {
+        font-size: 16px;
+    }
+
+    .newPrice {
+        font-size: 16px;
+
+    }
+
+    .filters {
+        margin-right: 10px;
+        justify-content: space-between;
+    }
+}
+
+@media screen and (max-width: 700px) {
+    .filters{
+        font-size: 22px;
+    }
+
+    .card{
+        text-align: center;
+    }
+
+    .priceContainer {
+        display: inherit;
+        margin-top: 5px;
+    }
+
+    .price {
+        margin-right: 0px;
+         font-size: 14px;
+     }
+
+    .newPrice {
+        font-size: 14px;
+    }
+}

@@ -1,6 +1,8 @@
 import { Route, Routes } from 'react-router-dom';
-import { Home } from './pages/home/home';
 import { Layout } from './layout/Layout/Layout';
+import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
+import CollectionsPage from './pages/CollectionPage/CollectionsPage';
+import { Home } from './pages/home/home';
 import { NotFound } from './pages/not-found/not-found';
 
 function App() {
@@ -20,8 +22,12 @@ function App() {
                         element={<Home />}
                     />
                     <Route
-                        path="collection"
-                        element={<h1>Collection</h1>}
+                        path="collections"
+                        element={<CollectionsPage />}
+                    />
+                    <Route
+                        path="/collections/:id"
+                        element={<CollectionItemsPage />}
                     />
                     <Route
                         path="*"
