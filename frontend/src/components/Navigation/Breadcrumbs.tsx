@@ -1,13 +1,21 @@
-import React from 'react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { Breadcrumbs, Link, Stack } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import {fullData} from "../Carousels/carouselMock";
 
-export function CustomSeparator({ collectionName }) {
+interface CollectionTitles {
+    [key: string]: string;
+}
+
+interface BreadcrumbTitles {
+    [key: string]: string;
+}
+
+
+export function CustomSeparator() {
     const location = useLocation();
 
-    const breadcrumbTitles = {
+    const breadcrumbTitles: BreadcrumbTitles = {
         '/': 'Головна',
         '/collections': 'Колекції',
         '/about': 'Про нас',
@@ -36,15 +44,14 @@ export function CustomSeparator({ collectionName }) {
             );
         }
 
-        paths.forEach((path, index) => {
+        paths.forEach((path) => {
             currentPath += '/' + path;
-            const isLast = index === paths.length - 1;
 
-            const collectionTitles = fullData.collections.reduce((acc, collection) => {
+            const collectionTitles: CollectionTitles = fullData.collections.reduce((acc: CollectionTitles, collection) => {
                 acc[collection.id] = collection.name;
                 return acc;
             }, {});
-            const collectionTitle = collectionTitles[path] || path;
+            const collectionTitle: string = collectionTitles[path] || path;
 
             breadcrumbs.push(
                 <Link
