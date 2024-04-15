@@ -42,7 +42,7 @@ urlpatterns = [
     path('debug/', TemplateView.as_view(template_name='base.html'), name='debug'),
 
     # Default URL (index.html)
-    path('index/', TemplateView.as_view(template_name='index.html'), name='index'),
+    path('', TemplateView.as_view(template_name='index.html'), name='index'),
 ]
 
 
