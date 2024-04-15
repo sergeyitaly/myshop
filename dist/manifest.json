@@ -104,12 +104,12 @@
     "src": "src/components/Logo/logo.svg"
   },
   "src/main.tsx": {
-    "file": "assets/main.js",
+    "file": "main.js",
     "name": "main",
     "src": "src/main.tsx",
     "isEntry": true,
     "css": [
-      "assets/main.css"
+      "main.css"
     ],
     "assets": [
       "assets/logo.svg",

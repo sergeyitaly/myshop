@@ -26,9 +26,15 @@ export default defineConfig({
         index: './index.html', // Index HTML file
       },
       output: {
-        entryFileNames: 'assets/[name].js', // Output format for JS files
-        assetFileNames: 'assets/[name].[ext]', // Output format for other assets (e.g., CSS, images)
-        chunkFileNames: 'assets/[name].js', // Output format for chunk files
+        entryFileNames: '[name].js', // Output format for JS files
+        assetFileNames: (assetInfo) => {
+          // Determine if the asset is a CSS file
+          const isCss = assetInfo.name.endsWith('.css');
+
+          // Output CSS files directly to 'dist' folder
+          return isCss ? `[name].[ext]` : `assets/[name].[ext]`;
+        },
+        chunkFileNames: '[name].js', // Output format for chunk files
       },
       
     },
