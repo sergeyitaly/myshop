@@ -14,6 +14,8 @@ aws s3 sync dist s3://kolorytmedia/dist
 
 # Collect static files
 python3 manage.py collectstatic --noinput --clear
+
+rm -rf dist/*
 du -h --max-depth=5 | sort -rh
 
 # Deactivate the virtual environment
