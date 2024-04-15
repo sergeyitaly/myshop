@@ -12,6 +12,7 @@ dist-ssr
 node_modules/
 site_cache/
 venv/
+staticfiles_build/
 __pycache__/
 __pycache__
 # Editor directories and files
