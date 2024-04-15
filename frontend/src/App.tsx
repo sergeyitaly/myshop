@@ -1,15 +1,22 @@
 import { Route, Routes } from 'react-router-dom';
-import { Home } from './pages/home';
 import { Layout } from './layout/Layout/Layout';
-import CollectionsPage from "./pages/CollectionPage/CollectionsPage";
-import CollectionItemsPage from "./pages/CollectionItem/CollectionItems";
-// import CollectionItems from "./pages/CollectionItem/CollectionItems";
+import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
+import CollectionsPage from './pages/CollectionPage/CollectionsPage';
+import { Home } from './pages/home/home';
+import { NotFound } from './pages/not-found/not-found';
 
 function App() {
     return (
         <>
             <Routes>
-                <Route element={<Layout withFooter withHeader/>}>
+                <Route
+                    element={
+                        <Layout
+                            withFooter
+                            withHeader
+                        />
+                    }
+                >
                     <Route
                         index
                         element={<Home />}
@@ -20,8 +27,12 @@ function App() {
                     />
                     <Route
                         path="/collections/:id"
-                        element={<CollectionItemsPage />} />
-
+                        element={<CollectionItemsPage />}
+                    />
+                    <Route
+                        path="*"
+                        element={<NotFound />}
+                    />
                 </Route>
             </Routes>
         </>
