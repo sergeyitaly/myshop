@@ -120,8 +120,12 @@ if USE_S3:
     #WHITENOISE_ROOT = 'staticfiles_build/static'
 #    DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
 #    STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    STATIC_LOCATION = '/staticfiles_build/'
+    AWS_STATIC_LOCATION ='/static/'
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
+    STATIC_URL = 'https://{}/{}/'.format(AWS_S3_CUSTOM_DOMAIN, STATIC_LOCATION, AWS_STATIC_LOCATION)
     DEFAULT_FILE_STORAGE ='storages.backends.s3boto3.S3Boto3Storage'
-
+    #STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/'
 
 else:
@@ -131,16 +135,18 @@ else:
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
+
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # Use whitenoise for serving static files
+STATIC_URL = '/static/'  # URL to serve static files
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
+WHITENOISE_ROOT = STATIC_ROOT
 # Static files settings (Vercel deployment)
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
-STATIC_URL = '/static/'  # URL to serve static files
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # Use whitenoise for serving static files
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
-WHITENOISE_ROOT = STATIC_ROOT
 
 # Additional Whitenoise settings
 WHITENOISE_INDEX_FILE = True

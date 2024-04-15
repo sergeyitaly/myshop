@@ -4,9 +4,11 @@ venv/
 __pycache__/
 __pycache__
 
+
 site_cache/
 venv/
 media/
 node_modules/
 package-lock.json
+static/
 yarn.lock
