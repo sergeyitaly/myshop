@@ -1,39 +1,15 @@
-{% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Koloryt</title>
-
-    <!-- Load the favicon -->
-    <link rel="icon" type="image/svg+xml" href="{% static '/vite.svg' %}">
-
-    <!-- Load main JavaScript bundle -->
-    {% if debug %}
-        <!-- Debug mode: Load Vite client and main.tsx for development -->
-        <script type="module" src="http://localhost:5173/@vite/client"></script>
-        <script type="module">
-            import RefreshRuntime from 'http://localhost:5173/@react-refresh';
-            RefreshRuntime.injectIntoGlobalHook(window);
-            window.$RefreshReg$ = () => {};
-            window.$RefreshSig$ = () => (type) => type;
-            window.__vite_plugin_react_preamble_installed__ = true;
-        </script>
-        <script type="module" src="http://localhost:5173/src/main.tsx"></script>
-        <link rel="modulepreload" crossorigin href="{% static '/assets/main.js' %}">
-
-    {% else %}
-        <!-- Production mode: Load compiled assets -->
-        <link rel="modulepreload" crossorigin href="{% static '/assets/js/main.js' %}">
-        <!-- Example: using static template tag -->
-        <link rel="stylesheet" href="{% static '/assets/css/main.css' %}" crossorigin>
-    {% endif %}
-
-</head>
-<body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>React App</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-</body>
+   {% load static %}
+    <script src="{% static '../dist/main.js' %}"></script>
+  </body>
+
 </html>
