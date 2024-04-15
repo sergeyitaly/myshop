@@ -118,14 +118,12 @@ USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
 if USE_S3:
     #LoadImagesToS3().copy_local_media_to_s3(os.path.join(BASE_DIR, 'media'))
     #WHITENOISE_ROOT = 'staticfiles_build/static'
-#    DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
-#    STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    STATIC_LOCATION = '/staticfiles_build/'
-    AWS_STATIC_LOCATION ='/static/'
-    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
-    STATIC_URL = 'https://{}/{}/'.format(AWS_S3_CUSTOM_DOMAIN, STATIC_LOCATION, AWS_STATIC_LOCATION)
-    DEFAULT_FILE_STORAGE ='storages.backends.s3boto3.S3Boto3Storage'
-    #STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    #DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
+    STATICFILES_STORAGE =  "storages.backends.s3.S3Storage"
+    AWS_STATIC_LOCATION = 'static'
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STATIC_LOCATION}/'
+    #DEFAULT_FILE_STORAGE ='storages.backends.s3boto3.S3Boto3Storage'
+#    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/'
 
 else:
@@ -133,14 +131,14 @@ else:
     # Media file settings (local or S3)
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # Use whitenoise for serving static files
+    STATIC_URL = '/static/'  # URL to serve static files
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
+    WHITENOISE_ROOT = STATIC_ROOT
 
 
 
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # Use whitenoise for serving static files
-STATIC_URL = '/static/'  # URL to serve static files
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
-WHITENOISE_ROOT = STATIC_ROOT
 # Static files settings (Vercel deployment)
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'dist'),)
 STATICFILES_FINDERS = [
