@@ -1,10 +1,24 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import styles from './BurgerMenu.module.scss';
-import { links } from '../../utils/links';
 import { Link } from 'react-router-dom';
+import useBlockScroll from '../../hooks/useBlockScroll';
+import useClickOutside from '../../hooks/useClickOutside';
+
+const links = [
+    { name: 'Колекції', href: '/collection' },
+    { name: 'Нові надходження', href: '/' },
+    { name: 'Всі колекції', href: '/' },
+    { name: 'Знижки', href: '/' },
+    { name: 'Про нас', href: '/' },
+    { name: 'Контакти', href: '/' },
+];
 
 export const BurgerMenu = () => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
+    const ref = useRef<HTMLDivElement>(null);
+
+    useBlockScroll(isOpen);
+    useClickOutside(ref, () => setIsOpen(false));
 
     return (
         <div className={styles.burger_container}>
@@ -20,10 +34,10 @@ export const BurgerMenu = () => {
             </button>
 
             <nav
+                ref={ref}
                 className={[styles.menu, isOpen && styles.menu_open].join(' ')}
             >
                 <div className={styles.logo_container}>
-                    <h2 className={styles.title}>Koloryt</h2>
                     <button
                         className={[
                             styles.burger,
@@ -42,6 +56,7 @@ export const BurgerMenu = () => {
                         key={name}
                         className={styles.link}
                         to={href}
+                        onClick={() => setIsOpen((prev) => !prev)}
                     >
                         {name}
                     </Link>
