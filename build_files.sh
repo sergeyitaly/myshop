@@ -10,7 +10,7 @@ pip install -r requirements.txt
 pip install awscli
 
 aws s3 sync templates s3://kolorytmedia/templates --delete
-aws s3 sync templates s3://kolorytmedia/dist --delete
+aws s3 sync dist s3://kolorytmedia/dist --delete
 
 
 # Collect static files
