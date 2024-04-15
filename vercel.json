@@ -20,6 +20,11 @@
       "src": "/dist/(.*)",
       "dest": "https://kolorytmedia.s3.amazonaws.com/dist/$1"
     },
+    
+    {
+      "src": "/(.*)",
+      "dest": "myshop/wsgi.py"
+    },
     {
       "src": "/media/(.*)",
       "headers": {
@@ -29,12 +34,7 @@
         "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" 
       },
       "continue": true
-    },
-
-    
-    {
-      "src": "/(.*)",
-      "dest": "myshop/wsgi.py"
     }
+
   ]
 }

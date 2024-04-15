@@ -12,9 +12,6 @@ pip install awscli
 aws s3 sync templates s3://kolorytmedia/templates
 aws s3 sync dist s3://kolorytmedia/dist
 
-rm -rf dist/*
-rm -rf templates/*
-
 # Collect static files
 python3 manage.py collectstatic --noinput --clear
 du -h --max-depth=5 | sort -rh
