@@ -1,7 +1,99 @@
 {
+  "node_modules/slick-carousel/slick/ajax-loader.gif": {
+    "file": "assets/ajax-loader.gif",
+    "src": "node_modules/slick-carousel/slick/ajax-loader.gif"
+  },
+  "node_modules/slick-carousel/slick/fonts/slick.svg": {
+    "file": "assets/slick.svg",
+    "src": "node_modules/slick-carousel/slick/fonts/slick.svg"
+  },
+  "src/assets/collection/Rectangle 36.svg": {
+    "file": "assets/Rectangle 36.svg",
+    "src": "src/assets/collection/Rectangle 36.svg"
+  },
+  "src/assets/collection/Rectangle 37.svg": {
+    "file": "assets/Rectangle 37.svg",
+    "src": "src/assets/collection/Rectangle 37.svg"
+  },
+  "src/assets/collection/Rectangle 38.svg": {
+    "file": "assets/Rectangle 38.svg",
+    "src": "src/assets/collection/Rectangle 38.svg"
+  },
+  "src/assets/collection/Rectangle 39.svg": {
+    "file": "assets/Rectangle 39.svg",
+    "src": "src/assets/collection/Rectangle 39.svg"
+  },
+  "src/assets/collection/Rectangle 40.svg": {
+    "file": "assets/Rectangle 40.svg",
+    "src": "src/assets/collection/Rectangle 40.svg"
+  },
+  "src/assets/collection/Rectangle 41.svg": {
+    "file": "assets/Rectangle 41.svg",
+    "src": "src/assets/collection/Rectangle 41.svg"
+  },
+  "src/assets/collection/Rectangle 42.svg": {
+    "file": "assets/Rectangle 42.svg",
+    "src": "src/assets/collection/Rectangle 42.svg"
+  },
+  "src/assets/collection/Rectangle 43.svg": {
+    "file": "assets/Rectangle 43.svg",
+    "src": "src/assets/collection/Rectangle 43.svg"
+  },
+  "src/assets/collection/Rectangle 44.svg": {
+    "file": "assets/Rectangle 44.svg",
+    "src": "src/assets/collection/Rectangle 44.svg"
+  },
+  "src/assets/ethno/Rectangle 45.svg": {
+    "file": "assets/Rectangle 45.svg",
+    "src": "src/assets/ethno/Rectangle 45.svg"
+  },
+  "src/assets/ethno/Rectangle 46.svg": {
+    "file": "assets/Rectangle 46.svg",
+    "src": "src/assets/ethno/Rectangle 46.svg"
+  },
+  "src/assets/ethno/Rectangle 47.svg": {
+    "file": "assets/Rectangle 47.svg",
+    "src": "src/assets/ethno/Rectangle 47.svg"
+  },
+  "src/assets/ethno/Rectangle 48.svg": {
+    "file": "assets/Rectangle 48.svg",
+    "src": "src/assets/ethno/Rectangle 48.svg"
+  },
+  "src/assets/ethno/Rectangle 49.svg": {
+    "file": "assets/Rectangle 49.svg",
+    "src": "src/assets/ethno/Rectangle 49.svg"
+  },
+  "src/assets/ethno/Rectangle 62.svg": {
+    "file": "assets/Rectangle 62.svg",
+    "src": "src/assets/ethno/Rectangle 62.svg"
+  },
   "src/components/AboutUsSection/vase.jpg": {
     "file": "assets/vase.jpg",
     "src": "src/components/AboutUsSection/vase.jpg"
+  },
+  "src/components/Carousels/img/1 (2).svg": {
+    "file": "assets/1 (2).svg",
+    "src": "src/components/Carousels/img/1 (2).svg"
+  },
+  "src/components/Carousels/img/2.svg": {
+    "file": "assets/2.svg",
+    "src": "src/components/Carousels/img/2.svg"
+  },
+  "src/components/Carousels/img/4.svg": {
+    "file": "assets/4.svg",
+    "src": "src/components/Carousels/img/4.svg"
+  },
+  "src/components/Carousels/img/Glas.svg": {
+    "file": "assets/Glas.svg",
+    "src": "src/components/Carousels/img/Glas.svg"
+  },
+  "src/components/Carousels/img/Keramic.svg": {
+    "file": "assets/Keramic.svg",
+    "src": "src/components/Carousels/img/Keramic.svg"
+  },
+  "src/components/Carousels/img/Rectangle 106.svg": {
+    "file": "assets/Rectangle 106.svg",
+    "src": "src/components/Carousels/img/Rectangle 106.svg"
   },
   "src/components/HeroSection/collection.jpg": {
     "file": "assets/collection.jpg",
@@ -16,40 +108,41 @@
     "name": "main",
     "src": "src/main.tsx",
     "isEntry": true,
-    "dynamicImports": [
-      "src/routes/about.lazy.js",
-      "src/routes/index.lazy.js"
-    ],
     "css": [
       "assets/main.css"
     ],
     "assets": [
-      "assets/logo.svg"
-    ]
-  },
-  "src/routes/about.lazy.js": {
-    "file": "assets/about.lazy.js",
-    "name": "about.lazy",
-    "src": "src/routes/about.lazy.js",
-    "isDynamicEntry": true,
-    "imports": [
-      "src/main.tsx"
-    ]
-  },
-  "src/routes/index.lazy.js": {
-    "file": "assets/index.lazy.js",
-    "name": "index.lazy",
-    "src": "src/routes/index.lazy.js",
-    "isDynamicEntry": true,
-    "imports": [
-      "src/main.tsx"
-    ],
-    "css": [
-      "assets/index.css"
-    ],
-    "assets": [
+      "assets/logo.svg",
+      "assets/Rectangle 106.svg",
+      "assets/1 (2).svg",
+      "assets/2.svg",
+      "assets/4.svg",
+      "assets/Keramic.svg",
+      "assets/Glas.svg",
+      "assets/Rectangle 40.svg",
+      "assets/Rectangle 41.svg",
+      "assets/Rectangle 42.svg",
+      "assets/Rectangle 43.svg",
+      "assets/Rectangle 44.svg",
+      "assets/Rectangle 36.svg",
+      "assets/Rectangle 37.svg",
+      "assets/Rectangle 38.svg",
+      "assets/Rectangle 39.svg",
+      "assets/Rectangle 45.svg",
+      "assets/Rectangle 46.svg",
+      "assets/Rectangle 47.svg",
+      "assets/Rectangle 48.svg",
+      "assets/Rectangle 49.svg",
+      "assets/Rectangle 62.svg",
+      "assets/404 error.png",
+      "assets/ajax-loader.gif",
+      "assets/slick.svg",
       "assets/vase.jpg",
       "assets/collection.jpg"
     ]
+  },
+  "src/pages/not-found/404 error.png": {
+    "file": "assets/404 error.png",
+    "src": "src/pages/not-found/404 error.png"
   }
 }
