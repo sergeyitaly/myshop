@@ -14,19 +14,19 @@
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/$1"
+      "dest": "/static/$1"
     },
     {
       "src": "/dist/(.*)",
-      "dest": "https://kolorytmedia.s3.amazonaws.com/dist/$1"
+      "dest": "/dist/$1"
     },
     {
       "src": "/assets/(.*)",
-      "dest": "https://kolorytmedia.s3.amazonaws.com/dist/assets/$1"
+      "dest": "/assets/$1"
     },    
     {
       "src": "/templates/(.*)",
-      "dest": "https://kolorytmedia.s3.amazonaws.com/templates/$1"
+      "dest": "/templates/$1"
     }, 
     {
       "src": "/(.*)",
