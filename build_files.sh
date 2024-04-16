@@ -13,7 +13,7 @@ export DJANGO_SETTINGS_MODULE=myshop.settings
 #aws s3 sync dist s3://kolorytmedia/dist
 
 # Collect static files
-python3 manage.py collectstatic --noinput --clear
+python manage.py collectstatic --noinput --clear
 
 du -h --max-depth=5 | sort -rh
 
