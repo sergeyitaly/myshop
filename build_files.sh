@@ -7,7 +7,7 @@
 pip install -r requirements.txt
 # Set Django settings module
 #export DJANGO_SETTINGS_MODULE=myshop.settings
-pip install awscli
+#pip install awscli
 
 #aws s3 sync templates s3://kolorytmedia/templates
 #aws s3 sync dist s3://kolorytmedia/dist
