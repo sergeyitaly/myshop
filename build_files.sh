@@ -7,9 +7,10 @@ python3 -m venv venv
 #python3 -m venv myenv
 source myenv/bin/activate
 # Install Python dependencies from requirements.txt
-pip install --root-user-action=ignore
 
 pip install -r requirements.txt
+pip install --root-user-action=ignore
+
 # Set Django settings module
 export DJANGO_SETTINGS_MODULE=myshop.settings
 #pip install awscli
