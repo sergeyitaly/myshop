@@ -17,7 +17,7 @@ export DJANGO_SETTINGS_MODULE=myshop.settings
 
 # Collect static files
 python manage.py collectstatic --noinput --clear
-
+du -h -s
 du -h --max-depth=5 | sort -rh
 
 # Deactivate the virtual environment
