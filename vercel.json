@@ -25,7 +25,7 @@
       "dest": "https://kolorytmedia.s3.amazonaws.com/dist/assets/$1"
     },    
     {
-      "src": "/templated/(.*)",
+      "src": "/templates(.*)",
       "dest": "https://kolorytmedia.s3.amazonaws.com/templates/$1"
     }, 
     {
