@@ -21,4 +21,4 @@ python manage.py collectstatic --noinput --clear
 du -h --max-depth=5 | sort -rh
 
 # Deactivate the virtual environment
-deactivate
+#deactivate
