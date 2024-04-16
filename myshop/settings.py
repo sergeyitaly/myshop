@@ -84,10 +84,8 @@ ROOT_URLCONF = 'myshop.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        "DIRS": [
-            BASE_DIR / "templates" ,
-
-                  ],
+        "DIRS": [BASE_DIR / "templates",
+                  AWS_TEMPLATES],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
