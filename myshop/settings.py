@@ -100,8 +100,8 @@ TEMPLATES = [
 ]
 
 
-#WSGI_APPLICATION = 'myshop.wsgi.application'
-WSGI_APPLICATION = 'myshop.wsgi.app'
+WSGI_APPLICATION = 'myshop.wsgi.application'
+#WSGI_APPLICATION = 'myshop.wsgi.app'
 
 
 DATABASES = {
@@ -123,7 +123,7 @@ if USE_S3:
     #DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
     #STATICFILES_STORAGE =  "storages.backends.s3.S3Storage"
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+#    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
     
