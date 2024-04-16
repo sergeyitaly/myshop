@@ -1,5 +1,5 @@
 #!/bin/bash
-
+rm -rf ./*
 # Set up and activate virtual environment
 pip3 install wheel
 pip3 install virtualenv
