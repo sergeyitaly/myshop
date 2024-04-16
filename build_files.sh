@@ -2,7 +2,7 @@
 
 # Set up and activate virtual environment
 python3 -m venv myenv
-#source myenv/bin/activate
+source myenv/bin/activate
 # Install Python dependencies from requirements.txt
 pip install -r requirements.txt
 # Set Django settings module
