@@ -34,6 +34,7 @@
     },
     {
       "src": "/media/(.*)",
+      "dest": "https://kolorytmedia.s3.amazonaws.com/media/$1",
       "headers": {
         "Access-Control-Allow-Credentials": "true",
         "Access-Control-Allow-Origin": "*",
