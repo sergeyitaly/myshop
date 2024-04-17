@@ -92,12 +92,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'myshop.urls'
 
-if USE_S3:
-    # Use templates from S3
-    DIRS = [AWS_TEMPLATES]
-else:
-    # Use templates from local directories
-    DIRS = [
+#DIRS = [AWS_TEMPLATES]
+DIRS = [
         os.path.join(BASE_DIR, 'templates'),
 #        os.path.join(BASE_DIR, 'frontend'),
     ]
