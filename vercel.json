@@ -13,16 +13,36 @@
   ],
   "routes": [
     {
-        "src": "/(.*)",
-        "dest": "/",
-        "methods": [
-            "GET",
-            "POST",
-            "PUT",
-            "PATCH",
-            "DELETE",
-            "OPTIONS"
-        ]
+      "src": "/static/(.*)",
+      "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/$1"
+    },
+    {
+      "src": "/dist/(.*)",
+      "dest": "https://kolorytmedia.s3.amazonaws.com/dist/$1"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "https://kolorytmedia.s3.amazonaws.com/dist/assets/$1"
+    },    
+    {
+      "src": "/templates/(.*)",
+      "dest": "https://kolorytmedia.s3.amazonaws.com/templates/$1"
+    }, 
+    {
+      "src": "/(.*)",
+      "dest": "myshop/wsgi.py"
+    },
+    {
+      "src": "/media/(.*)",
+      "dest": "https://kolorytmedia.s3.amazonaws.com/media/$1",
+      "headers": {
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET,OPTIONS,PATCH,DELETE,POST,PUT",
+        "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" 
+      },
+      "continue": true
     }
+
   ]
 }
