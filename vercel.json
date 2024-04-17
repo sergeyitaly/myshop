@@ -2,7 +2,6 @@
   "version": 2,
   "functions": {
     "api": {
-      "src": "myshop/wsgi.py",
       "runtime": "vercel-python@3.9",
       "memory": 512,
       "maxDuration": 30
