@@ -9,5 +9,4 @@ site_cache/
 venv/
 media/
 node_modules/
-package-lock.json
 yarn.lock
