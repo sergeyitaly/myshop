@@ -1,5 +1,6 @@
 #!/bin/bash
 
+rm -rf *./
 # Set up and activate virtual environment
 #python3 -m venv myenv
 #source myenv/bin/activate
