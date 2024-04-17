@@ -265,18 +265,18 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://:xuvRxyFZjR6kjCaDiIlOJ5J8tK9ATupQ@redis-12474.c15.us-east-1-4.ec2.cloud.redislabs.com:12474/0',
-        "KEY_PREFIX": "imdb",
-        "TIMEOUT": 60 * 30,  # in seconds: 60 * 15 (15 minutes)
-    }
-}
-
 #CACHES = {
 #    'default': {
-#        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-#        'LOCATION': os.path.join(BASE_DIR, 'site_cache'),
+#        'BACKEND': 'django_redis.cache.RedisCache',
+#        'LOCATION': 'redis://:xuvRxyFZjR6kjCaDiIlOJ5J8tK9ATupQ@redis-12474.c15.us-east-1-4.ec2.cloud.redislabs.com:12474/0',
+#        "KEY_PREFIX": "imdb",
+#        "TIMEOUT": 60 * 30,  # in seconds: 60 * 15 (15 minutes)
 #    }
 #}
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'site_cache'),
+    }
+}
