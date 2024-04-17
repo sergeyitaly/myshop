@@ -11,6 +11,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.permissions import DjangoObjectPermissions
 from django.shortcuts import render
 
+
 class ProductList(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer

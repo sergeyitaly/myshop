@@ -247,9 +247,8 @@ CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
         'LOCATION': 'redis://:xuvRxyFZjR6kjCaDiIlOJ5J8tK9ATupQ@redis-12474.c15.us-east-1-4.ec2.cloud.redislabs.com:12474/0',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        },
+        "KEY_PREFIX": "imdb",
+        "TIMEOUT": 60 * 15,  # in seconds: 60 * 15 (15 minutes)
     }
 }
 
