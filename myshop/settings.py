@@ -13,8 +13,8 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
+
 DEBUG = True
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
@@ -30,12 +30,17 @@ AWS_LOCATION = 'staticfiles_build/static/'
 AWS_TEMPLATES =f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
 USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
 
+VERCEL_DOMAIN = os.getenv('VERCEL_DOMAIN')
 
-CORS_ALLOWED_ORIGINS = [ "http://localhost:5173", "http://127.0.0.1:5173",
-                        f'https://{AWS_S3_CUSTOM_DOMAIN}',
-                        ]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    f"https://{VERCEL_DOMAIN}",
+    f"https://{AWS_S3_CUSTOM_DOMAIN}",
+]
+
 INTERNAL_IPS = ["127.0.0.1","localhost",]
-#ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.vercel.app', '.now.sh']
 # Application definition
 
 INSTALLED_APPS = [
@@ -64,6 +69,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'storages',    
     'drf_yasg',    
+    "debug_toolbar",
+
 ]
 
 MIDDLEWARE = [
@@ -77,16 +84,29 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'allauth.account.middleware.AccountMiddleware', 
     'django.middleware.locale.LocaleMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+
+
 ]
 
 ROOT_URLCONF = 'myshop.urls'
 
+if USE_S3:
+    # Use templates from S3
+    DIRS = [AWS_TEMPLATES]
+else:
+    # Use templates from local directories
+    DIRS = [
+        os.path.join(BASE_DIR, 'templates'),
+#        os.path.join(BASE_DIR, 'frontend'),
+    ]
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        "DIRS": [BASE_DIR / "templates",
-                  #AWS_TEMPLATES
-                  ],
+        'DIRS': DIRS,
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -131,16 +151,20 @@ else:
     # Local static file settings
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # Use whitenoise for serving static files
+#    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # Use whitenoise for serving static files
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'  # URL to serve static files
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
-    WHITENOISE_ROOT = STATIC_ROOT
+#    WHITENOISE_ROOT = STATIC_ROOT
 
 
 STATICFILES_DIRS = [
 os.path.join(BASE_DIR, 'dist'),  # Directory containing main.js and main.css
 os.path.join(BASE_DIR, 'dist', 'assets'),  # Directory containing other assets (images, etc.)
 ]
+    
 
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -166,13 +190,15 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
 }
+
 
 
 CORS_ORIGIN_ALLOW_ALL = True

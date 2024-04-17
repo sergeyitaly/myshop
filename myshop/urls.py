@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.views.generic import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
@@ -7,7 +7,9 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.contrib import admin
 from dotenv import load_dotenv
-import os
+from . import views
+from django.views.generic import RedirectView
+
 load_dotenv()
 
 schema_view = get_schema_view(
@@ -39,16 +41,24 @@ urlpatterns = [
     path('admin/', admin.site.urls),     # Admin URLs: /admin/
 
     # Debug view
-    path('debug/', TemplateView.as_view(template_name='base.html'), name='debug'),
+    path("__debug__", include("debug_toolbar.urls")),
+    #path('', TemplateView.as_view(template_name='index.html'), name='index'),
+    #re_path(r'^.*$', TemplateView.as_view(template_name='index.html'), name='index'),
+    path("", views.index, name="index"),
+
+
     # Default URL (index.html)
-    path('', TemplateView.as_view(template_name='index.html'), name='index'),
 ]
 
-
-if settings.DEBUG:
+if settings.DEBUG==True:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
     urlpatterns += static('/assets/', document_root=settings.STATICFILES_DIRS[1])
+else:
+   urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+   urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
 
        
        

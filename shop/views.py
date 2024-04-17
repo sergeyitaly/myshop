@@ -1,16 +1,16 @@
 from django.http import Http404
-from django.shortcuts import get_object_or_404
-from .serializers import *
-from .models import *
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import generics, status
-from rest_framework import viewsets, permissions
-from django.shortcuts import get_object_or_404
-from rest_framework.viewsets import GenericViewSet
-from rest_framework.permissions import DjangoObjectPermissions
+from rest_framework.generics import get_object_or_404
+from .serializers import ProductSerializer, CollectionSerializer
+from .models import Product, Collection
+from django.http import JsonResponse
 from django.shortcuts import render
 
+
+#def home(request):
+#    return render(request, 'home.html')
 
 class ProductList(generics.ListCreateAPIView):
     queryset = Product.objects.all()
@@ -30,10 +30,11 @@ class CollectionDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CollectionSerializer
 
 
-class ProductView(APIView):
-    serializer_class = ProductSerializer
-    queryset = Product.objects.all()
+class CollectionList(generics.ListCreateAPIView):
+    queryset = Collection.objects.all()
+    serializer_class = CollectionSerializer
 
+class ProductView(APIView):
     def get_object(self, pk):
         try:
             return Product.objects.get(pk=pk)
@@ -46,26 +47,21 @@ class ProductView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        product = request.data.get("product")
-        serializer = ProductSerializer(data=product)
-        if serializer.is_valid(raise_exception=True):
-            product_saved = serializer.save()
-        return Response({"success": "Product '{}' created successfully".format(product_saved.name)})
+        serializer = ProductSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk):
-        saved_product = get_object_or_404(Product.objects.all(), pk=pk)
-        data = request.data.get('product')
-        serializer = ProductSerializer(instance=saved_product, data=data, partial=True)
-        if serializer.is_valid(raise_exception=True):
-            product_saved = serializer.save()
-        return Response({
-            "success": "Product '{}' updated successfully".format(product_saved.title)
-        })
+        product = self.get_object(pk)
+        serializer = ProductSerializer(product, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-    # Get object with this pk
-        product = get_object_or_404(Product.objects.all(), pk=pk)
+        product = self.get_object(pk)
         product.delete()
-        return Response({
-            "message": "Product with id `{}` has been deleted.".format(pk)
-        }, status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)
