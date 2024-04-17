@@ -9,7 +9,10 @@
     "buildScript": {
       "runtime": "@vercel/static-build",
       "includeFiles": "build_files.sh"
-    }
+    },
+    "builds": [
+      { "src": "build_files.sh", "use": "@buildScript" }
+    ]
   },
   "rewrites": [
     { "source": "/static/(.*)", "destination": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/$1" },
@@ -40,9 +43,6 @@
         }
       ]
     }
-  ],
-  "builds": [
-    { "src": "build_files.sh", "use": "@buildScript" }
   ]
 }
 
