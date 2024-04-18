@@ -119,7 +119,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'myshop.wsgi.application'
 #WSGI_APPLICATION = 'myshop.wsgi.app'
 
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
