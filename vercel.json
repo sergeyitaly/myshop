@@ -4,7 +4,10 @@
     {
       "src": "myshop/wsgi.py",
       "use": "@vercel/python",
-      "config": { "maxLambdaSize": "120mb", "runtime": "python3.9" }
+      "config": {
+        "maxLambdaSize": "120mb",
+        "runtime": "python3.9"
+      }
     },
     {
       "src": "build_files.sh",
@@ -23,13 +26,13 @@
     {
       "src": "/assets/(.*)",
       "dest": "https://kolorytmedia.s3.amazonaws.com/dist/assets/$1"
-    },    
+    },
     {
       "src": "/templates/(.*)",
       "dest": "https://kolorytmedia.s3.amazonaws.com/templates/$1"
-    }, 
+    },
     {
-      "src": "/(.*)",
+      "src": "/api/(.*)",
       "dest": "myshop/wsgi.py"
     },
     {
@@ -39,9 +42,8 @@
         "Access-Control-Allow-Credentials": "true",
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET,OPTIONS,PATCH,DELETE,POST,PUT",
-        "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" 
-      },
-      "continue": true
+        "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
+      }
     }
   ]
 }
