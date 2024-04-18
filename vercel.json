@@ -5,7 +5,7 @@
       "src": "myshop/wsgi.py",
       "use": "@vercel/python",
       "config": {
-        "maxLambdaSize": "120mb",
+        "maxLambdaSize": "15mb",
         "runtime": "python3.9"
       }
     },
@@ -32,7 +32,7 @@
       "dest": "https://kolorytmedia.s3.amazonaws.com/templates/$1"
     },
     {
-      "src": "/(.*)",
+      "src": "/api/(.*)",
       "dest": "myshop/wsgi.py"
     }
   ]
