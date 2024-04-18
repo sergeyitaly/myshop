@@ -1,22 +1,25 @@
 {
-  "version": 2,
-  "functions": {
-    "api": {
-      "runtime": "vercel-python@3.9",
-      "memory": 512,
-      "maxDuration": 30
-    },
-    "buildScript": {
-      "runtime": "@vercel/static-build",
-      "includeFiles": ["myshop/wsgi.py", "build_files.sh"]
+  "builds": [{
+    "src": "myshop/wsgi.py",
+    "use": "@ardnt/vercel-python-wsgi",
+    "config": { "maxLambdaSize": "15mb" }
+}],
+"buildScript": {
+  "runtime": "@vercel/static-build",
+  "includeFiles": ["build_files.sh"]
+},
+"routes": [
+    {
+        "src": "/(.*)",
+        "dest": "vercel_app/wsgi.py"
     }
-  },
+],
   "rewrites": [
     { "source": "/static/(.*)", "destination": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/$1" },
-    { "source": "/dist/(.*)", "destination": "https://kolorytmedia.s3.amazonaws.com/dist/$1" },
-    { "source": "/assets/(.*)", "destination": "https://kolorytmedia.s3.amazonaws.com/dist/assets/$1" },
-    { "source": "/templates/(.*)", "destination": "https://kolorytmedia.s3.amazonaws.com/templates/$1" },
-    { "source": "/media/(.*)", "destination": "https://kolorytmedia.s3.amazonaws.com/media/$1" }
+    { "source": "/media/(.*)", "destination": "https://kolorytmedia.s3.amazonaws.com/media/$1" },
+    { "source": "/dist/(.*)", "destination": "/dist/$1" },
+    { "source": "/assets/(.*)", "destination": "/dist/assets/$1" },
+    { "source": "/templates/(.*)", "destination": "/templates/$1" }
   ],
   "headers": [
     {
@@ -40,8 +43,5 @@
         }
       ]
     }
-  ],
-  "builds": [
-    { "src": "build_files.sh", "use": "@buildScript" }
   ]
 }
