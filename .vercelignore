@@ -15,3 +15,5 @@ frontend/
 .vercel/
 ./.vercel/
 ./.vercel
+../.cache/
+../.cache
