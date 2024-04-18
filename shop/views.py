@@ -19,6 +19,7 @@ class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [AllowAny]  # Allow anonymous access
 
 
+
 class CollectionList(generics.ListCreateAPIView):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
