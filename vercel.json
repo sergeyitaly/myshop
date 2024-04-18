@@ -32,7 +32,7 @@
       "dest": "https://kolorytmedia.s3.amazonaws.com/templates/$1"
     },
     {
-      "src": "/api/(.*)",
+      "src": "/(.*)",
       "dest": "myshop/wsgi.py"
     },
     {
