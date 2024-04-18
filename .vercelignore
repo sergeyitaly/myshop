@@ -9,3 +9,7 @@ venv/
 media/
 node_modules/
 yarn.lock
+dist/
+frontend/
+.vite
+.vercel
