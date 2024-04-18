@@ -13,12 +13,12 @@ class CollectionSerializer(serializers.ModelSerializer):
     category = serializers.ReadOnlyField(source='category.name')
     class Meta:
         model = Collection
-        fields = ('id','name', 'category','slug','photo')
+        fields = ('name', 'category','slug','photo')
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ('name', 'slug', 'photo', 'price', 'stock', 'available')
+        fields = ('id','name', 'slug', 'photo', 'price', 'stock', 'available')
 
 class CreateCollectiontSerializer(serializers.ModelSerializer):
     class Meta:
