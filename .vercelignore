@@ -13,3 +13,5 @@ dist/
 frontend/
 .vite/
 .vercel/
+.cache/
+.cache
