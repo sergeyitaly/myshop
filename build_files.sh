@@ -3,6 +3,9 @@
 #python3 -m venv myenv
 #source myenv/bin/activate
 # Install Python dependencies from requirements.txt
+pip cache purge
+rm -rf ../.cache/pip
+
 pip install -r requirements.txt
 python3 manage.py makemigrations
 python3 manage.py migrate
