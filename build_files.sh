@@ -8,10 +8,10 @@ python3 manage.py makemigrations
 python3 manage.py migrate
 # Set Django settings module
 #export DJANGO_SETTINGS_MODULE=myshop.settings
-pip install awscli
+#pip install awscli
 
-aws s3 sync templates s3://kolorytmedia/templates
-aws s3 sync dist s3://kolorytmedia/dist
+#aws s3 sync templates s3://kolorytmedia/templates
+#aws s3 sync dist s3://kolorytmedia/dist
 
 # Collect static files
 python3 manage.py collectstatic --noinput --clear
