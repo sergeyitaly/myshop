@@ -9,6 +9,7 @@ from django.contrib import admin
 from dotenv import load_dotenv
 from . import views
 from django.views.generic import RedirectView
+from .views import CustomTokenObtainPairView, CustomTokenRefreshView
 
 load_dotenv()
 
@@ -34,6 +35,9 @@ urlpatterns = [
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
     path('auth/', include('djoser.urls.authtoken')),
+    
+    path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
 
     # App-specific URLs
     path('', include('accounts.urls')),  # Example: /accounts/

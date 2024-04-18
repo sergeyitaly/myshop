@@ -2,39 +2,55 @@ from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import generics, status
-from rest_framework.generics import get_object_or_404
-from .serializers import ProductSerializer, CollectionSerializer
-from .models import Product, Collection
-from django.http import JsonResponse
-from django.shortcuts import render
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer
+from .models import Product, Collection, Category
 
-
-#def home(request):
-#    return render(request, 'home.html')
 
 class ProductList(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    permission_classes = [AllowAny]  # Allow anonymous access
+
 
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    permission_classes = [AllowAny]  # Allow anonymous access
 
 
 class CollectionList(generics.ListCreateAPIView):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
+    permission_classes = [AllowAny]  # Allow anonymous access
+
 
 class CollectionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
+    permission_classes = [AllowAny]  # Allow anonymous access
 
 
-class CollectionList(generics.ListCreateAPIView):
-    queryset = Collection.objects.all()
-    serializer_class = CollectionSerializer
+class CategoryList(generics.ListCreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [AllowAny]  # Allow anonymous access
+
+
+class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [AllowAny]  # Allow anonymous access
+
+
+
+
+
+
 
 class ProductView(APIView):
+    permission_classes = [AllowAny]  # Allow anonymous access
+
     def get_object(self, pk):
         try:
             return Product.objects.get(pk=pk)
