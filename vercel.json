@@ -2,12 +2,11 @@
   "version": 2,
   "builds": [
     {
-      "functions": {
-        "api/*.py": {
-          "runtime": "python3.9",
-          "memory": 3009,
-          "maxDuration": 30
-        }
+      "src": "myshop/wsgi.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "120mb",
+        "runtime": "python3.9"
       }
     },
     {
