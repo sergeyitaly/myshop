@@ -24,12 +24,15 @@ class CollectionList(generics.ListCreateAPIView):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
     permission_classes = [AllowAny]  # Allow anonymous access
+    print(str(queryset.query))
+
 
 
 class CollectionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
     permission_classes = [AllowAny]  # Allow anonymous access
+    
 
 
 class CategoryList(generics.ListCreateAPIView):
