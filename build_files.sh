@@ -19,6 +19,7 @@ python3 manage.py collectstatic --noinput --clear
 find . -type f -size +10M -exec du -h {} +
 
 du -h --max-depth=5 | sort -rh
+du ../ -h --max-depth=5 | sort -rh
 
 # Deactivate the virtual environment
 #deactivate
