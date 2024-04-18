@@ -1,12 +1,22 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Product, Collection
+from .models import Product, Collection, Category
+from django.utils.text import slugify  # Import slugify function
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    search_fields = ['name']  # Define fields to search on
+
+    list_display = ['name', 'slug']
+    #readonly_fields = ['slug']
+    actions = ['delete_selected']
 
 @admin.register(Collection)
 class CollectionAdmin(admin.ModelAdmin):
-    list_display = ['name', 'image_tag', 'photo']
+    list_display = ['name', 'category','image_tag',  'price', 'stock', 'available','photo']
     readonly_fields = ['image_tag']
     actions = ['delete_selected']
+    list_filter = ('category','available',)
 
     def image_tag(self, obj):
         if obj.photo:
@@ -22,7 +32,7 @@ class CollectionAdmin(admin.ModelAdmin):
     
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'collection', 'image_tag', 'price', 'stock', 'available', 'photo')
+    list_display = ('name', 'image_tag', 'price', 'stock', 'available', 'photo')
     readonly_fields = ['image_tag']
     actions = ['delete_selected']
 

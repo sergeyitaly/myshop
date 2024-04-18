@@ -10,6 +10,9 @@ urlpatterns = [
     path('products/<int:pk>/', views.ProductDetail.as_view(), name='product' ),
     path('collections/', views.CollectionList.as_view(), name='collections'),
     path('collection/<int:pk>/', views.CollectionDetail.as_view(), name='collection'),
+    path('categories/', views.CategoryList.as_view(), name='categories'),
+    path('category/<int:pk>', views.CategoryDetail.as_view(), name='category'),
+
 #    path('', views.home, name='home'),  # Map root URL to home_view
 
 ]

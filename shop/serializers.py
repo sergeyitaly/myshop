@@ -1,23 +1,26 @@
 from ast import Delete
 from rest_framework import serializers
-from .models import Product, Collection
+from .models import Product, Collection, Category
 
-
-
-class CollectionSerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Collection
-        fields = ('name', 'slug','photo')
+        model = Category
+        fields = ('name', 'slug')
         lookup_field = 'slug'
         extra_kwargs = {'url': {'lookup_field': 'slug'}}
 
-class ProductSerializer(serializers.ModelSerializer):
-    collection = serializers.ReadOnlyField(source='collection.name')
+class CollectionSerializer(serializers.ModelSerializer):
+    category = serializers.ReadOnlyField(source='category.name')
     class Meta:
-        model = Product
-        fields = ('id', 'name', 'slug', 'collection', 'photo', 'price', 'stock', 'available')
+        model = Collection
+        fields = ('id','name', 'category','slug','photo')
 
-class CreateProductSerializer(serializers.ModelSerializer):
+class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ('name','collection', 'photo', 'price', 'stock')
+        fields = ('name', 'slug', 'photo', 'price', 'stock', 'available')
+
+class CreateCollectiontSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('name', 'category', 'photo', 'price', 'stock')
