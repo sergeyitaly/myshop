@@ -18,7 +18,7 @@ class MediaStorage(S3Boto3Storage):
     file_overwrite = True
     
 class Category(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
 
     def __str__(self):
@@ -36,8 +36,8 @@ class Collection(models.Model):
     else:    
         photo = models.ImageField(upload_to="photos/collection", null=True, blank=True)
 
-    name = models.CharField(max_length=100)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='collections')
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.IntegerField(default=0)
     available = models.BooleanField(default=True)
