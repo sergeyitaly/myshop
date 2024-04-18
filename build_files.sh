@@ -1,7 +1,7 @@
 #!/bin/bash
 # Set up and activate virtual environment
-python3 -m venv myenv
-source myenv/bin/activate
+#python3 -m venv myenv
+#source myenv/bin/activate
 # Install Python dependencies from requirements.txt
 pip install -r requirements.txt
 python3 manage.py makemigrations
