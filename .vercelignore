@@ -13,7 +13,3 @@ dist/
 frontend/
 .vite/
 .vercel/
-./.vercel/
-./.vercel
-../.cache/
-../.cache
