@@ -2,12 +2,12 @@
   "version": 2,
   "builds": [
     {
-      "src": "myshop/wsgi.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "150mb",
-        "runtime": "python3.9"
-      }
+      "functions": {
+        "api/*.py": {
+          "runtime": "python3.9",
+          "memory": 1024,
+          "maxDuration": 15 
+        }
     },
     {
       "src": "build_files.sh",
@@ -32,7 +32,7 @@
       "dest": "https://kolorytmedia.s3.amazonaws.com/templates/$1"
     },
     {
-      "src": "/api/(.*)",
+      "src": "/(.*)",
       "dest": "myshop/wsgi.py"
     }
   ]
