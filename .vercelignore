@@ -3,7 +3,6 @@ venv/
 __pycache__/
 __pycache__
 
-.git
 site_cache/
 venv/
 media/
