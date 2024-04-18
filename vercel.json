@@ -5,9 +5,10 @@
       "functions": {
         "api/*.py": {
           "runtime": "python3.9",
-          "memory": 1024,
-          "maxDuration": 15 
+          "memory": 3009,
+          "maxDuration": 30
         }
+      }
     },
     {
       "src": "build_files.sh",
