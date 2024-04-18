@@ -32,8 +32,8 @@
       "dest": "https://kolorytmedia.s3.amazonaws.com/templates/$1"
     },
     {
-      "src": "/api/(.*)",
-      "dest": "myshop/wsgi.py"
+      "src": "/myshop/(.*)",
+      "dest": "wsgi.py"
     }
   ]
 }
