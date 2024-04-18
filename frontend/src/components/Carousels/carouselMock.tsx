@@ -4,10 +4,6 @@ import image3 from './img/2.svg'
 import image4 from './img/4.svg'
 import image5 from './img/Keramic.svg';
 import image6 from './img/Glas.svg';
-// import image7 from './img/Rectangle 17 (1).svg';
-// import image8 from './img/Rectangle 18 (1).svg';
-// import image9 from './img/Rectangle 19 (1).svg';
-// import image10 from './img/Rectangle 20 (1).svg'
 import image11 from '../../assets/collection/Rectangle 40.svg';
 import image12 from '../../assets/collection/Rectangle 41.svg'
 import image13 from '../../assets/collection/Rectangle 42.svg'

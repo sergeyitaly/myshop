@@ -36,10 +36,10 @@ export function AllCollection() {
 export function Popular () {
     const settings = {
         infinite: true,
-        // slidesToShow: 2, // Показываем по 2 слайда в видимой области
-        slidesPerRow: 2, // Показываем по 2 слайда в каждом ряду
-        rows: 2, // Делим слайды на 2 ряда
+        slidesPerRow: 2,
+        rows: 2,
         speed: 500,
+        dots: true,
     };
     return (
         <div className={style.sliderContainer}>
@@ -73,7 +73,7 @@ export function Discount () {
         arrows: false,
     };
     return (
-        <div className={style.sliderContainer} style={{marginTop:'-30px'}}>
+        <div className={style.sliderContainer} >
             <p className={style.title}> Знижки </p>
             <Slider {...settings}>
                 {mockDataDiscount.map((product, index) => (
