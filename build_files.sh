@@ -1,7 +1,7 @@
 #!/bin/bash
 # Set up and activate virtual environment
 #python3 -m venv myenv
-#source myenv/bin/activate
+source venv/bin/activate
 # Install Python dependencies from requirements.txt
 pip cache purge
 rm -rf ../.cache/pip
