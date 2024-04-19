@@ -23,6 +23,10 @@
       "dest": "myshop/wsgi.py"
     },
     {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
       "src": "/dist/(.*)",
       "dest": "https://kolorytmedia.s3.amazonaws.com/dist/$1"
     },
