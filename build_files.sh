@@ -15,7 +15,7 @@
 pip install awscli
 
 #aws s3 sync templates s3://kolorytmedia/templates --recursive
-aws s3 mv sync staticfiles_build s3://kolorytmedia/staticfiles_build --recursive
+aws s3 mv staticfiles_build s3://kolorytmedia/staticfiles_build --recursive
 
 # Collect static files
 #python3 manage.py collectstatic --noinput --clear
