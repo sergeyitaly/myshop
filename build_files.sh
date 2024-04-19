@@ -1,3 +1,4 @@
+#!/bin/bash
 # Set up and activate virtual environment
 python3 -m venv myenv
 source venv/bin/activate
@@ -17,6 +18,7 @@ aws s3 sync dist s3://kolorytmedia/dist
 
 # Collect static files
 python3 manage.py collectstatic --noinput --clear
+
 du -h --max-depth=5 | sort -rh
 du ../ -h --max-depth=5 | sort -rh
 
