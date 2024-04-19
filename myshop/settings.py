@@ -150,8 +150,6 @@ else:
     STATIC_URL = '/static/'  # URL to serve static files
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
 #    WHITENOISE_ROOT = STATIC_ROOT
-
-
 STATICFILES_DIRS = [
 os.path.join(BASE_DIR, 'dist'),  # Directory containing main.js and main.css
 os.path.join(BASE_DIR, 'dist', 'assets'),  # Directory containing other assets (images, etc.)
