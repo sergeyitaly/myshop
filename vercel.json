@@ -13,7 +13,6 @@
       "src": "/(.*)",
       "dest": "myshop/wsgi.py"
     }
-
   ],
   "headers": [
     {
