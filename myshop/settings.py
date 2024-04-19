@@ -40,7 +40,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 INTERNAL_IPS = ["127.0.0.1","localhost",]
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.vercel.app', '.now.sh']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.vercel.app',]
 # Application definition
 
 INSTALLED_APPS = [
