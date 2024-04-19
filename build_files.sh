@@ -18,9 +18,6 @@ aws s3 sync dist s3://kolorytmedia/dist
 
 # Collect static files
 python3 manage.py collectstatic --noinput --clear
-chmod 777 ../.cache
-rm -rf ../.cache
-rm -rf ../.git
 du -h --max-depth=5 | sort -rh
 du ../ -h --max-depth=5 | sort -rh
 
