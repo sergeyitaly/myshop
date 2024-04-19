@@ -9,7 +9,6 @@ lerna-debug.log*
 *.local
 
 
-.git/
 pip/
 .vite
 .vercel
@@ -33,5 +32,7 @@ __pycache__
 .env
 dist/
 tmp/
+
+.vercel
 
 .vercel
