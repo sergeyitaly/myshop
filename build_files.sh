@@ -1,4 +1,3 @@
-#!/bin/bash
 # Set up and activate virtual environment
 #python3 -m venv myenv
 #source venv/bin/activate
