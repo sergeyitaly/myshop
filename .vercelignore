@@ -8,3 +8,8 @@ node_modules/
 yarn.lock
 frontend/
 dist/
+myenv/
+node_modules/
+.git/
+*.pyc
+*.log
