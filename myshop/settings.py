@@ -33,11 +33,11 @@ USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
 VERCEL_DOMAIN = os.getenv('VERCEL_DOMAIN')
 
 CORS_ALLOWED_ORIGINS = [
- "*",
- #   "http://localhost:5173",
- #   "http://127.0.0.1:5173",
-#    f"https://{VERCEL_DOMAIN}",
- #   f"https://{AWS_S3_CUSTOM_DOMAIN}",
+
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    f"https://{VERCEL_DOMAIN}",
+    f"https://{AWS_S3_CUSTOM_DOMAIN}",
 ]
 
 INTERNAL_IPS = ["127.0.0.1","localhost",]
