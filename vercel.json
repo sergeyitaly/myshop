@@ -1,24 +1,20 @@
 
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "myshop/wsgi.py",
-      "use": "@vercel/python",
-      "config": { "maxLambdaSize": "150mb", "runtime": "python3.9" }
+  "build": {
+    "env": {
+      "DJANGO_SETTINGS_MODULE": "myshop.settings.production"
     },
-    {
-      "src": "build_files.sh",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    }
-  ],
+    "cmd": "pip install -r requirements.txt && python manage.py collectstatic --noinput && du -h --max-depth=5 | sort -rh"
+  },
   "routes": [
     {
       "src": "/(.*)",
       "dest": "myshop/wsgi.py"
+    },
+    {
+      "src": "/static/(.*)",
+      "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/$1"
     }
   ]
 }
