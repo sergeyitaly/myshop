@@ -31,7 +31,3 @@ __pycache__
 *.sw?
 .env
 tmp/
-
-.vercel
-
-.vercel
