@@ -35,11 +35,6 @@
       "dest": "https://kolorytmedia.s3.amazonaws.com/templates/$1"
     },
     {
-      "handle": "filesystem"
-    }
-  ],
-  "rewrites": [
-    {
       "src`": "/(.*)",
       "dest": "myshop/wsgi.py"
     }
