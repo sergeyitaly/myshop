@@ -5,7 +5,7 @@
       "src": "myshop/wsgi.py",
       "use": "@vercel/python",
       "config": {
-        "maxLambdaSize": "200mb",
+        "maxLambdaSize": "15mb",
         "runtime": "python3.9"
       }
     },
@@ -18,6 +18,10 @@
     }
   ],
   "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "myshop/wsgi.py"
+    },
     {
       "src": "/static/(.*)",
       "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/$1"
@@ -33,10 +37,6 @@
     {
       "src": "/templates/(.*)",
       "dest": "https://kolorytmedia.s3.amazonaws.com/templates/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "myshop/wsgi.py"
     }
   ]
 }
