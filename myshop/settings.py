@@ -40,7 +40,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 INTERNAL_IPS = ["127.0.0.1","localhost",]
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.vercel.app',]
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.vercel.app', '.now.sh']
 # Application definition
 
 INSTALLED_APPS = [
@@ -116,8 +116,8 @@ TEMPLATES = [
 ]
 
 
-#WSGI_APPLICATION = 'myshop.wsgi.application'
-WSGI_APPLICATION = 'myshop.wsgi.app'
+WSGI_APPLICATION = 'myshop.wsgi.application'
+#WSGI_APPLICATION = 'myshop.wsgi.app'
 
 
 DATABASES = {
