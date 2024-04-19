@@ -10,7 +10,6 @@ frontend/
 dist/
 myenv/
 node_modules/
-.git/
 *.pyc
 *.log
 env/
