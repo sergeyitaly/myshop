@@ -40,8 +40,8 @@
   ],
   "rewrites": [
     {
-      "source": "/(.*)",
-      "destination": "myshop/wsgi.py"
+      "src`": "/(.*)",
+      "dest": "myshop/wsgi.py"
     }
   ],
   "headers": [
