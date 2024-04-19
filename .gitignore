@@ -30,7 +30,6 @@ __pycache__
 *.sln
 *.sw?
 .env
-dist/
 tmp/
 
 .vercel
