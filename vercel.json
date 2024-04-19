@@ -3,10 +3,9 @@
   "builds": [
     {
       "src": "myshop/wsgi.py",
-      "use": "@vercel/python",
+      "use": "@ardnt/vercel-python-wsgi",
       "config": {
-        "maxLambdaSize": "150mb",
-        "runtime": "python3.9"
+        "maxLambdaSize": "150mb"
       }
     }
   ],
@@ -17,7 +16,7 @@
     },
     {
       "src": "/static/(.*)",
-      "dest": "/staticfiles_build/static/$1"
+      "dest": "/static/$1"
     }
   ]
 }
