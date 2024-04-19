@@ -116,11 +116,8 @@ TEMPLATES = [
     },
 ]
 
-
 #WSGI_APPLICATION = 'myshop.wsgi.application'
 WSGI_APPLICATION = 'myshop.wsgi.app'
-
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -132,8 +129,6 @@ DATABASES = {
     }
 }
 
-
-    
 if USE_S3:
     #LoadImagesToS3().copy_local_media_to_s3(os.path.join(BASE_DIR, 'media'))
     #STATICFILES_STORAGE =  "storages.backends.s3.S3Storage"
