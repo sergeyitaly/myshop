@@ -15,7 +15,6 @@ pip/
 media/
 node_modules/
 site_cache/
-staticfiles_build/
 venv/
 __pycache__/
 __pycache__
