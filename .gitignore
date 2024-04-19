@@ -9,7 +9,7 @@ lerna-debug.log*
 *.local
 
 
-../.git/
+.git/
 pip/
 .vite
 .vercel
