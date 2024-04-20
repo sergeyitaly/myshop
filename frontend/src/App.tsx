@@ -14,9 +14,9 @@ function App() {
           <Route index element={<Home />} />
           <Route path="collections" element={<CollectionsPage />} />
           <Route path="/collections/:id" element={<CollectionItemsPage />} />
+          <Route path="/product/:id" element={<ProductPage />} />
           <Route path="*" element={<NotFound />} />
         </Route>
-        <Route path="product" element={<ProductPage />}></Route>
       </Routes>
     </>
   );

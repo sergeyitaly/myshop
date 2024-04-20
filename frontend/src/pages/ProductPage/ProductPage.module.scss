@@ -1,13 +1,14 @@
 .container {
   display: flex;
   width: 1440px;
-  gap: 25px;
+  gap: 20px;
   padding: 24px 20px 0;
+  margin-bottom: 164px;
 }
 
 .images {
   display: flex;
-  gap: 15px;
+  gap: 20px;
 }
 
 .imgMin {
@@ -18,17 +19,22 @@
   align-self: start;
 }
 
-.prodName {
+.prodTitle {
   display: flex;
   justify-content: space-between;
+  margin-bottom: 27px;
+}
+
+.prodName {
   font-family: "Inter", sans-serif;
   font-weight: 500;
   font-size: 36px;
   color: #000;
-  margin-bottom: 27px;
 }
 
 .prodPrice {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
   font-size: 32px;
   font-weight: 500;
 }
@@ -74,8 +80,8 @@
   margin-right: 16px;
 }
 
-.sizeBox {
-  border: 1px solid #cdcdcd;
+.firstSizeBox {
+  border: 1px solid #000;
   width: auto;
   height: 40px;
   padding: 7px 7px;
@@ -83,6 +89,20 @@
   font-weight: 400;
   font-size: 20px;
   color: #000;
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+  background: #fff;
+  cursor: pointer;
+}
+
+.secondSizeBox {
+  border: 1px solid #cdcdcd;
+  width: auto;
+  height: 40px;
+  padding: 7px 7px;
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  color: #cdcdcd;
   text-align: center;
   background: #fff;
   cursor: pointer;
@@ -101,8 +121,12 @@
   width: 60px;
   height: 36px;
   background: #fff;
+  padding-top: 8px;
+  padding-bottom: 18px;
   border: none;
   border-bottom: 1px solid #cdcdcd;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
   cursor: pointer;
 }
 
@@ -110,8 +134,12 @@
   width: 60px;
   height: 36px;
   background: #fff;
+  padding-top: 10px;
+  padding-bottom: 10px;
   border: none;
   border-bottom: 1px solid #cdcdcd;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
   cursor: pointer;
 }
 
@@ -138,6 +166,7 @@
   text-align: center;
   color: #fff;
   background: #0b0599;
+  border: none;
   border-radius: 5px;
   width: 276px;
   height: 52px;
@@ -175,14 +204,6 @@
   cursor: pointer;
 }
 
-.descrTitle {
-  font-family: "Inter", sans-serif;
-  font-weight: 500;
-  font-size: 32px;
-  color: #000;
-  margin-bottom: 20px;
-}
-
 .description {
   font-family: "Inter", sans-serif;
   font-weight: 400;
@@ -198,18 +219,266 @@
   display: flex;
   justify-content: space-between;
   margin-bottom: 40px;
+  width: 572px;
+  height: 51px;
+  border-bottom: 1px solid #cdcdcd;
 }
 
-.usageTitle {
+.noBorder {
+  display: flex;
+  justify-content: space-between;
+  //   margin-bottom: 40px;
+  width: 572px;
+  height: 51px;
+  border: none;
+}
+
+.arrBtn {
+  background: #fff;
+  cursor: pointer;
+  border: none;
+}
+
+.title {
   font-family: "Inter", sans-serif;
   font-weight: 500;
   font-size: 32px;
   color: #000;
+  margin-bottom: 16px;
 }
 
-.careTitle {
+.titleRoll {
   font-family: "Inter", sans-serif;
   font-weight: 500;
   font-size: 32px;
   color: #000;
+  margin-bottom: 12px;
+}
+
+.usageDescr {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 130%;
+  color: #000;
+  width: 570px;
+  margin-bottom: 8px;
+}
+
+.careDescr {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 130%;
+  color: #000;
+  width: 570px;
+  margin-bottom: 8px;
+}
+
+.boxUsageDescr {
+  border-bottom: 1px solid #cdcdcd;
+  margin-bottom: 35px;
+}
+
+.boxCareDescr {
+  border-bottom: 1px solid #cdcdcd;
+}
+
+.collectionTitle {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 36px;
+  color: #000;
+  margin-bottom: 20px;
+}
+
+.collectionContainer {
+  width: 1440px;
+  padding: 0 20px;
+  margin-bottom: 164px;
+}
+
+.collectionList {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+.collectionImg {
+  width: 335px;
+  height: 364px;
+  margin-bottom: 8px;
+}
+
+.collectionItemName {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  text-align: center;
+  color: #000;
+  margin-bottom: 8px;
+}
+
+.collectionItemPrice {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  text-align: center;
+  color: #a3a3a3;
+  margin-bottom: 8px;
+}
+
+@media screen and (max-width: 768px) {
+  .container {
+    display: flex;
+    flex-direction: column;
+    width: 768px;
+    gap: 20px;
+    padding: 24px 15px 0;
+    margin-bottom: 164px;
+  }
+  .imgMin {
+    display: none;
+  }
+
+  .imgMax {
+    max-width: 768px;
+  }
+
+  .collectionContainer {
+    width: 768px;
+    padding: 0 15px;
+    margin-bottom: 164px;
+  }
+
+  .collectionList {
+    flex-wrap: wrap;
+  }
+}
+
+@media screen and (max-width: 375px) {
+  .container {
+    display: flex;
+    flex-direction: column;
+    width: 375px;
+    gap: 15px;
+    padding: 24px 15px 0;
+    margin-bottom: 164px;
+  }
+  .images {
+    margin-bottom: 15px;
+  }
+
+  .prodTitle {
+    gap: 44px;
+  }
+  .prodName {
+    font-size: 20px;
+  }
+
+  .prodPrice {
+    font-size: 20px;
+  }
+
+  .inStock {
+    margin-bottom: 24px;
+  }
+
+  .colorName {
+    font-size: 16px;
+  }
+
+  .setColor {
+    gap: 4px;
+    margin-bottom: 24px;
+  }
+
+  .size {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .selectSize {
+    margin-bottom: 24px;
+  }
+
+  .sizeNumber {
+    gap: 4px;
+    margin-right: 26px;
+  }
+
+  .firstSizeBox {
+    height: 24px;
+    padding: 3px 3px;
+    font-size: 14px;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.25);
+  }
+
+  .secondSizeBox {
+    height: 24px;
+    padding: 3px 3px;
+    font-size: 14px;
+  }
+
+  .counter {
+    border: 1px solid #d9d9d9;
+    border-radius: 5px;
+    width: 85px;
+    height: 24px;
+  }
+
+  .decCount {
+    width: 30px;
+    height: 24px;
+    padding-top: 2px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #d9d9d9;
+  }
+
+  .inkCount {
+    width: 30px;
+    height: 24px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #d9d9d9;
+  }
+
+  .count {
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    color: #000;
+    width: 25px;
+    height: 24px;
+    text-align: center;
+    padding-top: 2px;
+    border-bottom: 1px solid #d9d9d9;
+  }
+
+  .buyBtn {
+    margin-bottom: 44px;
+  }
+
+  .addBtn {
+    font-size: 16px;
+    width: 163px;
+    height: 36px;
+    margin-right: 17px;
+  }
+
+  .buyNow {
+    font-size: 16px;
+    width: 163px;
+    height: 36px;
+  }
+
+  .firstColor {
+    width: 24px;
+    height: 24px;
+  }
+
+  .secondColor {
+    width: 24px;
+    height: 24px;
+  }
 }
