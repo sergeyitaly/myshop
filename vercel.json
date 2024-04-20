@@ -16,11 +16,10 @@
     {
       "src": "/(.*)",
       "dest": "myshop/wsgi.py"
-    },
-    
+    },    
     {
       "src": "/static/(.*)",
-      "dest": "/static/$1"
+      "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/$1"
     }
   ]
 }
