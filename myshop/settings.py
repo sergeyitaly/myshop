@@ -41,7 +41,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 
-INTERNAL_IPS = ["127.0.0.1","localhost",]
+INTERNAL_IPS = ["127.0.0.1","localhost",'::1']
 ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app']
 # Application definition
 
@@ -261,7 +261,9 @@ TIME_ZONE = 'Europe/Kiev'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,  # Only show toolbar in DEBUG mode
+}
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REDIS_CACHE_LOCATION = os.getenv('REDIS_CACHE_LOCATION')
 CACHES = {
