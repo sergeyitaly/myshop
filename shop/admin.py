@@ -11,10 +11,10 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(Collection)
 class CollectionAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'category', 'image_thumbnail', 'price', 'stock', 'available', 'photo']
-    readonly_fields = ['image_thumbnail']
+    readonly_fields = ['slug','image_thumbnail']
     actions = ['delete_selected']
     list_filter = ('category', 'available')
-    fields = ['name', 'category', 'price', 'stock', 'available', 'photo']  # Include 'photo' field here
+    fields = ['name', 'category',  'image_thumbnail','price', 'stock', 'available', 'photo']  # Include 'photo' field here
 
 
     def image_thumbnail(self, obj):
