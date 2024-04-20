@@ -3,9 +3,14 @@ from django.utils.text import slugify
 from django.template.defaultfilters import truncatechars 
 from django.utils.html import format_html
 import os
+from django.core.exceptions import ValidationError
 from storages.backends.s3boto3 import S3Boto3Storage
 from dotenv import load_dotenv
 from distutils.util import strtobool
+from PIL import Image
+from io import BytesIO
+import base64
+
 
 load_dotenv()
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
@@ -16,7 +21,56 @@ MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{AWS_MEDIA_LOCA
 class MediaStorage(S3Boto3Storage):
     location = AWS_MEDIA_LOCATION
     file_overwrite = True
-    
+
+
+
+class FlexibleImageField(models.ImageField):
+    description = "A flexible image field that supports multiple image types including SVG."
+
+    def __init__(self, *args, **kwargs):
+        self.use_s3_storage = USE_S3
+        if self.use_s3_storage:
+            kwargs['storage'] = MediaStorage()
+        kwargs['null'] = True
+        kwargs['blank'] = True
+        super().__init__(*args, **kwargs)
+
+    def from_db_value(self, value, expression, connection):
+        return value
+
+    def to_python(self, value):
+        return value
+
+    def validate_svg_image(self, image_data):
+        # Validate SVG content
+        if not image_data.startswith('<svg'):
+            raise ValidationError("Invalid SVG content.")
+
+    def validate_image_type(self, image_data):
+        # Check if the image data is a valid image (non-SVG)
+        try:
+            Image.open(BytesIO(base64.b64decode(image_data)))
+        except Exception:
+            raise ValidationError("Invalid image content.")
+
+    def validate(self, value, model_instance):
+        super().validate(value, model_instance)
+        if value:
+            if value.startswith('<svg'):
+                self.validate_svg_image(value)
+            else:
+                self.validate_image_type(value)
+
+    def get_prep_value(self, value):
+        return value
+
+    def value_to_string(self, obj):
+        value = self.value_from_object(obj)
+        return str(value)
+
+    def formfield(self, **kwargs):
+        return None
+
 class Category(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
@@ -31,10 +85,7 @@ class Category(models.Model):
     
 
 class Collection(models.Model):
-    if USE_S3:
-        photo = models.ImageField(upload_to="photos/collection", storage=MediaStorage(), null=True, blank=True)
-    else:    
-        photo = models.ImageField(upload_to="photos/collection", null=True, blank=True)
+    photo = FlexibleImageField(upload_to="photos/collection")
 
     name = models.CharField(max_length=255)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='collections')
@@ -57,14 +108,14 @@ class Collection(models.Model):
     def short_description(self):
         # Implement this based on the actual field in your model
         return truncatechars(self.name, 20)  # Change 'name' to the appropriate field
-    def image_tag(self, obj):
-        if obj.photo:
-            if USE_S3: photo_url = MEDIA_URL + obj.photo.name
-            else: photo_url = obj.photo.url
-            print(photo_url)
-            return format_html(f'<img src="{photo_url}" width="100" />')
+    def image_tag(self):
+        if self.photo:
+            if self.photo.startswith('<svg'):
+                return format_html(self.photo)
+            else:
+                return format_html('<img src="data:image;base64,{}" width="100" />', self.photo)
         else:
-            return '(No image)'    
+            return '(No image)'  
     image_tag.short_description = "Image"
     image_tag.allow_tags = True
 
@@ -77,13 +128,8 @@ class Collection(models.Model):
 
 
 class Product(models.Model):
-    if USE_S3:
-        photo = models.ImageField(upload_to="photos/product", storage=MediaStorage(), null=True, blank=True)
-        brandimage = models.FileField(upload_to="photos/svg", storage=MediaStorage(), null=True, blank=True) 
-    else:    
-        photo = models.ImageField(upload_to="photos/product", null=True, blank=True)
-        brandimage = models.FileField(upload_to="photos/svg", null=True, blank=True)
-    
+    photo = FlexibleImageField(upload_to="photos/product")
+
     name = models.CharField(max_length=300, db_index=True)
     slug = models.SlugField(max_length=200, db_index=True, unique=True)
     description = models.TextField(blank=True)
@@ -105,14 +151,14 @@ class Product(models.Model):
     def short_description(self):
         return truncatechars(self.description, 20)    
     
-    def image_tag(self, obj):
-        if obj.photo:
-            if USE_S3: photo_url = MEDIA_URL + obj.photo.name
-            else: photo_url = obj.photo.url
-            print(photo_url)
-            return format_html(f'<img src="{photo_url}" width="100" />')
+    def image_tag(self):
+        if self.photo:
+            if self.photo.startswith('<svg'):
+                return format_html(self.photo)
+            else:
+                return format_html('<img src="data:image;base64,{}" width="100" />', self.photo)
         else:
-            return '(No image)'    
+            return '(No image)'  
     image_tag.short_description = "Image"
     image_tag.allow_tags = True
 
