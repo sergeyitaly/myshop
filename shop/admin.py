@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import Product, Collection, Category
+from django.utils.text import slugify
 
 
 @admin.register(Category)
@@ -13,76 +14,59 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Collection)
 class CollectionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category','price', 'stock', 'available', 'created', 'updated','display_image')
-    prepopulated_fields = {'slug': ('name',)}
-    fields = ['name', 'description', 'price', 'stock', 'available', 'slug','photo']
+    list_display = ('name', 'category','price', 'stock', 'available', 'created', 'updated', 'display_image')
     readonly_fields = ['slug']
-    actions = ['delete_selected','mark_available', 'mark_unavailable']
-    
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.select_related('category')  # Use select_related for better performance
 
-    def get_sales_count(self, obj):
-        return obj.sales_count
+    # Specify the fields to display and edit in the admin form
+    fieldsets = [
+        (None, {'fields': ['name', 'description', 'photo', 'price', 'stock', 'available']}),
+        ('Slug', {'fields': ['slug'], 'classes': ['collapse']}),
+    ]
 
-    get_sales_count.short_description = 'Sales Count'
+    # Prepopulate the slug field based on the name field
+    prepopulated_fields = {'slug': ('name',)}
 
-    # Add actions to set product availability
-    actions = ['mark_available', 'mark_unavailable']
-
-    def mark_available(self, request, queryset):
-        queryset.update(available=True)
-
-    def mark_unavailable(self, request, queryset):
-        queryset.update(available=False)
-
-    mark_available.short_description = 'Mark selected products as available'
-    mark_unavailable.short_description = 'Mark selected products as unavailable'
     def display_image(self, obj):
         if obj.photo:
-            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(obj.photo.url))
+            return '<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(obj.photo.url)
         else:
             return 'No Image Found'
 
     display_image.short_description = 'Image'
     display_image.allow_tags = True  # Required for HTML rendering in Django admin
+
+    def save_model(self, request, obj, form, change):
+        """Automatically generate the slug when saving a new product."""
+        if not obj.slug:  # Generate slug only if it's not set
+            obj.slug = slugify(obj.name)
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'stock', 'available', 'created', 'updated','display_image')
-    prepopulated_fields = {'slug': ('name',)}
-    fields = ['name', 'description', 'price', 'stock', 'available', 'slug','photo']
+    list_display = ('name', 'price', 'stock', 'available', 'created', 'updated', 'display_image')
     readonly_fields = ['slug']
-    actions = ['delete_selected', 'mark_available', 'mark_unavailable']
-    
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.select_related('category')  # Use select_related for better performance
 
-    def get_sales_count(self, obj):
-        return obj.sales_count
+    # Specify the fields to display and edit in the admin form
+    fieldsets = [
+        (None, {'fields': ['name', 'description', 'photo', 'price', 'stock', 'available']}),
+        ('Slug', {'fields': ['slug'], 'classes': ['collapse']}),
+    ]
 
-    get_sales_count.short_description = 'Sales Count'
+    # Prepopulate the slug field based on the name field
+    prepopulated_fields = {'slug': ('name',)}
 
-    # Add actions to set product availability
-    actions = ['mark_available', 'mark_unavailable']
-
-    def mark_available(self, request, queryset):
-        queryset.update(available=True)
-
-    def mark_unavailable(self, request, queryset):
-        queryset.update(available=False)
-
-    mark_available.short_description = 'Mark selected products as available'
-    mark_unavailable.short_description = 'Mark selected products as unavailable'
-    
     def display_image(self, obj):
         if obj.photo:
-            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(obj.photo.url))
+            return '<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(obj.photo.url)
         else:
             return 'No Image Found'
 
     display_image.short_description = 'Image'
     display_image.allow_tags = True  # Required for HTML rendering in Django admin
+
+    def save_model(self, request, obj, form, change):
+        """Automatically generate the slug when saving a new product."""
+        if not obj.slug:  # Generate slug only if it's not set
+            obj.slug = slugify(obj.name)
+        super().save_model(request, obj, form, change)
