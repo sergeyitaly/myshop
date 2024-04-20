@@ -18,7 +18,7 @@
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "https://kolorytmedia.s3.amazonaws.com/static/$1"
+      "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/$1"
     },
     {
       "src": "/media/(.*)",
