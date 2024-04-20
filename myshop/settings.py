@@ -40,6 +40,7 @@ CORS_ALLOWED_ORIGINS = [
     f"https://{AWS_S3_CUSTOM_DOMAIN}",
 ]
 
+
 INTERNAL_IPS = ["127.0.0.1","localhost",]
 ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app']
 # Application definition
@@ -262,11 +263,11 @@ USE_L10N = True
 USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
+REDIS_CACHE_LOCATION = os.getenv('REDIS_CACHE_LOCATION')
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://:xuvRxyFZjR6kjCaDiIlOJ5J8tK9ATupQ@redis-12474.c15.us-east-1-4.ec2.cloud.redislabs.com:12474/0',
+        'LOCATION': REDIS_CACHE_LOCATION,
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         },

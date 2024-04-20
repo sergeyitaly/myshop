@@ -1,21 +1,18 @@
+
 {
   "version": 2,
   "builds": [
     {
       "src": "myshop/wsgi.py",
       "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "15mb",
-        "runtime": "python3.9",
-        "buildCommand": "pip install -r requirements.txt && python manage.py collectstatic --noinput"
-      }
+      "config": { "maxLambdaSize": "150mb", "runtime": "python3.9" }
+    },
+    {
+      "src": "build_files.sh",
+      "use": "@vercel/static-build"
     }
   ],
   "routes": [
-    {
-      "src": "/static/(.*)",
-      "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/$1"
-    },
     {
       "src": "/(.*)",
       "dest": "myshop/wsgi.py"
