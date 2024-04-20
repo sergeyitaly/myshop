@@ -11,9 +11,10 @@ class CategoryAdmin(admin.ModelAdmin):
     
 @admin.register(Collection)
 class CollectionAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'category', 'price', 'stock', 'available', 'photo_display']
-    readonly_fields = ['photo_display']
-    fields = ['name', 'category', 'price', 'stock', 'available', 'photo']
+    list_display = ['id', 'name', 'category', 'price', 'stock', 'available', 'photo']
+    readonly_fields = ['photo_display']  # Readonly field for image preview
+    list_filter = ['category', 'available']
+    search_fields = ['name']
 
     def photo_display(self, obj):
         if obj.photo:
