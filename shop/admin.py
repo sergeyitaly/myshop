@@ -1,57 +1,71 @@
 from django.contrib import admin
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 from .models import Product, Collection, Category
+
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     search_fields = ['name']
     list_display = ['name', 'slug']
+    readonly_fields = ['slug']
     actions = ['delete_selected']
     
-    
+
 @admin.register(Collection)
 class CollectionAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'category', 'price', 'stock', 'available', 'photo']
+    list_display = ('name', 'category','price', 'stock', 'available', 'created', 'updated')
+    prepopulated_fields = {'slug': ('name',)}
+    fields = ['name', 'description', 'image_tag', 'price', 'stock', 'available', 'slug','photo']
     readonly_fields = ['slug']
-    list_filter = ['category', 'available']
-    search_fields = ['name']
+    actions = ['delete_selected']
+    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.select_related('category')  # Use select_related for better performance
 
-    def photo_display(self, obj):
-        if obj.photo:
-            return '<img src="{0}" style="max-width: 200px; max-height: 200px;" />'.format(obj.photo.url)
-        return '(No SVG)'
+    def get_sales_count(self, obj):
+        return obj.sales_count
 
-    photo_display.short_description = 'SVG Preview'
-    photo_display.allow_tags = True
+    get_sales_count.short_description = 'Sales Count'
 
-    def delete_selected(self, request, queryset):
-        for obj in queryset:
-            if obj.photo:
-                obj.photo.delete()
-            obj.delete()
+    # Add actions to set product availability
+    actions = ['mark_available', 'mark_unavailable']
 
-    delete_selected.short_description = "Delete selected collections"
+    def mark_available(self, request, queryset):
+        queryset.update(available=True)
+
+    def mark_unavailable(self, request, queryset):
+        queryset.update(available=False)
+
+    mark_available.short_description = 'Mark selected products as available'
+    mark_unavailable.short_description = 'Mark selected products as unavailable'
+
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'image_thumbnail', 'price', 'stock', 'available', 'photo')
+    list_display = ('name', 'price', 'stock', 'available', 'created', 'updated')
+    prepopulated_fields = {'slug': ('name',)}
+    fields = ['name', 'description', 'image_tag', 'price', 'stock', 'available', 'slug','photo']
     readonly_fields = ['slug']
     actions = ['delete_selected']
-    fields = ['name', 'price', 'stock', 'available', 'photo']  # Include 'photo' field here
+    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.select_related('category')  # Use select_related for better performance
 
+    def get_sales_count(self, obj):
+        return obj.sales_count
 
-    def image_thumbnail(self, obj):
-        if obj.photo:
-            return mark_safe(f'<img src="{obj.photo.url}" width="100" />')
-        else:
-            return '(No image)'
+    get_sales_count.short_description = 'Sales Count'
 
-    image_thumbnail.short_description = "Image"
+    # Add actions to set product availability
+    actions = ['mark_available', 'mark_unavailable']
 
-    def delete_selected(self, request, queryset):
-        for obj in queryset:
-            if obj.photo:
-                obj.photo.delete()
-            obj.delete()
+    def mark_available(self, request, queryset):
+        queryset.update(available=True)
 
-    delete_selected.short_description = "Delete selected products"
+    def mark_unavailable(self, request, queryset):
+        queryset.update(available=False)
+
+    mark_available.short_description = 'Mark selected products as available'
+    mark_unavailable.short_description = 'Mark selected products as unavailable'
