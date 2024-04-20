@@ -16,6 +16,10 @@
     {
       "src": "/(.*)",
       "dest": "myshop/wsgi.py"
+    },
+    {
+      "src": "/static/(.*)",
+      "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/$1"
     },    
     {
       "src": "/dist/(.*)",
