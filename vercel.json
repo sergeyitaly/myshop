@@ -11,18 +11,22 @@
       "src": "build_files.sh",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist"
+        "distDir": "staticfiles_build/static"
       }
     }
   ],
   "routes": [
     {
-      "src": "/(.*)",
-      "dest": "myshop/wsgi.py"
+      "src": "/static/(.*)",
+      "dest": "https://kolorytmedia.s3.amazonaws.com/static/$1"
     },
     {
-      "src": "/static/(.*)",
-      "dest": "/staticfiles_build/static/$1"
+      "src": "/media/(.*)",
+      "dest": "https://kolorytmedia.s3.amazonaws.com/media/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "myshop/wsgi.py"
     }
   ]
 }
