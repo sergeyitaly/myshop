@@ -7,6 +7,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from shop.loadimages_tos3 import LoadImagesToS3
 from distutils.util import strtobool
+from django.core.validators import FileExtensionValidator
 
 load_dotenv()
 
@@ -39,7 +40,15 @@ CORS_ALLOWED_ORIGINS = [
 #    f"https://{VERCEL_DOMAIN}",
     f"https://{AWS_S3_CUSTOM_DOMAIN}",
 ]
-
+IMAGE_FILE_TYPES = [
+    'image/jpeg',
+    'image/pjpeg',
+    'image/png',
+    'image/svg+xml',  # Add SVG to allowed image types
+]
+IMAGE_FILE_VALIDATORS = [
+    FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'svg']),
+]
 
 INTERNAL_IPS = ["127.0.0.1","localhost",'::1']
 ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app', 'localhost']

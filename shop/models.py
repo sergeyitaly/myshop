@@ -3,16 +3,9 @@ from django.utils.text import slugify
 from django.template.defaultfilters import truncatechars 
 from django.utils.html import format_html
 import os
-from django.core.exceptions import ValidationError
 from storages.backends.s3boto3 import S3Boto3Storage
 from dotenv import load_dotenv
 from distutils.util import strtobool
-from PIL import Image
-from io import BytesIO
-import base64
-from django.forms import FileField, ClearableFileInput  # Import necessary forms
-
-
 
 load_dotenv()
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
@@ -23,52 +16,15 @@ MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{AWS_MEDIA_LOCA
 class MediaStorage(S3Boto3Storage):
     location = AWS_MEDIA_LOCATION
     file_overwrite = True
-
-class FlexibleImageField(models.ImageField):
-    description = "A flexible image field that supports multiple image types including SVG."
-    
-    def __init__(self, *args, **kwargs):
-        self.use_s3_storage = USE_S3
-        if self.use_s3_storage:
-            kwargs['storage'] = MediaStorage()
-        kwargs['null'] = True
-        kwargs['blank'] = True
-        super().__init__(*args, **kwargs)
-        
-    def validate_svg_image(self, image_data):
-        # Validate SVG content
-        if not image_data.startswith('<svg'):
-            raise ValidationError("Invalid SVG content.")
-
-    def validate_image_type(self, image_data):
-        # Check if the image data is a valid image (non-SVG)
-        try:
-            # Decode base64 image data and open it with PIL
-            img = Image.open(BytesIO(base64.b64decode(image_data)))
-            img.verify()  # Verify image file integrity
-        except Exception:
-            raise ValidationError("Invalid image content.")
-
-    def validate(self, value, model_instance):
-        super().validate(value, model_instance)
-        if value:
-            # Access the file via value.file and read the content
-            image_data = value.file.read()
-
-            # Check the type of image based on its content
-            if isinstance(image_data, str):  # Check if it's a string (SVG)
-                self.validate_svg_image(image_data)
-            else:  # Otherwise, assume it's binary data (image)
-                self.validate_image_type(image_data)
-
-    def formfield(self, **kwargs):
-        # Override formfield method to return None (no form field)
-        return None
-    
     
 class Category(models.Model):
     name = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=200, unique=True, blank=True)
+    slug = models.SlugField(max_length=200, unique=True, blank=True, null=True, db_index=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:  # Generate slug if it's not set
+            self.slug = slugify(self.name)
+        super(Category, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -77,101 +33,101 @@ class Category(models.Model):
         ordering = ('name',)
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
-        
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
-        
+    
+
 class Collection(models.Model):
-    photo = models.ImageField(upload_to='photos/collection')
+    if USE_S3:
+        photo = models.ImageField(upload_to="photos/collection", storage=MediaStorage(), null=True, blank=True)
+    else:    
+        photo = models.ImageField(upload_to="photos/collection", null=True, blank=True)
+        
     name = models.CharField(max_length=255)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='collections')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    description = models.TextField(blank=False, null=False)  # Make description required
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.IntegerField(default=0)
     available = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    slug = models.SlugField(max_length=200, unique=True, blank=True)
+    sales_count = models.PositiveIntegerField(default=0)  # Field to track sales
+    slug = models.SlugField(max_length=200, unique=True, blank=True, null=True, db_index=True)
+
+
+    def image_tag(self):
+        if self.image:
+            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(self.image.url))
+        else:
+            return 'No Image Found'
 
     def __str__(self):
         return self.name
 
-    class Meta:
-        ordering = ('name',)
-        verbose_name = 'Collection'
-        verbose_name_plural = 'Collections'
-        
     def save(self, *args, **kwargs):
-        if not self.slug:
+        if not self.slug:  # Generate slug if it's not set
             self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
+        super(Product, self).save(*args, **kwargs)
 
-    @property
-    def short_description(self):
-        # Implement this based on the actual field in your model
-        return truncatechars(self.name, 20)  # Change 'name' to the appropriate field
-    def image_tag(self):
-        if self.photo:
-            if self.photo.startswith('<svg'):
-                return format_html(self.photo)
-            else:
-                return format_html('<img src="data:image;base64,{}" width="100" />', self.photo)
-        else:
-            return '(No image)'  
-    image_tag.short_description = "Image"
-    image_tag.allow_tags = True
-
-    def delete(self, *args, **kwargs):
-        # Delete associated photo when collection is deleted
-        if self.photo:
-            self.photo.delete()
-        super().delete(*args, **kwargs)
-
-
-
-class Product(models.Model):
-    photo = FlexibleImageField(upload_to="photos/product")
-
-    name = models.CharField(max_length=300, db_index=True)
-    slug = models.SlugField(max_length=200, unique=True, blank=True)
-    description = models.TextField(blank=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    stock = models.PositiveIntegerField()
-    available = models.BooleanField(default=True)
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.name
-    
-    class Meta:
-        ordering = ('name',)
-        verbose_name = 'Product'
-        verbose_name_plural = 'Products'
-
-    @property
-    def short_description(self):
-        return truncatechars(self.description, 20)    
-    
-    def image_tag(self):
-        if self.photo:
-            if self.photo.startswith('<svg'):
-                return format_html(self.photo)
-            else:
-                return format_html('<img src="data:image;base64,{}" width="100" />', self.photo)
-        else:
-            return '(No image)'  
-    image_tag.short_description = "Image"
-    image_tag.allow_tags = True
-    
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         # Delete associated photo when product is deleted
         if self.photo:
             self.photo.delete()
         super().delete(*args, **kwargs)
+
+    class Meta:
+        ordering = ('name',)
+        verbose_name = 'Product'
+        verbose_name_plural = 'Products'
+
+    image_tag.short_description = "Image"
+    image_tag.allow_tags = True
+
+
+class Product(models.Model):
+    if USE_S3:
+        photo = models.ImageField(upload_to="photos/product", storage=MediaStorage(), null=True, blank=True)
+        brandimage = models.FileField(upload_to="photos/svg", storage=MediaStorage(), null=True, blank=True) 
+    else:    
+        photo = models.ImageField(upload_to="photos/product", null=True, blank=True)
+        brandimage = models.FileField(upload_to="photos/svg", null=True, blank=True)
+
+    name = models.CharField(max_length=255)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    description = models.TextField(blank=False, null=False)  # Make description required
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    stock = models.IntegerField(default=0)
+    available = models.BooleanField(default=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    sales_count = models.PositiveIntegerField(default=0)  # Field to track sales
+    slug = models.SlugField(max_length=200, unique=True, blank=True, null=True, db_index=True)
+
+
+    def image_tag(self):
+        if self.image:
+            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(self.image.url))
+        else:
+            return 'No Image Found'
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:  # Generate slug if it's not set
+            self.slug = slugify(self.name)
+        super(Product, self).save(*args, **kwargs)
+
+
+    def delete(self, *args, **kwargs):
+        # Delete associated photo when product is deleted
+        if self.photo:
+            self.photo.delete()
+        super().delete(*args, **kwargs)
+
+    class Meta:
+        ordering = ('name',)
+        verbose_name = 'Product'
+        verbose_name_plural = 'Products'
+
+    image_tag.short_description = "Image"
+    image_tag.allow_tags = True
