@@ -36,7 +36,7 @@ CORS_ALLOWED_ORIGINS = [
 
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    f"https://{VERCEL_DOMAIN}",
+#    f"https://{VERCEL_DOMAIN}",
     f"https://{AWS_S3_CUSTOM_DOMAIN}",
 ]
 
