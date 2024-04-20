@@ -19,5 +19,10 @@
     {
       "src": "/(.*)",
       "dest": "myshop/wsgi.py"
+    },
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/assets/$1"
     }
+  ]
 }
