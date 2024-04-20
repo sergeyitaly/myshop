@@ -78,6 +78,11 @@ class Category(models.Model):
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
         
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+        
 class Collection(models.Model):
     photo = models.ImageField(upload_to='photos/collection')
     name = models.CharField(max_length=255)
@@ -87,15 +92,20 @@ class Collection(models.Model):
     available = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    slug = models.SlugField(max_length=200, db_index=True, unique=True)
+    slug = models.SlugField(max_length=200, unique=True, blank=True)
 
-def __str__(self):
-    return self.name
+    def __str__(self):
+        return self.name
 
-class Meta:
-    ordering = ('name',)
-    verbose_name = 'Collection'
-    verbose_name_plural = 'Collections'
+    class Meta:
+        ordering = ('name',)
+        verbose_name = 'Collection'
+        verbose_name_plural = 'Collections'
+        
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
     @property
     def short_description(self):
@@ -124,7 +134,7 @@ class Product(models.Model):
     photo = FlexibleImageField(upload_to="photos/product")
 
     name = models.CharField(max_length=300, db_index=True)
-    slug = models.SlugField(max_length=200, db_index=True, unique=True)
+    slug = models.SlugField(max_length=200, unique=True, blank=True)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField()
@@ -154,6 +164,11 @@ class Product(models.Model):
             return '(No image)'  
     image_tag.short_description = "Image"
     image_tag.allow_tags = True
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         # Delete associated photo when product is deleted
