@@ -12,7 +12,7 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(Collection)
 class CollectionAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'category', 'price', 'stock', 'available', 'photo']
-    readonly_fields = ['photo_display']  # Readonly field for image preview
+    readonly_fields = ['slug']
     list_filter = ['category', 'available']
     search_fields = ['name']
 
