@@ -29,6 +29,7 @@ import style from "./style.module.scss";
 import { fullData } from "../../components/Carousels/carouselMock";
 import Pagination from "@mui/material/Pagination";
 import CarouselBestseller from "../CollectionPage/CarouselBestseller/CarouselBestseller";
+import { Link } from "react-router-dom";
 
 const CollectionItemsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -45,7 +46,7 @@ const CollectionItemsPage: React.FC = () => {
       <h1 className={style.title}>{collection.name}</h1>
       <div className={style.cardContainer}>
         {collection.items.map((product, index) => (
-          <div key={index} className={style.card}>
+          <Link to={`/product/${id}`} key={index} className={style.card}>
             <div className={style.cardImage}>
               <img
                 src={product.imageUrl}
@@ -55,7 +56,7 @@ const CollectionItemsPage: React.FC = () => {
               <p className={style.name}>{product.name}</p>
               <p className={style.price}>{product.price}</p>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
       <div className={style.pagination}>

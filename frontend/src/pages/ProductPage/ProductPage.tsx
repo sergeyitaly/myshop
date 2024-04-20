@@ -5,8 +5,7 @@ import ringQueen from "../../assets/collection/Rectangle 48.svg";
 import braceletQueen from "../../assets/collection/Rectangle 69.svg";
 import ringsSet from "../../assets/collection/Rectangle 70.svg";
 import earrings from "../../assets/collection/Rectangle 71.svg";
-import arrow1 from "./icons/fluent_ios-arrow-24-regular.svg";
-import arrow2 from "./icons/fluent_ios-arrow-24-regular (1).svg";
+import arrowBottom from "./icons/fluent_ios-arrow-24-regular.svg";
 import arrowUp from "./icons/arrow-Up.svg";
 import negativeIcon from "./icons/-.svg";
 import positiveIcon from "./icons/+.svg";
@@ -37,7 +36,7 @@ const ProductPage = () => {
           <img className={style.imgMax} src={productImgMax} alt="invida" />
         </div>
         <div>
-          <div className={style.titlePrice}>
+          <div className={style.priceTitle}>
             <div className={style.prodTitle}>
               <p className={style.prodName}>Кольє Інвіда</p>
               <p className={style.prodPrice}>10 500,00 грн</p>
@@ -111,7 +110,7 @@ const ProductPage = () => {
               {isVisible ? (
                 <img src={arrowUp} alt="arrow" />
               ) : (
-                <img src={arrow1} alt="arrow" />
+                <img src={arrowBottom} alt="arrow" />
               )}
             </button>
           </div>
@@ -135,7 +134,7 @@ const ProductPage = () => {
               {isVisible ? (
                 <img src={arrowUp} alt="arrow" />
               ) : (
-                <img src={arrow2} alt="arrow" />
+                <img src={arrowBottom} alt="arrow" />
               )}
             </button>
           </div>
@@ -166,7 +165,7 @@ const ProductPage = () => {
         <p className={style.collectionTitle}>Також з цієї колекції</p>
         <ul className={style.collectionList}>
           <li>
-            <img className={style.collectionImg} src={ringQueen} alt="ring" />
+            <img className={style.collectionImg} src={ringQueen} />
             <p className={style.collectionItemName}>Каблучка Queen</p>
             <p className={style.collectionItemPrice}>7 300,00 грн</p>
           </li>
@@ -180,14 +179,14 @@ const ProductPage = () => {
             <p className={style.collectionItemPrice}>8 300,00 грн.</p>
           </li>
           <li>
-            <img className={style.collectionImg} src={earrings} alt="rings" />
+            <img className={style.collectionImg} src={ringsSet} alt="rings" />
             <p className={style.collectionItemName}>Сет з каблучок</p>
             <p className={style.collectionItemPrice}>10 300,00 грн.</p>
           </li>
           <li>
             <img
               className={style.collectionImg}
-              src={ringsSet}
+              src={earrings}
               alt="earrings"
             />
             <p className={style.collectionItemName}>Сережки з цитрином</p>

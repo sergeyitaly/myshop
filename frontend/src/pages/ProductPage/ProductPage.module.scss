@@ -211,7 +211,6 @@
   line-height: 130%;
   color: #000;
   width: 570px;
-  height: 208px;
   margin-bottom: 47px;
 }
 
@@ -363,14 +362,25 @@
     width: 375px;
     gap: 15px;
     padding: 24px 15px 0;
-    margin-bottom: 164px;
+    margin-bottom: 64px;
   }
   .images {
     margin-bottom: 15px;
   }
 
+  .imgMax {
+    width: 375px;
+    height: 365px;
+  }
+
+  .priceTitle {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
   .prodTitle {
-    gap: 44px;
+    margin-bottom: 0;
   }
   .prodName {
     font-size: 20px;
@@ -381,6 +391,7 @@
   }
 
   .inStock {
+    font-size: 12px;
     margin-bottom: 24px;
   }
 
@@ -480,5 +491,66 @@
   .secondColor {
     width: 24px;
     height: 24px;
+  }
+
+  .title {
+    font-weight: 500;
+    font-size: 16px;
+    color: #000;
+    margin-bottom: 4px;
+  }
+
+  .description {
+    font-size: 14px;
+    line-height: 136%;
+    width: 340px;
+    margin-bottom: 14px;
+  }
+
+  .roll {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    width: 343px;
+    height: 23px;
+    border-bottom: 1px solid #cdcdcd;
+  }
+
+  .titleRoll {
+    font-weight: 500;
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+
+  .noBorder {
+    display: flex;
+    justify-content: space-between;
+    width: 343px;
+    height: 23px;
+    border: none;
+  }
+
+  .usageDescr {
+    font-size: 14px;
+    line-height: 136%;
+    width: 340px;
+    margin-bottom: 5px;
+  }
+
+  .careDescr {
+    font-size: 14px;
+    line-height: 136%;
+    width: 340px;
+    margin-bottom: 5px;
+  }
+
+  .boxUsageDescr {
+    border-bottom: 1px solid #cdcdcd;
+    margin-bottom: 29px;
+  }
+
+  .collectionTitle {
+    font-size: 16px;
+    margin-bottom: 16px;
   }
 }
