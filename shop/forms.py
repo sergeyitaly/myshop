@@ -2,6 +2,26 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+import xml.etree.cElementTree as et
+from django_svg_image_form_field import SvgAndImageFormField
+from .models import Product, Collection, Category
+
+
+class CollectionForm(forms.ModelForm):
+    class Meta:
+        model = Collection
+        exclude = []
+        field_classes = {
+            'photo': SvgAndImageFormField,
+        }
+        
+class ProductForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        exclude = []
+        field_classes = {
+            'photo': SvgAndImageFormField,
+        }
 
 
 class LoginUserForm(AuthenticationForm):

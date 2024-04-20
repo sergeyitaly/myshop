@@ -40,17 +40,6 @@ CORS_ALLOWED_ORIGINS = [
 #    f"https://{VERCEL_DOMAIN}",
     f"https://{AWS_S3_CUSTOM_DOMAIN}",
 ]
-IMAGE_FILE_TYPES = [
-    'image/jpeg',
-    'image/pjpeg',
-    'image/png',
-    'image/svg+xml',  # Add SVG to allowed image types
-]
-IMAGE_FILE_VALIDATORS = [
-    FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'svg']),
-]
-ALLOWED_FILE_TYPES = ['svg', 'jpeg', 'jpg', 'png']  # Include SVG in the allowed file types
-
 
 INTERNAL_IPS = ["127.0.0.1","localhost",'::1']
 ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app', 'localhost']
@@ -58,7 +47,7 @@ ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app', 'localhost']
 
 INSTALLED_APPS = [
     'admin_interface',
-     'colorfield',
+    'colorfield',
     'whitenoise.runserver_nostatic',
     'django.contrib.admin',
     'django.contrib.auth',
