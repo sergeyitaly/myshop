@@ -10,12 +10,20 @@
     {
       "src": "build_files.sh",
       "use": "@vercel/static-build"
+    },
+    "config": {
+      "distDir": "dist"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
       "dest": "myshop/wsgi.py"
+    },
+    
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
     }
   ]
 }
