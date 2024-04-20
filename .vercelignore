@@ -6,8 +6,6 @@ site_cache/
 media/
 node_modules/
 yarn.lock
-frontend/
-dist/
 myenv/
 node_modules/
 *.pyc
