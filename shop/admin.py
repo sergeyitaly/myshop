@@ -11,17 +11,17 @@ class CategoryAdmin(admin.ModelAdmin):
     
 @admin.register(Collection)
 class CollectionAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'category', 'price', 'stock', 'available', 'photo_preview']
-    readonly_fields = ['photo_preview']
+    list_display = ['id', 'name', 'category', 'price', 'stock', 'available', 'photo_display']
+    readonly_fields = ['photo_display']
     fields = ['name', 'category', 'price', 'stock', 'available', 'photo']
 
-    def photo_preview(self, obj):
+    def photo_display(self, obj):
         if obj.photo:
-            return f'<img src="{obj.photo.url}" width="100">'
-        return '(No image)'
+            return '<img src="{0}" style="max-width: 200px; max-height: 200px;" />'.format(obj.photo.url)
+        return '(No SVG)'
 
-    photo_preview.short_description = 'Photo Preview'
-    photo_preview.allow_tags = True
+    photo_display.short_description = 'SVG Preview'
+    photo_display.allow_tags = True
 
     def delete_selected(self, request, queryset):
         for obj in queryset:
