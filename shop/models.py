@@ -10,6 +10,8 @@ from distutils.util import strtobool
 from PIL import Image
 from io import BytesIO
 import base64
+from django.forms import FileField, ClearableFileInput  # Import necessary forms
+
 
 
 load_dotenv()
@@ -22,11 +24,9 @@ class MediaStorage(S3Boto3Storage):
     location = AWS_MEDIA_LOCATION
     file_overwrite = True
 
-
-
 class FlexibleImageField(models.ImageField):
     description = "A flexible image field that supports multiple image types including SVG."
-
+    
     def __init__(self, *args, **kwargs):
         self.use_s3_storage = USE_S3
         if self.use_s3_storage:
@@ -34,43 +34,42 @@ class FlexibleImageField(models.ImageField):
         kwargs['null'] = True
         kwargs['blank'] = True
         super().__init__(*args, **kwargs)
-
-    def from_db_value(self, value, expression, connection):
-        return value
-
-    def to_python(self, value):
-        return value
-
-    def validate_svg_image(self, image_data):
+        
+    def validate_svg_image(self, image_file):
         # Validate SVG content
-        if not image_data.startswith('<svg'):
+        svg_content = image_file.read()
+        if not svg_content.startswith(b'<svg'):
             raise ValidationError("Invalid SVG content.")
 
-    def validate_image_type(self, image_data):
-        # Check if the image data is a valid image (non-SVG)
+    def validate_image_type(self, image_file):
+        # Check if the image file is a valid image (non-SVG)
         try:
-            Image.open(BytesIO(base64.b64decode(image_data)))
+            img = Image.open(image_file)
+            img.verify()  # Verify image file integrity
         except Exception:
             raise ValidationError("Invalid image content.")
 
     def validate(self, value, model_instance):
         super().validate(value, model_instance)
         if value:
-            if value.startswith('<svg'):
-                self.validate_svg_image(value)
-            else:
-                self.validate_image_type(value)
+            try:
+                # Open the image file
+                image_file = value.file
 
-    def get_prep_value(self, value):
-        return value
+                # Check the type of image based on its content
+                if value.content_type == 'image/svg+xml':
+                    self.validate_svg_image(image_file)
+                else:
+                    self.validate_image_type(image_file)
 
-    def value_to_string(self, obj):
-        value = self.value_from_object(obj)
-        return str(value)
+            except AttributeError:
+                raise ValidationError("Invalid image content.")
 
     def formfield(self, **kwargs):
+        # Override formfield method to return None (no form field)
         return None
-
+    
+    
 class Category(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
@@ -82,11 +81,8 @@ class Category(models.Model):
         ordering = ('name',)
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
-    
-
 class Collection(models.Model):
-    photo = FlexibleImageField(upload_to="photos/collection")
-
+    photo = models.ImageField(upload_to='photos/collection')
     name = models.CharField(max_length=255)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='collections')
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -96,13 +92,13 @@ class Collection(models.Model):
     updated = models.DateTimeField(auto_now=True)
     slug = models.SlugField(max_length=200, db_index=True, unique=True)
 
-    def __str__(self):
-        return self.name
-    
-    class Meta:
-        ordering = ('name',)
-        verbose_name = 'Collection'
-        verbose_name_plural = 'Collections'
+def __str__(self):
+    return self.name
+
+class Meta:
+    ordering = ('name',)
+    verbose_name = 'Collection'
+    verbose_name_plural = 'Collections'
 
     @property
     def short_description(self):
