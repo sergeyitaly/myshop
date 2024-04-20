@@ -35,16 +35,16 @@ class FlexibleImageField(models.ImageField):
         kwargs['blank'] = True
         super().__init__(*args, **kwargs)
         
-    def validate_svg_image(self, image_file):
+    def validate_svg_image(self, image_data):
         # Validate SVG content
-        svg_content = image_file.read()
-        if not svg_content.startswith(b'<svg'):
+        if not image_data.startswith('<svg'):
             raise ValidationError("Invalid SVG content.")
 
-    def validate_image_type(self, image_file):
-        # Check if the image file is a valid image (non-SVG)
+    def validate_image_type(self, image_data):
+        # Check if the image data is a valid image (non-SVG)
         try:
-            img = Image.open(image_file)
+            # Decode base64 image data and open it with PIL
+            img = Image.open(BytesIO(base64.b64decode(image_data)))
             img.verify()  # Verify image file integrity
         except Exception:
             raise ValidationError("Invalid image content.")
@@ -52,18 +52,14 @@ class FlexibleImageField(models.ImageField):
     def validate(self, value, model_instance):
         super().validate(value, model_instance)
         if value:
-            try:
-                # Open the image file
-                image_file = value.file
+            # Access the file via value.file and read the content
+            image_data = value.file.read()
 
-                # Check the type of image based on its content
-                if value.content_type == 'image/svg+xml':
-                    self.validate_svg_image(image_file)
-                else:
-                    self.validate_image_type(image_file)
-
-            except AttributeError:
-                raise ValidationError("Invalid image content.")
+            # Check the type of image based on its content
+            if isinstance(image_data, str):  # Check if it's a string (SVG)
+                self.validate_svg_image(image_data)
+            else:  # Otherwise, assume it's binary data (image)
+                self.validate_image_type(image_data)
 
     def formfield(self, **kwargs):
         # Override formfield method to return None (no form field)
@@ -81,6 +77,7 @@ class Category(models.Model):
         ordering = ('name',)
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
+        
 class Collection(models.Model):
     photo = models.ImageField(upload_to='photos/collection')
     name = models.CharField(max_length=255)
