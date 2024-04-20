@@ -49,6 +49,8 @@ IMAGE_FILE_TYPES = [
 IMAGE_FILE_VALIDATORS = [
     FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'svg']),
 ]
+ALLOWED_FILE_TYPES = ['svg', 'jpeg', 'jpg', 'png']  # Include SVG in the allowed file types
+
 
 INTERNAL_IPS = ["127.0.0.1","localhost",'::1']
 ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app', 'localhost']
