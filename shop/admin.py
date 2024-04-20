@@ -13,11 +13,11 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Collection)
 class CollectionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category','price', 'stock', 'available', 'created', 'updated')
+    list_display = ('name', 'category','price', 'stock', 'available', 'created', 'updated','display_image')
     prepopulated_fields = {'slug': ('name',)}
-    fields = ['name', 'description', 'image_tag', 'price', 'stock', 'available', 'slug','photo']
+    fields = ['name', 'description', 'price', 'stock', 'available', 'slug','photo']
     readonly_fields = ['slug']
-    actions = ['delete_selected']
+    actions = ['delete_selected','mark_available', 'mark_unavailable']
     
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -39,15 +39,23 @@ class CollectionAdmin(admin.ModelAdmin):
 
     mark_available.short_description = 'Mark selected products as available'
     mark_unavailable.short_description = 'Mark selected products as unavailable'
+    def display_image(self, obj):
+        if obj.photo:
+            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(obj.photo.url))
+        else:
+            return 'No Image Found'
+
+    display_image.short_description = 'Image'
+    display_image.allow_tags = True  # Required for HTML rendering in Django admin
 
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'stock', 'available', 'created', 'updated')
+    list_display = ('name', 'price', 'stock', 'available', 'created', 'updated','display_image')
     prepopulated_fields = {'slug': ('name',)}
-    fields = ['name', 'description', 'image_tag', 'price', 'stock', 'available', 'slug','photo']
+    fields = ['name', 'description', 'price', 'stock', 'available', 'slug','photo']
     readonly_fields = ['slug']
-    actions = ['delete_selected']
+    actions = ['delete_selected', 'mark_available', 'mark_unavailable']
     
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -69,3 +77,12 @@ class ProductAdmin(admin.ModelAdmin):
 
     mark_available.short_description = 'Mark selected products as available'
     mark_unavailable.short_description = 'Mark selected products as unavailable'
+    
+    def display_image(self, obj):
+        if obj.photo:
+            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(obj.photo.url))
+        else:
+            return 'No Image Found'
+
+    display_image.short_description = 'Image'
+    display_image.allow_tags = True  # Required for HTML rendering in Django admin
