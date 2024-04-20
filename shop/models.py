@@ -13,6 +13,14 @@ AWS_MEDIA_LOCATION = os.getenv('AWS_MEDIA', 'media')
 USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
 MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{AWS_MEDIA_LOCATION}/'
 
+
+
+def validate_file_extension(value):
+    ext = os.path.splitext(value.name)[1]  # [0] returns path+filename
+    valid_extensions = ['.jpg', '.jpeg', '.png', '.svg']
+    if not ext.lower() in valid_extensions:
+        raise ValidationError('Unsupported file extension.')
+    
 class MediaStorage(S3Boto3Storage):
     location = AWS_MEDIA_LOCATION
     file_overwrite = True
@@ -117,10 +125,10 @@ class Collection(models.Model):
 class Product(models.Model):
     if USE_S3:
         photo = models.ImageField(upload_to="photos/product", storage=MediaStorage(), null=True, blank=True)
-        brandimage = models.FileField(upload_to="photos/svg", storage=MediaStorage(), null=True, blank=True) 
+        brandimage = models.ImageField(upload_to="photos/svg", storage=MediaStorage(), null=True, blank=True) 
     else:    
         photo = models.ImageField(upload_to="photos/product", null=True, blank=True)
-        brandimage = models.FileField(upload_to="photos/svg", null=True, blank=True)
+        brandimage = models.ImageField(upload_to="photos/svg", null=True, blank=True)
 
     name = models.CharField(max_length=255)
     description = models.TextField(blank=False, null=False)  # Make description required

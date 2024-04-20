@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from .models import Product, Collection, Category
 from django.utils.text import slugify
-
+from .forms import CollectionForm, ProductForm
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -10,7 +10,6 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ['name', 'slug']
     readonly_fields = ['slug']
     actions = ['delete_selected']
-    
 
 @admin.register(Collection)
 class CollectionAdmin(admin.ModelAdmin):
@@ -19,6 +18,7 @@ class CollectionAdmin(admin.ModelAdmin):
 
     # Specify the fields to display and edit in the admin form
     fields = ['name', 'description', 'category','photo', 'price', 'currency', 'stock', 'available', 'slug']
+    form = CollectionForm
     
     def display_price(self, obj):
         return f'{obj.currency} {obj.price}'
@@ -62,7 +62,8 @@ class ProductAdmin(admin.ModelAdmin):
 
     # Specify the fields to display and edit in the admin form
     fields = ['name', 'description', 'photo', 'price', 'currency','stock', 'available', 'slug']
-    
+    form = ProductForm
+
     def display_price(self, obj):
         return f'{obj.currency} {obj.price}'
 
