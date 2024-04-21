@@ -130,6 +130,8 @@ class Product(models.Model):
         photo = models.ImageField(upload_to="photos/product", null=True, blank=True)
         brandimage = models.ImageField(upload_to="photos/svg", null=True, blank=True)
 
+    collection = models.ForeignKey(Collection, on_delete=models.CASCADE, null=True, blank=True)
+
     name = models.CharField(max_length=255)
     description = models.TextField(blank=False, null=False)  # Make description required
     price = models.DecimalField(max_digits=10, decimal_places=2)
