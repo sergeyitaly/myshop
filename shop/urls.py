@@ -7,7 +7,7 @@ app_name = "products"
 # app_name will help us do a reverse look-up latter.
 urlpatterns = [
     path('products/', views.ProductList.as_view(), name='products'),
-    path('products/<int:pk>/', views.ProductDetail.as_view(), name='product' ),
+    path('product/<int:pk>/', views.ProductDetail.as_view(), name='product' ),
     path('collections/', views.CollectionList.as_view(), name='collections'),
     path('collection/<int:pk>/', views.CollectionDetail.as_view(), name='collection'),
     path('categories/', views.CategoryList.as_view(), name='categories'),
