@@ -23,6 +23,7 @@ class CollectionSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     photo_url = serializers.SerializerMethodField()
+    collection = serializers.ReadOnlyField(source='collection.name')
 
     def get_photo_url(self, obj):
         if obj.photo:

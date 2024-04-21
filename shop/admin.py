@@ -57,11 +57,11 @@ class CollectionAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'display_photo','display_description','display_price', 'stock', 'available')
+    list_display = ('name', 'display_photo','collection','display_description','display_price', 'stock', 'available')
     readonly_fields = ['slug']  # Make slug readonly
 
     # Specify the fields to display and edit in the admin form
-    fields = ['name', 'description', 'photo', 'price', 'currency','stock', 'available', 'slug']
+    fields = ['name', 'description', 'collection','photo', 'price', 'currency','stock', 'available', 'slug']
     form = ProductForm
 
     def display_price(self, obj):
