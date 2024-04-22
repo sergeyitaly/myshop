@@ -1,6 +1,6 @@
 .container {
   display: flex;
-  width: 1440px;
+  width: 2200px;
   gap: 20px;
   padding: 24px 20px 0;
   margin-bottom: 164px;
@@ -327,50 +327,51 @@
   margin-bottom: 8px;
 }
 
-@media screen and (max-width: 768px) {
+// @media screen and (max-width: 768px) {
+//   .container {
+//     display: flex;
+//     flex-direction: column;
+//     width: 768px;
+//     gap: 20px;
+//     padding: 24px 15px 0;
+//     margin-bottom: 164px;
+//   }
+//   .imgMin {
+//     display: none;
+//   }
+
+//   .imgMax {
+//     max-width: 768px;
+//   }
+
+//   .collectionContainer {
+//     width: 768px;
+//     padding: 0 15px;
+//     margin-bottom: 164px;
+//   }
+
+//   .collectionList {
+//     flex-wrap: wrap;
+//   }
+// }
+
+@media screen and (max-width: 480px) {
   .container {
     display: flex;
     flex-direction: column;
-    width: 768px;
-    gap: 20px;
+    width: auto;
+    gap: 15px;
     padding: 24px 15px 0;
-    margin-bottom: 164px;
+    margin-bottom: 64px;
   }
+
   .imgMin {
     display: none;
   }
 
   .imgMax {
-    max-width: 768px;
-  }
-
-  .collectionContainer {
-    width: 768px;
-    padding: 0 15px;
-    margin-bottom: 164px;
-  }
-
-  .collectionList {
-    flex-wrap: wrap;
-  }
-}
-
-@media screen and (max-width: 375px) {
-  .container {
-    display: flex;
-    flex-direction: column;
-    width: 375px;
-    gap: 15px;
-    padding: 24px 15px 0;
-    margin-bottom: 64px;
-  }
-  .images {
-    margin-bottom: 15px;
-  }
-
-  .imgMax {
-    width: 375px;
-    height: 365px;
+    display: block;
+    width: 100%;
   }
 
   .priceTitle {
@@ -381,6 +382,7 @@
 
   .prodTitle {
     margin-bottom: 0;
+    justify-content: space-between;
   }
   .prodName {
     font-size: 20px;
@@ -503,7 +505,7 @@
   .description {
     font-size: 14px;
     line-height: 136%;
-    width: 340px;
+    width: auto;
     margin-bottom: 14px;
   }
 
@@ -511,7 +513,7 @@
     display: flex;
     justify-content: space-between;
     margin-bottom: 15px;
-    width: 343px;
+    width: auto;
     height: 23px;
     border-bottom: 1px solid #cdcdcd;
   }
@@ -525,7 +527,7 @@
   .noBorder {
     display: flex;
     justify-content: space-between;
-    width: 343px;
+    width: auto;
     height: 23px;
     border: none;
   }
@@ -533,14 +535,14 @@
   .usageDescr {
     font-size: 14px;
     line-height: 136%;
-    width: 340px;
+    width: auto;
     margin-bottom: 5px;
   }
 
   .careDescr {
     font-size: 14px;
     line-height: 136%;
-    width: 340px;
+    width: auto;
     margin-bottom: 5px;
   }
 
@@ -549,8 +551,39 @@
     margin-bottom: 29px;
   }
 
+  .collectionContainer {
+    max-width: 480px;
+    padding: 0 15px;
+    margin-bottom: 64px;
+  }
+
+  .collectionList {
+    flex-wrap: wrap;
+    column-gap: 16px;
+    row-gap: 40px;
+  }
+
+  .collectionItem {
+    width: 164px;
+    height: 195px;
+  }
+
+  .collectionImg {
+    width: 164px;
+    height: 151px;
+    margin-bottom: 4px;
+  }
+
   .collectionTitle {
     font-size: 16px;
     margin-bottom: 16px;
+  }
+  .collectionItemName {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .collectionItemPrice {
+    font-size: 14px;
   }
 }

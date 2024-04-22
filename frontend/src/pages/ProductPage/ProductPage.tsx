@@ -1,10 +1,15 @@
 import { useState } from "react";
+import { useMediaQuery } from "react-responsive";
 import productImgMin from "../../assets/collection/Rectangle 63.svg";
 import productImgMax from "../../assets/collection/Rectangle 45.svg";
 import ringQueen from "../../assets/collection/Rectangle 48.svg";
 import braceletQueen from "../../assets/collection/Rectangle 69.svg";
 import ringsSet from "../../assets/collection/Rectangle 70.svg";
 import earrings from "../../assets/collection/Rectangle 71.svg";
+import ringQueenMob from "../../assets/collection/Rectangle 135.svg";
+import braceletQueenMob from "../../assets/collection/Rectangle 135 (1).svg";
+import ringsSetMob from "../../assets/collection/Rectangle 135 (2).svg";
+import earringsMob from "../../assets/collection/Rectangle 135 (3).svg";
 import arrowBottom from "./icons/fluent_ios-arrow-24-regular.svg";
 import arrowUp from "./icons/arrow-Up.svg";
 import negativeIcon from "./icons/-.svg";
@@ -14,6 +19,10 @@ import style from "./ProductPage.module.scss";
 const ProductPage = () => {
   const [counter, setCounter] = useState(1);
   const [isVisible, setIsVisible] = useState(false);
+  const [isVisible1, setIsVisible1] = useState(false);
+  const isMobile = useMediaQuery({
+    query: "(max-width: 480px)",
+  });
 
   const handleIncrementCounter = () => {
     setCounter(counter + 1);
@@ -27,13 +36,21 @@ const ProductPage = () => {
   const onToggleVisibility = () => {
     setIsVisible(!isVisible);
   };
+  const onToggleVisibility1 = () => {
+    setIsVisible1(!isVisible1);
+  };
 
   return (
     <>
       <div className={style.container}>
         <div className={style.images}>
           <img className={style.imgMin} src={productImgMin} alt="invida" />
-          <img className={style.imgMax} src={productImgMax} alt="invida" />
+          <img
+            className={style.imgMax}
+            src={productImgMax}
+            width="690px"
+            alt="invida"
+          />
         </div>
         <div>
           <div className={style.priceTitle}>
@@ -63,6 +80,7 @@ const ProductPage = () => {
                   className={style.negativeIcon}
                   src={negativeIcon}
                   alt="-"
+                  width={isMobile ? `${14}` : `${16}`}
                 />
               </button>
               <p className={style.count}>{counter}</p>
@@ -74,6 +92,7 @@ const ProductPage = () => {
                   className={style.positiveIcon}
                   src={positiveIcon}
                   alt="+"
+                  width={isMobile ? `${14}` : `${16}`}
                 />
               </button>
             </div>
@@ -108,9 +127,19 @@ const ProductPage = () => {
               type="button"
             >
               {isVisible ? (
-                <img src={arrowUp} alt="arrow" />
+                <img
+                  src={arrowUp}
+                  alt="arrow"
+                  width={isMobile ? "16" : "24"}
+                  height={isMobile ? "16" : "24"}
+                />
               ) : (
-                <img src={arrowBottom} alt="arrow" />
+                <img
+                  src={arrowBottom}
+                  alt="arrow"
+                  width={isMobile ? "16" : "24"}
+                  height={isMobile ? "16" : "24"}
+                />
               )}
             </button>
           </div>
@@ -123,22 +152,32 @@ const ProductPage = () => {
               </p>
             </div>
           )}
-          <div className={isVisible ? `${style.noBorder}` : `${style.roll}`}>
+          <div className={isVisible1 ? `${style.noBorder}` : `${style.roll}`}>
             <p className={style.title}>Догляд:</p>
 
             <button
-              onClick={onToggleVisibility}
+              onClick={onToggleVisibility1}
               className={style.arrBtn}
               type="button"
             >
-              {isVisible ? (
-                <img src={arrowUp} alt="arrow" />
+              {isVisible1 ? (
+                <img
+                  src={arrowUp}
+                  alt="arrow"
+                  width={isMobile ? "16" : "24"}
+                  height={isMobile ? "16" : "24"}
+                />
               ) : (
-                <img src={arrowBottom} alt="arrow" />
+                <img
+                  src={arrowBottom}
+                  alt="arrow"
+                  width={isMobile ? "16" : "24"}
+                  height={isMobile ? "16" : "24"}
+                />
               )}
             </button>
           </div>
-          {isVisible && (
+          {isVisible1 && (
             <div className={style.boxCareDescr}>
               <p className={style.careDescr}>
                 Чистка: Використовуйте м'яку тканину або спеціалізований розчин
@@ -164,29 +203,36 @@ const ProductPage = () => {
       <div className={style.collectionContainer}>
         <p className={style.collectionTitle}>Також з цієї колекції</p>
         <ul className={style.collectionList}>
-          <li>
-            <img className={style.collectionImg} src={ringQueen} />
+          <li className={style.collectionItem}>
+            <img
+              className={style.collectionImg}
+              src={isMobile ? `${ringQueenMob}` : `${ringQueen}`}
+            />
             <p className={style.collectionItemName}>Каблучка Queen</p>
             <p className={style.collectionItemPrice}>7 300,00 грн</p>
           </li>
-          <li>
+          <li className={style.collectionItem}>
             <img
               className={style.collectionImg}
-              src={braceletQueen}
+              src={isMobile ? `${braceletQueenMob}` : `${braceletQueen}`}
               alt="bracelet"
             />
             <p className={style.collectionItemName}>Браслет Oueen</p>
             <p className={style.collectionItemPrice}>8 300,00 грн.</p>
           </li>
-          <li>
-            <img className={style.collectionImg} src={ringsSet} alt="rings" />
+          <li className={style.collectionItem}>
+            <img
+              className={style.collectionImg}
+              src={isMobile ? `${ringsSetMob}` : `${ringsSet}`}
+              alt="rings"
+            />
             <p className={style.collectionItemName}>Сет з каблучок</p>
             <p className={style.collectionItemPrice}>10 300,00 грн.</p>
           </li>
-          <li>
+          <li className={style.collectionItem}>
             <img
               className={style.collectionImg}
-              src={earrings}
+              src={isMobile ? `${earringsMob}` : `${earrings}`}
               alt="earrings"
             />
             <p className={style.collectionItemName}>Сережки з цитрином</p>
