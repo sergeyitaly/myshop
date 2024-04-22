@@ -1,4 +1,3 @@
-// CollectionsPage.tsx
 import { Link } from 'react-router-dom';
 import style from './style.module.scss';
 import { fullData } from "../../components/Carousels/carouselMock";
