@@ -1,25 +1,42 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+// vite.config.js
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import svgr from 'vite-plugin-svgr';
+import reactRefresh from '@vitejs/plugin-react-refresh';
+import path from 'path';
 
-const cssFileName = 'index.min.css'
-
-
-// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
-  publicDir: './public',
+  plugins: [
+    svgr(),
+    react(),
+    reactRefresh(),
+  ],
+  
   build: {
-    manifest: "manifest.json",
+    modulePreload: {
+      polyfill: false,
+    },
+    outDir: path.resolve(__dirname, '../dist'), // Output directory resolved to myshop/dist
+    manifest: true, // Generate manifest.json
     rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'src/main.tsx'), // Entry point for the application
+      },
       output: {
-        assetFileNames: (file) => {
-          return `assets/css/${cssFileName}`
-        },
-        entryFileNames: (file) => {
-          return `assets/js/[name].min.js`
-        }
-      }
-    }
-  }
+        entryFileNames: '[name].js', // Output format for JS files
+        assetFileNames: 'assets/[name].[ext]', // Output format for other assets (e.g., CSS, images)
+        chunkFileNames: '[name].js', // Output format for chunk files
+      },
+    },
+  },
 
-})
+  server: {
+    port: 5173, // Specify the port for the Vite development server
+    proxy: {
+      '/static': {
+        target: 'http://localhost:8000', // Proxy requests to Django development server
+        changeOrigin: true,
+      },
+    },
+  },
+});

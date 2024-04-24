@@ -1,6 +1,6 @@
 export const links = [
     {
-        href: '/',
+        href: '/collections',
         name: 'Колекції',
     },
     {
@@ -11,4 +11,8 @@ export const links = [
         href: '/',
         name: 'Контакти',
     },
+    // {
+    //     href: '/collectionItem',
+    //     name: 'Колеуція',
+    // }
 ];
