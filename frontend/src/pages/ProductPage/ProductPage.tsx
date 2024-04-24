@@ -15,6 +15,8 @@ import arrowUp from "./icons/arrow-Up.svg";
 import negativeIcon from "./icons/-.svg";
 import positiveIcon from "./icons/+.svg";
 import style from "./ProductPage.module.scss";
+import SwipeProduct from "../../components/Carousels/SwipeProduct/SwipeProduct";
+import CarouselBestseller from "../CollectionPage/CarouselBestseller/CarouselBestseller";
 
 const ProductPage = () => {
   const [counter, setCounter] = useState(1);
@@ -22,9 +24,6 @@ const ProductPage = () => {
   const [isVisible1, setIsVisible1] = useState(false);
   const isMobile = useMediaQuery({
     query: "(max-width: 480px)",
-  });
-  const isTablet = useMediaQuery({
-    query: "(max-width: 768px)",
   });
 
   const handleIncrementCounter = () => {

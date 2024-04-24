@@ -8,6 +8,7 @@
 
 .images {
   display: flex;
+  justify-content: center;
   gap: 20px;
 }
 
@@ -331,7 +332,7 @@
   .container {
     display: flex;
     flex-direction: column;
-    width: 768px;
+    width: auto;
     gap: 15px;
     padding: 24px 15px 0;
     margin-bottom: 100px;
@@ -763,12 +764,12 @@
   }
 
   .collectionItem {
-    width: 164px;
+    width: auto;
     height: 195px;
   }
 
   .collectionImg {
-    width: 164px;
+    width: auto;
     height: 151px;
     margin-bottom: 4px;
   }
