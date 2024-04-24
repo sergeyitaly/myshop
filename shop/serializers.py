@@ -1,23 +1,45 @@
 from ast import Delete
 from rest_framework import serializers
-from .models import Product, Collection
+from .models import Product, Collection, Category
 
-
-
-class CollectionSerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Collection
-        fields = ('name', 'slug','photo')
+        model = Category
+        fields = '__all__'
         lookup_field = 'slug'
         extra_kwargs = {'url': {'lookup_field': 'slug'}}
 
-class ProductSerializer(serializers.ModelSerializer):
-    collection = serializers.ReadOnlyField(source='collection.name')
-    class Meta:
-        model = Product
-        fields = ('id', 'name', 'slug', 'collection', 'photo', 'price', 'stock', 'available')
+class CollectionSerializer(serializers.ModelSerializer):
+    category = serializers.ReadOnlyField(source='category.name')
+    photo_url = serializers.SerializerMethodField()
 
-class CreateProductSerializer(serializers.ModelSerializer):
+    def get_photo_url(self, obj):
+        if obj.photo:
+            return obj.photo.url
+        return None
+    class Meta:
+        model = Collection
+        fields = '__all__'
+
+class ProductSerializer(serializers.ModelSerializer):
+    photo_url = serializers.SerializerMethodField()
+    collection = serializers.ReadOnlyField(source='collection.name')
+
+    def get_photo_url(self, obj):
+        if obj.photo:
+            return obj.photo.url
+        return None
     class Meta:
         model = Product
-        fields = ('name','collection', 'photo', 'price', 'stock')
+        fields = '__all__'
+
+class CreateCollectiontSerializer(serializers.ModelSerializer):
+    photo_url = serializers.SerializerMethodField()
+
+    def get_photo_url(self, obj):
+        if obj.photo:
+            return obj.photo.url
+        return None
+    class Meta:
+        model = Product
+        fields = '__all__'

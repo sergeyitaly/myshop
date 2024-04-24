@@ -1,0 +1,13 @@
+node_modules/
+__pycache__/
+__pycache__
+
+site_cache/
+node_modules/
+yarn.lock
+myenv/
+node_modules/
+*.pyc
+*.log
+env/
+dist/

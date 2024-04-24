@@ -1,37 +1,14 @@
-from urllib import response
-from django.shortcuts import redirect
-from rest_framework.generics import (ListCreateAPIView,RetrieveUpdateDestroyAPIView,)
-from . import permission
-from myshop.settings import REST_FRAMEWORK
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.request import Request
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from .serializers import *
 from django.contrib.auth import authenticate, login
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from djoser.views import UserViewSet
+from django.http import JsonResponse
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status
- 
-class ActivateUser(UserViewSet):
-    def get_serializer(self, *args, **kwargs):
-        serializer_class = self.get_serializer_class()
-        kwargs.setdefault('context', self.get_serializer_context())
-        kwargs['data'] = {"uid": self.kwargs['uid'], "token": self.kwargs['token']}
-        return serializer_class(*args, **kwargs)
-
- 
-    def activation(self, request, uid, token, *args, **kwargs):
-        super().activation(request, *args, **kwargs)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
+from rest_framework.views import APIView
+from .serializers import LoginRequestSerializer, UserSerializer  # Corrected import path
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def login(request: Request):
+@permission_classes([AllowAny])
+def login_view(request):
     serializer = LoginRequestSerializer(data=request.data)
     if serializer.is_valid():
         authenticated_user = authenticate(**serializer.validated_data)
@@ -44,7 +21,8 @@ def login(request: Request):
         return Response(serializer.errors, status=400)
 
 class UserView(APIView):
-    permission_classes= [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         return Response({'data': 'Booo! You are inside the account'})
 
@@ -52,17 +30,17 @@ class UserView(APIView):
 @permission_classes([AllowAny])
 def registration_view(request):
     if request.method == 'POST':
-        serializer= UserSerializer(data=request.data)
-        data={}
+        serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             customuser = serializer.save()
-            data['response'] = 'Succesfully registered new user!!!'
-            data['email'] = customuser.email
-            data['username'] = customuser.username
+            response_data = {
+                'response': 'Successfully registered new user!!!',
+                'email': customuser.email,
+                'username': customuser.username
+            }
+            return Response(response_data)
         else:
-            data=serializer.errors
-        return Response(data)
-
+            return Response(serializer.errors, status=400)
 
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
