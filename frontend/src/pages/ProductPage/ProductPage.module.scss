@@ -1,6 +1,6 @@
 .container {
   display: flex;
-  width: 2200px;
+  width: 1440px;
   gap: 20px;
   padding: 24px 20px 0;
   margin-bottom: 164px;
@@ -211,7 +211,7 @@
   line-height: 130%;
   color: #000;
   width: 570px;
-  margin-bottom: 47px;
+  margin-bottom: 40px;
 }
 
 .roll {
@@ -327,33 +327,237 @@
   margin-bottom: 8px;
 }
 
-// @media screen and (max-width: 768px) {
-//   .container {
-//     display: flex;
-//     flex-direction: column;
-//     width: 768px;
-//     gap: 20px;
-//     padding: 24px 15px 0;
-//     margin-bottom: 164px;
-//   }
-//   .imgMin {
-//     display: none;
-//   }
+@media screen and (max-width: 768px) {
+  .container {
+    display: flex;
+    flex-direction: column;
+    width: 768px;
+    gap: 15px;
+    padding: 24px 15px 0;
+    margin-bottom: 100px;
+  }
 
-//   .imgMax {
-//     max-width: 768px;
-//   }
+  .imgMin {
+    display: none;
+  }
 
-//   .collectionContainer {
-//     width: 768px;
-//     padding: 0 15px;
-//     margin-bottom: 164px;
-//   }
+  .imgMax {
+    display: block;
+    width: 100%;
+  }
 
-//   .collectionList {
-//     flex-wrap: wrap;
-//   }
-// }
+  .priceTitle {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .prodTitle {
+    justify-content: space-between;
+    margin-bottom: 0;
+  }
+
+  .prodName {
+    font-size: 28px;
+  }
+
+  .prodPrice {
+    font-size: 28px;
+  }
+
+  .inStock {
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+
+  .colorName {
+    font-size: 18px;
+  }
+
+  .setColor {
+    gap: 6px;
+    margin-bottom: 28px;
+  }
+
+  .firstColor {
+    width: 32px;
+    height: 32px;
+  }
+
+  .secondColor {
+    width: 32px;
+    height: 32px;
+  }
+
+  .size {
+    font-size: 18px;
+  }
+
+  .selectSize {
+    margin-bottom: 26px;
+  }
+
+  .sizeNumber {
+    gap: 6px;
+    margin-right: 24px;
+  }
+
+  .firstSizeBox {
+    width: 32px;
+    height: 32px;
+    padding: 4px 4px;
+    font-size: 16px;
+    box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.25);
+  }
+
+  .secondSizeBox {
+    width: 32px;
+    height: 32px;
+    padding: 4px 4px;
+    font-size: 16px;
+  }
+
+  .counter {
+    border: 1px solid #d9d9d9;
+    border-radius: 5px;
+    width: 130px;
+    height: 30px;
+    border-bottom: none;
+  }
+
+  .decCount {
+    width: 45px;
+    height: 30px;
+    padding-top: 1px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #d9d9d9;
+  }
+
+  .inkCount {
+    width: 45px;
+    height: 30px;
+    background: #fff;
+    padding-top: 6px;
+    padding-bottom: 5px;
+  }
+
+  .count {
+    font-size: 18px;
+    color: #000;
+    width: 40px;
+    height: 30px;
+    padding-top: 5px;
+    border-bottom: 1px solid #d9d9d9;
+  }
+
+  .buyBtn {
+    margin-bottom: 40px;
+  }
+
+  .addBtn {
+    font-size: 20px;
+    width: 225px;
+    height: 44px;
+    margin-right: 16px;
+  }
+
+  .buyNow {
+    font-size: 20px;
+    width: 225px;
+    height: 44px;
+  }
+
+  .title {
+    font-weight: 500;
+    font-size: 24px;
+    color: #000;
+    margin-bottom: 6px;
+  }
+
+  .description {
+    font-size: 16px;
+    line-height: 132%;
+    max-width: 730px;
+    margin-bottom: 28px;
+  }
+
+  .roll {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    max-width: 730px;
+    height: 37px;
+    border-bottom: 1px solid #cdcdcd;
+  }
+
+  .titleRoll {
+    font-weight: 500;
+    font-size: 24px;
+    margin-bottom: 7px;
+  }
+
+  .noBorder {
+    max-width: 730px;
+    height: 37px;
+    border: none;
+  }
+
+  .usageDescr {
+    font-size: 16px;
+    line-height: 132%;
+    max-width: 730px;
+    margin-bottom: 7px;
+  }
+
+  .careDescr {
+    font-size: 16px;
+    line-height: 132%;
+    max-width: 730px;
+    margin-bottom: 7px;
+  }
+
+  .boxUsageDescr {
+    border-bottom: 1px solid #cdcdcd;
+    margin-bottom: 20px;
+  }
+
+  .collectionContainer {
+    max-width: 768px;
+    padding: 0 15px;
+    margin-bottom: 100px;
+  }
+
+  .collectionList {
+    flex-wrap: wrap;
+    column-gap: 16px;
+    row-gap: 60px;
+  }
+
+  .collectionItem {
+    width: 250px;
+    height: 315px;
+  }
+
+  .collectionImg {
+    width: 250px;
+    height: 260px;
+    margin-bottom: 5px;
+  }
+
+  .collectionTitle {
+    font-size: 24px;
+    margin-bottom: 18px;
+  }
+
+  .collectionItemName {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .collectionItemPrice {
+    font-size: 18px;
+  }
+}
 
 @media screen and (max-width: 480px) {
   .container {
@@ -380,10 +584,6 @@
     gap: 12px;
   }
 
-  .prodTitle {
-    margin-bottom: 0;
-    justify-content: space-between;
-  }
   .prodName {
     font-size: 20px;
   }
@@ -408,7 +608,6 @@
 
   .size {
     font-size: 16px;
-    margin-bottom: 8px;
   }
 
   .selectSize {
@@ -421,6 +620,7 @@
   }
 
   .firstSizeBox {
+    width: 24px;
     height: 24px;
     padding: 3px 3px;
     font-size: 14px;
@@ -428,6 +628,7 @@
   }
 
   .secondSizeBox {
+    width: 24px;
     height: 24px;
     padding: 3px 3px;
     font-size: 14px;
@@ -438,12 +639,13 @@
     border-radius: 5px;
     width: 85px;
     height: 24px;
+    border-bottom: none;
   }
 
   .decCount {
     width: 30px;
     height: 24px;
-    padding-top: 2px;
+    padding-top: 1px;
     padding-bottom: 6px;
     border-bottom: 1px solid #d9d9d9;
   }
@@ -451,19 +653,16 @@
   .inkCount {
     width: 30px;
     height: 24px;
-    padding-top: 4px;
+    padding-top: 5px;
     padding-bottom: 4px;
     border-bottom: 1px solid #d9d9d9;
   }
 
   .count {
-    font-family: "Inter", sans-serif;
-    font-weight: 400;
     font-size: 16px;
     color: #000;
     width: 25px;
     height: 24px;
-    text-align: center;
     padding-top: 2px;
     border-bottom: 1px solid #d9d9d9;
   }
@@ -548,7 +747,7 @@
 
   .boxUsageDescr {
     border-bottom: 1px solid #cdcdcd;
-    margin-bottom: 29px;
+    margin-bottom: 24px;
   }
 
   .collectionContainer {

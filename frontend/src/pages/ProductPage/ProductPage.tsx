@@ -23,6 +23,9 @@ const ProductPage = () => {
   const isMobile = useMediaQuery({
     query: "(max-width: 480px)",
   });
+  const isTablet = useMediaQuery({
+    query: "(max-width: 768px)",
+  });
 
   const handleIncrementCounter = () => {
     setCounter(counter + 1);
@@ -130,15 +133,15 @@ const ProductPage = () => {
                 <img
                   src={arrowUp}
                   alt="arrow"
-                  width={isMobile ? "16" : "24"}
-                  height={isMobile ? "16" : "24"}
+                  width={isMobile ? "16" : "22"}
+                  height={isMobile ? "16" : "22"}
                 />
               ) : (
                 <img
                   src={arrowBottom}
                   alt="arrow"
-                  width={isMobile ? "16" : "24"}
-                  height={isMobile ? "16" : "24"}
+                  width={isMobile ? "16" : "22"}
+                  height={isMobile ? "16" : "22"}
                 />
               )}
             </button>
@@ -164,15 +167,15 @@ const ProductPage = () => {
                 <img
                   src={arrowUp}
                   alt="arrow"
-                  width={isMobile ? "16" : "24"}
-                  height={isMobile ? "16" : "24"}
+                  width={isMobile ? "16" : "22"}
+                  height={isMobile ? "16" : "22"}
                 />
               ) : (
                 <img
                   src={arrowBottom}
                   alt="arrow"
-                  width={isMobile ? "16" : "24"}
-                  height={isMobile ? "16" : "24"}
+                  width={isMobile ? "16" : "22"}
+                  height={isMobile ? "16" : "22"}
                 />
               )}
             </button>
