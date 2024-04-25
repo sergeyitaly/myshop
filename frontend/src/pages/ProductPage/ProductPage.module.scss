@@ -1,0 +1,789 @@
+.container {
+  display: flex;
+  width: 1440px;
+  gap: 20px;
+  padding: 24px 20px 0;
+  margin-bottom: 164px;
+}
+
+.images {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.imgMin {
+  align-self: start;
+}
+
+.imgMax {
+  align-self: start;
+}
+
+.prodTitle {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 27px;
+}
+
+.prodName {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 36px;
+  color: #000;
+}
+
+.prodPrice {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 32px;
+  font-weight: 500;
+}
+
+.inStock {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  color: #07b118;
+  margin-bottom: 37px;
+}
+
+.colorName {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  color: #000;
+  margin-bottom: 8px;
+}
+
+.setColor {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.size {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  color: #000;
+  margin-bottom: 8px;
+}
+
+.selectSize {
+  display: flex;
+  margin-bottom: 32px;
+}
+
+.sizeNumber {
+  display: flex;
+  gap: 8px;
+  margin-right: 16px;
+}
+
+.firstSizeBox {
+  border: 1px solid #000;
+  width: auto;
+  height: 40px;
+  padding: 7px 7px;
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  color: #000;
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+  background: #fff;
+  cursor: pointer;
+}
+
+.secondSizeBox {
+  border: 1px solid #cdcdcd;
+  width: auto;
+  height: 40px;
+  padding: 7px 7px;
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  color: #cdcdcd;
+  text-align: center;
+  background: #fff;
+  cursor: pointer;
+}
+
+.counter {
+  display: flex;
+  border: 1px solid #cdcdcd;
+  border-radius: 5px;
+  width: 172px;
+  height: 36px;
+  border-bottom: none;
+}
+
+.decCount {
+  width: 60px;
+  height: 36px;
+  background: #fff;
+  padding-top: 8px;
+  padding-bottom: 18px;
+  border: none;
+  border-bottom: 1px solid #cdcdcd;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  cursor: pointer;
+}
+
+.inkCount {
+  width: 60px;
+  height: 36px;
+  background: #fff;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border: none;
+  border-bottom: 1px solid #cdcdcd;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  cursor: pointer;
+}
+
+.count {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  color: #000;
+  width: 52px;
+  height: 36px;
+  text-align: center;
+  padding-top: 8px;
+  border-bottom: 1px solid #cdcdcd;
+}
+
+.buyBtn {
+  margin-bottom: 36px;
+}
+
+.addBtn {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 24px;
+  text-align: center;
+  color: #fff;
+  background: #0b0599;
+  border: none;
+  border-radius: 5px;
+  width: 276px;
+  height: 52px;
+  cursor: pointer;
+  margin-right: 20px;
+}
+
+.buyNow {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 24px;
+  text-align: center;
+  color: #191919;
+  border: 1px solid #cdcdcd;
+  border-radius: 5px;
+  width: 276px;
+  height: 52px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.firstColor {
+  width: 40px;
+  height: 40px;
+  background: #e0b139;
+  border: 1px solid #000;
+  cursor: pointer;
+}
+
+.secondColor {
+  width: 40px;
+  height: 40px;
+  background: #d9d9d9;
+  border: none;
+  cursor: pointer;
+}
+
+.description {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 130%;
+  color: #000;
+  width: 570px;
+  margin-bottom: 40px;
+}
+
+.roll {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  width: 572px;
+  height: 51px;
+  border-bottom: 1px solid #cdcdcd;
+}
+
+.noBorder {
+  display: flex;
+  justify-content: space-between;
+  //   margin-bottom: 40px;
+  width: 572px;
+  height: 51px;
+  border: none;
+}
+
+.arrBtn {
+  background: #fff;
+  cursor: pointer;
+  border: none;
+}
+
+.title {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 32px;
+  color: #000;
+  margin-bottom: 16px;
+}
+
+.titleRoll {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 32px;
+  color: #000;
+  margin-bottom: 12px;
+}
+
+.usageDescr {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 130%;
+  color: #000;
+  width: 570px;
+  margin-bottom: 8px;
+}
+
+.careDescr {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 130%;
+  color: #000;
+  width: 570px;
+  margin-bottom: 8px;
+}
+
+.boxUsageDescr {
+  border-bottom: 1px solid #cdcdcd;
+  margin-bottom: 35px;
+}
+
+.boxCareDescr {
+  border-bottom: 1px solid #cdcdcd;
+}
+
+.collectionTitle {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 36px;
+  color: #000;
+  margin-bottom: 20px;
+}
+
+.collectionContainer {
+  width: 1440px;
+  padding: 0 20px;
+  margin-bottom: 164px;
+}
+
+.collectionList {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+.collectionImg {
+  width: 335px;
+  height: 364px;
+  margin-bottom: 8px;
+}
+
+.collectionItemName {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  text-align: center;
+  color: #000;
+  margin-bottom: 8px;
+}
+
+.collectionItemPrice {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  text-align: center;
+  color: #a3a3a3;
+  margin-bottom: 8px;
+}
+
+@media screen and (max-width: 768px) {
+  .container {
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    gap: 15px;
+    padding: 24px 15px 0;
+    margin-bottom: 100px;
+  }
+
+  .imgMin {
+    display: none;
+  }
+
+  .imgMax {
+    display: block;
+    width: 100%;
+  }
+
+  .priceTitle {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .prodTitle {
+    justify-content: space-between;
+    margin-bottom: 0;
+  }
+
+  .prodName {
+    font-size: 28px;
+  }
+
+  .prodPrice {
+    font-size: 28px;
+  }
+
+  .inStock {
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+
+  .colorName {
+    font-size: 18px;
+  }
+
+  .setColor {
+    gap: 6px;
+    margin-bottom: 28px;
+  }
+
+  .firstColor {
+    width: 32px;
+    height: 32px;
+  }
+
+  .secondColor {
+    width: 32px;
+    height: 32px;
+  }
+
+  .size {
+    font-size: 18px;
+  }
+
+  .selectSize {
+    margin-bottom: 26px;
+  }
+
+  .sizeNumber {
+    gap: 6px;
+    margin-right: 24px;
+  }
+
+  .firstSizeBox {
+    width: 32px;
+    height: 32px;
+    padding: 4px 4px;
+    font-size: 16px;
+    box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.25);
+  }
+
+  .secondSizeBox {
+    width: 32px;
+    height: 32px;
+    padding: 4px 4px;
+    font-size: 16px;
+  }
+
+  .counter {
+    border: 1px solid #d9d9d9;
+    border-radius: 5px;
+    width: 130px;
+    height: 30px;
+    border-bottom: none;
+  }
+
+  .decCount {
+    width: 45px;
+    height: 30px;
+    padding-top: 1px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #d9d9d9;
+  }
+
+  .inkCount {
+    width: 45px;
+    height: 30px;
+    background: #fff;
+    padding-top: 6px;
+    padding-bottom: 5px;
+  }
+
+  .count {
+    font-size: 18px;
+    color: #000;
+    width: 40px;
+    height: 30px;
+    padding-top: 5px;
+    border-bottom: 1px solid #d9d9d9;
+  }
+
+  .buyBtn {
+    margin-bottom: 40px;
+  }
+
+  .addBtn {
+    font-size: 20px;
+    width: 225px;
+    height: 44px;
+    margin-right: 16px;
+  }
+
+  .buyNow {
+    font-size: 20px;
+    width: 225px;
+    height: 44px;
+  }
+
+  .title {
+    font-weight: 500;
+    font-size: 24px;
+    color: #000;
+    margin-bottom: 6px;
+  }
+
+  .description {
+    font-size: 16px;
+    line-height: 132%;
+    max-width: 730px;
+    margin-bottom: 28px;
+  }
+
+  .roll {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    max-width: 730px;
+    height: 37px;
+    border-bottom: 1px solid #cdcdcd;
+  }
+
+  .titleRoll {
+    font-weight: 500;
+    font-size: 24px;
+    margin-bottom: 7px;
+  }
+
+  .noBorder {
+    max-width: 730px;
+    height: 37px;
+    border: none;
+  }
+
+  .usageDescr {
+    font-size: 16px;
+    line-height: 132%;
+    max-width: 730px;
+    margin-bottom: 7px;
+  }
+
+  .careDescr {
+    font-size: 16px;
+    line-height: 132%;
+    max-width: 730px;
+    margin-bottom: 7px;
+  }
+
+  .boxUsageDescr {
+    border-bottom: 1px solid #cdcdcd;
+    margin-bottom: 20px;
+  }
+
+  .collectionContainer {
+    max-width: 768px;
+    padding: 0 15px;
+    margin-bottom: 100px;
+  }
+
+  .collectionList {
+    flex-wrap: wrap;
+    column-gap: 16px;
+    row-gap: 60px;
+  }
+
+  .collectionItem {
+    width: 250px;
+    height: 315px;
+  }
+
+  .collectionImg {
+    width: 250px;
+    height: 260px;
+    margin-bottom: 5px;
+  }
+
+  .collectionTitle {
+    font-size: 24px;
+    margin-bottom: 18px;
+  }
+
+  .collectionItemName {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .collectionItemPrice {
+    font-size: 18px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .container {
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    gap: 15px;
+    padding: 24px 15px 0;
+    margin-bottom: 64px;
+  }
+
+  .imgMin {
+    display: none;
+  }
+
+  .imgMax {
+    display: block;
+    width: 100%;
+  }
+
+  .priceTitle {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .prodName {
+    font-size: 20px;
+  }
+
+  .prodPrice {
+    font-size: 20px;
+  }
+
+  .inStock {
+    font-size: 12px;
+    margin-bottom: 24px;
+  }
+
+  .colorName {
+    font-size: 16px;
+  }
+
+  .setColor {
+    gap: 4px;
+    margin-bottom: 24px;
+  }
+
+  .size {
+    font-size: 16px;
+  }
+
+  .selectSize {
+    margin-bottom: 24px;
+  }
+
+  .sizeNumber {
+    gap: 4px;
+    margin-right: 26px;
+  }
+
+  .firstSizeBox {
+    width: 24px;
+    height: 24px;
+    padding: 3px 3px;
+    font-size: 14px;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.25);
+  }
+
+  .secondSizeBox {
+    width: 24px;
+    height: 24px;
+    padding: 3px 3px;
+    font-size: 14px;
+  }
+
+  .counter {
+    border: 1px solid #d9d9d9;
+    border-radius: 5px;
+    width: 85px;
+    height: 24px;
+    border-bottom: none;
+  }
+
+  .decCount {
+    width: 30px;
+    height: 24px;
+    padding-top: 1px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #d9d9d9;
+  }
+
+  .inkCount {
+    width: 30px;
+    height: 24px;
+    padding-top: 5px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #d9d9d9;
+  }
+
+  .count {
+    font-size: 16px;
+    color: #000;
+    width: 25px;
+    height: 24px;
+    padding-top: 2px;
+    border-bottom: 1px solid #d9d9d9;
+  }
+
+  .buyBtn {
+    margin-bottom: 44px;
+  }
+
+  .addBtn {
+    font-size: 16px;
+    width: 163px;
+    height: 36px;
+    margin-right: 17px;
+  }
+
+  .buyNow {
+    font-size: 16px;
+    width: 163px;
+    height: 36px;
+  }
+
+  .firstColor {
+    width: 24px;
+    height: 24px;
+  }
+
+  .secondColor {
+    width: 24px;
+    height: 24px;
+  }
+
+  .title {
+    font-weight: 500;
+    font-size: 16px;
+    color: #000;
+    margin-bottom: 4px;
+  }
+
+  .description {
+    font-size: 14px;
+    line-height: 136%;
+    width: auto;
+    margin-bottom: 14px;
+  }
+
+  .roll {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    width: auto;
+    height: 23px;
+    border-bottom: 1px solid #cdcdcd;
+  }
+
+  .titleRoll {
+    font-weight: 500;
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+
+  .noBorder {
+    display: flex;
+    justify-content: space-between;
+    width: auto;
+    height: 23px;
+    border: none;
+  }
+
+  .usageDescr {
+    font-size: 14px;
+    line-height: 136%;
+    width: auto;
+    margin-bottom: 5px;
+  }
+
+  .careDescr {
+    font-size: 14px;
+    line-height: 136%;
+    width: auto;
+    margin-bottom: 5px;
+  }
+
+  .boxUsageDescr {
+    border-bottom: 1px solid #cdcdcd;
+    margin-bottom: 24px;
+  }
+
+  .collectionContainer {
+    max-width: 480px;
+    padding: 0 15px;
+    margin-bottom: 64px;
+  }
+
+  .collectionList {
+    flex-wrap: wrap;
+    column-gap: 16px;
+    row-gap: 40px;
+  }
+
+  .collectionItem {
+    width: auto;
+    height: 195px;
+  }
+
+  .collectionImg {
+    width: auto;
+    height: 151px;
+    margin-bottom: 4px;
+  }
+
+  .collectionTitle {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+  .collectionItemName {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .collectionItemPrice {
+    font-size: 14px;
+  }
+}
