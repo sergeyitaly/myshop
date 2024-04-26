@@ -33,6 +33,8 @@ USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
 
 VERCEL_DOMAIN = os.getenv('VERCEL_DOMAIN')
 
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
 
     "http://localhost:5173",
@@ -196,8 +198,6 @@ REST_FRAMEWORK = {
 
 
 
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDENTIALS = True
 AUTHENTICATION_BACKENDS ={
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
