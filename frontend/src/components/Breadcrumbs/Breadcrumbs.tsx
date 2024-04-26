@@ -37,7 +37,7 @@ export function CustomSeparator() {
                     underline="hover"
                     color="inherit"
                     to="/"
-                    sx={{marginLeft:'30px', fontSize:'18px'}}
+                    sx={{marginLeft:'30px', fontSize:'20px', font:'Inter', color:'#000000'}}
                 >
                     Головна
                 </Link>
@@ -60,7 +60,7 @@ export function CustomSeparator() {
                     underline="hover"
                     color="inherit"
                     to={currentPath}
-                    sx={{fontSize:'18px'}}
+                    sx={{fontSize:'18px', color:'#000000'}}
                 >
                     {breadcrumbTitles[currentPath] || collectionTitle}
                 </Link>
