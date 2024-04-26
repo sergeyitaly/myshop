@@ -17,7 +17,7 @@ export default defineConfig({
       polyfill: false,
     },
     outDir: path.resolve(__dirname, '../dist'), // Output directory resolved to myshop/dist
-    manifest: true, // Generate manifest.json
+    manifest: 'manifest.json',
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'src/main.tsx'), // Entry point for the application
