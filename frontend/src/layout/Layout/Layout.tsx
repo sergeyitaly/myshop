@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { Footer } from '../Footer/Footer';
 import { Header } from '../Header/Header';
-import {CustomSeparator} from "../../components/Navigation/Breadcrumbs";
+import {CustomSeparator} from "../../components/Breadcrumbs/Breadcrumbs";
 // import { useHistory } from 'react-router-dom';
 
 export const Layout = ({
