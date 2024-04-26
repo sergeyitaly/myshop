@@ -151,8 +151,9 @@ else:
 #    WHITENOISE_ROOT = STATIC_ROOT
 STATICFILES_DIRS = [
 os.path.join(BASE_DIR, 'dist'),  # Directory containing main.js and main.css
-os.path.join(BASE_DIR, 'dist','assets'),  # Directory containing other assets (images, etc.)
+os.path.join(BASE_DIR, 'dist', 'assets'),  # Directory containing other assets (images, etc.)
 ]
+
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
