@@ -5,12 +5,14 @@
   padding: 24px 20px 0;
   margin-bottom: 164px;
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .images {
   display: flex;
   justify-content: center;
   gap: 20px;
+  flex-shrink: 1;
 }
 
 .imgMin {
@@ -19,6 +21,11 @@
 
 .imgMax {
   align-self: start;
+  max-width: 690px;
+}
+
+.descContainer {
+  flex-shrink: 1;
 }
 
 .prodTitle {
@@ -298,6 +305,7 @@
   padding: 0 20px;
   margin-bottom: 164px;
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .collectionList {
@@ -570,6 +578,10 @@
     gap: 15px;
     padding: 24px 15px 0;
     margin-bottom: 64px;
+  }
+
+  .images {
+    display: none;
   }
 
   .imgMin {

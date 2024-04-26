@@ -15,7 +15,7 @@ import arrowUp from "./icons/arrow-Up.svg";
 import negativeIcon from "./icons/-.svg";
 import positiveIcon from "./icons/+.svg";
 import style from "./ProductPage.module.scss";
-import CarouselProduct from "../../components/Carousels/CarouselProduct/CarouselProduct";
+import CarouselProductMobile from "../../components/Carousels/CarouselProduct/CarouselProductMobile";
 
 const ProductPage = () => {
   const [counter, setCounter] = useState(1);
@@ -44,17 +44,16 @@ const ProductPage = () => {
   return (
     <>
       <div className={style.container}>
+        {isMobile && <CarouselProductMobile />}
         <div className={style.images}>
           <img className={style.imgMin} src={productImgMin} alt="invida" />
           <img
             className={style.imgMax}
             src={productImgMax}
-            width="690px"
             alt="invida"
           />
-          {/* <CarouselProduct /> */}
         </div>
-        <div>
+        <div className={style.descContainer}>
           <div className={style.priceTitle}>
             <div className={style.prodTitle}>
               <p className={style.prodName}>Кольє Інвіда</p>
