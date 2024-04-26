@@ -11,4 +11,3 @@ node_modules/
 *.log
 env/
 dist/
-frontend/
