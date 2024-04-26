@@ -15,8 +15,7 @@ import arrowUp from "./icons/arrow-Up.svg";
 import negativeIcon from "./icons/-.svg";
 import positiveIcon from "./icons/+.svg";
 import style from "./ProductPage.module.scss";
-import SwipeProduct from "../../components/Carousels/SwipeProduct/SwipeProduct";
-import CarouselBestseller from "../CollectionPage/CarouselBestseller/CarouselBestseller";
+import CarouselProduct from "../../components/Carousels/CarouselProduct/CarouselProduct";
 
 const ProductPage = () => {
   const [counter, setCounter] = useState(1);
@@ -53,6 +52,7 @@ const ProductPage = () => {
             width="690px"
             alt="invida"
           />
+          {/* <CarouselProduct /> */}
         </div>
         <div>
           <div className={style.priceTitle}>
