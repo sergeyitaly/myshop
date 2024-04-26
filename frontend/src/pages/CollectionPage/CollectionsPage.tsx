@@ -1,10 +1,18 @@
-// CollectionsPage.tsx
 import { Link } from 'react-router-dom';
 import style from './style.module.scss';
-import { fullData } from "../../components/Carousels/carouselMock";
 
-const CollectionsPage: React.FC = () => {
+interface Collection {
+    id: string;
+    name: string;
+    photo: string;
+    category: string;
+}
 
+interface Props {
+    collections: Collection[]; // Define the type of collections
+}
+
+const CollectionsPage: React.FC<Props> = ({ collections }) => {
     return (
         <div className={style.container}>
             <h1 className={style.title}> Колекції </h1>
