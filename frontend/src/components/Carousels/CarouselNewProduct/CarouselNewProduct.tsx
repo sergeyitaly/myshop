@@ -5,8 +5,16 @@ import style from './style.module.scss'
 import {mockDataCategories} from "../carouselMock";
 
 function CarouselNewProduct () {
+
+    const totalCards = mockDataCategories.length;
+    let dotsValue = true;
+
+    if (totalCards <= 2) {
+        dotsValue = false;
+    }
+
     const settings = {
-        dots: true,
+        dots: dotsValue,
         infinite: true,
         speed: 500,
         slidesToShow: 2,
@@ -17,6 +25,7 @@ function CarouselNewProduct () {
             {
                 breakpoint: 600,
                 settings: {
+                    dots: true,
                     slidesToShow: 1,
                     slidesToScroll: 1,
                     initialSlide: 0,
