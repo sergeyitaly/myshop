@@ -5,12 +5,12 @@ import useBlockScroll from '../../hooks/useBlockScroll';
 import useClickOutside from '../../hooks/useClickOutside';
 
 const links = [
-    { name: 'Колекції', href: '/collection' },
-    { name: 'Нові надходження', href: '/' },
-    { name: 'Всі колекції', href: '/' },
-    { name: 'Знижки', href: '/' },
-    { name: 'Про нас', href: '/' },
-    { name: 'Контакти', href: '/' },
+    { name: 'Колекції', href: '/collections' },
+    { name: 'Нові надходження', href: '/*' },
+    { name: 'Всі колекції', href: '/*' },
+    { name: 'Знижки', href: '/*' },
+    { name: 'Про нас', href: '/*' },
+    { name: 'Контакти', href: '/*' },
 ];
 
 export const BurgerMenu = () => {
