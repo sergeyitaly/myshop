@@ -17,8 +17,8 @@ export const chunkFileNames = `${assetDir}/[name].js`
 const assets: AssetOutputEntry[] = [
   {
       output: `${assetDir}/img/[name].[ext]`,
-      regex: /\.(png|jpe?g|gif|svg|webp|avif)$/
-  },
+      regex: /\.(png|jpe?g|gif|svg|webp|avif|jpg)$/
+    },
   {
       regex: /\.css$/,
       output: `${assetDir}/css/[name].[ext]`
