@@ -1,0 +1,148 @@
+{
+  "node_modules/slick-carousel/slick/ajax-loader.gif": {
+    "file": "assets/img/ajax-loader.gif",
+    "src": "node_modules/slick-carousel/slick/ajax-loader.gif"
+  },
+  "node_modules/slick-carousel/slick/fonts/slick.svg": {
+    "file": "assets/img/slick.svg",
+    "src": "node_modules/slick-carousel/slick/fonts/slick.svg"
+  },
+  "src/assets/collection/Rectangle 36.svg": {
+    "file": "assets/img/Rectangle 36.svg",
+    "src": "src/assets/collection/Rectangle 36.svg"
+  },
+  "src/assets/collection/Rectangle 37.svg": {
+    "file": "assets/img/Rectangle 37.svg",
+    "src": "src/assets/collection/Rectangle 37.svg"
+  },
+  "src/assets/collection/Rectangle 38.svg": {
+    "file": "assets/img/Rectangle 38.svg",
+    "src": "src/assets/collection/Rectangle 38.svg"
+  },
+  "src/assets/collection/Rectangle 39.svg": {
+    "file": "assets/img/Rectangle 39.svg",
+    "src": "src/assets/collection/Rectangle 39.svg"
+  },
+  "src/assets/collection/Rectangle 40.svg": {
+    "file": "assets/img/Rectangle 40.svg",
+    "src": "src/assets/collection/Rectangle 40.svg"
+  },
+  "src/assets/collection/Rectangle 41.svg": {
+    "file": "assets/img/Rectangle 41.svg",
+    "src": "src/assets/collection/Rectangle 41.svg"
+  },
+  "src/assets/collection/Rectangle 42.svg": {
+    "file": "assets/img/Rectangle 42.svg",
+    "src": "src/assets/collection/Rectangle 42.svg"
+  },
+  "src/assets/collection/Rectangle 43.svg": {
+    "file": "assets/img/Rectangle 43.svg",
+    "src": "src/assets/collection/Rectangle 43.svg"
+  },
+  "src/assets/collection/Rectangle 44.svg": {
+    "file": "assets/img/Rectangle 44.svg",
+    "src": "src/assets/collection/Rectangle 44.svg"
+  },
+  "src/assets/ethno/Rectangle 45.svg": {
+    "file": "assets/img/Rectangle 45.svg",
+    "src": "src/assets/ethno/Rectangle 45.svg"
+  },
+  "src/assets/ethno/Rectangle 46.svg": {
+    "file": "assets/img/Rectangle 46.svg",
+    "src": "src/assets/ethno/Rectangle 46.svg"
+  },
+  "src/assets/ethno/Rectangle 47.svg": {
+    "file": "assets/img/Rectangle 47.svg",
+    "src": "src/assets/ethno/Rectangle 47.svg"
+  },
+  "src/assets/ethno/Rectangle 48.svg": {
+    "file": "assets/img/Rectangle 48.svg",
+    "src": "src/assets/ethno/Rectangle 48.svg"
+  },
+  "src/assets/ethno/Rectangle 49.svg": {
+    "file": "assets/img/Rectangle 49.svg",
+    "src": "src/assets/ethno/Rectangle 49.svg"
+  },
+  "src/assets/ethno/Rectangle 62.svg": {
+    "file": "assets/img/Rectangle 62.svg",
+    "src": "src/assets/ethno/Rectangle 62.svg"
+  },
+  "src/components/AboutUsSection/vase.jpg": {
+    "file": "assets/img/vase.jpg",
+    "src": "src/components/AboutUsSection/vase.jpg"
+  },
+  "src/components/Carousels/img/1 (2).svg": {
+    "file": "assets/img/1 (2).svg",
+    "src": "src/components/Carousels/img/1 (2).svg"
+  },
+  "src/components/Carousels/img/2.svg": {
+    "file": "assets/img/2.svg",
+    "src": "src/components/Carousels/img/2.svg"
+  },
+  "src/components/Carousels/img/4.svg": {
+    "file": "assets/img/4.svg",
+    "src": "src/components/Carousels/img/4.svg"
+  },
+  "src/components/Carousels/img/Glas.svg": {
+    "file": "assets/img/Glas.svg",
+    "src": "src/components/Carousels/img/Glas.svg"
+  },
+  "src/components/Carousels/img/Keramic.svg": {
+    "file": "assets/img/Keramic.svg",
+    "src": "src/components/Carousels/img/Keramic.svg"
+  },
+  "src/components/Carousels/img/Rectangle 106.svg": {
+    "file": "assets/img/Rectangle 106.svg",
+    "src": "src/components/Carousels/img/Rectangle 106.svg"
+  },
+  "src/components/HeroSection/collection.jpg": {
+    "file": "assets/img/collection.jpg",
+    "src": "src/components/HeroSection/collection.jpg"
+  },
+  "src/components/Logo/logo.svg": {
+    "file": "assets/img/logo.svg",
+    "src": "src/components/Logo/logo.svg"
+  },
+  "src/main.tsx": {
+    "file": "assets/main.js",
+    "name": "main",
+    "src": "src/main.tsx",
+    "isEntry": true,
+    "css": [
+      "assets/css/main.css"
+    ],
+    "assets": [
+      "assets/img/logo.svg",
+      "assets/img/Rectangle 106.svg",
+      "assets/img/1 (2).svg",
+      "assets/img/2.svg",
+      "assets/img/4.svg",
+      "assets/img/Keramic.svg",
+      "assets/img/Glas.svg",
+      "assets/img/Rectangle 40.svg",
+      "assets/img/Rectangle 41.svg",
+      "assets/img/Rectangle 42.svg",
+      "assets/img/Rectangle 43.svg",
+      "assets/img/Rectangle 44.svg",
+      "assets/img/Rectangle 36.svg",
+      "assets/img/Rectangle 37.svg",
+      "assets/img/Rectangle 38.svg",
+      "assets/img/Rectangle 39.svg",
+      "assets/img/Rectangle 45.svg",
+      "assets/img/Rectangle 46.svg",
+      "assets/img/Rectangle 47.svg",
+      "assets/img/Rectangle 48.svg",
+      "assets/img/Rectangle 49.svg",
+      "assets/img/Rectangle 62.svg",
+      "assets/img/404 error.png",
+      "assets/img/vase.jpg",
+      "assets/img/ajax-loader.gif",
+      "assets/img/slick.svg",
+      "assets/img/collection.jpg"
+    ]
+  },
+  "src/pages/not-found/404 error.png": {
+    "file": "assets/img/404 error.png",
+    "src": "src/pages/not-found/404 error.png"
+  }
+}
