@@ -23,15 +23,16 @@
 }
 
 .imageContainer {
-    height: 230px;
+    //height: 230px;
     overflow: hidden;
+    position: relative;
 }
 
 .image {
     width: 100%;
     height: auto;
 }
-///////////////////////////////////////
+
 .cardImage .name {
     position: absolute;
     top: 50%;
@@ -110,9 +111,6 @@
     color: #787878;
 }
 
-.newPrice {
-}
-
 .saleLabel {
     position: absolute;
     top: 10px;
@@ -122,8 +120,8 @@
     color: #000000;
     width: 55px;
     height: 24px;
+    text-align: center;
 }
-
 
 .strikethrough {
     text-decoration: line-through;
