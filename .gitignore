@@ -30,5 +30,3 @@ __pycache__
 *.sw?
 .env
 tmp/
-dist/
-dist
