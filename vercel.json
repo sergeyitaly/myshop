@@ -25,16 +25,11 @@
     },
     {
       "src": "/assets/(.*)",
-      "dest": "https://kolorytmedia.s3.amazonaws.com/dist/assets/$1"
+      "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/assets/$1"
     },
     {
       "src": "/dist/(.*)",
       "dest": "https://kolorytmedia.s3.amazonaws.com/dist/$1"
-    },
-
-    {
-      "src": "/templates/(.*)",
-      "dest": "https://kolorytmedia.s3.amazonaws.com/templates/$1"
     },
     {
       "src": "/(.*)",

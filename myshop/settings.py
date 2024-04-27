@@ -73,7 +73,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'storages',    
     'drf_yasg',    
-    "debug_toolbar",
+   # "debug_toolbar",
 
 ]
 
@@ -88,7 +88,7 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'allauth.account.middleware.AccountMiddleware', 
     'django.middleware.locale.LocaleMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+#    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 
 
@@ -96,17 +96,18 @@ MIDDLEWARE = [
 #DIRS = [AWS_TEMPLATES]
 
 ROOT_URLCONF = 'myshop.urls'
+WSGI_APPLICATION = 'myshop.wsgi.app'
 
 
 DIRS = [os.path.join(BASE_DIR, 'templates'),
-        AWS_TEMPLATES,]
+#        AWS_TEMPLATES,
+        
+        ]
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            os.path.join(BASE_DIR, 'templates'),  # Local templates directory
- #           AWS_TEMPLATES,  # S3 templates directory
-        ],        'APP_DIRS': True,
+        'DIRS': DIRS, 
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',  
@@ -119,7 +120,6 @@ TEMPLATES = [
 ]
 
 #WSGI_APPLICATION = 'myshop.wsgi.application'
-WSGI_APPLICATION = 'myshop.wsgi.app'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -262,9 +262,9 @@ TIME_ZONE = 'Europe/Kiev'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-DEBUG_TOOLBAR_CONFIG = {
-    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,  # Only show toolbar in DEBUG mode
-}
+#DEBUG_TOOLBAR_CONFIG = {
+#    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,  # Only show toolbar in DEBUG mode
+#}
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REDIS_CACHE_LOCATION = os.getenv('REDIS_CACHE_LOCATION')
 CACHES = {

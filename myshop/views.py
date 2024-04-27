@@ -26,8 +26,11 @@ def index(request):
         return render(request, "index.html")
     else:
         # Render the template from S3 bucket
-        s3_template_url = f"{AWS_TEMPLATES}index.html"
-        return render(request, s3_template_url)
+        #s3_template_url = f"{AWS_TEMPLATES}index.html"
+        #return render(request, s3_template_url)
+    
+        return render(request, "index.html")
+
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
