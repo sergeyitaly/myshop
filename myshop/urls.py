@@ -53,13 +53,14 @@ urlpatterns = [
     # Default URL (index.html)
 ]
 
-#if settings.DEBUG:
-#urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-#urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
-#urlpatterns += static(settings.STATIC_URL + '/assets/img/', document_root=settings.STATICFILES_DIRS[1])
-#else:
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if settings.DEBUG==True:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+    urlpatterns += static('/assets/', document_root=settings.STATICFILES_DIRS[1])
+else:
+   urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+   urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 
 
        
