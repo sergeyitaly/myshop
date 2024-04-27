@@ -10,3 +10,4 @@ node_modules/
 *.pyc
 *.log
 env/
+staticfiles_build/
