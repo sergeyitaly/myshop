@@ -60,6 +60,9 @@ if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     # Optionally, serve assets from the second directory in STATICFILES_DIRS
     urlpatterns += static('/assets/', document_root=settings.STATICFILES_DIRS[1])
+    
+ #   urlpatterns += static('/assets/', document_root=settings.STATICFILES_ROOT[1])
+
 
 
 
