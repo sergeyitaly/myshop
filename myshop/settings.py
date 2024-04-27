@@ -27,7 +27,6 @@ AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
 AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
 AWS_MEDIA_LOCATION = os.getenv('AWS_MEDIA', 'media')  # Default to 'media' if not specified
-AWS_TEMPLATES =f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
 USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
 
 VERCEL_DOMAIN = os.getenv('VERCEL_DOMAIN')
@@ -96,7 +95,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'myshop.urls'
 
-#DIRS = [AWS_TEMPLATES]
 DIRS = [
         os.path.join(BASE_DIR, 'templates'),
 #        os.path.join(BASE_DIR, 'frontend'),
