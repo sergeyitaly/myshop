@@ -133,10 +133,10 @@ DATABASES = {
 if USE_S3:
     #LoadImagesToS3().copy_local_media_to_s3(os.path.join(BASE_DIR, 'media'))
     #STATICFILES_STORAGE =  "storages.backends.s3.S3Storage"
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # new
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build')
+    #STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # new
+    #STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build')
 
-    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/staticfiles_build/'
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/staticfiles_build/static/'
     #DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     #STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/'
@@ -150,9 +150,8 @@ else:
     #STATICFILES_STORAGE='django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
     STATIC_URL = '/static/'  # URL to serve static files
 #    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage' # new
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # new
-
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # new
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build','static')
 WHITENOISE_ROOT = STATIC_ROOT
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'dist'),  # Directory containing main.js and main.css
