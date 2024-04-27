@@ -53,7 +53,7 @@ urlpatterns = [
     # Default URL (index.html)
 ]
 
-if settings.DEBUG==True:
+if settings.USE_S3==False:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
     urlpatterns += static('/assets/', document_root=settings.STATICFILES_DIRS[1])
