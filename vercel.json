@@ -19,19 +19,13 @@
       "src": "/static/(.*)",
       "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/$1"
     },
-
-    {
-      "src": "/assets/css/(.*)",
-      "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/assetss/css/$1"
-    },
-
-    {
-      "src": "/static/(.*)",
-      "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/$1"
-    },
     {
       "src": "/media/(.*)",
       "dest": "https://kolorytmedia.s3.amazonaws.com/media/$1"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/assets/$1"
     },
     {
       "src": "/(.*)",
