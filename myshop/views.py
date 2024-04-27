@@ -26,7 +26,7 @@ def index(request):
         return render(request, "index.html")
     else:
         # Render the template from S3 bucket
-        s3_template_url = AWS_TEMPLATES/'index.html'
+        s3_template_url = f"{AWS_TEMPLATES}index.html"
         return render(request, s3_template_url)
 
 class CustomTokenObtainPairView(TokenObtainPairView):
