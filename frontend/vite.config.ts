@@ -24,7 +24,7 @@ const assets: AssetOutputEntry[] = [
       output: `${assetDir}/css/[name].[ext]`
   },
   {
-      output: `${assetDir}/[name].[ext]`,
+      output: `${assetDir}/js/[name].[ext]`,
       regex: /\.js$/
   },
   {
@@ -55,7 +55,9 @@ export default defineConfig({
     modulePreload: {
       polyfill: false,
     },
-    outDir: path.resolve(__dirname, '../dist'), // Output directory resolved to myshop/dist
+  //  outDir: path.resolve(__dirname, 'static'), // Output directory resolved to myshop/frontend/static
+    outDir: path.resolve(__dirname, 'static'),
+
     manifest: 'manifest.json',
     emptyOutDir: true, //delete everything in ..dist folder before build
     rollupOptions: {

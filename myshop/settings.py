@@ -27,7 +27,7 @@ AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
 AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
 AWS_MEDIA_LOCATION = os.getenv('AWS_MEDIA', 'media')  # Default to 'media' if not specified
-AWS_LOCATION = 'staticfiles_build/static/'
+AWS_LOCATION = 'staticfiles_build/'
 AWS_TEMPLATES =f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
 USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
 
@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'knox',
     'cart',
     'accounts',
+    'frontend',
     'djoser',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
@@ -134,7 +135,9 @@ DATABASES = {
 
 if USE_S3:
     #LoadImagesToS3().copy_local_media_to_s3(os.path.join(BASE_DIR, 'media'))
-    STATICFILES_STORAGE =  "storages.backends.s3.S3Storage"
+    #STATICFILES_STORAGE =  "storages.backends.s3.S3Storage"
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # new
+
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
     #DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     #STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
@@ -144,20 +147,25 @@ else:
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 #    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # Use whitenoise for serving static files
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+    #DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    #STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+    #STATICFILES_STORAGE='django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
     STATIC_URL = '/static/'  # URL to serve static files
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
-#    WHITENOISE_ROOT = STATIC_ROOT
-STATICFILES_DIRS = [
-os.path.join(BASE_DIR, 'dist'),  # Directory containing main.js and main.css
-os.path.join(BASE_DIR, 'dist', 'assets'),  # Directory containing other assets (images, etc.)
-]
+#    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage' # new
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # new
 
-STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-]
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build')
+WHITENOISE_ROOT = STATIC_ROOT
+#STATICFILES_DIRS = [
+#    os.path.join(BASE_DIR, 'static'),  # Directory containing main.js and main.css
+#    os.path.join(BASE_DIR, 'frontend','static','assets','img'),  # Directory containing other assets (images, etc.)
+#]
+
+STATICFILES_FINDERS = (
+   "django.contrib.staticfiles.finders.FileSystemFinder",
+   "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+)
+
 
 # Additional Whitenoise settings
 WHITENOISE_INDEX_FILE = True
