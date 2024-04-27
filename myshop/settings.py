@@ -138,7 +138,7 @@ if USE_S3:
 
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/staticfiles_build/static/'
     #DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    #STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/'
 else:
     # Local static file settings
@@ -150,9 +150,10 @@ else:
     #STATICFILES_STORAGE='django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
     STATIC_URL = '/static/'  # URL to serve static files
 #    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage' # new
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # new
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build','static')
-WHITENOISE_ROOT = STATIC_ROOT
+ 
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # new
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build','static')
+    WHITENOISE_ROOT = STATIC_ROOT
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'dist'),  # Directory containing main.js and main.css
 #    os.path.join(BASE_DIR, 'frontend','static','assets','img'),  # Directory containing other assets (images, etc.)
