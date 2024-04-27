@@ -68,7 +68,7 @@ INSTALLED_APPS = [
     'knox',
     'cart',
     'accounts',
-    'frontend',
+  #  'frontend',
     'djoser',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
@@ -157,10 +157,10 @@ else:
 
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build')
 WHITENOISE_ROOT = STATIC_ROOT
-#STATICFILES_DIRS = [
-#    os.path.join(BASE_DIR, 'static'),  # Directory containing main.js and main.css
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'dist'),  # Directory containing main.js and main.css
 #    os.path.join(BASE_DIR, 'frontend','static','assets','img'),  # Directory containing other assets (images, etc.)
-#]
+]
 
 STATICFILES_FINDERS = (
    "django.contrib.staticfiles.finders.FileSystemFinder",
