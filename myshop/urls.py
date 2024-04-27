@@ -44,7 +44,7 @@ urlpatterns = [
     path('', include('shop.urls')),      # Example: /products/
     path('admin/', admin.site.urls),     # Admin URLs: /admin/
     # Debug view
-    path("__debug__/", include("debug_toolbar.urls")),
+  #  path("__debug__/", include("debug_toolbar.urls")),
  #   path('debug/', TemplateView.as_view(template_name='../frontend/index.html'), name='index'),
     #re_path(r'^.*$', TemplateView.as_view(template_name='index.html'), name='index'),
     path("", views.index, name="index"),
