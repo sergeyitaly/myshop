@@ -28,12 +28,8 @@
       "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/assets/$1"
     },
     {
-      "src": "/css/(.*)",
-      "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/css/$1"
-    },
-    {
-      "src": "/img/(.*)",
-      "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/img/$1"
+      "src": "/static/assets/(.*)",
+      "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/assets/$1"
     },
     {
       "src": "/(.*)",
