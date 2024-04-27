@@ -28,7 +28,7 @@ AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
 AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
 AWS_MEDIA_LOCATION = os.getenv('AWS_MEDIA', 'media')  # Default to 'media' if not specified
 AWS_LOCATION = 'staticfiles_build/static/'
-AWS_TEMPLATES =f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+AWS_TEMPLATES =f'https://{AWS_S3_CUSTOM_DOMAIN}/templates/'
 USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
 
 VERCEL_DOMAIN = os.getenv('VERCEL_DOMAIN')
@@ -96,13 +96,17 @@ MIDDLEWARE = [
 #DIRS = [AWS_TEMPLATES]
 
 ROOT_URLCONF = 'myshop.urls'
-#DIRS = [os.path.join(BASE_DIR, 'templates'),]
-#DIRS = [AWS_TEMPLATES,]
+
+
+DIRS = [os.path.join(BASE_DIR, 'templates'),
+        AWS_TEMPLATES,]
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),  # Local templates directory
+ #           AWS_TEMPLATES,  # S3 templates directory
+        ],        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',  

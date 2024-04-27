@@ -15,14 +15,19 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 load_dotenv()
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-AWS_MEDIA_LOCATION = os.getenv('AWS_MEDIA', 'media')
 USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+AWS_TEMPLATES =f'https://{AWS_S3_CUSTOM_DOMAIN}/templates/'
+
 
 def index(request):
-    if USE_S3==False: 
-        return render(request, "../templates/index.html")
-
-    else: return render(request, AWS_STORAGE_BUCKET_NAME/'templates/index.html')
+    if USE_S3 == False:
+        # Render the local template
+        return render(request, "index.html")
+    else:
+        # Render the template from S3 bucket
+        s3_template_url = AWS_TEMPLATES/'index.html'
+        return render(request, s3_template_url)
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
