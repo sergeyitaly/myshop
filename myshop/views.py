@@ -1,16 +1,28 @@
-from django.shortcuts import render
-
-def index(request):
-    return render(request, "index.html")
-
 
 # views.py
 
+
+from django.shortcuts import render
+import os
+from dotenv import load_dotenv
+from distutils.util import strtobool
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenObtainPairView
+
+
+load_dotenv()
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_MEDIA_LOCATION = os.getenv('AWS_MEDIA', 'media')
+USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
+
+def index(request):
+    if USE_S3==False: 
+        return render(request, "../templates/index.html")
+
+    else: return render(request, AWS_STORAGE_BUCKET_NAME/'templates/index.html')
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):

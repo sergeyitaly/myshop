@@ -96,14 +96,12 @@ MIDDLEWARE = [
 #DIRS = [AWS_TEMPLATES]
 
 ROOT_URLCONF = 'myshop.urls'
-DIRS = [os.path.join(BASE_DIR, 'templates'),]
+#DIRS = [os.path.join(BASE_DIR, 'templates'),]
 #DIRS = [AWS_TEMPLATES,]
-
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': DIRS,
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
