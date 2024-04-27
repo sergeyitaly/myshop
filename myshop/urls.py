@@ -53,13 +53,13 @@ urlpatterns = [
     # Default URL (index.html)
 ]
 
-if settings.USE_S3==False:
+if settings.DEBUG:
+    # Serve media files
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+    # Serve static files collected in STATIC_ROOT after running collectstatic
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    # Optionally, serve assets from the second directory in STATICFILES_DIRS
     urlpatterns += static('/assets/', document_root=settings.STATICFILES_DIRS[1])
-else:
-   urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-   urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
 
