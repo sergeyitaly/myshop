@@ -25,11 +25,11 @@
     },
     {
       "src": "/assets/(.*)",
-      "dest": "/dist/assets/$1"
+      "dest": "https://kolorytmedia.s3.amazonaws.com/dist/assets/$1"
     },
     {
       "src": "/dist/(.*)",
-      "dest": "/dist/$1"
+      "dest": "https://kolorytmedia.s3.amazonaws.com/dist/$1"
     },
     {
       "src": "/(.*)",
