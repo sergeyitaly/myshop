@@ -14,7 +14,7 @@ python3 manage.py migrate
 #export DJANGO_SETTINGS_MODULE=myshop.settings
 pip install awscli
 aws s3 mv media s3://kolorytmedia/media --recursive
-aws s3 mv dist s3://kolorytmedia/dist --recursive
+#aws s3 mv dist s3://kolorytmedia/dist --recursive
 #aws s3 mv templates s3://kolorytmedia/templates --recursive
 
 
