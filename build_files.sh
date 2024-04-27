@@ -16,7 +16,7 @@ python3 manage.py collectstatic --noinput --clear
 #export DJANGO_SETTINGS_MODULE=myshop.settings
 pip install awscli
 aws s3 mv media s3://kolorytmedia/media --recursive
-aws s3 mv staticfiles_build s3://kolorytmedia/staticfiles_build --recursive
+#aws s3 mv staticfiles_build s3://kolorytmedia/staticfiles_build --recursive
 
 du -h --max-depth=5 | sort -rh
 # Deactivate the virtual environment
