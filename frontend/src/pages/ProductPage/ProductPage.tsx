@@ -47,11 +47,7 @@ const ProductPage = () => {
         {isMobile && <CarouselProductMobile />}
         <div className={style.images}>
           <img className={style.imgMin} src={productImgMin} alt="invida" />
-          <img
-            className={style.imgMax}
-            src={productImgMax}
-            alt="invida"
-          />
+          <img className={style.imgMax} src={productImgMax} alt="invida" />
         </div>
         <div className={style.descContainer}>
           <div className={style.priceTitle}>

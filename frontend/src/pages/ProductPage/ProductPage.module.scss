@@ -1,50 +1,43 @@
 .container {
   display: flex;
-  width: 1440px;
-  gap: 20px;
-  padding: 24px 20px 0;
+  max-width: 100vw;
+  gap: 15px;
+  padding: 24px 15px 0;
   margin-bottom: 164px;
-  overflow-x: hidden;
-  overflow-y: auto;
 }
 
 .images {
   display: flex;
   justify-content: center;
   gap: 20px;
-  flex-shrink: 1;
-}
-
-.imgMin {
-  align-self: start;
+  align-items: flex-start;
 }
 
 .imgMax {
-  align-self: start;
-  max-width: 690px;
+  max-width: 650px;
 }
 
 .descContainer {
-  flex-shrink: 1;
+  max-width: 600px;
 }
 
 .prodTitle {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 27px;
+  margin-bottom: 15px;
 }
 
 .prodName {
   font-family: "Inter", sans-serif;
   font-weight: 500;
-  font-size: 36px;
+  font-size: 32px;
   color: #000;
 }
 
 .prodPrice {
   font-family: "Inter", sans-serif;
   font-weight: 500;
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 500;
 }
 
@@ -53,7 +46,7 @@
   font-weight: 400;
   font-size: 20px;
   color: #07b118;
-  margin-bottom: 37px;
+  margin-bottom: 25px;
 }
 
 .colorName {
@@ -165,7 +158,9 @@
 }
 
 .buyBtn {
-  margin-bottom: 36px;
+  display: flex;
+  margin-bottom: 34px;
+  gap: 15px;
 }
 
 .addBtn {
@@ -177,7 +172,7 @@
   background: #0b0599;
   border: none;
   border-radius: 5px;
-  width: 276px;
+  width: 250px;
   height: 52px;
   cursor: pointer;
   margin-right: 20px;
@@ -191,7 +186,7 @@
   color: #191919;
   border: 1px solid #cdcdcd;
   border-radius: 5px;
-  width: 276px;
+  width: 250px;
   height: 52px;
   background: #fff;
   cursor: pointer;
@@ -216,10 +211,10 @@
 .description {
   font-family: "Inter", sans-serif;
   font-weight: 400;
-  font-size: 20px;
+  font-size: 19px;
   line-height: 130%;
   color: #000;
-  width: 570px;
+  max-width: 540px;
   margin-bottom: 40px;
 }
 
@@ -227,7 +222,7 @@
   display: flex;
   justify-content: space-between;
   margin-bottom: 40px;
-  width: 572px;
+  max-width: 540px;
   height: 51px;
   border-bottom: 1px solid #cdcdcd;
 }
@@ -235,8 +230,7 @@
 .noBorder {
   display: flex;
   justify-content: space-between;
-  //   margin-bottom: 40px;
-  width: 572px;
+  max-width: 540px;
   height: 51px;
   border: none;
 }
@@ -250,7 +244,7 @@
 .title {
   font-family: "Inter", sans-serif;
   font-weight: 500;
-  font-size: 32px;
+  font-size: 30px;
   color: #000;
   margin-bottom: 16px;
 }
@@ -258,7 +252,7 @@
 .titleRoll {
   font-family: "Inter", sans-serif;
   font-weight: 500;
-  font-size: 32px;
+  font-size: 30px;
   color: #000;
   margin-bottom: 12px;
 }
@@ -266,20 +260,20 @@
 .usageDescr {
   font-family: "Inter", sans-serif;
   font-weight: 400;
-  font-size: 20px;
+  font-size: 19px;
   line-height: 130%;
   color: #000;
-  width: 570px;
+  max-width: 540px;
   margin-bottom: 8px;
 }
 
 .careDescr {
   font-family: "Inter", sans-serif;
   font-weight: 400;
-  font-size: 20px;
+  font-size: 19px;
   line-height: 130%;
   color: #000;
-  width: 570px;
+  max-width: 540px;
   margin-bottom: 8px;
 }
 
@@ -295,17 +289,15 @@
 .collectionTitle {
   font-family: "Inter", sans-serif;
   font-weight: 500;
-  font-size: 36px;
+  font-size: 34px;
   color: #000;
   margin-bottom: 20px;
 }
 
 .collectionContainer {
-  width: 1440px;
   padding: 0 20px;
   margin-bottom: 164px;
-  overflow-x: hidden;
-  overflow-y: auto;
+  max-width: 100vw;
 }
 
 .collectionList {
@@ -315,7 +307,7 @@
 }
 
 .collectionImg {
-  width: 335px;
+  width: 315px;
   height: 364px;
   margin-bottom: 8px;
 }
@@ -342,10 +334,14 @@
   .container {
     display: flex;
     flex-direction: column;
-    width: auto;
+    max-width: fit-content;
     gap: 15px;
     padding: 24px 15px 0;
     margin-bottom: 100px;
+  }
+
+  .images {
+    max-width: 100%;
   }
 
   .imgMin {
@@ -354,7 +350,11 @@
 
   .imgMax {
     display: block;
-    width: 100%;
+    max-width: 100%;
+  }
+
+  .descContainer {
+    max-width: 690px;
   }
 
   .priceTitle {
@@ -364,6 +364,7 @@
   }
 
   .prodTitle {
+    max-width: 732px;
     justify-content: space-between;
     margin-bottom: 0;
   }
@@ -766,7 +767,7 @@
   }
 
   .collectionContainer {
-    max-width: 480px;
+    max-width: 100vw;
     padding: 0 15px;
     margin-bottom: 64px;
   }
