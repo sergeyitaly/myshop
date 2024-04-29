@@ -28,11 +28,13 @@ AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
 AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
 AWS_MEDIA_LOCATION = os.getenv('AWS_MEDIA', 'media')  # Default to 'media' if not specified
 AWS_LOCATION = 'staticfiles_build/static/'
-AWS_TEMPLATES =f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
+AWS_TEMPLATES =f'https://{AWS_S3_CUSTOM_DOMAIN}/templates/'
 USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
 
 VERCEL_DOMAIN = os.getenv('VERCEL_DOMAIN')
 
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
 
     "http://localhost:5173",
@@ -71,7 +73,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'storages',    
     'drf_yasg',    
-    "debug_toolbar",
+   # "debug_toolbar",
 
 ]
 
@@ -86,25 +88,25 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'allauth.account.middleware.AccountMiddleware', 
     'django.middleware.locale.LocaleMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+#    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 
 
 ]
+#DIRS = [AWS_TEMPLATES]
 
 ROOT_URLCONF = 'myshop.urls'
-
-#DIRS = [AWS_TEMPLATES]
-DIRS = [
-        os.path.join(BASE_DIR, 'templates'),
-#        os.path.join(BASE_DIR, 'frontend'),
-    ]
+WSGI_APPLICATION = 'myshop.wsgi.app'
 
 
+DIRS = [os.path.join(BASE_DIR, 'templates'),
+#        AWS_TEMPLATES,
+        
+        ]
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': DIRS,
+        'DIRS': DIRS, 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -118,7 +120,6 @@ TEMPLATES = [
 ]
 
 #WSGI_APPLICATION = 'myshop.wsgi.application'
-WSGI_APPLICATION = 'myshop.wsgi.app'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -132,10 +133,12 @@ DATABASES = {
 
 if USE_S3:
     #LoadImagesToS3().copy_local_media_to_s3(os.path.join(BASE_DIR, 'media'))
-    #STATICFILES_STORAGE =  "storages.backends.s3.S3Storage"
+    STATICFILES_STORAGE =  "storages.backends.s3.S3Storage"
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    #DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    #STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/'
 else:
     # Local static file settings
@@ -196,8 +199,6 @@ REST_FRAMEWORK = {
 
 
 
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDENTIALS = True
 AUTHENTICATION_BACKENDS ={
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
@@ -261,9 +262,9 @@ TIME_ZONE = 'Europe/Kiev'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-DEBUG_TOOLBAR_CONFIG = {
-    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,  # Only show toolbar in DEBUG mode
-}
+#DEBUG_TOOLBAR_CONFIG = {
+#    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,  # Only show toolbar in DEBUG mode
+#}
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REDIS_CACHE_LOCATION = os.getenv('REDIS_CACHE_LOCATION')
 CACHES = {

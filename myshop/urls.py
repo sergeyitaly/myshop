@@ -44,8 +44,8 @@ urlpatterns = [
     path('', include('shop.urls')),      # Example: /products/
     path('admin/', admin.site.urls),     # Admin URLs: /admin/
     # Debug view
-    path("__debug__", include("debug_toolbar.urls")),
-    #path('', TemplateView.as_view(template_name='index.html'), name='index'),
+  #  path("__debug__/", include("debug_toolbar.urls")),
+ #   path('debug/', TemplateView.as_view(template_name='../frontend/index.html'), name='index'),
     #re_path(r'^.*$', TemplateView.as_view(template_name='index.html'), name='index'),
     path("", views.index, name="index"),
 
@@ -53,13 +53,16 @@ urlpatterns = [
     # Default URL (index.html)
 ]
 
-if settings.DEBUG==True:
+if settings.DEBUG:
+    # Serve media files
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+    # Serve static files collected in STATIC_ROOT after running collectstatic
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    # Optionally, serve assets from the second directory in STATICFILES_DIRS
     urlpatterns += static('/assets/', document_root=settings.STATICFILES_DIRS[1])
-else:
-   urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-   urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    
+ #   urlpatterns += static('/assets/', document_root=settings.STATICFILES_ROOT[1])
+
 
 
 
