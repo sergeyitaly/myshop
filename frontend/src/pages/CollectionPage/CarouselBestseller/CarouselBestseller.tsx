@@ -1,20 +1,10 @@
-import React from 'react';
-import Slider from 'react-slick';
-import style from './style.module.scss';
-import { Link } from 'react-router-dom';
+import style from "../../../components/Carousels/CarouselCeramic/style.module.scss";
+import {mockDataProducts} from "../../../components/Carousels/carouselMock";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
-interface Product {
-    id: string;
-    name: string;
-    price: string;
-    photo: string;
-}
-
-interface CarouselBestsellerProps {
-    products: Product[];
-}
-
-const CarouselBestseller: React.FC<CarouselBestsellerProps> = ({ products }) => {
+function CarouselBestseller () {
     const settings = {
         dots: true,
         infinite: true,
@@ -30,29 +20,27 @@ const CarouselBestseller: React.FC<CarouselBestsellerProps> = ({ products }) => 
                     slidesToShow: 2,
                     slidesToScroll: 2,
                     initialSlide: 0,
-                },
-            },
-        ],
+                }
+            }
+        ]
     };
-
     return (
         <div className={style.sliderContainer}>
             <p className={style.title}>Бестселери</p>
             <Slider {...settings}>
-                {products.map((product) => (
-                    <Link to={`/products/${product.id}`} key={product.id} className={style.card}>
-                    <div key={product.id} className={style.card}>
+                {mockDataProducts.map((product, index) => (
+                    <div key={index} className={style.card}>
                         <div className={style.cardImage}>
-                            <img src={product.photo} alt={product.name} className={style.image} />
-                            <p className={style.name}>{product.name}</p>
+                            <img src={product.imageUrl} alt={product.name} className={style.image}/>
+                            <p className={style.name} >{product.name}</p>
                             <p className={style.price}>{product.price}</p>
                         </div>
                     </div>
-                    </Link>
                 ))}
             </Slider>
         </div>
     );
-};
+}
 
-export default CarouselBestseller;
+
+export default CarouselBestseller ;
