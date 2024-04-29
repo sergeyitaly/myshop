@@ -1,63 +1,63 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+// import React from 'react';
+// import style from './style.module.scss';
+// import Pagination from '@mui/material/Pagination';
+//
+// const CollectionItems: React.FC = ({ collection }) => {
+//     return (
+//         <div className={style.container}>
+//             <h1 className={style.title}>{collection.name}</h1>
+//             <div className={style.cardContainer}>
+//                 {collection.items.map((product, index) => (
+//                     <div key={index} className={style.card}>
+//                         <div className={style.cardImage}>
+//                             <img src={product.imageUrl} alt={product.name} style={{maxWidth:'100%'}} />
+//                             <p className={style.name}>{product.name}</p>
+//                             <p className={style.category}>{product.price}</p>
+//                         </div>
+//                     </div>
+//                 ))}
+//                 <Pagination count={3} />
+//             </div>
+//         </div>
+//     );
+// };
+//
+// export default CollectionItems;
+// CollectionItemsPage.tsx
+import { useParams } from 'react-router-dom'; // импорт useParams для получения параметров маршрута
 import style from './style.module.scss';
-import CarouselBestseller from '../CollectionPage/CarouselBestseller/CarouselBestseller';
-import axios from 'axios';
+import { fullData } from "../../components/Carousels/carouselMock";
+import Pagination from '@mui/material/Pagination';
+import CarouselBestseller from "../CollectionPage/CarouselBestseller/CarouselBestseller";
 
-interface Product {
-    id: string;
-    name: string;
-    price: string;
-    photo: string;
-}
+const CollectionItemsPage: React.FC = () => {
 
-interface Collection {
-    id: string;
-    name: string;
-    photo: string;
-    category: string;
-}
-
-interface CollectionItemsPageProps {
-    collections: Collection[];
-    products: Product[];
-}
-
-const CollectionItemsPage: React.FC<CollectionItemsPageProps> = ({ products }) => {
     const { id } = useParams<{ id: string }>();
-    const [collection, setCollection] = useState<any>(null); // Change type as needed
-
-    useEffect(() => {
-        const fetchCollection = async () => {
-            try {
-                const response = await axios.get(`/collections/${id}`);
-                setCollection(response.data);
-            } catch (error) {
-                console.error('Error fetching collection:', error);
-            }
-        };
-        fetchCollection();
-    }, [id]);
+    const collection = fullData.collections.find(collection => collection.id === id);
 
     if (!collection) {
-        return <div className={style.container}>Collection not found.</div>;
+        return <div> Коллекция не найдена </div>
     }
 
     return (
         <div className={style.container}>
             <h1 className={style.title}>{collection.name}</h1>
-            {/* Render collection items here */}
-            {products.map((product) => (
-                <div key={product.id} className={style.card}>
-                    <div className={style.cardImage}>
-                        <img src={product.photo} alt={product.name} style={{ maxWidth: '100%' }} />
-                        <p className={style.name}>{product.name}</p>
-                        <p className={style.price}>{product.price}</p>
-                    </div>
-                </div>
-            ))}
-            {/* Render CarouselBestseller component */}
-            <CarouselBestseller products={products} />
+            <div className={style.cardContainer}>
+                {collection.items.map((product, index) => (
+                        <div key={index} className={style.card}>
+                            <div className={style.cardImage}>
+                                <img src={product.imageUrl} alt={product.name} style={{maxWidth:'100%'}} />
+                                <p className={style.name}>{product.name}</p>
+                                <p className={style.price}>{product.price}</p>
+                            </div>
+                        </div>
+                ))}
+            </div>
+            <div className={style.pagination}>
+                <Pagination count={5} />
+            </div>
+            <CarouselBestseller />
+
         </div>
     );
 };
