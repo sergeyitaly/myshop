@@ -25,13 +25,14 @@ const ProductPage = () => {
     query: "(max-width: 480px)",
   });
 
-  const handleIncrementCounter = () => {
-    setCounter(counter + 1);
-  };
-
-  const handleDecrementCounter = () => {
-    if (counter === 1) return;
-    setCounter(counter - 1);
+  const handleCounter = (value) => () => {
+    if (value === "increment") {
+      setCounter(counter + 1);
+    } else {
+      if (counter > 1) {
+        setCounter(counter - 1);
+      }
+    }
   };
 
   const onToggleVisibility = () => {
@@ -69,10 +70,7 @@ const ProductPage = () => {
               <div className={style.secondSizeBox}>40</div>
             </div>
             <div className={style.counter}>
-              <button
-                className={style.decCount}
-                onClick={handleDecrementCounter}
-              >
+              <button className={style.decCount} onClick={handleCounter}>
                 <img
                   className={style.negativeIcon}
                   src={negativeIcon}
@@ -81,10 +79,7 @@ const ProductPage = () => {
                 />
               </button>
               <p className={style.count}>{counter}</p>
-              <button
-                className={style.inkCount}
-                onClick={handleIncrementCounter}
-              >
+              <button className={style.inkCount} onClick={handleCounter}>
                 <img
                   className={style.positiveIcon}
                   src={positiveIcon}
