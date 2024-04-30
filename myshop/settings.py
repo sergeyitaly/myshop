@@ -1,4 +1,3 @@
-
 import os
 from pathlib import Path
 from decouple import config
@@ -20,7 +19,7 @@ AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
 AWS_DEFAULT_ACL = 'public-read'
-AWS_QUERYSTRING_AUTH = False # needed for ckeditor with S3
+AWS_QUERYSTRING_AUTH = False  # needed for ckeditor with S3
 AWS_S3_FILE_OVERWRITE = True
 AWS_DEFAULT_ACL = None
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
@@ -28,20 +27,22 @@ AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
 AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
 AWS_MEDIA_LOCATION = os.getenv('AWS_MEDIA', 'media')  # Default to 'media' if not specified
 AWS_LOCATION = 'staticfiles_build/static/'
-AWS_TEMPLATES =f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
+AWS_TEMPLATES = f'https://{AWS_S3_CUSTOM_DOMAIN}/templates/'
 USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
 
 VERCEL_DOMAIN = os.getenv('VERCEL_DOMAIN')
 
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
 
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-#    f"https://{VERCEL_DOMAIN}",
+    #    f"https://{VERCEL_DOMAIN}",
     f"https://{AWS_S3_CUSTOM_DOMAIN}",
 ]
 
-INTERNAL_IPS = ["127.0.0.1","localhost",'::1']
+INTERNAL_IPS = ["127.0.0.1", "localhost", '::1']
 ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app', 'localhost']
 # Application definition
 
@@ -69,9 +70,9 @@ INSTALLED_APPS = [
     'djoser',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    'storages',    
-    'drf_yasg',    
-    "debug_toolbar",
+    'storages',
+    'drf_yasg',
+    # "debug_toolbar",
 
 ]
 
@@ -84,23 +85,21 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    'allauth.account.middleware.AccountMiddleware', 
+    'allauth.account.middleware.AccountMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    #    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 
-
 ]
+# DIRS = [AWS_TEMPLATES]
 
 ROOT_URLCONF = 'myshop.urls'
+WSGI_APPLICATION = 'myshop.wsgi.app'
 
-#DIRS = [AWS_TEMPLATES]
-DIRS = [
-        os.path.join(BASE_DIR, 'templates'),
-#        os.path.join(BASE_DIR, 'frontend'),
-    ]
+DIRS = [os.path.join(BASE_DIR, 'templates'),
+        #        AWS_TEMPLATES,
 
-
+        ]
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -108,7 +107,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug',  
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -117,8 +116,7 @@ TEMPLATES = [
     },
 ]
 
-#WSGI_APPLICATION = 'myshop.wsgi.application'
-WSGI_APPLICATION = 'myshop.wsgi.app'
+# WSGI_APPLICATION = 'myshop.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -131,25 +129,27 @@ DATABASES = {
 }
 
 if USE_S3:
-    #LoadImagesToS3().copy_local_media_to_s3(os.path.join(BASE_DIR, 'media'))
-    #STATICFILES_STORAGE =  "storages.backends.s3.S3Storage"
+    # LoadImagesToS3().copy_local_media_to_s3(os.path.join(BASE_DIR, 'media'))
+    STATICFILES_STORAGE = "storages.backends.s3.S3Storage"
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    # DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    # STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/'
 else:
     # Local static file settings
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-#    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # Use whitenoise for serving static files
+    #    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # Use whitenoise for serving static files
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'  # URL to serve static files
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
 #    WHITENOISE_ROOT = STATIC_ROOT
 STATICFILES_DIRS = [
-os.path.join(BASE_DIR, 'dist'),  # Directory containing main.js and main.css
-os.path.join(BASE_DIR, 'dist', 'assets'),  # Directory containing other assets (images, etc.)
+    os.path.join(BASE_DIR, 'dist'),  # Directory containing main.js and main.css
+    os.path.join(BASE_DIR, 'dist', 'assets'),  # Directory containing other assets (images, etc.)
 ]
 
 STATICFILES_FINDERS = [
@@ -175,7 +175,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-#REST_FRAMEWORK = {
+# REST_FRAMEWORK = {
 #    'DEFAULT_AUTHENTICATION_CLASSES': [
 #        'rest_framework.authentication.TokenAuthentication',
 #        'rest_framework.authentication.SessionAuthentication',
@@ -183,7 +183,7 @@ AUTH_PASSWORD_VALIDATORS = [
 #    'DEFAULT_PERMISSION_CLASSES': [
 #        'rest_framework.permissions.IsAuthenticated',
 #    ],
-#}
+# }
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -192,13 +192,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 6,
 }
 
-
-
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDENTIALS = True
-AUTHENTICATION_BACKENDS ={
+AUTHENTICATION_BACKENDS = {
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
 }
@@ -206,19 +204,19 @@ AUTHENTICATION_BACKENDS ={
 SITE_ID = 3
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
-#AUTH_USER_MODEL = "accounts.CustomUser"
+# AUTH_USER_MODEL = "accounts.CustomUser"
 DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': 'password-reset/{uid}/{token}',
     'USERNAME_RESET_CONFIRM_URL': 'username-reset/{uid}/{token}',
     'ACTIVATION_URL': 'activate/{uid}/{token}',
     'SEND_ACTIVATION_EMAIL': True,
-    'SEND_CONFIRMATION_EMAIL' :True,
+    'SEND_CONFIRMATION_EMAIL': True,
     'SERIALIZERS': {},
-    'USER_CREATE_PASSWORD_RETYPE' : True,
-    'USERNAME_CHANGED_EMAIL_CONFIRMATION' :True,
-    'PASSWORD_CHANGED_EMAIL_CONFIRMATION' :True,
-    'SEND_CONFIRMATION_EMAIL' :True,
-    'SERIALAZERS':{  }
+    'USER_CREATE_PASSWORD_RETYPE': True,
+    'USERNAME_CHANGED_EMAIL_CONFIRMATION': True,
+    'PASSWORD_CHANGED_EMAIL_CONFIRMATION': True,
+    'SEND_CONFIRMATION_EMAIL': True,
+    'SERIALAZERS': {}
 }
 # app password: vxfnflimsnbvgfvx
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -227,7 +225,6 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
-
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
@@ -261,9 +258,9 @@ TIME_ZONE = 'Europe/Kiev'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-DEBUG_TOOLBAR_CONFIG = {
-    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,  # Only show toolbar in DEBUG mode
-}
+# DEBUG_TOOLBAR_CONFIG = {
+#    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,  # Only show toolbar in DEBUG mode
+# }
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REDIS_CACHE_LOCATION = os.getenv('REDIS_CACHE_LOCATION')
 CACHES = {
@@ -278,9 +275,9 @@ CACHES = {
     }
 }
 
-#CACHES = {
+# CACHES = {
 #    'default': {
 #        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
 #        'LOCATION': os.path.join(BASE_DIR, 'site_cache'),
 #    }
-#}
+# }
