@@ -53,7 +53,10 @@ function App() {
         <Routes>
             <Route element={<Layout withFooter withHeader />}>
                 <Route index element={<Home />} />
-                <Route path="/collections" element={<CollectionsPage collections={collections} />} />
+                {/* Ensure collections are fetched before rendering CollectionsPage */}
+                {collections.length > 0 && (
+                    <Route path="/collections" element={<CollectionsPage collections={collections} />} />
+                )}
                 {/* Pass collections and products to CollectionItemsPage */}
                 <Route path="/collection/:id" element={<CollectionItemsPage collections={collections} products={products} />} />
                 <Route path="/products" element={<CarouselBestseller products={products} />} />

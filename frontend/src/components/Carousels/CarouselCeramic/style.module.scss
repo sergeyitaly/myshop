@@ -16,6 +16,8 @@
 .card {
     font-size: 18px;
     text-align: center;
+    margin-bottom: 20px;
+    font-weight: 400;
 }
 
 .cardImage {
@@ -31,19 +33,18 @@
 }
 
 .price {
-    margin-top: 10px;
+    margin: 10px 0;
     color: #787878;
-    margin-bottom: 10px;
 }
 
 
 @media screen and (max-width: 600px) {
     .sliderContainer {
-        margin-top: 30px; /* Пример изменения свойства только для мобильных экранов */
+        margin-top: 30px;
     }
 
     .title {
-        font-size: 26px; /* Пример изменения свойства только для мобильных экранов */
+        font-size: 26px;
     }
 
     .card{
