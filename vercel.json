@@ -14,7 +14,7 @@
       "use": "@vercel/static-build"
     },
     {
-      "src": "frontend/package.json", 
+      "src": "package.json", 
       "use": "vercel-build"
     }
   ],
