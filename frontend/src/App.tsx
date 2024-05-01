@@ -7,6 +7,7 @@ import { NotFound } from './pages/not-found/not-found';
 import axios from 'axios';
 import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
 import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
+import { AppProvider } from './AppContext'; // Import the AppProvider component
 
 interface Collection {
     id: string;
@@ -52,17 +53,23 @@ function App() {
         fetchProducts();
     }, []);
 
-    const loadMoreCollections = async () => {
-        if (nextPage) {
-            try {
-                const response = await axios.get<{ results: Collection[]; next: string | null }>(nextPage);
-                setCollections([...collections, ...response.data.results]);
-                setNextPage(response.data.next); // Update the URL of the next page
-            } catch (error) {
-                console.error('Error fetching more collections:', error);
+const loadMoreCollections = async () => {
+    if (nextPage) {
+        try {
+            const response = await axios.get<{ results: Collection[]; next: string | null }>(nextPage);
+            setCollections([...collections, ...response.data.results]);
+            setNextPage(response.data.next); // Update the URL of the next page
+            
+            // Increment pageCounter when loading more collections
+            const pageCounter = localStorage.getItem('pageCounter');
+            if (pageCounter) {
+                localStorage.setItem('pageCounter', String(parseInt(pageCounter) + 1));
             }
+        } catch (error) {
+            console.error('Error fetching more collections:', error);
         }
-    };
+    }
+};
 
     const loadMoreProducts = async (id: string) => {
         if (nextPage) {
@@ -77,21 +84,23 @@ function App() {
     };
 
     return (
-        <Routes>
-            <Route element={<Layout withFooter withHeader />}>
-                <Route index element={<Home />} />
-                <Route
-                    path="/collections"
-                    element={<CollectionsPage collections={collections} loadMoreCollections={loadMoreCollections} hasNextPage={nextPage !== null} />}
-                />
-                <Route
-                    path="/collection/:id"
-                    element={<CollectionItemsPage products={products} loadMoreProducts={loadMoreProducts} />}
-                />
-                <Route path="/products" element={<CarouselBestseller products={products} />} />
-                <Route path="*" element={<NotFound />} />
-            </Route>
-        </Routes>
+        <AppProvider>
+            <Routes>
+                <Route element={<Layout withFooter withHeader />}>
+                    <Route index element={<Home />} />
+                    <Route
+                        path="/collections"
+                        element={<CollectionsPage collections={collections} loadMoreCollections={loadMoreCollections} hasNextPage={nextPage !== null} />}
+                    />
+                    <Route
+                        path="/collection/:id"
+                        element={<CollectionItemsPage products={products} loadMoreProducts={loadMoreProducts} />}
+                    />
+                    <Route path="/products" element={<CarouselBestseller products={products} />} />
+                    <Route path="*" element={<NotFound />} />
+                </Route>
+            </Routes>
+        </AppProvider>
     );
 }
 
