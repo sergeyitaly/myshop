@@ -29,7 +29,7 @@ AWS_MEDIA_LOCATION = os.getenv('AWS_MEDIA', 'media')  # Default to 'media' if no
 AWS_LOCATION = 'staticfiles_build/static/'
 AWS_TEMPLATES = f'https://{AWS_S3_CUSTOM_DOMAIN}/templates/'
 USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
-
+AWS_FRONTEND_DOMAIN = f"https://{AWS_S3_CUSTOM_DOMAIN}"
 VERCEL_DOMAIN = os.getenv('VERCEL_DOMAIN')
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -39,7 +39,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     #    f"https://{VERCEL_DOMAIN}",
-    f"https://{AWS_S3_CUSTOM_DOMAIN}",
+    AWS_FRONTEND_DOMAIN,
 ]
 
 INTERNAL_IPS = ["127.0.0.1", "localhost", '::1']
