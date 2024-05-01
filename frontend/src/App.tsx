@@ -28,9 +28,10 @@ function App() {
     const [nextPage, setNextPage] = useState<string | null>(null);
 
     useEffect(() => {
+        
         const fetchCollections = async () => {
             try {
-                const response = await axios.get<{ results: Collection[]; next: string | null }>('http://localhost:8000/collections/');
+                const response = await axios.get<{ results: Collection[]; next: string | null }>('/collections/');
                 setCollections(response.data.results);
                 setNextPage(response.data.next); // Store the URL of the next page
             } catch (error) {
@@ -40,8 +41,9 @@ function App() {
 
         const fetchProducts = async () => {
             try {
-                const response = await axios.get<Product[]>('http://localhost:8000/products/');
-                setProducts(response.data);
+                const response = await axios.get<{ results: Product[]; next: string | null }>('/products/');
+                setProducts(response.data.results);
+                setNextPage(response.data.next); // Store the URL of the next page
             } catch (error) {
                 console.error('Error fetching products:', error);
             }
