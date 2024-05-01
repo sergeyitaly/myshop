@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import style from './style.module.scss';
+import { Link } from 'react-router-dom'; // Import Link from react-router-dom
 
 interface Collection {
     id: string;
@@ -16,11 +17,20 @@ interface Props {
 }
 
 const CollectionsPage: React.FC<Props> = ({ collections, loadMoreCollections, hasNextPage }) => {
-    useEffect(() => {
-        // Clear page counter from localStorage when component mounts
-        localStorage.removeItem('pageCounter');
-    }, []);
+    const location = useLocation();
 
+    useEffect(() => {
+        // Reset pageCounter in localStorage and activate LoadMore button when returning to /collections or /
+        if (location.pathname === '/collections' || location.pathname === '/') {
+            localStorage.setItem('pageCounter', '1'); // Reset pageCounter to 1
+            
+        } else {
+            const pageCounter = localStorage.getItem('pageCounter');
+            if (pageCounter) {
+                localStorage.setItem('pageCounter', String(parseInt(pageCounter) + 1)); // Increment pageCounter
+            }
+        }
+    }, [location]);
     return (
         <div className={style.container}>
             <h1 className={style.title}> Колекції </h1>
