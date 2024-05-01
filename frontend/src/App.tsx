@@ -6,6 +6,7 @@ import { Home } from './pages/home/home';
 import { NotFound } from './pages/not-found/not-found';
 import axios from 'axios';
 import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
+import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
 
 interface Collection {
     id: string;
@@ -82,7 +83,10 @@ function App() {
                     path="/collections"
                     element={<CollectionsPage collections={collections} loadMoreCollections={loadMoreCollections} hasNextPage={nextPage !== null} />}
                 />
-
+                <Route
+                    path="/collection/:id"
+                    element={<CollectionItemsPage products={products} loadMoreProducts={loadMoreProducts} />}
+                />
                 <Route path="/products" element={<CarouselBestseller products={products} />} />
                 <Route path="*" element={<NotFound />} />
             </Route>
