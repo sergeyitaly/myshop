@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { Layout } from './layout/Layout/Layout';
 import CollectionsPage from './pages/CollectionPage/CollectionsPage';
@@ -28,52 +28,37 @@ function App() {
     const [nextPage, setNextPage] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchCollections = async () => {
+        const fetchData = async () => {
             try {
-                const response = await axios.get<{ results: Collection[]; next: string | null }>('http://localhost:8000/collections/');
-                setCollections(response.data.results);
-                setNextPage(response.data.next); // Store the URL of the next page
+                const collectionsResponse = await axios.get<{ results: Collection[]; next: string | null }>('http://localhost:8000/collections/');
+                setCollections(collectionsResponse.data.results);
+                setNextPage(collectionsResponse.data.next); // Store the URL of the next page
+
+                const productsResponse = await axios.get<Product[]>('http://localhost:8000/products/');
+                setProducts(productsResponse.data);
             } catch (error) {
-                console.error('Error fetching collections:', error);
+                console.error('Error fetching data:', error);
             }
         };
 
-        const fetchProducts = async () => {
-            try {
-                const response = await axios.get<Product[]>('http://localhost:8000/products/');
-                setProducts(response.data);
-            } catch (error) {
-                console.error('Error fetching products:', error);
-            }
-        };
-
-        fetchCollections();
-        fetchProducts();
+        fetchData();
     }, []);
 
-    const loadMoreCollections = async () => {
+    const loadMoreData = async (url: string, setter: React.Dispatch<React.SetStateAction<any[]>>) => {
         if (nextPage) {
             try {
-                const response = await axios.get<{ results: Collection[]; next: string | null }>(nextPage);
-                setCollections([...collections, ...response.data.results]);
+                const response = await axios.get<{ results: any[]; next: string | null }>(url);
+                setter(prevData => [...prevData, ...response.data.results]);
                 setNextPage(response.data.next); // Update the URL of the next page
             } catch (error) {
-                console.error('Error fetching more collections:', error);
+                console.error('Error fetching more data:', error);
             }
         }
     };
 
-    const loadMoreProducts = async (id: string) => {
-        if (nextPage) {
-            try {
-                const response = await axios.get<{ results: Product[]; next: string | null }>(`/products/?collection=${id}&page=${nextPage}`);
-                setProducts([...products, ...response.data.results]);
-                setNextPage(response.data.next);
-            } catch (error) {
-                console.error('Error fetching more products:', error);
-            }
-        }
-    };
+    const loadMoreCollections = () => loadMoreData(nextPage!, setCollections);
+
+    const loadMoreProducts = (id: string) => loadMoreData(`/products/?collection=${id}&page=${nextPage}`, setProducts);
 
     return (
         <Routes>
