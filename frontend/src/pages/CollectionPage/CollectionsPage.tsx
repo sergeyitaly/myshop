@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import style from './style.module.scss';
 
@@ -16,6 +16,11 @@ interface Props {
 }
 
 const CollectionsPage: React.FC<Props> = ({ collections, loadMoreCollections, hasNextPage }) => {
+    useEffect(() => {
+        // Clear page counter from localStorage when component mounts
+        localStorage.removeItem('pageCounter');
+    }, []);
+
     return (
         <div className={style.container}>
             <h1 className={style.title}> Колекції </h1>
