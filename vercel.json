@@ -14,11 +14,8 @@
       "use": "@vercel/static-build"
     },
     {
-      "src": "frontend", 
-      "use": "@vercel/vercel-build", 
-      "config": {
-        "distDir": "dist" 
-      }
+      "src": "frontend/package.json", 
+      "use": "vercel-build"
     }
   ],
   "routes": [
