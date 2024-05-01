@@ -15,7 +15,7 @@
     },
     {
       "src": "frontend", 
-      "use": "@vercel/static-build", 
+      "use": "@vercel/vercel-build", 
       "config": {
         "distDir": "dist" 
       }
