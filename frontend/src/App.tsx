@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { Layout } from './layout/Layout/Layout';
 import CollectionsPage from './pages/CollectionPage/CollectionsPage';
@@ -7,6 +6,7 @@ import { Home } from './pages/home/home';
 import { NotFound } from './pages/not-found/not-found';
 import axios from 'axios';
 import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
+import  {useState, useEffect } from 'react';
 
 interface Collection {
     id: string;
@@ -29,8 +29,8 @@ function App() {
     useEffect(() => {
         const fetchCollections = async () => {
             try {
-                const response = await axios.get<Collection[]>('/collections/');
-                setCollections(response.data);
+                const response = await axios.get<{ results: Collection[]; next: string | null }>('http://localhost:8000/collections/');
+                setCollections(response.data.results);
             } catch (error) {
                 console.error('Error fetching collections:', error);
             }
@@ -38,7 +38,7 @@ function App() {
 
         const fetchProducts = async () => {
             try {
-                const response = await axios.get<Product[]>('/products/');
+                const response = await axios.get<Product[]>('http://localhost:8000/products/');
                 setProducts(response.data);
             } catch (error) {
                 console.error('Error fetching products:', error);
@@ -49,15 +49,12 @@ function App() {
         fetchProducts();
     }, []);
 
+
     return (
         <Routes>
             <Route element={<Layout withFooter withHeader />}>
                 <Route index element={<Home />} />
-                {/* Ensure collections are fetched before rendering CollectionsPage */}
-                {collections.length > 0 && (
-                    <Route path="/collections" element={<CollectionsPage collections={collections} />} />
-                )}
-                {/* Pass collections and products to CollectionItemsPage */}
+                <Route path="/collections" element={<CollectionsPage collections={collections} />} />
                 <Route path="/collection/:id" element={<CollectionItemsPage collections={collections} products={products} />} />
                 <Route path="/products" element={<CarouselBestseller products={products} />} />
                 <Route path="*" element={<NotFound />} />
