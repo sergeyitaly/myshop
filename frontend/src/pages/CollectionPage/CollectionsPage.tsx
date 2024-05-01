@@ -11,9 +11,11 @@ interface Collection {
 
 interface Props {
     collections: Collection[]; // Define the type of collections
+    loadMoreCollections: () => void; // Function to load more collections
+    hasNextPage: boolean; // Indicates if there is a next page
 }
 
-const CollectionsPage: React.FC<Props> = ({ collections }) => {
+const CollectionsPage: React.FC<Props> = ({ collections, loadMoreCollections, hasNextPage }) => {
     return (
         <div className={style.container}>
             <h1 className={style.title}> Колекції </h1>
@@ -32,6 +34,11 @@ const CollectionsPage: React.FC<Props> = ({ collections }) => {
                     <p>No collections available</p>
                 )}
             </div>
+            {hasNextPage && (
+                <div className={style.loadMore}>
+                    <button onClick={loadMoreCollections}>Load More</button>
+                </div>
+            )}
         </div>
     );
 };
