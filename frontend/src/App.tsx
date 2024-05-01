@@ -31,7 +31,7 @@ function App() {
         
         const fetchCollections = async () => {
             try {
-                const response = await axios.get<{ results: Collection[]; next: string | null }>('/collections/');
+                const response = await axios.get<{ results: Collection[]; next: string | null }>('http://localhost:8000/collections/');
                 setCollections(response.data.results);
                 setNextPage(response.data.next); // Store the URL of the next page
             } catch (error) {
@@ -41,7 +41,7 @@ function App() {
 
         const fetchProducts = async () => {
             try {
-                const response = await axios.get<{ results: Product[]; next: string | null }>('/products/');
+                const response = await axios.get<{ results: Product[]; next: string | null }>('http://localhost:8000/products/');
                 setProducts(response.data.results);
                 setNextPage(response.data.next); // Store the URL of the next page
             } catch (error) {
@@ -68,7 +68,7 @@ function App() {
     const loadMoreProducts = async (id: string) => {
         if (nextPage) {
             try {
-                const response = await axios.get<{ results: Product[]; next: string | null }>(`/products/?collection=${id}&page=${nextPage}`);
+                const response = await axios.get<{ results: Product[]; next: string | null }>(`http://localhost:8000/products/?collection=${id}&page=${nextPage}`);
                 setProducts([...products, ...response.data.results]);
                 setNextPage(response.data.next);
             } catch (error) {
