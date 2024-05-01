@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Route, Routes} from 'react-router-dom'; // Import useNavigate
+import { Route, Routes } from 'react-router-dom';
 import { Layout } from './layout/Layout/Layout';
 import CollectionsPage from './pages/CollectionPage/CollectionsPage';
-import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
 import { Home } from './pages/home/home';
 import { NotFound } from './pages/not-found/not-found';
 import axios from 'axios';
@@ -28,7 +27,6 @@ function App() {
     const [nextPage, setNextPage] = useState<string | null>(null);
 
     useEffect(() => {
-        
         const fetchCollections = async () => {
             try {
                 const response = await axios.get<{ results: Collection[]; next: string | null }>('http://localhost:8000/collections/');
@@ -41,9 +39,8 @@ function App() {
 
         const fetchProducts = async () => {
             try {
-                const response = await axios.get<{ results: Product[]; next: string | null }>('http://localhost:8000/products/');
-                setProducts(response.data.results);
-                setNextPage(response.data.next); // Store the URL of the next page
+                const response = await axios.get<Product[]>('http://localhost:8000/products/');
+                setProducts(response.data);
             } catch (error) {
                 console.error('Error fetching products:', error);
             }
@@ -68,7 +65,7 @@ function App() {
     const loadMoreProducts = async (id: string) => {
         if (nextPage) {
             try {
-                const response = await axios.get<{ results: Product[]; next: string | null }>(`http://localhost:8000/products/?collection=${id}&page=${nextPage}`);
+                const response = await axios.get<{ results: Product[]; next: string | null }>(`/products/?collection=${id}&page=${nextPage}`);
                 setProducts([...products, ...response.data.results]);
                 setNextPage(response.data.next);
             } catch (error) {
@@ -76,14 +73,6 @@ function App() {
             }
         }
     };
-
-    // Reset collections and products when navigating back to home after loading all pages
-    useEffect(() => {
-        if (!nextPage) {
-            setCollections([]);
-            setProducts([]);
-        }
-    }, [nextPage]);
 
     return (
         <Routes>
@@ -93,10 +82,7 @@ function App() {
                     path="/collections"
                     element={<CollectionsPage collections={collections} loadMoreCollections={loadMoreCollections} hasNextPage={nextPage !== null} />}
                 />
-                <Route
-                    path="/collection/:id"
-                    element={<CollectionItemsPage products={products} loadMoreProducts={loadMoreProducts} />}
-                />
+
                 <Route path="/products" element={<CarouselBestseller products={products} />} />
                 <Route path="*" element={<NotFound />} />
             </Route>

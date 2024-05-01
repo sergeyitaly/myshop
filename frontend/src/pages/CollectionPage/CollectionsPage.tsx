@@ -31,9 +31,13 @@ const CollectionsPage: React.FC<Props> = ({ collections, loadMoreCollections, ha
                         </Link>
                     ))
                 ) : (
-                    <p>No collections available</p>
+                    // Display "No collections available" only if collections are loaded and empty
+                    collections ? (
+                        <p>No collections available</p>
+                    ) : null // Do not display anything if collections are still being loaded
                 )}
             </div>
+            {/* Render "Load More" button only if there are more pages to load */}
             {hasNextPage && (
                 <div className={style.loadMore}>
                     <button onClick={loadMoreCollections}>Load More</button>
