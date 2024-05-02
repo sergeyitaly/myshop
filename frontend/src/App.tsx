@@ -53,25 +53,25 @@ function App() {
         fetchProducts();
     }, []);
 
-const loadMoreCollections = async () => {
-    if (nextPage) {
-        try {
-            const response = await axios.get<{ results: Collection[]; next: string | null }>(nextPage);
-            setCollections([...collections, ...response.data.results]);
-            setNextPage(response.data.next); // Update the URL of the next page
-            
-            // Increment pageCounter when loading more collections
-            const pageCounter = localStorage.getItem('pageCounter');
-            if (pageCounter) {
-                localStorage.setItem('pageCounter', String(parseInt(pageCounter) + 1));
+    const loadMoreCollections = async () => {
+        if (nextPage) {
+            try {
+                const response = await axios.get<{ results: Collection[]; next: string | null }>(nextPage);
+                setCollections([...collections, ...response.data.results]);
+                setNextPage(response.data.next); // Update the URL of the next page
+                
+                // Increment pageCounter when loading more collections
+                const pageCounter = localStorage.getItem('pageCounter');
+                if (pageCounter) {
+                    localStorage.setItem('pageCounter', String(parseInt(pageCounter) + 1));
+                }
+            } catch (error) {
+                console.error('Error fetching more collections:', error);
             }
-        } catch (error) {
-            console.error('Error fetching more collections:', error);
         }
-    }
-};
+    };
 
-    const loadMoreProducts = async (id: string) => {
+    const loadMoreProducts = async () => {
         if (nextPage) {
             try {
                 const response = await axios.get<{ results: Product[]; next: string | null }>(nextPage);
