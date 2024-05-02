@@ -7,6 +7,8 @@ import { NotFound } from './pages/not-found/not-found';
 import axios from 'axios';
 import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
 import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
+import { useLocation } from 'react-router-dom';
+
 //import { AppProvider } from './AppContext'; // Import the AppProvider component
 
 interface Collection {
@@ -82,6 +84,15 @@ function App() {
             }
         }
     };
+
+    const location = useLocation();
+
+    useEffect(() => {
+        // Reset pageCounter in localStorage when returning to /collections or /
+        if (location.pathname === '/collections' || location.pathname === '/') {
+            localStorage.setItem('pageCounter', '1'); // Reset pageCounter to 1
+        }
+    }, [location]);
 
     return (
 //        <AppProvider>
