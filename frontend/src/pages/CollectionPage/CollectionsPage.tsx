@@ -55,7 +55,7 @@ const CollectionsPage: React.FC<Props> = ({ collections, loadMoreCollections, ha
             {/* Render "Load More" button only if there are more pages to load */}
             {hasNextPage && (
                 <div className={style.loadMore}>
-                    <button onClick={loadMoreCollections} onTouchEnd={loadMoreCollections}>Load More</button>
+                    <button onClick={loadMoreCollections}>Load More</button>
                 </div>
             )}
         </div>
