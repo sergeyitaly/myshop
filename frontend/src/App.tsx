@@ -46,7 +46,7 @@ function App() {
 
         const fetchProducts = async () => {
             try {
-                const response = await axios.get<{ results: Product[]; next: string | null }>('/products/');
+                const response = await axios.get<{ results: Product[]; next: string | null }>('http://localhost:8000/products/');
                 setProducts(response.data.results);
                 setNextPage(response.data.next); // Store the URL of the next page
             } catch (error) {
@@ -98,11 +98,17 @@ function App() {
                         path="/collections"
                         element={<CollectionsPage collections={collections} loadMoreCollections={loadMoreCollections} hasNextPage={nextPage !== null} />}
                     />
+                   <Route
+                    path="/collections/"  // Add route for '/collections/'
+                    element={<CollectionsPage collections={collections} loadMoreCollections={loadMoreCollections} hasNextPage={nextPage !== null} />}
+                     />
                     <Route
                         path="/collection/:id"
                         element={<CollectionItemsPage products={products} loadMoreProducts={loadMoreProducts} />}
                     />
                     <Route path="/products" element={<CarouselBestseller products={products} />} />
+                    <Route path="/products/" element={<CarouselBestseller products={products} />} />
+
                     <Route path="*" element={<NotFound />} />
                 </Route>
             </Routes>
