@@ -7,7 +7,7 @@ import { NotFound } from './pages/not-found/not-found';
 import axios from 'axios';
 import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
 import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
-import { AppProvider } from './AppContext'; // Import the AppProvider component
+//import { AppProvider } from './AppContext'; // Import the AppProvider component
 
 interface Collection {
     id: string;
@@ -31,7 +31,6 @@ function App() {
     useEffect(() => {
         const fetchCollections = async () => {
             try {
-                //http://localhost:8000/
                 const response = await axios.get<{ results: Collection[]; next: string | null }>('/collections/');
                 setCollections(response.data.results);
                 setNextPage(response.data.next); // Store the URL of the next page
@@ -42,7 +41,7 @@ function App() {
 
         const fetchProducts = async () => {
             try {
-                const response = await axios.get<{ results: Product[]; next: string | null }>('http://localhost:8000/products/');
+                const response = await axios.get<{ results: Product[]; next: string | null }>('/products/');
                 setProducts(response.data.results);
                 setNextPage(response.data.next); // Store the URL of the next page
             } catch (error) {
@@ -85,7 +84,7 @@ const loadMoreCollections = async () => {
     };
 
     return (
-        <AppProvider>
+//        <AppProvider>
             <Routes>
                 <Route element={<Layout withFooter withHeader />}>
                     <Route index element={<Home />} />
@@ -101,7 +100,7 @@ const loadMoreCollections = async () => {
                     <Route path="*" element={<NotFound />} />
                 </Route>
             </Routes>
-        </AppProvider>
+//        </AppProvider>
     );
 }
 
