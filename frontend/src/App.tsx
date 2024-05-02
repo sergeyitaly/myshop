@@ -31,7 +31,8 @@ function App() {
     useEffect(() => {
         const fetchCollections = async () => {
             try {
-                const response = await axios.get<{ results: Collection[]; next: string | null }>('http://localhost:8000/collections/');
+                //http://localhost:8000/
+                const response = await axios.get<{ results: Collection[]; next: string | null }>('/collections/');
                 setCollections(response.data.results);
                 setNextPage(response.data.next); // Store the URL of the next page
             } catch (error) {
