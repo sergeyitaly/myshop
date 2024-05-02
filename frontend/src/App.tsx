@@ -7,7 +7,6 @@ import { NotFound } from './pages/not-found/not-found';
 import axios from 'axios';
 import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
 import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
-import { useLocation } from 'react-router-dom';
 
 //import { AppProvider } from './AppContext'; // Import the AppProvider component
 
@@ -26,14 +25,18 @@ interface Product {
 }
 
 function App() {
+    
     const [collections, setCollections] = useState<Collection[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
     const [nextPage, setNextPage] = useState<string | null>(null);
 
     useEffect(() => {
+        localStorage.setItem('pageCounter', '1');
+
         const fetchCollections = async () => {
+
             try {
-                const response = await axios.get<{ results: Collection[]; next: string | null }>('/collections/');
+                const response = await axios.get<{ results: Collection[]; next: string | null }>('http://localhost:8000/collections/');
                 setCollections(response.data.results);
                 setNextPage(response.data.next); // Store the URL of the next page
             } catch (error) {
@@ -56,12 +59,13 @@ function App() {
     }, []);
 
     const loadMoreCollections = async () => {
+
         if (nextPage) {
             try {
                 const response = await axios.get<{ results: Collection[]; next: string | null }>(nextPage);
                 setCollections([...collections, ...response.data.results]);
                 setNextPage(response.data.next); // Update the URL of the next page
-                
+
                 // Increment pageCounter when loading more collections
                 const pageCounter = localStorage.getItem('pageCounter');
                 if (pageCounter) {
@@ -84,15 +88,6 @@ function App() {
             }
         }
     };
-
-    const location = useLocation();
-
-    useEffect(() => {
-        // Reset pageCounter in localStorage when returning to /collections or /
-        if (location.pathname === '/collections' || location.pathname === '/') {
-            localStorage.setItem('pageCounter', '1'); // Reset pageCounter to 1
-        }
-    }, [location]);
 
     return (
 //        <AppProvider>
