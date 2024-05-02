@@ -74,7 +74,7 @@ const loadMoreCollections = async () => {
     const loadMoreProducts = async (id: string) => {
         if (nextPage) {
             try {
-                const response = await axios.get<{ results: Product[]; next: string | null }>(`/products/?collection=${id}&page=${nextPage}`);
+                const response = await axios.get<{ results: Product[]; next: string | null }>(nextPage);
                 setProducts([...products, ...response.data.results]);
                 setNextPage(response.data.next);
             } catch (error) {
