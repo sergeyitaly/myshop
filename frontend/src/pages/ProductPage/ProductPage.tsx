@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useMediaQuery } from "react-responsive";
-import productImgMin from "../../assets/collection/Rectangle 63.svg";
-import productImgMax from "../../assets/collection/Rectangle 45.svg";
+import { mockDataCollection } from "./productPageMock";
+// import productImgMin from "../../assets/collection/Rectangle 63.svg";
+// import productImgMax from "../../assets/collection/Rectangle 45.svg";
 import ringQueen from "../../assets/collection/Rectangle 48.svg";
 import braceletQueen from "../../assets/collection/Rectangle 69.svg";
 import ringsSet from "../../assets/collection/Rectangle 70.svg";
@@ -15,7 +16,8 @@ import arrowUp from "./icons/arrow-Up.svg";
 import negativeIcon from "./icons/-.svg";
 import positiveIcon from "./icons/+.svg";
 import style from "./ProductPage.module.scss";
-import CarouselProductMobile from "../../components/Carousels/CarouselProduct/CarouselProductMobile";
+import CarouselProductMobile from "../../components/Carousels/CarouselProduct/CarouselProductMobile/CarouselProductMobile";
+import CarouselProductDesktop from "../../components/Carousels/CarouselProduct/CarouselProductDesktop/CarouselProductDesktop";
 
 const ProductPage = () => {
   const [counter, setCounter] = useState(1);
@@ -23,6 +25,10 @@ const ProductPage = () => {
   const [isVisible1, setIsVisible1] = useState(false);
   const isMobile = useMediaQuery({
     query: "(max-width: 480px)",
+  });
+
+  const isDesktop = useMediaQuery({
+    query: "(min-width: 770px)",
   });
 
   const handleCounter = (value) => () => {
@@ -35,21 +41,23 @@ const ProductPage = () => {
     }
   };
 
-  const onToggleVisibility = () => {
-    setIsVisible(!isVisible);
-  };
-  const onToggleVisibility1 = () => {
-    setIsVisible1(!isVisible1);
+  const handleToggleVisibility = (index) => () => {
+    if (index === 1) {
+      setIsVisible(!isVisible);
+    } else {
+      setIsVisible1(!isVisible1);
+    }
   };
 
   return (
     <>
       <div className={style.container}>
+        {isDesktop && <CarouselProductDesktop />}
         {isMobile && <CarouselProductMobile />}
-        <div className={style.images}>
+        {/* <div className={style.images}>
           <img className={style.imgMin} src={productImgMin} alt="invida" />
           <img className={style.imgMax} src={productImgMax} alt="invida" />
-        </div>
+        </div> */}
         <div className={style.descContainer}>
           <div className={style.priceTitle}>
             <div className={style.prodTitle}>
@@ -70,7 +78,10 @@ const ProductPage = () => {
               <div className={style.secondSizeBox}>40</div>
             </div>
             <div className={style.counter}>
-              <button className={style.decCount} onClick={handleCounter}>
+              <button
+                className={style.decCount}
+                onClick={handleCounter("decrement")}
+              >
                 <img
                   className={style.negativeIcon}
                   src={negativeIcon}
@@ -79,7 +90,10 @@ const ProductPage = () => {
                 />
               </button>
               <p className={style.count}>{counter}</p>
-              <button className={style.inkCount} onClick={handleCounter}>
+              <button
+                className={style.inkCount}
+                onClick={handleCounter("increment")}
+              >
                 <img
                   className={style.positiveIcon}
                   src={positiveIcon}
@@ -114,7 +128,7 @@ const ProductPage = () => {
             </p>
 
             <button
-              onClick={onToggleVisibility}
+              onClick={handleToggleVisibility(1)}
               className={style.arrBtn}
               type="button"
             >
@@ -148,7 +162,7 @@ const ProductPage = () => {
             <p className={style.title}>Догляд:</p>
 
             <button
-              onClick={onToggleVisibility1}
+              onClick={handleToggleVisibility(2)}
               className={style.arrBtn}
               type="button"
             >
@@ -192,9 +206,11 @@ const ProductPage = () => {
           )}
         </div>
       </div>
+
       <div className={style.collectionContainer}>
         <p className={style.collectionTitle}>Також з цієї колекції</p>
         <ul className={style.collectionList}>
+          {/* {mockDataCollection.map((product,index) => )} */}
           <li className={style.collectionItem}>
             <img
               className={style.collectionImg}
@@ -209,7 +225,7 @@ const ProductPage = () => {
               src={isMobile ? `${braceletQueenMob}` : `${braceletQueen}`}
               alt="bracelet"
             />
-            <p className={style.collectionItemName}>Браслет Oueen</p>
+            <p className={style.collectionItemName}>Браслет Queen</p>
             <p className={style.collectionItemPrice}>8 300,00 грн.</p>
           </li>
           <li className={style.collectionItem}>
