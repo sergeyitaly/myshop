@@ -1,4 +1,5 @@
 .container {
+  font-family: "Inter", sans-serif;
   display: flex;
   max-width: 100vw;
   gap: 15px;
@@ -6,43 +7,38 @@
   margin-bottom: 164px;
 }
 
-.images {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  align-items: flex-start;
-}
+// .images {
+//   display: flex;
+//   justify-content: center;
+//   gap: 15px;
+//   align-items: flex-start;
+// }
 
-.imgMax {
-  max-width: 650px;
-}
+// .imgMax {
+//   max-width: 650px;
+// }
 
 .descContainer {
   max-width: 600px;
 }
 
 .prodTitle {
+  font-weight: 500;
+  color: #000;
   display: flex;
   justify-content: space-between;
   margin-bottom: 15px;
 }
 
 .prodName {
-  font-family: "Inter", sans-serif;
-  font-weight: 500;
   font-size: 32px;
-  color: #000;
 }
 
 .prodPrice {
-  font-family: "Inter", sans-serif;
-  font-weight: 500;
   font-size: 30px;
-  font-weight: 500;
 }
 
 .inStock {
-  font-family: "Inter", sans-serif;
   font-weight: 400;
   font-size: 20px;
   color: #07b118;
@@ -50,7 +46,6 @@
 }
 
 .colorName {
-  font-family: "Inter", sans-serif;
   font-weight: 400;
   font-size: 20px;
   color: #000;
@@ -61,6 +56,22 @@
   display: flex;
   gap: 8px;
   margin-bottom: 32px;
+}
+
+.firstColor {
+  width: 40px;
+  height: 40px;
+  background: #e0b139;
+  border: 1px solid #000;
+  cursor: pointer;
+}
+
+.secondColor {
+  width: 40px;
+  height: 40px;
+  background: #d9d9d9;
+  border: none;
+  cursor: pointer;
 }
 
 .size {
@@ -80,6 +91,8 @@
   display: flex;
   gap: 8px;
   margin-right: 16px;
+  font-weight: 400;
+  font-size: 20px;
 }
 
 .firstSizeBox {
@@ -87,9 +100,6 @@
   width: auto;
   height: 40px;
   padding: 7px 7px;
-  font-family: "Inter", sans-serif;
-  font-weight: 400;
-  font-size: 20px;
   color: #000;
   box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
   background: #fff;
@@ -101,9 +111,6 @@
   width: auto;
   height: 40px;
   padding: 7px 7px;
-  font-family: "Inter", sans-serif;
-  font-weight: 400;
-  font-size: 20px;
   color: #cdcdcd;
   text-align: center;
   background: #fff;
@@ -146,7 +153,6 @@
 }
 
 .count {
-  font-family: "Inter", sans-serif;
   font-weight: 400;
   font-size: 20px;
   color: #000;
@@ -164,7 +170,6 @@
 }
 
 .addBtn {
-  font-family: "Inter", sans-serif;
   font-weight: 500;
   font-size: 24px;
   text-align: center;
@@ -179,7 +184,6 @@
 }
 
 .buyNow {
-  font-family: "Inter", sans-serif;
   font-weight: 500;
   font-size: 24px;
   text-align: center;
@@ -192,24 +196,7 @@
   cursor: pointer;
 }
 
-.firstColor {
-  width: 40px;
-  height: 40px;
-  background: #e0b139;
-  border: 1px solid #000;
-  cursor: pointer;
-}
-
-.secondColor {
-  width: 40px;
-  height: 40px;
-  background: #d9d9d9;
-  border: none;
-  cursor: pointer;
-}
-
 .description {
-  font-family: "Inter", sans-serif;
   font-weight: 400;
   font-size: 19px;
   line-height: 130%;
@@ -242,7 +229,6 @@
 }
 
 .title {
-  font-family: "Inter", sans-serif;
   font-weight: 500;
   font-size: 30px;
   color: #000;
@@ -250,7 +236,6 @@
 }
 
 .titleRoll {
-  font-family: "Inter", sans-serif;
   font-weight: 500;
   font-size: 30px;
   color: #000;
@@ -258,7 +243,6 @@
 }
 
 .usageDescr {
-  font-family: "Inter", sans-serif;
   font-weight: 400;
   font-size: 19px;
   line-height: 130%;
@@ -268,7 +252,6 @@
 }
 
 .careDescr {
-  font-family: "Inter", sans-serif;
   font-weight: 400;
   font-size: 19px;
   line-height: 130%;
@@ -287,7 +270,6 @@
 }
 
 .collectionTitle {
-  font-family: "Inter", sans-serif;
   font-weight: 500;
   font-size: 34px;
   color: #000;
@@ -295,6 +277,7 @@
 }
 
 .collectionContainer {
+  font-family: "Inter", sans-serif;
   padding: 0 20px;
   margin-bottom: 164px;
   max-width: 100vw;
@@ -313,7 +296,6 @@
 }
 
 .collectionItemName {
-  font-family: "Inter", sans-serif;
   font-weight: 500;
   font-size: 20px;
   text-align: center;
@@ -322,7 +304,6 @@
 }
 
 .collectionItemPrice {
-  font-family: "Inter", sans-serif;
   font-weight: 400;
   font-size: 20px;
   text-align: center;
@@ -598,6 +579,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    margin-top: 16px;
   }
 
   .prodName {
