@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMediaQuery } from "react-responsive";
-import { mockDataCollection } from "./productPageMock";
+// import { mockDataCollection, mockDataMobCollection } from "./productPageMock";
 // import productImgMin from "../../assets/collection/Rectangle 63.svg";
 // import productImgMax from "../../assets/collection/Rectangle 45.svg";
 import ringQueen from "../../assets/collection/Rectangle 48.svg";
@@ -27,9 +27,9 @@ const ProductPage = () => {
     query: "(max-width: 480px)",
   });
 
-  const isDesktop = useMediaQuery({
-    query: "(min-width: 770px)",
-  });
+  // const isDesktop = useMediaQuery({
+  //   query: "(min-width: 770px)",
+  // });
 
   const handleCounter = (value) => () => {
     if (value === "increment") {
@@ -52,7 +52,7 @@ const ProductPage = () => {
   return (
     <>
       <div className={style.container}>
-        {isDesktop && <CarouselProductDesktop />}
+        <CarouselProductDesktop />
         {isMobile && <CarouselProductMobile />}
         {/* <div className={style.images}>
           <img className={style.imgMin} src={productImgMin} alt="invida" />

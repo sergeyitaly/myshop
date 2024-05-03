@@ -36,24 +36,27 @@ export const mockDataCollection: Product[] = [
     price: "5 600,00 грн",
     imageUrl: image4,
   },
+];
+
+export const mockDataMobCollection = [
   {
     name: "Каблучка Queen",
     price: "7 300,00 грн",
-    imageUrl: image5,
+    imageUrlMob: image5,
   },
   {
     name: "Браслет Queen",
     price: "8 300,00 грн",
-    imageUrl: image6,
+    imageUrlMob: image6,
   },
   {
     name: "Сет з каблучок",
     price: "10 300,00 грн",
-    imageUrl: image7,
+    imageUrlMob: image7,
   },
   {
     name: "Сережки з цитрином",
     price: "5 600,00 грн",
-    imageUrl: image8,
+    imageUrlMob: image8,
   },
 ];
