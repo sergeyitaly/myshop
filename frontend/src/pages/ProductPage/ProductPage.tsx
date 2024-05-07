@@ -27,9 +27,9 @@ const ProductPage = () => {
     query: "(max-width: 480px)",
   });
 
-  // const isDesktop = useMediaQuery({
-  //   query: "(min-width: 770px)",
-  // });
+  const isDesktop = useMediaQuery({
+    query: "(min-width: 770px)",
+  });
 
   const handleCounter = (value) => () => {
     if (value === "increment") {
@@ -52,7 +52,7 @@ const ProductPage = () => {
   return (
     <>
       <div className={style.container}>
-        <CarouselProductDesktop />
+        {isDesktop && <CarouselProductDesktop />}
         {isMobile && <CarouselProductMobile />}
         {/* <div className={style.images}>
           <img className={style.imgMin} src={productImgMin} alt="invida" />

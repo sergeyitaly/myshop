@@ -1,29 +1,21 @@
 .sliderContainer {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
+  display: table;
+  width: 100%;
 }
-
+.slick-slider {
+  display: flex;
+  flex-direction: row-reverse;
+}
 .slider {
-  margin-right: 20px;
-  max-width: 650px; /* Додано для обмеження ширини великої картинки */
-}
-
-.thumbnails {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-
-.thumbnail {
-  margin-bottom: 10px;
-}
-
-.thumbnail img {
-  width: 80px;
-  height: auto;
+  display: table-cell;
+  max-width: 650px;
 }
 
 .slick-dots {
-  display: none; /* Ховаємо стандартні точки слайдера */
+  display: none;
+}
+
+.slider img {
+  max-width: 100%;
+  height: auto;
 }
