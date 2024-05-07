@@ -66,6 +66,15 @@ const CarouselProductDesktop = () => {
           </div>
         </Slider>
       </div>
+      {/* <div className={style.thumbnails}>
+        {[productImgMax, ringQueen, braceletQueen, ringsSet, earrings].map(
+          (img, index) => (
+            <div key={index} className={style.thumbnail}>
+              <img src={img} alt={`Thumbnail ${index}`} />
+            </div>
+          )
+        )}
+      </div> */}
     </div>
   );
 };
