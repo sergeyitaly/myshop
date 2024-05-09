@@ -9,10 +9,11 @@ interface Collection {
 }
 
 interface Props {
-    collections: Collection[]; // Define the type of collections
+    collections: Collection[];
 }
 
 const CollectionsPage: React.FC<Props> = ({ collections }) => {
+
     return (
         <div className={style.container}>
             <h1 className={style.title}> Колекції </h1>
