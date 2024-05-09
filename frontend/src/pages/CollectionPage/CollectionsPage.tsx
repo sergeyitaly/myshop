@@ -12,20 +12,9 @@ interface Collection {
 
 interface Props {
     collections: Collection[];
-    loadMoreCollections: () => void;
-    hasNextPage: boolean;
 }
 
-const CollectionsPage: React.FC<Props> = ({ collections, loadMoreCollections, hasNextPage }) => {
-    const location = useLocation();
-
-    useEffect(() => {
-        // Reset pageCounter in localStorage when returning to /collections or /
-        if (location.pathname === '/collections' || location.pathname === '/') {
-            localStorage.setItem('pageCounter', '1'); // Reset pageCounter to 1
-        }
-    }, [location]);
-
+const CollectionsPage: React.FC<Props> = ({ collections }) => {
     return (
         <div className={style.container}>
             <h1 className={style.title}> Колекції </h1>

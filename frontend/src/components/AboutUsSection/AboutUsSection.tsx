@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import styles from './AboutUsSection.module.scss';
 import { Link } from 'react-router-dom';
+import vase from './vase.jpg'
 
 export const AboutUsSection = () => {
+
     let content =
         " — це унікальний проект, створений командою з шести осіб, які об'єднали свою пристрасть до української культури та бажання просувати її через домашній декор. Магазин спеціалізується на продукції з українською тематикою, пропонуючи широкий асортимент товарів для дому, включаючи кераміку, скло та різноманітні аксесуари.";
     const [width, setWidth] = useState(window.innerWidth);
@@ -24,7 +26,7 @@ export const AboutUsSection = () => {
     }, []);
 
     return (
-        <section className={styles.section}>
+        <section className={styles.section} style={{ backgroundImage: `url(${vase})` }}>
             <div className={styles.content}>
                 <span className={styles.blue}>KOLORYT</span>
                 {content}
