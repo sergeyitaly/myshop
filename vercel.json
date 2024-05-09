@@ -5,7 +5,7 @@
       "src": "myshop/wsgi.py",
       "use": "@vercel/python",
       "config": {
-        "maxLambdaSize": "150mb",
+        "maxLambdaSize": "100mb",
         "runtime": "python3.9"
       }
     },

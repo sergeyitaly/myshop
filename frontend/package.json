@@ -8,8 +8,8 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "vercel-postbuild": "cp -r ../dist/* .vercel_build_output", 
-    "vercel-build": "tsc && vite build && npm run vercel-postbuild" 
+    "vercel-postbuild": "cp -r ../dist/* .vercel_build_output",
+    "vercel-build": "tsc && vite build && npm run vercel-postbuild"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
@@ -35,6 +35,7 @@
     "@types/node": "^20.12.7",
     "@types/react": "^18.2.56",
     "@types/react-dom": "^18.2.19",
+    "@types/react-router-dom": "^5.3.3",
     "@types/react-slick": "^0.23.13",
     "@typescript-eslint/eslint-plugin": "^7.0.2",
     "@typescript-eslint/parser": "^7.0.2",
