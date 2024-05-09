@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'storages',
     'drf_yasg',
+    'django_filters'
     # "debug_toolbar",
 
 ]
