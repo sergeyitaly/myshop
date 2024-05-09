@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
 from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer
 from .models import Product, Collection, Category
 
@@ -11,6 +12,7 @@ class ProductList(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]  # Allow anonymous access
+    pagination_class = PageNumberPagination
 
 
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -25,6 +27,7 @@ class CollectionList(generics.ListCreateAPIView):
     serializer_class = CollectionSerializer
     permission_classes = [AllowAny]  # Allow anonymous access
     print(str(queryset.query))
+    pagination_class = PageNumberPagination
 
 
 
@@ -32,6 +35,7 @@ class CollectionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
     permission_classes = [AllowAny]  # Allow anonymous access
+    pagination_class = PageNumberPagination
     
 
 
@@ -39,6 +43,7 @@ class CategoryList(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [AllowAny]  # Allow anonymous access
+    pagination_class = PageNumberPagination
 
 
 class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):

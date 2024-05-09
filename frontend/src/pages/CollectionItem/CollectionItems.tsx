@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom'; // Import useNavigate
 import style from './style.module.scss';
 import CarouselBestseller from '../CollectionPage/CarouselBestseller/CarouselBestseller';
 import axios from 'axios';
@@ -19,19 +19,22 @@ interface Collection {
 }
 
 interface CollectionItemsPageProps {
-    collections: Collection[];
     products: Product[];
+    loadMoreProducts: (id: string) => void;
 }
 
-const CollectionItemsPage: React.FC<CollectionItemsPageProps> = ({ products }) => {
-    const { id } = useParams<{ id: string }>();
-    const [collection, setCollection] = useState<any>(null); // Change type as needed
+const CollectionItemsPage: React.FC<CollectionItemsPageProps> = ({ products, loadMoreProducts }) => {
+    const { id } = useParams<{ id?: string }>(); // Provide a default value or make id optional
+    const [collection, setCollection] = useState<Collection | null>(null);
+    const navigate = useNavigate(); // Initialize navigate
 
     useEffect(() => {
         const fetchCollection = async () => {
             try {
-                const response = await axios.get(`/collections/${id}`);
-                setCollection(response.data);
+                if (id) { // Check if id is not undefined
+                    const response = await axios.get<Collection>(`/collections/${id}`);
+                    setCollection(response.data);
+                }
             } catch (error) {
                 console.error('Error fetching collection:', error);
             }
@@ -58,6 +61,10 @@ const CollectionItemsPage: React.FC<CollectionItemsPageProps> = ({ products }) =
             ))}
             {/* Render CarouselBestseller component */}
             <CarouselBestseller products={products} />
+            {/* Load more button */}
+            <button onClick={() => id && loadMoreProducts(id)}>Load More</button>
+            {/* Navigate back to the main page when all pages are loaded */}
+            {!id && <button onClick={() => navigate('/')}>Go back to main page</button>}
         </div>
     );
 };

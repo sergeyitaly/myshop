@@ -14,6 +14,20 @@
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <script src="{% static 'main.js' %}"></script>
+
+    <!-- Pagination -->
+    <div class="pagination">
+        {% if products.has_previous %}
+            <a href="?page={{ products.previous_page_number }}">Previous</a>
+        {% endif %}
+
+        <span class="current-page">Page {{ products.number }} of {{ products.paginator.num_pages }}</span>
+
+        {% if products.has_next %}
+            <a href="?page={{ products.next_page_number }}">Next</a>
+        {% endif %}
+    </div>
 </body>
 
 </html>
+
