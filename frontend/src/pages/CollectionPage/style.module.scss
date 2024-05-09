@@ -5,7 +5,6 @@
 .cardContainer {
   display: flex;
   flex-wrap: wrap;
-  //justify-content: space-between;
 }
 
 .title {
@@ -19,10 +18,11 @@
   color: inherit;
 }
 
-.cardImage {
-  //border: 1px solid #ddd;
-  padding: 0 5px;
-  border-radius: 5px;
+.cardImage img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  padding: 0 10px;
 }
 
 .name {
