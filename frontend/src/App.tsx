@@ -29,7 +29,7 @@ function App() {
     useEffect(() => {
         const fetchCollections = async () => {
             try {
-                const response = await axios.get<Collection[]>('/collections/');
+                const response = await axios.get<{ results: Collection[]; next: string | null }>('http://localhost:8000/collections/');
                 setCollections(response.data);
             } catch (error) {
                 console.error('Error fetching collections:', error);
