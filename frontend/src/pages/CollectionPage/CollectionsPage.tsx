@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import style from './style.module.scss';
+// CollectionsPage.tsx
+import React from 'react';
 import { Link } from 'react-router-dom';
+import style from './style.module.scss';
 
 interface Collection {
     id: string;
@@ -12,9 +12,11 @@ interface Collection {
 
 interface Props {
     collections: Collection[];
+    loadMoreCollections: () => void;
+    hasNextPage: boolean;
 }
 
-const CollectionsPage: React.FC<Props> = ({ collections }) => {
+const CollectionsPage: React.FC<Props> = ({ collections, loadMoreCollections, hasNextPage }) => {
     return (
         <div className={style.container}>
             <h1 className={style.title}> Колекції </h1>
