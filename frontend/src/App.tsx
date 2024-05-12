@@ -1,3 +1,4 @@
+// App.tsx
 import { useState, useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { Layout } from './layout/Layout/Layout';
@@ -7,8 +8,6 @@ import { NotFound } from './pages/not-found/not-found';
 import axios from 'axios';
 import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
 import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
-
-//import { AppProvider } from './AppContext'; // Import the AppProvider component
 
 interface Collection {
     id: string;
@@ -30,14 +29,13 @@ function App() {
     const [nextPage, setNextPage] = useState<string | null>(null);
 
     useEffect(() => {
-                localStorage.setItem('pageCounter', '1');
+        localStorage.setItem('pageCounter', '1');
 
         const fetchCollections = async () => {
-
             try {
                 const response = await axios.get<{ results: Collection[]; next: string | null }>('/collections/');
                 setCollections(response.data.results);
-                setNextPage(response.data.next); // Store the URL of the next page
+                setNextPage(response.data.next);
             } catch (error) {
                 console.error('Error fetching collections:', error);
             }
@@ -47,7 +45,7 @@ function App() {
             try {
                 const response = await axios.get<{ results: Product[]; next: string | null }>('/products/');
                 setProducts(response.data.results);
-                setNextPage(response.data.next); // Store the URL of the next page
+                setNextPage(response.data.next);
             } catch (error) {
                 console.error('Error fetching products:', error);
             }
@@ -58,14 +56,11 @@ function App() {
     }, []);
 
     const loadMoreCollections = async () => {
-
         if (nextPage) {
             try {
                 const response = await axios.get<{ results: Collection[]; next: string | null }>(nextPage);
                 setCollections([...collections, ...response.data.results]);
-                setNextPage(response.data.next); // Update the URL of the next page
-
-                // Increment pageCounter when loading more collections
+                setNextPage(response.data.next);
                 const pageCounter = localStorage.getItem('pageCounter');
                 if (pageCounter) {
                     localStorage.setItem('pageCounter', String(parseInt(pageCounter) + 1));
@@ -89,23 +84,21 @@ function App() {
     };
 
     return (
-//        <AppProvider>
-            <Routes>
-                <Route element={<Layout withFooter withHeader />}>
-                    <Route index element={<Home />} />
-                    <Route
-                        path="/collections"
-                        element={<CollectionsPage collections={collections} loadMoreCollections={loadMoreCollections} hasNextPage={nextPage !== null} />}
-                    />
-                    <Route
-                        path="/collection/:id"
-                        element={<CollectionItemsPage products={products} loadMoreProducts={loadMoreProducts} />}
-                    />
-                    <Route path="/products" element={<CarouselBestseller products={products} />} />
-                    <Route path="*" element={<NotFound />} />
-                </Route>
-            </Routes>
-//        </AppProvider>
+        <Routes>
+            <Route element={<Layout withFooter withHeader />}>
+                <Route index element={<Home />} />
+                <Route
+                    path="/collections"
+                    element={<CollectionsPage collections={collections} loadMoreCollections={loadMoreCollections} hasNextPage={nextPage !== null} />}
+                />
+                <Route
+                    path="/collection/:id"
+                    element={<CollectionItemsPage products={products} loadMoreProducts={loadMoreProducts} />}
+                />
+                <Route path="/products" element={<CarouselBestseller products={products} />} />
+                <Route path="*" element={<NotFound />} />
+            </Route>
+        </Routes>
     );
 }
 
