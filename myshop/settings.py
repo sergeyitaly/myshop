@@ -282,3 +282,7 @@ CACHES = {
 #        'LOCATION': os.path.join(BASE_DIR, 'site_cache'),
 #    }
 # }
+
+CORS_ALLOWED_ORIGINS = [
+    'https://myshop-six-wheat.vercel.app',
+]
