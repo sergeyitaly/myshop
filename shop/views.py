@@ -1,5 +1,6 @@
 from django.http import Http404
-from rest_framework.filters import SearchFilter
+from django.shortcuts import render
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import generics, status
@@ -33,8 +34,9 @@ class ProductList(generics.ListCreateAPIView):
     permission_classes = [AllowAny]  # Allow anonymous access
     pagination_class = CustomPageNumberPagination
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_fields = ['name', 'category']
+    filterset_fields = ['category']
     search_fields = ['name', 'description']
+    ordering_fields = ['name', 'price']
 
 
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -47,19 +49,48 @@ class CollectionList(generics.ListCreateAPIView):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
     permission_classes = [AllowAny]  # Allow anonymous access
-    print(str(queryset.query))
+
     pagination_class = CustomPageNumberPagination
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_fields = ['name']
-    search_fields = ['name']
+    filterset_fields = ['category']
+    search_fields = ['name', 'description']
+    ordering_fields = ['name', 'price']
+
+
+class CollectionItemsPage(generics.ListAPIView):
+    serializer_class = ProductSerializer
+    pagination_class = CustomPageNumberPagination
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['name', 'description']
+    ordering_fields = ['name', 'price']
+
+    def get_queryset(self):
+        collection_id = self.kwargs['pk']
+
+        try:
+            collection = Collection.objects.get(pk=collection_id)
+        except Collection.DoesNotExist:
+            raise Http404("Collection does not exist")
+        queryset = collection.product_set.all()
+        return queryset
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        queryset = self.filter_queryset(queryset)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 
 class CollectionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
     permission_classes = [AllowAny]  # Allow anonymous access
-    pagination_class = PageNumberPagination
-    
+
+
 
 
 class CategoryList(generics.ListCreateAPIView):
