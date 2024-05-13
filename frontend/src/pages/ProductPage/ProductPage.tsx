@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMediaQuery } from "react-responsive";
 // import { mockDataCollection, mockDataMobCollection } from "./productPageMock";
 // import productImgMin from "../../assets/collection/Rectangle 63.svg";
-// import productImgMax from "../../assets/collection/Rectangle 45.svg";
+import productImgMax from "../../components/Carousels/img/Rectangle 45.svg";
 import ringQueen from "../../assets/collection/Rectangle 48.svg";
 import braceletQueen from "../../assets/collection/Rectangle 69.svg";
 import ringsSet from "../../assets/collection/Rectangle 70.svg";
@@ -25,6 +25,10 @@ const ProductPage = () => {
   const [isVisible1, setIsVisible1] = useState(false);
   const isMobile = useMediaQuery({
     query: "(max-width: 480px)",
+  });
+
+  const isTab = useMediaQuery({
+    query: "(min-width: 481px) and (max-width: 768px)",
   });
 
   const isDesktop = useMediaQuery({
@@ -54,10 +58,9 @@ const ProductPage = () => {
       <div className={style.container}>
         {isDesktop && <CarouselProductDesktop />}
         {isMobile && <CarouselProductMobile />}
-        {/* <div className={style.images}>
-          <img className={style.imgMin} src={productImgMin} alt="invida" />
+        {isTab && (
           <img className={style.imgMax} src={productImgMax} alt="invida" />
-        </div> */}
+        )}
         <div className={style.descContainer}>
           <div className={style.priceTitle}>
             <div className={style.prodTitle}>
