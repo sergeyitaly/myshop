@@ -37,6 +37,7 @@ const CarouselProductDesktop = () => {
         </div>
       );
     },
+    arrows: false,
     dots: true,
     dotsClass: "slick-dots slick-thumb",
     infinite: true,
@@ -49,20 +50,28 @@ const CarouselProductDesktop = () => {
     <div className={style.sliderContainer}>
       <div className={style.slider}>
         <Slider {...settings}>
-          <div>
-            <img src={productImgMax} alt="Product Image Max" />
+          <div className={style.mainBox}>
+            <img
+              className={style.mainImg}
+              src={productImgMax}
+              alt="Product Image Max"
+            />
           </div>
           <div>
-            <img src={ringQueen} alt="Ring Queen" />
+            <img className={style.slickImg} src={ringQueen} alt="Ring Queen" />
           </div>
           <div>
-            <img src={braceletQueen} alt="Bracelet Queen" />
+            <img
+              className={style.slickImg}
+              src={braceletQueen}
+              alt="Bracelet Queen"
+            />
           </div>
           <div>
-            <img src={ringsSet} alt="Rings Set" />
+            <img className={style.slickImg} src={ringsSet} alt="Rings Set" />
           </div>
           <div>
-            <img src={earrings} alt="Earrings" />
+            <img className={style.slickImg} src={earrings} alt="Earrings" />
           </div>
         </Slider>
       </div>

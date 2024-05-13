@@ -2,18 +2,16 @@
   display: table;
   width: 100%;
 }
-.slick-slider {
-  display: flex;
-  flex-direction: row-reverse;
-}
+
 .slider {
   display: table-cell;
   max-width: 650px;
 }
 
-.slick-dots {
-  display: none;
-}
+// .slick-dots li {
+//   width: 80px;
+//   height: 80px;
+// }
 
 .slider img {
   max-width: 100%;
