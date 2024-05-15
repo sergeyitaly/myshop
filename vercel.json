@@ -20,10 +20,6 @@
       "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/$1"
     },
     {
-      "src": "/media/(.*)",
-      "dest": "https://kolorytmedia.s3.amazonaws.com/media/$1"
-    },
-    {
       "src": "/assets/(.*)",
       "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/assets/$1"
     },
