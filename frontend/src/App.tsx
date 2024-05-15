@@ -10,7 +10,9 @@ import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/Carous
 import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
 
 
-const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
+//const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
+const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
+
 
 interface Collection {
     id: string;
