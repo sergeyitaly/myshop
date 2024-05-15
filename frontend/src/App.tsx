@@ -9,7 +9,8 @@ import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/Carous
 import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
 
 // Retrieve API base URL from environment variables
-const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || process.env.REACT_APP_LOCAL_API_BASE_URL;
+const apiBaseUrl =  process.env.REACT_APP_LOCAL_API_BASE_URL || process.env.REACT_APP_API_BASE_URL ;
+//const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 interface Collection {
     id: string;
@@ -57,21 +58,22 @@ function App() {
         fetchProducts();
     }, []);
 
-    const loadMoreCollections = async () => {
-        if (nextPage) {
-            try {
-                const response = await axios.get<{ results: Collection[]; next: string | null }>(nextPage);
-                setCollections([...collections, ...response.data.results]);
-                setNextPage(response.data.next);
-                const pageCounter = localStorage.getItem('pageCounter');
-                if (pageCounter) {
-                    localStorage.setItem('pageCounter', String(parseInt(pageCounter) + 1));
-                }
-            } catch (error) {
-                console.error('Error fetching more collections:', error);
+const loadMoreCollections = async () => {
+    if (nextPage) {
+        try {
+            const response = await axios.get<{ results: Collection[]; next: string | null }>(nextPage);
+            setCollections([...collections, ...response.data.results]);
+            setNextPage(response.data.next);
+            const pageCounter = localStorage.getItem('pageCounter');
+            if (pageCounter) {
+                localStorage.setItem('pageCounter', String(parseInt(pageCounter) + 1));
             }
+        } catch (error) {
+            console.error('Error fetching more collections:', error);
         }
-    };
+    }
+};
+
 
     const loadMoreProducts = async () => {
         if (nextPage) {
