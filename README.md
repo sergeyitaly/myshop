@@ -1,6 +1,6 @@
 install python, django, npm
 
-go to frontend folder - nmp run build, npm run dev (localhost:5173)
+go to frontend folder - npm run build, npm run dev (localhost:5173)
 
 go to main folder:
    - python -m pip install -r requirements.txt
