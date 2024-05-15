@@ -51,9 +51,6 @@ export function processAssetFileNames(info: PreRenderedAsset): string {
   return `${assetDir}/[name].[ext]`
 }
 
-// Define the base API URL based on the environment
-const apiBaseUrl = process.env.NODE_ENV === 'production' ? 'https://vercel.com' : 'http://localhost:8000';
-
 export default defineConfig({
   plugins: [
     svgr(),
@@ -73,12 +70,14 @@ export default defineConfig({
     modulePreload: {
       polyfill: false,
     },
+    //  outDir: path.resolve(__dirname, 'static'), // Output directory resolved to myshop/frontend/static
     outDir: path.resolve(__dirname, '../dist'),
+
     manifest: 'manifest.json',
-    emptyOutDir: true,
+    emptyOutDir: true, //delete everything in ..dist folder before build
     rollupOptions: {
       input: {
-        main: path.resolve(__dirname, 'src/main.tsx'),
+        main: path.resolve(__dirname, 'src/main.tsx'), // Entry point for the application
       },
       output: {
         entryFileNames: entryFileNames,
@@ -87,11 +86,12 @@ export default defineConfig({
       },
     },
   },
+
   server: {
-    port: 5173,
+    port: 5173, // Specify the port for the Vite development server
     proxy: {
       '/static': {
-        target: apiBaseUrl,
+        target: 'http://localhost:8000', // Proxy requests to Django development server
         changeOrigin: true,
       },
     },
