@@ -1,4 +1,3 @@
-// App.tsx
 import { useState, useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { Layout } from './layout/Layout/Layout';
@@ -9,10 +8,8 @@ import axios from 'axios';
 import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
 import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
 
-
-//const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
+// Retrieve API base URL from environment variables
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || process.env.REACT_APP_LOCAL_API_BASE_URL;
-
 
 interface Collection {
     id: string;
