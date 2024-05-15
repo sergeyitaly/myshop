@@ -9,6 +9,9 @@ import axios from 'axios';
 import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
 import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
 
+
+const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
+
 interface Collection {
     id: string;
     name: string;
@@ -33,7 +36,7 @@ function App() {
 
         const fetchCollections = async () => {
             try {
-                const response = await axios.get<{ results: Collection[]; next: string | null }>('/collections/');
+                const response = await axios.get<{ results: Collection[]; next: string | null }>(`${apiBaseUrl}/collections/`);
                 setCollections(response.data.results);
                 setNextPage(response.data.next);
             } catch (error) {
@@ -43,7 +46,7 @@ function App() {
 
         const fetchProducts = async () => {
             try {
-                const response = await axios.get<{ results: Product[]; next: string | null }>('/products/');
+                const response = await axios.get<{ results: Product[]; next: string | null }>(`${apiBaseUrl}/products/`);
                 setProducts(response.data.results);
                 setNextPage(response.data.next);
             } catch (error) {
