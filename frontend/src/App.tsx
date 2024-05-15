@@ -11,7 +11,7 @@ import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
 
 
 //const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
-const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
+const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || process.env.REACT_APP_LOCAL_API_BASE_URL;
 
 
 interface Collection {
