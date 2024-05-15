@@ -1,6 +1,6 @@
 import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+// import "slick-carousel/slick/slick.css";
+// import "slick-carousel/slick/slick-theme.css";
 import productImgMax from "../../img/Rectangle 45.svg";
 import ringQueen from "../../img/Rectangle 45.svg";
 import braceletQueen from "../../img/Rectangle 45.svg";
