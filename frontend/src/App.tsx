@@ -8,13 +8,9 @@ import axios from 'axios';
 import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
 import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
 
+
 // Retrieve API base URL from environment variables
-//const apiBaseUrl =  process.env.REACT_APP_LOCAL_API_BASE_URL || process.env.REACT_APP_API_BASE_URL ;
-
-//const isLocal = process.env.NODE_ENV === 'development';
-//const apiBaseUrl = isLocal ? process.env.REACT_APP_LOCAL_API_BASE_URL : process.env.REACT_APP_API_BASE_URL;
-const apiBaseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : process.env.REACT_APP_API_BASE_URL;
-
+const apiBaseUrl =  process.env.REACT_APP_LOCAL_API_BASE_URL || process.env.REACT_APP_API_BASE_URL ;
 interface Collection {
     id: string;
     name: string;

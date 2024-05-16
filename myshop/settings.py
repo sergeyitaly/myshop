@@ -31,6 +31,7 @@ AWS_TEMPLATES = f'https://{AWS_S3_CUSTOM_DOMAIN}/templates/'
 USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
 AWS_FRONTEND_DOMAIN = f"https://{AWS_S3_CUSTOM_DOMAIN}"
 VERCEL_DOMAIN = os.getenv('VERCEL_DOMAIN')
+LOCAL_HOST = os.getenv('LOCAL_HOST')
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
@@ -43,7 +44,8 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 INTERNAL_IPS = ["127.0.0.1", "localhost", '::1']
-ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app', 'localhost']
+ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app',LOCAL_HOST]
+
 # Application definition
 
 INSTALLED_APPS = [
