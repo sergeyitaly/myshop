@@ -10,8 +10,6 @@ import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
 
 // Retrieve API base URL from environment variables
 const apiBaseUrl =  process.env.REACT_APP_LOCAL_API_BASE_URL || process.env.REACT_APP_API_BASE_URL ;
-//const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-
 interface Collection {
     id: string;
     name: string;
@@ -33,6 +31,7 @@ function App() {
 
     useEffect(() => {
         localStorage.setItem('pageCounter', '1');
+        console.log(window.location.href);
 
         const fetchCollections = async () => {
             try {
