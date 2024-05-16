@@ -70,12 +70,13 @@ export default defineConfig({
     modulePreload: {
       polyfill: false,
     },
+
     //  outDir: path.resolve(__dirname, 'static'), // Output directory resolved to myshop/frontend/static
     outDir: path.resolve(__dirname, '../dist'),
-
     manifest: 'manifest.json',
     emptyOutDir: true, //delete everything in ..dist folder before build
     rollupOptions: {
+      external: ['.env'],
       input: {
         main: path.resolve(__dirname, 'src/main.tsx'), // Entry point for the application
       },
