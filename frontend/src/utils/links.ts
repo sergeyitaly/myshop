@@ -4,15 +4,11 @@ export const links = [
         name: 'Колекції',
     },
     {
-        href: '/',
+        href: '/*',
         name: 'Про нас',
     },
     {
-        href: '/',
+        href: '/*',
         name: 'Контакти',
     },
-    // {
-    //     href: '/collectionItem',
-    //     name: 'Колеуція',
-    // }
 ];
