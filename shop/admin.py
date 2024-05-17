@@ -17,7 +17,7 @@ class CollectionAdmin(admin.ModelAdmin):
     readonly_fields = ['slug']  # Make slug readonly
 
     # Specify the fields to display and edit in the admin form
-    fields = ['name', 'description', 'category','photo', 'price', 'currency', 'stock', 'available', 'slug']
+    fields = ['name', 'category','photo']
     form = CollectionForm
     
     def display_price(self, obj):
