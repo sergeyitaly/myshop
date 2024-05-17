@@ -1,10 +1,15 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
+import reactRefresh from '@vitejs/plugin-react-refresh';
 import path from 'path';
+import { PreRenderedAsset } from "rollup";
+import commonjs from 'vite-plugin-commonjs';
 import dotenv from 'dotenv';
+import { resolve } from 'path';
 
-dotenv.config({ path: path.resolve(__dirname, `.env.${process.env.NODE_ENV}`) });
+dotenv.config({ path: resolve(__dirname, '.env') });
+//dotenv.config({ path: path.resolve(__dirname, `.env.${process.env.NODE_ENV}`) });
 
 const assetDir = "assets";
 const entryFileNames = `${assetDir}/[name].js`;
@@ -17,7 +22,7 @@ const assets = [
   { output: `${assetDir}/[name][ext]`, regex: /\.xml$/ }
 ];
 
-function processAssetFileNames(info) {
+function processAssetFileNames(info: PreRenderedAsset): string {
   const name = info.name as string;
   const result = assets.find(a => a.regex.test(name));
   return result ? result.output : `${assetDir}/[name].[ext]`;
@@ -27,6 +32,8 @@ export default defineConfig({
   plugins: [
     svgr(),
     react(),
+    reactRefresh(),
+    commonjs()
   ],
   resolve: {
     alias: {
@@ -37,12 +44,11 @@ export default defineConfig({
     'process.env': {
       VITE_LOCAL_API_BASE_URL: process.env.VITE_LOCAL_API_BASE_URL,
       VITE_API_BASE_URL: process.env.VITE_API_BASE_URL,
-    }
-  },
+    }  },
   build: {
     modulePreload: { polyfill: false },
     outDir: path.resolve(__dirname, '../dist'),
-    manifest: true,
+    manifest: 'manifest.json',
     emptyOutDir: true,
     rollupOptions: {
       input: { main: path.resolve(__dirname, 'src/main.tsx') },

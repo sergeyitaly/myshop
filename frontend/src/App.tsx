@@ -8,6 +8,7 @@ import axios from 'axios';
 import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
 import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
 
+//dotenv.config({ path: path.resolve(__dirname, `.env.${process.env.NODE_ENV}`) });
 // Retrieve API base URL from environment variables
 const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
 
