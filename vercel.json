@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "myshop/wsgi.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "150mb",
+        "runtime": "python3.9"
+      }
+    },
+    {
+      "src": "build_files.sh",
+      "use": "@vercel/static-build"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/$1"
+    },
+    {
+      "src": "/media/(.*)",
+      "dest": "https://kolorytmedia.s3.amazonaws.com/media/$1"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/assets/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "myshop/wsgi.py"
+    }
+  ]
+}

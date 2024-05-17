@@ -1,0 +1,22 @@
+myshop/
+├── frontend/
+│   └── src/
+│       ├── assets/
+│       ├── components/
+│       ├── hooks/
+│       ├── layout/
+│       ├── pages/
+│       ├── utils/
+│       ├── App.tsx
+│       ├── index.scss
+│       └── main.tsx
+├── dist/
+│   ├── main.js
+│   ├── main.css
+│   └── assets/
+│       └── other_assets.png
+├── myshop/
+│   ├── settings.py
+│   └── urls.py
+└── templates/
+    └── index.html

@@ -1,12 +1,9 @@
-
 import email
-from enum import unique
-from tkinter.ttk import Style
 from rest_framework.serializers import Serializer, ModelSerializer, CharField
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from rest_framework import serializers
-from accounts.models import *
+from .models import CustomUser
 
 from django.contrib.auth import authenticate, get_user_model
 from djoser.conf import settings
@@ -34,15 +31,15 @@ class CustomTokenCreateSerializer(TokenCreateSerializer):
 class UserSerializer(ModelSerializer):
     password = serializers.CharField(style={'input_type':'password'}, write_only=True)
     re_password = serializers.CharField(style={'input_type':'re_password'}, write_only=True)
+
     class Meta:
          model = CustomUser
-         fields = ['email','username',  'password','re_password']
-         #extra_kwargs = {'password': {'write_only': True}}
+         fields = ['email', 'username', 'password', 're_password']
 
     def save(self):
         new_customuser= CustomUser(
-            email = self.validated_data['email'],
-            username = self.validated_data['username'],
+            email=self.validated_data['email'],
+            username=self.validated_data['username'],
         )
         password = self.validated_data['password']
         re_password = self.validated_data['re_password']
@@ -53,14 +50,12 @@ class UserSerializer(ModelSerializer):
         new_customuser.save()
         return new_customuser
 
-         
 class LoginRequestSerializer(Serializer):
     model = User
     username = CharField(required=True)
     password = CharField(required=True)
 
 class TokenSeriazliser(ModelSerializer):
-
     class Meta:
         model = Token
         fields = ['key']

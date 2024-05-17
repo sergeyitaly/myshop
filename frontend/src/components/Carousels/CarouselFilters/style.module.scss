@@ -1,19 +1,19 @@
 .sliderContainer {
-    margin-top: 80px;
     padding: 0 10px;
+    margin: 70px 0;
 }
 
 .filters {
-    font-size: 32px;
+    font-size: 26px;
     font-weight: 500;
     display: flex;
     margin-bottom: 30px;
-    justify-content: space-between;
-    margin-right: 200px;
 }
 
 .card {
     padding-right: 10px;
+    margin-bottom: 20px;
+    font-weight: 400;
 }
 
 .cardImage {
@@ -23,15 +23,16 @@
 }
 
 .imageContainer {
-    height: 230px;
+    //height: 230px;
     overflow: hidden;
+    position: relative;
 }
 
 .image {
     width: 100%;
     height: auto;
 }
-///////////////////////////////////////
+
 .cardImage .name {
     position: absolute;
     top: 50%;
@@ -49,36 +50,77 @@
     font-size: 18px;
 }
 
-.selected {
-    text-decoration: underline;
+.filters {
+    //width: fit-content;
+    font-size: 26px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    gap: clamp(5px, 3vw, 17px);
+    text-decoration: none;
+    color: var(--gray-500);
+    justify-content: space-between;
+    margin-right: 200px;
+
+    p {
+        position: relative;
+        cursor: pointer;
+
+        &::after {
+            content: "";
+            width: 100%;
+            border-bottom: 2px solid transparent;
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            opacity: 0;
+            transition: opacity 400ms ease, border-color 300ms ease; // Добавляем переход для изменения цвета и прозрачности
+        }
+
+        &:hover::after {
+            opacity: 0.5;
+            border-color: var(--blue); // Изменяем цвет на ваш синий
+        }
+    }
+
+    .selected {
+        //font-weight: 600;
+        font-size: 26px;
+
+        &::after {
+            content: "";
+            width: 100%;
+            border-bottom: 1px solid var(--blue); // Применяем подчеркивание
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            opacity: 1; // Отображаем подчеркивание по умолчанию
+        }
+    }
 }
 
 .priceContainer {
     display: flex;
     justify-content: center;
     margin-top: 10px;
+    font-size: 18px;
 }
 
 .price {
-    //text-decoration: line-through;
     margin-right: 10px;
     color: #787878;
-    font-size: 18px;
-}
-
-.newPrice {
-    font-size: 18px;
-
 }
 
 .saleLabel {
     position: absolute;
     top: 10px;
     left: 10px;
-    background-color: rgba(255, 255, 255, 0.81);
-    border-radius: 15px;
+    background-color: #D9D9D9;
+    border-radius: 10px;
     color: #000000;
-    padding: 5px;
+    width: 55px;
+    height: 24px;
+    text-align: center;
 }
 
 .strikethrough {
@@ -138,8 +180,8 @@
 
     .price {
         margin-right: 0px;
-         font-size: 14px;
-     }
+        font-size: 14px;
+    }
 
     .newPrice {
         font-size: 14px;
