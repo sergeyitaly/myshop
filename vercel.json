@@ -7,7 +7,6 @@
       "config": {
         "maxLambdaSize": "100mb",
         "runtime": "python3.9"
-        
       }
     },
     {
@@ -29,7 +28,7 @@
       "dest": "myshop/wsgi.py"
     }
   ],
-  "headers": [
+    "headers": [
     {
       "source": "/(.*)",
       "headers": [
