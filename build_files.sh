@@ -8,8 +8,6 @@
 #rm -rf ../.cache/pip
 
 cd frontend
-npm install typescript --save-dev
-
 npm run vercel-build
 cd ..
 
@@ -25,5 +23,6 @@ aws s3 mv media s3://kolorytmedia/media --recursive
 
 
 python3 manage.py collectstatic --noinput --clear
+rm -rf frontend
 du -h --max-depth=5 | sort -rh
 # Deactivate the virtual environment
