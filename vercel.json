@@ -1,7 +1,7 @@
 {
   "version": 2,
   "builds": [
-    { "src": "build_files.sh", "use": "@now/static-build" }
+    { "src": "build_files.sh", "use": "@vercel/static-build" }
   ],
   "routes": [
     {
