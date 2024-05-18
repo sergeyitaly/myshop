@@ -16,7 +16,7 @@
   ],
   "functions": {
     "build": {
-      "runtime": "@vercel/build-utils",
+      "runtime": "now-static-build@latest",
       "includeFiles": "build_files.sh"
     }
   }
