@@ -8,6 +8,8 @@
 #rm -rf ../.cache/pip
 
 cd frontend
+npm install -g typescript
+
 npm run build
 cd ..
 
