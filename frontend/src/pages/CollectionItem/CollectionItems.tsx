@@ -18,6 +18,11 @@ interface Collection {
     category: string;
 }
 
+interface PaginatedProducts {
+    results: Product[];
+    next: string | null;
+}
+
 const CollectionItemsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [collection, setCollection] = useState<Collection | null>(null);
@@ -27,37 +32,27 @@ const CollectionItemsPage: React.FC = () => {
     const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
 
     useEffect(() => {
-        const fetchCollection = async () => {
+        const fetchData = async () => {
             try {
-                if (id) {
-                    const response = await axios.get<Collection>(`${apiBaseUrl}/collections/${id}/`);
-                    setCollection(response.data);
-                    fetchProducts(id);
-                }
+                const [collectionResponse, productsResponse] = await Promise.all([
+                    axios.get<Collection>(`${apiBaseUrl}/collection/${id}/`),
+                    axios.get<PaginatedProducts>(`${apiBaseUrl}/collection/${id}/products/`)
+                ]);
+                setCollection(collectionResponse.data);
+                setProducts(productsResponse.data.results);
+                setNextPage(productsResponse.data.next);
             } catch (error) {
-                console.error('Error fetching collection:', error);
+                console.error('Error fetching data:', error);
             }
         };
 
-        const fetchProducts = async (collectionId: string) => {
-            try {
-                const response = await axios.get<{ results: Product[]; next: string | null }>(
-                    `${apiBaseUrl}/collections/${collectionId}/products/`
-                );
-                setProducts(response.data.results);
-                setNextPage(response.data.next);
-            } catch (error) {
-                console.error('Error fetching products:', error);
-            }
-        };
-
-        fetchCollection();
+        fetchData();
     }, [id, apiBaseUrl]);
 
     const loadMoreProducts = async () => {
         if (nextPage) {
             try {
-                const response = await axios.get<{ results: Product[]; next: string | null }>(nextPage);
+                const response = await axios.get<PaginatedProducts>(nextPage);
                 setProducts((prevProducts) => [...prevProducts, ...response.data.results]);
                 setNextPage(response.data.next);
             } catch (error) {
@@ -66,24 +61,38 @@ const CollectionItemsPage: React.FC = () => {
         }
     };
 
-    if (!collection) {
-        return <div className={style.container}>Collection not found.</div>;
+    useEffect(() => {
+        const handleScroll = () => {
+            if (
+                window.innerHeight + document.documentElement.scrollTop === document.documentElement.offsetHeight
+            ) {
+                loadMoreProducts();
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [nextPage]); // Add nextPage as a dependency to useEffect
+
+    if (!collection || products.length === 0) {
+        return <div className={style.container}>Loading...</div>;
     }
 
     return (
         <div className={style.container}>
             <h1 className={style.title}>{collection.name}</h1>
-            {products.map((product) => (
-                <div key={product.id} className={style.card}>
-                    <div className={style.cardImage}>
-                        <img src={product.photo} alt={product.name} style={{ maxWidth: '100%' }} />
-                        <p className={style.name}>{product.name}</p>
-                        <p className={style.price}>{product.price}</p>
+            <div className={style.productContainer}>
+                {products.map((product) => (
+                    <div key={product.id} className={style.productCard}>
+                        <div className={style.cardImage}>
+                            <img src={product.photo} alt={product.name} style={{ maxWidth: '100%' }} />
+                            <p className={style.name}>{product.name}</p>
+                            <p className={style.price}>{product.price}</p>
+                        </div>
                     </div>
-                </div>
-            ))}
+                ))}
+            </div>
             <CarouselBestseller products={products} />
-            <button onClick={loadMoreProducts}>Load More</button>
             <button onClick={() => navigate('/')}>Go back to main page</button>
         </div>
     );

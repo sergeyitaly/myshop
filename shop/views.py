@@ -10,6 +10,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer
 from .models import Product, Collection, Category
 
+class CollectionProductsView(generics.ListAPIView):
+    serializer_class = ProductSerializer
+    permission_classes = [AllowAny]  # Allow anonymous access
+
+    def get_queryset(self):
+        collection_id = self.kwargs['pk']
+        return Product.objects.filter(collection_id=collection_id)
+
 
 class CustomPageNumberPagination(PageNumberPagination):
     page_size = 6
