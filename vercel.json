@@ -1,5 +1,8 @@
 {
   "version": 2,
+  "builds": [
+    { "src": "build_files.sh", "use": "@now/static-build" }
+  ],
   "routes": [
     {
       "src": "/static/(.*)",
@@ -13,11 +16,5 @@
       "src": "/(.*)",
       "dest": "myshop/wsgi.py"
     }
-  ],
-  "functions": {
-    "build": {
-      "runtime": "now-static-build@latest",
-      "includeFiles": "build_files.sh"
-    }
-  }
+  ]
 }
