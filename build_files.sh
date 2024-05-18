@@ -8,7 +8,7 @@
 #rm -rf ../.cache/pip
 
 cd frontend
-npm run vercel-build
+npm run build
 cd ..
 
 pip install -r requirements.txt

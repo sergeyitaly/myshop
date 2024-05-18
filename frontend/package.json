@@ -9,7 +9,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "vercel-postbuild": "cp -r ../dist/* .vercel_build_output",
-    "vercel-build": "tsc && vite build --output ../dist && npm run vercel-postbuild"
+    "vercel-build": "tsc && vite build && npm run vercel-postbuild"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
