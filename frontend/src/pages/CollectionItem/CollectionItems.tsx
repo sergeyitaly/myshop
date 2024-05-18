@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import style from './style.module.scss';
 import CarouselBestseller from '../CollectionPage/CarouselBestseller/CarouselBestseller';
 import axios from 'axios';
@@ -28,7 +28,6 @@ const CollectionItemsPage: React.FC = () => {
     const [collection, setCollection] = useState<Collection | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
     const [nextPage, setNextPage] = useState<string | null>(null);
-    const navigate = useNavigate();
     const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
 
     useEffect(() => {
@@ -100,7 +99,6 @@ const CollectionItemsPage: React.FC = () => {
                 ))}
             </div>
             <CarouselBestseller products={products} />
-            <button onClick={() => navigate('/')}>Повернутися на головну сторінку</button>
         </div>
     );
 };
