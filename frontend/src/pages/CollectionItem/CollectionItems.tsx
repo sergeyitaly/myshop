@@ -18,32 +18,52 @@ interface Collection {
     category: string;
 }
 
-interface CollectionItemsPageProps {
-    products: Product[];
-    loadMoreProducts: (id: string) => void;
-}
-
-const CollectionItemsPage: React.FC<CollectionItemsPageProps> = ({ products, loadMoreProducts }) => {
-    const { id } = useParams<{ id?: string }>();
+const CollectionItemsPage: React.FC = () => {
+    const { id } = useParams<{ id: string }>();
     const [collection, setCollection] = useState<Collection | null>(null);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [nextPage, setNextPage] = useState<string | null>(null);
     const navigate = useNavigate();
+    const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
 
     useEffect(() => {
         const fetchCollection = async () => {
             try {
                 if (id) {
-                    const response = await axios.get<Collection>(`${getApiBaseUrl()}/collections/${id}`);
+                    const response = await axios.get<Collection>(`${apiBaseUrl}/collections/${id}/`);
                     setCollection(response.data);
+                    fetchProducts(id);
                 }
             } catch (error) {
                 console.error('Error fetching collection:', error);
             }
         };
-        fetchCollection();
-    }, [id]);
 
-    const getApiBaseUrl = () => {
-        return process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
+        const fetchProducts = async (collectionId: string) => {
+            try {
+                const response = await axios.get<{ results: Product[]; next: string | null }>(
+                    `${apiBaseUrl}/collections/${collectionId}/products/`
+                );
+                setProducts(response.data.results);
+                setNextPage(response.data.next);
+            } catch (error) {
+                console.error('Error fetching products:', error);
+            }
+        };
+
+        fetchCollection();
+    }, [id, apiBaseUrl]);
+
+    const loadMoreProducts = async () => {
+        if (nextPage) {
+            try {
+                const response = await axios.get<{ results: Product[]; next: string | null }>(nextPage);
+                setProducts((prevProducts) => [...prevProducts, ...response.data.results]);
+                setNextPage(response.data.next);
+            } catch (error) {
+                console.error('Error fetching more products:', error);
+            }
+        }
     };
 
     if (!collection) {
@@ -63,8 +83,8 @@ const CollectionItemsPage: React.FC<CollectionItemsPageProps> = ({ products, loa
                 </div>
             ))}
             <CarouselBestseller products={products} />
-            <button onClick={() => id && loadMoreProducts(id)}>Load More</button>
-            {!id && <button onClick={() => navigate('/')}>Go back to main page</button>}
+            <button onClick={loadMoreProducts}>Load More</button>
+            <button onClick={() => navigate('/')}>Go back to main page</button>
         </div>
     );
 };
