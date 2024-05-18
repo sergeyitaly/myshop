@@ -74,30 +74,21 @@ function App() {
         }
     };
 
-    const loadMoreProducts = async () => {
-        if (nextPage) {
-            try {
-                const response = await axios.get<{ results: Product[]; next: string | null }>(nextPage);
-                setProducts([...products, ...response.data.results]);
-                setNextPage(response.data.next);
-            } catch (error) {
-                console.error('Error fetching more products:', error);
-            }
-        }
-    };
-
     return (
         <Routes>
             <Route element={<Layout withFooter withHeader />}>
                 <Route index element={<Home />} />
                 <Route
                     path="/collections"
-                    element={<CollectionsPage collections={collections} loadMoreCollections={loadMoreCollections} hasNextPage={nextPage !== null} />}
+                    element={
+                        <CollectionsPage
+                            collections={collections}
+                            loadMoreCollections={loadMoreCollections}
+                            hasNextPage={nextPage !== null}
+                        />
+                    }
                 />
-                <Route
-                    path="/collection/:id"
-                    element={<CollectionItemsPage />}
-                />
+                <Route path="/collection/:id" element={<CollectionItemsPage />} />
                 <Route path="/products" element={<CarouselBestseller products={products} />} />
                 <Route path="*" element={<NotFound />} />
             </Route>
