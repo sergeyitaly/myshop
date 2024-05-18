@@ -10,4 +10,3 @@ frontend/node_modules/
 *.pyc
 *.log
 env/
-node_modules/
