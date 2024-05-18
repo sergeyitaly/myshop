@@ -74,8 +74,15 @@ const CollectionItemsPage: React.FC = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, [nextPage]); // Add nextPage as a dependency to useEffect
 
-    if (!collection || products.length === 0) {
-        return <div className={style.container}>Loading...</div>;
+    if (!collection) {
+        return <div className={style.container}>Завантаження...</div>;
+    } else if (products.length === 0) {
+        return (
+            <div className={style.container}>
+                <h1 className={style.title}>{collection.name}</h1>
+                <p>В цій колекції немає продуктів.</p>
+            </div>
+        );
     }
 
     return (
@@ -93,7 +100,7 @@ const CollectionItemsPage: React.FC = () => {
                 ))}
             </div>
             <CarouselBestseller products={products} />
-            <button onClick={() => navigate('/')}>Go back to main page</button>
+            <button onClick={() => navigate('/')}>Повернутися на головну сторінку</button>
         </div>
     );
 };
