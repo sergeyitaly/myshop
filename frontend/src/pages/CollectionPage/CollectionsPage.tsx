@@ -49,10 +49,10 @@ const CollectionsPage: React.FC<Props> = ({ collections, loadMoreCollections, ha
                     </Link>
                 ))}
             </div>
-            {loading && <div className={style.loading}>Loading...</div>}
+            {loading && <div className={style.loading}>Завантаження...</div>}
             {hasNextPage && (
                 <div className={style.loadMore}>
-                    <button onClick={loadMoreCollections}>Load More</button>
+                    <button onClick={loadMoreCollections}> Завантажити щє </button>
                 </div>
             )}
         </div>
