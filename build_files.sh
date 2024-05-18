@@ -8,6 +8,8 @@
 #rm -rf ../.cache/pip
 
 cd frontend
+npm install typescript --save-dev
+
 npm run vercel-build
 cd ..
 
