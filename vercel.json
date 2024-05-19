@@ -4,12 +4,6 @@
     { "src": "myshop/wsgi.py", "use": "@vercel/python", "config": { "maxLambdaSize": "100mb", "runtime": "python3.9" } },
     { "src": "build_files.sh", "use": "@vercel/static-build" }
   ],
-  "rewrites": [
-    {
-        "source": "/(.*)",
-        "destination": "/"
-    }
-],
   "routes": [
     {
       "src": "/static/(.*)",
@@ -19,6 +13,12 @@
       "src": "/assets/(.*)",
       "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/assets/$1"
     },
+    {
+      "src": "/(.*)",
+      "dest": "/myshop/wsgi.py"
+    }
+  ],
+  "rewrites": [
     {
       "src": "/(.*)",
       "dest": "/myshop/wsgi.py"
