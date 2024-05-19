@@ -44,11 +44,12 @@ urlpatterns = [
     path('api/', include('shop.urls')),      # Example: /products/
     path('admin/', admin.site.urls),     # Admin URLs: /admin/
     # Debug view
-  #  path("__debug__/", include("debug_toolbar.urls")),
- #   path('debug/', TemplateView.as_view(template_name='../frontend/index.html'), name='index'),
+    #  path("__debug__/", include("debug_toolbar.urls")),
+    #  path('debug/', TemplateView.as_view(template_name='../frontend/index.html'), name='index'),
     #re_path(r'^.*$', TemplateView.as_view(template_name='index.html'), name='index'),
     path("", views.index, name="index"),
-    re_path(r'^.*$', RedirectView.as_view(url='/index/')),
+    # Catch-all URL pattern (redirect to index.html)
+    re_path(r'^.*$', RedirectView.as_view(url='/')),
 
 
     # Default URL (index.html)

@@ -89,7 +89,7 @@ function App() {
                 />
                 <Route
                     path="/collection/:id"
-                    element={<CollectionItemsPage  />}
+                    element={<CollectionItemsPage />}
                 />
                 <Route path="/products" element={<CarouselBestseller products={products} />} />
                 <Route path="*" element={<NotFound />} />
