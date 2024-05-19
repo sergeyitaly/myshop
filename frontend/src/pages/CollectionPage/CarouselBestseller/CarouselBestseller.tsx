@@ -14,7 +14,7 @@ interface CarouselBestsellerProps {
     products: Product[];
 }
 
-const CarouselBestseller: React.FC<CarouselBestsellerProps> = ({ products }) => {
+const CarouselBestseller: React.FC<CarouselBestsellerProps> = React.memo(({ products }) => {
     const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
 
     const settings = {
@@ -45,7 +45,12 @@ const CarouselBestseller: React.FC<CarouselBestsellerProps> = ({ products }) => 
                     <Link to={`${apiBaseUrl}/api/products/${product.id}`} key={product.id} className={style.card}>
                         <div key={product.id} className={style.card}>
                             <div className={style.cardImage}>
-                                <img src={product.photo} alt={product.name} className={style.image} />
+                                <img
+                                    src={product.photo}
+                                    alt={product.name}
+                                    className={style.image}
+                                    loading="lazy" // Add lazy loading attribute
+                                />
                                 <p className={style.name}>{product.name}</p>
                                 <p className={style.price}>{product.price}</p>
                             </div>
@@ -55,6 +60,8 @@ const CarouselBestseller: React.FC<CarouselBestsellerProps> = ({ products }) => 
             </Slider>
         </div>
     );
-};
+});
 
 export default CarouselBestseller;
+
+

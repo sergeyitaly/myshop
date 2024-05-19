@@ -69,7 +69,12 @@ const CollectionItemsPage: React.FC = () => {
                 {products.map((product) => (
                     <div key={product.id} className={style.productCard}>
                         <div className={style.cardImage}>
-                            <img src={product.photo} alt={product.name} style={{ maxWidth: '100%' }} />
+                            <img
+                                src={product.photo}
+                                alt={product.name}
+                                style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
+                                loading="lazy" // Add lazy loading attribute
+                            />
                             <p className={style.name}>{product.name}</p>
                             <p className={style.price}>{product.price}</p>
                         </div>
