@@ -13,9 +13,9 @@
       "src": "/assets/(.*)",
       "dest": "https://kolorytmedia.s3.amazonaws.com/staticfiles_build/static/assets/$1"
     },
-    { 
-      "src": "/[^.]+",
-      "dest": "/myshop/wsgi.py", 
+    {
+      "src": "/(.*)",
+      "dest": "/myshop/wsgi.py",
       "status": 200 
     }
   ]
