@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import style from './style.module.scss';
 
@@ -16,17 +16,10 @@ interface Props {
 }
 
 const CollectionsPage: React.FC<Props> = ({ collections, loadMoreCollections, hasNextPage }) => {
-    const [loading, setLoading] = useState(true);
-
     useEffect(() => {
-        setLoading(false); // Simulate loading time, replace with actual fetching logic
-    }, []);
-
-    useEffect(() => {
-        const handleScroll = () => {
-            if (
-                window.innerHeight + document.documentElement.scrollTop === document.documentElement.offsetHeight
-            ) {
+        const handleScroll = (event: Event) => {
+            const target = event.target as Window;
+            if (target.innerHeight + target.document.documentElement.scrollTop === target.document.documentElement.offsetHeight) {
                 loadMoreCollections();
             }
         };
@@ -42,14 +35,13 @@ const CollectionsPage: React.FC<Props> = ({ collections, loadMoreCollections, ha
                 {collections.map((collection) => (
                     <Link to={`/collection/${collection.id}`} key={collection.id} className={style.card}>
                         <div className={style.cardImage}>
-                            <img src={collection.photo} alt={collection.name} style={{ maxWidth: '100%' }} />
+                            <img src={collection.photo} alt={collection.name} style={{ maxWidth: '100%' }} loading="lazy" />
                             <p className={style.name}>{collection.name}</p>
                             <p className={style.category}>{collection.category}</p>
                         </div>
                     </Link>
                 ))}
             </div>
-            {loading && <div className={style.loading}>Завантаження...</div>}
             {hasNextPage && (
                 <div className={style.loadMore}>
                     <button onClick={loadMoreCollections}>Завантажити ще</button>
