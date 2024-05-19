@@ -15,6 +15,8 @@ interface CarouselBestsellerProps {
 }
 
 const CarouselBestseller: React.FC<CarouselBestsellerProps> = ({ products }) => {
+    const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
+
     const settings = {
         dots: true,
         infinite: true,
@@ -40,14 +42,14 @@ const CarouselBestseller: React.FC<CarouselBestsellerProps> = ({ products }) => 
             <p className={style.title}>Бестселери</p>
             <Slider {...settings}>
                 {products.map((product) => (
-                    <Link to={`/products/${product.id}`} key={product.id} className={style.card}>
-                    <div key={product.id} className={style.card}>
-                        <div className={style.cardImage}>
-                            <img src={product.photo} alt={product.name} className={style.image} />
-                            <p className={style.name}>{product.name}</p>
-                            <p className={style.price}>{product.price}</p>
+                    <Link to={`${apiBaseUrl}/api/products/${product.id}`} key={product.id} className={style.card}>
+                        <div key={product.id} className={style.card}>
+                            <div className={style.cardImage}>
+                                <img src={product.photo} alt={product.name} className={style.image} />
+                                <p className={style.name}>{product.name}</p>
+                                <p className={style.price}>{product.price}</p>
+                            </div>
                         </div>
-                    </div>
                     </Link>
                 ))}
             </Slider>

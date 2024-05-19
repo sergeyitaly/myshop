@@ -8,7 +8,6 @@ import axios from 'axios';
 import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
 import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
 
-// Retrieve API base URL from environment variables
 const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
 
 interface Collection {
@@ -36,7 +35,7 @@ function App() {
 
         const fetchCollections = async () => {
             try {
-                const response = await axios.get<{ results: Collection[]; next: string | null }>(`${apiBaseUrl}/collections/`);
+                const response = await axios.get<{ results: Collection[]; next: string | null }>(`${apiBaseUrl}/api/collections/`);
                 setCollections(response.data.results);
                 setNextPage(response.data.next);
             } catch (error) {
@@ -46,7 +45,7 @@ function App() {
 
         const fetchProducts = async () => {
             try {
-                const response = await axios.get<{ results: Product[]; next: string | null }>(`${apiBaseUrl}/products/`);
+                const response = await axios.get<{ results: Product[]; next: string | null }>(`${apiBaseUrl}/api/products/`);
                 setProducts(response.data.results);
                 setNextPage(response.data.next);
             } catch (error) {
@@ -88,7 +87,10 @@ function App() {
                         />
                     }
                 />
-                <Route path="/collection/:id" element={<CollectionItemsPage />} />
+                <Route
+                    path="/collection/:id"
+                    element={<CollectionItemsPage  />}
+                />
                 <Route path="/products" element={<CarouselBestseller products={products} />} />
                 <Route path="*" element={<NotFound />} />
             </Route>
