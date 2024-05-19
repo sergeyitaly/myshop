@@ -18,64 +18,42 @@ interface Collection {
     category: string;
 }
 
-interface PaginatedProducts {
-    results: Product[];
-    next: string | null;
-}
-
 const CollectionItemsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [collection, setCollection] = useState<Collection | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
-    const [nextPage, setNextPage] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
     const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
 
     useEffect(() => {
         const fetchData = async () => {
             try {
+                setLoading(true);
                 const [collectionResponse, productsResponse] = await Promise.all([
-                    axios.get<Collection>(`${apiBaseUrl}/collection/${id}/`),
-                    axios.get<PaginatedProducts>(`${apiBaseUrl}/collection/${id}/products/`)
+                    axios.get<Collection>(`${apiBaseUrl}/api/collection/${id}/`),
+                    axios.get<{ results: Product[] }>(`${apiBaseUrl}/api/collection/${id}/products/`)
                 ]);
                 setCollection(collectionResponse.data);
-                setProducts(productsResponse.data.results);
-                setNextPage(productsResponse.data.next);
+                setProducts(productsResponse.data.results); // Adjusting to handle response with results key
+                setLoading(false);
             } catch (error) {
                 console.error('Error fetching data:', error);
+                setLoading(false);
             }
         };
 
         fetchData();
     }, [id, apiBaseUrl]);
 
-    const loadMoreProducts = async () => {
-        if (nextPage) {
-            try {
-                const response = await axios.get<PaginatedProducts>(nextPage);
-                setProducts((prevProducts) => [...prevProducts, ...response.data.results]);
-                setNextPage(response.data.next);
-            } catch (error) {
-                console.error('Error fetching more products:', error);
-            }
-        }
-    };
-
-    useEffect(() => {
-        const handleScroll = () => {
-            if (
-                window.innerHeight + document.documentElement.scrollTop === document.documentElement.offsetHeight
-            ) {
-                loadMoreProducts();
-            }
-        };
-
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [nextPage]); // Add nextPage as a dependency to useEffect
+    if (loading) {
+        return <div className={style.container}>Завантаження...</div>;
+    }
 
     if (!collection) {
-        return <div className={style.container}>Завантаження...</div>;
-    } else if (products.length === 0) {
+        return <div className={style.container}>Колекції не існує</div>;
+    }
+
+    if (products.length === 0) {
         return (
             <div className={style.container}>
                 <h1 className={style.title}>{collection.name}</h1>

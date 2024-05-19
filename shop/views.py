@@ -9,6 +9,7 @@ from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer
 from .models import Product, Collection, Category
+from django_filters import rest_framework as filters
 
 class CollectionProductsView(generics.ListAPIView):
     serializer_class = ProductSerializer
@@ -36,16 +37,22 @@ class CustomPageNumberPagination(PageNumberPagination):
         })
 
 
+class ProductFilter(filters.FilterSet):
+    category = filters.CharFilter(field_name='category__name', lookup_expr='icontains')
+
+    class Meta:
+        model = Product
+        fields = ['category', 'name', 'price']
+
 class ProductList(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]  # Allow anonymous access
     pagination_class = CustomPageNumberPagination
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_fields = ['category']
+    filterset_class = ProductFilter
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'price']
-
 
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()

@@ -41,7 +41,7 @@ urlpatterns = [
 
     # App-specific URLs
     path('', include('accounts.urls')),  # Example: /accounts/
-    path('', include('shop.urls')),      # Example: /products/
+    path('api/', include('shop.urls')),      # Example: /products/
     path('admin/', admin.site.urls),     # Admin URLs: /admin/
     # Debug view
   #  path("__debug__/", include("debug_toolbar.urls")),

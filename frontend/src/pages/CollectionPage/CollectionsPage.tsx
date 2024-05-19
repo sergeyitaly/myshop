@@ -37,7 +37,7 @@ const CollectionsPage: React.FC<Props> = ({ collections, loadMoreCollections, ha
 
     return (
         <div className={style.container}>
-            <h1 className={style.title}> Колекції </h1>
+            <h1 className={style.title}>Колекції</h1>
             <div className={style.cardContainer}>
                 {collections.map((collection) => (
                     <Link to={`/collection/${collection.id}`} key={collection.id} className={style.card}>
@@ -52,7 +52,7 @@ const CollectionsPage: React.FC<Props> = ({ collections, loadMoreCollections, ha
             {loading && <div className={style.loading}>Завантаження...</div>}
             {hasNextPage && (
                 <div className={style.loadMore}>
-                    <button onClick={loadMoreCollections}> Завантажити щє </button>
+                    <button onClick={loadMoreCollections}>Завантажити ще</button>
                 </div>
             )}
         </div>
