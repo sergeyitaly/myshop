@@ -6,8 +6,8 @@
   ],
   "rewrites": [
     {
-        "src": "/(.*)",
-        "dest": "/"
+        "source": "/(.*)",
+        "destination": "/"
     }
 ],
   "routes": [
