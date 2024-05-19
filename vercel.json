@@ -17,6 +17,7 @@
       "src": "/(.*)",
       "dest": "myshop/wsgi.py"
     },
-    {"source": "/(.*)", "destination": "/"}
+    {"src": "/(.*)", 
+    "dst": "/"}
   ]
 }
