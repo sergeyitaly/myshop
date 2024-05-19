@@ -16,6 +16,7 @@
     {
       "src": "/(.*)",
       "dest": "/myshop/wsgi.py"
-    }
+    },
+    { "src": "/[^.]+", "dest": "/", "status": 200 }
   ]
 }
