@@ -16,12 +16,9 @@
     {
       "src": "/(.*)",
       "dest": "/myshop/wsgi.py"
-    }
-  ],
-  "rewrites": [
-    {
-      "src": "/(.*)",
-      "dest": "/myshop/wsgi.py"
-    }
+    },
+    {  "src": "/(.*)", 
+       "dest": "/", 
+       "status": 200 }
   ]
 }
