@@ -1,12 +1,14 @@
 from rest_framework import serializers
 from .models import Product, Collection, Category
 
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'
         lookup_field = 'slug'
         extra_kwargs = {'url': {'lookup_field': 'slug'}}
+
 
 class CollectionSerializer(serializers.ModelSerializer):
     category = serializers.ReadOnlyField(source='category.name')
@@ -21,6 +23,7 @@ class CollectionSerializer(serializers.ModelSerializer):
         model = Collection
         fields = '__all__'
 
+
 class ProductSerializer(serializers.ModelSerializer):
     photo_url = serializers.SerializerMethodField()
     collection = serializers.ReadOnlyField(source='collection.name')
@@ -33,6 +36,7 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
+
 
 class CreateCollectionSerializer(serializers.ModelSerializer):
     photo_url = serializers.SerializerMethodField()
