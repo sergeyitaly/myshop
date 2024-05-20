@@ -4,6 +4,7 @@ from .models import Product, Collection, Category
 from django.utils.text import slugify
 from .forms import CollectionForm, ProductForm
 
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     search_fields = ['name']
@@ -11,10 +12,10 @@ class CategoryAdmin(admin.ModelAdmin):
     readonly_fields = ['slug']
     actions = ['delete_selected']
 
+
 @admin.register(Collection)
 class CollectionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category','display_photo','display_description', 'display_price', 'stock', 'available')
-    readonly_fields = ['slug']  # Make slug readonly
+    list_display = ('name', 'category','display_photo',)
 
     # Specify the fields to display and edit in the admin form
     fields = ['name', 'category','photo']
@@ -41,6 +42,7 @@ class CollectionAdmin(admin.ModelAdmin):
             return 'No Image Found'
 
     display_photo.short_description = 'Photo Preview'
+
     def save_model(self, request, obj, form, change):
         """Automatically generate the slug when saving a new product."""
         if not obj.slug:  # Generate slug only if it's not set
@@ -54,6 +56,7 @@ class CollectionAdmin(admin.ModelAdmin):
             return 'No Description'
 
     display_description.short_description = 'Description'
+
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
