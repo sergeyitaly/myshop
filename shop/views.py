@@ -11,6 +11,7 @@ from .serializers import ProductSerializer, CollectionSerializer, CategorySerial
 from .models import Product, Collection, Category
 from django_filters import rest_framework as filters
 
+
 class CollectionProductsView(generics.ListAPIView):
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]  # Allow anonymous access
@@ -44,6 +45,7 @@ class ProductFilter(filters.FilterSet):
         model = Product
         fields = ['category', 'name', 'price']
 
+
 class ProductList(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -53,6 +55,7 @@ class ProductList(generics.ListCreateAPIView):
     filterset_class = ProductFilter
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'price']
+
 
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
@@ -68,8 +71,8 @@ class CollectionList(generics.ListCreateAPIView):
     pagination_class = CustomPageNumberPagination
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['category']
-    search_fields = ['name', 'description']
-    ordering_fields = ['name', 'price']
+    search_fields = ['name']
+    ordering_fields = ['name']
 
 
 class CollectionItemsPage(generics.ListAPIView):
@@ -88,6 +91,7 @@ class CollectionItemsPage(generics.ListAPIView):
             raise Http404("Collection does not exist")
         queryset = collection.product_set.all()
         return queryset
+
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         queryset = self.filter_queryset(queryset)
@@ -99,13 +103,10 @@ class CollectionItemsPage(generics.ListAPIView):
         return Response(serializer.data)
 
 
-
 class CollectionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
     permission_classes = [AllowAny]  # Allow anonymous access
-
-
 
 
 class CategoryList(generics.ListCreateAPIView):
