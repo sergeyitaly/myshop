@@ -9,7 +9,6 @@ from distutils.util import strtobool
 from django.core.validators import FileExtensionValidator
 
 load_dotenv()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
@@ -59,6 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'shop',
+    'order',
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
@@ -284,7 +284,3 @@ CACHES = {
 #        'LOCATION': os.path.join(BASE_DIR, 'site_cache'),
 #    }
 # }
-
-CORS_ALLOWED_ORIGINS = [
-    'https://myshop-six-wheat.vercel.app',
-]

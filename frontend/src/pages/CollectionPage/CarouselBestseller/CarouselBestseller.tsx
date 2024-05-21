@@ -4,7 +4,20 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-function CarouselBestseller () {
+interface Product {
+    id: string;
+    name: string;
+    price: string;
+    photo: string;
+}
+
+interface CarouselBestsellerProps {
+    products: Product[];
+}
+
+const CarouselBestseller: React.FC<CarouselBestsellerProps> = React.memo(({ products }) => {
+    const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
+
     const settings = {
         dots: true,
         infinite: true,
@@ -28,19 +41,27 @@ function CarouselBestseller () {
         <div className={style.sliderContainer}>
             <p className={style.title}>Бестселери</p>
             <Slider {...settings}>
-                {mockDataProducts.map((product, index) => (
-                    <div key={index} className={style.card}>
-                        <div className={style.cardImage}>
-                            <img src={product.imageUrl} alt={product.name} className={style.image}/>
-                            <p className={style.name} >{product.name}</p>
-                            <p className={style.price}>{product.price}</p>
+                {products.map((product) => (
+                    <Link to={`${apiBaseUrl}/api/products/${product.id}`} key={product.id} className={style.card}>
+                        <div key={product.id} className={style.card}>
+                            <div className={style.cardImage}>
+                                <img
+                                    src={product.photo}
+                                    alt={product.name}
+                                    className={style.image}
+                                    loading="lazy" // Add lazy loading attribute
+                                />
+                                <p className={style.name}>{product.name}</p>
+                                <p className={style.price}>{product.price}</p>
+                            </div>
                         </div>
-                    </div>
+                    </Link>
                 ))}
             </Slider>
         </div>
     );
-}
+});
+
+export default CarouselBestseller;
 
 
-export default CarouselBestseller ;

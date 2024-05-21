@@ -9,6 +9,19 @@ from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer
 from .models import Product, Collection, Category
+from django_filters import rest_framework as filters
+from django.http import HttpResponse
+from rest_framework.decorators import api_view
+
+
+
+class CollectionProductsView(generics.ListAPIView):
+    serializer_class = ProductSerializer
+    permission_classes = [AllowAny]  # Allow anonymous access
+
+    def get_queryset(self):
+        collection_id = self.kwargs['pk']
+        return Product.objects.filter(collection_id=collection_id)
 
 
 class CustomPageNumberPagination(PageNumberPagination):
@@ -27,6 +40,13 @@ class CustomPageNumberPagination(PageNumberPagination):
             'page_size': self.page.paginator.per_page,
         })
 
+class ProductFilter(filters.FilterSet):
+    category = filters.CharFilter(field_name='category__name', lookup_expr='icontains')
+
+    class Meta:
+        model = Product
+        fields = ['category', 'name', 'price']
+
 
 class ProductList(generics.ListCreateAPIView):
     queryset = Product.objects.all()
@@ -34,7 +54,7 @@ class ProductList(generics.ListCreateAPIView):
     permission_classes = [AllowAny]  # Allow anonymous access
     pagination_class = CustomPageNumberPagination
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_fields = ['category']
+    filterset_class = ProductFilter
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'price']
 
@@ -44,7 +64,6 @@ class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]  # Allow anonymous access
 
-
 class CollectionList(generics.ListCreateAPIView):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
@@ -53,9 +72,8 @@ class CollectionList(generics.ListCreateAPIView):
     pagination_class = CustomPageNumberPagination
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['category']
-    search_fields = ['name', 'description']
-    ordering_fields = ['name', 'price']
-
+    search_fields = ['name']
+    ordering_fields = ['name']
 
 class CollectionItemsPage(generics.ListAPIView):
     serializer_class = ProductSerializer
@@ -63,6 +81,7 @@ class CollectionItemsPage(generics.ListAPIView):
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'price']
+    permission_classes = [AllowAny]  # Allow anonymous access
 
     def get_queryset(self):
         collection_id = self.kwargs['pk']
@@ -73,6 +92,7 @@ class CollectionItemsPage(generics.ListAPIView):
             raise Http404("Collection does not exist")
         queryset = collection.product_set.all()
         return queryset
+
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         queryset = self.filter_queryset(queryset)
@@ -84,13 +104,10 @@ class CollectionItemsPage(generics.ListAPIView):
         return Response(serializer.data)
 
 
-
 class CollectionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
     permission_classes = [AllowAny]  # Allow anonymous access
-
-
 
 
 class CategoryList(generics.ListCreateAPIView):
@@ -101,7 +118,7 @@ class CategoryList(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['name']
     search_fields = ['name']
-
+    permission_classes = [AllowAny]  # Allow anonymous access
 
 class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
@@ -142,3 +159,4 @@ class ProductView(APIView):
         product = self.get_object(pk)
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    

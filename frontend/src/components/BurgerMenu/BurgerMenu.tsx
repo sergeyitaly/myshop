@@ -11,6 +11,7 @@ const links = [
     { name: 'Знижки', href: '/*' },
     { name: 'Про нас', href: '/*' },
     { name: 'Контакти', href: '/*' },
+    { name: 'Замовлення', href:'/order'},
 ];
 
 export const BurgerMenu = () => {
