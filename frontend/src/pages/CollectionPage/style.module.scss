@@ -1,5 +1,5 @@
 .container {
-  margin:70px 30px;
+  margin: 70px 30px;
 }
 
 .cardContainer {
@@ -42,7 +42,6 @@
 }
 
 @media screen and (max-width: 700px) {
-
   .card {
     width: calc(50%);
     margin-bottom: 40px;
@@ -54,7 +53,7 @@
 }
 
 @media screen and (max-width: 500px) {
-    .name {
+  .name {
     font-size: 18px;
   }
 

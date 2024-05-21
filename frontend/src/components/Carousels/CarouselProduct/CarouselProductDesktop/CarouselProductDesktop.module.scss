@@ -1,0 +1,22 @@
+.sliderContainer {
+  display: table;
+  width: 100%;
+}
+
+.slider {
+  display: table-cell;
+  max-width: 650px;
+}
+
+.thumbnail {
+  width: 80px;
+}
+
+.thumbnail img {
+  display: block;
+}
+
+.slider img {
+  max-width: 100%;
+  height: auto;
+}
