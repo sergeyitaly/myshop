@@ -7,6 +7,8 @@ import { NotFound } from './pages/not-found/not-found';
 import axios from 'axios';
 import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
 import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
+import OrderPage from './pages/OrderPage/OrderPage'; // Import the new OrderPage component
+
 
 const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
 
@@ -92,6 +94,7 @@ function App() {
                     element={<CollectionItemsPage />}
                 />
                 <Route path="/products" element={<CarouselBestseller products={products} />} />
+                <Route path="/order" element={<OrderPage />} /> 
                 <Route path="*" element={<NotFound />} />
             </Route>
         </Routes>

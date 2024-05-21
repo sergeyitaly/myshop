@@ -42,6 +42,8 @@ urlpatterns = [
     # App-specific URLs
     path('', include('accounts.urls')),  # Example: /accounts/
     path('api/', include('shop.urls')),      # Example: /products/
+    path('api/', include('order.urls')),      # Example: /products/
+
     path('admin/', admin.site.urls),     # Admin URLs: /admin/
     # Debug view
     #  path("__debug__/", include("debug_toolbar.urls")),
@@ -50,9 +52,6 @@ urlpatterns = [
     path("", views.index, name="index"),
     # Catch-all URL pattern (redirect to index.html)
     re_path(r'^.*$', RedirectView.as_view(url='/')),
-
-
-    # Default URL (index.html)
 ]
 
 if settings.DEBUG:

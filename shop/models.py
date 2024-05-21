@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.text import slugify
 from django.template.defaultfilters import truncatechars 
 from django.utils.html import format_html
+from django.core.exceptions import ValidationError
 import os
 from storages.backends.s3boto3 import S3Boto3Storage
 from dotenv import load_dotenv
@@ -28,25 +29,6 @@ class MediaStorage(S3Boto3Storage):
 
 class Category(models.Model):
     name = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=200, unique=True, blank=True)
-    
-    def generate_unique_slug(self, name):
-        """
-        Generate a unique slug for the category based on the name.
-        This method ensures that the generated slug is unique by appending a number if needed.
-        """
-        base_slug = slugify(name)
-        slug = base_slug
-        num = 1
-        while Category.objects.filter(slug=slug).exists():
-            slug = f'{base_slug}-{num}'
-            num += 1
-        return slug
-
-    def save(self, *args, **kwargs):
-        if not self.slug:  # Generate slug only if it's not set
-            self.slug = self.generate_unique_slug(self.name)
-        super(Category, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -55,36 +37,30 @@ class Category(models.Model):
         ordering = ('name',)
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
-    
+
 
 class Collection(models.Model):
     if USE_S3:
         photo = models.ImageField(upload_to="photos/collection", storage=MediaStorage(), null=True, blank=True)
-    else:    
+    else:
         photo = models.ImageField(upload_to="photos/collection", null=True, blank=True)
-        
+
     name = models.CharField(max_length=255)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    sales_count = models.PositiveIntegerField(default=0)  # Field to track sales
+    sales_count = models.PositiveIntegerField(default=0)
 
     def image_tag(self):
-        if self.image:
-            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(self.image.url))
+        if self.photo:
+            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(self.photo.url))
         else:
             return 'No Image Found'
 
     def __str__(self):
         return self.name
 
-    def save(self, *args, **kwargs):
-        if not self.slug:  # Generate slug only if it's not set
-            self.slug = self.generate_unique_slug(self.name)
-        super(Collection, self).save(*args, **kwargs)
-
     def delete(self, *args, **kwargs):
-        # Delete associated photo when product is deleted
         if self.photo:
             self.photo.delete()
         super().delete(*args, **kwargs)
@@ -101,23 +77,21 @@ class Collection(models.Model):
 class Product(models.Model):
     if USE_S3:
         photo = models.ImageField(upload_to="photos/product", storage=MediaStorage(), null=True, blank=True)
-        brandimage = models.ImageField(upload_to="photos/svg", storage=MediaStorage(), null=True, blank=True) 
-    else:    
+        brandimage = models.ImageField(upload_to="photos/svg", storage=MediaStorage(), null=True, blank=True)
+    else:
         photo = models.ImageField(upload_to="photos/product", null=True, blank=True)
         brandimage = models.ImageField(upload_to="photos/svg", null=True, blank=True)
 
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE, null=True, blank=True)
-
     name = models.CharField(max_length=255)
-    description = models.TextField(blank=False, null=False)  # Make description required
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.IntegerField(default=0)
     available = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    sales_count = models.PositiveIntegerField(default=0)  # Field to track sales
-    slug = models.SlugField(max_length=200, unique=True, blank=True)
-    # Define choices for currency
+    sales_count = models.PositiveIntegerField(default=0)
+    slug = models.SlugField(unique=True)
+    
     CURRENCY_CHOICES = (
         ('UAH', 'UAH (грн)'),
         ('USD', 'USD ($)'),
@@ -126,25 +100,23 @@ class Product(models.Model):
     currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default='UAH')
 
     def image_tag(self):
-        if self.image:
-            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(self.image.url))
+        if self.photo:
+            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(self.photo.url))
         else:
             return 'No Image Found'
 
     def __str__(self):
         return self.name
-
+  
     def save(self, *args, **kwargs):
-        if not self.slug:  # Generate slug only if it's not set
-            self.slug = self.generate_unique_slug(self.name)
-        super(Product, self).save(*args, **kwargs)
+        if not self.slug:
+            self.slug = self.generate_unique_slug()
+        super().save(*args, **kwargs)
 
-    def generate_unique_slug(self, name):
-        """
-        Generate a unique slug for the category based on the name.
-        This method ensures that the generated slug is unique by appending a number if needed.
-        """
-        base_slug = slugify(name)
+    def generate_unique_slug(self):
+        base_slug = slugify(self.name)
+        if not base_slug:
+            base_slug = f'product-{self.pk}'
         slug = base_slug
         num = 1
         while Product.objects.filter(slug=slug).exists():
@@ -153,7 +125,6 @@ class Product(models.Model):
         return slug
 
     def delete(self, *args, **kwargs):
-        # Delete associated photo when product is deleted
         if self.photo:
             self.photo.delete()
         super().delete(*args, **kwargs)

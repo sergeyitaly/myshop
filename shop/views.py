@@ -10,6 +10,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer
 from .models import Product, Collection, Category
 from django_filters import rest_framework as filters
+from django.http import HttpResponse
+from rest_framework.decorators import api_view
+
 
 
 class CollectionProductsView(generics.ListAPIView):
@@ -37,7 +40,6 @@ class CustomPageNumberPagination(PageNumberPagination):
             'page_size': self.page.paginator.per_page,
         })
 
-
 class ProductFilter(filters.FilterSet):
     category = filters.CharFilter(field_name='category__name', lookup_expr='icontains')
 
@@ -62,7 +64,6 @@ class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]  # Allow anonymous access
 
-
 class CollectionList(generics.ListCreateAPIView):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
@@ -74,13 +75,13 @@ class CollectionList(generics.ListCreateAPIView):
     search_fields = ['name']
     ordering_fields = ['name']
 
-
 class CollectionItemsPage(generics.ListAPIView):
     serializer_class = ProductSerializer
     pagination_class = CustomPageNumberPagination
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'price']
+    permission_classes = [AllowAny]  # Allow anonymous access
 
     def get_queryset(self):
         collection_id = self.kwargs['pk']
@@ -117,7 +118,7 @@ class CategoryList(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['name']
     search_fields = ['name']
-
+    permission_classes = [AllowAny]  # Allow anonymous access
 
 class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
@@ -158,3 +159,4 @@ class ProductView(APIView):
         product = self.get_object(pk)
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
