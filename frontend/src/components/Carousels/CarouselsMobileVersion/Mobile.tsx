@@ -83,7 +83,7 @@ export function Discount () {
                             <div className={style.imageContainer}>
                                 <p className={style.saleLabel}>Sale</p>
                                 <img src={product.imageUrl} alt={product.name} className={style.image} />
-                        </div>
+                            </div>
                             <p className={style.name} style={{marginTop:'15px', textAlign:'center'}}>{product.name}</p>
                             <div className={style.priceContainer}>
                                 <p className={style.oldPrice}>{product.price}</p>

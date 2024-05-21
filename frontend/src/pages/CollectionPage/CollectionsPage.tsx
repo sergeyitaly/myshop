@@ -1,18 +1,19 @@
+
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import style from './style.module.scss';
 
 interface Collection {
-    id: string;
-    name: string;
-    photo: string;
-    category: string;
+  id: string;
+  name: string;
+  photo: string;
+  category: string;
 }
 
 interface Props {
-    collections: Collection[];
-    loadMoreCollections: () => void;
-    hasNextPage: boolean;
+  collections: Collection[];
+  loadMoreCollections: () => void;
+  hasNextPage: boolean;
 }
 
 const CollectionsPage: React.FC<Props> = ({ collections, loadMoreCollections, hasNextPage }) => {
@@ -48,7 +49,9 @@ const CollectionsPage: React.FC<Props> = ({ collections, loadMoreCollections, ha
                 </div>
             )}
         </div>
-    );
+      )}
+    </div>
+  );
 };
 
 export default CollectionsPage;

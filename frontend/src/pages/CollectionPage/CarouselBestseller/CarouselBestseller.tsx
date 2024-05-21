@@ -1,7 +1,8 @@
-import React from 'react';
-import Slider from 'react-slick';
-import style from './style.module.scss';
-import { Link } from 'react-router-dom';
+import style from "../../../components/Carousels/CarouselCeramic/style.module.scss";
+import {mockDataProducts} from "../../../components/Carousels/carouselMock";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 interface Product {
     id: string;
@@ -32,11 +33,10 @@ const CarouselBestseller: React.FC<CarouselBestsellerProps> = React.memo(({ prod
                     slidesToShow: 2,
                     slidesToScroll: 2,
                     initialSlide: 0,
-                },
-            },
-        ],
+                }
+            }
+        ]
     };
-
     return (
         <div className={style.sliderContainer}>
             <p className={style.title}>Бестселери</p>

@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import style from './style.module.scss';
 import CarouselBestseller from '../CollectionPage/CarouselBestseller/CarouselBestseller';
 import axios from 'axios';
 
-interface Product {
-    id: string;
-    name: string;
-    price: string;
-    photo: string;
-}
+
+const CollectionItemsPage: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const collection = fullData.collections.find(
+    (collection) => collection.id === id
+  );
 
 interface Collection {
     id: string;
@@ -67,7 +67,7 @@ const CollectionItemsPage: React.FC = () => {
             <h1 className={style.title}>{collection.name}</h1>
             <div className={style.productContainer}>
                 {products.map((product) => (
-                    <div key={product.id} className={style.productCard}>
+                     <Link to={`/product/${id}`} key={product.id} className={style.card}>
                         <div className={style.cardImage}>
                             <img
                                 src={product.photo}
@@ -78,12 +78,13 @@ const CollectionItemsPage: React.FC = () => {
                             <p className={style.name}>{product.name}</p>
                             <p className={style.price}>{product.price}</p>
                         </div>
-                    </div>
+                    </Link>
                 ))}
             </div>
             <CarouselBestseller products={products} />
         </div>
     );
+  };
 };
 
 export default CollectionItemsPage;

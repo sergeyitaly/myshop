@@ -10,7 +10,7 @@ export const NotFound = () => {
                 alt="404"
             />
             <h2 className={styles.message}>Opps ця сторінка не знайдена</h2>
-            <a href="/" className={styles.link}>Повернутися на голову сторінку</a>
+            <a className={styles.link}>Повернутися на голову сторінку</a>
         </main>
     );
 };

@@ -10,6 +10,7 @@ export const links = [
     {
         href: '/*',
         name: 'Контакти',
+
     }
     // {
     //     href: '/collectionItem',
