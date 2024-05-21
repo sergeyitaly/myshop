@@ -26,7 +26,7 @@ const OrderPage: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await axios.post('/api/orders/', {
+            await axios.post('/api/order/', {
                 name,
                 email,
                 address,
