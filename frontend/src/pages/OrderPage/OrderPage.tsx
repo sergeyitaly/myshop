@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import style from './orderpage.module.scss';
+import { Link } from 'react-router-dom';
 
 interface OrderItem {
     product: string;
@@ -41,6 +42,7 @@ const OrderPage: React.FC = () => {
     return (
         <div className={style.container}>
             <h1>Place Order</h1>
+            <Link to={'/order'}>
             <form onSubmit={handleSubmit} className={style.form}>
                 <div className={style.formGroup}>
                     <label>Name</label>
@@ -74,6 +76,7 @@ const OrderPage: React.FC = () => {
                 <button type="button" onClick={addItem} className={style.addButton}>Add another item</button>
                 <button type="submit" className={style.submitButton}>Submit Order</button>
             </form>
+            </Link>
         </div>
     );
 };
