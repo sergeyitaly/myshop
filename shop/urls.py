@@ -13,7 +13,6 @@ urlpatterns = [
     path('categories/', views.CategoryList.as_view(), name='categories'),
     path('category/<int:pk>', views.CategoryDetail.as_view(), name='category'),
     path('collection/<int:pk>/products/', views.CollectionProductsView.as_view(), name='collection_products'),
-
 #    path('', views.home, name='home'),  # Map root URL to home_view
 
 ]

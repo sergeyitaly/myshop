@@ -33,6 +33,6 @@ tmp/
 .vite/
 dist/
 media/
-
+migrations/
 
 
