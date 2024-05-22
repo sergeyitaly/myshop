@@ -10,7 +10,7 @@ import style from "./CarouselProductDesktop.module.scss";
 
 const CarouselProductDesktop = () => {
   const settings = {
-    customPaging: function (i) {
+    customPaging: function (i: number) {
       let imgSrc;
       switch (i) {
         case 0:
