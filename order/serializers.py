@@ -1,7 +1,10 @@
 from rest_framework import serializers
 from .models import Order, OrderItem
+from shop.models import Product
 
 class OrderItemSerializer(serializers.ModelSerializer):
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())  # Reference product by ID
+
     class Meta:
         model = OrderItem
         fields = ['product', 'quantity']

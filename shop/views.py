@@ -45,7 +45,7 @@ class ProductFilter(filters.FilterSet):
 
     class Meta:
         model = Product
-        fields = ['category', 'name', 'price']
+        fields = ['category', 'name', 'price','sales_count','popularity']
 
 
 class ProductList(generics.ListCreateAPIView):

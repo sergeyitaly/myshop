@@ -1,6 +1,7 @@
-import Slider from "react-slick";
-// import "slick-carousel/slick/slick.css";
-// import "slick-carousel/slick/slick-theme.css";
+import React from "react";
+import Slider, { Settings } from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import productImgMax from "../../img/Rectangle 45.svg";
 import ringQueen from "../../img/Rectangle 45.svg";
 import braceletQueen from "../../img/Rectangle 45.svg";
@@ -8,8 +9,8 @@ import ringsSet from "../../img/Rectangle 45.svg";
 import earrings from "../../img/Rectangle 45.svg";
 import style from "./CarouselProductDesktop.module.scss";
 
-const CarouselProductDesktop = () => {
-  const settings = {
+const CarouselProductDesktop: React.FC = () => {
+  const settings: Settings = {
     customPaging: function (i: number) {
       let imgSrc;
       switch (i) {
@@ -31,11 +32,7 @@ const CarouselProductDesktop = () => {
         default:
           imgSrc = productImgMax;
       }
-      return (
-        <div className={style.thumbnail}>
-          <img src={imgSrc} alt={`Thumbnail ${i}`} />
-        </div>
-      );
+      return <img src={imgSrc} alt={`Thumbnail ${i}`} />;
     },
     arrows: false,
     dots: true,
@@ -75,15 +72,6 @@ const CarouselProductDesktop = () => {
           </div>
         </Slider>
       </div>
-      {/* <div className={style.thumbnails}>
-        {[productImgMax, ringQueen, braceletQueen, ringsSet, earrings].map(
-          (img, index) => (
-            <div key={index} className={style.thumbnail}>
-              <img src={img} alt={`Thumbnail ${index}`} />
-            </div>
-          )
-        )}
-      </div> */}
     </div>
   );
 };

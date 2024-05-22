@@ -1,15 +1,6 @@
-<<<<<<< HEAD
-// CollectionsPage.tsx
-import React from "react";
-import { Link } from "react-router-dom";
-import style from "./style.module.scss";
-// import { fullData } from "../../components/Carousels/carouselMock";
-=======
-
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import style from './style.module.scss';
->>>>>>> 1508f088bdf484631432e8c9bb7be7c1556c97a3
 
 interface Collection {
   id: string;
@@ -57,9 +48,7 @@ const CollectionsPage: React.FC<Props> = ({ collections, loadMoreCollections, ha
                 </div>
             )}
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default CollectionsPage;
