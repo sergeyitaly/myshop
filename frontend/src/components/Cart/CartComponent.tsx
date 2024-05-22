@@ -1,11 +1,8 @@
-import { useState } from 'react';
+import React, { useState } from 'react'; // Make sure to import React
 import styles from './style.module.scss';
 import image from './Rectangle 88.svg';
 import positiveIcon from './+.svg';
-import negativeIcon from './Line 18.svg'
-import {useMediaQuery} from "@mui/material";
-
-// import {useMediaQuery} from "@mui/material";
+import negativeIcon from './Line 18.svg';
 
 interface Product {
     id: number;
@@ -16,10 +13,8 @@ interface Product {
     imageUrl: string;
 }
 
-
 const CartModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-
-    const [cartItems, setCartItems] = useState<Product[]>([
+    const [cartItems] = useState<Product[]>([
         {
             id: 1,
             name: 'Кольє Інвіда',
@@ -31,13 +26,7 @@ const CartModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     ]);
 
     const total = cartItems.reduce((acc, item) => acc + item.price, 0);
-
     const [counter, setCounter] = useState(1);
-    // const [isVisible, setIsVisible] = useState(false);
-    // const [isVisible1, setIsVisible1] = useState(false);
-    // const isMobile = useMediaQuery({
-    //     query: "(max-width: 480px)",
-    // });
 
     const handleIncrementCounter = () => {
         setCounter(counter + 1);
@@ -47,13 +36,6 @@ const CartModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         if (counter === 1) return;
         setCounter(counter - 1);
     };
-
-    // const onToggleVisibility = () => {
-    //     setIsVisible(!isVisible);
-    // };
-    // const onToggleVisibility1 = () => {
-    //     setIsVisible1(!isVisible1);
-    // };
 
     return (
         <div className={styles.modalBackground}>
@@ -117,10 +99,7 @@ const CartModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     <p>Загальна вартість ${total}</p>
                     <button className={styles.to_order}>Оформити замовлення</button>
                 </div>
-
-
             </div>
-
         </div>
     );
 };

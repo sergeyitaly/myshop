@@ -1,13 +1,14 @@
-import Slider from "react-slick";
+import React from "react";
+import Slider, { Settings } from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import productImageMob from "../../../../assets/collection/invidaMob.svg";
 import style from "./CarouselProductMobile.module.scss";
 
-const CarouselProductMobile = () => {
-  const settings = {
+const CarouselProductMobile: React.FC = () => {
+  const settings: Settings = {
     dots: true,
-    lazyLoad: true,
+    lazyLoad: "ondemand", // Specify lazyLoad as "ondemand" or "progressive"
     infinite: true,
     speed: 500,
     slidesToShow: 1,
@@ -15,8 +16,9 @@ const CarouselProductMobile = () => {
     initialSlide: 2,
     variableWidth: false,
   };
+
   return (
-    <>
+    <div>
       <Slider className={style.swiperContainer} {...settings}>
         <div className={style.swiperSlide}>
           <img className={style.imgMob} src={productImageMob} alt="invida" />
@@ -25,7 +27,7 @@ const CarouselProductMobile = () => {
           <img src={productImageMob} alt="invida" />
         </div>
       </Slider>
-    </>
+    </div>
   );
 };
 

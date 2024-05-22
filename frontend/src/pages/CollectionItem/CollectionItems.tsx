@@ -4,18 +4,18 @@ import style from './style.module.scss';
 import CarouselBestseller from '../CollectionPage/CarouselBestseller/CarouselBestseller';
 import axios from 'axios';
 
-
-const CollectionItemsPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const collection = fullData.collections.find(
-    (collection) => collection.id === id
-  );
-
 interface Collection {
     id: string;
     name: string;
     photo: string;
     category: string;
+}
+
+interface Product {
+    id: string;
+    name: string;
+    photo: string;
+    price: number;
 }
 
 const CollectionItemsPage: React.FC = () => {
@@ -67,7 +67,7 @@ const CollectionItemsPage: React.FC = () => {
             <h1 className={style.title}>{collection.name}</h1>
             <div className={style.productContainer}>
                 {products.map((product) => (
-                     <Link to={`/product/${id}`} key={product.id} className={style.card}>
+                     <Link to={`/product/${product.id}`} key={product.id} className={style.card}>
                         <div className={style.cardImage}>
                             <img
                                 src={product.photo}
@@ -81,10 +81,9 @@ const CollectionItemsPage: React.FC = () => {
                     </Link>
                 ))}
             </div>
-            <CarouselBestseller products={products} />
+            <CarouselBestseller products={products.map(product => ({ ...product, price: String(product.price) }))} />
         </div>
     );
-  };
 };
 
 export default CollectionItemsPage;
