@@ -11,7 +11,7 @@ class CollectionAdmin(admin.ModelAdmin):
     list_display = ('id','name', 'category','photo', 'image_tag') 
     search_fields = ['name']
     readonly_fields = ('id','image_tag',)
-    fields = ('id', 'name',  'category', 'photo', 'image_tag','slug') 
+    fields = ('id', 'name',  'category', 'photo', 'image_tag') 
 admin.site.register(Collection, CollectionAdmin)
 
 class ProductAdmin(admin.ModelAdmin):
