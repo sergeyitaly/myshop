@@ -10,7 +10,6 @@ import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
 import ProductPage from "./pages/ProductPage/ProductPage";
 import OrderPage from './pages/OrderPage/OrderPage'; // Import the new OrderPage component
 
-
 const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
 
 interface Collection {
@@ -49,7 +48,7 @@ function App() {
         const fetchProducts = async () => {
             try {
                 const response = await axios.get<{ results: Product[]; next: string | null }>(`${apiBaseUrl}/api/products/`);
-                setProducts(response.data.results);
+                setProducts(response.data.results); // Ensure products are set properly
                 setNextPage(response.data.next);
             } catch (error) {
                 console.error('Error fetching products:', error);
