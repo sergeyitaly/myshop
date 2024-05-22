@@ -1,0 +1,77 @@
+// orderpage.module.scss
+
+.container {
+  margin: 70px 30px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.addButton, .submitButton {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+.addButton {
+  background-color: #28a745;
+}
+
+.addButton:hover, .submitButton:hover {
+  opacity: 0.8;
+}
+
+h1, h2 {
+  margin: 10px 0 30px 0;
+}
+
+@media screen and (max-width: 700px) {
+  .formGroup input {
+    padding: 8px;
+  }
+
+  .addButton, .submitButton {
+    font-size: 14px;
+  }
+
+  h1, h2 {
+    font-size: 24px;
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .formGroup input {
+    padding: 6px;
+  }
+
+  .addButton, .submitButton {
+    font-size: 12px;
+  }
+
+  h1, h2 {
+    font-size: 20px;
+  }
+}
