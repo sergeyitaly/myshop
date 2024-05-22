@@ -2,7 +2,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import style from "./style.module.scss";
-import { fullData } from "../../components/Carousels/carouselMock";
+// import { fullData } from "../../components/Carousels/carouselMock";
 
 interface Collection {
   id: string;

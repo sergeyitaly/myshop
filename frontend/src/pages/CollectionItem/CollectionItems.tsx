@@ -2,15 +2,22 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import style from "./style.module.scss";
 import { fullData } from "../../components/Carousels/carouselMock";
-import Pagination from "@mui/material/Pagination";
+// import Pagination from "@mui/material/Pagination";
 import CarouselBestseller from "../CollectionPage/CarouselBestseller/CarouselBestseller";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 const CollectionItemsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const collection = fullData.collections.find(
     (collection) => collection.id === id
   );
+  interface Collection {
+    id: string;
+    name: string;
+    photo: string;
+    category: string;
+  }
 
   interface CollectionItemsPageProps {
     products: Product[];

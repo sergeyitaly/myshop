@@ -7,7 +7,6 @@ import style from "./CarouselProductMobile.module.scss";
 const CarouselProductMobile = () => {
   const settings = {
     dots: true,
-    lazyLoad: true,
     infinite: true,
     speed: 500,
     slidesToShow: 1,

@@ -35,7 +35,7 @@ const ProductPage = () => {
     query: "(min-width: 770px)",
   });
 
-  const handleCounter = (value) => () => {
+  const handleCounter = (value: "increment" | "decrement") => () => {
     if (value === "increment") {
       setCounter(counter + 1);
     } else {
@@ -45,7 +45,7 @@ const ProductPage = () => {
     }
   };
 
-  const handleToggleVisibility = (index) => () => {
+  const handleToggleVisibility = (index: number) => () => {
     if (index === 1) {
       setIsVisible(!isVisible);
     } else {
