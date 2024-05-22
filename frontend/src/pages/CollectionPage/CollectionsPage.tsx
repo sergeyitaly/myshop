@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import style from './style.module.scss';
@@ -49,9 +48,7 @@ const CollectionsPage: React.FC<Props> = ({ collections, loadMoreCollections, ha
                 </div>
             )}
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default CollectionsPage;
