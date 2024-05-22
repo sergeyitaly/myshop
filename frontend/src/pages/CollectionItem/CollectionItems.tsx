@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import style from "./style.module.scss";
@@ -7,14 +6,6 @@ import { fullData } from "../../components/Carousels/carouselMock";
 import CarouselBestseller from "../CollectionPage/CarouselBestseller/CarouselBestseller";
 import { Link } from "react-router-dom";
 import axios from "axios";
-=======
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import style from './style.module.scss';
-import CarouselBestseller from '../CollectionPage/CarouselBestseller/CarouselBestseller';
-import axios from 'axios';
-
->>>>>>> 1508f088bdf484631432e8c9bb7be7c1556c97a3
 
 const CollectionItemsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -33,6 +24,13 @@ interface Collection {
     name: string;
     photo: string;
     category: string;
+}
+
+interface Product {
+    id: string;
+    name: string;
+    photo: string;
+    price: number;
 }
 
 const CollectionItemsPage: React.FC = () => {
@@ -84,7 +82,7 @@ const CollectionItemsPage: React.FC = () => {
             <h1 className={style.title}>{collection.name}</h1>
             <div className={style.productContainer}>
                 {products.map((product) => (
-                     <Link to={`/product/${id}`} key={product.id} className={style.card}>
+                     <Link to={`/product/${product.id}`} key={product.id} className={style.card}>
                         <div className={style.cardImage}>
                             <img
                                 src={product.photo}
@@ -98,10 +96,9 @@ const CollectionItemsPage: React.FC = () => {
                     </Link>
                 ))}
             </div>
-            <CarouselBestseller products={products} />
+            <CarouselBestseller products={products.map(product => ({ ...product, price: String(product.price) }))} />
         </div>
     );
-  };
 };
 
 export default CollectionItemsPage;

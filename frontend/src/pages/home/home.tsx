@@ -6,7 +6,6 @@ import CarouselFilters from "../../components/Carousels/CarouselFilters/Carousel
 import { HeroSection } from '../../components/HeroSection/HeroSection';
 import {AllCollection, Discount, Popular} from "../../components/Carousels/CarouselsMobileVersion/Mobile";
 import {useEffect, useState} from "react";
-import OrderPage from "../OrderPage/OrderPage";
 
 export const Home = () => {
     const [isMobile, setIsMobile] = useState(false);
@@ -38,7 +37,6 @@ export const Home = () => {
                 <CarouselFilters />
             )}
             <AboutUsSection />
-            <OrderPage/>
         </main>
     );
 };
