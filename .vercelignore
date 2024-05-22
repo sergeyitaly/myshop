@@ -6,7 +6,7 @@ site_cache/
 node_modules/
 yarn.lock
 myenv/
-node_modules/
+frontend/node_modules/
 *.pyc
 *.log
 env/
