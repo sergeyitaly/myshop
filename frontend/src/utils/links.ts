@@ -11,10 +11,6 @@ export const links = [
         href: '/*',
         name: 'Контакти',
 
-    },
-    {
-        href:'/cart',
-        name:'Корзина'
     }
     // {
     //     href: '/collectionItem',
