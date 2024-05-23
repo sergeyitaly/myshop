@@ -1,17 +1,18 @@
+// BurgerMenu.tsx
 import { useRef, useState } from 'react';
-import styles from './BurgerMenu.module.scss';
 import { Link } from 'react-router-dom';
+import styles from './BurgerMenu.module.scss';
 import useBlockScroll from '../../hooks/useBlockScroll';
 import useClickOutside from '../../hooks/useClickOutside';
 
 const links = [
     { name: 'Колекції', href: '/collections' },
-    { name: 'Нові надходження', href: '/*' },
-    { name: 'Всі колекції', href: '/*' },
-    { name: 'Знижки', href: '/*' },
-    { name: 'Про нас', href: '/*' },
-    { name: 'Контакти', href: '/*' },
-    { name: 'Замовлення', href:'/order'},
+    { name: 'Нові надходження', href: '/new-arrivals' },
+    { name: 'Всі колекції', href: '/all-collections' },
+    { name: 'Знижки', href: '/discounts' },
+    { name: 'Про нас', href: '/about' },
+    { name: 'Контакти', href: '/contact' },
+    { name: 'Замовлення', href: '/order' },
 ];
 
 export const BurgerMenu = () => {
@@ -24,9 +25,7 @@ export const BurgerMenu = () => {
     return (
         <div className={styles.burger_container}>
             <button
-                className={[styles.burger, isOpen && styles.button_open].join(
-                    ' '
-                )}
+                className={[styles.burger, isOpen && styles.button_open].join(' ')}
                 onClick={() => setIsOpen((prev) => !prev)}
             >
                 <div className={styles.bar1}></div>
@@ -40,10 +39,7 @@ export const BurgerMenu = () => {
             >
                 <div className={styles.logo_container}>
                     <button
-                        className={[
-                            styles.burger,
-                            isOpen && styles.button_open,
-                        ].join(' ')}
+                        className={[styles.burger, isOpen && styles.button_open].join(' ')}
                         onClick={() => setIsOpen((prev) => !prev)}
                     >
                         <div className={styles.bar1}></div>
@@ -57,7 +53,7 @@ export const BurgerMenu = () => {
                         key={name}
                         className={styles.link}
                         to={href}
-                        onClick={() => setIsOpen((prev) => !prev)}
+                        onClick={() => setIsOpen(false)}
                     >
                         {name}
                     </Link>

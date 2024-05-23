@@ -1,5 +1,5 @@
 ## Precondition
-1. **Create and run virtual env using CLI**:
+1. **Create and run virtual env using CLI** or run setup_venv.bat for Windows and setup_venev.sh for macOs:
    - ```python -m venv <venv_name>```
    - ```navigate to the folder with requirements.txt```
    - ```pip install -r requirements.txt```

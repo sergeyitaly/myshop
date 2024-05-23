@@ -1,32 +1,24 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import style from "./style.module.scss";
-import { fullData } from "../../components/Carousels/carouselMock";
-// import Pagination from "@mui/material/Pagination";
-import CarouselBestseller from "../CollectionPage/CarouselBestseller/CarouselBestseller";
-import { Link } from "react-router-dom";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import style from './style.module.scss';
+import CarouselBestseller from '../CollectionPage/CarouselBestseller/CarouselBestseller';
+import axios from 'axios';
+
+interface Collection {
+    id: string;
+    name: string;
+    photo: string;
+    category: string;
+  }
+
+interface Product {
+    id: string;
+    name: string;
+    photo: string;
+    price: number;
+}
 
 const CollectionItemsPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const collection = fullData.collections.find(
-    (collection) => collection.id === id
-  );
-  interface Collection {
-    id: string;
-    name: string;
-    photo: string;
-    category: string;
-  }
-
-  interface Collection {
-    id: string;
-    name: string;
-    photo: string;
-    category: string;
-  }
-
-  const CollectionItemsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [collection, setCollection] = useState<Collection | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
@@ -75,28 +67,29 @@ const CollectionItemsPage: React.FC = () => {
     }
 
     return (
-      <div className={style.container}>
-        <h1 className={style.title}>{collection.name}</h1>
-        <div className={style.productContainer}>
-          {products.map((product) => (
-            <Link to={`/product/${id}`} key={product.id} className={style.card}>
-              <div className={style.cardImage}>
-                <img
-                  src={product.photo}
-                  alt={product.name}
-                  style={{ maxWidth: "100%", height: "auto", display: "block" }}
-                  loading="lazy" // Add lazy loading attribute
-                />
-                <p className={style.name}>{product.name}</p>
-                <p className={style.price}>{product.price}</p>
-              </div>
-            </Link>
-          ))}
+        <div className={style.container}>
+            <h1 className={style.title}>{collection.name}</h1>
+            <div className={style.productContainer}>
+                {products.map((product) => (
+                     <Link to={`/product/${product.id}`} key={product.id} className={style.card}>
+                        <div className={style.cardImage}>
+                            <img
+                                src={product.photo}
+                                alt={product.name}
+                                style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
+                                loading="lazy" // Add lazy loading attribute
+                            />
+                            <p className={style.name}>{product.name}</p>
+                            <p className={style.price}>{product.price}</p>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+            <CarouselBestseller products={products.map(product => ({ ...product, price: String(product.price) }))} />
         </div>
         <CarouselBestseller products={products} />
       </div>
     );
-  };
 };
 
 export default CollectionItemsPage;

@@ -1,9 +1,8 @@
-import style from "../../../components/Carousels/CarouselCeramic/style.module.scss";
-// import { mockDataProducts } from "../../../components/Carousels/carouselMock";
-import Slider from "react-slick";
-import { Link } from "react-router-dom";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+import Slider from 'react-slick';
+import style from './style.module.scss';
 
 interface Product {
   id: string;
@@ -16,11 +15,8 @@ interface CarouselBestsellerProps {
   products: Product[];
 }
 
-const CarouselBestseller: React.FC<CarouselBestsellerProps> = React.memo(
-  ({ products }) => {
-    const apiBaseUrl =
-      import.meta.env.VITE_LOCAL_API_BASE_URL ||
-      import.meta.env.VITE_API_BASE_URL;
+const CarouselBestseller: React.FC<CarouselBestsellerProps> = ({ products }) => {
+    const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
 
     const settings = {
       dots: true,
@@ -41,6 +37,7 @@ const CarouselBestseller: React.FC<CarouselBestsellerProps> = React.memo(
         },
       ],
     };
+
     return (
       <div className={style.sliderContainer}>
         <p className={style.title}>Бестселери</p>
@@ -68,7 +65,6 @@ const CarouselBestseller: React.FC<CarouselBestsellerProps> = React.memo(
         </Slider>
       </div>
     );
-  }
-);
+};
 
 export default CarouselBestseller;
