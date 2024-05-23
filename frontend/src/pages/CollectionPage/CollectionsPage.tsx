@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
-import style from "./style.module.scss";
+import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import style from './style.module.scss';
 
 interface Collection {
   id: string;
@@ -62,8 +62,6 @@ const CollectionsPage: React.FC<Props> = ({
         <div className={style.loadMore}>
           <button onClick={loadMoreCollections}>Завантажити ще</button>
         </div>
-      )}
-    </div>
-  );
+    );
 };
 export default CollectionsPage;
