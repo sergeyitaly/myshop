@@ -1,114 +1,74 @@
 import style from "../../../components/Carousels/CarouselCeramic/style.module.scss";
-import { mockDataProducts } from "../../../components/Carousels/carouselMock";
+// import { mockDataProducts } from "../../../components/Carousels/carouselMock";
 import Slider from "react-slick";
+import { Link } from "react-router-dom";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-<<<<<<< HEAD
-function CarouselBestseller() {
-  const settings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 3,
-    slidesToScroll: 3,
-    initialSlide: 0,
-    arrows: false,
-    responsive: [
-      {
-        breakpoint: 700,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 2,
-          initialSlide: 0,
-        },
-      },
-    ],
-  };
-
-  return (
-    <div className={style.sliderContainer}>
-      <p className={style.title}>Бестселери</p>
-      <Slider {...settings}>
-        {mockDataProducts.map((product, index) => (
-          <div key={index} className={style.card}>
-            <div className={style.cardImage}>
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                className={style.image}
-              />
-              <p className={style.name}>{product.name}</p>
-              <p className={style.price}>{product.price}</p>
-            </div>
-          </div>
-        ))}
-      </Slider>
-    </div>
-  );
-}
-
-export default CarouselBestseller;
-=======
 interface Product {
-    id: string;
-    name: string;
-    price: string;
-    photo: string;
+  id: string;
+  name: string;
+  price: string;
+  photo: string;
 }
 
 interface CarouselBestsellerProps {
-    products: Product[];
+  products: Product[];
 }
 
-const CarouselBestseller: React.FC<CarouselBestsellerProps> = React.memo(({ products }) => {
-    const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
+const CarouselBestseller: React.FC<CarouselBestsellerProps> = React.memo(
+  ({ products }) => {
+    const apiBaseUrl =
+      import.meta.env.VITE_LOCAL_API_BASE_URL ||
+      import.meta.env.VITE_API_BASE_URL;
 
     const settings = {
-        dots: true,
-        infinite: true,
-        speed: 500,
-        slidesToShow: 3,
-        slidesToScroll: 3,
-        initialSlide: 0,
-        arrows: false,
-        responsive: [
-            {
-                breakpoint: 700,
-                settings: {
-                    slidesToShow: 2,
-                    slidesToScroll: 2,
-                    initialSlide: 0,
-                }
-            }
-        ]
+      dots: true,
+      infinite: true,
+      speed: 500,
+      slidesToShow: 3,
+      slidesToScroll: 3,
+      initialSlide: 0,
+      arrows: false,
+      responsive: [
+        {
+          breakpoint: 700,
+          settings: {
+            slidesToShow: 2,
+            slidesToScroll: 2,
+            initialSlide: 0,
+          },
+        },
+      ],
     };
     return (
-        <div className={style.sliderContainer}>
-            <p className={style.title}>Бестселери</p>
-            <Slider {...settings}>
-                {products.map((product) => (
-                    <Link to={`${apiBaseUrl}/api/products/${product.id}`} key={product.id} className={style.card}>
-                        <div key={product.id} className={style.card}>
-                            <div className={style.cardImage}>
-                                <img
-                                    src={product.photo}
-                                    alt={product.name}
-                                    className={style.image}
-                                    loading="lazy" // Add lazy loading attribute
-                                />
-                                <p className={style.name}>{product.name}</p>
-                                <p className={style.price}>{product.price}</p>
-                            </div>
-                        </div>
-                    </Link>
-                ))}
-            </Slider>
-        </div>
+      <div className={style.sliderContainer}>
+        <p className={style.title}>Бестселери</p>
+        <Slider {...settings}>
+          {products.map((product) => (
+            <Link
+              to={`${apiBaseUrl}/api/products/${product.id}`}
+              key={product.id}
+              className={style.card}
+            >
+              <div key={product.id} className={style.card}>
+                <div className={style.cardImage}>
+                  <img
+                    src={product.photo}
+                    alt={product.name}
+                    className={style.image}
+                    loading="lazy" // Add lazy loading attribute
+                  />
+                  <p className={style.name}>{product.name}</p>
+                  <p className={style.price}>{product.price}</p>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </Slider>
+      </div>
     );
-});
+  }
+);
 
 export default CarouselBestseller;
-
-
->>>>>>> 1508f088bdf484631432e8c9bb7be7c1556c97a3
