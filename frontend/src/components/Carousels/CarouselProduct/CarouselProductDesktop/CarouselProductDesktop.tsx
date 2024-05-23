@@ -9,7 +9,6 @@ import ringsSet from "../../img/Rectangle 45.svg";
 import earrings from "../../img/Rectangle 45.svg";
 import style from "./CarouselProductDesktop.module.scss";
 
-
 const CarouselProductDesktop: React.FC = () => {
   const settings: Settings = {
     customPaging: function (i: number) {

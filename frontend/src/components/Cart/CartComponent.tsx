@@ -104,10 +104,6 @@ const CartModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 </div>
             </div>
         </div>
-        <div>
-          <p>Загальна вартість ${total}</p>
-          <button className={styles.to_order}>Оформити замовлення</button>
-        </div>
       </div>
     </div>
   );
