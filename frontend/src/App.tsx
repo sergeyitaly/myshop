@@ -1,4 +1,3 @@
-// App.tsx
 import { useState, useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { Layout } from './layout/Layout/Layout';
@@ -8,7 +7,7 @@ import { NotFound } from './pages/not-found/not-found';
 import axios from 'axios';
 import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
 import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
-import OrderPage from './pages/OrderPage/OrderPage'; // Import the new OrderPage component
+import OrderPage from './pages/OrderPage/OrderPage';
 
 const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
 
@@ -29,17 +28,15 @@ interface Product {
 function App() {
     const [collections, setCollections] = useState<Collection[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
-    const [nextPage, setNextPage] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
 
     useEffect(() => {
-        localStorage.setItem('pageCounter', '1');
-        console.log(window.location.href);
-
-        const fetchCollections = async () => {
+        const fetchCollections = async (page: number) => {
             try {
-                const response = await axios.get<{ results: Collection[]; next: string | null }>(`${apiBaseUrl}/api/collections/`);
+                const response = await axios.get<{ results: Collection[]; next: string | null; count: number }>(`${apiBaseUrl}/api/collections/?page=${page}`);
                 setCollections(response.data.results);
-                setNextPage(response.data.next);
+                setTotalPages(Math.ceil(response.data.count / 6)); // Assuming 6 collections per page
             } catch (error) {
                 console.error('Error fetching collections:', error);
             }
@@ -47,59 +44,48 @@ function App() {
 
         const fetchProducts = async () => {
             try {
-                const response = await axios.get<{ results: Product[]; next: string | null }>(`${apiBaseUrl}/api/products/`);
+                const response = await axios.get<{ results: Product[] }>(`${apiBaseUrl}/api/products/`);
                 setProducts(response.data.results);
-                setNextPage(response.data.next);
             } catch (error) {
                 console.error('Error fetching products:', error);
             }
         };
 
-        fetchCollections();
+        fetchCollections(currentPage);
         fetchProducts();
-    }, [apiBaseUrl]);
+    }, [apiBaseUrl, currentPage]);
 
-    const loadMoreCollections = async () => {
-        if (nextPage) {
-            try {
-                const response = await axios.get<{ results: Collection[]; next: string | null }>(nextPage);
-                setCollections([...collections, ...response.data.results]);
-                setNextPage(response.data.next);
-                const pageCounter = localStorage.getItem('pageCounter');
-                if (pageCounter) {
-                    localStorage.setItem('pageCounter', String(parseInt(pageCounter) + 1));
-                }
-            } catch (error) {
-                console.error('Error fetching more collections:', error);
-            }
-        }
+    const loadCollectionsByPage = (page: number) => {
+        setCurrentPage(page);
     };
 
     return (
         <Routes>
             <Route element={<Layout withFooter withHeader />}>
-
                 <Route index element={<Home />} />
                 <Route
                     path="/collections"
                     element={
                         <CollectionsPage
                             collections={collections}
-                            loadMoreCollections={loadMoreCollections}
-                            hasNextPage={nextPage !== null}
+                            loadCollectionsByPage={loadCollectionsByPage}
+                            hasNextPage={currentPage < totalPages}
+                            totalPages={totalPages}
                         />
                     }
                 />
                 <Route
                     path="/collection/:id"
-                    element={<CollectionItemsPage />}
+                    element={
+                        <CollectionItemsPage
+                            loadProductsByPage={(id, page) => axios.get(`${apiBaseUrl}/api/collection/${id}/products/?page=${page}`)}
+                        />
+                    }
                 />
                 <Route path="/products" element={<CarouselBestseller products={products} />} />
                 <Route path="/order" element={<OrderPage />} />
-
                 <Route path="*" element={<NotFound />} />
             </Route>
-
         </Routes>
     );
 }

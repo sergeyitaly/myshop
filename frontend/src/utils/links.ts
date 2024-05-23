@@ -12,8 +12,5 @@ export const links = [
         name: 'Контакти',
 
     }
-    // {
-    //     href: '/collectionItem',
-    //     name: 'Колеуція',
-    // }
+
 ];
