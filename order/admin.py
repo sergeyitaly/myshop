@@ -4,14 +4,30 @@ from .models import Order, OrderItem
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 1
-    readonly_fields = ['product', 'quantity']
-class OrderItemAdmin(admin.ModelAdmin):
-    readonly_fields = ['order', 'quantity']  # Adjust according to your model fields
-    list_display = ('order', 'quantity')  # Adjust according to your model fields
+    readonly_fields = ['product', 'quantity', 'item_price', 'subtotal']
 
-class OrderItemInline(admin.TabularInline):
-    model = OrderItem
-    readonly_fields = ['order', 'quantity']  # Adjust according to your model fields
-    extra = 1
+    def item_price(self, obj):
+        return obj.product.price
+    item_price.short_description = 'Price'
 
-admin.site.register(OrderItem, OrderItemAdmin)
+    def subtotal(self, obj):
+        return obj.quantity * obj.product.price
+    subtotal.short_description = 'Subtotal'
+
+class OrderAdmin(admin.ModelAdmin):
+    inlines = [OrderItemInline]
+    readonly_fields = ['name', 'email', 'address', 'total_quantity', 'total_price']
+
+    def total_quantity(self, obj):
+        return sum(item.quantity for item in obj.order_items.all())
+    total_quantity.short_description = 'Total Quantity'
+
+    def total_price(self, obj):
+        return sum(item.quantity * item.product.price for item in obj.order_items.all())
+    total_price.short_description = 'Total Price'
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.prefetch_related('order_items__product')
+
+admin.site.register(Order, OrderAdmin)

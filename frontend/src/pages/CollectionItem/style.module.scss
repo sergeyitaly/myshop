@@ -18,7 +18,6 @@
 }
 
 .cardImage {
-  padding: 0 5px;
   border-radius: 5px;
   overflow: hidden; /* Ensures the image stays within the bounds */
   display: flex;
@@ -33,9 +32,12 @@
   object-fit: cover; /* Ensures images maintain their aspect ratio and cover the container */
 }
 
-.name {
-  margin-top: 10px;
+.cardContent {
   text-align: center;
+  margin-top: 10px;
+}
+
+.name {
   font-size: 18px;
   color: #191919;
   font-weight: 500;
@@ -43,7 +45,6 @@
 
 .price {
   margin-top: 7px;
-  text-align: center;
   color: #A8A8A8;
   font-size: 18px;
   font-weight: 400;

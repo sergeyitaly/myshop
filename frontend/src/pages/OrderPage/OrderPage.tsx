@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import style from './orderpage.module.scss';
@@ -6,24 +6,51 @@ import style from './orderpage.module.scss';
 interface OrderItem {
     product: string;
     quantity: number;
+    price: number;
+}
+
+interface Product {
+    id: string;
+    price: number;
 }
 
 const OrderPage: React.FC = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [address, setAddress] = useState('');
-    const [items, setItems] = useState<OrderItem[]>([{ product: '', quantity: 1 }]);
+    const [items, setItems] = useState<OrderItem[]>([{ product: '', quantity: 1, price: 0 }]);
+    const [totalAmount, setTotalAmount] = useState(0);
     const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
-    const navigate = useNavigate(); // Add the useNavigate hook
+    const navigate = useNavigate();
 
-    const handleItemChange = (index: number, field: 'product' | 'quantity', value: string | number) => {
+    useEffect(() => {
+        calculateTotalAmount();
+    }, [items]);
+
+    const handleItemChange = async (index: number, field: 'product' | 'quantity' | 'price', value: string | number) => {
         const newItems = [...items];
         newItems[index][field] = value as never;
+
+        if (field === 'product' && typeof value === 'string') {
+            try {
+                const response = await axios.get<Product>(`${apiBaseUrl}/api/product/${value}/`);
+                newItems[index].price = response.data.price;
+            } catch (error) {
+                console.error('Error fetching product price:', error);
+                newItems[index].price = 0; // Default to 0 if there is an error
+            }
+        }
+
         setItems(newItems);
     };
 
     const addItem = () => {
-        setItems([...items, { product: '', quantity: 1 }]);
+        setItems([...items, { product: '', quantity: 1, price: 0 }]);
+    };
+
+    const calculateTotalAmount = () => {
+        const total = items.reduce((acc, item) => acc + item.quantity * item.price, 0);
+        setTotalAmount(total);
     };
 
     const sendEmail = async () => {
@@ -39,7 +66,6 @@ const OrderPage: React.FC = () => {
         }
     };
 
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
@@ -48,9 +74,8 @@ const OrderPage: React.FC = () => {
                 email,
                 address,
                 items: items.map(item => ({ product: item.product, quantity: item.quantity })),
-                // No parent_order_id provided
             };
-    
+
             await axios.post(`${apiBaseUrl}/api/order/`, orderData);
             alert('Order submitted successfully!');
             sendEmail();
@@ -59,8 +84,10 @@ const OrderPage: React.FC = () => {
             console.error('Error submitting order:', error);
         }
     };
-    
 
+    useEffect(() => {
+        calculateTotalAmount();
+    }, [items]);
 
     return (
         <div className={style.container}>
@@ -93,8 +120,15 @@ const OrderPage: React.FC = () => {
                             value={item.quantity}
                             onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value))}
                         />
+                        <label>Price</label>
+                        <input
+                            type="number"
+                            value={item.price}
+                            readOnly
+                        />
                     </div>
                 ))}
+                <div className={style.totalAmount}>Total Amount: ${totalAmount}</div>
                 <button type="button" onClick={addItem} className={style.addButton}>Add another item</button>
                 <button type="submit" className={style.submitButton}>Submit Order</button>
             </form>
