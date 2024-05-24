@@ -12,11 +12,10 @@ interface Collection {
 interface Props {
     collections: Collection[];
     loadCollectionsByPage: (page: number) => void;
-    hasNextPage: boolean;
     totalPages: number;
 }
 
-const CollectionsPage: React.FC<Props> = ({ collections, loadCollectionsByPage, totalPages }) => {
+const CollectionsPage: React.FC<Props> = ({ collections = [], loadCollectionsByPage, totalPages }) => {
     const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
@@ -26,6 +25,8 @@ const CollectionsPage: React.FC<Props> = ({ collections, loadCollectionsByPage, 
     const handlePageClick = (page: number) => {
         setCurrentPage(page);
     };
+
+    const validTotalPages = isNaN(totalPages) || totalPages < 1 ? 1 : totalPages;
 
     return (
         <div className={style.container}>
@@ -42,7 +43,7 @@ const CollectionsPage: React.FC<Props> = ({ collections, loadCollectionsByPage, 
                 ))}
             </div>
             <div className={style.pagination}>
-                {[...Array(totalPages)].map((_, index) => (
+                {[...Array(validTotalPages)].map((_, index) => (
                     <button 
                         key={index + 1} 
                         onClick={() => handlePageClick(index + 1)} 
