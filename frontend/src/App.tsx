@@ -1,8 +1,10 @@
+// src/App.tsx
 import { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { Layout } from './layout/Layout/Layout';
 import CollectionsPage from './pages/CollectionPage/CollectionsPage';
 import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
+import ProductPage from './pages/ProductPage/ProductPage';
 import { Home } from './pages/home/home';
 import { NotFound } from './pages/not-found/not-found';
 import axios from 'axios';
@@ -12,85 +14,86 @@ import OrderPage from './pages/OrderPage/OrderPage';
 const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
 
 interface Collection {
-    id: string;
-    name: string;
-    photo: string;
-    category: string;
+  id: string;
+  name: string;
+  photo: string;
+  category: string;
 }
 
 interface Product {
-    id: string;
-    name: string;
-    price: string;
-    photo: string;
+  id: string;
+  name: string;
+  price: string;
+  photo: string;
 }
 
 const loadProductsByPage = (id: string, page: number): Promise<any> => {
-    return axios.get(`${apiBaseUrl}/api/collection/${id}/products/?page=${page}`);
+  return axios.get(`${apiBaseUrl}/api/collection/${id}/products/?page=${page}`);
 };
 
 function App() {
-    const [collections, setCollections] = useState<Collection[]>([]);
-    const [products, setProducts] = useState<Product[]>([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(0);
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
 
-    const loadCollectionsByPage = async (page: number) => {
-        setCurrentPage(page);
-        try {
-            const response = await axios.get<{ results: Collection[]; count: number }>(
-                `${apiBaseUrl}/api/collections/?page=${page}`
-            );
-            setCollections(response.data.results);
-            const pages = Math.ceil(response.data.count / 6); // Assuming 6 collections per page
-            setTotalPages(pages);
-        } catch (error) {
-            console.error('Error fetching collections:', error);
-        }
+  const loadCollectionsByPage = async (page: number) => {
+    setCurrentPage(page);
+    try {
+      const response = await axios.get<{ results: Collection[]; count: number }>(
+        `${apiBaseUrl}/api/collections/?page=${page}`
+      );
+      setCollections(response.data.results);
+      const pages = Math.ceil(response.data.count / 6); // Assuming 6 collections per page
+      setTotalPages(pages);
+    } catch (error) {
+      console.error('Error fetching collections:', error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get<{ results: Product[] }>(`${apiBaseUrl}/api/products/`);
+        setProducts(response.data.results);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
     };
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                const response = await axios.get<{ results: Product[] }>(`${apiBaseUrl}/api/products/`);
-                setProducts(response.data.results);
-            } catch (error) {
-                console.error('Error fetching products:', error);
-            }
-        };
+    loadCollectionsByPage(currentPage);
+    fetchProducts();
+  }, [apiBaseUrl, currentPage]);
 
-        loadCollectionsByPage(currentPage);
-        fetchProducts();
-    }, [apiBaseUrl, currentPage]);
-
-    return (
-        <Routes>
-            <Route element={<Layout withFooter withHeader />}>
-                <Route index element={<Home />} />
-                <Route
-                    path="/collections"
-                    element={
-                        <CollectionsPage
-                            collections={collections}
-                            loadCollectionsByPage={loadCollectionsByPage}
-                            totalPages={totalPages}
-                        />
-                    }
-                />
-                <Route
-                    path="/collection/:id"
-                    element={
-                        <CollectionItemsPage
-                            loadProductsByPage={loadProductsByPage}
-                        />
-                    }
-                />
-                <Route path="/products" element={<CarouselBestseller products={products} />} />
-                <Route path="/order" element={<OrderPage />} />
-                <Route path="*" element={<NotFound />} />
-            </Route>
-        </Routes>
-    );
+  return (
+    <Routes>
+      <Route element={<Layout withFooter withHeader />}>
+        <Route index element={<Home />} />
+        <Route
+          path="/collections"
+          element={
+            <CollectionsPage
+              collections={collections}
+              loadCollectionsByPage={loadCollectionsByPage}
+              totalPages={totalPages}
+            />
+          }
+        />
+        <Route
+          path="/collection/:id"
+          element={
+            <CollectionItemsPage
+              loadProductsByPage={loadProductsByPage}
+            />
+          }
+        />
+        <Route path="/product/:id" element={<ProductPage />} />
+        <Route path="/products" element={<CarouselBestseller products={products} />} />
+        <Route path="/order" element={<OrderPage />} />
+        <Route path="*" element={<NotFound />} />
+      </Route>
+    </Routes>
+  );
 }
 
 export default App;
