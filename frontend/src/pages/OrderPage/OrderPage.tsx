@@ -4,22 +4,26 @@ import { useNavigate } from 'react-router-dom';
 import style from './orderpage.module.scss';
 
 interface OrderItem {
-    product: string;
+    product_id: string;
     quantity: number;
     price: number;
+    product?: Product; // Added product property
 }
 
 interface Product {
     id: string;
+    name: string;
     price: number;
+    slug: string;
 }
 
 const OrderPage: React.FC = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [address, setAddress] = useState('');
-    const [items, setItems] = useState<OrderItem[]>([{ product: '', quantity: 1, price: 0 }]);
+    const [items, setItems] = useState<OrderItem[]>([{ product_id: '', quantity: 1, price: 0 }]);
     const [totalAmount, setTotalAmount] = useState(0);
+    const [orderSubmitted, setOrderSubmitted] = useState(false);
     const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
     const navigate = useNavigate();
 
@@ -27,25 +31,41 @@ const OrderPage: React.FC = () => {
         calculateTotalAmount();
     }, [items]);
 
-    const handleItemChange = async (index: number, field: 'product' | 'quantity' | 'price', value: string | number) => {
+    useEffect(() => {
+        if (orderSubmitted) {
+            const timer = setTimeout(() => {
+                navigate('/');
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [orderSubmitted, navigate]);
+
+    const handleItemChange = async (
+        index: number,
+        field: 'product_id' | 'quantity' | 'price',
+        value: string | number
+    ) => {
         const newItems = [...items];
         newItems[index][field] = value as never;
-
-        if (field === 'product' && typeof value === 'string') {
+    
+        if (field === 'product_id' && typeof value === 'string') {
             try {
                 const response = await axios.get<Product>(`${apiBaseUrl}/api/product/${value}/`);
-                newItems[index].price = response.data.price;
+                const productData = response.data;
+                newItems[index].product = productData;
+                newItems[index].price = productData.price;
             } catch (error) {
-                console.error('Error fetching product price:', error);
-                newItems[index].price = 0; // Default to 0 if there is an error
+                console.error('Error fetching product data:', error);
             }
         }
-
+    
         setItems(newItems);
     };
+    
+    
 
     const addItem = () => {
-        setItems([...items, { product: '', quantity: 1, price: 0 }]);
+        setItems([...items, { product_id: '', quantity: 1, price: 0 }]);
     };
 
     const calculateTotalAmount = () => {
@@ -73,65 +93,68 @@ const OrderPage: React.FC = () => {
                 name,
                 email,
                 address,
-                items: items.map(item => ({ product: item.product, quantity: item.quantity })),
+                order_items: items.map(item => ({
+                    product_id: item.product_id,
+                    quantity: item.quantity,
+                })),
             };
-
+    
             await axios.post(`${apiBaseUrl}/api/order/`, orderData);
-            alert('Order submitted successfully!');
+            setOrderSubmitted(true);
             sendEmail();
-            navigate('/');
         } catch (error) {
             console.error('Error submitting order:', error);
         }
     };
-
-    useEffect(() => {
-        calculateTotalAmount();
-    }, [items]);
+    
 
     return (
         <div className={style.container}>
             <h1>Place Order</h1>
-            <form onSubmit={handleSubmit} className={style.form}>
-                <div className={style.formGroup}>
-                    <label>Name</label>
-                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
-                </div>
-                <div className={style.formGroup}>
-                    <label>Email</label>
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                </div>
-                <div className={style.formGroup}>
-                    <label>Address</label>
-                    <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} />
-                </div>
-                <h2>Order Items</h2>
-                {items.map((item, index) => (
-                    <div key={index} className={style.formGroup}>
-                        <label>Product ID</label>
-                        <input
-                            type="text"
-                            value={item.product}
-                            onChange={(e) => handleItemChange(index, 'product', e.target.value)}
-                        />
-                        <label>Quantity</label>
-                        <input
-                            type="number"
-                            value={item.quantity}
-                            onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value))}
-                        />
-                        <label>Price</label>
-                        <input
-                            type="number"
-                            value={item.price}
-                            readOnly
-                        />
+            {orderSubmitted ? (
+                <div className={style.successMessage}>Order has been successfully submitted! Redirecting to home page...</div>
+            ) : (
+                <form onSubmit={handleSubmit} className={style.form}>
+                    <div className={style.formGroup}>
+                        <label>Name</label>
+                        <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
                     </div>
-                ))}
-                <div className={style.totalAmount}>Total Amount: ${totalAmount}</div>
-                <button type="button" onClick={addItem} className={style.addButton}>Add another item</button>
-                <button type="submit" className={style.submitButton}>Submit Order</button>
-            </form>
+                    <div className={style.formGroup}>
+                        <label>Email</label>
+                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                    </div>
+                    <div className={style.formGroup}>
+                        <label>Address</label>
+                        <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} />
+                    </div>
+                    <h2>Order Items</h2>
+                    {items.map((item, index) => (
+                        <div key={index} className={style.formGroup}>
+                            <label>Product ID</label>
+                            <input
+                                type="text"
+                                value={item.product?.id} // Use product.id instead of product_id
+                                onChange={(e) => handleItemChange(index, 'product_id', e.target.value)}
+                            />
+                            <label>Quantity</label>
+                            <input
+                                type="number"
+                                value={item.quantity}
+                                onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value))}
+                            />
+                            <label>Price</label>
+                            <input
+                                type="number"
+                                value={item.price}
+                                readOnly
+                            />
+                        </div>
+                    ))}
+                    <div className={style.totalAmount}>Total Amount: ${totalAmount}</div>
+                    <button type="button" onClick={addItem} className={style.addButton}>Add another item</button>
+                    <button type="submit" className={style.submitButton}>Submit Order</button>
+                </form>
+            )}
         </div>
     );
 };
