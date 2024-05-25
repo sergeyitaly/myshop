@@ -1,39 +1,30 @@
 from rest_framework import serializers
 from .models import Order, OrderItem
-from shop.models import Product
-
-class ProductSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = ['id', 'name', 'price', 'collection']
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    product = ProductSerializer(read_only=True)
-    product_id = serializers.PrimaryKeyRelatedField(
-        source='product', 
-        queryset=Product.objects.all(), 
-        write_only=True
-    )  # Reference product by ID for creation
+    product_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = OrderItem
-        fields = ['product', 'product_id', 'quantity', 'price']
+        fields = ['product_id', 'quantity']
 
     def create(self, validated_data):
-        product = validated_data.pop('product')
-        price = product.price
-        return OrderItem.objects.create(product=product, price=price, **validated_data)
+        product_id = validated_data.pop('product_id')
+        order_item = OrderItem.objects.create(product_id=product_id, **validated_data)
+        return order_item
+
 
 class OrderSerializer(serializers.ModelSerializer):
-    items = OrderItemSerializer(many=True)
+    order_items = OrderItemSerializer(many=True)
 
     class Meta:
         model = Order
-        fields = ['name', 'email', 'address', 'items', 'total_amount']
+        fields = ['name', 'email', 'address', 'order_items']
 
     def create(self, validated_data):
-        items_data = validated_data.pop('items')
+        items_data = validated_data.pop('order_items')
         order = Order.objects.create(**validated_data)
         for item_data in items_data:
-            OrderItem.objects.create(order=order, **item_data)
+            product_id = item_data.pop('product_id')
+            OrderItem.objects.create(order=order, product_id=product_id, **item_data)
         return order
