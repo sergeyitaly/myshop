@@ -41,8 +41,7 @@ const CollectionsPage: React.FC<Props> = ({ collections = [], loadCollectionsByP
                         key={collection.id} 
                         className={style.card}
                         >
-                            <div className={style.cardImage}
-                           >å
+                            <div className={style.cardImage}>
                                 <img 
                                 src={collection.photo} 
                                 alt={collection.name} 
