@@ -17,10 +17,6 @@ interface CarouselBestsellerProps {
 const CarouselBestseller: React.FC<CarouselBestsellerProps> = ({
   products,
 }) => {
-  const apiBaseUrl =
-    import.meta.env.VITE_LOCAL_API_BASE_URL ||
-    import.meta.env.VITE_API_BASE_URL;
-
   const settings = {
     dots: true,
     infinite: true,
@@ -47,17 +43,17 @@ const CarouselBestseller: React.FC<CarouselBestsellerProps> = ({
       <Slider {...settings}>
         {products.map((product) => (
           <Link
-            to={`${apiBaseUrl}/api/products/${product.id}`}
+            to={`/product/${product.id}`}
             key={product.id}
             className={style.card}
           >
-            <div key={product.id} className={style.card}>
+            <div className={style.card}>
               <div className={style.cardImage}>
                 <img
                   src={product.photo}
                   alt={product.name}
                   className={style.image}
-                  loading="lazy" // Add lazy loading attribute
+                  loading="lazy"
                 />
                 <p className={style.name}>{product.name}</p>
                 <p className={style.price}>{product.price}</p>
