@@ -35,14 +35,15 @@ const CollectionItemsPage: React.FC<CollectionItemsPageProps> = ({ loadProductsB
     const fetchData = async (page: number) => {
       try {
         setLoading(true);
-        const collectionData = await getCollectionNameById(id!);
-        setCollection(collectionData);
 
-        const productsResponse = await loadProductsByPage(id!, page);
-        setProducts(productsResponse.data.results);
-        const totalProducts = productsResponse.data.count;
-        const pages = Math.ceil(totalProducts / 6);
-        setTotalPages(pages);
+        if (!collection) {
+          const collectionData = await getCollectionNameById(id!);
+          setCollection(collectionData);
+        }
+
+        const { data: { results, count } } = await loadProductsByPage(id!, page);
+        setProducts(results);
+        setTotalPages(Math.ceil(count / 6));
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -51,59 +52,56 @@ const CollectionItemsPage: React.FC<CollectionItemsPageProps> = ({ loadProductsB
     };
 
     fetchData(currentPage);
-  }, [id, loadProductsByPage, currentPage]);
+  }, [id, loadProductsByPage, currentPage, collection]);
 
   const handlePageClick = (page: number) => {
     setCurrentPage(page);
   };
 
   if (loading) {
-    return <div className={style.container}>Loading...</div>;
+    return <div className={style.container}>Завантажується...</div>;
   }
 
   if (!collection) {
     return <div className={style.container}>Collection does not exist.</div>;
   }
 
-  if (products.length === 0) {
-    return (
-      <div className={style.container}>
-        <h1 className={style.title}>{collection.name}</h1>
-        <p>This collection has no products.</p>
-      </div>
-    );
-  }
-
   return (
     <>
       <h1 className={style.title}>{collection.name}</h1>
-      <div className={style.productContainer}>
-        {products.map((product) => (
-          <Link 
-            to={`/product/${product.id}`} 
-            key={product.id} 
-            className={style.card}
-          >
-            <div className={style.cardImage}>
-              <img
-                src={product.photo}
-                alt={product.name}
-                style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
-                loading="lazy"
-              />
-            </div>
-            <div className={style.cardContent}>
-              <p className={style.name}>{product.name}</p>
-              <p className={style.price}>{product.price}</p>
-            </div>
-          </Link>
-        ))}
-      </div>
+      {products.length === 0 ? (
+        <div className={style.container}>
+          <p>В цій коллекції немає продуктів.</p>
+        </div>
+      ) : (
+        <div className={style.productContainer}>
+          {products.map((product) => (
+            <Link
+              to={`/product/${product.id}`}
+              key={product.id}
+              className={style.card}
+            >
+              <div className={style.cardImage}>
+                <img
+                  src={product.photo}
+                  alt={product.name}
+                  style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
+                  loading="lazy"
+                />
+              </div>
+              <div className={style.cardContent}>
+                <p className={style.name}>{product.name}</p>
+                <p className={style.price}>{product.price}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
       <div className={style.pagination}>
         {[...Array(totalPages)].map((_, index) => (
-          <button 
-            key={index + 1} 
-            onClick={() => handlePageClick(index + 1)} 
+          <button
+            key={index + 1}
+            onClick={() => handlePageClick(index + 1)}
             className={currentPage === index + 1 ? style.activePage : ''}
           >
             {index + 1}
