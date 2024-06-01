@@ -59,7 +59,7 @@ const CollectionItemsPage: React.FC<CollectionItemsPageProps> = ({ loadProductsB
   };
 
   if (loading) {
-    return <div className={style.container}>Завантажується...</div>;
+    return <div className={style.container}>Loading...</div>;
   }
 
   if (!collection) {
@@ -71,7 +71,7 @@ const CollectionItemsPage: React.FC<CollectionItemsPageProps> = ({ loadProductsB
       <h1 className={style.title}>{collection.name}</h1>
       {products.length === 0 ? (
         <div className={style.container}>
-          <p>В цій коллекції немає продуктів.</p>
+          <p>This collection has no products.</p>
         </div>
       ) : (
         <div className={style.productContainer}>
