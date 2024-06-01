@@ -37,11 +37,11 @@ export async function getProductNameById(productId: string): Promise<Product> {
   }
 }
 
-// Function to fetch all collections
-export async function getCollections(): Promise<Collection[]> {
+// Function to fetch all collections with pagination
+export async function getCollections(page: number = 1): Promise<{ results: Collection[], totalPages: number }> {
   try {
-    const response = await axios.get<{ results: Collection[] }>(`${apiBaseUrl}/api/collections/`);
-    return response.data.results;
+    const response = await axios.get<{ results: Collection[], totalPages: number }>(`${apiBaseUrl}/api/collections/?page=${page}`);
+    return response.data;
   } catch (error) {
     throw new Error('Error fetching collections: ' + error);
   }
