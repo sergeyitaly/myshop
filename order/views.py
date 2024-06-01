@@ -27,3 +27,18 @@ def create_order(request):
     else:
         print("Validation Errors:", serializer.errors)  # Debugging line to print validation errors
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])  # Allow anonymous access
+def send_email(request):
+    try:
+        to_email = request.data.get('to')
+        subject = request.data.get('subject')
+        body = request.data.get('body')
+
+        send_mail(subject, body, 'your_email@example.com', [to_email], fail_silently=False)
+
+        return Response({'message': 'Email sent successfully'}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'message': f'Error sending email: {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

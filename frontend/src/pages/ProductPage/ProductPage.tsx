@@ -1,8 +1,7 @@
-// ProductPage.tsx
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
 import style from './ProductPage.module.scss';
+import { getProductNameById } from '../../api/api';
 
 interface Product {
   id: string;
@@ -16,14 +15,13 @@ const ProductPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  const [quantity, setQuantity] = useState(1); // Initialize quantity to 1
-  const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get<Product>(`${apiBaseUrl}/api/product/${id}/`);
-        setProduct(response.data);
+        const productData = await getProductNameById(id!);
+        setProduct(productData);
       } catch (error) {
         console.error('Error fetching product:', error);
       } finally {
@@ -31,16 +29,16 @@ const ProductPage: React.FC = () => {
       }
     };
 
-    fetchProduct();
-  }, [id, apiBaseUrl]);
+    fetchData();
+  }, [id]);
 
   const handleIncrement = () => {
-    setQuantity((prevQuantity) => prevQuantity + 1); // Increase quantity by 1
+    setQuantity((prevQuantity) => prevQuantity + 1);
   };
 
   const handleDecrement = () => {
     if (quantity > 0) {
-      setQuantity((prevQuantity) => prevQuantity - 1); // Decrease quantity by 1 if it's greater than 0
+      setQuantity((prevQuantity) => prevQuantity - 1);
     }
   };
 

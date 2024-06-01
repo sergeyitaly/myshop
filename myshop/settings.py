@@ -7,6 +7,13 @@ from dotenv import load_dotenv
 from shop.loadimages_tos3 import LoadImagesToS3
 from distutils.util import strtobool
 from django.core.validators import FileExtensionValidator
+import os
+import ssl
+import certifi
+from urllib.request import build_opener, HTTPSHandler
+import urllib.request
+from urllib.request import urlopen
+import json
 
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,7 +27,7 @@ AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
 AWS_DEFAULT_ACL = 'public-read'
 AWS_QUERYSTRING_AUTH = False  # needed for ckeditor with S3
 AWS_S3_FILE_OVERWRITE = True
-AWS_DEFAULT_ACL = None
+#AWS_DEFAULT_ACL = None
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
 AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
@@ -41,7 +48,8 @@ CORS_ALLOWED_ORIGINS = [
     VERCEL_DOMAIN,
     AWS_FRONTEND_DOMAIN,
 ]
-
+SECURE_SSL_REDIRECT = False
+SECURE_HSTS_SECONDS=0
 INTERNAL_IPS = ["127.0.0.1", "localhost", '::1']
 ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app', 'localhost']
 
@@ -221,13 +229,26 @@ DJOSER = {
     'SEND_CONFIRMATION_EMAIL': True,
     'SERIALAZERS': {}
 }
-# app password: vxfnflimsnbvgfvx
+
+#SSL_CERT_DIR='/etc/ssl/certs/'
+
+ssl._create_default_https_context = ssl._create_unverified_context
+#context = ssl.create_default_context(cafile=certifi.where())
+#https_handler = HTTPSHandler(context=context)
+
+# Configure Django email backend with the custom HTTPSHandler
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+#EMAIL_BACKEND = 'backend.email.EmailBackend'
+
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
+
+
+# Set up the custom opener with the HTTPSHandler
+#opener = build_opener(https_handler)
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
