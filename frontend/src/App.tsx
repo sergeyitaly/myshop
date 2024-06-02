@@ -1,4 +1,3 @@
-// src/App.tsx
 import { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { Layout } from './layout/Layout/Layout';
@@ -10,8 +9,6 @@ import { NotFound } from './pages/not-found/not-found';
 import axios from 'axios';
 import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
 import OrderPage from './pages/OrderPage/OrderPage';
-
-
 
 const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
 
@@ -46,7 +43,7 @@ function App() {
         `${apiBaseUrl}/api/collections/?page=${page}`
       );
       setCollections(response.data.results);
-      const pages = Math.ceil(response.data.count / 6); // Assuming 6 collections per page
+      const pages = Math.ceil(response.data.count / 9); // 9 collections per page
       setTotalPages(pages);
     } catch (error) {
       console.error('Error fetching collections:', error);

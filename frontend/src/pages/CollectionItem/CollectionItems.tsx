@@ -97,17 +97,19 @@ const CollectionItemsPage: React.FC<CollectionItemsPageProps> = ({ loadProductsB
           ))}
         </div>
       )}
-      <div className={style.pagination}>
-        {[...Array(totalPages)].map((_, index) => (
-          <button
-            key={index + 1}
-            onClick={() => handlePageClick(index + 1)}
-            className={currentPage === index + 1 ? style.activePage : ''}
-          >
-            {index + 1}
-          </button>
-        ))}
-      </div>
+      {products.length > 6 && (
+        <div className={style.pagination}>
+          {[...Array(totalPages)].map((_, index) => (
+            <button
+              key={index + 1}
+              onClick={() => handlePageClick(index + 1)}
+              className={currentPage === index + 1 ? style.activePage : ''}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
+      )}
       <CarouselBestseller products={products.map(product => ({ ...product, price: String(product.price) }))} />
     </>
   );
