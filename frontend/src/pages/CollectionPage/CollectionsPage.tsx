@@ -52,17 +52,19 @@ const CollectionsPage: React.FC<Props> = ({ collections = [], loadCollectionsByP
             </Link>
           ))}
         </div>
-        <div className={style.pagination}>
-          {[...Array(validTotalPages)].map((_, index) => (
-            <button
-              key={index + 1}
-              onClick={() => handlePageClick(index + 1)}
-              className={currentPage === index + 1 ? style.activePage : ''}
-            >
-              {index + 1}
-            </button>
-          ))}
-        </div>
+        {collections.length > 9 && (
+          <div className={style.pagination}>
+            {[...Array(validTotalPages)].map((_, index) => (
+              <button
+                key={index + 1}
+                onClick={() => handlePageClick(index + 1)}
+                className={currentPage === index + 1 ? style.activePage : ''}
+              >
+                {index + 1}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
