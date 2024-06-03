@@ -6,6 +6,7 @@ import os
 from storages.backends.s3boto3 import S3Boto3Storage
 from dotenv import load_dotenv
 from distutils.util import strtobool
+from django.core.files.images import get_image_dimensions
 
 load_dotenv()
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
@@ -14,9 +15,26 @@ USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
 MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{AWS_MEDIA_LOCATION}/'
 
 def validate_file_extension(value):
-    ext = os.path.splitext(value.name)[1]  # [0] returns path+filename
+    ext = os.path.splitext(value.name)[1].lower()
     valid_extensions = ['.jpg', '.jpeg', '.png', '.svg']
-    if not ext.lower() in valid_extensions:
+    if ext not in valid_extensions:
+        raise ValidationError('Unsupported file extension.')
+
+def validate_image(value):
+    """
+    Validate that the uploaded file is a valid image.
+    """
+    try:
+        width, height = get_image_dimensions(value)
+    except AttributeError:
+        raise ValidationError("The file is not an image.")
+
+def validate_svg(value):
+    """
+    Validate that the file is an SVG image.
+    """
+    ext = os.path.splitext(value.name)[1].lower()
+    if ext != '.svg':
         raise ValidationError('Unsupported file extension.')
 
 class MediaStorage(S3Boto3Storage):
@@ -70,11 +88,11 @@ class Collection(models.Model):
 
 class Product(models.Model):
     if USE_S3:
-        photo = models.ImageField(upload_to="photos/product", storage=MediaStorage(), null=True, blank=True, validators=[validate_file_extension])
-        brandimage = models.ImageField(upload_to="photos/svg", storage=MediaStorage(), null=True, blank=True, validators=[validate_file_extension])
+        photo = models.ImageField(upload_to="photos/product", storage=MediaStorage(), null=True, blank=True, validators=[validate_image])
+        brandimage = models.ImageField(upload_to="photos/svg", storage=MediaStorage(), null=True, blank=True, validators=[validate_svg])
     else:
-        photo = models.ImageField(upload_to="photos/product", null=True, blank=True, validators=[validate_file_extension])
-        brandimage = models.ImageField(upload_to="photos/svg", null=True, blank=True, validators=[validate_file_extension])
+        photo = models.ImageField(upload_to="photos/product", null=True, blank=True, validators=[validate_image])
+        brandimage = models.ImageField(upload_to="photos/svg", null=True, blank=True, validators=[validate_svg])
 
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=255)
@@ -87,7 +105,9 @@ class Product(models.Model):
     sales_count = models.PositiveIntegerField(default=0)
     popularity = models.PositiveIntegerField(default=0)
     slug = models.SlugField(unique=True)
-    
+    color = models.CharField(max_length=50, null=True, blank=True)
+    size = models.CharField(max_length=50, null=True, blank=True, help_text="Format: LxHxD (in mm or specify cm)")
+
     CURRENCY_CHOICES = (
         ('UAH', 'UAH (грн)'),
         ('USD', 'USD ($)'),
