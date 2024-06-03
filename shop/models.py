@@ -1,7 +1,7 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.utils.html import format_html
 from django.utils.text import slugify
-from django.core.exceptions import ValidationError
 import os
 from storages.backends.s3boto3 import S3Boto3Storage
 from dotenv import load_dotenv
@@ -21,18 +21,12 @@ def validate_file_extension(value):
         raise ValidationError('Unsupported file extension.')
 
 def validate_image(value):
-    """
-    Validate that the uploaded file is a valid image.
-    """
     try:
         width, height = get_image_dimensions(value)
     except AttributeError:
         raise ValidationError("The file is not an image.")
 
 def validate_svg(value):
-    """
-    Validate that the file is an SVG image.
-    """
     ext = os.path.splitext(value.name)[1].lower()
     if ext != '.svg':
         raise ValidationError('Unsupported file extension.')
@@ -88,11 +82,11 @@ class Collection(models.Model):
 
 class Product(models.Model):
     if USE_S3:
-        photo = models.ImageField(upload_to="photos/product", storage=MediaStorage(), null=True, blank=True, validators=[validate_image])
-        brandimage = models.ImageField(upload_to="photos/svg", storage=MediaStorage(), null=True, blank=True, validators=[validate_svg])
+        photo = models.ImageField(upload_to="photos/product", storage=MediaStorage(), null=True, blank=True, validators=[validate_image, validate_file_extension])
+        brandimage = models.ImageField(upload_to="photos/svg", storage=MediaStorage(), null=True, blank=True, validators=[validate_svg, validate_file_extension])
     else:
-        photo = models.ImageField(upload_to="photos/product", null=True, blank=True, validators=[validate_image])
-        brandimage = models.ImageField(upload_to="photos/svg", null=True, blank=True, validators=[validate_svg])
+        photo = models.ImageField(upload_to="photos/product", null=True, blank=True, validators=[validate_image, validate_file_extension])
+        brandimage = models.ImageField(upload_to="photos/svg", null=True, blank=True, validators=[validate_svg, validate_file_extension])
 
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=255)
@@ -152,3 +146,10 @@ class Product(models.Model):
 
     image_tag.short_description = "Image"
     image_tag.allow_tags = True
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, default=None, on_delete=models.CASCADE)
+    images = models.FileField(upload_to='photos/product', validators=[validate_image, validate_file_extension])
+
+    def __str__(self):
+        return self.product.name

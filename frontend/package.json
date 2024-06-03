@@ -49,6 +49,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "react-responsive": "^10.0.0",
+    "react-swipeable": "^7.0.1",
     "typescript": "^5.2.2",
     "vite": "^5.1.4",
     "vite-plugin-svgr": "^4.2.0"
