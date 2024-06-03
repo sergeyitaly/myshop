@@ -1,6 +1,6 @@
 from django import forms
-from django_svg_image_form_field import SvgAndImageFormField
 from .models import Product, Collection, ProductImage
+from django_svg_image_form_field import SvgAndImageFormField
 
 
 class CollectionForm(forms.ModelForm):
@@ -8,7 +8,7 @@ class CollectionForm(forms.ModelForm):
         model = Collection
         exclude = []
         field_classes = {
-            'photo': SvgAndImageFormField,
+            'photo': SvgAndImageFormField,  # Allow both SVG and regular image files
         }
     
 class ProductForm(forms.ModelForm):
@@ -16,9 +16,8 @@ class ProductForm(forms.ModelForm):
         model = Product
         exclude = []
         field_classes = {
-            'photo': SvgAndImageFormField,
-            'brandimage': SvgAndImageFormField,
-
+            'photo': SvgAndImageFormField,  # Allow both SVG and regular image files
+            'brandimage': SvgAndImageFormField,  # Allow both SVG and regular image files
         }
 
 class ProductImageForm(forms.ModelForm):

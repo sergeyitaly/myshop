@@ -12,6 +12,10 @@ npm run vercel-build
 cd ..
 
 pip install -r requirements.txt
+python3 manage.py makemigrations shop
+python3 manage.py migrate shop
+python3 manage.py makemigrations order
+python3 manage.py migrate order
 python3 manage.py makemigrations
 python3 manage.py migrate
 # Set Django settings module
