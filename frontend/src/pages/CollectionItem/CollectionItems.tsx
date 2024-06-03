@@ -12,11 +12,17 @@ interface Collection {
   category: string;
 }
 
+interface ProductImage {
+  id: string;
+  images: string;
+}
+
 interface Product {
   id: string;
   name: string;
   photo: string;
   price: number | string;
+  images: ProductImage[]; // Ensure images is defined as a part of the Product type
 }
 
 interface CollectionItemsPageProps {
@@ -83,7 +89,7 @@ const CollectionItemsPage: React.FC<CollectionItemsPageProps> = ({ loadProductsB
             >
               <div className={style.cardImage}>
                 <img
-                  src={product.photo}
+                  src={product.images[0]?.images || product.photo} // Use the first image if available
                   alt={product.name}
                   style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
                   loading="lazy"

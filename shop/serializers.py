@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Collection, Category
+from .models import Product, Collection, Category, ProductImage
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,9 +23,16 @@ class CollectionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ['id', 'images']
+
+
 class ProductSerializer(serializers.ModelSerializer):
     photo_url = serializers.SerializerMethodField()
     collection = serializers.ReadOnlyField(source='collection.name')
+    images = ProductImageSerializer(source='productimage_set', many=True, read_only=True)
 
     def get_photo_url(self, obj):
         if obj.photo:

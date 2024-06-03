@@ -2,6 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import style from './ProductPage.module.scss';
 import { getProductNameById } from '../../api/api';
+import { useSwipeable } from 'react-swipeable'; // Import useSwipeable hook
+
+interface ProductImage {
+  id: string;
+  images: string; // Assuming 'images' property contains image URLs
+}
 
 interface Product {
   id: string;
@@ -9,6 +15,7 @@ interface Product {
   photo: string;
   price: number | string;
   description: string;
+  images?: ProductImage[]; // Make images property optional
 }
 
 const ProductPage: React.FC = () => {
@@ -42,6 +49,15 @@ const ProductPage: React.FC = () => {
     }
   };
 
+  const handlers = useSwipeable({
+    onSwipedLeft: () => {
+      // Handle swipe left
+    },
+    onSwipedRight: () => {
+      // Handle swipe right
+    }
+  });
+
   if (loading) {
     return <div className={style.container}>Loading...</div>;
   }
@@ -51,11 +67,18 @@ const ProductPage: React.FC = () => {
   }
 
   return (
-    <div className={style.container}>
+    <div className={style.container} {...handlers}>
       <div className={style.leftSection}>
         <div className={style.imageContainer}>
           <img src={product.photo} alt={product.name} className={style.image} />
         </div>
+        {product.images && product.images.length > 0 && (
+          <div className={style.imageGallery}>
+            {product.images.map((img) => (
+              <img key={img.id} src={img.images} alt={product.name} className={style.thumbnail} />
+            ))}
+          </div>
+        )}
         <h1 className={style.title}>{product.name}</h1>
       </div>
       <div className={style.rightSection}>
