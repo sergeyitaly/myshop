@@ -66,7 +66,7 @@ class Collection(models.Model):
             decoded_filename = unquote(filename)
             return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(decoded_filename))
         else:
-            return 'No Image Found'
+            return format_html('<img src="collection.jpg" style="max-height: 150px; max-width: 150px;" />')
 
     def __str__(self):
         return self.name
@@ -120,7 +120,7 @@ class Product(models.Model):
             decoded_filename = unquote(filename)
             return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(decoded_filename))
         else:
-            return 'No Image Found'
+            return format_html('<img src="product.png" style="max-height: 150px; max-width: 150px;" />')
 
     def __str__(self):
         return self.name

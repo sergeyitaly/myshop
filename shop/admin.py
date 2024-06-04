@@ -38,7 +38,7 @@ class ProductAdmin(admin.ModelAdmin):
         elif obj.photo:
             return format_html('<img src="{}" style="max-width:100px; max-height:100px;" />', obj.photo.url)
         else:
-            placeholder_url = 'sample.png'
+            placeholder_url = 'product.png'
             return format_html('<img src="{}" style="max-width:100px; max-height:100px;" />', placeholder_url)
     first_product_image.short_description = 'Image'
 
@@ -77,7 +77,9 @@ class CollectionAdmin(admin.ModelAdmin):
     def image_tag(self, obj):
         if obj.photo:
             return format_html('<img src="{}" style="max-height:150px; max-width:150px;" />', obj.photo.url)
-        return format_html('<img src="{}" style="max-height:150px; max-width:150px;" />', 'placeholder.jpg')
+        else:
+            placeholder_url = 'collection.jpg'
+            return format_html('<img src="{}" style="max-height:150px; max-width:150px;" />', placeholder_url)
     image_tag.short_description = "Image"
 
 admin.site.register(Collection, CollectionAdmin)
