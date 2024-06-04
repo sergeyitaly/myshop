@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from . import views
 from django.views.generic import RedirectView
 from .views import CustomTokenObtainPairView, CustomTokenRefreshView
+from django.conf.urls.i18n import i18n_patterns
 
 load_dotenv()
 
@@ -53,6 +54,10 @@ urlpatterns = [
     # Catch-all URL pattern (redirect to index.html)
     re_path(r'^.*$', RedirectView.as_view(url='/')),
 ]
+
+urlpatterns += i18n_patterns(
+    path('i18n/', include('django.conf.urls.i18n')),
+)
 
 if settings.DEBUG:
     # Serve media files
