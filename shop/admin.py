@@ -3,14 +3,20 @@ from django.urls import reverse
 from django.utils.html import format_html
 from .models import Category, Collection, Product, ProductImage
 
-class ProductImageInline(admin.TabularInline):
+class ProductImageInline(admin.StackedInline):
     model = ProductImage
-    extra = 1  # Number of extra inline forms
+    readonly_fields = ['get_image_tag']
+
+    def get_image_tag(self, obj):
+        if obj.images:
+            return format_html('<img src="{}" style="max-width:100px; max-height:100px;" />', obj.images.url)
+        return "No Image Found"
+    get_image_tag.short_description = 'Image'
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductImageInline]
-    list_display = ('id','get_product_name', 'first_product_image', 'collection', 'price', 'currency', 'stock', 'available', 'sales_count', 'popularity')
+    list_display = ('id', 'get_product_name', 'first_product_image', 'collection', 'price', 'currency', 'stock', 'available', 'sales_count', 'popularity')
     search_fields = ['name']
     readonly_fields = ('id', 'slug', 'image_tag')
     fields = (
@@ -34,14 +40,20 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
-    list_display = ['id', 'product', 'get_image_url']
-    readonly_fields = ['get_image_url']
+    list_display = ['id', 'product', 'get_image_url', 'display_photo']
+    readonly_fields = ['get_image_url', 'display_photo']
 
     def get_image_url(self, obj):
         if obj.images:
             return obj.images.url
         return "No Image Found"
     get_image_url.short_description = 'Image URL'
+
+    def display_photo(self, obj):
+        if obj.images:
+            return format_html('<img src="{}" style="max-width:100px; max-height:100px;" />'.format(obj.images.url))
+        return "No Image Found"
+    display_photo.short_description = "Photo"
 
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('id', 'name',)
