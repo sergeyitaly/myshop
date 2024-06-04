@@ -5,6 +5,7 @@ from .models import Category, Collection, Product, ProductImage
 
 class ProductImageInline(admin.StackedInline):
     model = ProductImage
+    extra = 1
     readonly_fields = ['get_image_tag']
 
     def get_image_tag(self, obj):
@@ -18,7 +19,7 @@ class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductImageInline]
     list_display = ('id', 'get_product_name', 'first_product_image', 'collection', 'price', 'currency', 'stock', 'available', 'sales_count', 'popularity')
     search_fields = ['name']
-    readonly_fields = ('id', 'slug', 'image_tag')
+    readonly_fields = ('id', 'slug', 'image_tag', 'photo')  # Add 'photo' to readonly_fields
     fields = (
         'id', 'name', 'collection', 'description', 'price', 'currency', 'stock', 'available', 'sales_count',
         'popularity', 'color', 'size', 'slug', 'photo', 'image_tag'
