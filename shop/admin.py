@@ -1,7 +1,21 @@
 from django.contrib import admin
-from django.urls import reverse
-from django.utils.html import format_html
+from django.forms import FileField
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 from .models import Category, Collection, Product, ProductImage
+from django.utils.html import format_html
+from django.urls import reverse
+
+class CustomImageFileField(FileField):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.validators = [validate_image]
+
+def validate_image(value):
+    valid_extensions = ['jpg', 'jpeg', 'png', 'svg']
+    ext = value.name.split('.')[-1].lower()
+    if ext not in valid_extensions:
+        raise ValidationError(_('Only JPG, JPEG, PNG, and SVG files are allowed.'))
 
 class ProductImageInline(admin.StackedInline):
     model = ProductImage
