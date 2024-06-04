@@ -7,6 +7,7 @@ from storages.backends.s3boto3 import S3Boto3Storage
 from dotenv import load_dotenv
 from distutils.util import strtobool
 from django.core.files.images import get_image_dimensions
+from urllib.parse import unquote  # Add this import
 
 load_dotenv()
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
@@ -60,7 +61,10 @@ class Collection(models.Model):
 
     def image_tag(self):
         if self.photo:
-            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(self.photo.url))
+            url = self.photo.url
+            filename = os.path.basename(url)
+            decoded_filename = unquote(filename)
+            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(decoded_filename))
         else:
             return 'No Image Found'
 
@@ -82,11 +86,11 @@ class Collection(models.Model):
 
 class Product(models.Model):
     if USE_S3:
-        photo = models.ImageField(upload_to="photos/product", storage=MediaStorage(), null=True, blank=True, validators=[validate_image, validate_file_extension])
-        brandimage = models.ImageField(upload_to="photos/svg", storage=MediaStorage(), null=True, blank=True, validators=[validate_svg, validate_file_extension])
+        photo = models.ImageField(upload_to="photos/product", storage=MediaStorage(), null=True, blank=True, validators=[validate_file_extension])
+        brandimage = models.ImageField(upload_to="photos/svg", storage=MediaStorage(), null=True, blank=True, validators=[validate_file_extension])
     else:
-        photo = models.ImageField(upload_to="photos/product", null=True, blank=True, validators=[validate_image, validate_file_extension])
-        brandimage = models.ImageField(upload_to="photos/svg", null=True, blank=True, validators=[validate_svg, validate_file_extension])
+        photo = models.ImageField(upload_to="photos/product", null=True, blank=True, validators=[validate_file_extension])
+        brandimage = models.ImageField(upload_to="photos/svg", null=True, blank=True, validators=[validate_file_extension])
 
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=255)
@@ -111,7 +115,10 @@ class Product(models.Model):
 
     def image_tag(self):
         if self.photo:
-            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(self.photo.url))
+            url = self.photo.url
+            filename = os.path.basename(url)
+            decoded_filename = unquote(filename)
+            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(decoded_filename))
         else:
             return 'No Image Found'
 
@@ -149,7 +156,14 @@ class Product(models.Model):
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, default=None, on_delete=models.CASCADE)
-    images = models.FileField(upload_to='photos/product', validators=[validate_image, validate_file_extension])
+    images = models.FileField(upload_to='photos/product', validators=[validate_file_extension])
 
     def __str__(self):
         return self.product.name
+
+    def save(self, *args, **kwargs):
+        if self.images:
+            filename = os.path.basename(self.images.name)
+            decoded_filename = unquote(filename)
+            self.images.name = decoded_filename
+        super().save(*args, **kwargs)
