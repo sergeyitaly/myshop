@@ -3,15 +3,9 @@ from django.urls import reverse
 from django.utils.html import format_html
 from .models import Category, Collection, Product, ProductImage
 
-class ProductImageInline(admin.StackedInline):
+class ProductImageInline(admin.TabularInline):
     model = ProductImage
-    readonly_fields = ['get_image_tag']
-
-    def get_image_tag(self, obj):
-        if obj.images:
-            return format_html('<img src="{}" style="max-width:100px; max-height:100px;" />', obj.images.url)
-        return "No Image Found"
-    get_image_tag.short_description = 'Image'
+    extra = 1  # Number of extra inline forms
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
