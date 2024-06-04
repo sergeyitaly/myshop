@@ -5,7 +5,6 @@ from .models import Category, Collection, Product, ProductImage
 
 class ProductImageInline(admin.StackedInline):
     model = ProductImage
-    extra = 1
     readonly_fields = ['get_image_tag']
 
     def get_image_tag(self, obj):
@@ -19,7 +18,7 @@ class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductImageInline]
     list_display = ('id', 'get_product_name', 'first_product_image', 'collection', 'price', 'currency', 'stock', 'available', 'sales_count', 'popularity')
     search_fields = ['name']
-    readonly_fields = ('id', 'slug', 'image_tag', 'photo')  # Add 'photo' to readonly_fields
+    readonly_fields = ('id', 'slug', 'image_tag')
     fields = (
         'id', 'name', 'collection', 'description', 'price', 'currency', 'stock', 'available', 'sales_count',
         'popularity', 'color', 'size', 'slug', 'photo', 'image_tag'
@@ -36,7 +35,11 @@ class ProductAdmin(admin.ModelAdmin):
         first_image = obj.productimage_set.first()  # Use the related manager
         if first_image and first_image.images:
             return format_html('<img src="{}" style="max-width:100px; max-height:100px;" />', first_image.images.url)
-        return format_html('<img src="{}" style="max-width:100px; max-height:100px;" />', obj.photo.url) if obj.photo else 'No Image Found'
+        elif obj.photo:
+            return format_html('<img src="{}" style="max-width:100px; max-height:100px;" />', obj.photo.url)
+        else:
+            placeholder_url = 'sample.png'
+            return format_html('<img src="{}" style="max-width:100px; max-height:100px;" />', placeholder_url)
     first_product_image.short_description = 'Image'
 
 @admin.register(ProductImage)
@@ -74,7 +77,7 @@ class CollectionAdmin(admin.ModelAdmin):
     def image_tag(self, obj):
         if obj.photo:
             return format_html('<img src="{}" style="max-height:150px; max-width:150px;" />', obj.photo.url)
-        return 'No Image Found'
+        return format_html('<img src="{}" style="max-height:150px; max-width:150px;" />', 'placeholder.jpg')
     image_tag.short_description = "Image"
 
 admin.site.register(Collection, CollectionAdmin)
