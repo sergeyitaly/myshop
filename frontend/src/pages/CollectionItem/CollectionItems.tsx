@@ -5,6 +5,8 @@ import CarouselBestseller from '../CollectionPage/CarouselBestseller/CarouselBes
 import { AxiosResponse } from 'axios';
 import { getCollectionNameById } from '../../api/api';
 
+const DEFAULT_PRODUCT_IMAGE = '../../shop/product.png'; // Update with your default image path
+
 interface Collection {
   id: string;
   name: string;
@@ -83,7 +85,7 @@ const CollectionItemsPage: React.FC<CollectionItemsPageProps> = ({ loadProductsB
             >
               <div className={style.cardImage}>
                 <img
-                  src={product.photo}
+                  src={product.photo || DEFAULT_PRODUCT_IMAGE}
                   alt={product.name}
                   style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
                   loading="lazy"
