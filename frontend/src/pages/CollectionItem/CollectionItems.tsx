@@ -99,7 +99,7 @@ const CollectionItemsPage: React.FC<CollectionItemsPageProps> = ({ loadProductsB
           ))}
         </div>
       )}
-      {products.length >= 6 && (
+      {products.length > 0 && (
         <div className={style.pagination}>
           {[...Array(totalPages)].map((_, index) => (
             <button
