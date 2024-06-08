@@ -1,0 +1,30 @@
+@import '../../variables';
+
+.container {
+    font-size: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    @media (max-width: $screen-big) {
+        font-size: 19px;
+    }
+    
+    @media (max-width: $screen-laptop) {
+        font-size: 18px;
+    }
+   
+    @media (max-width: $screen-tablet) {
+        font-size: 17px;
+    }
+ 
+    @media (max-width: $screen-mobile) {
+        font-size: 16px;
+    }
+}
+
+.contentСontainer {
+    display: flex;
+    gap: 8px;
+}
+

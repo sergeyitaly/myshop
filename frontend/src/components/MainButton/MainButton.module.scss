@@ -1,0 +1,37 @@
+@import '../../variables';
+
+.button {
+    border: 1px solid #CDCDCD;
+    font-weight: 500;
+    font-size: 24px;
+    padding: 11px;
+    border-radius: 5px;
+    background: transparent;
+    transition: .2s;
+
+    &:hover {
+        background-color: $color-button;
+        color: $color-background;
+        border-color: $color-button;
+    }
+
+    @media (max-width: $screen-big) {
+        font-size: 22px;
+    }
+    
+    @media (max-width: $screen-laptop) {
+        font-size: 20px;
+        padding: 10px;
+    }
+   
+    @media (max-width: $screen-tablet) {
+        font-size: 18px;
+        padding: 9px;
+    }
+ 
+    @media (max-width: $screen-mobile) {
+        font-size: 16px;
+        padding: 8px;
+    }
+}
+

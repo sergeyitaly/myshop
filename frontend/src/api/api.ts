@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { Product } from '../models/entities';
 
-const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
+export const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
 
 interface Collection {
   id: string;
@@ -9,13 +10,13 @@ interface Collection {
   category: string;
 }
 
-interface Product {
-  id: string;
-  name: string;
-  photo: string;
-  price: number | string;
-  description: string;
-}
+// interface Product {
+//   id: string;
+//   name: string;
+//   photo: string;
+//   price: number | string;
+//   description: string;
+// }
 
 // Function to fetch collection name by ID
 export async function getCollectionNameById(collectionId: string): Promise<Collection> {
@@ -30,7 +31,11 @@ export async function getCollectionNameById(collectionId: string): Promise<Colle
 // Function to fetch product name by ID
 export async function getProductNameById(productId: string): Promise<Product> {
   try {
+    console.log(apiBaseUrl);
+    
     const response = await axios.get<Product>(`${apiBaseUrl}/api/product/${productId}/`);
+    console.log(response.data);
+    
     return response.data;
   } catch (error) {
     throw new Error('Error fetching product: ' + error);

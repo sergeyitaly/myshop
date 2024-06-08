@@ -1,0 +1,74 @@
+@import '../../../variables';
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    h3 {
+        font-size: 20px;
+        font-weight: 500;
+        text-align: center;
+    }
+
+    span {
+        display: block;
+        color: $color-gray-200;
+    }
+}
+
+.imageBox {
+    min-width: 100px;
+    height: 364px;
+    img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+}
+
+@media (max-width: $screen-big) {
+    .imageBox {
+        height: 340px;
+    }
+}
+
+@media (max-width: $screen-laptop) {
+    .container{
+        gap: 5px;
+        padding: 10px;
+        h3{
+            font-size: 18px;
+        }
+        span{
+            font-size: 16px;
+        }
+    }
+    .imageBox {
+        height: 320px;
+    }
+}
+
+@media (max-width: $screen-tablet) {
+    
+    .imageBox {
+        height: 280px;
+    }
+}
+
+@media (max-width: $screen-mobile) {
+    .container{
+        gap: 5px;
+        padding: 10px;
+        h3{
+            font-size: 16px;
+        }
+        span{
+            font-size: 14px;
+        }
+    }
+    .imageBox {
+        height: 151px;
+    }
+}
