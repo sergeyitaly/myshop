@@ -9,6 +9,7 @@ import { NotFound } from './pages/not-found/not-found';
 import axios from 'axios';
 import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
 import OrderPage from './pages/OrderPage/OrderPage';
+import { Product } from './models/entities';
 
 const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
 
@@ -19,12 +20,15 @@ interface Collection {
   category: string;
 }
 
-interface Product {
-  id: string;
-  name: string;
-  price: string;
-  photo: string;
-}
+// interface Product {
+//   id: string;
+//   name: string;
+//   price: string;
+//   photo: string;
+// }
+
+console.log(apiBaseUrl);
+
 
 const loadProductsByPage = (id: string, page: number): Promise<any> => {
   return axios.get(`${apiBaseUrl}/api/collection/${id}/products/?page=${page}`);

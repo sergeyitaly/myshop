@@ -2,12 +2,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Capriola&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
+
+
 :root {
   --container-max-width: min(1440px, 95%);
   --header-mobile-view-width: 1000px;
   --blue: #0f0fff;
   --gray-500: #191919;
   --gray: #CDCDCD;
+  --screen-big: 1440px;
+  --screen-laptop: 1366px;
+  --screen-tablet: 1280px;
+  --screen-mobile: 740px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
 }
 
 * {

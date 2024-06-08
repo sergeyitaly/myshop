@@ -1,0 +1,48 @@
+@import '../../../variables';
+
+$full-size: 40px;
+$big-size: 36px;
+$middle-size: 32px;
+$medium-size: 28px;
+$small-size: 24px;
+
+
+.box {
+    width: $full-size;
+    height: $full-size;
+    font-size: 20px;
+    border: 1px solid #CDCDCD;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #CDCDCD;
+
+    @media (max-width: $screen-big) {
+        width: $big-size;
+        height: $big-size;
+        font-size: 19px;
+    }
+    
+    @media (max-width: $screen-laptop) {
+        width: $middle-size;
+        height: $middle-size;
+        font-size: 18px;
+    }
+   
+    @media (max-width: $screen-tablet) {
+        width: $medium-size;
+        height: $medium-size;
+        font-size: 16px;
+    }
+ 
+    @media (max-width: $screen-mobile) {
+        width: $small-size;
+        height: $small-size;
+        font-size: 14px;
+    }
+}
+
+.active {
+    border: 2px solid black;
+    color: black;
+}
