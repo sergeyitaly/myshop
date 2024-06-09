@@ -23,6 +23,7 @@ const ProductPage: React.FC = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // Track current image index
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,17 +45,27 @@ const ProductPage: React.FC = () => {
   };
 
   const handleDecrement = () => {
-    if (quantity > 0) {
+    if (quantity > 1) {
       setQuantity((prevQuantity) => prevQuantity - 1);
     }
   };
 
   const handlers = useSwipeable({
     onSwipedLeft: () => {
-      // Handle swipe left
+      // Handle swipe left (move to next image)
+      if (product && product.images && product.images.length > 0) {
+        setCurrentImageIndex((prevIndex) =>
+          prevIndex === product.images!.length - 1 ? 0 : prevIndex + 1
+        );
+      }
     },
     onSwipedRight: () => {
-      // Handle swipe right
+      // Handle swipe right (move to previous image)
+      if (product && product.images && product.images.length > 0) {
+        setCurrentImageIndex((prevIndex) =>
+          prevIndex === 0 ? product.images!.length - 1 : prevIndex - 1
+        );
+      }
     }
   });
 
@@ -67,15 +78,26 @@ const ProductPage: React.FC = () => {
   }
 
   return (
-    <div className={style.container} {...handlers}>
+    <div className={style.container}>
       <div className={style.leftSection}>
-        <div className={style.imageContainer}>
+        <div className={style.imageContainer} {...handlers}>
           <img src={product.photo} alt={product.name} className={style.image} />
         </div>
         {product.images && product.images.length > 0 && (
           <div className={style.imageGallery}>
-            {product.images.map((img) => (
-              <img key={img.id} src={img.images} alt={product.name} className={style.thumbnail} />
+            {product.images.map((image, index) => (
+              <div
+                key={image.id}
+                className={`${style.imageContainer} ${
+                  index === currentImageIndex ? style.active : ''
+                }`}
+              >
+                <img
+                  src={image.images}
+                  alt={product.name}
+                  className={style.image}
+                />
+              </div>
             ))}
           </div>
         )}

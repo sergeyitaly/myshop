@@ -62,12 +62,10 @@ class Collection(models.Model):
     def image_tag(self):
         if self.photo:
             url = self.photo.url
-            filename = os.path.basename(url)
-            decoded_filename = unquote(filename)
-            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(decoded_filename))
+            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(url))
         else:
             return format_html('<img src="collection.jpg" style="max-height: 150px; max-width: 150px;" />')
-
+        
     def __str__(self):
         return self.name
 
@@ -116,9 +114,7 @@ class Product(models.Model):
     def image_tag(self):
         if self.photo:
             url = self.photo.url
-            filename = os.path.basename(url)
-            decoded_filename = unquote(filename)
-            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(decoded_filename))
+            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(url))
         else:
             return format_html('<img src="product.png" style="max-height: 150px; max-width: 150px;" />')
 
@@ -164,6 +160,5 @@ class ProductImage(models.Model):
     def save(self, *args, **kwargs):
         if self.images:
             filename = os.path.basename(self.images.name)
-            decoded_filename = unquote(filename)
-            self.images.name = decoded_filename
+            self.images.name = filename  # Save the filename exactly as it is
         super().save(*args, **kwargs)
