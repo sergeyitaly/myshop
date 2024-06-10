@@ -4,22 +4,32 @@ import style from './ValueBox.module.scss'
 
 interface ValueBoxProps {
     color?: string
-    value?: string | number
+    title?: string | number
+    value: string 
     isActive?: boolean
+    onClick?: (value: string) => void
 }
 
 
 export const ValueBox = ({
     color,
+    title,
     value,
-    isActive
+    isActive,
+    onClick
 }: ValueBoxProps) => {
+
+    const handleClick = () => {
+        onClick && onClick(value)
+    }
+
     return (
-        <div
+        <button
             className={clsx(style.box, {[style.active]: isActive})}
             style={{background: color}}
+            onClick={handleClick}
         >
-            {!!value &&<span>{value}</span>}
-        </div>
+            {!!value &&<span>{title}</span>}
+        </button>
     )
 }

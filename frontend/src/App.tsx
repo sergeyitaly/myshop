@@ -10,6 +10,7 @@ import axios from 'axios';
 import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
 import OrderPage from './pages/OrderPage/OrderPage';
 import { Product } from './models/entities';
+import { ServerResponce } from './models/server-responce';
 
 const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
 
@@ -20,19 +21,9 @@ interface Collection {
   category: string;
 }
 
-// interface Product {
-//   id: string;
-//   name: string;
-//   price: string;
-//   photo: string;
-// }
-
-console.log(apiBaseUrl);
 
 
-const loadProductsByPage = (id: string, page: number): Promise<any> => {
-  return axios.get(`${apiBaseUrl}/api/collection/${id}/products/?page=${page}`);
-};
+
 
 function App() {
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -82,14 +73,7 @@ function App() {
             />
           }
         />
-        <Route
-          path="/collection/:id"
-          element={
-            <CollectionItemsPage
-              loadProductsByPage={loadProductsByPage}
-            />
-          }
-        />
+        <Route path="/collection/:id" element={<CollectionItemsPage/>}/>
         <Route path="/product/:id" element={<ProductPage />} />
         <Route path="/products" element={<CarouselBestseller products={products} />} />
         <Route path="/order" element={<OrderPage />} />

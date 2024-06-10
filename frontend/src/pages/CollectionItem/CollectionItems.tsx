@@ -2,10 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import style from './style.module.scss';
 import CarouselBestseller from '../CollectionPage/CarouselBestseller/CarouselBestseller';
-import { AxiosResponse } from 'axios';
-import { getCollectionNameById } from '../../api/api';
+import axios, { AxiosResponse } from 'axios';
+import { apiBaseUrl, getCollectionNameById, getCollectionProducts } from '../../api/api';
+import { Product } from '../../models/entities';
+import { ServerResponce } from '../../models/server-responce';
 
 const DEFAULT_PRODUCT_IMAGE = '../../shop/product.png'; // Update with your default image path
+
+const loadProductsByPage = (id: string, page: number): Promise<ServerResponce<Product[]>> => {
+  return axios.get(`${apiBaseUrl}/api/collection/${id}/products/?page=${page}`);
+};
 
 interface Collection {
   id: string;
@@ -14,18 +20,9 @@ interface Collection {
   category: string;
 }
 
-interface Product {
-  id: string;
-  name: string;
-  photo: string;
-  price: number | string;
-}
 
-interface CollectionItemsPageProps {
-  loadProductsByPage: (id: string, page: number) => Promise<AxiosResponse<any>>;
-}
 
-const CollectionItemsPage: React.FC<CollectionItemsPageProps> = ({ loadProductsByPage }) => {
+const CollectionItemsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [collection, setCollection] = useState<Collection | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
@@ -43,9 +40,12 @@ const CollectionItemsPage: React.FC<CollectionItemsPageProps> = ({ loadProductsB
           setCollection(collectionData);
         }
 
-        const { data: { results, count } } = await loadProductsByPage(id!, page);
-        setProducts(results);
-        setTotalPages(Math.ceil(count / 6));
+        if(id){
+          const {results, count} = await getCollectionProducts(id, page)
+          setProducts(results);
+          setTotalPages(Math.ceil(count / 6));
+        }
+        
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -112,7 +112,10 @@ const CollectionItemsPage: React.FC<CollectionItemsPageProps> = ({ loadProductsB
           ))}
         </div>
       )}
-      <CarouselBestseller products={products.map(product => ({ ...product, price: String(product.price) }))} />
+      <CarouselBestseller
+          // products={products.map(product => ({ ...product, price: String(product.price) }))} 
+          products={products}
+       />
     </>
   );
 };

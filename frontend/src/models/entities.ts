@@ -6,7 +6,7 @@
 //   }
 
 export interface Product {
-    id: string | number
+    id: number | string
     available: boolean
     brandimage: null | string
     collection: string
@@ -18,18 +18,24 @@ export interface Product {
     photo: string;
     photo_url: string;
     popularity: number
-    price: number | string;
+    price: number ;
     sales_count: number;
     size: string
     slug: string
     stock: string
     created: Date
     updated: Date
+}
 
-    
-    
-    
-    
+
+interface Color {
+    name?: string
+    color: string
+}
+
+export interface ProductVariantsModel {
+    colors: Color[]
+    sizes: string[]
 }
 
 interface ProductImage {
