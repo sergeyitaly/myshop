@@ -151,8 +151,12 @@ class Product(models.Model):
     image_tag.allow_tags = True
 
 class ProductImage(models.Model):
+    if USE_S3:
+        images = models.FileField(upload_to='photos/product', storage=MediaStorage(), validators=[validate_file_extension])
+    else:
+        images = models.FileField(upload_to='photos/product', validators=[validate_file_extension])
+
     product = models.ForeignKey(Product, default=None, on_delete=models.CASCADE)
-    images = models.FileField(upload_to='photos/product', validators=[validate_file_extension])
 
     def __str__(self):
         return self.product.name
