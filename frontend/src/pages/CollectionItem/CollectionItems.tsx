@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import style from './style.module.scss';
 import CarouselBestseller from '../CollectionPage/CarouselBestseller/CarouselBestseller';
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import { apiBaseUrl, getCollectionNameById, getCollectionProducts } from '../../api/api';
 import { Product } from '../../models/entities';
 import { ServerResponce } from '../../models/server-responce';
