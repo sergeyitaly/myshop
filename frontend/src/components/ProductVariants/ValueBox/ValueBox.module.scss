@@ -8,6 +8,7 @@ $small-size: 24px;
 
 
 .box {
+    cursor: pointer;
     width: $full-size;
     height: $full-size;
     font-size: 20px;
@@ -16,6 +17,7 @@ $small-size: 24px;
     justify-content: center;
     align-items: center;
     color: #CDCDCD;
+    background: transparent;
 
     @media (max-width: $screen-big) {
         width: $big-size;

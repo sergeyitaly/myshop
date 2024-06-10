@@ -13,12 +13,6 @@ interface Collection {
     name: string;
 }
 
-interface Product {
-    id: string;
-    name: string;
-    collectionId?: string;
-}
-
 export function CustomSeparator() {
     const location = useLocation();
     const [productName, setProductName] = useState<string>('');
@@ -32,7 +26,7 @@ export function CustomSeparator() {
 
                 if (paths.includes('product')) {
                     const productId = paths[paths.indexOf('product') + 1];
-                    const product: Product = await getProductNameById(productId);
+                    const product = await getProductNameById(productId);
                     setProductName(product.name);
 
                 } else if (paths.includes('collection')) {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import style from './orderpage.module.scss';
+import { Product } from '../../models/entities';
 
 interface OrderItem {
     product_id: string;
@@ -10,12 +11,7 @@ interface OrderItem {
     product?: Product; // Added product property
 }
 
-interface Product {
-    id: string;
-    name: string;
-    price: number;
-    slug: string;
-}
+
 
 const OrderPage: React.FC = () => {
     const [name, setName] = useState('');
@@ -27,9 +23,15 @@ const OrderPage: React.FC = () => {
     const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
     const navigate = useNavigate();
 
+
+    const calculateTotalAmount = () => {
+        const total = items.reduce((acc, item) => acc + item.quantity * item.price, 0);
+        setTotalAmount(total);
+    };
+
     useEffect(() => {
         calculateTotalAmount();
-    }, [items]);
+    }, [items, calculateTotalAmount]);
 
     useEffect(() => {
         if (orderSubmitted) {
@@ -68,10 +70,7 @@ const OrderPage: React.FC = () => {
         setItems([...items, { product_id: '', quantity: 1, price: 0 }]);
     };
 
-    const calculateTotalAmount = () => {
-        const total = items.reduce((acc, item) => acc + item.quantity * item.price, 0);
-        setTotalAmount(total);
-    };
+  
 
     const sendEmail = async () => {
         try {
