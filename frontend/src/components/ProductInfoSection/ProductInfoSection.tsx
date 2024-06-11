@@ -32,8 +32,6 @@ export const ProductInfoSection = ({
 
     const isMobile = useMediaQuery(screens.maxMobile)
 
-    console.log(isMobile);
-    
 
     useEffect(() => {
         setCurrentImage(product.photo)
