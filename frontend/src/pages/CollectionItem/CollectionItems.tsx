@@ -23,9 +23,7 @@ const CollectionItemsPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    const fetchData = async (
-      // page: number
-    ) => {
+    const fetchData = async () => {
       try {
         setLoading(true);
 
@@ -35,7 +33,7 @@ const CollectionItemsPage: React.FC = () => {
         }
 
         if(id){
-          const {results, count} = await getCollectionProducts(+id, 
+          const {results, count} = await getCollectionProducts(+id
             // {page}
           )
           setProducts(results);
