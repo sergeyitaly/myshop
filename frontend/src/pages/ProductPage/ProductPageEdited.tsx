@@ -3,20 +3,21 @@ import { useParams } from 'react-router-dom';
 import style from './ProductPage.module.scss';
 import { getProductNameById } from '../../api/api';
 import { useSwipeable } from 'react-swipeable'; // Import useSwipeable hook
+import { Product } from '../../models/entities';
 
-interface ProductImage {
-  id: string;
-  images: string; // Assuming 'images' property contains image URLs
-}
+// interface ProductImage {
+//   id: string;
+//   images: string; // Assuming 'images' property contains image URLs
+// }
 
-interface Product {
-  id: string;
-  name: string;
-  photo: string;
-  price: number | string;
-  description: string;
-  images?: ProductImage[]; // Make images property optional
-}
+// interface Product {
+//   id: string;
+//   name: string;
+//   photo: string;
+//   price: number | string;
+//   description: string;
+//   images?: ProductImage[]; // Make images property optional
+// }
 
 const ProductPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
