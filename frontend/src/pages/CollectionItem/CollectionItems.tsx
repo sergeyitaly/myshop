@@ -41,7 +41,7 @@ const CollectionItemsPage: React.FC = () => {
         }
 
         if(id){
-          const {results, count} = await getCollectionProducts(id, page)
+          const {results, count} = await getCollectionProducts(id, {page})
           setProducts(results);
           setTotalPages(Math.ceil(count / 6));
         }

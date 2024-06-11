@@ -33,3 +33,9 @@ body {
   font-weight: 500;
   color: var(--gray-500);
 }
+
+button {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}

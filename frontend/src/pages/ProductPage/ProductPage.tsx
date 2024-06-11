@@ -1,42 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { apiBaseUrl } from '../../api/api';
 import { Product } from '../../models/entities';
 import { ProductSlider } from '../../components/ProductSlider/ProductSlider';
-import axios from 'axios';
 import { ProductSlide } from '../../components/Cards/ProductSlide/ProductSlide';
 import { ProductInfoSection } from '../../components/ProductInfoSection/ProductInfoSection';
 import { MainContainer } from './components/MainContainer';
 import { useProduct } from '../../hooks/useProduct';
 import { ROUTE } from '../../constants';
+import { useProducts } from '../../hooks/useProducts';
 
 
 const ProductPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  
-
-  const [products, setProducts] = useState<Product[]>([])
-
-  
+  const [allowClick, setAllowClick] = useState<boolean>(true)
 
   const {product, isLoading, isFetching, variants, changeColor, changeSize} = useProduct(id)
 
-
-  const [allowClick, setAllowClick] = useState<boolean>(true)
-  
-
-  useEffect(() => {
-    getProducts()
-  }, [])
-
-  const getProducts = async () => {
-    const products = await axios.get(`${apiBaseUrl}/api/products/`)
-    setProducts(products.data.results);
-  }
-
-
+  const {products} = useProducts()
 
 
   if (isLoading) {
@@ -67,14 +49,14 @@ const ProductPage: React.FC = () => {
         title='Також з цієї колекції'
         onAllowClick={setAllowClick}
       >
-          {
-            products.map((product) => (
-                <ProductSlide
-                    key={product.id}   
-                    product={product}
-                    onClick={handleClickSlide}
-                />
-            ))
+        {
+          products.map((product) => (
+              <ProductSlide
+                  key={product.id}   
+                  product={product}
+                  onClick={handleClickSlide}
+              />
+          ))
         }
       </ProductSlider>
     </MainContainer>

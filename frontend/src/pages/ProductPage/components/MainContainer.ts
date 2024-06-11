@@ -1,6 +1,6 @@
 import styled from '@emotion/styled'
 
-export const MainContainer = styled.div<{isLoading: boolean}>`
+export const MainContainer = styled.main<{isLoading: boolean}>`
     position: relative;
     display: flex;
     flex-direction: column;

@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { Product } from '../models/entities';
 import { ServerResponce } from '../models/server-responce';
+import { queryString } from 'object-query-string'
+import { CollectionProductFilter, ProductFilter } from '../models/filters';
 
 export const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
 
@@ -33,21 +35,23 @@ export async function getProductNameById(productId: string | number): Promise<Pr
   }
 }
 
-export async function getCollectionProducts(collectionId: string, page: number): Promise<ServerResponce<Product[]>> {
+export async function getCollectionProducts(collectionId: string, query: CollectionProductFilter): Promise<ServerResponce<Product[]>> {
   try{
-    const response = await axios.get<ServerResponce<Product[]>>(`${apiBaseUrl}/api/collection/${collectionId}/products/?page=${page}`);
+    const qs = queryString(query)
+    const response = await axios.get<ServerResponce<Product[]>>(`${apiBaseUrl}/api/collection/${collectionId}/products/?${qs}`);
     
     return response.data;
   }
   catch (error) {
     throw new Error('Error fetching product: ' + error);
   }
-};
+}
 
 
-export async function getProducts(queryString?: string): Promise<Product[]> {
+export async function getProducts(productFilter?: ProductFilter): Promise<Product[]> {
   try{
-    const response = await axios.get<ServerResponce<Product[]>>(`${apiBaseUrl}/api/products/?${queryString}`);
+    const qs = productFilter ? queryString(productFilter) : ''
+    const response = await axios.get<ServerResponce<Product[]>>(`${apiBaseUrl}/api/products/?${qs}`);
     
     return response.data.results;
   }

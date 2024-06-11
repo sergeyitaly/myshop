@@ -3,9 +3,17 @@ import { Product, ProductVariantsModel } from '../../models/entities'
 import { PageContainer } from '../PageContainer'
 import { DropDown } from './components/DropDown/DropDown'
 import { ProductControl } from './components/ProductControl/ProductControl'
-
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import { Modal, useMediaQuery } from '@mui/material'
+import Slider from 'react-slick'
 import style from './ProductInfoSection.module.scss'
-import { Modal } from '@mui/material'
+
+const settings = {
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+  };
 
 
 interface ProductInfoSectionProps {
@@ -26,6 +34,11 @@ export const ProductInfoSection = ({
     const [currentImage, setCurrentImage] = useState<string>(product.photo)
     const [bigImage, setBigImage] = useState<string | null>(null)
 
+    const isMobile = useMediaQuery('(max-width: 740px)')
+
+    console.log(isMobile);
+    
+
     useEffect(() => {
         setCurrentImage(product.photo)
     }, [product.photo])
@@ -43,30 +56,55 @@ export const ProductInfoSection = ({
     <>
         <section >
             <PageContainer className={style.container}>
-                <div className={style.wrapper}>
-                    <div className={style.imageList}>
+                {
+                    isMobile ?
+                    <Slider {...settings} className={style.imageBox}>
                         {
                             product.images?.map((image) => (
                             <div 
                                 key={image.id}
-                                className={style.previevBox}
-                                onClick={() => setCurrentImage(image.images)}
+                                className={style.slide}
                             >
                                 <img src={image.images}/>
+                                <button 
+                                className={style.zoomButton}
+                                onClick={openModal}
+                                >
+                                    <ZoomInIcon/>
+                                </button>
                             </div>
                             ))
                         }
-                    </div>
-                </div>
-                <div 
-                    className={style.imageBox}
-                    onClick={openModal}    
-                >
-                    <img 
-                        className={style.image}
-                        src={currentImage}
-                    />
-                </div>
+                    </Slider>
+                    :
+                    <>
+                        <div className={style.wrapper}>
+                            <div className={style.imageList}>
+                                {
+                                    product.images?.map((image) => (
+                                    <div 
+                                        key={image.id}
+                                        className={style.previevBox}
+                                        onClick={() => setCurrentImage(image.images)}
+                                    >
+                                        <img src={image.images}/>
+                                    </div>
+                                    ))
+                                }
+                            </div>
+                        </div>
+                        <div 
+                            className={style.imageBox}
+                            onClick={openModal}    
+                        >
+                            <img 
+                                className={style.image}
+                                src={currentImage}
+                            />
+                        </div>
+                    </>
+                }
+            
                 <div className={style.productInfo}>
                     <ProductControl 
                         product={product}
