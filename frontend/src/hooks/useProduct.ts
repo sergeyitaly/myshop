@@ -32,16 +32,23 @@ export const useProduct = (productId?: number | string) => {
 
     useEffect(() => {
         if(products.length){
-            const colors = products.map(product => ({color: product.color}))
-            const sizes = products.map(product => product.size)
-            setVariants({colors, sizes})
+            const allColors = products.map(product => product.color)
+            const uniqueColors = new Set(allColors)
+            const colors = Array.from(uniqueColors).map(color => {
+              const prod = products.find(product => product.color === color) as Product
+              return {color: prod.color}
+            })
+            const allSizes = products.map(product => product.size)
+            const sizes = new Set(allSizes)
+            
+            setVariants({colors, sizes: Array.from(sizes)})
         }
     }, [products])
 
     const fetchData = async (id: number | string) => {
         try {
           const productData = await getProductNameById(id);
-          const theSameProducts = await getProducts(`name=${productData.name}`)
+          const theSameProducts = await getProducts({name: productData.name})
           setProducts(theSameProducts);
           
           setProduct(productData);

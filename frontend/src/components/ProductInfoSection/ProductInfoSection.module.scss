@@ -86,6 +86,18 @@
   ;
 }
 
+.slide{
+  // border: 1px solid red;
+  height: calc(90vw);
+  position: relative;
+}
+
+.zoomButton{
+  padding: 5px;
+  position: absolute;
+  top: 20px;
+  left: 30px;
+}
 
 .center{
   display: flex;

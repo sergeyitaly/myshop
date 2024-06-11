@@ -2,6 +2,7 @@ import {Settings} from "react-slick";
 
 export const settings: Settings = {
     infinite: true,
+    arrows: false,
     slidesToShow: 4,
     slidesToScroll: 4,
     initialSlide: 0,

@@ -21,9 +21,6 @@ interface Collection {
 }
 
 
-
-
-
 function App() {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
