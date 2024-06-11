@@ -93,6 +93,7 @@ export const ProductControl = ({
           />
           <MainButton
             className={style.buy}
+            colored
             title='Купити зараз'
           />
         </div>

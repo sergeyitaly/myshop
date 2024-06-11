@@ -1,12 +1,5 @@
-// interface Product {
-//     id: string;
-//     name: string;
-//     price: string;
-//     photo: string;
-//   }
-
 export interface Product {
-    id: number | string
+    id: number
     available: boolean
     brandimage: null | string
     collection: string
@@ -52,4 +45,15 @@ export interface ProductColorModel {
 export interface ProductSizeModel {
     productId: Product['id']
     value: string | number
+}
+
+export interface Collection {
+    id: number
+    category: string
+    photo_url: string
+    photo: string
+    name: string
+    created: Date
+    updated: Date
+    sales_count: number
 }

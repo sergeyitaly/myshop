@@ -1,23 +1,28 @@
 import axios from 'axios';
-import { Product } from '../models/entities';
-import { ServerResponce } from '../models/server-responce';
+import { Collection, Product } from '../models/entities';
+import { ServerResponce, ShortServiceResponce } from '../models/server-responce';
 import { queryString } from 'object-query-string'
-import { CollectionProductFilter, ProductFilter } from '../models/filters';
+import { CollectionFilter, CollectionProductFilter, ProductFilter } from '../models/filters';
 
 export const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
 
-interface Collection {
-  id: string;
-  name: string;
-  photo: string;
-  category: string;
-}
-
 
 // Function to fetch collection name by ID
-export async function getCollectionNameById(collectionId: string): Promise<Collection> {
+export async function getCollectionNameById(collectionId: number): Promise<Collection> {
   try {
     const response = await axios.get<Collection>(`${apiBaseUrl}/api/collection/${collectionId}/`);
+    
+    return response.data;
+  } catch (error) {
+    throw new Error('Error fetching collection: ' + error);
+  }
+}
+
+export async function getCollectionsByFilter(collectionFilter: CollectionFilter): Promise<ShortServiceResponce<Collection[]>> {
+  try {
+    const qs = collectionFilter ? queryString(collectionFilter) : ''
+    const response = await axios.get<ShortServiceResponce<Collection[]>>(`${apiBaseUrl}/api/collections/?${qs}`);
+    
     return response.data;
   } catch (error) {
     throw new Error('Error fetching collection: ' + error);
@@ -35,7 +40,19 @@ export async function getProductNameById(productId: string | number): Promise<Pr
   }
 }
 
-export async function getCollectionProducts(collectionId: string, query: CollectionProductFilter): Promise<ServerResponce<Product[]>> {
+export async function getCollectionProducts(collectionId: number): Promise<ShortServiceResponce<Product[]>>  {
+  try{
+    const response = await axios.get<ShortServiceResponce<Product[]>>(`${apiBaseUrl}/api/collection/${collectionId}/products/`);
+
+    return response.data;
+  }
+
+  catch (error) {
+    throw new Error('Error fetching product: ' + error);
+  }
+}
+
+export async function getCollectionProductsByFilter(collectionId: string, query: CollectionProductFilter): Promise<ServerResponce<Product[]>> {
   try{
     const qs = queryString(query)
     const response = await axios.get<ServerResponce<Product[]>>(`${apiBaseUrl}/api/collection/${collectionId}/products/?${qs}`);

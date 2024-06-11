@@ -9,16 +9,10 @@ import { NotFound } from './pages/not-found/not-found';
 import axios from 'axios';
 import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
 import OrderPage from './pages/OrderPage/OrderPage';
-import { Product } from './models/entities';
+import { Collection, Product } from './models/entities';
 
 const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
 
-interface Collection {
-  id: string;
-  name: string;
-  photo: string;
-  category: string;
-}
 
 
 function App() {
@@ -53,7 +47,7 @@ function App() {
 
     loadCollectionsByPage(currentPage);
     fetchProducts();
-  }, [apiBaseUrl, currentPage]);
+  }, [currentPage]);
 
   return (
     <Routes>

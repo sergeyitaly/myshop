@@ -1,13 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import style from './style.module.scss';
+import { Collection } from '../../models/entities';
 
-interface Collection {
-  id: string;
-  name: string;
-  photo: string;
-  category: string;
-}
+
 
 interface Props {
   collections: Collection[];

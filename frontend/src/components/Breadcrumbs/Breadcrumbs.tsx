@@ -8,10 +8,7 @@ interface BreadcrumbTitles {
     [key: string]: string;
 }
 
-interface Collection {
-    id: string;
-    name: string;
-}
+
 
 export function CustomSeparator() {
     const location = useLocation();
@@ -31,7 +28,7 @@ export function CustomSeparator() {
 
                 } else if (paths.includes('collection')) {
                     const collectionId = paths[paths.indexOf('collection') + 1];
-                    const collection: Collection = await getCollectionNameById(collectionId);
+                    const collection = await getCollectionNameById(+collectionId);
                     setCollectionName(collection.name);
                     setCollectionNum(collectionId); // Set collectionNum from collectionId
                 } else {

@@ -16,3 +16,11 @@ export interface CollectionProductFilter {
     page?: number
     page_size?: number
 }
+
+export interface CollectionFilter {
+    category?: string
+    search?: string
+    ordering?: string
+    page?: number
+    page_size?: number
+}
