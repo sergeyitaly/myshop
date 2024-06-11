@@ -2,23 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import style from './style.module.scss';
 import CarouselBestseller from '../CollectionPage/CarouselBestseller/CarouselBestseller';
-import axios from 'axios';
-import { apiBaseUrl, getCollectionNameById, getCollectionProducts } from '../../api/api';
-import { Product } from '../../models/entities';
-import { ServerResponce } from '../../models/server-responce';
+import { getCollectionNameById, getCollectionProducts } from '../../api/api';
+import { Collection, Product } from '../../models/entities';
 
 const DEFAULT_PRODUCT_IMAGE = '../../shop/product.png'; // Update with your default image path
 
-const loadProductsByPage = (id: string, page: number): Promise<ServerResponce<Product[]>> => {
-  return axios.get(`${apiBaseUrl}/api/collection/${id}/products/?page=${page}`);
-};
+// const loadProductsByPage = (id: string, page: number): Promise<ServerResponce<Product[]>> => {
+//   return axios.get(`${apiBaseUrl}/api/collection/${id}/products/?page=${page}`);
+// };
 
-interface Collection {
-  id: string;
-  name: string;
-  photo: string;
-  category: string;
-}
 
 
 
@@ -31,17 +23,21 @@ const CollectionItemsPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    const fetchData = async (page: number) => {
+    const fetchData = async (
+      // page: number
+    ) => {
       try {
         setLoading(true);
 
-        if (!collection) {
-          const collectionData = await getCollectionNameById(id!);
+        if (!collection && id) {
+          const collectionData = await getCollectionNameById(+id);
           setCollection(collectionData);
         }
 
         if(id){
-          const {results, count} = await getCollectionProducts(id, {page})
+          const {results, count} = await getCollectionProducts(+id, 
+            // {page}
+          )
           setProducts(results);
           setTotalPages(Math.ceil(count / 6));
         }
@@ -53,8 +49,10 @@ const CollectionItemsPage: React.FC = () => {
       }
     };
 
-    fetchData(currentPage);
-  }, [id, loadProductsByPage, currentPage, collection]);
+    fetchData(
+      // currentPage
+    );
+  }, [id, currentPage, collection]);
 
   const handlePageClick = (page: number) => {
     setCurrentPage(page);

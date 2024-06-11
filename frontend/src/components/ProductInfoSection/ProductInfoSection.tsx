@@ -6,14 +6,10 @@ import { ProductControl } from './components/ProductControl/ProductControl'
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import { Modal, useMediaQuery } from '@mui/material'
 import Slider from 'react-slick'
+import { settings } from './SliderSettings'
 import style from './ProductInfoSection.module.scss'
+import { screens } from '../../constants'
 
-const settings = {
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-  };
 
 
 interface ProductInfoSectionProps {
@@ -34,7 +30,7 @@ export const ProductInfoSection = ({
     const [currentImage, setCurrentImage] = useState<string>(product.photo)
     const [bigImage, setBigImage] = useState<string | null>(null)
 
-    const isMobile = useMediaQuery('(max-width: 740px)')
+    const isMobile = useMediaQuery(screens.maxMobile)
 
     console.log(isMobile);
     

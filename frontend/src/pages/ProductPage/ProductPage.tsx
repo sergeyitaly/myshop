@@ -7,7 +7,8 @@ import { ProductInfoSection } from '../../components/ProductInfoSection/ProductI
 import { MainContainer } from './components/MainContainer';
 import { useProduct } from '../../hooks/useProduct';
 import { ROUTE } from '../../constants';
-import { useProducts } from '../../hooks/useProducts';
+import { useCollectionByName } from '../../hooks/useCollectionByName';
+import { useCollectionProducts } from '../../hooks/useCollectionProducts';
 
 
 const ProductPage: React.FC = () => {
@@ -18,7 +19,9 @@ const ProductPage: React.FC = () => {
 
   const {product, isLoading, isFetching, variants, changeColor, changeSize} = useProduct(id)
 
-  const {products} = useProducts()
+  const {collection} = useCollectionByName(product?.collection)
+
+  const {products} = useCollectionProducts(collection?.id)
 
 
   if (isLoading) {

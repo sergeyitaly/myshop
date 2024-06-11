@@ -28,5 +28,5 @@
    - ```python manage.py runserver``` (localhost:8000)
   
 ## Other info
-1. admin panel - localhost:8000/admin/ (login: admin, pass: admin)
+1. admin panel - localhost:8000/admin/
 2. swagger - localhost:8000/swagger/

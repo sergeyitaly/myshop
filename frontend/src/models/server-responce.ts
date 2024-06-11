@@ -7,3 +7,10 @@ export interface ServerResponce<T> {
     previous_page_number: null | number,
     results: T
 }
+
+export interface ShortServiceResponce<T> {
+    count: number
+    next: string
+    previous: string
+    results: T
+}

@@ -7,7 +7,10 @@ export const screen = {
 }
 
 export const screens = {
-    maxMobile: '(max-mobile: 740px)'
+    maxBig: '(max-width: 1440px)',
+    maxLaptop: '(max-width: 1366px)',
+    maxTablet: '(max-width: 1280px)',
+    maxMobile: '(max-width: 740px)'
 }
 
 export enum ROUTE {

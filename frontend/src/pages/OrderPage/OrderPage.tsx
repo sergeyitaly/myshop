@@ -24,14 +24,13 @@ const OrderPage: React.FC = () => {
     const navigate = useNavigate();
 
 
-    const calculateTotalAmount = () => {
-        const total = items.reduce((acc, item) => acc + item.quantity * item.price, 0);
-        setTotalAmount(total);
-    };
-
     useEffect(() => {
+        const calculateTotalAmount = () => {
+            const total = items.reduce((acc, item) => acc + item.quantity * item.price, 0);
+            setTotalAmount(total);
+        };
         calculateTotalAmount();
-    }, [items, calculateTotalAmount]);
+    }, [items]);
 
     useEffect(() => {
         if (orderSubmitted) {
