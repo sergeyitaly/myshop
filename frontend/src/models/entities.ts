@@ -21,30 +21,9 @@ export interface Product {
 }
 
 
-interface Color {
-    name?: string
-    color: string
-}
-
-export interface ProductVariantsModel {
-    colors: Color[]
-    sizes: string[]
-}
-
 interface ProductImage {
     id: string;
-    images: string; // Assuming 'images' property contains image URLs
-}
-
-export interface ProductColorModel {
-    productId: Product['id']
-    name: string
-    color: string
-}
-
-export interface ProductSizeModel {
-    productId: Product['id']
-    value: string | number
+    images: string; 
 }
 
 export interface Collection {
@@ -56,4 +35,25 @@ export interface Collection {
     created: Date
     updated: Date
     sales_count: number
+}
+
+export interface Category {
+    id: number
+    name: string
+}
+
+export interface User {
+    id: number
+    username: string
+    email: string
+}
+
+interface Color {
+    name?: string
+    color: string
+}
+
+export interface ProductVariantsModel {
+    colors: Color[]
+    sizes: string[]
 }

@@ -7,22 +7,24 @@ import { ProductInfoSection } from '../../components/ProductInfoSection/ProductI
 import { MainContainer } from './components/MainContainer';
 import { useProduct } from '../../hooks/useProduct';
 import { ROUTE } from '../../constants';
-import { useCollectionByName } from '../../hooks/useCollectionByName';
-import { useCollectionProducts } from '../../hooks/useCollectionProducts';
+import { useGetAllProductsFromCollectionQuery, useGetCollectionByNameQuery } from '../../api/collectionSlice';
+import { skipToken } from '@reduxjs/toolkit/query';
 
 
 const ProductPage: React.FC = () => {
+
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
+
   const [allowClick, setAllowClick] = useState<boolean>(true)
 
-  const {product, isLoading, isFetching, variants, changeColor, changeSize} = useProduct(id)
+  const {product, isLoading, isFetching, variants, changeColor, changeSize} = useProduct(+id!)
 
-  const {collection} = useCollectionByName(product?.collection)
+  const {data: collection} = useGetCollectionByNameQuery(product?.collection ?? skipToken)
 
-  const {products} = useCollectionProducts(collection?.id)
-
+  const {data: productsData} = useGetAllProductsFromCollectionQuery(collection?.id ?? skipToken)
+  
 
   if (isLoading) {
     return <div >Loading...</div>;
@@ -49,21 +51,22 @@ const ProductPage: React.FC = () => {
         onChangeSize={changeSize}
       />
       <ProductSlider 
-        title='Також з цієї колекції'
-        onAllowClick={setAllowClick}
-      >
-        {
-          products.map((product) => (
-              <ProductSlide
-                  key={product.id}   
-                  product={product}
-                  onClick={handleClickSlide}
-              />
-          ))
-        }
-      </ProductSlider>
+         title='Також з цієї колекції'
+         onAllowClick={setAllowClick}
+       >
+         {
+           productsData?.results.map((product) => (
+               <ProductSlide
+                   key={product.id}   
+                   product={product}
+                   onClick={handleClickSlide}
+               />
+           ))
+         }
+       </ProductSlider>
     </MainContainer>
-  );
-};
+    
+  )
+}
 
 export default ProductPage;

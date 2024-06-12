@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Product, ProductVariantsModel } from "../models/entities";
-import { getProductNameById, getProducts } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import { ROUTE } from "../constants";
+import { useGetManyProductsByFilterQuery, useGetOneProductByIdQuery } from "../api/productSlice";
+import { skipToken } from "@reduxjs/toolkit/query";
 
 
 const initialVariants: ProductVariantsModel = {
@@ -10,28 +11,28 @@ const initialVariants: ProductVariantsModel = {
     sizes: []
 }
 
-export const useProduct = (productId?: number | string) => {
+export const useProduct = (productId: number) => {
 
-    const [isLoading, setLoading] = useState<boolean>(true)
-    const [isFetching, setFetching] = useState<boolean>(false)
-    const [product, setProduct] = useState<Product | null>(null);
-    const [products, setProducts] = useState<Product[]>([])
     const [variants, setVariants] = useState<ProductVariantsModel>(initialVariants)
+
+    const {
+      data: product, 
+      isLoading: isLoadingProduct, 
+      isFetching
+    } = useGetOneProductByIdQuery(productId)
+
+    const {
+      data: productsResponce, 
+      isLoading: isLoadingProducts,
+      isFetching: isFetchingProducts
+    } = useGetManyProductsByFilterQuery(product ? {name: product.name} : skipToken)
+
+    const products = productsResponce?.results
 
     const navigate = useNavigate()
 
     useEffect(() => {
-        setFetching(true)
-        if(!productId){
-          setLoading(false)
-          setFetching(false)
-          return
-        }
-        fetchData(productId)
-    }, [productId]);
-
-    useEffect(() => {
-        if(products.length){
+        if(products?.length){
             const allColors = products.map(product => product.color)
             const uniqueColors = new Set(allColors)
             const colors = Array.from(uniqueColors).map(color => {
@@ -45,23 +46,8 @@ export const useProduct = (productId?: number | string) => {
         }
     }, [products])
 
-    const fetchData = async (id: number | string) => {
-        try {
-          const productData = await getProductNameById(id);
-          const theSameProducts = await getProducts({name: productData.name})
-          setProducts(theSameProducts);
-          
-          setProduct(productData);
-        } catch (error) {
-          console.error('Error fetching product:', error);
-        } finally {
-          setLoading(false);
-          setFetching(false)
-        }
-      };
-
       const changeColor = (value: string) => {
-        if(product){
+        if(product && products){
           const matchProduct = products.find(item => ((item.size === product.size) && (item.color === value)))
           if(matchProduct) {
             navigate(`${ROUTE.PRODUCT}${matchProduct.id}`)
@@ -73,7 +59,7 @@ export const useProduct = (productId?: number | string) => {
       }
       
       const changeSize = (value: string) => {
-        if(product){
+        if(product && products){
           const matchProduct = products.find(item => ((item.color === product.color) && (item.size === value)))
           if(matchProduct) {
             navigate(`${ROUTE.PRODUCT}${matchProduct.id}`)
@@ -84,14 +70,11 @@ export const useProduct = (productId?: number | string) => {
         }
       }
 
-    
-
-
     return {
         product,
         products,
-        isLoading,
-        isFetching,
+        isLoading: isLoadingProduct || isLoadingProducts,
+        isFetching: isFetching || isFetchingProducts,
         variants,
         changeColor,
         changeSize
