@@ -24,3 +24,10 @@ export interface CollectionFilter {
     page?: number
     page_size?: number
 }
+
+export interface CategoryFilter {
+    name?: string
+    search?: string
+    page?: number
+    page_size?: number
+}

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Collection, Product } from '../models/entities';
-import { ServerResponce, ShortServiceResponce } from '../models/server-responce';
+import { ServerResponce, ShortServerResponce } from '../models/server-responce';
 import { queryString } from 'object-query-string'
 import { CollectionFilter, CollectionProductFilter, ProductFilter } from '../models/filters';
 
@@ -18,10 +18,10 @@ export async function getCollectionNameById(collectionId: number): Promise<Colle
   }
 }
 
-export async function getCollectionsByFilter(collectionFilter: CollectionFilter): Promise<ShortServiceResponce<Collection[]>> {
+export async function getCollectionsByFilter(collectionFilter: CollectionFilter): Promise<ShortServerResponce<Collection[]>> {
   try {
     const qs = collectionFilter ? queryString(collectionFilter) : ''
-    const response = await axios.get<ShortServiceResponce<Collection[]>>(`${apiBaseUrl}/api/collections/?${qs}`);
+    const response = await axios.get<ShortServerResponce<Collection[]>>(`${apiBaseUrl}/api/collections/?${qs}`);
     
     return response.data;
   } catch (error) {
@@ -40,9 +40,9 @@ export async function getProductNameById(productId: string | number): Promise<Pr
   }
 }
 
-export async function getCollectionProducts(collectionId: number): Promise<ShortServiceResponce<Product[]>>  {
+export async function getCollectionProducts(collectionId: number): Promise<ShortServerResponce<Product[]>>  {
   try{
-    const response = await axios.get<ShortServiceResponce<Product[]>>(`${apiBaseUrl}/api/collection/${collectionId}/products/`);
+    const response = await axios.get<ShortServerResponce<Product[]>>(`${apiBaseUrl}/api/collection/${collectionId}/products/`);
 
     return response.data;
   }

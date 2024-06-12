@@ -8,9 +8,10 @@ export interface ServerResponce<T> {
     results: T
 }
 
-export interface ShortServiceResponce<T> {
+export interface ShortServerResponce<T> {
     count: number
     next: string
     previous: string
     results: T
 }
+

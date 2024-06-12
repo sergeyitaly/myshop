@@ -17,3 +17,13 @@ export enum ROUTE {
     HOME = '/',
     PRODUCT = '/product/'
 }
+
+export enum ENDPOINTS {
+    CATEGORIES = 'categories',
+    CATEGORY = 'category',
+    COLLECTION = 'collection',
+    COLLECTIONS = 'collections',
+    ORDER = 'order',
+    PRODUCT = 'product',
+    PRODUCTS = 'products'
+}
