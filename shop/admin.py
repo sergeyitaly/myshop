@@ -13,7 +13,7 @@ class ProductAdmin(admin.ModelAdmin):
     readonly_fields = ('id', 'slug', 'main_product_image_display', 'display_gallery')
     fields = (
         'id', 'name', 'collection', 'description', 'price', 'currency', 'stock', 'available', 'sales_count',
-        'popularity', 'color', 'size', 'slug', 'photo', 'main_product_image_display', 'display_gallery'
+        'popularity', 'color_name', 'color_value','size','usage','maintance', 'slug', 'photo', 'main_product_image_display', 'display_gallery'
     )
     list_display_links = ['name']
     sortable_by = ['collection', 'price', 'sales_count', 'popularity']
