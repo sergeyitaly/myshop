@@ -1,0 +1,57 @@
+@import '../../variables';
+
+.container {
+    border: 1px solid #CDCDCD;
+    display: flex;
+    gap: 10px;
+    font-size: 20px;
+    align-items: center;
+    border-radius: 5px;
+    align-self: flex-end;
+
+    button{
+        cursor: pointer;
+        background: transparent;
+        font-size: 30px;
+        border: none;
+        padding: 1px 28px;
+        color: #CDCDCD;
+
+        &:hover {
+            color: black;
+        }
+    }
+
+    @media (max-width: $screen-big) {
+        font-size: 19px;
+        button{
+            font-size: 26px;
+            padding: 1px 20px; 
+        }
+    }
+      
+    @media (max-width: $screen-laptop) {
+        font-size: 18px;
+        button{
+            font-size: 24px;
+            padding: 1px 16px; 
+        }
+    }
+    
+    @media (max-width: $screen-tablet) {
+        font-size: 17px;
+        button{
+            font-size: 22px;
+            padding: 1px 12px; 
+        }
+    }
+    
+    @media (max-width: $screen-mobile) {
+        font-size: 16px;
+        button{
+            font-size: 20px;
+            padding: 0px 10px; 
+        }
+    }
+}
+

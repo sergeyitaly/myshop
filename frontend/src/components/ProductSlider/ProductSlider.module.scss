@@ -1,0 +1,30 @@
+@import '../../variables';
+
+
+
+.title {
+    font-weight: 500;
+    font-size: 36px;
+    margin-bottom: 25px;
+
+    @media (max-width: $screen-big) {
+        font-size: 28px;
+        margin-bottom: 22px;
+    }
+
+    @media (max-width: $screen-laptop) {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    @media (max-width: $screen-tablet) {
+        font-size: 22px;
+        margin-bottom: 18px;
+    }
+
+    @media (max-width: $screen-mobile) {
+        font-size: 16px;
+        margin-bottom: 15px;
+    }
+
+}
