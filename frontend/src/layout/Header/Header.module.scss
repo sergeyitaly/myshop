@@ -1,7 +1,10 @@
+@import '../../variables';
+
 .header {
     padding: 46px;
     margin-bottom: 24px;
     position: relative;
+    border-bottom: 1px solid $color-button;
 }
 
 .container {
@@ -16,10 +19,11 @@
     flex-shrink: 2;
 }
 
-@media screen and (max-width: 600px) {
+@media (max-width: $screen-mobile) {
     .header {
         padding: 20px;
-        margin-bottom: 0;
+        margin-bottom: 33px;
+
     }
 
     .container {

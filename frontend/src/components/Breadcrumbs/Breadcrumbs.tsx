@@ -8,16 +8,7 @@ interface BreadcrumbTitles {
     [key: string]: string;
 }
 
-interface Collection {
-    id: string;
-    name: string;
-}
 
-interface Product {
-    id: string;
-    name: string;
-    collectionId?: string;
-}
 
 export function CustomSeparator() {
     const location = useLocation();
@@ -32,12 +23,12 @@ export function CustomSeparator() {
 
                 if (paths.includes('product')) {
                     const productId = paths[paths.indexOf('product') + 1];
-                    const product: Product = await getProductNameById(productId);
+                    const product = await getProductNameById(productId);
                     setProductName(product.name);
 
                 } else if (paths.includes('collection')) {
                     const collectionId = paths[paths.indexOf('collection') + 1];
-                    const collection: Collection = await getCollectionNameById(collectionId);
+                    const collection = await getCollectionNameById(+collectionId);
                     setCollectionName(collection.name);
                     setCollectionNum(collectionId); // Set collectionNum from collectionId
                 } else {

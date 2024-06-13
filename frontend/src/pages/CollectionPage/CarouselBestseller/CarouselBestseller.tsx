@@ -2,13 +2,14 @@ import React from "react";
 import { Link } from "react-router-dom";
 import Slider from "react-slick";
 import style from "./style.module.scss";
+import { Product } from "../../../models/entities";
 
-interface Product {
-  id: string;
-  name: string;
-  price: number | string;
-  photo: string;
-}
+// interface Product {
+//   id: string;
+//   name: string;
+//   price: number | string;
+//   photo: string;
+// }
 
 interface CarouselBestsellerProps {
   products: Product[];

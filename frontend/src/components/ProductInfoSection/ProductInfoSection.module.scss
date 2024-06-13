@@ -1,0 +1,213 @@
+@import '../../variables';
+
+.container {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 22px;
+}
+
+.wrapper {
+  position: relative;
+  grid-column: 1/2;
+  grid-row: span 2;
+  overflow: auto;
+  height: 50vw;
+
+  &::-webkit-scrollbar {
+    width: 0px; 
+    height: 0px              
+  }
+}
+
+.imageList{
+  position: absolute;
+  flex-direction: column;
+  display: flex;
+  gap: 10px;
+  top: 0;
+  left: 0;
+}
+
+.previevBox{
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+  }
+}
+
+.imageBox {
+  grid-column: span 6;
+  grid-row: span 2;
+  height: 50vw;
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.productInfo {
+  grid-column: span 5;
+  grid-row: span 2;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  container-type: inline-size;
+}
+
+.description {
+  h3{ 
+    font-size: clamp(16px, 3vw, 32px);
+    font-weight: 400;
+    margin-bottom: clamp(8px, 2vw, 25px);
+  }
+
+  p{
+    font-size: clamp(14px, 1.5vw, 20px);
+    font-weight: 400;
+  }
+}
+
+.applyDropdown {
+  grid-column: -1/-6;
+}
+
+.careDropdown {
+  grid-column: -1/-6;
+}
+
+.controlContainer{
+  display: grid;
+  grid-template-areas: 
+  'name price'
+  'availability'
+  'color'
+  'size'
+  'add buy'
+  ;
+}
+
+.slide{
+  // border: 1px solid red;
+  height: calc(90vw);
+  position: relative;
+}
+
+.zoomButton{
+  padding: 5px;
+  position: absolute;
+  top: 20px;
+  left: 30px;
+}
+
+.center{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  outline: none;
+}
+.zoomImage{
+  width: 90%;
+  img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.dotsContainer{
+  border: 1px solid red;
+}
+
+.dots{
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translate(-50%);
+  width: 100%;
+  text-align: center;
+  li {
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    display: inline-block;
+    margin: 0 5px;
+    width: 8px;
+    height: 8px;
+    button{
+      position: absolute;
+      background: $color-gray-200;
+      font-size: 0;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+    }
+  }
+}
+
+
+
+@media (max-width: 930px) {
+  .wrapper {
+    height: 100px;
+    grid-column: span 6;
+    grid-row: 2/3;
+    flex-direction: row;
+  }
+
+  .imageBox{
+    grid-row: 1/2;
+    height: auto;
+  }
+
+  .imageList{
+    width: auto;
+    flex-direction: row;
+    overflow: hidden;
+  }
+
+  .previevBox{
+    width: 90px;
+    height: 90px;
+    display: inline;
+
+  }
+
+  .productInfo {
+    grid-column: span 6;
+  }
+  .applyDropdown {
+    grid-column: -1/7;
+  }
+  
+  .careDropdown {
+    grid-column: -1/7;
+  }
+}
+
+@media (max-width: $screen-mobile) {
+  .wrapper {
+    display: none;
+  }
+
+  .imageBox {
+    grid-column: 1/-1;
+  }
+
+  .productInfo {
+    grid-column: 1/-1;
+  }
+
+  .applyDropdown {
+    grid-column: 1/-1;
+  }
+  
+  .careDropdown {
+    grid-column: 1/-1;
+  }
+}

@@ -1,122 +1,72 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import style from './ProductPage.module.scss';
-import { getProductNameById } from '../../api/api';
-import { useSwipeable } from 'react-swipeable'; // Import useSwipeable hook
+import React, { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Product } from '../../models/entities';
+import { ProductSlider } from '../../components/ProductSlider/ProductSlider';
+import { ProductSlide } from '../../components/Cards/ProductSlide/ProductSlide';
+import { ProductInfoSection } from '../../components/ProductInfoSection/ProductInfoSection';
+import { MainContainer } from './components/MainContainer';
+import { useProduct } from '../../hooks/useProduct';
+import { ROUTE } from '../../constants';
+import { useGetAllProductsFromCollectionQuery, useGetCollectionByNameQuery } from '../../api/collectionSlice';
+import { skipToken } from '@reduxjs/toolkit/query';
 
-interface ProductImage {
-  id: string;
-  images: string; // Assuming 'images' property contains image URLs
-}
-
-interface Product {
-  id: string;
-  name: string;
-  photo: string;
-  price: number | string;
-  description: string;
-  images?: ProductImage[]; // Make images property optional
-}
 
 const ProductPage: React.FC = () => {
+
   const { id } = useParams<{ id: string }>();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [quantity, setQuantity] = useState(1);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0); // Track current image index
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const productData = await getProductNameById(id!);
-        setProduct(productData);
-      } catch (error) {
-        console.error('Error fetching product:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    fetchData();
-  }, [id]);
+  const [allowClick, setAllowClick] = useState<boolean>(true)
 
-  const handleIncrement = () => {
-    setQuantity((prevQuantity) => prevQuantity + 1);
-  };
+  const {product, isLoading, isFetching, variants, changeColor, changeSize} = useProduct(+id!)
 
-  const handleDecrement = () => {
-    if (quantity > 1) {
-      setQuantity((prevQuantity) => prevQuantity - 1);
-    }
-  };
+  const {data: collection} = useGetCollectionByNameQuery(product?.collection ?? skipToken)
 
-  const handlers = useSwipeable({
-    onSwipedLeft: () => {
-      // Handle swipe left (move to next image)
-      if (product && product.images && product.images.length > 0) {
-        setCurrentImageIndex((prevIndex) =>
-          prevIndex === product.images!.length - 1 ? 0 : prevIndex + 1
-        );
-      }
-    },
-    onSwipedRight: () => {
-      // Handle swipe right (move to previous image)
-      if (product && product.images && product.images.length > 0) {
-        setCurrentImageIndex((prevIndex) =>
-          prevIndex === 0 ? product.images!.length - 1 : prevIndex - 1
-        );
-      }
-    }
-  });
+  const {data: productsData} = useGetAllProductsFromCollectionQuery(collection?.id ?? skipToken)
+  
 
-  if (loading) {
-    return <div className={style.container}>Loading...</div>;
+  if (isLoading) {
+    return <div >Loading...</div>;
   }
 
   if (!product) {
-    return <div className={style.container}>Product not found.</div>;
+    return <div >Product not found.</div>;
   }
 
+  const handleClickSlide = (productItem: Product) => {
+    allowClick &&
+    navigate(`${ROUTE.PRODUCT}${productItem.id}`)
+  }
+
+
   return (
-    <div className={style.container}>
-      <div className={style.leftSection}>
-        <div className={style.imageContainer} {...handlers}>
-          <img src={product.photo} alt={product.name} className={style.image} />
-        </div>
-        {product.images && product.images.length > 0 && (
-          <div className={style.imageGallery}>
-            {product.images.map((image, index) => (
-              <div
-                key={image.id}
-                className={`${style.imageContainer} ${
-                  index === currentImageIndex ? style.active : ''
-                }`}
-              >
-                <img
-                  src={image.images}
-                  alt={product.name}
-                  className={style.image}
-                />
-              </div>
-            ))}
-          </div>
-        )}
-        <h1 className={style.title}>{product.name}</h1>
-      </div>
-      <div className={style.rightSection}>
-        <p className={style.description}>{product.description}</p>
-        <div className={style.priceContainer}>
-          <p className={style.price}>${product.price}</p>
-          <div className={style.addToCart}>
-            <button className={style.decrement} onClick={handleDecrement}>-</button>
-            <input type="text" value={quantity} className={style.quantity} readOnly />
-            <button className={style.increment} onClick={handleIncrement}>+</button>
-            <button className={style.addToCartBtn}>Add to Cart</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+    <MainContainer
+      isLoading = {isFetching}
+    >
+      <ProductInfoSection
+        product={product}
+        productVariants={variants}
+        onChangeColor={changeColor}
+        onChangeSize={changeSize}
+      />
+      <ProductSlider 
+         title='Також з цієї колекції'
+         onAllowClick={setAllowClick}
+       >
+         {
+           productsData?.results.map((product) => (
+               <ProductSlide
+                   key={product.id}   
+                   product={product}
+                   onClick={handleClickSlide}
+               />
+           ))
+         }
+       </ProductSlider>
+    </MainContainer>
+    
+  )
+}
 
 export default ProductPage;
