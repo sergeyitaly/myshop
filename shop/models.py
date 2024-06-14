@@ -106,7 +106,7 @@ class Product(models.Model):
     color_value=ColorField(default='#RRGGBB',null=True, blank=True, help_text="Enter the color value in the format #RRGGBB")
     size = models.CharField(max_length=50, null=True, blank=True, help_text="Format: LxHxD (in mm or specify cm)")
     usage = models.TextField(null=True, blank=True, help_text="Застосування")
-    maintance = models.TextField(null=True, blank=True, help_text="Догляд")
+    maintenance = models.TextField(null=True, blank=True, help_text="Догляд")
 
     CURRENCY_CHOICES = (
         ('UAH', 'UAH (грн)'),
