@@ -33,13 +33,16 @@ export const useProduct = (productId: number) => {
 
     useEffect(() => {
         if(products?.length){
-            const allColors = products.map(product => product.color)
+            const allColors = products.map(product => product.color_value).filter(color => !!color) as string[]
             const uniqueColors = new Set(allColors)
             const colors = Array.from(uniqueColors).map(color => {
-              const prod = products.find(product => product.color === color) as Product
-              return {color: prod.color}
+              const prod = products.find(product => product.color_value === color) as Product
+              const uniqueColor = prod.color_value as string
+              return {color: uniqueColor}
             })
-            const allSizes = products.map(product => product.size)
+
+
+            const allSizes = products.map(product => product.size).filter(size => !!size) as string[]
             const sizes = new Set(allSizes)
             
             setVariants({colors, sizes: Array.from(sizes)})
@@ -48,19 +51,19 @@ export const useProduct = (productId: number) => {
 
       const changeColor = (value: string) => {
         if(product && products){
-          const matchProduct = products.find(item => ((item.size === product.size) && (item.color === value)))
+          const matchProduct = products.find(item => ((item.size === product.size) && (item.color_value === value)))
           if(matchProduct) {
             navigate(`${ROUTE.PRODUCT}${matchProduct.id}`)
             return
           }
-          const matchColor = products.find(item => item.color === value) 
+          const matchColor = products.find(item => item.color_value === value) 
           if(matchColor) navigate(`${ROUTE.PRODUCT}${matchColor.id}`)
         }
       }
       
       const changeSize = (value: string) => {
         if(product && products){
-          const matchProduct = products.find(item => ((item.color === product.color) && (item.size === value)))
+          const matchProduct = products.find(item => ((item.color_value === product.color_value) && (item.size === value)))
           if(matchProduct) {
             navigate(`${ROUTE.PRODUCT}${matchProduct.id}`)
             return
