@@ -40,6 +40,7 @@ export function Popular () {
         rows: 2,
         speed: 500,
         dots: true,
+        arrows: false
     };
     return (
         <div className={style.sliderContainer}>

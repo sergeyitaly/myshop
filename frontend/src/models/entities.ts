@@ -1,27 +1,30 @@
 export interface Product {
-    id: number
-    available: boolean
-    brandimage: null | string
-    collection: string
-    color: string
-    currency: string
-    description: string
-    images?: ProductImage[] // Make images property optional
-    name: string;
-    photo: string;
-    photo_url: string;
-    popularity: number
-    price: number ;
-    sales_count: number;
-    size: string
-    slug: string
-    stock: string
-    created: Date
-    updated: Date
-}
+    id: number,
+    photo_url: string,
+    collection: string,
+    images: ProductImage[],
+    photo: string | null,
+    brandimage: string | null,
+    name: string,
+    description: string | null,
+    price: string,
+    stock: number,
+    available: boolean,
+    created: Date,
+    updated: Date,
+    sales_count: number,
+    popularity: number,
+    slug: string,
+    color_name: string | null,
+    color_value: string | null,
+    size: string | null,
+    usage: string | null,
+    maintenance: string | null,
+    currency: 'UAH' | 'USD' | 'EUR'
+  }
 
 
-interface ProductImage {
+export interface ProductImage {
     id: string;
     images: string; 
 }

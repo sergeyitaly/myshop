@@ -22,6 +22,9 @@ export const ProductControl = ({
     onChangeSize
 }: ProductControlProps) => {
 
+  console.log(product);
+  
+
     const {name, available, price, currency} = product
 
     const {colors, sizes} = variants
@@ -49,14 +52,14 @@ export const ProductControl = ({
           <ProductVariants
             className={style.color}
             title='Колір'
-            value='позолота'
+            value={product.color_name || ''}
           >
             {
               colors.map(({color}) => (
                 <ValueBox 
                   key={color}
                   value={color}
-                  isActive={color === product.color}
+                  isActive={color === product.color_value}
                   color={color}
                   onClick={onChangeColor}
                 />

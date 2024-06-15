@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import style from './style.module.scss';
 import CarouselBestseller from '../CollectionPage/CarouselBestseller/CarouselBestseller';
-import { getCollectionNameById, getCollectionProducts } from '../../api/api';
+import { getCollectionNameById, getCollectionProducts, getCollectionProductsByFilter } from '../../api/api';
 import { Collection, Product } from '../../models/entities';
 
 const DEFAULT_PRODUCT_IMAGE = '../../shop/product.png'; // Update with your default image path
@@ -23,7 +23,7 @@ const CollectionItemsPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (page: number) => {
       try {
         setLoading(true);
 
@@ -33,9 +33,7 @@ const CollectionItemsPage: React.FC = () => {
         }
 
         if(id){
-          const {results, count} = await getCollectionProducts(+id
-            // {page}
-          )
+          const {results, count} = await getCollectionProductsByFilter(+id, {page})
           setProducts(results);
           setTotalPages(Math.ceil(count / 6));
         }
@@ -48,7 +46,7 @@ const CollectionItemsPage: React.FC = () => {
     };
 
     fetchData(
-      // currentPage
+      currentPage
     );
   }, [id, currentPage, collection]);
 

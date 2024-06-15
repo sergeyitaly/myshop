@@ -3,12 +3,11 @@ import { Product, ProductVariantsModel } from '../../models/entities'
 import { PageContainer } from '../PageContainer'
 import { DropDown } from './components/DropDown/DropDown'
 import { ProductControl } from './components/ProductControl/ProductControl'
-import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import { Modal, useMediaQuery } from '@mui/material'
-import Slider from 'react-slick'
-import { settings } from './SliderSettings'
 import style from './ProductInfoSection.module.scss'
 import { screens } from '../../constants'
+import { ProductImageSlider } from './components/ProductImageSlider/ProductImageSlider'
+import { ProductImageSlide } from './components/ProductImageSlide/ProductImageSlide'
 
 
 
@@ -27,7 +26,7 @@ export const ProductInfoSection = ({
 }: ProductInfoSectionProps) => {
 
     
-    const [currentImage, setCurrentImage] = useState<string>(product.photo)
+    const [currentImage, setCurrentImage] = useState<string | null>(product.photo)
     const [bigImage, setBigImage] = useState<string | null>(null)
 
     const isMobile = useMediaQuery(screens.maxMobile)
@@ -52,24 +51,11 @@ export const ProductInfoSection = ({
             <PageContainer className={style.container}>
                 {
                     isMobile ?
-                    <Slider {...settings} className={style.imageBox}>
-                        {
-                            product.images?.map((image) => (
-                            <div 
-                                key={image.id}
-                                className={style.slide}
-                            >
-                                <img src={image.images}/>
-                                <button 
-                                className={style.zoomButton}
-                                onClick={openModal}
-                                >
-                                    <ZoomInIcon/>
-                                </button>
-                            </div>
-                            ))
-                        }
-                    </Slider>
+                    <ProductImageSlider
+                        className={style.imageBox}
+                        images={product.images}
+                        onClickZoom={openModal}
+                     />
                     :
                     <>
                         <div className={style.wrapper}>
@@ -87,15 +73,15 @@ export const ProductInfoSection = ({
                                 }
                             </div>
                         </div>
-                        <div 
+                        {
+                        currentImage &&
+                        <ProductImageSlide
                             className={style.imageBox}
-                            onClick={openModal}    
-                        >
-                            <img 
-                                className={style.image}
-                                src={currentImage}
-                            />
-                        </div>
+                            src={currentImage}
+                            alt={product.name}
+                            onClickZoom={openModal}
+                        />
+                        }
                     </>
                 }
             
@@ -114,11 +100,13 @@ export const ProductInfoSection = ({
 
                 <DropDown
                     className={style.applyDropdown}
+                    changebleParam={product.id}
                     title='Застосування:'
                     content='Підходить для повсякденного носіння, а також стане чудовим доповненням до вечірнього або урочистого вбрання.'
                 />
                 <DropDown
                     className={style.careDropdown}
+                    changebleParam={product.id}
                     title='Догляд:'
                     content="Чистка: Використовуйте м'яку тканину або спеціалізований розчин для чищення срібла. Не використовуйте абразивні засоби, оскільки вони можуть пошкодити покриття.
 

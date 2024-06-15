@@ -1,3 +1,13 @@
+@import '../../variables';
+
+.container {
+  margin-bottom: 24px;
+
+  @media (max-width: $screen-mobile) {
+    margin-bottom: 33px;
+  }
+}
+
 .breadcrumb {
     background-color: #e3e3e26e;
     padding: 10px;
@@ -17,4 +27,7 @@
       margin-right: 8px;
     }
   }
+
+
+ 
   

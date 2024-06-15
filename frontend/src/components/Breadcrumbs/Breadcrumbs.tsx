@@ -3,6 +3,7 @@ import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { Breadcrumbs, Link, Stack } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { getProductNameById, getCollectionNameById } from '../../api/api';
+import styles from './style.module.scss'
 
 interface BreadcrumbTitles {
     [key: string]: string;
@@ -149,7 +150,7 @@ export function CustomSeparator() {
     };
 
     return (
-        <div style={{ backgroundColor: '#E3E3E26E' }}>
+        <div className={styles.container} style={{ backgroundColor: '#E3E3E26E' }}>
             <Stack spacing={2}>
                 <Breadcrumbs separator={<NavigateNextIcon />} aria-label="breadcrumb">
                     {generateBreadcrumbs()}
