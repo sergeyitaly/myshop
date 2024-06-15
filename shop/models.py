@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from distutils.util import strtobool
 from django.core.files.images import get_image_dimensions
 from urllib.parse import unquote  # Add this import
+from colorfield.fields import ColorField
 
 load_dotenv()
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
@@ -101,8 +102,11 @@ class Product(models.Model):
     sales_count = models.PositiveIntegerField(default=0)
     popularity = models.PositiveIntegerField(default=0)
     slug = models.SlugField(unique=True)
-    color = models.CharField(max_length=50, null=True, blank=True)
+    color_name = models.CharField(max_length=50, null=True, blank=True, help_text="Enter the color name, e.g., magenta or purple")
+    color_value=ColorField(default='#RRGGBB',null=True, blank=True, help_text="Enter the color value in the format #RRGGBB")
     size = models.CharField(max_length=50, null=True, blank=True, help_text="Format: LxHxD (in mm or specify cm)")
+    usage = models.TextField(null=True, blank=True, help_text="Застосування")
+    maintenance = models.TextField(null=True, blank=True, help_text="Догляд")
 
     CURRENCY_CHOICES = (
         ('UAH', 'UAH (грн)'),

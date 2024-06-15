@@ -293,6 +293,12 @@ CACHES = {
         'LOCATION': REDIS_CACHE_LOCATION,
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'CONNECTION_POOL_KWARGS': {
+                'max_connections': 100,
+                'retry_on_timeout': True,
+            },
+            'SOCKET_CONNECT_TIMEOUT': 5,  # seconds
+            'SOCKET_TIMEOUT': 5,  # seconds
         },
         'KEY_PREFIX': 'imdb',  # Optional: Set a key prefix for all cache keys
         'TIMEOUT': 60 * 15,  # Cache timeout in seconds (e.g., 30 minutes)
