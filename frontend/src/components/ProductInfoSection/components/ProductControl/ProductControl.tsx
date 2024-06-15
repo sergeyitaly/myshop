@@ -66,7 +66,6 @@ export const ProductControl = ({
           
           <div className={style.sizeArea}>
             <ProductVariants
-                
                 title='Розмір'
             >
                 {
