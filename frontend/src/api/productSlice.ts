@@ -4,6 +4,8 @@ import { Product } from "../models/entities";
 import { ServerResponce } from "../models/server-responce";
 import { apiSlice } from "./mainApiSlice";
 import { ProductFilter } from "../models/filters";
+import axios from "axios";
+import { apiBaseUrl } from "./api";
 
 export const productApiSlice = apiSlice.injectEndpoints({
     endpoints: builder => ({
@@ -11,6 +13,17 @@ export const productApiSlice = apiSlice.injectEndpoints({
         getAllProducts: builder.query<ServerResponce<Product[]>, void>({
             query: () => `${ENDPOINTS.PRODUCTS}/`
           }),
+
+        getManyProductsByIdList: builder.query<Product[], number[]>({
+            queryFn: async (idList) => {
+                const products = await Promise.all(idList.map(async (id) => {
+                    const {data} = await axios.get<Product>(`${apiBaseUrl}/api/${ENDPOINTS.PRODUCT}/${id}/`)
+                    return data
+                }))
+
+                return {data: products}
+            }
+        }),
 
         getManyProductsByFilter: builder.query<ServerResponce<Product[]>, ProductFilter>({
             query: (queryBuilder) => {
@@ -28,5 +41,6 @@ export const productApiSlice = apiSlice.injectEndpoints({
 export const {
     useGetAllProductsQuery,
     useGetManyProductsByFilterQuery,
-    useGetOneProductByIdQuery
+    useGetOneProductByIdQuery,
+    useGetManyProductsByIdListQuery
 } = productApiSlice

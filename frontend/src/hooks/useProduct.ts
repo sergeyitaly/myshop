@@ -14,6 +14,7 @@ const initialVariants: ProductVariantsModel = {
 export const useProduct = (productId: number) => {
 
     const [variants, setVariants] = useState<ProductVariantsModel>(initialVariants)
+    // const [counter, setCounter] = useState<number>(1)
 
     const {
       data: product, 
@@ -72,6 +73,7 @@ export const useProduct = (productId: number) => {
           if(matchColor) navigate(`${ROUTE.PRODUCT}${matchColor.id}`)
         }
       }
+
 
     return {
         product,

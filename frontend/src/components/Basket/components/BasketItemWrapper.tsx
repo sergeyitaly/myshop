@@ -1,20 +1,35 @@
 import { useProduct } from "../../../hooks/useProduct"
-import { BasketItem } from "./BasketItem"
+import { Product } from "../../../models/entities"
+import { BasketItem } from "../../Cards/BasketItem/BasketItem"
+import { BasketItemSkeleton } from "../../Cards/BasketItem/BasketItemSkeleton/BasketItemSkeleton"
 
-export const BasketItemWrapper = () => {
+interface BasketItemWrapperProps {
+    productId: number
+    qty: number
+    onClickDelete: (product: Product) => void
+    onClickIncrement: (product: Product) => void
+    onClickDecrement: (product: Product) => void
+}
 
-    const {product, variants} = useProduct(13)
+export const BasketItemWrapper = ({
+    productId,
+    qty,
+    onClickDelete,
+    onClickIncrement,
+    onClickDecrement
+}: BasketItemWrapperProps) => {
 
-    return (
-        <>
-            {
-                product &&  
-                <BasketItem
-                    product={product}
-                    variants={variants}
-                />
-            }
-           
-        </>
-    )   
+    const {product, variants, isLoading} = useProduct(productId)
+
+    if(isLoading) return <BasketItemSkeleton/>
+
+    if(product) return (
+        <BasketItem
+        product={product}
+        qty={qty}
+        variants={variants}
+        onClickDelete={onClickDelete}
+        onClickIncrement={onClickIncrement}
+        onClickDecrement={onClickDecrement}
+    />)
 }

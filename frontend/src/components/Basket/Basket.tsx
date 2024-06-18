@@ -4,12 +4,24 @@ import { useBasket } from '../../hooks/useBasket'
 import useClickOutside from '../../hooks/useClickOutside'
 import { MainButton } from '../MainButton/MainButton'
 import { AppIcon } from '../SvgIconComponents/AppIcon'
-import { BasketItem } from './components/BasketItem'
 import { BasketItemWrapper } from './components/BasketItemWrapper'
+import { EmptyBasket } from './components/EmptyBasket/EmptyBasket'
+import clsx from 'clsx'
 
 export const Basket = (): JSX.Element => {
 
-    const {openStatus, closeBasket} = useBasket()
+    const {
+        openStatus, 
+        basketItems, 
+        totalPrice, 
+        isEmptyBasket,
+        productQty,
+        closeBasket, 
+        deleteFromBasket, 
+        increaceCounter, 
+        reduceCounter
+
+    } = useBasket()
 
     const basketBox = useRef<HTMLDivElement | null>(null)
     
@@ -34,18 +46,34 @@ export const Basket = (): JSX.Element => {
                         <header className={styles.header}>
                             <h4 className={styles. titleContainer}>
                                 <span className={styles.title}>Кошик</span>
-                                <span className={styles.counter}>{`(1)`}</span>
+                                <span className={styles.counter}>{`(${productQty})`}</span>
                             </h4>
                             <button onClick={closeBasket}>
                                 <AppIcon iconName='cross'/>
                             </button>
                         </header>
-                        <div className={styles.content}>
-                            <BasketItemWrapper/>
+                        <div className={clsx(styles.content, {
+                            [styles.center]: isEmptyBasket
+                        })}>
+                            {
+                                !isEmptyBasket ?
+                                basketItems.map(({productId, qty}) => (
+                                    <BasketItemWrapper
+                                        key={productId}
+                                        productId={productId}
+                                        qty={qty}
+                                        onClickDelete={deleteFromBasket}
+                                        onClickIncrement={increaceCounter}
+                                        onClickDecrement={reduceCounter}
+                                    />
+                                ))
+                                :
+                                <EmptyBasket/>
+                            }
                         </div>
                         <div className={styles.totalPrice}>
                             <span>Загальна сума</span>   
-                            <span>10000 грн</span>   
+                            <span>{totalPrice} грн</span>   
                         </div>
                         <div className={styles.actions}>
                             <MainButton

@@ -6,7 +6,8 @@ import { MainButton } from '../../../MainButton/MainButton'
 import { ValueBox } from '../../../ProductVariants/ValueBox/ValueBox'
 import style from './ProductControl.module.scss'
 import { ProductVariants } from '../../../ProductVariants/ProductVariants'
-import { useState } from 'react'
+import { useBasket } from '../../../../hooks/useBasket'
+import { useCounter } from '../../../../hooks/useCounter'
 
 interface ProductControlProps {
     product: Product
@@ -19,27 +20,27 @@ export const ProductControl = ({
     product,
     variants,
     onChangeColor,
-    onChangeSize
+    onChangeSize,
 }: ProductControlProps) => {
 
-  console.log(product);
-  
 
     const {name, available, price, currency} = product
 
     const {colors, sizes} = variants
 
-    const [quantity, setQuantity] = useState(1);
+    const {
+      qty,
+      handleIncrement,
+      handleDecrement
+    } = useCounter(1)
 
-    const handleIncrement = () => {
-        setQuantity((prevQuantity) => prevQuantity + 1);
-      };
-    
-      const handleDecrement = () => {
-        if (quantity > 0) {
-          setQuantity((prevQuantity) => prevQuantity - 1);
-        }
-      };
+    const {addToBasket} = useBasket()
+
+
+
+    const handleAddToBasket = () => {
+      addToBasket(product, qty)
+    }
 
     return (
         <div className={style.container}>
@@ -84,7 +85,7 @@ export const ProductControl = ({
                 }
             </ProductVariants>
             <Counter
-                value={quantity}
+                value={qty}
                 onIncrement={handleIncrement}
                 onReduce={handleDecrement}
             />    
@@ -92,6 +93,7 @@ export const ProductControl = ({
           <MainButton
             className={style.add}
             title='Додати до кошика'
+            onClick={handleAddToBasket}
           />
           <MainButton
             className={style.buy}

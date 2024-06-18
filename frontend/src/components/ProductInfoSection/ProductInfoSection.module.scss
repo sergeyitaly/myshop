@@ -11,7 +11,8 @@
   grid-column: 1/2;
   grid-row: span 2;
   overflow: auto;
-  height: 50vw;
+  max-height: 500px;
+
 
   &::-webkit-scrollbar {
     width: 0px; 

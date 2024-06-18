@@ -48,6 +48,15 @@
 
 .content {
     flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    gap: 40px;
+}
+
+.center {
+    justify-content: center;
+    align-items: center;
 }
 
 .totalPrice {
