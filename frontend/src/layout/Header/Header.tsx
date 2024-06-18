@@ -1,6 +1,4 @@
-// Header.tsx
-import { useState } from 'react';
-import Cart from '../../components/Cart/Cart'; // Ensure this path is correct
+ // Ensure this path is correct
 import { BurgerMenu } from '../../components/BurgerMenu/BurgerMenu';
 import { Logo } from '../../components/Logo/Logo';
 import { Navigation } from '../../components/Navigation/Navigation';

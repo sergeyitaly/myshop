@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import style from './style.module.scss';
 import CarouselBestseller from '../CollectionPage/CarouselBestseller/CarouselBestseller';
-import { getCollectionNameById, getCollectionProducts, getCollectionProductsByFilter } from '../../api/api';
+import { getCollectionNameById, getCollectionProductsByFilter } from '../../api/api';
 import { Collection, Product } from '../../models/entities';
 
 const DEFAULT_PRODUCT_IMAGE = '../../shop/product.png'; // Update with your default image path

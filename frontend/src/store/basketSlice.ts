@@ -1,7 +1,20 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
-const initialState = {
-    openStatus: false
+export interface BasketItemModel {
+    productId: number
+    qty: number
+}
+
+interface InitialStateModel {
+    openStatus: boolean
+    basketItems: BasketItemModel[]
+    totalPrice: number
+}
+
+const initialState: InitialStateModel = {
+    openStatus: false,
+    basketItems: [],
+    totalPrice: 0
 }
 
 export const basketSlice = createSlice({
@@ -11,9 +24,19 @@ export const basketSlice = createSlice({
         setOpenStatus: (state, action: PayloadAction<boolean>) => {
             state.openStatus = action.payload
         },
+
+        setBasketItems: (state, action: PayloadAction<BasketItemModel[]>) => {
+            state.basketItems = action.payload
+        },
+
+        setTotalPrice: (state, action: PayloadAction<number>) => {
+            state.totalPrice = action.payload
+        }
     }
 })
 
 export const {
-    setOpenStatus
+    setOpenStatus,
+    setBasketItems,
+    setTotalPrice
 } = basketSlice.actions

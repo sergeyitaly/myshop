@@ -7,21 +7,41 @@ import styles from './BasketItem.module.scss'
 
 interface BasketItemProps {
     product: Product
+    qty: number
     variants: ProductVariantsModel
+    onClickDelete: (product: Product) => void 
+    onClickIncrement: (product: Product) => void 
+    onClickDecrement: (product: Product) => void 
 }
 
 
 export const BasketItem = ({
     product,
-    variants
+    variants,
+    qty,
+    onClickDelete,
+    onClickIncrement,
+    onClickDecrement
 }: BasketItemProps) => {
 
     const {photo, name, available, price, currency} = product
 
+    const handleClickDelete = () => {
+        onClickDelete && onClickDelete(product)
+    }
+
+    const handleClickIncrement = () => {
+        onClickIncrement && onClickIncrement(product)
+    }
+
+    const handleClickDecrement = () => {
+        onClickDecrement && onClickDecrement(product)
+    }
+
     return (
         <div className={styles.container}>
             <div className={styles.image}>
-                <img src={photo} />
+                {photo && <img src={photo}/>}
             </div>
             <div className={styles.info}>
                 <h4>{name}</h4>
@@ -35,7 +55,7 @@ export const BasketItem = ({
                                 key={color}
                                 value={color}
                                 color={color}
-                                isActive={color === product.color}
+                                isActive={color === product.color_value}
                             />
                         ))
                     }
@@ -56,15 +76,20 @@ export const BasketItem = ({
                     }
                     </ProductVariants>
                     <Counter
-                    value={10}
-                    // onIncrement={handleIncrement}
-                    // onReduce={handleDecrement}
+                        value={qty}
+                        onIncrement={handleClickIncrement}
+                        onReduce={handleClickDecrement}
                     />  
                 </div>
                 <AvailableLable
                     isAvailable = {available}
                 />
-                <span>{price} {currency}</span>
+                <div className={styles.control}>
+                    <span>{price} {currency}</span>
+                    <button
+                        onClick={handleClickDelete}
+                    >Delete</button>
+                </div>
             </div>
         </div> 
     ) 

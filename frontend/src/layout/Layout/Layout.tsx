@@ -3,7 +3,7 @@ import { Footer } from '../Footer/Footer';
 import { Header } from '../Header/Header';
 import {CustomSeparator} from "../../components/Breadcrumbs/Breadcrumbs";
 import { Basket } from '../../components/Basket/Basket';
-import { useState } from 'react';
+import { AppSnackbar } from '../../components/Snackbar/Shackbar';
 // import { useHistory } from 'react-router-dom';
 
 export const Layout = ({
@@ -14,9 +14,6 @@ export const Layout = ({
     withFooter: boolean;
 }) => {
     // const history = useHistory();
-
-    
-
 
     return (
         <>
@@ -30,6 +27,7 @@ export const Layout = ({
 
             }
             <Basket />
+            <AppSnackbar/>
         </>
     );
 };

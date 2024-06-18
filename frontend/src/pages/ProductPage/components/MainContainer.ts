@@ -1,5 +1,4 @@
 import styled from '@emotion/styled'
-import { screens } from '../../../constants'
 
 export const MainContainer = styled.main<{isLoading: boolean}>`
     position: relative;
