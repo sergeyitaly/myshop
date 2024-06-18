@@ -1,5 +1,5 @@
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import ArrowForward from '@mui/icons-material/ArrowForwardIos'
 import clsx from 'clsx'
 import style from './DropDown.module.scss'
@@ -8,15 +8,21 @@ interface DropDownProps {
     title: string
     content?: string
     className?: string
+    changebleParam?: string | number
 }
 
 export const DropDown = ({
     title,
     content,
-    className
+    className,
+    changebleParam
 }: DropDownProps) => {
 
     const [active, setActive] = useState<boolean>(false)
+
+    useEffect(() => {
+        setActive(false)
+    }, [changebleParam])
 
     return (
         <div className={clsx(style.container, className)}>

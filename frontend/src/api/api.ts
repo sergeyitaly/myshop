@@ -52,7 +52,7 @@ export async function getCollectionProducts(collectionId: number): Promise<Short
   }
 }
 
-export async function getCollectionProductsByFilter(collectionId: string, query: CollectionProductFilter): Promise<ServerResponce<Product[]>> {
+export async function getCollectionProductsByFilter(collectionId: number, query: CollectionProductFilter): Promise<ServerResponce<Product[]>> {
   try{
     const qs = queryString(query)
     const response = await axios.get<ServerResponce<Product[]>>(`${apiBaseUrl}/api/collection/${collectionId}/products/?${qs}`);

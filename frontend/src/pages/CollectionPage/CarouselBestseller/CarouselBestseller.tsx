@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Slider from "react-slick";
 import style from "./style.module.scss";
 import { Product } from "../../../models/entities";
+import defaultPhoto from '../../../assets/default.png'
 
 // interface Product {
 //   id: string;
@@ -51,7 +52,7 @@ const CarouselBestseller: React.FC<CarouselBestsellerProps> = ({
             <div className={style.card}>
               <div className={style.cardImage}>
                 <img
-                  src={product.photo}
+                  src={product.photo || defaultPhoto}
                   alt={product.name}
                   className={style.image}
                   loading="lazy"

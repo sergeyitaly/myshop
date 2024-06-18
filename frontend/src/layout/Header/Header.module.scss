@@ -19,6 +19,11 @@
     flex-shrink: 2;
 }
 
+.control {
+    display: flex;
+    gap: 30px;
+}
+
 @media (max-width: $screen-mobile) {
     .header {
         padding: 20px;
@@ -30,3 +35,5 @@
         gap: 25px;
     }
 }
+
+

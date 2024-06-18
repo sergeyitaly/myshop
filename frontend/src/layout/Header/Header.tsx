@@ -1,18 +1,16 @@
-// Header.tsx
-import { useState } from 'react';
-import Cart from '../../components/Cart/Cart'; // Ensure this path is correct
+ // Ensure this path is correct
 import { BurgerMenu } from '../../components/BurgerMenu/BurgerMenu';
 import { Logo } from '../../components/Logo/Logo';
 import { Navigation } from '../../components/Navigation/Navigation';
 import { Search } from '../../components/Search/Search';
 import styles from './Header.module.scss';
+import { HeaderIconButton } from './components/HeaderIconButton/HeaderIconButton';
+import { useBasket } from '../../hooks/useBasket';
 
 export const Header = () => {
-    const [cartOpen, setCartOpen] = useState(false);
+    const {openBasket} = useBasket()
 
-    const handleCloseCart = () => {
-        setCartOpen(false);
-    };
+    
 
     return (
         <header className={styles.header}>
@@ -20,8 +18,13 @@ export const Header = () => {
                 <BurgerMenu />
                 <Logo className={styles.logo} />
                 <Navigation />
-                <Search />
-                <Cart onClose={handleCloseCart} isOpen={cartOpen} />
+                <div className={styles.control}>
+                    <Search />
+                    {/* <Cart onClose={handleCloseCart} isOpen={cartOpen} /> */}
+                    <HeaderIconButton
+                        onClick={openBasket}
+                    />
+                </div>
             </div>
         </header>
     );

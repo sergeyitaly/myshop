@@ -1,0 +1,72 @@
+@import '../../variables';
+
+.container {
+    position: fixed;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+    background: #00000066;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+}
+
+.box {
+    padding: 20px;
+    position: absolute;
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+    right: 0;
+    width: 473px;
+    height: 90vh;
+    background-color: $color-background;
+    border-radius: 0 0 0 10px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.titleContainer {
+    position: relative;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 500;
+}
+
+.counter {
+    color: $color-blue;
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    transform: translateX(100%)
+}
+
+.content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    gap: 40px;
+}
+
+.center {
+    justify-content: center;
+    align-items: center;
+}
+
+.totalPrice {
+    display: flex;
+    justify-content: space-between;
+    font-size: 20px;
+}
+
+.actions{
+    display: flex;
+    flex-direction: column;
+    gap: 10px
+}
