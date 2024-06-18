@@ -1,5 +1,6 @@
 import { Product } from '../../../models/entities'
 import style from './ProductSlide.module.scss'
+import defaultPhoto from '../../../assets/default.png'
 
 interface ProductSlideProps {
     product: Product
@@ -23,7 +24,7 @@ export const ProductSlide = ({
             onClick={handleClick}
         >
             <div className={style.imageBox}>
-                <img src={photo} alt="" />
+                <img src={photo || defaultPhoto} alt="" />
             </div>
             <h3>{name}</h3>
             <span>{price} {currency}</span>

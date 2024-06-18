@@ -18,13 +18,13 @@
   .title {
     grid-area: title;
     font-weight: 500;
-    font-size: clamp(16px, 2.5vw, 36px);
+    font-size: clamp(20px, 2.5vw, 36px);
   }
 
   .price {
     grid-area: price;
     font-weight: 500;
-    font-size: clamp(16px, 2.2vw, 32px);
+    font-size: clamp(20px, 2.5vw, 32px);
     justify-self: end;
   }
 

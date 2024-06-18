@@ -27,3 +27,7 @@ export enum ENDPOINTS {
     PRODUCT = 'product',
     PRODUCTS = 'products'
 }
+
+export enum STORAGE {
+    BASKET='basket'
+}

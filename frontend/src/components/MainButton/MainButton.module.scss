@@ -10,9 +10,7 @@
     transition: .2s;
 
     &:hover {
-        background-color: $color-button;
-        color: $color-background;
-        border-color: $color-button;
+        background-color: darken($color: $color-background, $amount: 10);
     }
 
     @media (max-width: $screen-big) {

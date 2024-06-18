@@ -54,7 +54,7 @@ const OrderPage: React.FC = () => {
                 const response = await axios.get<Product>(`${apiBaseUrl}/api/product/${value}/`);
                 const productData = response.data;
                 newItems[index].product = productData;
-                newItems[index].price = productData.price;
+                newItems[index].price = +productData.price;
             } catch (error) {
                 console.error('Error fetching product data:', error);
             }

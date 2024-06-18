@@ -11,7 +11,8 @@
   grid-column: 1/2;
   grid-row: span 2;
   overflow: auto;
-  height: 50vw;
+  max-height: 500px;
+
 
   &::-webkit-scrollbar {
     width: 0px; 
@@ -41,13 +42,7 @@
 .imageBox {
   grid-column: span 6;
   grid-row: span 2;
-  height: 50vw;
-  img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+  max-height: 500px;
 }
 
 .productInfo {
@@ -61,7 +56,7 @@
 
 .description {
   h3{ 
-    font-size: clamp(16px, 3vw, 32px);
+    font-size: clamp(16px, 2.5vw, 32px);
     font-weight: 400;
     margin-bottom: clamp(8px, 2vw, 25px);
   }
@@ -91,18 +86,7 @@
   ;
 }
 
-.slide{
-  // border: 1px solid red;
-  height: calc(90vw);
-  position: relative;
-}
 
-.zoomButton{
-  padding: 5px;
-  position: absolute;
-  top: 20px;
-  left: 30px;
-}
 
 .center{
   display: flex;
@@ -119,38 +103,6 @@
   }
 }
 
-.dotsContainer{
-  border: 1px solid red;
-}
-
-.dots{
-  position: absolute;
-  bottom: 30px;
-  left: 50%;
-  transform: translate(-50%);
-  width: 100%;
-  text-align: center;
-  li {
-    border-radius: 20px;
-    overflow: hidden;
-    position: relative;
-    display: inline-block;
-    margin: 0 5px;
-    width: 8px;
-    height: 8px;
-    button{
-      position: absolute;
-      background: $color-gray-200;
-      font-size: 0;
-      width: 100%;
-      height: 100%;
-      left: 0;
-      top: 0;
-    }
-  }
-}
-
-
 
 @media (max-width: 930px) {
   .wrapper {
@@ -162,7 +114,7 @@
 
   .imageBox{
     grid-row: 1/2;
-    height: auto;
+    max-height: none;
   }
 
   .imageList{

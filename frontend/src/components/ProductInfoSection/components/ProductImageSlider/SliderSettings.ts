@@ -1,5 +1,5 @@
 import { Settings } from "react-slick";
-import styles from './ProductInfoSection.module.scss'
+import styles from './ProductImageSlider.module.scss'
 import './active-dots.css'
 
 
