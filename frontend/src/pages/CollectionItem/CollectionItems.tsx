@@ -110,10 +110,7 @@ const CollectionItemsPage: React.FC = () => {
             ))}
           </div>
         )}
-        <CarouselBestseller
-            // products={products.map(product => ({ ...product, price: String(product.price) }))} 
-            products={products}
-        />
+        <CarouselBestseller />
        </PageContainer>
     </main>
   );
