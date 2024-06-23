@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import style from './style.module.scss';
 import { Collection } from '../../models/entities';
+import { PreviewCard } from '../../components/Cards/PreviewCard/PreviewCard';
+import { PageContainer } from '../../components/PageContainer';
+import { ROUTE } from '../../constants';
 
 
 
@@ -14,6 +17,8 @@ interface Props {
 const CollectionsPage: React.FC<Props> = ({ collections = [], loadCollectionsByPage, totalPages }) => {
   const [currentPage, setCurrentPage] = useState(1);
 
+  const navigate = useNavigate()
+
   useEffect(() => {
     loadCollectionsByPage(currentPage);
   }, [currentPage, loadCollectionsByPage]);
@@ -24,45 +29,42 @@ const CollectionsPage: React.FC<Props> = ({ collections = [], loadCollectionsByP
 
   const validTotalPages = isNaN(totalPages) || totalPages < 1 ? 1 : totalPages;
 
+  const handleClickCollectionCard = (id: number) => {
+    navigate(ROUTE.COLLECTION + id)
+  }
+ 
   return (
-    <div>
-      <div className={style.container}>
-        <h1 className={style.title}>Колекції</h1>
-        <div className={style.cardContainer}>
-          {collections.map((collection) => (
-            <Link
-              to={`/collection/${collection.id}`}
-              key={collection.id}
-              className={style.card}
-            >
-              <div className={style.cardImage}>
-                <img
-                  src={collection.photo}
-                  alt={collection.name}
-                  style={{ maxWidth: '100%' }}
-                  loading="lazy"
-                />
-                <p className={style.name}>{collection.name}</p>
-                <p className={style.category}>{collection.category}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-        {collections.length > 9 && (
-          <div className={style.pagination}>
-            {[...Array(validTotalPages)].map((_, index) => (
-              <button
-                key={index + 1}
-                onClick={() => handlePageClick(index + 1)}
-                className={currentPage === index + 1 ? style.activePage : ''}
-              >
-                {index + 1}
-              </button>
+    <main>
+      <section>
+        <PageContainer>
+          <h1 className={style.title}>Колекції</h1>
+          <div className={style.cardContainer}>
+            {collections.map((collection) => (
+              <PreviewCard
+                  key={collection.id}
+                  photoSrc={collection.photo}
+                  title={collection.name}
+                  subTitle={collection.category}
+                  onClick={() => handleClickCollectionCard(collection.id)}
+              />
             ))}
           </div>
-        )}
-      </div>
-    </div>
+          {collections.length > 9 && (
+            <div className={style.pagination}>
+              {[...Array(validTotalPages)].map((_, index) => (
+                <button
+                  key={index + 1}
+                  onClick={() => handlePageClick(index + 1)}
+                  className={currentPage === index + 1 ? style.activePage : ''}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
+          )}
+        </PageContainer>
+      </section>
+    </main>
   );
 };
 
