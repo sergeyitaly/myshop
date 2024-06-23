@@ -4,6 +4,7 @@ import style from './style.module.scss';
 import CarouselBestseller from '../CollectionPage/CarouselBestseller/CarouselBestseller';
 import { getCollectionNameById, getCollectionProductsByFilter } from '../../api/api';
 import { Collection, Product } from '../../models/entities';
+import { PageContainer } from '../../components/PageContainer';
 
 const DEFAULT_PRODUCT_IMAGE = '../../shop/product.png'; // Update with your default image path
 
@@ -23,6 +24,8 @@ const CollectionItemsPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
+    console.log('effect');
+    
     const fetchData = async (page: number) => {
       try {
         setLoading(true);
@@ -63,54 +66,56 @@ const CollectionItemsPage: React.FC = () => {
   }
 
   return (
-    <>
-      <h1 className={style.title}>{collection.name}</h1>
-      {products.length === 0 ? (
-        <div className={style.container}>
-          <p>This collection has no products.</p>
-        </div>
-      ) : (
-        <div className={style.productContainer}>
-          {products.map((product) => (
-            <Link
-              to={`/product/${product.id}`}
-              key={product.id}
-              className={style.card}
-            >
-              <div className={style.cardImage}>
-                <img
-                  src={product.photo || DEFAULT_PRODUCT_IMAGE}
-                  alt={product.name}
-                  style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
-                  loading="lazy"
-                />
-              </div>
-              <div className={style.cardContent}>
-                <p className={style.name}>{product.name}</p>
-                <p className={style.price}>{product.price}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
-      {products.length > 0 && (
-        <div className={style.pagination}>
-          {[...Array(totalPages)].map((_, index) => (
-            <button
-              key={index + 1}
-              onClick={() => handlePageClick(index + 1)}
-              className={currentPage === index + 1 ? style.activePage : ''}
-            >
-              {index + 1}
-            </button>
-          ))}
-        </div>
-      )}
-      <CarouselBestseller
-          // products={products.map(product => ({ ...product, price: String(product.price) }))} 
-          products={products}
-       />
-    </>
+    <main>
+      <PageContainer>
+        <h1 className={style.title}>{collection.name}</h1>
+        {products.length === 0 ? (
+          <div className={style.container}>
+            <p>This collection has no products.</p>
+          </div>
+        ) : (
+          <div className={style.productContainer}>
+            {products.map((product) => (
+              <Link
+                to={`/product/${product.id}`}
+                key={product.id}
+                className={style.card}
+              >
+                <div className={style.cardImage}>
+                  <img
+                    src={product.photo || DEFAULT_PRODUCT_IMAGE}
+                    alt={product.name}
+                    style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
+                    loading="lazy"
+                  />
+                </div>
+                <div className={style.cardContent}>
+                  <p className={style.name}>{product.name}</p>
+                  <p className={style.price}>{product.price}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+        {products.length > 0 && (
+          <div className={style.pagination}>
+            {[...Array(totalPages)].map((_, index) => (
+              <button
+                key={index + 1}
+                onClick={() => handlePageClick(index + 1)}
+                className={currentPage === index + 1 ? style.activePage : ''}
+              >
+                {index + 1}
+              </button>
+            ))}
+          </div>
+        )}
+        <CarouselBestseller
+            // products={products.map(product => ({ ...product, price: String(product.price) }))} 
+            products={products}
+        />
+       </PageContainer>
+    </main>
   );
 };
 
