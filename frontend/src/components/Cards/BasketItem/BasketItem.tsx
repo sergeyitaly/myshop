@@ -3,6 +3,7 @@ import { AvailableLable } from "../../AvailableLabel/AvailableLabel"
 import { Counter } from "../../Counter/Counter"
 import { ProductVariants } from "../../ProductVariants/ProductVariants"
 import { ValueBox } from "../../ProductVariants/ValueBox/ValueBox"
+import { IconButton } from "../../UI/IconButton/IconButton"
 import styles from './BasketItem.module.scss'
 
 interface BasketItemProps {
@@ -44,7 +45,14 @@ export const BasketItem = ({
                 {photo && <img src={photo}/>}
             </div>
             <div className={styles.info}>
-                <h4>{name}</h4>
+                <div className={styles.header}>
+                    <h4>{name}</h4>
+                    <IconButton
+                        className={styles.icon}
+                        iconName="delete"
+                        onClick={handleClickDelete}
+                    />
+                </div>
                 <h5>Срібло 925 проби </h5>
                 <ProductVariants
                     title="Колір"
@@ -86,9 +94,6 @@ export const BasketItem = ({
                 />
                 <div className={styles.control}>
                     <span>{price} {currency}</span>
-                    <button
-                        onClick={handleClickDelete}
-                    >Delete</button>
                 </div>
             </div>
         </div> 
