@@ -1,33 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import style from './style.module.scss';
 import { Collection } from '../../models/entities';
 import { PreviewCard } from '../../components/Cards/PreviewCard/PreviewCard';
 import { PageContainer } from '../../components/PageContainer';
 import { ROUTE } from '../../constants';
+import { useGetAllCollectionsQuery } from '../../api/collectionSlice';
 
 
 
-interface Props {
-  collections: Collection[];
-  loadCollectionsByPage: (page: number) => void;
-  totalPages: number;
-}
 
-const CollectionsPage: React.FC<Props> = ({ collections = [], loadCollectionsByPage, totalPages }) => {
-  const [currentPage, setCurrentPage] = useState(1);
+
+const CollectionsPage: React.FC = () => {
+
 
   const navigate = useNavigate()
 
-  useEffect(() => {
-    loadCollectionsByPage(currentPage);
-  }, [currentPage, loadCollectionsByPage]);
+  const {data} = useGetAllCollectionsQuery()
 
-  const handlePageClick = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const validTotalPages = isNaN(totalPages) || totalPages < 1 ? 1 : totalPages;
+  const collections: Collection[] = data?.results || []
 
   const handleClickCollectionCard = (id: number) => {
     navigate(ROUTE.COLLECTION + id)
@@ -49,19 +40,6 @@ const CollectionsPage: React.FC<Props> = ({ collections = [], loadCollectionsByP
               />
             ))}
           </div>
-          {collections.length > 9 && (
-            <div className={style.pagination}>
-              {[...Array(validTotalPages)].map((_, index) => (
-                <button
-                  key={index + 1}
-                  onClick={() => handlePageClick(index + 1)}
-                  className={currentPage === index + 1 ? style.activePage : ''}
-                >
-                  {index + 1}
-                </button>
-              ))}
-            </div>
-          )}
         </PageContainer>
       </section>
     </main>
