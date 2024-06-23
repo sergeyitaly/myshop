@@ -7,8 +7,12 @@ import { AppIcon } from '../SvgIconComponents/AppIcon'
 import { BasketItemWrapper } from './components/BasketItemWrapper'
 import { EmptyBasket } from './components/EmptyBasket/EmptyBasket'
 import clsx from 'clsx'
+import { useNavigate } from 'react-router-dom'
+import { ROUTE } from '../../constants'
 
 export const Basket = (): JSX.Element => {
+
+    const navigate = useNavigate()
 
     const {
         openStatus, 
@@ -34,6 +38,14 @@ export const Basket = (): JSX.Element => {
         
     }, [openStatus])
 
+
+    const handleClickBlueButton = () => {
+        if(isEmptyBasket){
+            navigate(ROUTE.HOME)
+            closeBasket()
+        }
+    }
+
     return (
         <>
             {
@@ -43,7 +55,9 @@ export const Basket = (): JSX.Element => {
                         ref={basketBox}
                         className={styles.box}
                     >
-                        <header className={styles.header}>
+                        <header className={clsx(styles.header, {
+                            [styles.endline]: isEmptyBasket
+                        })}>
                             <h4 className={styles. titleContainer}>
                                 <span className={styles.title}>Кошик</span>
                                 <span className={styles.counter}>{`(${productQty})`}</span>
@@ -71,20 +85,23 @@ export const Basket = (): JSX.Element => {
                                 <EmptyBasket/>
                             }
                         </div>
-                        <div className={styles.totalPrice}>
-                            <span>Загальна сума</span>   
-                            <span>{totalPrice} грн</span>   
-                        </div>
+                        {
+                            !isEmptyBasket &&
+                            <div className={styles.totalPrice}>
+                                <span>Загальна сума</span>   
+                                <span>{totalPrice} грн</span>   
+                            </div>
+                        }
                         <div className={styles.actions}>
                             <MainButton
-                                title='Оформити замовлення'
+                                title= {isEmptyBasket ? 'Повернутися на головну' : 'Оформити замовлення'}
                                 colored
+                                onClick={handleClickBlueButton}
                             />
                             <MainButton
                                 title='Продовжити покупки'
                                 onClick={closeBasket}
                             />
-
                         </div>
                     </div>
                 </div>

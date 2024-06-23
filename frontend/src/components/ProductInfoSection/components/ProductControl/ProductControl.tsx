@@ -34,12 +34,13 @@ export const ProductControl = ({
       handleDecrement
     } = useCounter(1)
 
-    const {addToBasket} = useBasket()
+    const {addToBasket, openBasket} = useBasket()
 
 
 
     const handleAddToBasket = () => {
       addToBasket(product, qty)
+      openBasket()
     }
 
     return (

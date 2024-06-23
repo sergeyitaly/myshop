@@ -31,3 +31,5 @@ export enum ENDPOINTS {
 export enum STORAGE {
     BASKET='basket'
 }
+
+export type AppIconNames = 'cart' | 'cross' | 'vase' | 'delete'
