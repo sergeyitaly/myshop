@@ -4,11 +4,11 @@ import { Logo } from '../../components/Logo/Logo';
 import { Navigation } from '../../components/Navigation/Navigation';
 import { Search } from '../../components/Search/Search';
 import styles from './Header.module.scss';
-import { HeaderIconButton } from './components/HeaderIconButton/HeaderIconButton';
 import { useBasket } from '../../hooks/useBasket';
+import { IconButton } from '../../components/UI/IconButton/IconButton';
 
 export const Header = () => {
-    const {openBasket} = useBasket()
+    const {openBasket, productQty} = useBasket()
 
     
 
@@ -21,7 +21,10 @@ export const Header = () => {
                 <div className={styles.control}>
                     <Search />
                     {/* <Cart onClose={handleCloseCart} isOpen={cartOpen} /> */}
-                    <HeaderIconButton
+                    <IconButton
+                        className={styles.headerButton}
+                        iconName='cart'
+                        badgeValue={productQty}
                         onClick={openBasket}
                     />
                 </div>

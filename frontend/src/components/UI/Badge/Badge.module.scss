@@ -1,0 +1,10 @@
+@import '../../../variables';
+
+.wrapper {
+    font-size: 10px;
+    background: $color-button;
+    color: $color-background;
+    padding: 2px 5px;
+    border-radius: 50px;
+    text-align: center;
+}

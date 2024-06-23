@@ -1,8 +1,15 @@
 
+@import '../../../variables';
+
 .container {
     // border: 1px solid black;
     display: flex;
     gap: 10px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
 }
 
 .image {
@@ -18,6 +25,7 @@
 
 .info {
     display: flex;
+    flex-grow: 1;
     flex-direction: column;
     font-weight: 400;
     gap: 10px;
@@ -36,4 +44,10 @@
 .control {
     display: flex;
     justify-content: space-between;
+}
+
+.icon {
+    svg {
+        fill: $color-button
+    }
 }

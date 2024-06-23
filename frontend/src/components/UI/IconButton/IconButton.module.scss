@@ -1,0 +1,15 @@
+@import '../../../variables';
+
+.button {
+    position: relative;
+    transition: .2s;
+    &:hover {
+        scale: 1.1;
+    }
+}
+
+.badge {
+    position: absolute;
+    left: calc(100% - 5px);
+    top: -4px;
+}
