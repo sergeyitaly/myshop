@@ -4,20 +4,9 @@ import Slider from "react-slick";
 import style from "./style.module.scss";
 import { Product } from "../../../models/entities";
 import defaultPhoto from '../../../assets/default.png'
+import { useGetAllProductsQuery } from "../../../api/productSlice";
 
-// interface Product {
-//   id: string;
-//   name: string;
-//   price: number | string;
-//   photo: string;
-// }
-
-interface CarouselBestsellerProps {
-  products: Product[];
-}
-
-const CarouselBestseller: React.FC<CarouselBestsellerProps> = ({
-  products,
+const CarouselBestseller: React.FC = ({
 }) => {
   const settings = {
     dots: true,
@@ -38,6 +27,10 @@ const CarouselBestseller: React.FC<CarouselBestsellerProps> = ({
       },
     ],
   };
+
+  const {data} = useGetAllProductsQuery()
+
+  const products: Product[] = data?.results || []
 
   return (
     <div className={style.sliderContainer}>
