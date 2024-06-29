@@ -9,9 +9,9 @@ from distutils.util import strtobool
 from django.core.validators import FileExtensionValidator
 import os
 import ssl
+import smtplib
 import certifi
 from urllib.request import build_opener, HTTPSHandler
-import urllib.request
 from urllib.request import urlopen
 import json
 
@@ -82,7 +82,9 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'storages',
     'drf_yasg',
-    'django_filters'
+    'django_filters',
+    "phonenumber_field",
+
     # "debug_toolbar",
 
 ]
@@ -245,10 +247,22 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
 
 
-# Set up the custom opener with the HTTPSHandler
-#opener = build_opener(https_handler)
+class TlsSmtp(smtplib.SMTP):
+    def starttls(self, keyfile=None, certfile=None, context=None):
+        self.ehlo_or_helo_if_needed()
+        self.putcmd("STARTTLS")
+        (resp, reply) = self.getreply()
+        if resp == 220:
+            if context is None:
+                context = ssl._create_unverified_context()  # Create an unverified context
+            self.sock = context.wrap_socket(self.sock)
+            self.file = self.sock.makefile('rb')
+            self.helo_resp = None
+
+EMAIL_BACKEND = 'myshop.settings.TlsSmtp'  
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
