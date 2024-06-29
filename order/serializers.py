@@ -19,7 +19,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['name', 'email', 'address', 'order_items']
+        fields = ['name','surname', 'email', 'address', 'order_items']
 
     def create(self, validated_data):
         items_data = validated_data.pop('order_items')
@@ -28,3 +28,22 @@ class OrderSerializer(serializers.ModelSerializer):
             product_id = item_data.pop('product_id')
             OrderItem.objects.create(order=order, product_id=product_id, **item_data)
         return order
+
+    def update(self, instance, validated_data):
+        items_data = validated_data.pop('order_items')
+        instance.name = validated_data.get('name', instance.name)
+        instance.name = validated_data.get('name', instance.name)
+
+        instance.email = validated_data.get('email', instance.email)
+        instance.address = validated_data.get('address', instance.address)
+        instance.save()
+
+        # Delete existing order items
+        instance.order_items.all().delete()
+
+        # Create new order items
+        for item_data in items_data:
+            product_id = item_data.pop('product_id')
+            OrderItem.objects.create(order=instance, product_id=product_id, **item_data)
+
+        return instance

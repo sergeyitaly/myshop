@@ -14,9 +14,11 @@ class OrderItemInline(admin.TabularInline):
         return obj.quantity * obj.product.price
     subtotal.short_description = 'Subtotal'
 
+
 class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderItemInline]
-    readonly_fields = ['name', 'email', 'address', 'total_quantity', 'total_price']
+    readonly_fields = ['name', 'surname', 'phone', 'email', 'address', 'total_quantity', 'total_price', 'receiver_comments']
+    fields = ['name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments', 'total_quantity', 'total_price']
 
     def total_quantity(self, obj):
         return sum(item.quantity for item in obj.order_items.all())
@@ -29,5 +31,11 @@ class OrderAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         return queryset.prefetch_related('order_items__product')
+
+    def save_model(self, request, obj, form, change):
+        if not obj.receiver:
+            obj.receiver_comments = ''
+        super().save_model(request, obj, form, change)
+
 
 admin.site.register(Order, OrderAdmin)
