@@ -24,7 +24,6 @@ const CollectionItemsPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    console.log('effect');
     
     const fetchData = async (page: number) => {
       try {
