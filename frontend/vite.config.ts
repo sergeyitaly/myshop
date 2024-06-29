@@ -58,6 +58,7 @@ export default defineConfig({
         chunkFileNames,
       },
     },
+    chunkSizeWarningLimit: 1000
   },
   server: {
     port: 5173,
