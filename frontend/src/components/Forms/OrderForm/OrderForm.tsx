@@ -53,7 +53,7 @@ export const OrderForm = ({
     return (
             <Formik
                 initialValues={initialValues}
-                onSubmit={(form) => {
+                onSubmit={() => {
                 }}
             >
                 <Form className={clsx(styles.form, className)}>
