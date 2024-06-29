@@ -12,7 +12,7 @@ export const FormikTextArea = ({
     ...props
 }: FormikTextAreaProps) => {
 
-    const [field, _, helpers] = useField(props)
+    const [field, meta, helpers] = useField(props)
 
     useEffect(() => {
 
@@ -23,6 +23,9 @@ export const FormikTextArea = ({
 
 
     return (
-        <textarea className={clsx(styles.textaarea, className)} {...field} {...props}/>
+        <>
+            <textarea className={clsx(styles.textaarea, className)} {...field} {...props}/>
+            {meta.error && <div>Error</div>}
+        </>
     )
 }
