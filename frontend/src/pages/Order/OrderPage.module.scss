@@ -1,0 +1,30 @@
+@import '../../variables';
+
+.title {
+    text-align: center;
+    color: $color-blue;
+    font-weight: medium;
+    font-size: clamp(1.25rem, 1.702vw + 0.718rem, 2.25rem);
+    margin-top: clamp(1.875rem, 4.787vw + 0.379rem, 4.688rem);
+    margin-bottom: clamp(1.25rem, 4.787vw - 0.246rem, 4.063rem);
+
+}
+
+.orderSection {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+
+    @media (max-width: $screen-mobile) {
+        .preview {
+            display: none;
+        }
+    }
+}
+
+.formContainer {
+    flex-grow: 1;
+}
+
+
+

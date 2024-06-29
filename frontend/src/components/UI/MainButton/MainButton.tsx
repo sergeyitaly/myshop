@@ -5,18 +5,23 @@ import style from './MainButton.module.scss'
 
 interface MainButtonProps extends DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> {
     title: string
-    colored?: boolean
+    color?: 'blue' | 'black'
 }
 
 export const MainButton = ({
     title,
     className,
-    colored,
+    color,
     ...props
 }: MainButtonProps) => {
     return (
         <button 
-            className={clsx(style.button, {[style.coloredButton]: colored}, className)}
+            className={clsx(
+                style.button, 
+                {
+                    [style.blue]: color === 'blue',
+                    [style.black]: color === 'black'
+                }, className)}
             {...props}
         >
             {title}

@@ -2,7 +2,7 @@
 import { Product, ProductVariantsModel} from '../../../../models/entities'
 import { AvailableLable } from '../../../AvailableLabel/AvailableLabel'
 import { Counter } from '../../../Counter/Counter'
-import { MainButton } from '../../../MainButton/MainButton'
+import { MainButton } from '../../../UI/MainButton/MainButton'
 import { ValueBox } from '../../../ProductVariants/ValueBox/ValueBox'
 import style from './ProductControl.module.scss'
 import { ProductVariants } from '../../../ProductVariants/ProductVariants'
@@ -86,6 +86,7 @@ export const ProductControl = ({
                 }
             </ProductVariants>
             <Counter
+                className={style.counter}
                 value={qty}
                 onIncrement={handleIncrement}
                 onReduce={handleDecrement}
@@ -98,7 +99,7 @@ export const ProductControl = ({
           />
           <MainButton
             className={style.buy}
-            colored
+            color='blue'
             title='Купити зараз'
           />
         </div>

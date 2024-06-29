@@ -6,8 +6,7 @@ import { Product } from "../../../models/entities";
 import defaultPhoto from '../../../assets/default.png'
 import { useGetAllProductsQuery } from "../../../api/productSlice";
 
-const CarouselBestseller: React.FC = ({
-}) => {
+const CarouselBestseller: React.FC = () => {
   const settings = {
     dots: true,
     infinite: true,

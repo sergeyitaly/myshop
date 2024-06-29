@@ -1,0 +1,35 @@
+@import '../../../variables';
+
+
+
+.label {
+    cursor: pointer;
+    input {
+        display: none;
+    }
+    input:checked ~ .rectangle .point {
+        scale: 1;
+    }
+}
+
+
+
+.rectangle {
+    border: 3px solid $color-button;
+    border-radius: 5px;
+    width: clamp(1.5rem, 0.638vw + 1.301rem, 1.875rem);
+    height: clamp(1.5rem, 0.638vw + 1.301rem, 1.875rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.point {
+    width: 70%;
+    height: 70%;
+    background: $color-button;
+    border-radius: 3px;
+    scale: 0;
+    transition: .2s;
+}
+

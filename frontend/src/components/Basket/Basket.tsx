@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import styles from './Basket.module.scss'
 import { useBasket } from '../../hooks/useBasket'
 import useClickOutside from '../../hooks/useClickOutside'
-import { MainButton } from '../MainButton/MainButton'
+import { MainButton } from '../UI/MainButton/MainButton'
 import { AppIcon } from '../SvgIconComponents/AppIcon'
 import { BasketItemWrapper } from './components/BasketItemWrapper'
 import { EmptyBasket } from './components/EmptyBasket/EmptyBasket'
@@ -40,10 +40,11 @@ export const Basket = (): JSX.Element => {
 
 
     const handleClickBlueButton = () => {
+        closeBasket()
         if(isEmptyBasket){
             navigate(ROUTE.HOME)
-            closeBasket()
         }
+        navigate(ROUTE.ORDER)
     }
 
     return (
@@ -95,7 +96,7 @@ export const Basket = (): JSX.Element => {
                         <div className={styles.actions}>
                             <MainButton
                                 title= {isEmptyBasket ? 'Повернутися на головну' : 'Оформити замовлення'}
-                                colored
+                                color='blue'
                                 onClick={handleClickBlueButton}
                             />
                             <MainButton
