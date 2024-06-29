@@ -60,3 +60,8 @@ export interface ProductVariantsModel {
     colors: Color[]
     sizes: string[]
 }
+
+export interface BasketItemModel {
+    productId: number
+    qty: number
+}
