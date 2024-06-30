@@ -86,6 +86,7 @@ export const ProductControl = ({
                 }
             </ProductVariants>
             <Counter
+                className={style.counter}
                 value={qty}
                 onIncrement={handleIncrement}
                 onReduce={handleDecrement}

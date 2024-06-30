@@ -1,4 +1,5 @@
 import { PageContainer } from "../../components/PageContainer"
+import { OrderPreview } from "./OrderPreview/OrderPreview"
 import styles from './OrderPage.module.scss'
 
 
@@ -12,7 +13,8 @@ export const OrderPage = () => {
             <PageContainer>
                 <h1 className={styles.title}>Оформити замовлення</h1>
                 <section className={styles.orderSection}>
-                    <div>Order page</div>
+                    {/* <OrderForm className={styles.formContainer}/> */}
+                    <OrderPreview className={styles.preview}/>
                 </section>
             </PageContainer>
         </main>

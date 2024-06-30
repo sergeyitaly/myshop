@@ -1,16 +1,10 @@
 import { useEffect, useMemo } from "react"
 import { STORAGE } from "../constants"
-import { Product } from "../models/entities"
+import { BasketItemModel, Product } from "../models/entities"
 import { setBasketItems, setOpenStatus, setTotalPrice } from "../store/basketSlice"
 import { useAppDispatch, useAppSelector } from "../store/hooks"
 import { useSnackbar } from "./useSnackbar"
 import { useGetManyProductsByIdListQuery } from "../api/productSlice"
-
-interface BasketItemModel {
-    productId: number
-    qty: number
-}
-
 
 export const useBasket = () => {
 

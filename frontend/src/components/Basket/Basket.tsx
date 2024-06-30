@@ -40,13 +40,11 @@ export const Basket = (): JSX.Element => {
 
 
     const handleClickBlueButton = () => {
+        closeBasket()
         if(isEmptyBasket){
             navigate(ROUTE.HOME)
         }
-        else{
-            navigate(ROUTE.ORDER)
-        }
-        closeBasket()
+        navigate(ROUTE.ORDER)
     }
 
     return (
