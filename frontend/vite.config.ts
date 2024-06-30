@@ -47,6 +47,7 @@ export default defineConfig({
     }  },
   build: {
     chunkSizeWarningLimit: 1000, // Set limit to 1000 kB
+    target: 'es2015', // Ensure compatibility
     modulePreload: { polyfill: false },
     outDir: path.resolve(__dirname, '../dist'),
     manifest: 'manifest.json',
