@@ -12,7 +12,10 @@ export const FormikTextArea = ({
     ...props
 }: FormikTextAreaProps) => {
 
-    const [field, _, helpers] = useField(props)
+    const [field, meta, helpers] = useField(props)
+
+    console.log(meta);
+    
 
     useEffect(() => {
 
