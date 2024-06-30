@@ -17,19 +17,5 @@
       "src": "/(.*)",
       "dest": "/myshop/wsgi.py"
     }
-  ],
-  "redirects": [
-    {
-      "source": "/uk/:path*",
-      "destination": "/:path*",
-      "has": [
-        {
-          "type": "header",
-          "key": "x-vercel-ip-country",
-          "value": "UA"
-        }
-      ],
-      "permanent": false
-    }
   ]
 }
