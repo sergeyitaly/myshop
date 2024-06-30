@@ -1,7 +1,7 @@
 import { useField } from "formik"
 import { DetailedHTMLProps, TextareaHTMLAttributes, useEffect } from "react"
-import styles from './FormikTextArea.module.scss'
 import clsx from "clsx"
+import styles from './FormikTextArea.module.scss'
 
 interface FormikTextAreaProps extends DetailedHTMLProps<TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement> {
     name: string
