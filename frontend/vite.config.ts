@@ -46,6 +46,7 @@ export default defineConfig({
       VITE_API_BASE_URL: process.env.VITE_API_BASE_URL,
     }  },
   build: {
+    chunkSizeWarningLimit: 1000, // Set limit to 1000 kB
     modulePreload: { polyfill: false },
     outDir: path.resolve(__dirname, '../dist'),
     manifest: 'manifest.json',
