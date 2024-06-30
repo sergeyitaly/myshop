@@ -50,6 +50,7 @@ export default defineConfig({
     outDir: path.resolve(__dirname, '../dist'),
     manifest: 'manifest.json',
     emptyOutDir: true,
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       input: { main: path.resolve(__dirname, 'src/main.tsx') },
       output: {
