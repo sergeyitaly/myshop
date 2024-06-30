@@ -16,7 +16,8 @@ export const screens = {
 export enum ROUTE {
     HOME = '/',
     PRODUCT = '/product/',
-    COLLECTION = '/collection/'
+    COLLECTION = '/collection/',
+    ORDER = '/order'
 }
 
 export enum ENDPOINTS {
@@ -31,6 +32,24 @@ export enum ENDPOINTS {
 
 export enum STORAGE {
     BASKET='basket'
+}
+
+export const color = {
+    error: '#E03131',
+    gray100: '#CDCDCD',
+    gray200: '#A3A3A3',
+    gray300: '#787878',
+    gray400: '#4F4F4F',
+    gray500: '#191919',
+    blue: '#0F0FFF',
+    button: '#0B0599',
+    background: '#ffffff',
+    black: '#000000',
+    brown: '#5F2111',
+    gold: '#8E8B5F',
+    warm: '#F3DFA2',
+    dirtyWhite: '#F4F5F5',
+    darkOrange: '#BB4430'
 }
 
 export type AppIconNames = 'cart' | 'cross' | 'vase' | 'delete'
