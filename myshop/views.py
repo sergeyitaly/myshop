@@ -3,6 +3,7 @@
 
 
 from django.shortcuts import render
+import os
 from dotenv import load_dotenv
 from distutils.util import strtobool
 from rest_framework.views import APIView
@@ -10,19 +11,10 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenObtainPairView
-from django.shortcuts import redirect
-
 
 def index(request):
     return render(request, "index.html")
 
-def redirect_to_vercel_domain(request):
-    # Replace with your Vercel domain
-    return redirect('https://your-vercel-domain.vercel.app')
-
-def redirect_to_aws_frontend(request):
-    # Replace with your AWS frontend domain
-    return redirect('https://your-aws-frontend-domain.com')
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):

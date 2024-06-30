@@ -58,8 +58,7 @@ urlpatterns = [
     path("", views.index, name="index"),
     # Catch-all URL pattern (redirect to index.html)
     re_path(r'^.*$', RedirectView.as_view(url='/')),
-    path('redirect-to-vercel/', views.redirect_to_vercel_domain, name='redirect_to_vercel'),
-    path('redirect-to-aws-frontend/', views.redirect_to_aws_frontend, name='redirect_to_aws_frontend'),
+
 ]
 
 
