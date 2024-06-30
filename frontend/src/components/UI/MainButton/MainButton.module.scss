@@ -1,4 +1,4 @@
-@import '../../variables';
+@import '../../../variables';
 
 .button {
     border: 1px solid $color-gray-100;
@@ -33,13 +33,22 @@
     }
 }
 
-.coloredButton {
+.blue {
     background-color: $color-button;
     color: $color-background;
     border-color: $color-button;
 
     &:hover {
         background-color: darken($color: $color-button, $amount: 10);
+    }
+}
+
+.black {
+    background-color: $color-black;
+    color: $color-background;
+    background-color: $color-black;
+    &:hover {
+        background-color: lighten($color: $color-black, $amount: 20);
     }
 }
 

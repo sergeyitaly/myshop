@@ -6,7 +6,7 @@ import ProductPage from './pages/ProductPage/ProductPage';
 import { Home } from './pages/home/home';
 import { NotFound } from './pages/not-found/not-found';
 import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
-import OrderPage from './pages/OrderPage/OrderPage';
+import { OrderPage } from './pages/Order/OrderPage';
 
 function App() {
 
