@@ -319,6 +319,9 @@ CACHES = {
     }
 }
 
+#REDIRECT = bool(strtobool(os.getenv('REDIRECT', 'False')))
+#SECURE_SSL_REDIRECT = REDIRECT
+
 # CACHES = {
 #    'default': {
 #        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',

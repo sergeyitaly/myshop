@@ -4,11 +4,7 @@ import styles from './OrderPage.module.scss'
 import { OrderForm } from "../../components/Forms/OrderForm/OrderForm"
 
 
-
 export const OrderPage = () => {
-
-    
-
     return (
         <main>
             <PageContainer>

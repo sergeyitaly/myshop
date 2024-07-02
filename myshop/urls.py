@@ -11,8 +11,13 @@ from . import views
 from django.views.generic import RedirectView
 from .views import CustomTokenObtainPairView, CustomTokenRefreshView
 from django.conf.urls.i18n import i18n_patterns
+import os
 
 load_dotenv()
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+AWS_FRONTEND_DOMAIN = f"https://{AWS_S3_CUSTOM_DOMAIN}"
+VERCEL_DOMAIN = os.getenv('VERCEL_DOMAIN')
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -53,7 +58,9 @@ urlpatterns = [
     path("", views.index, name="index"),
     # Catch-all URL pattern (redirect to index.html)
     re_path(r'^.*$', RedirectView.as_view(url='/')),
+
 ]
+
 
 urlpatterns += i18n_patterns(
     path('i18n/', include('django.conf.urls.i18n')),
