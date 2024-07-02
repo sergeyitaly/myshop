@@ -1,0 +1,58 @@
+@import '../../../variables';
+
+@mixin checkboxContainer{
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 20px 15px
+}
+
+
+.inputsContainer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(0.938rem, 1.596vw + 0.439rem, 1.875rem) clamp(0.938rem, 0.532vw + 0.771rem, 1.25rem);
+}
+
+.form {
+    max-width: 690px;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2.5rem, 3.191vw + 1.503rem, 4.375rem);
+}
+
+.anotherPersonBox {
+    grid-column: span 2;
+    @include checkboxContainer
+}
+
+.presentBox {
+    @include checkboxContainer
+}
+
+.commentButton {
+    font-size: clamp(0.75rem, 0.851vw + 0.484rem, 1.25rem);
+    color: $color-blue;
+    border-bottom: 1px solid transparent;
+    grid-column: 2/-1;
+    justify-self: start;
+    transition: 0.2s;
+    &:hover {
+        border-color: $color-blue;
+    }
+}
+
+.textArea {
+    grid-column: 2/-1;
+}
+
+@media (max-width: 1000px) {
+    .inputsContainer {
+        grid-template-columns: 1fr;
+    }
+
+    .anotherPersonBox {
+        grid-column: auto;
+    }
+    
+}

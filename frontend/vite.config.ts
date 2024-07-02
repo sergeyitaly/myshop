@@ -56,6 +56,7 @@ export default defineConfig({
         entryFileNames,
         assetFileNames: processAssetFileNames,
         chunkFileNames,
+        format: 'cjs'
       },
     },
   },

@@ -84,6 +84,7 @@ export const BasketItem = ({
                     }
                     </ProductVariants>
                     <Counter
+                        className={styles.selfTop}
                         value={qty}
                         onIncrement={handleClickIncrement}
                         onReduce={handleClickDecrement}
