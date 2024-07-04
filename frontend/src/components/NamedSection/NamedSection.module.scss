@@ -1,0 +1,11 @@
+
+.title {
+    font-weight: 500;
+    font-size: clamp(1.25rem, 1.277vw + 0.851rem, 2rem);
+    margin-bottom: clamp(0.938rem, 1.596vw + 0.439rem, 1.875rem);
+
+    &.skeleton {
+        height: clamp(1.563rem, 1.489vw + 1.097rem, 2.438rem);
+        width: clamp(12.5rem, 21.277vw + 5.851rem, 25rem);
+    }
+}

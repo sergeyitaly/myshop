@@ -1,5 +1,4 @@
 import clsx from 'clsx'
-import { BasketItemModel } from '../../../models/entities'
 import { FormikInput } from '../../UI/FormikInput/FormikInput'
 import { Form, Formik} from 'formik'
 import { FormikCheckBox } from '../../UI/FormikCheckBox/FormikCheckBox'
@@ -10,18 +9,8 @@ import { MainButton } from '../../UI/MainButton/MainButton'
 import { OrderInfo } from '../../OrderInfo/OrderInfo'
 import { CheckBoxComment } from '../../CheckBoxComment/CheckBoxComment'
 import styles from './OrderForm.module.scss'
-
-
-interface OrderFormModel {
-    firstName: string
-    lastName: string
-    phone: string
-    email: string
-    isAnotherRecipient: boolean
-    comment: string
-    isPresent: boolean
-    products: BasketItemModel[]
-}
+import { OrderFormModel } from './order-form.model'
+import { ProductAndPriceFormikUpdate } from './ProductAndPriceFormikUpdate/ProductAndPriceFormikUpdate'
 
 
 const initialValues: OrderFormModel = {
@@ -32,7 +21,8 @@ const initialValues: OrderFormModel = {
     comment: '',
     isAnotherRecipient: false,
     isPresent: false,
-    products: []
+    products: [],
+    totalPrice: 0
 }
 
 interface OrderFormProps {
@@ -118,6 +108,7 @@ export const OrderForm = ({
                         title='Оформити замовлення'
                         color='black'
                     />
+                    <ProductAndPriceFormikUpdate/>
                 </Form>
             </Formik>
     )
