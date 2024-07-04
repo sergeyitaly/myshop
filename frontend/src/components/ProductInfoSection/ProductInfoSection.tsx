@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Product, ProductVariantsModel } from '../../models/entities'
-import { PageContainer } from '../PageContainer'
+import { PageContainer } from '../containers/PageContainer'
 import { DropDown } from './components/DropDown/DropDown'
 import { ProductControl } from './components/ProductControl/ProductControl'
 import { Modal, useMediaQuery } from '@mui/material'

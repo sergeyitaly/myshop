@@ -1,7 +1,9 @@
+import clsx from 'clsx'
 import style from './PreviewCard.module.scss'
 
 
 interface PreviewCardProps {
+    className?: string
     photoSrc: string
     title: string
     subTitle?: string 
@@ -10,6 +12,7 @@ interface PreviewCardProps {
 
 
 export const PreviewCard = ({
+    className,
     photoSrc,
     title,
     subTitle,
@@ -22,14 +25,13 @@ export const PreviewCard = ({
 
     return (
         <div 
-            className={style.card}
+            className={clsx(style.card, className)}
             onClick={handleClick}
         >
             <div className={style.imgWrapper}>
                 <img
                     src={photoSrc}
                     alt={title}
-                    // style={{ maxWidth: '100%' }}
                     loading="lazy"
                 />
             </div>
