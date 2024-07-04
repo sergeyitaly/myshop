@@ -10,7 +10,9 @@ export const MapComponent = ({
     qty
 }: MapComponentProps) => {
 
-    const array = Array.from({length: qty}, (v, i) => i);
+    const array = Array.from({length: qty}, (_, i) => i);
+
+    
 
     return (
         <> 

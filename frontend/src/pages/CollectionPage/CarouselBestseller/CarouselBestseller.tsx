@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React from "react";
 import Slider, {Settings} from "react-slick";
 import style from "./style.module.scss";
 import { Product } from "../../../models/entities";
