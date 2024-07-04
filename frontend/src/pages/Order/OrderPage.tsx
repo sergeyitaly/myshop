@@ -1,4 +1,4 @@
-import { PageContainer } from "../../components/PageContainer"
+import { PageContainer } from "../../components/containers/PageContainer"
 import { OrderPreview } from "./OrderPreview/OrderPreview"
 import styles from './OrderPage.module.scss'
 import { OrderForm } from "../../components/Forms/OrderForm/OrderForm"

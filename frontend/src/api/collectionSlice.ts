@@ -24,7 +24,7 @@ export const collectionApiSlice = apiSlice.injectEndpoints({
         }),
 
         getOneCollectionById: builder.query<Collection, number>({
-            query: (collectionId) => `${ENDPOINTS.COLLECTION}/${collectionId}`
+            query: (collectionId) => `${ENDPOINTS.COLLECTION}/${collectionId}/`
         }),
 
         getCollectionByName: builder.query<Collection, string>({

@@ -1,0 +1,32 @@
+@import '../../../variables';
+
+@mixin infoContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 500;
+    font-size: clamp(1rem, 1.277vw + 0.601rem, 1.75rem);
+    height: clamp(11.625rem, 33.404vw + 1.186rem, 31.25rem);
+}
+
+
+.container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 80px 20px;
+  
+    @media (max-width: $screen-mobile) {
+      grid-template-columns: repeat(2, minmax(150px, 1fr));
+      gap: 40px 20px;
+    }
+}
+
+.emptyContainer {
+    @include infoContainer;
+    color: $color-blue;
+}
+
+.errorContainer {
+    @include infoContainer;
+    color: $color-error;
+}
