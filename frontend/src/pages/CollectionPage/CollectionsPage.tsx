@@ -5,8 +5,6 @@ import { PreviewCard } from '../../components/Cards/PreviewCard/PreviewCard';
 import { ROUTE } from '../../constants';
 import { useGetAllCollectionsQuery } from '../../api/collectionSlice';
 import { NamedSection } from '../../components/NamedSection/NamedSection';
-import { PreviewLoadingCard } from '../../components/Cards/PreviewCard/PreviewLoagingCard';
-import { MapComponent } from '../../components/MapComponent';
 import { PreviewItemsContainer } from '../../components/containers/PreviewItemsContainer/PreviewItemsContainer';
 
 
