@@ -11,6 +11,7 @@ import { useGetAllProductsFromCollectionQuery, useGetCollectionByNameQuery } fro
 import { skipToken } from '@reduxjs/toolkit/query';
 
 
+
 const ProductPage: React.FC = () => {
 
   const { id } = useParams<{ id: string }>();

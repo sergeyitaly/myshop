@@ -2,7 +2,7 @@ import Slider from "react-slick"
 import { ReactNode } from "react"
 import { settings } from "./sliderSettings"
 import style from './ProductSlider.module.scss'
-import { PageContainer } from "../PageContainer"
+import { PageContainer } from "../containers/PageContainer"
 
 interface ProductSliderProps {
     title: string
