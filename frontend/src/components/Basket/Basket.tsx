@@ -9,6 +9,7 @@ import { EmptyBasket } from './components/EmptyBasket/EmptyBasket'
 import clsx from 'clsx'
 import { useNavigate } from 'react-router-dom'
 import { ROUTE } from '../../constants'
+import { formatNumber } from '../../functions/formatNumber'
 
 export const Basket = (): JSX.Element => {
 
@@ -90,7 +91,7 @@ export const Basket = (): JSX.Element => {
                             !isEmptyBasket &&
                             <div className={styles.totalPrice}>
                                 <span>Загальна сума</span>   
-                                <span>{totalPrice} грн</span>   
+                                <span>{formatNumber(totalPrice)} грн</span>   
                             </div>
                         }
                         <div className={styles.actions}>
