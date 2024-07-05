@@ -1,3 +1,5 @@
+import { formatCurrency } from "../../../functions/formatCurrency"
+import { formatNumber } from "../../../functions/formatNumber"
 import { Product, ProductVariantsModel } from "../../../models/entities"
 import { AvailableLable } from "../../AvailableLabel/AvailableLabel"
 import { Counter } from "../../Counter/Counter"
@@ -41,20 +43,22 @@ export const BasketItem = ({
 
     return (
         <div className={styles.container}>
-            <div className={styles.image}>
-                {photo && <img src={photo}/>}
+            <div className={styles.imgWrapper}>
+                <div className={styles.image}>
+                    {photo && <img src={photo}/>}
+                </div>
             </div>
             <div className={styles.info}>
                 <div className={styles.header}>
-                    <h4>{name}</h4>
+                    <h4 className={styles.title}>{name}</h4>
                     <IconButton
                         className={styles.icon}
                         iconName="delete"
                         onClick={handleClickDelete}
                     />
                 </div>
-                <h5>Срібло 925 проби </h5>
                 <ProductVariants
+                    className={styles.characteristic}
                     title="Колір"
                 >
                     {
@@ -70,6 +74,7 @@ export const BasketItem = ({
                 </ProductVariants>
                 <div className={styles. counterBox}>
                     <ProductVariants
+                        className={styles.characteristic}
                         title="Розмір"
                     >
                        {
@@ -94,7 +99,7 @@ export const BasketItem = ({
                     isAvailable = {available}
                 />
                 <div className={styles.control}>
-                    <span>{price} {currency}</span>
+                    <span>{formatNumber(price) } {formatCurrency(currency)}</span>
                 </div>
             </div>
         </div> 

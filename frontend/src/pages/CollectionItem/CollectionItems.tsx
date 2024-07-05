@@ -8,6 +8,8 @@ import { useGetAllProductsFromCollectionQuery, useGetOneCollectionByIdQuery } fr
 import { skipToken } from '@reduxjs/toolkit/query';
 import { PreviewItemsContainer } from '../../components/containers/PreviewItemsContainer/PreviewItemsContainer';
 import { ROUTE } from '../../constants';
+import { formatNumber } from '../../functions/formatNumber';
+import { formatCurrency } from '../../functions/formatCurrency';
 
 
 
@@ -54,7 +56,7 @@ const CollectionItemsPage: React.FC = () => {
                       key={product.id}
                       photoSrc={product.photo || ''}
                       title={product.name}
-                      subTitle={product.price}
+                      subTitle={`${formatNumber(product.price)} ${formatCurrency(product.currency)}`}
                       onClick={() => handleClickProduct(product.id)}
                   />
                 ))
@@ -71,7 +73,7 @@ const CollectionItemsPage: React.FC = () => {
                       key={product.id}
                       photoSrc={product.photo || ''}
                       title={product.name}
-                      subTitle={product.price}
+                      subTitle={`${formatNumber(product.price)} ${formatCurrency(product.currency)}`}
                       onClick={() => handleClickProduct(product.id)}
                   />
               ))
