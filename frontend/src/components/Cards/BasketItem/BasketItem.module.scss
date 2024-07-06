@@ -2,36 +2,53 @@
 @import '../../../variables';
 
 .container {
-    // border: 1px solid black;
     display: flex;
     gap: 10px;
 }
 
 .header {
+    position: relative;
     display: flex;
     justify-content: space-between;
+    .icon {
+        position: absolute;
+        right: 0;
+        top: 0;
+    }
+}
+
+
+.imgWrapper {
+    align-self: self-start;
+    max-width: 156px;
+    min-width: 100px;
+    width: 100%;
 }
 
 .image {
-    max-width: 156px;
-    align-self: self-start;
+    position: relative;
+    padding-top: 100%;
     img{
+        position: absolute;
+        top: 0;
+        left: 0;
         display: block;
         width: 100%;
         height: 100%;
-        object-fit: contain;
+        object-position: center;
+        object-fit: cover;
     }
 }
 
 .info {
     display: flex;
-    flex-grow: 1;
     flex-direction: column;
+    gap: clamp(0.5rem, 0.745vw + 0.267rem, 0.938rem);
+    flex-grow: 1;
     font-weight: 400;
-    gap: 10px;
 
     h4 {
-        font-size: 20px;
+        font-size: clamp(0.875rem, 0.638vw + 0.676rem, 1.25rem);
         font-weight: 500;
     }
 }
@@ -44,6 +61,10 @@
 .control {
     display: flex;
     justify-content: space-between;
+    span {
+        font-size: clamp(1rem, 0.426vw + 0.867rem, 1.25rem);
+        font-weight: 500;
+    }
 }
 
 .icon {
@@ -54,4 +75,10 @@
 
 .selfTop {
     align-self: flex-start;
+}
+
+.characteristic {
+    p {
+        font-size: clamp(0.875rem, 0.213vw + 0.809rem, 1rem);
+    }
 }

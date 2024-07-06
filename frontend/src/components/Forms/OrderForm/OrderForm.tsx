@@ -3,26 +3,29 @@ import { FormikInput } from '../../UI/FormikInput/FormikInput'
 import { Form, Formik} from 'formik'
 import { FormikCheckBox } from '../../UI/FormikCheckBox/FormikCheckBox'
 import { FormikTextArea } from '../../UI/FormikTextArea/FormikTextArea'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { OrderFormBox } from '../../../pages/Order/OrderFormBox/OrderFormBox'
 import { MainButton } from '../../UI/MainButton/MainButton'
 import { OrderInfo } from '../../OrderInfo/OrderInfo'
 import { CheckBoxComment } from '../../CheckBoxComment/CheckBoxComment'
 import styles from './OrderForm.module.scss'
-import { OrderFormModel } from './order-form.model'
 import { ProductAndPriceFormikUpdate } from './ProductAndPriceFormikUpdate/ProductAndPriceFormikUpdate'
+import { OrderDTO } from '../../../models/dto'
+import { CreateOrderErrorResponce, useCreateOrderMutation } from '../../../api/orderSlice'
+import { orderValidSchema } from './validationSchema'
+import { ServerErrorHandling } from './ServerErrorHandling'
+import { useNavigate } from 'react-router-dom'
+import { ROUTE } from '../../../constants'
 
 
-const initialValues: OrderFormModel = {
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    comment: '',
-    isAnotherRecipient: false,
-    isPresent: false,
-    products: [],
-    totalPrice: 0
+const initialValues: OrderDTO = {
+  name: '',
+  surname: '',
+  email: '',
+  phone: '',
+  receiver: false,
+  order_items: [],
+  receiver_comments: ''
 }
 
 interface OrderFormProps {
@@ -34,7 +37,24 @@ export const OrderForm = ({
     className
 }: OrderFormProps) => {
 
+    const navigate = useNavigate()
+
     const [isOpenComment, setOpenComment] = useState<boolean>(false)
+
+    const [createOrder, {isSuccess, error, isError}] = useCreateOrderMutation()
+
+    let errorResponce: CreateOrderErrorResponce | null = null
+    if(isError){
+        errorResponce = error as CreateOrderErrorResponce
+    }
+
+    useEffect (() => {
+
+        isSuccess &&
+        navigate(ROUTE.THANK)
+
+    }, [isSuccess])
+    
 
     const handleClickAddComment = () => {
         setOpenComment(!isOpenComment)
@@ -43,9 +63,11 @@ export const OrderForm = ({
     return (
             <Formik
                 initialValues={initialValues}
+                validationSchema={orderValidSchema}
+
                 onSubmit={(form) => {
                     console.log(form);
-                    
+                    createOrder(form)
                 }}
             >
                 <Form className={clsx(styles.form, className)}>
@@ -53,13 +75,13 @@ export const OrderForm = ({
                         title='Отримувач'
                     >
                         <div className={styles.inputsContainer}>
-                            <FormikInput label="Ім'я" name='firstName'/>
-                            <FormikInput label="Прізвище" name='lastName'/>
+                            <FormikInput label="Ім'я" name='name'/>
+                            <FormikInput label="Прізвище" name='surname'/>
                             <FormikInput label="Телефон" name='phone'/>
                             <FormikInput label="Email" name='email'/>
                             <div className={clsx(styles.anotherPersonBox) }>
                                 <FormikCheckBox 
-                                    name='isAnotherRecipient' 
+                                    name='receiver' 
                                 />
                                  <CheckBoxComment 
                                     text='Отримувач - інша особа'
@@ -72,7 +94,7 @@ export const OrderForm = ({
                                     isOpenComment &&
                                     <FormikTextArea 
                                         className={styles.textArea}
-                                        name='comment'
+                                        name='receiver_comments'
                                         placeholder='Тут можна написати коментар'
                                     />
                                 }
@@ -109,6 +131,9 @@ export const OrderForm = ({
                         color='black'
                     />
                     <ProductAndPriceFormikUpdate/>
+                    <ServerErrorHandling
+                        errors={errorResponce && errorResponce.data}
+                    />
                 </Form>
             </Formik>
     )

@@ -1,16 +1,22 @@
 import { useFormikContext } from "formik"
 import { useBasket } from "../../../../hooks/useBasket"
 import { useEffect } from "react"
-import { OrderFormModel } from "../order-form.model"
+import { OrderDTO } from "../../../../models/dto"
 
 export const ProductAndPriceFormikUpdate = () => {
 
-    const {basketItems, totalPrice} = useBasket()
-    const {setValues} = useFormikContext<OrderFormModel>()
+    const {basketItems} = useBasket()
+    const {setValues} = useFormikContext<OrderDTO>()
 
     useEffect(() => {
-        setValues((state) => ({...state, products: basketItems, totalPrice}) )
-    }, [basketItems, totalPrice])
+
+        const orderItems: OrderDTO['order_items'] = basketItems.map(({productId, qty}) => ({
+            product_id: productId,
+            quantity: qty
+        }))
+
+        setValues((state) => ({...state, order_items: orderItems}) )
+    }, [basketItems])
 
     return <></>
 }

@@ -8,6 +8,7 @@ import style from './ProductControl.module.scss'
 import { ProductVariants } from '../../../ProductVariants/ProductVariants'
 import { useBasket } from '../../../../hooks/useBasket'
 import { useCounter } from '../../../../hooks/useCounter'
+import { formatPrice } from '../../../../functions/formatPrice'
 
 interface ProductControlProps {
     product: Product
@@ -22,7 +23,6 @@ export const ProductControl = ({
     onChangeColor,
     onChangeSize,
 }: ProductControlProps) => {
-
 
     const {name, available, price, currency} = product
 
@@ -46,7 +46,7 @@ export const ProductControl = ({
     return (
         <div className={style.container}>
           <h2 className={style.title}>{name}</h2>
-          <div className={style.price}>{price} {currency}</div>
+          <div className={style.price}>{formatPrice(price, currency)}</div>
           <AvailableLable 
             className={style.available}
             isAvailable={available}
