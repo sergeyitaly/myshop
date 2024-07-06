@@ -10,6 +10,6 @@ router.register(r'order-items', OrderItemViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('create-order/', create_order, name='create_order'),
+    path('order/', create_order, name='create_order'),
     path('send-email/', send_email, name='send_email'),
 ]
