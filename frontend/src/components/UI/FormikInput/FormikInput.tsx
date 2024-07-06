@@ -1,6 +1,6 @@
 import { TextField } from "@mui/material"
-import { useField } from "formik"
-import { DetailedHTMLProps, InputHTMLAttributes } from "react"
+import { useField, useFormikContext } from "formik"
+import { DetailedHTMLProps, InputHTMLAttributes, useEffect, useState } from "react"
 
 interface FormikInputProps extends DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {
     label: string
@@ -13,13 +13,30 @@ export const FormikInput = ({
     ...props
 }: FormikInputProps) => {
 
-    const [field] = useField(props)
+    const [field, meta] = useField(props)
+
+    const {error, touched} = meta
+
+        const {isSubmitting} = useFormikContext()
+
+        const [clicked, setClicked] = useState<boolean>(false)
+
+        useEffect(() => {
+            isSubmitting && setClicked(true)
+        }, [isSubmitting])
+
+        useEffect(() => {
+            setClicked(false)
+        }, [field.value])
+        
 
     return (
         <TextField 
             fullWidth
             label={label} variant="outlined"
             {...field}
+            error = {clicked && !!error && !!touched}
+            helperText = {clicked && !!error && !!touched && error}
         />
     )
 }

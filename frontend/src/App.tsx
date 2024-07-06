@@ -8,6 +8,8 @@ import { NotFound } from './pages/not-found/not-found';
 import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
 // import OrderPage from './pages/OrderPage/OrderPage';
 import { OrderPage } from './pages/Order/OrderPage';
+import { ThankPage } from './pages/ThankPage/ThankPage';
+import { ROUTE } from './constants';
 
 function App() {
 
@@ -21,6 +23,7 @@ function App() {
         <Route path="/product/:id" element={<ProductPage/>} />
         <Route path="/products" element={<CarouselBestseller />} />
         <Route path="/order" element={<OrderPage />} />
+        <Route path={ROUTE.THANK} element={<ThankPage />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

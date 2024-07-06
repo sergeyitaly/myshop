@@ -79,6 +79,6 @@
 
 .characteristic {
     p {
-        font-size: 14px;
+        font-size: clamp(0.875rem, 0.213vw + 0.809rem, 1rem);
     }
 }
