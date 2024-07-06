@@ -67,3 +67,15 @@ export interface BasketItemModel {
     productId: number
     qty: number
 }
+
+
+export interface Order {
+    name: string
+    surname: string
+    phone: number
+    email: string
+    address: string
+    receiver: boolean
+    receiver_comments: string | null
+    submitted_at: Date
+}

@@ -17,7 +17,8 @@ export enum ROUTE {
     HOME = '/',
     PRODUCT = '/product/',
     COLLECTION = '/collection/',
-    ORDER = '/order'
+    ORDER = '/order',
+    THANK = '/thank'
 }
 
 export enum ENDPOINTS {
@@ -27,7 +28,8 @@ export enum ENDPOINTS {
     COLLECTIONS = 'collections',
     ORDER = 'order',
     PRODUCT = 'product',
-    PRODUCTS = 'products'
+    PRODUCTS = 'products',
+   
 }
 
 export enum STORAGE {
