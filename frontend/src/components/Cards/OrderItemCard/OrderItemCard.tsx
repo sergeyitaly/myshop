@@ -3,6 +3,7 @@ import defaultPhoto from '../../../assets/default.png'
 import styles from './OrderItemCard.module.scss'
 import { Counter } from "../../Counter/Counter"
 import { AvailableLable } from "../../AvailableLabel/AvailableLabel"
+import { formatPrice } from "../../../functions/formatPrice"
 
 
 interface OrderItemCardProps {
@@ -61,7 +62,7 @@ export const OrderItemCard = ({
                     >Видалити</button>
                 </div>
                 <AvailableLable className={styles.available} isAvailable={available}/>
-                <p className={styles.price}>{price} {currency}</p>
+                <p className={styles.price}>{formatPrice(price, currency)}</p>
             </div>
         </div>
     )

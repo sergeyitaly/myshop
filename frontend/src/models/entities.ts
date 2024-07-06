@@ -1,3 +1,5 @@
+export type Currency = 'UAH' | 'USD' | 'EUR'
+
 export interface Product {
     id: number,
     photo_url: string,
@@ -20,7 +22,7 @@ export interface Product {
     size: string | null,
     usage: string | null,
     maintenance: string | null,
-    currency: 'UAH' | 'USD' | 'EUR'
+    currency: Currency
   }
 
 
@@ -64,4 +66,16 @@ export interface ProductVariantsModel {
 export interface BasketItemModel {
     productId: number
     qty: number
+}
+
+
+export interface Order {
+    name: string
+    surname: string
+    phone: number
+    email: string
+    address: string
+    receiver: boolean
+    receiver_comments: string | null
+    submitted_at: Date
 }
