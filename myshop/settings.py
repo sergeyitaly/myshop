@@ -42,7 +42,6 @@ LOCAL_HOST = os.getenv('LOCAL_HOST')
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     VERCEL_DOMAIN,
@@ -241,6 +240,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 # Configure Django email backend with the custom HTTPSHandler
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 #EMAIL_BACKEND = 'backend.email.EmailBackend'
+#EMAIL_BACKEND = 'myshop.settings.TlsSmtp'
 
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
