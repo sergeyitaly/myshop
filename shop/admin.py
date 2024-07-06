@@ -1,9 +1,13 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Product, ProductImage, Category, Collection
+from .models import Product, ProductImage, Category, Collection, AdditionalField
 
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
+    extra = 1
+
+class AdditionalFieldInline(admin.TabularInline):
+    model = AdditionalField
     extra = 1
 
 @admin.register(Product)
@@ -13,12 +17,13 @@ class ProductAdmin(admin.ModelAdmin):
     readonly_fields = ('id', 'slug', 'main_product_image_display', 'display_gallery')
     fields = (
         'id', 'name', 'collection', 'description', 'price', 'currency', 'stock', 'available', 'sales_count',
-        'popularity', 'color_name', 'color_value','size','usage','maintenance', 'slug', 'photo', 'main_product_image_display', 'display_gallery'
+        'popularity', 'color_name', 'color_value', 'size', 'slug', 'photo',
+        'main_product_image_display', 'display_gallery'
     )
     list_display_links = ['name']
     sortable_by = ['collection', 'price', 'sales_count', 'popularity']
     show_full_result_count = False
-    inlines = [ProductImageInline]
+    inlines = [ProductImageInline, AdditionalFieldInline]  # Include AdditionalFieldInline here
 
     def main_product_image(self, obj):
         if obj.photo:
@@ -41,13 +46,11 @@ class ProductAdmin(admin.ModelAdmin):
         return format_html(images_html)
     display_gallery.short_description = "Product Images"
 
-
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')
     search_fields = ['name']
     readonly_fields = ('id', 'name')
-
 
 @admin.register(Collection)
 class CollectionAdmin(admin.ModelAdmin):

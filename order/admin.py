@@ -1,5 +1,8 @@
+# shop/admin.py
+
 from django.contrib import admin
 from .models import Order, OrderItem
+from .serializers import OrderSerializer
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
@@ -17,8 +20,8 @@ class OrderItemInline(admin.TabularInline):
 
 class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderItemInline]
-    readonly_fields = ['name', 'surname', 'phone', 'email', 'address', 'total_quantity', 'total_price', 'receiver_comments']
-    fields = ['name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments', 'total_quantity', 'total_price']
+    readonly_fields = ['total_quantity', 'total_price']  # Exclude fields managed by serializer
+    fields = ['name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments', 'present']
 
     def total_quantity(self, obj):
         return sum(item.quantity for item in obj.order_items.all())
@@ -28,14 +31,20 @@ class OrderAdmin(admin.ModelAdmin):
         return sum(item.quantity * item.product.price for item in obj.order_items.all())
     total_price.short_description = 'Total Price'
 
-    def get_queryset(self, request):
-        queryset = super().get_queryset(request)
-        return queryset.prefetch_related('order_items__product')
-
     def save_model(self, request, obj, form, change):
+        # Ensure receiver_comments is empty if receiver is False
         if not obj.receiver:
             obj.receiver_comments = ''
         super().save_model(request, obj, form, change)
 
+    def save_related(self, request, form, formsets, change):
+        # Manually save related order items using serializer
+        if form.instance.pk is None:
+            # Only create order items when creating a new order
+            serializer = OrderSerializer(data=form.cleaned_data)
+            if serializer.is_valid():
+                order = serializer.save()
+                form.instance.pk = order.pk
+                super().save_related(request, form, formsets, change)
 
 admin.site.register(Order, OrderAdmin)

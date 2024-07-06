@@ -11,6 +11,7 @@ class OrderForm(forms.Form):
     name = forms.CharField(label='Your Name', max_length=100)
     email = forms.EmailField(label='Your Email')
     address = forms.CharField(label='Shipping Address', widget=forms.Textarea)
+    phone = forms.CharField(label='Phone', widget=forms.Textarea)
 
 class OrderItemForm(forms.Form):
     product = forms.ModelChoiceField(queryset=Product.objects.all())

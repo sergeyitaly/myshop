@@ -12,6 +12,7 @@ class Order(models.Model):
     receiver_comments = models.TextField(blank=True, null=True, help_text='Comments about the receiver')  # Added this field
     submitted_at = models.DateTimeField(auto_now_add=True)
     parent_order = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+    present = models.BooleanField(null=True, help_text='Package as a present')
 
     def __str__(self):
         return f"Order {self.id}"

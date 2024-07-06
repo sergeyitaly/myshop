@@ -1,11 +1,15 @@
-# urls.py
-
-from django.urls import path
-from .views import create_order, send_email  # Import the view function for sending email
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import OrderViewSet, OrderItemViewSet, create_order, send_email  # Import the view functions and viewsets
 
 app_name = "orders"
 
+router = DefaultRouter()
+router.register(r'orders', OrderViewSet)
+router.register(r'order-items', OrderItemViewSet)
+
 urlpatterns = [
-    path('order/', create_order, name='order'),
-    path('send-email/', send_email, name='send_email'),  # Define the URL endpoint for sending email
+    path('', include(router.urls)),
+    path('create-order/', create_order, name='create_order'),
+    path('send-email/', send_email, name='send_email'),
 ]
