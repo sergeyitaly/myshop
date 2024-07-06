@@ -1,3 +1,5 @@
+# shop/serializers.py
+
 from rest_framework import serializers
 from .models import Order, OrderItem
 
@@ -19,7 +21,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['name','surname', 'email', 'address', 'order_items']
+        fields = ['id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments', 'submitted_at', 'parent_order', 'present', 'order_items']
 
     def create(self, validated_data):
         items_data = validated_data.pop('order_items')
@@ -30,12 +32,16 @@ class OrderSerializer(serializers.ModelSerializer):
         return order
 
     def update(self, instance, validated_data):
-        items_data = validated_data.pop('order_items')
+        items_data = validated_data.pop('order_items', [])
         instance.name = validated_data.get('name', instance.name)
-        instance.name = validated_data.get('name', instance.name)
-
+        instance.surname = validated_data.get('surname', instance.surname)
+        instance.phone = validated_data.get('phone', instance.phone)
         instance.email = validated_data.get('email', instance.email)
         instance.address = validated_data.get('address', instance.address)
+        instance.receiver = validated_data.get('receiver', instance.receiver)
+        instance.receiver_comments = validated_data.get('receiver_comments', instance.receiver_comments)
+        instance.parent_order = validated_data.get('parent_order', instance.parent_order)
+        instance.present = validated_data.get('present', instance.present)
         instance.save()
 
         # Delete existing order items

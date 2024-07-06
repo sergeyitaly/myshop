@@ -83,6 +83,16 @@ class Collection(models.Model):
     image_tag.short_description = "Image"
     image_tag.allow_tags = True
 
+
+class AdditionalField(models.Model):
+    name = models.CharField(max_length=255)
+    value = models.TextField()
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='additional_fields')  # Updated related_name
+
+    def __str__(self):
+        return f"{self.name} - {self.value}"
+
+
 class Product(models.Model):
     if USE_S3:
         photo = models.ImageField(upload_to="photos/product", storage=MediaStorage(), null=True, blank=True, validators=[validate_file_extension])
@@ -105,8 +115,6 @@ class Product(models.Model):
     color_name = models.CharField(max_length=50, null=True, blank=True, help_text="Enter the color name, e.g., magenta or purple")
     color_value=ColorField(default='#RRGGBB',null=True, blank=True, help_text="Enter the color value in the format #RRGGBB")
     size = models.CharField(max_length=50, null=True, blank=True, help_text="Format: LxHxD (in mm or specify cm)")
-    usage = models.TextField(null=True, blank=True, help_text="Застосування")
-    maintenance = models.TextField(null=True, blank=True, help_text="Догляд")
 
     CURRENCY_CHOICES = (
         ('UAH', 'UAH (грн)'),

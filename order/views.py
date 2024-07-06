@@ -1,10 +1,18 @@
+from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework import status
 from django.core.mail import send_mail
-from .serializers import OrderSerializer
-from .models import Product
+from .models import Order, OrderItem, Product
+from .serializers import OrderSerializer, OrderItemSerializer
+
+class OrderViewSet(viewsets.ModelViewSet):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+
+class OrderItemViewSet(viewsets.ModelViewSet):
+    queryset = OrderItem.objects.all()
+    serializer_class = OrderItemSerializer
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -29,7 +37,6 @@ def create_order(request):
     else:
         print("Validation Errors:", serializer.errors)  # Debugging line to print validation errors
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 @api_view(['POST'])
 @permission_classes([AllowAny])  # Allow anonymous access
