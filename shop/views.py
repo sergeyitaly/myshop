@@ -7,8 +7,8 @@ from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import Http404
 from django_filters import rest_framework as filters
-from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer, AdditionalFieldSerializer
-from .models import Product, Collection, Category, AdditionalField
+from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer
+from .models import Product, Collection, Category
 
 class CustomPageNumberPagination(PageNumberPagination):
     default_page_size = 6
@@ -84,10 +84,13 @@ class CollectionItemsPage(generics.ListAPIView):
 
     def get_queryset(self):
         try:
-            collection_id = self.kwargs['pk']
-            collection = Collection.objects.get(pk=collection_id)
-            queryset = collection.product_set.all()
-        except (KeyError, Collection.DoesNotExist):
+            collection_id = self.kwargs.get('pk')
+            if collection_id is not None:
+                collection = Collection.objects.get(pk=collection_id)
+                queryset = collection.product_set.all()
+            else:
+                queryset = Product.objects.none()
+        except Collection.DoesNotExist:
             queryset = Product.objects.none()
 
         return queryset
