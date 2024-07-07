@@ -1,17 +1,22 @@
+# admin.py
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import Product, ProductImage, Category, Collection, AdditionalField
+from .forms import AdditionalFieldForm, ProductForm, CollectionForm, ProductImageForm
 
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
+    form = ProductImageForm
     extra = 1
 
 class AdditionalFieldInline(admin.TabularInline):
     model = AdditionalField
+    form = AdditionalFieldForm
     extra = 1
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
+    form = ProductForm
     list_display = ('id', 'name', 'collection', 'main_product_image', 'price', 'currency', 'stock', 'available', 'sales_count', 'popularity')
     search_fields = ['name']
     readonly_fields = ('id', 'slug', 'main_product_image_display', 'display_gallery')
@@ -23,7 +28,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_display_links = ['name']
     sortable_by = ['collection', 'price', 'sales_count', 'popularity']
     show_full_result_count = False
-    inlines = [ProductImageInline, AdditionalFieldInline]  # Include AdditionalFieldInline here
+    inlines = [ProductImageInline, AdditionalFieldInline]
 
     def main_product_image(self, obj):
         if obj.photo:
@@ -54,6 +59,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Collection)
 class CollectionAdmin(admin.ModelAdmin):
+    form = CollectionForm
     list_display = ('id', 'name', 'category', 'image_tag')
     search_fields = ['name']
     readonly_fields = ('id', 'image_tag')
