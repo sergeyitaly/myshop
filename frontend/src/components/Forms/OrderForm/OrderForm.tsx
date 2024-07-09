@@ -16,7 +16,6 @@ import { orderValidSchema } from './validationSchema'
 import { ServerErrorHandling } from './ServerErrorHandling'
 import { useNavigate } from 'react-router-dom'
 import { ROUTE } from '../../../constants'
-import { AppInput } from '../../UI/AppInput/AppInput'
 
 
 const initialValues: OrderDTO = {
