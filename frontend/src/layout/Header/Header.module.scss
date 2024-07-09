@@ -1,22 +1,21 @@
 @import '../../variables';
 
 .header {
-    padding: 46px;
-    margin-bottom: 24px;
     position: relative;
     border-bottom: 1px solid $color-button;
 }
 
 .container {
-    margin-inline: auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 89px;
+    padding-top: clamp(0.75rem, 0.426vw + 0.617rem, 1rem);
+    padding-bottom: clamp(0.75rem, 0.426vw + 0.617rem, 1rem);
 }
 
 .logo {
     flex-shrink: 2;
+    max-width: clamp(8.125rem, 7.447vw + 5.798rem, 12.5rem);
 }
 
 .control {
@@ -25,12 +24,6 @@
 }
 
 @media (max-width: $screen-mobile) {
-    .header {
-        padding: 20px;
-        margin-bottom: 33px;
-
-    }
-
     .container {
         gap: 25px;
     }

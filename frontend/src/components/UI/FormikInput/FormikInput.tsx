@@ -1,6 +1,7 @@
 import { TextField } from "@mui/material"
 import { useField, useFormikContext } from "formik"
 import { DetailedHTMLProps, InputHTMLAttributes, useEffect, useState } from "react"
+import { AppInput } from "../AppInput/AppInput"
 
 interface FormikInputProps extends DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {
     label: string
@@ -31,12 +32,11 @@ export const FormikInput = ({
         
 
     return (
-        <TextField 
-            fullWidth
-            label={label} variant="outlined"
+        <AppInput 
+            label={label}
             {...field}
             error = {clicked && !!error && !!touched}
-            helperText = {clicked && !!error && !!touched && error}
+            helperText = {error}
         />
     )
 }

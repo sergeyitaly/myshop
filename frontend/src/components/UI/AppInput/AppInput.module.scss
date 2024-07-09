@@ -1,0 +1,62 @@
+
+@import '../../../variables';
+.input {
+    border-radius: 7px;
+    border: 1px solid $color-gray-100;
+    padding: clamp(0.5rem, 0.213vw + 0.434rem, 0.625rem);
+    outline: 2px solid transparent;
+    width: 100%;
+    transition: 0.3s;
+    
+    &:focus {
+        outline-color: $color-blue;
+    }
+}
+
+.label {
+    position: relative;
+    margin: 5px 0;
+    
+    span {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        left: clamp(0.5rem, 0.213vw + 0.434rem, 0.625rem);
+        font-size: clamp(0.875rem, 0.213vw + 0.809rem, 1rem);
+        color: $color-gray-300;
+        background: $color-background;
+        padding: 0 7px;
+        transition: .2s;
+    }
+
+    .activeSpan {
+        top: 0%;
+    }
+}
+
+.error {
+    input {
+        border-color: $color-error;
+        &:focus {
+            outline-color: $color-error;
+        }
+    }
+
+    span {
+        color: $color-error;;
+    }
+}
+
+.errorMessage {
+    z-index: 1;
+    position: absolute;
+    border: 1px solid $color-error;
+    padding: 0 10px;
+    border-radius: 7px;
+    font-size: 14px;
+    background: $color-background;
+    bottom: 0;
+    left: 10px;
+    transform: translateY(50%);
+    color: $color-error
+}
