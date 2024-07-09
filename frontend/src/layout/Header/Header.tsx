@@ -3,9 +3,10 @@ import { BurgerMenu } from '../../components/BurgerMenu/BurgerMenu';
 import { Logo } from '../../components/Logo/Logo';
 import { Navigation } from '../../components/Navigation/Navigation';
 import { Search } from '../../components/Search/Search';
-import styles from './Header.module.scss';
 import { useBasket } from '../../hooks/useBasket';
 import { IconButton } from '../../components/UI/IconButton/IconButton';
+import { PageContainer } from '../../components/containers/PageContainer';
+import styles from './Header.module.scss';
 
 export const Header = () => {
     const {openBasket, productQty} = useBasket()
@@ -14,7 +15,7 @@ export const Header = () => {
 
     return (
         <header className={styles.header}>
-            <div className={styles.container}>
+            <PageContainer className={styles.container}>
                 <BurgerMenu />
                 <Logo className={styles.logo} />
                 <Navigation />
@@ -28,7 +29,7 @@ export const Header = () => {
                         onClick={openBasket}
                     />
                 </div>
-            </div>
+            </PageContainer>
         </header>
     );
 };
