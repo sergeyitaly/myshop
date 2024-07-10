@@ -1,5 +1,7 @@
 @import '../../variables';
 
+$gap: clamp(0.625rem, 1.277vw + 0.226rem, 1.375rem);
+
 
 .wrapper {
     display: flex;
@@ -11,37 +13,37 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: clamp(0.938rem, 3.723vw - 0.226rem, 3.125rem);
+    padding: clamp(0.75rem, 2.128vw + 0.085rem, 2rem);
     max-width: 1017px;
-    gap: clamp(1.25rem, 1.596vw + 0.751rem, 2.188rem);
     box-shadow: 0px 0px 25px 7px rgba(0,0,0,0.25);
     border-radius: 5px;
     text-align: center;
 }
 
 .title {
-    font-size: clamp(2.25rem, 2.979vw + 1.319rem, 4rem);
+    font-size: clamp(1.5rem, 1.277vw + 1.101rem, 2.25rem);
     font-weight: 400;
+    margin-bottom: $gap;
 }
 
 .p {
-    font-size: clamp(0.875rem, 1.064vw + 0.543rem, 1.5rem);
+    font-size: clamp(0.875rem, 0.426vw + 0.742rem, 1.125rem);
 }
 
 .image {
-    padding-left: clamp(5rem, 18.085vw - 0.652rem, 15.625rem);
-    padding-right: clamp(5rem, 18.085vw - 0.652rem, 15.625rem);
+    max-width: clamp(9.375rem, 15.957vw + 4.388rem, 18.75rem);
     width: 100%;
 }
 
 .check {
-    font-size: clamp(1rem, 2.128vw + 0.335rem, 2.25rem);
+    font-size: clamp(0.875rem, 0.426vw + 0.742rem, 1.125rem);
     color: $color-blue;
+    margin-bottom: $gap;
 }
 
 .text {
 
-   font-size: clamp(0.75rem, 1.277vw + 0.351rem, 1.5rem);
+   font-size: clamp(0.875rem, 0.426vw + 0.742rem, 1.125rem);
    span {
     color: $color-blue;
    }
@@ -49,6 +51,6 @@
 
 .link {
     color: $color-blue;
-    font-size: clamp(1rem, 2.128vw + 0.335rem, 2.25rem);
-    margin: 30px 0;
+    font-size: clamp(0.875rem, 0.851vw + 0.609rem, 1.375rem);
+    margin: 20px 0;
 }
