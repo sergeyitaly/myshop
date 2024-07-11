@@ -83,7 +83,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'django_filters',
     "phonenumber_field",
-
+    "anymail",
     # "debug_toolbar",
 
 ]
@@ -231,38 +231,24 @@ DJOSER = {
     'SERIALAZERS': {}
 }
 
-#SSL_CERT_DIR='/etc/ssl/certs/'
+# Email Backend Configuration
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#EMAIL_HOST = 'smtp.gmail.com'  # Gmail SMTP server
+#EMAIL_PORT = 587  # Gmail SMTP port (TLS)
+#EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')  # Your Gmail address
+#EMAIL_HOST_PASSWORD = os.getenv('GMAIL_SERVICE_KEY')  # Your Gmail app password
+#EMAIL_USE_TLS = True  # Use TLS for secure connection
+#DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-ssl._create_default_https_context = ssl._create_unverified_context
-#context = ssl.create_default_context(cafile=certifi.where())
-#https_handler = HTTPSHandler(context=context)
+MAILGUN_API_KEY = os.getenv('MAILGUN_API_KEY')
+MAILGUN_DOMAIN = os.getenv('MAILGUN_DOMAIN')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 
-# Configure Django email backend with the custom HTTPSHandler
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-#EMAIL_BACKEND = 'backend.email.EmailBackend'
-#EMAIL_BACKEND = 'myshop.settings.TlsSmtp'
-
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
-
-
-class TlsSmtp(smtplib.SMTP):
-    def starttls(self, keyfile=None, certfile=None, context=None):
-        self.ehlo_or_helo_if_needed()
-        self.putcmd("STARTTLS")
-        (resp, reply) = self.getreply()
-        if resp == 220:
-            if context is None:
-                context = ssl._create_unverified_context()  # Create an unverified context
-            self.sock = context.wrap_socket(self.sock)
-            self.file = self.sock.makefile('rb')
-            self.helo_resp = None
-
-EMAIL_BACKEND = 'myshop.settings.TlsSmtp'  
+EMAIL_BACKEND = 'django_mailgun_mime.backends.MailgunMIMEBackend'
+ANYMAIL = {
+    "MAILGUN_API_KEY": MAILGUN_API_KEY,
+    "MAILGUN_SENDER_DOMAIN": MAILGUN_DOMAIN,
+}
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
