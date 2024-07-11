@@ -11,8 +11,6 @@ interface OrderItem {
     product?: Product; // Added product property
 }
 
-
-
 const OrderPage: React.FC = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -22,7 +20,6 @@ const OrderPage: React.FC = () => {
     const [orderSubmitted, setOrderSubmitted] = useState(false);
     const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta.env.VITE_API_BASE_URL;
     const navigate = useNavigate();
-
 
     useEffect(() => {
         const calculateTotalAmount = () => {
@@ -48,7 +45,7 @@ const OrderPage: React.FC = () => {
     ) => {
         const newItems = [...items];
         newItems[index][field] = value as never;
-    
+
         if (field === 'product_id' && typeof value === 'string') {
             try {
                 const response = await axios.get<Product>(`${apiBaseUrl}/api/product/${value}/`);
@@ -59,17 +56,13 @@ const OrderPage: React.FC = () => {
                 console.error('Error fetching product data:', error);
             }
         }
-    
+
         setItems(newItems);
     };
-    
-    
 
     const addItem = () => {
         setItems([...items, { product_id: '', quantity: 1, price: 0 }]);
     };
-
-  
 
     const sendEmail = async () => {
         try {
@@ -96,7 +89,7 @@ const OrderPage: React.FC = () => {
                     quantity: item.quantity,
                 })),
             };
-    
+
             await axios.post(`${apiBaseUrl}/api/order/`, orderData);
             setOrderSubmitted(true);
             sendEmail();
@@ -104,7 +97,6 @@ const OrderPage: React.FC = () => {
             console.error('Error submitting order:', error);
         }
     };
-    
 
     return (
         <div className={style.container}>
@@ -131,7 +123,7 @@ const OrderPage: React.FC = () => {
                             <label>Product ID</label>
                             <input
                                 type="text"
-                                value={item.product?.id} // Use product.id instead of product_id
+                                value={item.product?.id || item.product_id} // Use product.id if available
                                 onChange={(e) => handleItemChange(index, 'product_id', e.target.value)}
                             />
                             <label>Quantity</label>
