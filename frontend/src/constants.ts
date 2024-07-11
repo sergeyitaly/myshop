@@ -54,4 +54,4 @@ export const color = {
     darkOrange: '#BB4430'
 }
 
-export type AppIconNames = 'cart' | 'cross' | 'vase' | 'delete'
+export type AppIconNames = 'cart' | 'cross' | 'vase' | 'delete' | 'search'

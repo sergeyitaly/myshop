@@ -7,6 +7,7 @@ import { useBasket } from '../../hooks/useBasket';
 import { IconButton } from '../../components/UI/IconButton/IconButton';
 import { PageContainer } from '../../components/containers/PageContainer';
 import styles from './Header.module.scss';
+import { SearchWindow } from '../../components/SearchWindow/SearchWindow';
 
 export const Header = () => {
     const {openBasket, productQty} = useBasket()
@@ -30,6 +31,7 @@ export const Header = () => {
                     />
                 </div>
             </PageContainer>
+            <SearchWindow/>
         </header>
     );
 };
