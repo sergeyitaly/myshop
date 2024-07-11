@@ -1,5 +1,10 @@
 export type Currency = 'UAH' | 'USD' | 'EUR'
 
+export interface AdditionalField {
+    name: string
+    value: string
+}
+
 export interface Product {
     id: number,
     photo_url: string,
@@ -20,9 +25,8 @@ export interface Product {
     color_name: string | null,
     color_value: string | null,
     size: string | null,
-    usage: string | null,
-    maintenance: string | null,
     currency: Currency
+    additional_fields: AdditionalField[]
   }
 
 

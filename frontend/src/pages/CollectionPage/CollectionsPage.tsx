@@ -20,6 +20,7 @@ const CollectionsPage: React.FC = () => {
     navigate(ROUTE.COLLECTION + id)
   }
 
+  
  
   return (
     <main>

@@ -31,12 +31,15 @@ export const basketSlice = createSlice({
 
         setTotalPrice: (state, action: PayloadAction<number>) => {
             state.totalPrice = action.payload
-        }
+        },
+
+        resetBasket: () => initialState
     }
 })
 
 export const {
     setOpenStatus,
     setBasketItems,
-    setTotalPrice
+    setTotalPrice,
+    resetBasket
 } = basketSlice.actions
