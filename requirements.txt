@@ -10,10 +10,12 @@ defusedxml==0.8.0rc2
 Django==4.2.13
 django-admin-interface==0.28.6
 django-allauth==0.61.1
+django-anymail==11.0
 django-colorfield==0.11.0
 django-cors-headers==4.3.1
 django-extensions==3.2.3
 django-filter==24.2
+django-mailgun-mime==0.1.7
 django-phonenumber-field==8.0.0
 django-redis==5.4.0
 django-rest-knox==4.2.0
