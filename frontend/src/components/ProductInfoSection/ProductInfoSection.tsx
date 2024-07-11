@@ -98,18 +98,17 @@ export const ProductInfoSection = ({
                     </div>
                 </div>
 
-                <DropDown
-                    className={style.applyDropdown}
-                    changebleParam={product.id}
-                    title='Застосування:'
-                    content={product.usage || ''}
-                />
-                <DropDown
-                    className={style.careDropdown}
-                    changebleParam={product.id}
-                    title='Догляд:'
-                    content={product.maintenance || ''}
-                />
+                {
+                    product.additional_fields.map(({name, value}) => (
+                        <DropDown
+                            className={style.applyDropdown}
+                            changebleParam={product.id}
+                            title={name}
+                            content={value}
+                        />
+                    ))
+                }
+              
             </PageContainer>
         </section>
         <Modal

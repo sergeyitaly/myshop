@@ -16,14 +16,16 @@ import { orderValidSchema } from './validationSchema'
 import { ServerErrorHandling } from './ServerErrorHandling'
 import { useNavigate } from 'react-router-dom'
 import { ROUTE } from '../../../constants'
+import { useBasket } from '../../../hooks/useBasket'
 
 
 const initialValues: OrderDTO = {
   name: '',
   surname: '',
   email: '',
-  phone: '',
+  phone: '+380',
   receiver: false,
+  present: false,
   order_items: [],
   receiver_comments: ''
 }
@@ -32,7 +34,6 @@ interface OrderFormProps {
     className?: string
 }
 
-
 export const OrderForm = ({
     className
 }: OrderFormProps) => {
@@ -40,6 +41,8 @@ export const OrderForm = ({
     const navigate = useNavigate()
 
     const [isOpenComment, setOpenComment] = useState<boolean>(false)
+
+    const {clearBasket} = useBasket()
 
     const [createOrder, {isSuccess, error, isError}] = useCreateOrderMutation()
 
@@ -50,8 +53,10 @@ export const OrderForm = ({
 
     useEffect (() => {
 
-        isSuccess &&
-        navigate(ROUTE.THANK)
+        if(isSuccess){
+            navigate(ROUTE.THANK)
+            clearBasket()
+        }
 
     }, [isSuccess])
     
@@ -61,6 +66,7 @@ export const OrderForm = ({
     }
 
     return (
+        
             <Formik
                 initialValues={initialValues}
                 validationSchema={orderValidSchema}
@@ -70,10 +76,16 @@ export const OrderForm = ({
                     createOrder(form)
                 }}
             >
+                
                 <Form className={clsx(styles.form, className)}>
                     <OrderFormBox
                         title='Отримувач'
                     >
+                        <button type='button'
+                            onClick={() => {
+                                clearBasket()
+                            }}
+                        >Button</button>
                         <div className={styles.inputsContainer}>
                             <FormikInput label="Ім'я" name='name'/>
                             <FormikInput label="Прізвище" name='surname'/>
@@ -88,6 +100,7 @@ export const OrderForm = ({
                                 />
                                 <button 
                                     className={styles.commentButton}
+                                    type='button'
                                     onClick={handleClickAddComment}
                                 >{!isOpenComment ? 'Додати коментар' : 'Прибрати коментар'}</button>
                                 {
@@ -119,7 +132,7 @@ export const OrderForm = ({
                     >
                         <div className={styles.presentBox}>
                             <FormikCheckBox 
-                                name='isPresent' 
+                                name='present' 
                             />
                             <CheckBoxComment 
                                 text='Запакувати як подарунок'
