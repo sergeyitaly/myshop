@@ -27,8 +27,8 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = ['id', 'images']
 
 class AdditionalFieldSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source='custom_name')  # Map custom_name to name
-    value = serializers.CharField(source='custom_value')  # Map custom_value to value
+    name = serializers.CharField()  # No need to specify source='name'
+    value = serializers.CharField() 
 
     class Meta:
         model = AdditionalField
