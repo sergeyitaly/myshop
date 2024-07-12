@@ -6,17 +6,20 @@ import styles from './SearchWindow.module.scss'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { ResultCardSkeleton } from './ResultCard/ResultCardSkeleton'
 import { MapComponent } from '../MapComponent'
+import { Product } from '../../models/entities'
 
 interface SearchWindowProps {
     value: string
     onChange: (e: ChangeEvent<HTMLInputElement>) => void
     onClickClose?: () => void
+    onClickProduct?: (product: Product) => void
 }
 
 export const SearchWindow = ({
     value,
     onChange,
-    onClickClose
+    onClickClose,
+    onClickProduct
 }: SearchWindowProps) => {
 
     const {
@@ -28,6 +31,10 @@ export const SearchWindow = ({
     
     const handleClickClose = () => {
         onClickClose && onClickClose()
+    }
+
+    const handleClickProduct = (product: Product) => {
+        onClickProduct && onClickProduct(product)
     }
 
     return (
@@ -50,11 +57,12 @@ export const SearchWindow = ({
                 products && !!products.results.length && 
                 <div className={styles.resultContainer}>
                     {
-                        products.results.map(({name, photo_url}) => (
+                        products.results.map((product) => (
                             <ResultCard
-                                src={photo_url}
-                                title={name}
+                                src={product.photo_url}
+                                title={product.name}
                                 loading={isFetching}
+                                onClick={() => handleClickProduct(product)}
                             />
                         ))
                     }

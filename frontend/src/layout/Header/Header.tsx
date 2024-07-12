@@ -8,13 +8,21 @@ import { PageContainer } from '../../components/containers/PageContainer';
 import styles from './Header.module.scss';
 import { SearchWindow } from '../../components/SearchWindow/SearchWindow';
 import { useSearch } from '../../hooks/useSearch';
+import { useNavigate } from 'react-router-dom';
+import { ROUTE } from '../../constants';
+import { Product } from '../../models/entities';
 
 export const Header = () => {
     const {openBasket, productQty} = useBasket()
 
     const {open, value, toggleSearchBar, handleChange, closeSearchBar} = useSearch()
 
-    
+    const navigate = useNavigate()
+
+    const handleClickProduct = (product: Product) => {
+        navigate(`${ROUTE.PRODUCT}${product.id}`)
+        closeSearchBar()
+    }
 
     return (
         <header className={styles.header}>
@@ -43,6 +51,7 @@ export const Header = () => {
                     value={value}
                     onChange={handleChange}
                     onClickClose={closeSearchBar}
+                    onClickProduct={handleClickProduct}
                 />
             }
 

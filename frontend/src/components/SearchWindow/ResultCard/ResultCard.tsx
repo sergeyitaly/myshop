@@ -6,18 +6,23 @@ interface ResultCardProps {
     src: string
     title: string
     loading?: boolean
+    onClick?: () => void
 }
 
 
 export const ResultCard = ({
     src,
     title,
-    loading
+    loading,
+    onClick
 }: ResultCardProps) => {
     return (
-        <div className={clsx(styles.card, {
-            [styles.loading]: loading
-        })}> 
+        <div 
+            className={clsx(styles.card, {
+                [styles.loading]: loading
+            })}
+            onClick={onClick}
+        > 
             <div className={styles.imageWrapper}>
                 <img 
                     className={styles.image}
