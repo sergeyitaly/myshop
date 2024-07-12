@@ -40,7 +40,6 @@ const ProductPage: React.FC = () => {
     navigate(`${ROUTE.PRODUCT}${productItem.id}`)
   }
 
-
   return (
     <MainContainer
       isLoading = {isFetching}
