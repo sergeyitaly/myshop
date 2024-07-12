@@ -2,7 +2,7 @@
     position: relative;
     max-width: 165px;
     width: 100%;
-
+    cursor: pointer;
     .titleSkeleton {
         height: clamp(0.625rem, 1.064vw + 0.293rem, 1.25rem);
     }
