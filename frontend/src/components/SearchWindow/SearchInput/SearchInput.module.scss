@@ -1,0 +1,33 @@
+@import '../../../variables';
+
+.container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 5px;
+    gap: 15px;
+
+}
+
+.input {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    &:focus ~ .underline {
+        background: $color-button;
+    }
+}
+
+.sign {
+    cursor: pointer;
+}
+
+.underline {
+    position: absolute;
+    transition: .3s;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: $color-gray-200;
+}

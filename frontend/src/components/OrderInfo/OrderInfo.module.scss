@@ -1,10 +1,10 @@
 @import '../../variables';
 
 .container {
-    font-size: clamp(0.875rem, 1.064vw + 0.543rem, 1.5rem);
+    font-size: clamp(0.875rem, 0.638vw + 0.676rem, 1.25rem);
     font-weight: 400;
     border: 1px solid $color-gray-100;
     border-radius: 7px;
-    padding: clamp(0.75rem, 0.319vw + 0.65rem, 0.938rem);
+    padding: clamp(0.5rem, 0.213vw + 0.434rem, 0.625rem);
     text-align: center;
 }

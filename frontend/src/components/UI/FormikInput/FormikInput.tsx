@@ -1,6 +1,7 @@
-import { TextField } from "@mui/material"
 import { useField, useFormikContext } from "formik"
-import { DetailedHTMLProps, InputHTMLAttributes, useEffect, useState } from "react"
+import { ChangeEvent, DetailedHTMLProps, InputHTMLAttributes, useEffect, useState } from "react"
+import { AppInput } from "../AppInput/AppInput"
+import { formatPhoneNumber } from "../../../functions/phoneFormatter"
 
 interface FormikInputProps extends DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {
     label: string
@@ -13,7 +14,7 @@ export const FormikInput = ({
     ...props
 }: FormikInputProps) => {
 
-    const [field, meta] = useField(props)
+    const [field, meta, helpers] = useField(props)
 
     const {error, touched} = meta
 
@@ -29,14 +30,27 @@ export const FormikInput = ({
             setClicked(false)
         }, [field.value])
         
+        
+
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+            if(field.name === 'phone'){
+                helpers.setValue(formatPhoneNumber(e.target.value).phone)
+                console.log(formatPhoneNumber(e.target.value));
+                
+                return
+            }
+            field.onChange(e)
+    }
 
     return (
-        <TextField 
-            fullWidth
-            label={label} variant="outlined"
+        <AppInput 
+            label={label}
             {...field}
+            value={field.name === 'phone' ? formatPhoneNumber(field.value).formatedPhone : field.value}
+            onChange={handleChange}
+            {...props}
             error = {clicked && !!error && !!touched}
-            helperText = {clicked && !!error && !!touched && error}
+            helperText = {error}
         />
     )
 }

@@ -43,7 +43,7 @@ export const Basket = (): JSX.Element => {
     const handleClickBlueButton = () => {
         closeBasket()
         if(isEmptyBasket){
-            navigate(ROUTE.HOME)
+            return navigate(ROUTE.HOME)
         }
         navigate(ROUTE.ORDER)
     }

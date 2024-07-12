@@ -1,11 +1,7 @@
 @import '../../variables';
 
 .container {
-  margin-bottom: 24px;
-
-  @media (max-width: $screen-mobile) {
-    margin-bottom: 33px;
-  }
+  margin: clamp(0.5rem, 0.745vw + 0.267rem, 0.938rem) 0;
 }
 
 .breadcrumb {

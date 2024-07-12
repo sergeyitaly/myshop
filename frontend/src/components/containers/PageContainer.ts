@@ -2,8 +2,7 @@ import styled from '@emotion/styled'
 import { screen } from '../../constants'
 
 export const PageContainer = styled.div`
-    padding: 0 clamp(10px, 1vw, 20px);
+    padding-left: clamp(0.75rem, 2.087vw + 0.098rem, 2.063rem);
+    padding-right: clamp(0.75rem, 2.087vw + 0.098rem, 2.063rem);
     max-width: ${screen.maxBig};
-    margin: 0 auto;
-
 `
