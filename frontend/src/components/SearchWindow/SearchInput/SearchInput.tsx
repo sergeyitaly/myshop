@@ -1,12 +1,16 @@
+import { DetailedHTMLProps, InputHTMLAttributes } from 'react'
 import { AppIcon } from '../../SvgIconComponents/AppIcon'
 import styles from './SearchInput.module.scss'
 
-interface SearchInputProps {
+interface SearchInputProps extends DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {
     id: string
+    onClickClose: () => void
 }
 
 export const SearchInput = ({
-    id
+    id,
+    onClickClose,
+    ...props
 }: SearchInputProps) => {
     return (
         <div className={styles.container}>
@@ -21,8 +25,9 @@ export const SearchInput = ({
                 autoComplete='off'
                 className={styles.input}
                 type="text" 
+                {...props}
             />
-            <button>
+            <button onClick={onClickClose}>
                 <AppIcon iconName='cross'/>
             </button>
             <span className={styles.underline}/>
