@@ -2,12 +2,14 @@ import { configureStore } from '@reduxjs/toolkit'
 import { apiSlice } from '../api/mainApiSlice'
 import { basketSlice } from './basketSlice'
 import { snackbarSlice} from './snackbarSlice'
+import { searchSlice } from './searchSlice'
 
 export const store = configureStore({
   reducer: {
     [apiSlice.reducerPath]: apiSlice.reducer,
     basket: basketSlice.reducer,
-    snackbar: snackbarSlice.reducer
+    snackbar: snackbarSlice.reducer,
+    searchBar: searchSlice.reducer
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware().concat(apiSlice.middleware)

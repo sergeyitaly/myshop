@@ -1,0 +1,38 @@
+.card {
+    position: relative;
+    max-width: 165px;
+    width: 100%;
+    cursor: pointer;
+    .titleSkeleton {
+        height: clamp(0.625rem, 1.064vw + 0.293rem, 1.25rem);
+    }
+
+    
+}
+
+.loading {
+    filter: blur(3px);
+}
+
+
+.imageWrapper {
+    padding-top: 100%;
+    position: relative;
+    .image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.title {
+    font-size: clamp(0.875rem, 0.426vw + 0.742rem, 1.125rem);
+    font-weight: 400;
+    text-align: center;
+    margin-top: clamp(0.438rem, 0.319vw + 0.338rem, 0.625rem);
+}
+

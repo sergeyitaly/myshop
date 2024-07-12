@@ -6,6 +6,7 @@ export interface OrderDTO {
     email: string
     receiver: boolean
     receiver_comments: string | null
+    present: boolean
     order_items: {
         product_id: number
         quantity: number

@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react"
 import { STORAGE } from "../constants"
 import { BasketItemModel, Product } from "../models/entities"
-import { setBasketItems, setOpenStatus, setTotalPrice } from "../store/basketSlice"
+import { setBasketItems, setOpenStatus, setTotalPrice, resetBasket } from "../store/basketSlice"
 import { useAppDispatch, useAppSelector } from "../store/hooks"
 import { useSnackbar } from "./useSnackbar"
 import { useGetManyProductsByIdListQuery } from "../api/productSlice"
@@ -20,8 +20,6 @@ export const useBasket = () => {
 
     const {data} = useGetManyProductsByIdListQuery(idList)
 
-    
-    
 
     const getBasketContent = (): BasketItemModel[] => {
         const itemsString = localStorage.getItem(STORAGE.BASKET)
@@ -102,6 +100,11 @@ export const useBasket = () => {
         saveToLocalStorageAndUpdateState(contentArray)
     }
 
+    const clearBasket = () => {
+        localStorage.removeItem(STORAGE.BASKET)
+        dispatch(resetBasket())
+    }
+
     return {
         basketItems,
         openStatus,
@@ -112,6 +115,7 @@ export const useBasket = () => {
         deleteFromBasket,
         increaceCounter,
         reduceCounter,
+        clearBasket,
         productQty: basketItems.length,
         isEmptyBasket: !basketItems.length
     }
