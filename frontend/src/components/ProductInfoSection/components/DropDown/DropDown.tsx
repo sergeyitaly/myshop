@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import ArrowForward from '@mui/icons-material/ArrowForwardIos'
 import clsx from 'clsx'
 import style from './DropDown.module.scss'
+import { splitText } from '../../../../functions/splitText'
 
 interface DropDownProps {
     title: string
@@ -42,7 +43,15 @@ export const DropDown = ({
             })}>
                 <p className={style.content}>
 
-                    {content ? content : `Опис поки що відсутній`}
+                    {content ? 
+                        splitText(content).map((paragraph, i) => {
+                            if(!paragraph) return <br/>
+                            return <p key={i}>{paragraph}</p>
+                        }
+                    )
+                     : 
+                     `Опис поки що відсутній`
+                    }
                 </p>
             </div>
         </div>
