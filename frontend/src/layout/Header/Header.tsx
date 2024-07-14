@@ -54,8 +54,6 @@ export const Header = () => {
                     onClickProduct={handleClickProduct}
                 />
             }
-
-            
         </header>
     );
 };

@@ -9,7 +9,7 @@ export const useSearch = () => {
 
     useEffect(() => {
         dispatch(setValue(''))
-    }, [open])
+    }, [open, dispatch])
 
     const openSearchBar = () => {
         dispatch(setOpenState(true))

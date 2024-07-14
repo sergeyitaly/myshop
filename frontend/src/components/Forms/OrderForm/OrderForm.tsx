@@ -17,6 +17,7 @@ import { ServerErrorHandling } from './ServerErrorHandling'
 import { useNavigate } from 'react-router-dom'
 import { ROUTE } from '../../../constants'
 import { useBasket } from '../../../hooks/useBasket'
+import { EmptyItemsErrorHandler } from '../EmptyItemsErrorHandler'
 
 
 const initialValues: OrderDTO = {
@@ -58,7 +59,7 @@ export const OrderForm = ({
             clearBasket()
         }
 
-    }, [isSuccess])
+    }, [isSuccess, clearBasket, navigate])
     
 
     const handleClickAddComment = () => {
@@ -70,9 +71,7 @@ export const OrderForm = ({
             <Formik
                 initialValues={initialValues}
                 validationSchema={orderValidSchema}
-
                 onSubmit={(form) => {
-                    console.log(form);
                     createOrder(form)
                 }}
             >
@@ -111,6 +110,7 @@ export const OrderForm = ({
                                         placeholder='Тут можна написати коментар'
                                     />
                                 }
+                                <EmptyItemsErrorHandler name='order_items'/>
                             </div>
                         </div>
                     </OrderFormBox>

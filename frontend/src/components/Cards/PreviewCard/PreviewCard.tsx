@@ -7,6 +7,7 @@ interface PreviewCardProps {
     photoSrc: string
     title: string
     subTitle?: string 
+    loading?: boolean
     onClick?: () => void  
 }
 
@@ -15,6 +16,7 @@ export const PreviewCard = ({
     className,
     photoSrc,
     title,
+    loading,
     subTitle,
     onClick
 }: PreviewCardProps) => {
@@ -25,7 +27,9 @@ export const PreviewCard = ({
 
     return (
         <div 
-            className={clsx(style.card, className)}
+            className={clsx(style.card, className, {
+                [style.loading] : loading
+            })}
             onClick={handleClick}
         >
             <div className={style.imgWrapper}>

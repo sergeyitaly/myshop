@@ -5,6 +5,7 @@
     max-width: 453px;
     container-type: inline-size ;
     cursor: pointer;
+    transition: .5s;
 }
 
 .imgWrapper {
@@ -31,6 +32,10 @@
     @container (max-width: 320px) {
         padding-top: calc(100%*0.92);
     }  
+}
+
+.loading {
+    filter: blur(7px);
 }
 
 

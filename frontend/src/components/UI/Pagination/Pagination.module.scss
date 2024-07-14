@@ -1,0 +1,47 @@
+@import '../../../variables';
+
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px
+}
+
+.pageContainer {
+    display: flex;
+    gap: 15px;
+    
+    
+    
+}
+
+.pageButton {
+    transition: 0.2s;
+    font-size: 24px;
+    font-weight: 400;
+    color: $color-gray-200;
+    &.active {
+       color: $color-black;
+       transform: scale(1.2);
+   }
+}
+
+.arrowButton {
+    svg{
+        transition: 0.2s;
+    }
+
+    
+    .active {
+        fill: $color-black;
+        stroke: $color-black;
+    }
+
+    &:disabled {
+        svg {
+            fill: $color-gray-200;
+            stroke: $color-gray-200;
+        }
+    }
+}
