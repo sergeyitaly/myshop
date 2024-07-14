@@ -11,6 +11,9 @@ import { useSearch } from '../../hooks/useSearch';
 import { useNavigate } from 'react-router-dom';
 import { ROUTE } from '../../constants';
 import { Product } from '../../models/entities';
+import { AnimatePresence } from 'framer-motion';
+
+
 
 export const Header = () => {
     const {openBasket, productQty} = useBasket()
@@ -45,15 +48,17 @@ export const Header = () => {
                     />
                 </div>
             </PageContainer>
-            {
-                open &&    
-                <SearchWindow
-                    value={value}
-                    onChange={handleChange}
-                    onClickClose={closeSearchBar}
-                    onClickProduct={handleClickProduct}
-                />
-            }
+            <AnimatePresence>
+                {
+                    open &&    
+                    <SearchWindow
+                        value={value}
+                        onChange={handleChange}
+                        onClickClose={closeSearchBar}
+                        onClickProduct={handleClickProduct}
+                    />
+                }
+            </AnimatePresence>
         </header>
     );
 };

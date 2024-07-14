@@ -45,7 +45,7 @@ export const OrderForm = ({
 
     const {clearBasket} = useBasket()
 
-    const [createOrder, {isSuccess, error, isError}] = useCreateOrderMutation()
+    const [createOrder, {isSuccess, error, isError, isLoading}] = useCreateOrderMutation()
 
     let errorResponce: CreateOrderErrorResponce | null = null
     if(isError){
@@ -140,8 +140,9 @@ export const OrderForm = ({
                         </div>
                     </OrderFormBox>
                     <MainButton
-                        title='Оформити замовлення'
+                        title={isLoading ? 'Завантажую...' : 'Оформити замовлення'}
                         color='black'
+                        disabled={isLoading}
                     />
                     <ProductAndPriceFormikUpdate/>
                     <ServerErrorHandling
