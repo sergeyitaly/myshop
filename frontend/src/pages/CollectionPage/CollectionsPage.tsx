@@ -7,7 +7,9 @@ import { useGetCollectionsByFilterQuery } from '../../api/collectionSlice';
 import { NamedSection } from '../../components/NamedSection/NamedSection';
 import { PreviewItemsContainer } from '../../components/containers/PreviewItemsContainer/PreviewItemsContainer';
 import { Pagination } from '../../components/UI/Pagination/Pagination';
+import { motion} from 'framer-motion'
 import styles from './style.module.scss'
+
 
 
 const CollectionsPage: React.FC = () => {
@@ -37,6 +39,17 @@ const CollectionsPage: React.FC = () => {
     setCurrentPage(page)
   }
   
+
+  const variants = {
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.15,
+      },
+    }),
+    hidden: { opacity: 0, y: 200 },
+  }
  
   return (
     <main>
@@ -47,15 +60,23 @@ const CollectionsPage: React.FC = () => {
             isLoading = {isLoading}
           >
               {
-                collections.map((collection) => (
-                  <PreviewCard
+                collections.map((collection, i) => (
+                  <motion.div
                       key={collection.id}
-                      photoSrc={collection.photo}
-                      title={collection.name}
-                      loading={isFetching}
-                      subTitle={collection.category}
-                      onClick={() => handleClickCollectionCard(collection.id)}
-                  />
+                      custom={i}
+                      initial = 'hidden'
+                      animate = 'visible'
+                      variants={variants}
+                  >
+                   
+                    <PreviewCard
+                        photoSrc={collection.photo}
+                        title={collection.name}
+                        loading={isFetching}
+                        subTitle={collection.category}
+                        onClick={() => handleClickCollectionCard(collection.id)}
+                    />
+                  </motion.div>
                 ))
               }
           </PreviewItemsContainer>

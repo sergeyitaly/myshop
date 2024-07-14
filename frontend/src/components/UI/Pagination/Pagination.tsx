@@ -50,6 +50,7 @@ export const Pagination = ({
                 {
                     pageArray.map((number) => (
                     <button 
+                        key = {number}
                         className={clsx(styles.pageButton, {
                             [styles.active]: currentPage === number
                         })}

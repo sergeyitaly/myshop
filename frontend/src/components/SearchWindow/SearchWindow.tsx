@@ -2,11 +2,13 @@ import { ChangeEvent } from 'react'
 import { useGetManyProductsByFilterQuery } from '../../api/productSlice'
 import { ResultCard } from './ResultCard/ResultCard'
 import { SearchInput } from './SearchInput/SearchInput'
-import styles from './SearchWindow.module.scss'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { ResultCardSkeleton } from './ResultCard/ResultCardSkeleton'
 import { MapComponent } from '../MapComponent'
 import { Product } from '../../models/entities'
+import {motion} from 'framer-motion'
+import styles from './SearchWindow.module.scss'
+
 
 interface SearchWindowProps {
     value: string
@@ -38,7 +40,19 @@ export const SearchWindow = ({
     }
 
     return (
-        <div className={styles.container}>
+        <motion.div 
+            initial = {{
+                x: '-50%',
+                top: '-100%',
+            }}
+            animate = {{
+                top: '100%'
+            }}
+            exit={{
+                top: '-100%',
+            }}
+            className={styles.container}
+        >
             <SearchInput 
                 id='search'
                 value={value}
@@ -79,6 +93,6 @@ export const SearchWindow = ({
                     }
                 </>
             }
-        </div>
+        </motion.div>
     )
 }
