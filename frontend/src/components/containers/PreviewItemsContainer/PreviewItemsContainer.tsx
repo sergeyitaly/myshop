@@ -47,7 +47,6 @@ export const PreviewItemsContainer = ({
         return (<p className={styles.errorContainer}>{textWhenError}</p>)
     }
     
-
     return (
         <>
             {
