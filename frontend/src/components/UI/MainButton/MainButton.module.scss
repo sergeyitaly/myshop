@@ -13,6 +13,10 @@
         background-color: darken($color: $color-background, $amount: 10);
     }
 
+    &:disabled {
+        background-color: $color-gray-200;
+    }
+
     @media (max-width: $screen-big) {
         font-size: 22px;
     }
@@ -49,6 +53,10 @@
     background-color: $color-black;
     &:hover {
         background-color: lighten($color: $color-black, $amount: 20);
+    }
+
+    &:disabled {
+        background-color: $color-gray-300;
     }
 }
 
