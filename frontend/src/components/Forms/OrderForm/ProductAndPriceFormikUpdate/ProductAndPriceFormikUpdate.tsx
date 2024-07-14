@@ -16,7 +16,7 @@ export const ProductAndPriceFormikUpdate = () => {
         }))
 
         setValues((state) => ({...state, order_items: orderItems}) )
-    }, [basketItems])
+    }, [basketItems, setValues])
 
     return <></>
 }

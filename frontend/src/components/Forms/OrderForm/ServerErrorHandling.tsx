@@ -17,15 +17,12 @@ export const ServerErrorHandling = ({
     errors
 }: ServerErrorHandlingProps) => {
 
-    const {values, setErrors} = useFormikContext()
-
-    console.log(values);
-    
+    const {setErrors} = useFormikContext()
 
     useEffect(() => {
         errors &&
         setErrors(errors)
-    }, [errors])
+    }, [errors, setErrors])
 
     return (<></>)
 }

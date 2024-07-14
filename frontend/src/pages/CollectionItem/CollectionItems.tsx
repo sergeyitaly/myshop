@@ -28,11 +28,7 @@ const CollectionItemsPage: React.FC = () => {
      isSuccess: isSuccessProductFetshing,
      isLoading: isLoadingProducts,
      isError: isErrorProducts,
-     error
   } = useGetAllProductsFromCollectionQuery( id ? +id : skipToken )
-
-  console.log(error);
-  
 
   const products = isSuccessProductFetshing ? productResponce.results : []
   
