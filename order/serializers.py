@@ -15,7 +15,6 @@ class OrderItemSerializer(serializers.ModelSerializer):
         order_item = OrderItem.objects.create(product_id=product_id, **validated_data)
         return order_item
 
-
 class OrderSerializer(serializers.ModelSerializer):
     order_items = OrderItemSerializer(many=True)
 

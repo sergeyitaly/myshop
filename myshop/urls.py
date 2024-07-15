@@ -41,7 +41,7 @@ urlpatterns = [
     path('api/token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
 
     # App-specific URLs
-    path('', include('accounts.urls')),  # Example: /accounts/
+    path('api', include('accounts.urls')),  # Example: /accounts/
     path('api/', include('shop.urls')),  # Example: /products/
     path('api/', include('order.urls')), # Example: /order/
 
