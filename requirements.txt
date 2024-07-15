@@ -20,7 +20,6 @@ django-mailgun-mime==0.1.7
 django-phonenumber-field==8.0.0
 django-redis==5.4.0
 django-rest-knox==4.2.0
-django-sendgrid-v5==1.2.3
 django-storages==1.14.2
 django-svg-image-form-field==1.0.1
 django-templated-mail==1.1.1
