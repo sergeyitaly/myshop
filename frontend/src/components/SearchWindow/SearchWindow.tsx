@@ -6,9 +6,8 @@ import { skipToken } from '@reduxjs/toolkit/query'
 import { ResultCardSkeleton } from './ResultCard/ResultCardSkeleton'
 import { MapComponent } from '../MapComponent'
 import { Product } from '../../models/entities'
-import {motion} from 'framer-motion'
+import { motion } from 'framer-motion'
 import styles from './SearchWindow.module.scss'
-
 
 interface SearchWindowProps {
     value: string
@@ -29,8 +28,8 @@ export const SearchWindow = ({
         isSuccess,
         isLoading,
         isFetching
-    } = useGetManyProductsByFilterQuery(value ? {search: value} : skipToken)
-    
+    } = useGetManyProductsByFilterQuery(value ? { search: value } : skipToken)
+
     const handleClickClose = () => {
         onClickClose && onClickClose()
     }
@@ -39,13 +38,18 @@ export const SearchWindow = ({
         onClickProduct && onClickProduct(product)
     }
 
+    const handleSearch = (query: string) => {
+        // Handle the search query here if needed
+        console.log('Search query:', query)
+    }
+
     return (
         <motion.div 
-            initial = {{
+            initial={{
                 x: '-50%',
                 top: '-100%',
             }}
-            animate = {{
+            animate={{
                 top: '100%'
             }}
             exit={{
@@ -58,12 +62,13 @@ export const SearchWindow = ({
                 value={value}
                 onChange={onChange}
                 onClickClose={handleClickClose}
+                onSearch={handleSearch}  // Add the onSearch prop here
             />
             {
                 isLoading ? 
                 <div className={styles.resultContainer}>
                     <MapComponent
-                        component={<ResultCardSkeleton/>}
+                        component={<ResultCardSkeleton />}
                         qty={4}
                     />
                 </div>
@@ -73,6 +78,7 @@ export const SearchWindow = ({
                     {
                         products.results.map((product) => (
                             <ResultCard
+                                key={product.id}
                                 src={product.photo_url}
                                 title={product.name}
                                 loading={isFetching}
