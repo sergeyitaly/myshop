@@ -1,16 +1,9 @@
 import SearchSVG from './search.svg';
 import styles from './Search.module.scss';
-import { ButtonHTMLAttributes, DetailedHTMLProps } from 'react';
 
-interface SearchProps extends DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> {
-
-}
-
-export const Search = ({
-    ...props
-}: SearchProps) => {
+export const Search = () => {
     return (
-        <button className={styles.button} {...props}>
+        <button className={styles.button}>
             <img
                 className={styles.icon}
                 src={SearchSVG}
