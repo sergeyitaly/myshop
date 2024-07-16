@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { AppImage } from '../../AppImage/AppImage'
 import style from './PreviewCard.module.scss'
 
 
@@ -25,6 +26,8 @@ export const PreviewCard = ({
         onClick && onClick()
     }
 
+
+
     return (
         <div 
             className={clsx(style.card, className, {
@@ -32,13 +35,12 @@ export const PreviewCard = ({
             })}
             onClick={handleClick}
         >
-            <div className={style.imgWrapper}>
-                <img
-                    src={photoSrc}
-                    alt={title}
-                    loading="lazy"
-                />
-            </div>
+              <AppImage
+                className={style.imageSize}
+                src={photoSrc}
+                alt={title}
+
+              />
             <p className={style.title}>{title}</p>
             <p className={style.subTitle}>{subTitle}</p>
         </div>
