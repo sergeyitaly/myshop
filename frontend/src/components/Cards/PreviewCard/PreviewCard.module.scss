@@ -8,31 +8,22 @@
     transition: .5s;
 }
 
-.imgWrapper {
+.imageSize {
     position: relative;
     padding-top: calc(100%*1.12);
-    img {
-        display: block;
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-
-    .skeleton {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-    }
 
     @container (max-width: 320px) {
         padding-top: calc(100%*0.92);
-    }  
+    } 
+    
+    .skeleton {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        top: 0
+    }
 }
+
 
 .loading {
     filter: blur(7px);
@@ -135,4 +126,6 @@
         }
     }
   }
+
+
 

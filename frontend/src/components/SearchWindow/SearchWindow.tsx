@@ -6,11 +6,13 @@ import { skipToken } from '@reduxjs/toolkit/query'
 import { ResultCardSkeleton } from './ResultCard/ResultCardSkeleton'
 import { MapComponent } from '../MapComponent'
 import { Product } from '../../models/entities'
-import { motion } from 'framer-motion'
 import styles from './SearchWindow.module.scss'
+import { MotionItem } from '../MotionComponents/MotionItem'
+import { MotionSearch } from '../MotionComponents/MotionSearch'
 
 interface SearchWindowProps {
     value: string
+    queryText: string
     onChange: (e: ChangeEvent<HTMLInputElement>) => void
     onClickClose?: () => void
     onClickProduct?: (product: Product) => void
@@ -18,6 +20,7 @@ interface SearchWindowProps {
 
 export const SearchWindow = ({
     value,
+    queryText,
     onChange,
     onClickClose,
     onClickProduct
@@ -28,7 +31,7 @@ export const SearchWindow = ({
         isSuccess,
         isLoading,
         isFetching
-    } = useGetManyProductsByFilterQuery(value ? { search: value } : skipToken)
+    } = useGetManyProductsByFilterQuery(value ? { search: queryText } : skipToken)
 
     const handleClickClose = () => {
         onClickClose && onClickClose()
@@ -44,19 +47,7 @@ export const SearchWindow = ({
     }
 
     return (
-        <motion.div 
-            initial={{
-                x: '-50%',
-                top: '-100%',
-            }}
-            animate={{
-                top: '100%'
-            }}
-            exit={{
-                top: '-100%',
-            }}
-            className={styles.container}
-        >
+        <MotionSearch className={styles.container}>
             <SearchInput 
                 id='search'
                 value={value}
@@ -76,14 +67,20 @@ export const SearchWindow = ({
                 products && !!products.results.length && 
                 <div className={styles.resultContainer}>
                     {
-                        products.results.map((product) => (
-                            <ResultCard
+                        products.results.map((product, i) => (
+                            <MotionItem
                                 key={product.id}
-                                src={product.photo_url}
-                                title={product.name}
-                                loading={isFetching}
-                                onClick={() => handleClickProduct(product)}
-                            />
+                                index={i}
+                                offset={50}
+                            >
+                                <ResultCard
+                                    key={product.id}
+                                    src={product.photo_url}
+                                    title={product.name}
+                                    loading={isFetching}
+                                    onClick={() => handleClickProduct(product)}
+                                />
+                            </MotionItem>
                         ))
                     }
                 </div>
@@ -99,6 +96,6 @@ export const SearchWindow = ({
                     }
                 </>
             }
-        </motion.div>
+        </MotionSearch>
     )
 }
