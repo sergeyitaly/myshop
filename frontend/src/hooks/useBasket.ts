@@ -1,25 +1,38 @@
-import { useEffect, useMemo } from "react"
+import { useEffect } from "react"
 import { STORAGE } from "../constants"
 import { BasketItemModel, Product } from "../models/entities"
-import { setBasketItems, setOpenStatus, setTotalPrice, resetBasket } from "../store/basketSlice"
+import { setBasketItems, setOpenStatus, setTotalPrice, resetBasket, setBootstrapIdList, setProducts, addProduct, deleteProduct } from "../store/basketSlice"
 import { useAppDispatch, useAppSelector } from "../store/hooks"
 import { useSnackbar } from "./useSnackbar"
 import { useGetManyProductsByIdListQuery } from "../api/productSlice"
+import { skipToken } from "@reduxjs/toolkit/query"
 
 export const useBasket = () => {
 
   
-    const {openStatus, basketItems, totalPrice} = useAppSelector(state => state.basket)
+    const {openStatus, basketItems, totalPrice, bootstrapIdList, products} = useAppSelector(state => state.basket)
+
+    const isEmptyBasket = !basketItems.length 
+    const isEmptyBootstrapIdList = !bootstrapIdList.length
+
     const dispatch = useAppDispatch()
 
     const {openInfo} = useSnackbar()
 
-    const idList = useMemo(() => {
-        return basketItems.map(({productId}) => productId )
-    }, [basketItems])
+    const {data, isLoading} = useGetManyProductsByIdListQuery(!isEmptyBootstrapIdList ? bootstrapIdList : skipToken)
 
-    const {data} = useGetManyProductsByIdListQuery(idList)
+    useEffect(() => {
+        if(data){
+            dispatch(setProducts(data))
+        }
+    }, [data])
 
+
+    const composedItems = basketItems.map((basketItem) => {
+        const product = products.find(({id}) => id === basketItem.productId)
+            return {...basketItem, product: product ? product : null}
+    })
+    
 
     const getBasketContent = (): BasketItemModel[] => {
         const itemsString = localStorage.getItem(STORAGE.BASKET)
@@ -32,10 +45,11 @@ export const useBasket = () => {
         dispatch(setBasketItems(content))
     }
 
+    
+
     useEffect(() => {
         let total = 0
-        if(data){
-            const priceList = data.map(({id, price}) => {
+            const priceList = products.map(({id, price}) => {
                 const matchedBasketItem = basketItems.find(({productId})=> productId === id)
                 if(matchedBasketItem){
                     return +price*matchedBasketItem.qty
@@ -43,13 +57,18 @@ export const useBasket = () => {
                 return 0
             })
             total = priceList.reduce((sum, current) => sum + current, 0)
-        }
         dispatch(setTotalPrice(total))
     }, [data, basketItems, dispatch])
 
     useEffect(() => {
         dispatch(setBasketItems(getBasketContent()))
     }, [openStatus, dispatch])
+
+
+    const bootstrap = () => {
+        dispatch(setBootstrapIdList())
+    }
+    
 
     const openBasket = () => {
         dispatch(setOpenStatus(true))
@@ -60,7 +79,8 @@ export const useBasket = () => {
     }
 
     const addToBasket = (product: Product, qty: number) => {
-        const contentArray: BasketItemModel[] = getBasketContent()
+        let contentArray: BasketItemModel[] = getBasketContent()
+        dispatch(addProduct(product))
 
         const newItem: BasketItemModel = {
             productId: product.id,
@@ -68,11 +88,23 @@ export const useBasket = () => {
         }
 
         const alreadyInBasket = contentArray.some(({productId}) => productId === product.id)
+
         if(alreadyInBasket){
-            return openInfo('Цей товар вже у кошику', 'info')
+            contentArray = contentArray.map((item) => {
+                if(item.productId === product.id){
+                    return {
+                        productId: item.productId,
+                        qty: item.qty + qty
+                    }
+                }
+                return item
+            })
         } 
 
-        contentArray.push(newItem)
+        if(!alreadyInBasket){
+            contentArray.push(newItem)
+        }
+
         const newBasketContentString = JSON.stringify(contentArray)
         localStorage.setItem(STORAGE.BASKET, newBasketContentString)
         openInfo('Товар додано до кошика');
@@ -82,6 +114,7 @@ export const useBasket = () => {
     const deleteFromBasket = (product: Product) => {
         const contentArray = getBasketContent().filter(({productId}) => product.id!==productId )
         saveToLocalStorageAndUpdateState(contentArray)
+        dispatch(deleteProduct(product))
     }
 
     const increaceCounter = (product: Product) => {
@@ -103,12 +136,16 @@ export const useBasket = () => {
     const clearBasket = () => {
         localStorage.removeItem(STORAGE.BASKET)
         dispatch(resetBasket())
+        dispatch(setProducts([]))
     }
+  
+
 
     return {
-        basketItems,
+        basketItems: composedItems, 
         openStatus,
         totalPrice,
+        bootstrap,
         openBasket,
         closeBasket,
         addToBasket,
@@ -116,7 +153,8 @@ export const useBasket = () => {
         increaceCounter,
         reduceCounter,
         clearBasket,
+        isLoading,
         productQty: basketItems.length,
-        isEmptyBasket: !basketItems.length
+        isEmptyBasket
     }
 }

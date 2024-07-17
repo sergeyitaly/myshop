@@ -9,7 +9,6 @@ import { MainButton } from '../../UI/MainButton/MainButton'
 import { OrderInfo } from '../../OrderInfo/OrderInfo'
 import { CheckBoxComment } from '../../CheckBoxComment/CheckBoxComment'
 import styles from './OrderForm.module.scss'
-import { ProductAndPriceFormikUpdate } from './ProductAndPriceFormikUpdate/ProductAndPriceFormikUpdate'
 import { OrderDTO } from '../../../models/dto'
 import { CreateOrderErrorResponce, useCreateOrderMutation } from '../../../api/orderSlice'
 import { orderValidSchema } from './validationSchema'
@@ -144,7 +143,6 @@ export const OrderForm = ({
                         color='black'
                         disabled={isLoading}
                     />
-                    <ProductAndPriceFormikUpdate/>
                     <ServerErrorHandling
                         errors={errorResponce && errorResponce.data}
                     />
