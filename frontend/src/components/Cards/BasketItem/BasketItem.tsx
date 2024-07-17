@@ -1,6 +1,6 @@
 import { formatCurrency } from "../../../functions/formatCurrency"
 import { formatNumber } from "../../../functions/formatNumber"
-import { Product, ProductVariantsModel } from "../../../models/entities"
+import { Color, Product } from "../../../models/entities"
 import { AvailableLable } from "../../AvailableLabel/AvailableLabel"
 import { Counter } from "../../Counter/Counter"
 import { ProductVariants } from "../../ProductVariants/ProductVariants"
@@ -11,7 +11,8 @@ import styles from './BasketItem.module.scss'
 interface BasketItemProps {
     product: Product
     qty: number
-    variants: ProductVariantsModel
+    color: Color
+    size: string
     onClickDelete: (product: Product) => void 
     onClickIncrement: (product: Product) => void 
     onClickDecrement: (product: Product) => void 
@@ -20,7 +21,8 @@ interface BasketItemProps {
 
 export const BasketItem = ({
     product,
-    variants,
+    color,
+    size,
     qty,
     onClickDelete,
     onClickIncrement,
@@ -61,32 +63,24 @@ export const BasketItem = ({
                     className={styles.characteristic}
                     title="Колір"
                 >
-                    {
-                        variants.colors.map(({color}) => (
-                            <ValueBox
-                                key={color}
-                                value={color}
-                                color={color}
-                                isActive={color === product.color_value}
-                            />
-                        ))
-                    }
+                    <ValueBox
+                        className={styles.noPointer}
+                        value={color.color}
+                        color={color.color}
+                    />
                 </ProductVariants>
                 <div className={styles. counterBox}>
                     <ProductVariants
                         className={styles.characteristic}
                         title="Розмір"
                     >
-                       {
-                        variants.sizes.map((size) => (
-                            <ValueBox
-                                key={size}
-                                value={size}
-                                title={size}
-                                isActive={size === product.size}
-                            />
-                        ))
-                    }
+                        <ValueBox
+                            className={styles.noPointer}
+                            key={size}
+                            value={size}
+                            title={size}
+                            isActive
+                        />
                     </ProductVariants>
                     <Counter
                         className={styles.selfTop}

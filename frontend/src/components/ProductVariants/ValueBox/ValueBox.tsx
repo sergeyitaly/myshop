@@ -3,6 +3,7 @@ import style from './ValueBox.module.scss'
 
 
 interface ValueBoxProps {
+    className?: string
     color?: string
     title?: string | number
     value: string 
@@ -12,6 +13,7 @@ interface ValueBoxProps {
 
 
 export const ValueBox = ({
+    className,
     color,
     title,
     value,
@@ -25,7 +27,7 @@ export const ValueBox = ({
 
     return (
         <button
-            className={clsx(style.box, {[style.active]: isActive})}
+            className={clsx(style.box, {[style.active]: isActive}, className)}
             style={{background: color}}
             onClick={handleClick}
         >

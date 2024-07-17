@@ -31,7 +31,7 @@ export const SearchWindow = ({
         isSuccess,
         isLoading,
         isFetching
-    } = useGetManyProductsByFilterQuery(value ? { search: queryText } : skipToken)
+    } = useGetManyProductsByFilterQuery(queryText ? { search: queryText } : skipToken)
 
     const handleClickClose = () => {
         onClickClose && onClickClose()

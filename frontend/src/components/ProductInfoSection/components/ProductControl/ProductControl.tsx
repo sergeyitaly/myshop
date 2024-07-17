@@ -9,6 +9,8 @@ import { ProductVariants } from '../../../ProductVariants/ProductVariants'
 import { useBasket } from '../../../../hooks/useBasket'
 import { useCounter } from '../../../../hooks/useCounter'
 import { formatPrice } from '../../../../functions/formatPrice'
+import { useNavigate } from 'react-router-dom'
+import { ROUTE } from '../../../../constants'
 
 interface ProductControlProps {
     product: Product
@@ -36,11 +38,18 @@ export const ProductControl = ({
 
     const {addToBasket, openBasket} = useBasket()
 
+    const navigate = useNavigate()
+
 
 
     const handleAddToBasket = () => {
       addToBasket(product, qty)
       openBasket()
+    }
+
+    const handleClickBuyNow = () => {
+      addToBasket(product, qty)
+      navigate(ROUTE.ORDER)
     }
 
     return (
@@ -101,6 +110,7 @@ export const ProductControl = ({
             className={style.buy}
             color='blue'
             title='Купити зараз'
+            onClick={handleClickBuyNow}
           />
         </div>
     )

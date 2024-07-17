@@ -1,4 +1,5 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { Product } from "../models/entities";
 
 export interface BasketItemModel {
     productId: number
@@ -9,12 +10,16 @@ interface InitialStateModel {
     openStatus: boolean
     basketItems: BasketItemModel[]
     totalPrice: number
+    bootstrapIdList: number[]
+    products: Product[]
 }
 
 const initialState: InitialStateModel = {
     openStatus: false,
     basketItems: [],
-    totalPrice: 0
+    totalPrice: 0,
+    bootstrapIdList: [],
+    products: []
 }
 
 export const basketSlice = createSlice({
@@ -33,7 +38,25 @@ export const basketSlice = createSlice({
             state.totalPrice = action.payload
         },
 
-        resetBasket: () => initialState
+        resetBasket: () => initialState,
+
+        setBootstrapIdList: (state) => {
+            state.bootstrapIdList = state.basketItems.map(({productId}) => productId)
+        },
+
+        setProducts: (state, action: PayloadAction<Product[]>) => {
+            state.products = action.payload
+        },
+
+        addProduct: (state, action: PayloadAction<Product>) => {
+            const isExist = state.products.some(({id}) => id === action.payload.id)
+            if(!isExist) state.products.push(action.payload)
+        },
+      
+        deleteProduct: (state, action: PayloadAction<Product>) => {
+            state.products = state.products.filter(({id}) => id !== action.payload.id)
+        }
+       
     }
 })
 
@@ -41,5 +64,9 @@ export const {
     setOpenStatus,
     setBasketItems,
     setTotalPrice,
-    resetBasket
+    resetBasket,
+    setBootstrapIdList,
+    setProducts,
+    addProduct,
+    deleteProduct,
 } = basketSlice.actions

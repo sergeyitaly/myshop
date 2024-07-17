@@ -26,8 +26,6 @@ export const AppImage = ({
         }
     }, [src]) 
 
-    console.log(className);
-    
 
     return (
         <div className={style.container}>
