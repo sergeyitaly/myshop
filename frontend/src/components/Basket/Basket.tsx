@@ -4,12 +4,14 @@ import { useBasket } from '../../hooks/useBasket'
 import useClickOutside from '../../hooks/useClickOutside'
 import { MainButton } from '../UI/MainButton/MainButton'
 import { AppIcon } from '../SvgIconComponents/AppIcon'
-import { BasketItemWrapper } from './components/BasketItemWrapper'
 import { EmptyBasket } from './components/EmptyBasket/EmptyBasket'
 import clsx from 'clsx'
 import { useNavigate } from 'react-router-dom'
 import { ROUTE } from '../../constants'
 import { formatNumber } from '../../functions/formatNumber'
+import { BasketItem } from '../Cards/BasketItem/BasketItem'
+import { BasketItemSkeleton } from '../Cards/BasketItem/BasketItemSkeleton/BasketItemSkeleton'
+import { MapComponent } from '../MapComponent'
 
 export const Basket = (): JSX.Element => {
 
@@ -21,6 +23,7 @@ export const Basket = (): JSX.Element => {
         totalPrice, 
         isEmptyBasket,
         productQty,
+        isLoading,
         closeBasket, 
         deleteFromBasket, 
         increaceCounter, 
@@ -73,16 +76,32 @@ export const Basket = (): JSX.Element => {
                         })}>
                             {
                                 !isEmptyBasket ?
-                                basketItems.map(({productId, qty}) => (
-                                    <BasketItemWrapper
-                                        key={productId}
-                                        productId={productId}
-                                        qty={qty}
-                                        onClickDelete={deleteFromBasket}
-                                        onClickIncrement={increaceCounter}
-                                        onClickDecrement={reduceCounter}
-                                    />
-                                ))
+                                <>
+                                    {
+                                        basketItems.map(({product, qty}) => (
+                                            product &&
+                                            <BasketItem
+                                                key={product.id}
+                                                product={product}
+                                                qty={qty}
+                                                color={{color: product.color_value || '', name: product.color_name || ''}}
+                                                size={product.size || ''}
+                                                onClickDelete={deleteFromBasket}
+                                                onClickIncrement={increaceCounter}
+                                                onClickDecrement={reduceCounter}
+                                            />
+                                        )
+                                        )
+                                    }
+                                    {
+                                        isLoading && 
+                                        <MapComponent 
+                                            component={<BasketItemSkeleton/>} 
+                                            qty={productQty}
+                                        />
+                                        
+                                    }
+                                </>
                                 :
                                 <EmptyBasket/>
                             }

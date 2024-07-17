@@ -18,7 +18,7 @@ import { AnimatePresence } from 'framer-motion';
 export const Header = () => {
     const {openBasket, productQty} = useBasket()
 
-    const {open, value, toggleSearchBar, handleChange, closeSearchBar} = useSearch()
+    const {open, value, debounceValue, toggleSearchBar, handleChange, closeSearchBar} = useSearch()
 
     const navigate = useNavigate()
 
@@ -53,6 +53,7 @@ export const Header = () => {
                     open &&    
                     <SearchWindow
                         value={value}
+                        queryText={debounceValue}
                         onChange={handleChange}
                         onClickClose={closeSearchBar}
                         onClickProduct={handleClickProduct}

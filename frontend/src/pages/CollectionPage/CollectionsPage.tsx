@@ -7,8 +7,8 @@ import { useGetCollectionsByFilterQuery } from '../../api/collectionSlice';
 import { NamedSection } from '../../components/NamedSection/NamedSection';
 import { PreviewItemsContainer } from '../../components/containers/PreviewItemsContainer/PreviewItemsContainer';
 import { Pagination } from '../../components/UI/Pagination/Pagination';
-import { motion} from 'framer-motion'
 import styles from './style.module.scss'
+import { MotionItem } from '../../components/MotionComponents/MotionItem';
 
 
 
@@ -39,17 +39,6 @@ const CollectionsPage: React.FC = () => {
     setCurrentPage(page)
   }
   
-
-  const variants = {
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: i * 0.15,
-      },
-    }),
-    hidden: { opacity: 0, y: 200 },
-  }
  
   return (
     <main>
@@ -58,17 +47,14 @@ const CollectionsPage: React.FC = () => {
         >
           <PreviewItemsContainer
             isLoading = {isLoading}
+            itemsQtyWhenLoading={limit}
           >
               {
                 collections.map((collection, i) => (
-                  <motion.div
-                      key={collection.id}
-                      custom={i}
-                      initial = 'hidden'
-                      animate = 'visible'
-                      variants={variants}
+                  <MotionItem
+                    key={collection.id}
+                    index={i}
                   >
-                   
                     <PreviewCard
                         photoSrc={collection.photo}
                         title={collection.name}
@@ -76,7 +62,7 @@ const CollectionsPage: React.FC = () => {
                         subTitle={collection.category}
                         onClick={() => handleClickCollectionCard(collection.id)}
                     />
-                  </motion.div>
+                  </MotionItem>                   
                 ))
               }
           </PreviewItemsContainer>

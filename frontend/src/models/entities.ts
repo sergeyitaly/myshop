@@ -57,7 +57,7 @@ export interface User {
     email: string
 }
 
-interface Color {
+export interface Color {
     name?: string
     color: string
 }
