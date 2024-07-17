@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { useBasket } from '../../../hooks/useBasket'
-import { OrderItemWrapper } from './OrderItemWrapper'
 import styles from './OrderPreview.module.scss'
 import { formatPrice } from '../../../functions/formatPrice'
+import { OrderItemCard } from '../../../components/Cards/OrderItemCard/OrderItemCard'
 
 interface OrderPreviewProps {
     className?: string
@@ -23,10 +23,11 @@ export const OrderPreview = ({
             </div>
             <div className={styles.content}>
             {
-                basketItems.map((item) => (
-                    <OrderItemWrapper 
-                        key={item.productId}
-                        basketItem={item}
+                basketItems.map(({product, qty}) => (
+                    product &&
+                    <OrderItemCard 
+                        product={product}
+                        qty={qty}
                         onClickDelete={deleteFromBasket}
                         onClickDecrement={reduceCounter}
                         onClickIncrement={increaceCounter}
