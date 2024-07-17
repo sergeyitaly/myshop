@@ -6,10 +6,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from shop.loadimages_tos3 import LoadImagesToS3
 from distutils.util import strtobool
-from django.core.validators import FileExtensionValidator
 import os
-import ssl
-import certifi
+
 
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -249,20 +247,24 @@ DJOSER = {
 #MAILCHIMP_MARKETING_AUDIENCE_ID =os.getenv('MAILCHIMP_MARKETING_AUDIENCE_ID')
 
 
-ANYMAIL = {
-    "MAILERSEND_API_TOKEN": os.getenv('MAILERSEND_API_TOKEN'),
-    }
+#ANYMAIL = {
+#    "MAILERSEND_API_TOKEN": os.getenv('MAILERSEND_API_TOKEN'),
+#    }
 
 #EMAIL_BACKEND = "anymail.backends.mailersend.EmailBackend"
 #EMAIL_BACKEND = 'django_mailersend.backend.MailerSendEmailBackend'
 
 DEFAULT_FROM_EMAIL=os.getenv('DEFAULT_FROM_EMAIL')
 #EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_BACKEND = 'django_mailersend.backend.MailerSendEmailBackend'
-MAILERSEND_API_KEY=os.getenv('MAILERSEND_API_KEY')
-MAILERSEND_SMTP_PORT = 587
-MAILERSEND_SMTP_USERNAME = os.getenv('MAILERSEND_SMTP_USERNAME')
-MAILERSEND_SMTP_HOST = 'smtp.mailersend.net'
+#EMAIL_BACKEND = 'django_mailersend.backend.MailerSendEmailBackend'
+EMAIL_BACKEND = 'myshop.custom_email_backend.CustomEmailBackend'
+
+#MAILERSEND_API_KEY=os.getenv('MAILERSEND_API_KEY')
+MAILERSEND_API_KEY=os.getenv('MAILERSEND_API_TOKEN')
+
+#MAILERSEND_SMTP_PORT = 587
+#MAILERSEND_SMTP_USERNAME = os.getenv('MAILERSEND_SMTP_USERNAME')
+#MAILERSEND_SMTP_HOST = 'smtp.mailersend.net'
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
