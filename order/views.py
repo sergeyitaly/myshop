@@ -6,8 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status, viewsets
 from .models import Order, OrderItem
 from .serializers import OrderSerializer, OrderItemSerializer
-from django.core.mail import send_mail
-import os
+from mailersend import emails
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -33,18 +32,33 @@ def create_order(request):
                 [f"{item.quantity} of product ID {item.product_id}" for item in order.order_items.all()]
             )
             subject = 'Order Confirmation'
-            message = f'Thank you for your order, {order.name}!\n\nYour order details:\n\n{order_items_info}'
-            from_email = settings.DEFAULT_FROM_EMAIL
-            recipient_list = [order.email]
+            html_content = f'<p>Thank you for your order, {order.name}!</p><p>Your order details:</p><p>{order_items_info}</p>'
+            plaintext_content = f'Thank you for your order, {order.name}!\n\nYour order details:\n\n{order_items_info}'
 
-            # Send email using Django's send_mail function with MailerSend backend
-            send_mail(
-                subject=subject,
-                message=message,
-                from_email=from_email,
-                recipient_list=recipient_list,
-                fail_silently=False,  # Set this to True to suppress errors
-            )
+            # MailerSend setup
+            mailer = emails.NewEmail(settings.MAILERSEND_API_KEY)
+
+            mail_body = {}
+            mail_from = {
+                "name": "Your Shop Name",
+                "email": settings.DEFAULT_FROM_EMAIL,
+            }
+            recipients = [
+                {
+                    "name": order.name,
+                    "email": order.email,
+                }
+            ]
+            
+            # Configure email parameters
+            mailer.set_mail_from(mail_from, mail_body)
+            mailer.set_mail_to(recipients, mail_body)
+            mailer.set_subject(subject, mail_body)
+            mailer.set_html_content(html_content, mail_body)
+            mailer.set_plaintext_content(plaintext_content, mail_body)
+
+            # Send the email
+            mailer.send(mail_body)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
