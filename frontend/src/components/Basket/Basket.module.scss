@@ -24,8 +24,8 @@
     background-color: $color-background;
     border-radius: 0 0 0 10px;
     @media (max-width: $screen-mobile) {
-        top: 50%;
-        transform: translateY(-50%)
+        top: 10%;
+        height: 80vh;
     }
 }
 

@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom'
 import { ROUTE } from '../../../constants'
 import { useBasket } from '../../../hooks/useBasket'
 import { EmptyItemsErrorHandler } from '../EmptyItemsErrorHandler'
+import { ProductAndPriceFormikUpdate } from './ProductAndPriceFormikUpdate/ProductAndPriceFormikUpdate'
 
 
 const initialValues: OrderDTO = {
@@ -58,12 +59,13 @@ export const OrderForm = ({
             clearBasket()
         }
 
-    }, [isSuccess, clearBasket, navigate])
+    }, [isSuccess ])
     
 
     const handleClickAddComment = () => {
         setOpenComment(!isOpenComment)
     }
+
 
     return (
         
@@ -146,6 +148,7 @@ export const OrderForm = ({
                     <ServerErrorHandling
                         errors={errorResponce && errorResponce.data}
                     />
+                    <ProductAndPriceFormikUpdate/>
                 </Form>
             </Formik>
     )

@@ -16,7 +16,7 @@ import { AnimatePresence } from 'framer-motion';
 
 
 export const Header = () => {
-    const {openBasket, productQty} = useBasket()
+    const {openBasket, isLoading, productQty} = useBasket()
 
     const {open, value, debounceValue, toggleSearchBar, handleChange, closeSearchBar} = useSearch()
 
@@ -41,6 +41,7 @@ export const Header = () => {
                     />
                     {/* <Cart onClose={handleCloseCart} isOpen={cartOpen} /> */}
                     <IconButton
+                        disabled = {isLoading}
                         className={styles.headerButton}
                         iconName='cart'
                         badgeValue={productQty}
