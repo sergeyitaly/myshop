@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { STORAGE } from "../constants"
 import { BasketItemModel, Product } from "../models/entities"
 import { setBasketItems, setOpenStatus, setTotalPrice, resetBasket, setBootstrapIdList, setProducts, addProduct, deleteProduct } from "../store/basketSlice"
@@ -28,10 +28,12 @@ export const useBasket = () => {
     }, [data])
 
 
-    const composedItems = basketItems.map((basketItem) => {
-        const product = products.find(({id}) => id === basketItem.productId)
-            return {...basketItem, product: product ? product : null}
-    })
+    const composedItems = useMemo(() => {
+        return basketItems.map((basketItem) => {
+            const product = products.find(({id}) => id === basketItem.productId)
+                return {...basketItem, product: product ? product : null}
+        })
+    }, [products, basketItems]) 
     
 
     const getBasketContent = (): BasketItemModel[] => {
@@ -133,6 +135,10 @@ export const useBasket = () => {
         saveToLocalStorageAndUpdateState(contentArray)
     }
 
+    const setItems = (items: BasketItemModel[]) => {
+        dispatch(setBasketItems(items))
+    }
+
     const clearBasket = () => {
         localStorage.removeItem(STORAGE.BASKET)
         dispatch(resetBasket())
@@ -153,6 +159,7 @@ export const useBasket = () => {
         increaceCounter,
         reduceCounter,
         clearBasket,
+        setItems,
         isLoading,
         productQty: basketItems.length,
         isEmptyBasket

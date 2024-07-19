@@ -10,8 +10,8 @@ import { useNavigate } from 'react-router-dom'
 import { ROUTE } from '../../constants'
 import { formatNumber } from '../../functions/formatNumber'
 import { BasketItem } from '../Cards/BasketItem/BasketItem'
-import { BasketItemSkeleton } from '../Cards/BasketItem/BasketItemSkeleton/BasketItemSkeleton'
-import { MapComponent } from '../MapComponent'
+import {AnimatePresence, motion, Reorder} from 'framer-motion'
+import { box, item, modal } from './motion.setings'
 
 export const Basket = (): JSX.Element => {
 
@@ -23,11 +23,11 @@ export const Basket = (): JSX.Element => {
         totalPrice, 
         isEmptyBasket,
         productQty,
-        isLoading,
         closeBasket, 
         deleteFromBasket, 
         increaceCounter, 
-        reduceCounter
+        reduceCounter,
+        setItems
 
     } = useBasket()
 
@@ -52,13 +52,21 @@ export const Basket = (): JSX.Element => {
     }
 
     return (
-        <>
+        <AnimatePresence>
             {
                 openStatus && 
-                <div className={styles.container}>
-                    <div 
+                <motion.div 
+                    className={styles.container}
+                    variants={modal}
+                    initial='hidden'
+                    animate='visible'
+                    exit='hidden'
+                >
+                    
+                    <motion.div 
                         ref={basketBox}
                         className={styles.box}
+                        variants={box}
                     >
                         <header className={clsx(styles.header, {
                             [styles.endline]: isEmptyBasket
@@ -71,41 +79,56 @@ export const Basket = (): JSX.Element => {
                                 <AppIcon iconName='cross'/>
                             </button>
                         </header>
-                        <div className={clsx(styles.content, {
-                            [styles.center]: isEmptyBasket
-                        })}>
-                            {
-                                !isEmptyBasket ?
-                                <>
+                                {
+                                    !isEmptyBasket ?
+                                    <Reorder.Group 
+                                        className={clsx(styles.content, {
+                                            [styles.center]: isEmptyBasket
+                                        })}
+                                        as='div' 
+                                        axis="y" 
+                                        values={basketItems} 
+                                        onReorder={setItems}
+                                    >
+                                    <AnimatePresence >
                                     {
-                                        basketItems.map(({product, qty}) => (
+                                        basketItems.map((basketItem) => {
+                                            const {product, qty, productId} = basketItem
+                                            return (
                                             product &&
-                                            <BasketItem
-                                                key={product.id}
-                                                product={product}
-                                                qty={qty}
-                                                color={{color: product.color_value || '', name: product.color_name || ''}}
-                                                size={product.size || ''}
-                                                onClickDelete={deleteFromBasket}
-                                                onClickIncrement={increaceCounter}
-                                                onClickDecrement={reduceCounter}
-                                            />
-                                        )
-                                        )
-                                    }
-                                    {
-                                        isLoading && 
-                                        <MapComponent 
-                                            component={<BasketItemSkeleton/>} 
-                                            qty={productQty}
-                                        />
-                                        
-                                    }
-                                </>
+                                                <Reorder.Item
+                                                    as='div'
+                                                    key={productId}
+                                                    initial={{ opacity: 0, height: 0 }}
+                                                    animate={{ opacity: 1, height: 'auto' }}
+                                                    exit={{ opacity: 0, height: 0, transition: {duration: .3} }}
+                                                    value={basketItem}
+                                                >
+                                                    <motion.div variants={item} >
+                                                        <BasketItem
+                                                            product={product}
+                                                            qty={qty}
+                                                            color={{color: product.color_value || '', name: product.color_name || ''}}
+                                                            size={product.size || ''}
+                                                            onClickDelete={deleteFromBasket}
+                                                            onClickIncrement={increaceCounter}
+                                                            onClickDecrement={reduceCounter}
+                                                        />
+                                                    </motion.div>
+                                                </Reorder.Item>
+                                            )})
+                                    }   
+                                    </AnimatePresence>
+                                </Reorder.Group>
                                 :
-                                <EmptyBasket/>
-                            }
-                        </div>
+                                <div  className={clsx(styles.content, {
+                                        [styles.center]: isEmptyBasket
+                                    })}
+                                >
+                                    <EmptyBasket/>
+                                </div>
+                        }
+                        
                         {
                             !isEmptyBasket &&
                             <div className={styles.totalPrice}>
@@ -124,9 +147,9 @@ export const Basket = (): JSX.Element => {
                                 onClick={closeBasket}
                             />
                         </div>
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
             }
-        </>
+        </AnimatePresence>
     )
 } 
