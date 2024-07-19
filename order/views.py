@@ -61,7 +61,7 @@ def create_order(request):
             formatted_date = localtime(order.submitted_at).strftime('%Y-%m-%d %H:%M')
 
             order_details = f"""
-            <p><strong>Замовлення:</strong> {order.id}</p>
+            <p><strong>Замовлення:</strong> {order.id} на сайті <a href='{settings.VERCEL_DOMAIN}'>KOLORYT!</a> </p>
             <p><strong>Ім'я:</strong> {order.name}</p>
             <p><strong>Прізвище:</strong> {order.surname}</p>
             <p><strong>Телефон:</strong> {order.phone}</p>
@@ -115,8 +115,8 @@ def create_order(request):
             </table>
             """
 
-            # Complete HTML content with total sum
-            email_body = order_details + "<h3><strong>В замовленні:</strong></h3>" + order_items_table + f"<p><strong>Загальна сума: {total_sum} {currency}</strong></p><br><br><p>Дякуємо за замовлення у KOLORYT! <a href='https://{settings.VERCEL_DOMAIN}'>{settings.VERCEL_DOMAIN}</a></p><br><p>Менеджер зв'яжеться з Вами скоро за вказаним номером телефону для уточнення деталей замовлення.</p>"
+            # Complete HTML content with total sum and KOLORYT as a link
+            email_body = order_details + "<h3><strong>В замовленні:</strong></h3>" + order_items_table + f"<p><strong>Загальна сума: {total_sum} {currency}</strong></p><br><br><p>Дякуємо за замовлення у <a href='{settings.VERCEL_DOMAIN}'>KOLORYT!</a></p><br><p>Менеджер зв'яжеться з Вами скоро за вказаним номером телефону для уточнення деталей замовлення.</p>"
 
             # Define the email data
             subject = f"KOLORYT. Замовлення № {order.id}"
