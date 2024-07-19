@@ -58,7 +58,10 @@ def create_order(request):
                     <td>{item.product.collection.name}</td>
                     <td>{item.quantity}</td>
                     <td>{item.product.size}</td>
-                    <td>{item.product.color_name}<br>{item.product.color_value}</td>
+                    <td>
+                        <div style="display: inline-block; width: 10px; height: 10px; background-color: {item.product.color_value};"></div>
+                        {item.product.color_name}
+                    </td>
                     <td>{item.product.price} {currency}</td>
                 </tr>
                 """
