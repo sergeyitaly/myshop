@@ -88,8 +88,8 @@ def create_order(request):
             </table>
             """
 
-            # Complete HTML content with total sum
-            email_body = order_details + "<h3><strong>В замовленні:</strong></h3>" + order_items_table + f"<p><strong>Загальна сума: {total_sum} {currency}</strong></p><br><br><p>Дякуємо за замовлення у KOLORYT!</p><br><p>Менеджер зв'яжеться з Вами скоро за вказаним номером телефону для уточнення деталей замовлення.</p>"
+            # Complete HTML content with total sum and Vercel domain as a clickable link
+            email_body = order_details + "<h3><strong>В замовленні:</strong></h3>" + order_items_table + f"<p><strong>Загальна сума: {total_sum} {currency}</strong></p><br><br><p>Дякуємо за замовлення у <a href=\"{settings.VERCEL_DOMAIN}\">KOLORYT</a>!</p><br><p>Менеджер зв'яжеться з Вами скоро за вказаним номером телефону для уточнення деталей замовлення.</p>"
 
             # Define the email data
             subject = f"KOLORYT. Замовлення № {order.id}"
