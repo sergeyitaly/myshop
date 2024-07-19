@@ -10,7 +10,6 @@ interface InitialStateModel {
     openStatus: boolean
     basketItems: BasketItemModel[]
     totalPrice: number
-    bootstrapIdList: number[]
     products: Product[]
 }
 
@@ -18,7 +17,6 @@ const initialState: InitialStateModel = {
     openStatus: false,
     basketItems: [],
     totalPrice: 0,
-    bootstrapIdList: [],
     products: []
 }
 
@@ -39,10 +37,6 @@ export const basketSlice = createSlice({
         },
 
         resetBasket: () => initialState,
-
-        setBootstrapIdList: (state) => {
-            state.bootstrapIdList = state.basketItems.map(({productId}) => productId)
-        },
 
         setProducts: (state, action: PayloadAction<Product[]>) => {
             state.products = action.payload
@@ -65,7 +59,6 @@ export const {
     setBasketItems,
     setTotalPrice,
     resetBasket,
-    setBootstrapIdList,
     setProducts,
     addProduct,
     deleteProduct,

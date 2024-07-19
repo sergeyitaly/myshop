@@ -13,10 +13,15 @@ import { ROUTE } from '../../constants';
 import { Product } from '../../models/entities';
 import { AnimatePresence } from 'framer-motion';
 
+interface HeaderProps {
+    basketLoadingStatus: boolean
+}
 
 
-export const Header = () => {
-    const {openBasket, isLoading, productQty} = useBasket()
+export const Header = ({
+    basketLoadingStatus
+}: HeaderProps) => {
+    const {openBasket, productQty} = useBasket()
 
     const {open, value, debounceValue, toggleSearchBar, handleChange, closeSearchBar} = useSearch()
 
@@ -41,7 +46,7 @@ export const Header = () => {
                     />
                     {/* <Cart onClose={handleCloseCart} isOpen={cartOpen} /> */}
                     <IconButton
-                        disabled = {isLoading}
+                        disabled = {basketLoadingStatus}
                         className={styles.headerButton}
                         iconName='cart'
                         badgeValue={productQty}
