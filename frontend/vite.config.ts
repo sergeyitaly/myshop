@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
-import reactRefresh from '@vitejs/plugin-react-refresh';
 import path from 'path';
 import { PreRenderedAsset } from "rollup";
 import commonjs from 'vite-plugin-commonjs';
@@ -32,7 +31,6 @@ export default defineConfig({
   plugins: [
     svgr(),
     react(),
-    reactRefresh(),
     commonjs()
   ],
   resolve: {
