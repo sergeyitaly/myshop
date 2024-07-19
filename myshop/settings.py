@@ -266,9 +266,11 @@ DJOSER = {
 
 ANYMAIL = {
     "MAILGUN_API_KEY": os.getenv('MAILGUN_API_KEY'),
-    "MAILGUN_SENDER_DOMAIN": os.getenv('MAILGUN_SENDER_DOMAIN'),  
+    "MAILGUN_SENDER_DOMAIN": os.getenv('MAILGUN_SENDER_DOMAIN'),
+      
 }
 EMAIL_TIMEOUT = 60  # 60 seconds
+
 
 EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 DEFAULT_FROM_EMAIL = os.getenv('MAILGUN_SMTP_USERNAME')
