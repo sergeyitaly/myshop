@@ -1,4 +1,5 @@
-import logging
+from django.utils.dateformat import format
+from django.utils.timezone import localtime
 from django.conf import settings
 from django.core.mail import EmailMessage
 from rest_framework.decorators import api_view, permission_classes
@@ -9,6 +10,7 @@ from .models import Order, OrderItem
 from .serializers import OrderSerializer, OrderItemSerializer
 
 # Set up logging
+import logging
 logger = logging.getLogger(__name__)
 
 class OrderItemViewSet(viewsets.ModelViewSet):
@@ -18,6 +20,7 @@ class OrderItemViewSet(viewsets.ModelViewSet):
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_order(request):
@@ -27,11 +30,11 @@ def create_order(request):
             order = serializer.save()
             order_items = order.order_items.all()  # Fetch related order items
 
-            # Format the order details with a simplified datetime
-            formatted_date = format(order.submitted_at, 'Y-m-d H:i')
+            # Format the order creation datetime with timezone-aware local time
+            formatted_date = localtime(order.submitted_at).strftime('%Y-%m-%d %H:%M')
 
             order_details = f"""
-            <p>Замовлення: № {order.id}</p>
+            <p>Замовлення: {order.id}</p>
             <p>Ім'я: {order.name}</p>
             <p>Прізвище: {order.surname}</p>
             <p>Телефон: {order.phone}</p>
@@ -93,6 +96,7 @@ def create_order(request):
             email.send()
 
             logger.info("Email sent successfully")
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             logger.error(f"Order data is invalid: {serializer.errors}")
