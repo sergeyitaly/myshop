@@ -45,17 +45,23 @@ def create_order(request):
             <p><strong>Пакування як подарунок:</strong> {"Так" if order.present else "Ні"}</p>
             """
 
-            # Generate HTML table for order items
+            # Assume all items have the same currency; get it from the first item
+            currency = order_items.first().product.currency if order_items.exists() else "UAH"  # Default to UAH if no items
+
+            # Generate HTML table for order items with columns rearranged
             order_items_rows = "".join([
                 f"""
                 <tr>
-                    <td><img src="{item.product.photo.url}" alt="{item.product.name}" style="max-height: 150px; max-width: 150px;" /></td>
-                    <td>{item.quantity}</td>
+                    <td>{index + 1}</td>
+                    <td><img src="{item.product.photo.url}" alt="{item.product.name}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
                     <td>{item.product.name}</td>
-                    <td>{item.product.price}</td>
+                    <td>{item.quantity}</td>
+                    <td>{item.product.size}</td>
+                    <td>{item.product.color_name}</td>
+                    <td>{item.product.price} {currency}</td>
                 </tr>
                 """
-                for item in order_items
+                for index, item in enumerate(order_items)
             ])
 
             # Calculate the total sum of all order items
@@ -65,9 +71,12 @@ def create_order(request):
             <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
                 <thead>
                     <tr>
-                        <th>Фото</th>
+                        <th>Номер</th>
+                        <th>Фото продукту</th>
+                        <th>Назва продукту</th>
                         <th>Кількість</th>
-                        <th>Продукт</th>
+                        <th>Розмір</th>
+                        <th>Колір</th>
                         <th>Ціна</th>
                     </tr>
                 </thead>
@@ -77,8 +86,8 @@ def create_order(request):
             </table>
             """
 
-            # Complete HTML content
-            email_body = order_details + "<h3><strong>В замовленні:</strong></h3>" + order_items_table + f"<p><strong>Загальна сума: {total_sum}</strong></p>"
+            # Complete HTML content with total sum
+            email_body = order_details + "<h3><strong>В замовленні:</strong></h3>" + order_items_table + f"<p><strong>Загальна сума: {total_sum} {currency}</strong></p><br><br><p>Дякуємо за замовлення у KOLORYT!</p><br><p>Менеджер зв'яжеться з Вами скоро за вказаним номером телефону для уточнення деталей замовлення.</p>"
 
             # Define the email data
             subject = f"KOLORYT. Замовлення № {order.id}"
