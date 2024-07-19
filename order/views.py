@@ -2,7 +2,7 @@ from django.utils.dateformat import format
 from django.utils.timezone import localtime
 from django.conf import settings
 from django.core.mail import EmailMessage
-from rest_framework.decorators import api_view, permission_classes, schema
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status, viewsets
@@ -26,7 +26,6 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
-
     @swagger_auto_schema(
         operation_description="Retrieve an order by ID",
         responses={200: OrderSerializer, 404: 'Not Found'}
@@ -48,7 +47,6 @@ class OrderViewSet(viewsets.ModelViewSet):
     )
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
-    
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -87,7 +85,7 @@ def create_order(request):
                     <td>{item.product.collection.name}</td>
                     <td>{item.quantity}</td>
                     <td>{item.product.size}</td>
-                    <td>{item.product.color_name}<div style="width: 10px; height: 10px; background-color: {item.product.color_value}; display: inline-block;"></div></td>
+                    <td>{item.product.color_name}<br> <div style="width: 10px; height: 10px; background-color: {item.product.color_value}; display: inline-block;"></div></td>
                     <td>{item.product.price} {currency}</td>
                 </tr>
                 """
@@ -118,7 +116,7 @@ def create_order(request):
             """
 
             # Complete HTML content with total sum
-            email_body = order_details + "<h3><strong>В замовленні:</strong></h3>" + order_items_table + f"<p><strong>Загальна сума: {total_sum} {currency}</strong></p><br><br><p>Дякуємо за замовлення у KOLORYT! <a href='http://{settings.VERCEL_DOMAIN}'>{settings.VERCEL_DOMAIN}</a></p><br><p>Менеджер зв'яжеться з Вами скоро за вказаним номером телефону для уточнення деталей замовлення.</p>"
+            email_body = order_details + "<h3><strong>В замовленні:</strong></h3>" + order_items_table + f"<p><strong>Загальна сума: {total_sum} {currency}</strong></p><br><br><p>Дякуємо за замовлення у KOLORYT! <a href='https://{settings.VERCEL_DOMAIN}'>{settings.VERCEL_DOMAIN}</a></p><br><p>Менеджер зв'яжеться з Вами скоро за вказаним номером телефону для уточнення деталей замовлення.</p>"
 
             # Define the email data
             subject = f"KOLORYT. Замовлення № {order.id}"
