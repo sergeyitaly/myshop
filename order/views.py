@@ -116,8 +116,38 @@ def create_order(request):
             """
 
             # Complete HTML content with total sum and KOLORYT as a link
-            email_body = order_details + "<h3><strong>В замовленні:</strong></h3>" + order_items_table + f"<p><strong>Загальна сума: {total_sum} {currency}</strong></p><br><br><p>Дякуємо за замовлення у <a href='{settings.VERCEL_DOMAIN}'>KOLORYT!</a></p><br><p>Менеджер зв'яжеться з Вами скоро за вказаним номером телефону для уточнення деталей замовлення.</p>"
+            unsubscribe_link = settings.VERCEL_DOMAIN
+            email_body = f"""
+            <html>
+            <head>
+                <style>
+                    /* Add any CSS styling here */
+                </style>
+            </head>
+            <body>
+                <p><strong>Замовлення:</strong> {order.id} на сайті <a href='{settings.VERCEL_DOMAIN}'>KOLORYT!</a></p>
+                <p><strong>Ім'я:</strong> {order.name}</p>
+                <p><strong>Прізвище:</strong> {order.surname}</p>
+                <p><strong>Телефон:</strong> {order.phone}</p>
+                <p><strong>Email:</strong> {order.email}</p>
+                <p><strong>Отримувач той самий:</strong> {"Так" if order.receiver else "Ні"}</p>
+                <p><strong>Коментар:</strong> {order.receiver_comments}</p>
+                <p><strong>Створено:</strong> {formatted_date}</p>
+                <p><strong>Пакування як подарунок:</strong> {"Так" if order.present else "Ні"}</p>
 
+                <h3><strong>В замовленні:</strong></h3>
+                {order_items_table}
+
+                <p><strong>Загальна сума: {total_sum} {currency}</strong></p>
+
+                <br><br>
+                <p>Дякуємо за замовлення у <a href='{settings.VERCEL_DOMAIN}'>KOLORYT!</a></p>
+                <p>Менеджер зв'яжеться з Вами скоро за вказаним номером телефону для уточнення деталей замовлення.</p>
+                <br>
+                <p>Якщо ви хочете відмовитися від отримання електронних листів, будь ласка, натисніть <a href='{unsubscribe_link}'>тут</a>.</p>
+            </body>
+            </html>
+            """
             # Define the email data
             subject = f"KOLORYT. Замовлення № {order.id}"
             recipient_list = [order.email]
