@@ -14,7 +14,8 @@ export const OrderPreview = ({
     className
 }: OrderPreviewProps) => {
 
-    const { basketItems, totalPrice, deleteFromBasket, reduceCounter, increaceCounter } = useBasket()
+    const { basketItems, totalPrice, deleteFromBasket, changeCounter} = useBasket()
+
 
     return (
         <div className={clsx(className, styles.container )}>
@@ -29,8 +30,7 @@ export const OrderPreview = ({
                         product={product}
                         qty={qty}
                         onClickDelete={deleteFromBasket}
-                        onClickDecrement={reduceCounter}
-                        onClickIncrement={increaceCounter}
+                        onChangeCounter={(val) => changeCounter(product, val)}
                     />
                 ))
             }
