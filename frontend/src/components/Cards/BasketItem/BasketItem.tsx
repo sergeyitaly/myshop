@@ -14,8 +14,8 @@ interface BasketItemProps {
     color: Color
     size: string
     onClickDelete: (product: Product) => void 
-    onClickIncrement: (product: Product) => void 
-    onClickDecrement: (product: Product) => void 
+    onClickName?: (product: Product) => void
+    onChangeCounter?: (product: Product, qty: number) => void
 }
 
 
@@ -25,22 +25,23 @@ export const BasketItem = ({
     size,
     qty,
     onClickDelete,
-    onClickIncrement,
-    onClickDecrement
+    onClickName,
+    onChangeCounter
 }: BasketItemProps) => {
 
     const {photo, name, available, price, currency} = product
+
 
     const handleClickDelete = () => {
         onClickDelete && onClickDelete(product)
     }
 
-    const handleClickIncrement = () => {
-        onClickIncrement && onClickIncrement(product)
+    const handleClickName = () => {
+        onClickName && onClickName(product)
     }
 
-    const handleClickDecrement = () => {
-        onClickDecrement && onClickDecrement(product)
+    const handleChangeCounter = (value: number) => {
+        onChangeCounter && onChangeCounter(product, value)
     }
 
     return (
@@ -52,7 +53,10 @@ export const BasketItem = ({
             </div>
             <div className={styles.info}>
                 <div className={styles.header}>
-                    <h4 className={styles.title}>{name}</h4>
+                    <h4 
+                        className={styles.title}
+                        onClick={handleClickName}
+                    >{name}</h4>
                     <IconButton
                         className={styles.icon}
                         iconName="delete"
@@ -62,6 +66,7 @@ export const BasketItem = ({
                 <ProductVariants
                     className={styles.characteristic}
                     title="Колір"
+                    value={color.name}
                 >
                     <ValueBox
                         className={styles.noPointer}
@@ -85,8 +90,7 @@ export const BasketItem = ({
                     <Counter
                         className={styles.selfTop}
                         value={qty}
-                        onIncrement={handleClickIncrement}
-                        onReduce={handleClickDecrement}
+                        onChangeCounter={handleChangeCounter}
                     />  
                 </div>
                 <AvailableLable

@@ -15,8 +15,6 @@ export const BasketItemWrapper = ({
     productId,
     qty,
     onClickDelete,
-    onClickIncrement,
-    onClickDecrement
 }: BasketItemWrapperProps) => {
 
     const {data, isLoading} = useGetOneProductByIdQuery(productId)
@@ -30,7 +28,5 @@ export const BasketItemWrapper = ({
             color={{color: data.color_value || '', name: data.color_name || ''}}
             size={data.size || ''}
             onClickDelete={onClickDelete}
-            onClickIncrement={onClickIncrement}
-            onClickDecrement={onClickDecrement}
         />)
 }

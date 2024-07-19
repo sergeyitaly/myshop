@@ -15,9 +15,14 @@ export const useCounter = (initialQty: number) => {
       }
     };
 
+    const setCounter = (number: number) => {
+      setQty(number)
+    }
+
     return {
         qty,
         handleIncrement,
-        handleDecrement
+        handleDecrement,
+        setCounter
     }
 }
