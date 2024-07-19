@@ -135,6 +135,14 @@ export const useBasket = () => {
         saveToLocalStorageAndUpdateState(contentArray)
     }
 
+    const changeCounter = (product: Product, counter: number) => {
+        const contentArray: BasketItemModel[] = getBasketContent().map(({productId, qty}) => ({
+            productId,
+            qty: productId===product.id ? counter : qty
+        }))
+        saveToLocalStorageAndUpdateState(contentArray)
+    }
+
     const setItems = (items: BasketItemModel[]) => {
         dispatch(setBasketItems(items))
     }
@@ -160,6 +168,7 @@ export const useBasket = () => {
         reduceCounter,
         clearBasket,
         setItems,
+        changeCounter,
         isLoading,
         productQty: basketItems.length,
         isEmptyBasket

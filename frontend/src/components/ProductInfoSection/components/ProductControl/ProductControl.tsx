@@ -32,14 +32,12 @@ export const ProductControl = ({
 
     const {
       qty,
-      handleIncrement,
-      handleDecrement
+      setCounter
     } = useCounter(1)
 
     const {addToBasket, openBasket} = useBasket()
 
     const navigate = useNavigate()
-
 
 
     const handleAddToBasket = () => {
@@ -97,8 +95,7 @@ export const ProductControl = ({
             <Counter
                 className={style.counter}
                 value={qty}
-                onIncrement={handleIncrement}
-                onReduce={handleDecrement}
+                onChangeCounter={setCounter}
             />    
           </div>
           <MainButton

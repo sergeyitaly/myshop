@@ -10,16 +10,14 @@ interface OrderItemCardProps {
     product: Product
     qty: number
     onClickDelete?: (product: Product) => void
-    onClickIncrement?: (product: Product) => void
-    onClickDecrement?: (product: Product) => void
+    onChangeCounter?: (value: number) => void
 }
 
 export const OrderItemCard = ({
     product,
     qty,
     onClickDelete,
-    onClickDecrement,
-    onClickIncrement
+    onChangeCounter
 }: OrderItemCardProps) => {
 
     const { photo, name, available, price, currency } = product
@@ -28,13 +26,7 @@ export const OrderItemCard = ({
         onClickDelete && onClickDelete(product)
     }
     
-    const handleClickIncrement = () => {
-        onClickIncrement && onClickIncrement(product)
-    }
-    
-    const handleClickReduce = () => {
-        onClickDecrement && onClickDecrement(product)
-    }
+   
 
     return (
         <div className={styles.card}>
@@ -53,8 +45,7 @@ export const OrderItemCard = ({
                     <Counter
                         className={styles.counter}
                         value={qty}
-                        onIncrement={handleClickIncrement}
-                        onReduce={handleClickReduce}
+                        onChangeCounter={onChangeCounter}
                     />
                     <button 
                         className={styles.deleteButton}
