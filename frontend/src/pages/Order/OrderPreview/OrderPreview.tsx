@@ -27,6 +27,7 @@ export const OrderPreview = ({
                 basketItems.map(({product, qty}) => (
                     product &&
                     <OrderItemCard 
+                        key={product.id}
                         product={product}
                         qty={qty}
                         onClickDelete={deleteFromBasket}
