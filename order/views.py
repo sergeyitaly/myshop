@@ -2,12 +2,15 @@ from django.utils.dateformat import format
 from django.utils.timezone import localtime
 from django.conf import settings
 from django.core.mail import EmailMessage
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, schema
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from .models import Order, OrderItem
 from .serializers import OrderSerializer, OrderItemSerializer
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from rest_framework.permissions import IsAuthenticated
 
 # Set up logging
 import logging
@@ -16,10 +19,36 @@ logger = logging.getLogger(__name__)
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
+    permission_classes = [IsAuthenticated]  # Ensure this matches your settings
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+
+
+    @swagger_auto_schema(
+        operation_description="Retrieve an order by ID",
+        responses={200: OrderSerializer, 404: 'Not Found'}
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Delete an order by ID",
+        responses={204: 'No Content', 404: 'Not Found'}
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Partially update an order by ID",
+        request_body=OrderSerializer,
+        responses={200: OrderSerializer, 400: 'Bad Request', 404: 'Not Found'}
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+    
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -58,10 +87,7 @@ def create_order(request):
                     <td>{item.product.collection.name}</td>
                     <td>{item.quantity}</td>
                     <td>{item.product.size}</td>
-                    <td>
-                        <div style="display: inline-block; width: 10px; height: 10px; background-color: {item.product.color_value};"></div>
-                        {item.product.color_name}
-                    </td>
+                    <td>{item.product.color_name}<div style="width: 10px; height: 10px; background-color: {item.product.color_value}; display: inline-block;"></div></td>
                     <td>{item.product.price} {currency}</td>
                 </tr>
                 """
@@ -91,8 +117,8 @@ def create_order(request):
             </table>
             """
 
-            # Complete HTML content with total sum and Vercel domain as a clickable link
-            email_body = order_details + "<h3><strong>В замовленні:</strong></h3>" + order_items_table + f"<p><strong>Загальна сума: {total_sum} {currency}</strong></p><br><br><p>Дякуємо за замовлення у <a href=\"{settings.VERCEL_DOMAIN}\">KOLORYT</a>!</p><br><p>Менеджер зв'яжеться з Вами скоро за вказаним номером телефону для уточнення деталей замовлення.</p>"
+            # Complete HTML content with total sum
+            email_body = order_details + "<h3><strong>В замовленні:</strong></h3>" + order_items_table + f"<p><strong>Загальна сума: {total_sum} {currency}</strong></p><br><br><p>Дякуємо за замовлення у KOLORYT! <a href='http://{settings.VERCEL_DOMAIN}'>{settings.VERCEL_DOMAIN}</a></p><br><p>Менеджер зв'яжеться з Вами скоро за вказаним номером телефону для уточнення деталей замовлення.</p>"
 
             # Define the email data
             subject = f"KOLORYT. Замовлення № {order.id}"

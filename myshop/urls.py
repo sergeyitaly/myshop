@@ -1,5 +1,5 @@
 from django.urls import path, include, re_path
-from django.views.generic import TemplateView
+from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework import permissions
@@ -8,7 +8,6 @@ from drf_yasg import openapi
 from django.contrib import admin
 from dotenv import load_dotenv
 from . import views
-from django.views.generic import RedirectView
 from .views import CustomTokenObtainPairView, CustomTokenRefreshView
 from django.conf.urls.i18n import i18n_patterns
 
@@ -16,9 +15,9 @@ load_dotenv()
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Snippets API",
+        title="KOLORYT API",
         default_version='v1',
-        description="Test description",
+        description="API documentation for KOLORIT project.",
         terms_of_service="https://www.google.com/policies/terms/",
         contact=openapi.Contact(email="contact@snippets.local"),
         license=openapi.License(name="BSD License"),
@@ -41,11 +40,11 @@ urlpatterns = [
     path('api/token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
 
     # App-specific URLs
-    path('api', include('accounts.urls')),  # Example: /accounts/
-    path('api/', include('shop.urls')),  # Example: /products/
-    path('api/', include('order.urls')), # Example: /order/
+    path('api/accounts/', include('accounts.urls')),  # Updated path: /api/accounts/
+    path('api/shop/', include('shop.urls')),  # Updated path: /api/shop/
+    path('api/order/', include('order.urls')),  # Ensure this matches your order URLs
 
-    path('admin/', admin.site.urls),     # Admin URLs: /admin/
+    path('admin/', admin.site.urls),  # Admin URLs: /admin/
     path("", views.index, name="index"),
     # Catch-all URL pattern (redirect to index.html)
     re_path(r'^.*$', RedirectView.as_view(url='/')),
