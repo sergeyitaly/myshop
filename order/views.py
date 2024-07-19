@@ -35,10 +35,10 @@ def create_order(request):
             <p>Прізвище: {order.surname}</p>
             <p>Телефон: {order.phone}</p>
             <p>Email: {order.email}</p>
-            <p>Отримувач той самий: {"Yes" if order.receiver else "No"}</p>
+            <p>Отримувач той самий: {"Так" if order.receiver else "Ні"}</p>
             <p>Коментар: {order.receiver_comments}</p>
             <p>Створено: {order.submitted_at}</p>
-            <p>Пакування як подарунок: {"Yes" if order.present else "No"}</p>
+            <p>Пакування як подарунок: {"Так" if order.present else "Ні"}</p>
             """
 
             # Generate HTML table for order items
@@ -48,11 +48,14 @@ def create_order(request):
                     <td><img src="{item.product.photo.url}" alt="{item.product.name}" style="max-height: 150px; max-width: 150px;" /></td>
                     <td>{item.quantity}</td>
                     <td>{item.product.name}</td>
-                    <td>{item.total_sum}</td>
+                    <td>{item.product.price}</td>
                 </tr>
                 """
                 for item in order_items
             ])
+
+            # Calculate the total sum of all order items
+            total_sum = sum(item.total_sum for item in order_items)
 
             order_items_table = f"""
             <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
@@ -61,7 +64,7 @@ def create_order(request):
                         <th>Фото</th>
                         <th>Кількість</th>
                         <th>Продукт</th>
-                        <th>Загальна сума</th>
+                        <th>Ціна</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -71,7 +74,7 @@ def create_order(request):
             """
 
             # Complete HTML content
-            email_body = order_details + "<h3>В замовленні:</h3>" + order_items_table
+            email_body = order_details + "<h3>В замовленні:</h3>" + order_items_table + f"<p><strong>Загальна сума: {total_sum}</strong></p>"
 
             # Define the email data
             subject = f"KOLORYT Замовлення № {order.id}"
