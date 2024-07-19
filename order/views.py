@@ -34,15 +34,15 @@ def create_order(request):
             formatted_date = localtime(order.submitted_at).strftime('%Y-%m-%d %H:%M')
 
             order_details = f"""
-            <p>Замовлення: {order.id}</p>
-            <p>Ім'я: {order.name}</p>
-            <p>Прізвище: {order.surname}</p>
-            <p>Телефон: {order.phone}</p>
-            <p>Email: {order.email}</p>
-            <p>Отримувач той самий: {"Yes" if order.receiver else "No"}</p>
-            <p>Коментар: {order.receiver_comments}</p>
-            <p>Створено: {formatted_date}</p>
-            <p>Пакування як подарунок: {"Yes" if order.present else "No"}</p>
+            <p><strong>Замовлення:</strong> {order.id}</p>
+            <p><strong>Ім'я:</strong> {order.name}</p>
+            <p><strong>Прізвище:</strong> {order.surname}</p>
+            <p><strong>Телефон:</strong> {order.phone}</p>
+            <p><strong>Email:</strong> {order.email}</p>
+            <p><strong>Отримувач той самий:</strong> {"Так" if order.receiver else "Ні"}</p>
+            <p><strong>Коментар:</strong> {order.receiver_comments}</p>
+            <p><strong>Створено:</strong> {formatted_date}</p>
+            <p><strong>Пакування як подарунок:</strong> {"Так" if order.present else "Ні"}</p>
             """
 
             # Generate HTML table for order items
@@ -78,7 +78,7 @@ def create_order(request):
             """
 
             # Complete HTML content
-            email_body = order_details + "<h3>В замовленні:</h3>" + order_items_table + f"<p><strong>Загальна сума: {total_sum}</strong></p>"
+            email_body = order_details + "<h3><strong>В замовленні:</strong></h3>" + order_items_table + f"<p><strong>Загальна сума: {total_sum}</strong></p>"
 
             # Define the email data
             subject = f"KOLORYT. Замовлення № {order.id}"
