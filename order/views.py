@@ -1,12 +1,12 @@
 import logging
 from django.conf import settings
+from django.core.mail import EmailMessage, get_connection
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from .models import Order, OrderItem
 from .serializers import OrderSerializer, OrderItemSerializer
-from mailersend import emails
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -27,39 +27,31 @@ def create_order(request):
         if serializer.is_valid():
             order = serializer.save()
 
-            # Construct the email content
-            order_items_info = "\n".join(
-                [f"{item.quantity} of product ID {item.product_id}" for item in order.order_items.all()]
-            )
-            subject = 'Order Confirmation'
-            html_content = f'<p>Thank you for your order, {order.name}!</p><p>Your order details:</p><p>{order_items_info}</p>'
-            plaintext_content = f'Thank you for your order, {order.name}!\n\nYour order details:\n\n{order_items_info}'
+            # Define the email data
+            subject = "Order Confirmation"
+            recipient_list = [order.email]
+            from_email = settings.MAILERSEND_SMTP_USERNAME
+            message = f"<p>Thank you for your order, {order.name}!</p><p>Your order details:</p><p>{order.order_items.all()}</p>"
 
-            # MailerSend setup
-            mailer = emails.NewEmail(settings.MAILERSEND_API_KEY)
+            # Use Django's default email backend settings
+            with get_connection(
+                host=settings.MAILERSEND_SMTP_HOST,
+                port=settings.MAILERSEND_SMTP_PORT,
+                username=settings.MAILERSEND_SMTP_USERNAME,
+                password=settings.MAILERSEND_API_KEY,
+                use_tls=True
+            ) as connection:
+                email = EmailMessage(
+                    subject=subject,
+                    body=message,
+                    to=recipient_list,
+                    from_email=from_email,
+                    connection=connection,
+                )
+                email.content_subtype = "html"  # Set the email content type to HTML
+                email.send()
 
-            mail_body = {}
-            mail_from = {
-                "name": "Your Shop Name",
-                "email": settings.DEFAULT_FROM_EMAIL,
-            }
-            recipients = [
-                {
-                    "name": order.name,
-                    "email": order.email,
-                }
-            ]
-            
-            # Configure email parameters
-            mailer.set_mail_from(mail_from, mail_body)
-            mailer.set_mail_to(recipients, mail_body)
-            mailer.set_subject(subject, mail_body)
-            mailer.set_html_content(html_content, mail_body)
-            mailer.set_plaintext_content(plaintext_content, mail_body)
-
-            # Send the email
-            mailer.send(mail_body)
-
+            logger.info("Email sent successfully")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             logger.error(f"Order data is invalid: {serializer.errors}")
