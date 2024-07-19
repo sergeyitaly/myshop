@@ -18,7 +18,6 @@ class OrderItemViewSet(viewsets.ModelViewSet):
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_order(request):
@@ -28,17 +27,19 @@ def create_order(request):
             order = serializer.save()
             order_items = order.order_items.all()  # Fetch related order items
 
-            # Format the order details
+            # Format the order details with a simplified datetime
+            formatted_date = format(order.submitted_at, 'Y-m-d H:i')
+
             order_details = f"""
-            <p>Замовлення: {order.id}</p>
+            <p>Замовлення: № {order.id}</p>
             <p>Ім'я: {order.name}</p>
             <p>Прізвище: {order.surname}</p>
             <p>Телефон: {order.phone}</p>
             <p>Email: {order.email}</p>
-            <p>Отримувач той самий: {"Так" if order.receiver else "Ні"}</p>
+            <p>Отримувач той самий: {"Yes" if order.receiver else "No"}</p>
             <p>Коментар: {order.receiver_comments}</p>
-            <p>Створено: {order.submitted_at}</p>
-            <p>Пакування як подарунок: {"Так" if order.present else "Ні"}</p>
+            <p>Створено: {formatted_date}</p>
+            <p>Пакування як подарунок: {"Yes" if order.present else "No"}</p>
             """
 
             # Generate HTML table for order items
@@ -77,7 +78,7 @@ def create_order(request):
             email_body = order_details + "<h3>В замовленні:</h3>" + order_items_table + f"<p><strong>Загальна сума: {total_sum}</strong></p>"
 
             # Define the email data
-            subject = f"KOLORYT Замовлення № {order.id}"
+            subject = f"KOLORYT. Замовлення № {order.id}"
             recipient_list = [order.email]
             from_email = settings.DEFAULT_FROM_EMAIL
 
