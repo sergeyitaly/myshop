@@ -1,31 +1,19 @@
 import { useEffect, useMemo } from "react"
 import { STORAGE } from "../constants"
 import { BasketItemModel, Product } from "../models/entities"
-import { setBasketItems, setOpenStatus, setTotalPrice, resetBasket, setBootstrapIdList, setProducts, addProduct, deleteProduct } from "../store/basketSlice"
+import { setBasketItems, setOpenStatus, setTotalPrice, resetBasket, setProducts, addProduct, deleteProduct } from "../store/basketSlice"
 import { useAppDispatch, useAppSelector } from "../store/hooks"
 import { useSnackbar } from "./useSnackbar"
-import { useGetManyProductsByIdListQuery } from "../api/productSlice"
-import { skipToken } from "@reduxjs/toolkit/query"
 
 export const useBasket = () => {
 
-  
-    const {openStatus, basketItems, totalPrice, bootstrapIdList, products} = useAppSelector(state => state.basket)
+    const {openStatus, basketItems, totalPrice, products} = useAppSelector(state => state.basket)
 
     const isEmptyBasket = !basketItems.length 
-    const isEmptyBootstrapIdList = !bootstrapIdList.length
 
     const dispatch = useAppDispatch()
 
     const {openInfo} = useSnackbar()
-
-    const {data, isLoading} = useGetManyProductsByIdListQuery(!isEmptyBootstrapIdList ? bootstrapIdList : skipToken)
-
-    useEffect(() => {
-        if(data){
-            dispatch(setProducts(data))
-        }
-    }, [data])
 
 
     const composedItems = useMemo(() => {
@@ -47,8 +35,6 @@ export const useBasket = () => {
         dispatch(setBasketItems(content))
     }
 
-    
-
     useEffect(() => {
         let total = 0
             const priceList = products.map(({id, price}) => {
@@ -60,16 +46,14 @@ export const useBasket = () => {
             })
             total = priceList.reduce((sum, current) => sum + current, 0)
         dispatch(setTotalPrice(total))
-    }, [data, basketItems, dispatch])
+    }, [products, basketItems, dispatch])
 
     useEffect(() => {
         dispatch(setBasketItems(getBasketContent()))
     }, [openStatus, dispatch])
 
 
-    const bootstrap = () => {
-        dispatch(setBootstrapIdList())
-    }
+    
     
 
     const openBasket = () => {
@@ -159,7 +143,6 @@ export const useBasket = () => {
         basketItems: composedItems, 
         openStatus,
         totalPrice,
-        bootstrap,
         openBasket,
         closeBasket,
         addToBasket,
@@ -169,7 +152,6 @@ export const useBasket = () => {
         clearBasket,
         setItems,
         changeCounter,
-        isLoading,
         productQty: basketItems.length,
         isEmptyBasket
     }
