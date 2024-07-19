@@ -55,6 +55,7 @@ def create_order(request):
                     <td>{index + 1}</td>
                     <td><img src="{item.product.photo.url}" alt="{item.product.name}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
                     <td>{item.product.name}</td>
+                    <td>{item.product.collection.name}</td>
                     <td>{item.quantity}</td>
                     <td>{item.product.size}</td>
                     <td>{item.product.color_name}</td>
@@ -74,6 +75,7 @@ def create_order(request):
                         <th>Номер</th>
                         <th>Фото продукту</th>
                         <th>Назва продукту</th>
+                        <th>Колекція</th>
                         <th>Кількість</th>
                         <th>Розмір</th>
                         <th>Колір</th>
