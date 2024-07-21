@@ -21,6 +21,9 @@ export const Counter = ({
         onChangeCounter && onChangeCounter(val)
     }, [val])
 
+    useEffect(() => {
+        setVal(value)
+    }, [value])
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const v = +e.target.value
