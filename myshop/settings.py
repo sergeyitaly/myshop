@@ -254,17 +254,27 @@ DJOSER = {
 #EMAIL_BACKEND = "anymail.backends.mailersend.EmailBackend"
 #EMAIL_BACKEND = 'django_mailersend.backend.MailerSendEmailBackend'
 
-DEFAULT_FROM_EMAIL=os.getenv('DEFAULT_FROM_EMAIL')
 #EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-#EMAIL_BACKEND = 'django_mailersend.backend.MailerSendEmailBackend'
-EMAIL_BACKEND = 'myshop.custom_email_backend.CustomEmailBackend'
-
+#EMAIL_USE_TLS = True
 #MAILERSEND_API_KEY=os.getenv('MAILERSEND_API_KEY')
-MAILERSEND_API_KEY=os.getenv('MAILERSEND_API_TOKEN')
-
 #MAILERSEND_SMTP_PORT = 587
 #MAILERSEND_SMTP_USERNAME = os.getenv('MAILERSEND_SMTP_USERNAME')
+#MAILERSEND_PASSWORD=os.getenv('MAILERSEND_PASSWORD')
 #MAILERSEND_SMTP_HOST = 'smtp.mailersend.net'
+
+
+
+ANYMAIL = {
+    "MAILGUN_API_KEY": os.getenv('MAILGUN_API_KEY'),
+    "MAILGUN_SENDER_DOMAIN": os.getenv('MAILGUN_SENDER_DOMAIN'),
+      
+}
+EMAIL_TIMEOUT = 60  # 60 seconds
+
+
+EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+DEFAULT_FROM_EMAIL = os.getenv('MAILGUN_SMTP_USERNAME')
+SERVER_EMAIL = os.getenv('MAILGUN_SMTP_USERNAME')
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
