@@ -14,19 +14,14 @@ class CollectionSerializer(serializers.ModelSerializer):
     photo_thumbnail_url = serializers.SerializerMethodField()
 
     def get_photo_url(self, obj):
-        try:
-            if obj.photo:
-                return obj.photo.url
-        except FileNotFoundError:
-            return None
+        if obj.photo:
+            return obj.photo.url
         return None
 
     def get_photo_thumbnail_url(self, obj):
-        try:
-            if obj.photo_thumbnail:
-                return obj.photo_thumbnail.url
-        except FileNotFoundError:
-            return None
+        if obj.photo:
+            # Assuming the thumbnail URL follows the naming pattern or storage conventions
+            return obj.photo.url.replace('photos/collection', 'photos/collection/thumbnails')
         return None
 
     class Meta:
@@ -37,11 +32,8 @@ class ProductImageSerializer(serializers.ModelSerializer):
     images_thumbnail_url = serializers.SerializerMethodField()
 
     def get_images_thumbnail_url(self, obj):
-        try:
-            if obj.images_thumbnail:
-                return obj.images_thumbnail.url
-        except FileNotFoundError:
-            return None
+        if obj.images_thumbnail:
+            return obj.images_thumbnail.url
         return None
 
     class Meta:
@@ -64,19 +56,14 @@ class ProductSerializer(serializers.ModelSerializer):
     additional_fields = AdditionalFieldSerializer(many=True, read_only=True)
 
     def get_photo_url(self, obj):
-        try:
-            if obj.photo:
-                return obj.photo.url
-        except FileNotFoundError:
-            return None
+        if obj.photo:
+            return obj.photo.url
         return None
 
     def get_photo_thumbnail_url(self, obj):
-        try:
-            if obj.photo_thumbnail:
-                return obj.photo_thumbnail.url
-        except FileNotFoundError:
-            return None
+        if obj.photo:
+            # Assuming the thumbnail URL follows the naming pattern or storage conventions
+            return obj.photo.url.replace('photos/product', 'photos/product/thumbnails')
         return None
 
     class Meta:
@@ -88,19 +75,14 @@ class CreateCollectionSerializer(serializers.ModelSerializer):
     photo_thumbnail_url = serializers.SerializerMethodField()
 
     def get_photo_url(self, obj):
-        try:
-            if obj.photo:
-                return obj.photo.url
-        except FileNotFoundError:
-            return None
+        if obj.photo:
+            return obj.photo.url
         return None
 
     def get_photo_thumbnail_url(self, obj):
-        try:
-            if obj.photo_thumbnail:
-                return obj.photo_thumbnail.url
-        except FileNotFoundError:
-            return None
+        if obj.photo:
+            # Assuming the thumbnail URL follows the naming pattern or storage conventions
+            return obj.photo.url.replace('photos/collection', 'photos/collection/thumbnails')
         return None
 
     class Meta:
