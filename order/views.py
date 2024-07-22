@@ -200,9 +200,9 @@ def create_order(request):
             email.content_subtype = "html"  # Set the content type to HTML
             email.send()
 
-            telegram_message = f"Ви отримали нове замовлення № {order.id}. Від <a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>"
+            telegram_message = f"Ви отримали нове замовлення № {order.id}. Від <a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. Деталі замовлення відправлено {order.email}"
             send_telegram_message(telegram_message)
-            
+
             return Response({'message': 'Order created successfully'}, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
