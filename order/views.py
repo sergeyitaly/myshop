@@ -196,11 +196,15 @@ def create_order(request):
             recipient_list = [order.email]
 
             # Send the email
-            email = EmailMessage(subject, email_body, settings.DEFAULT_FROM_EMAIL, recipient_list)
-            email.content_subtype = "html"  # Set the content type to HTML
-            email.send()
+            try:
+                email = EmailMessage(subject, email_body, settings.DEFAULT_FROM_EMAIL, recipient_list)
+                email.content_subtype = "html"
+                email.send()
+                logger.info(f"Order email sent to {order.email}")
+            except Exception as e:
+                logger.error(f"Failed to send email: {e}")
 
-            telegram_message = f"Ви отримали нове замовлення № {order.id}. Від <a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. Деталі замовлення відправлено {order.email}"
+            telegram_message = f"Ви створили нове замовлення № {order.id} на сайті <a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. Деталі замовлення відправлено на email: {order.email}"
             send_telegram_message(telegram_message)
 
             return Response({'message': 'Order created successfully'}, status=status.HTTP_201_CREATED)
