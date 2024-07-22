@@ -18,15 +18,38 @@ from django.views import View
 import logging
 import requests
 import json
+import random
+import os
 
 logger = logging.getLogger(__name__)
+
+def get_random_saying(file_path):
+    """Read sayings from a file and return a single random saying."""
+    if not os.path.exists(file_path):
+        logger.error(f"Failed to read sayings file: [Errno 2] No such file or directory: '{file_path}'")
+        return "No sayings available."
+    
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            sayings = [line.strip() for line in file if line.strip()]
+        
+        if not sayings:
+            logger.error("Sayings file is empty.")
+            return "No sayings available."
+        
+        return random.choice(sayings)
+    except Exception as e:
+        logger.error(f"Error reading sayings file: {e}")
+        return "No sayings available."
+
+    
 def set_telegram_webhook():
     url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/setWebhook"
     webhook_url = f"{settings.VERCEL_DOMAIN}/telegram-webhook/"  # Ensure this endpoint matches your Django webhook view
     payload = {'url': webhook_url}
     response = requests.post(url, json=payload)
     response.raise_for_status()
-    print('Webhook set:', response.json())
+    logger.info('Webhook set: %s', response.json())
 
 @method_decorator(csrf_exempt, name='dispatch')
 class TelegramWebhook(View):
@@ -39,15 +62,29 @@ class TelegramWebhook(View):
         return JsonResponse({'status': 'ok'})
 
 telegram_webhook = TelegramWebhook.as_view()
-def send_telegram_message(message):
+
+def send_telegram_message(order_id, email):
     bot_token = settings.TELEGRAM_BOT_TOKEN
     chat_id = settings.TELEGRAM_CHAT_ID
     url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
+    
+    # Get a single random saying from the sayings.txt file
+    sayings_file_path = settings.SAYINGS_FILE_PATH
+    random_saying = get_random_saying(sayings_file_path)
+    
+    message = (f"<b>Вітаємо!</b>\n\n"
+               f"Ви створили нове замовлення № <b>{order_id}</b> на сайті "
+               f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>.\n"
+               f"Деталі замовлення відправлено на email: <b>{email}</b>.\n\n"
+               f"<i>💬 {random_saying}</i>\n\n"  
+               f"<b>Дякуємо, що обрали нас!</b> 🌟")
+        
     payload = {
         'chat_id': chat_id,
         'text': message,
         'parse_mode': 'HTML'
     }
+    
     try:
         response = requests.post(url, data=payload)
         response.raise_for_status()
@@ -58,6 +95,7 @@ def send_telegram_message(message):
     except requests.exceptions.RequestException as e:
         logger.error(f"Request to Telegram API failed: {e}")
         raise
+
 
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
@@ -177,39 +215,29 @@ def create_order(request):
                 <p><strong>Коментар:</strong> {order.receiver_comments}</p>
                 <p><strong>Створено:</strong> {formatted_date}</p>
                 <p><strong>Пакування як подарунок:</strong> {"Так" if order.present else "Ні"}</p>
-
-                <h3><strong>В замовленні:</strong></h3>
                 {order_items_table}
-
-                <p><strong>Загальна сума: {total_sum} {currency}</strong></p>
-
-                <br><br>
-                <p>Дякуємо за замовлення у <a href='{settings.VERCEL_DOMAIN}'>KOLORYT!</a></p>
-                <p>Менеджер зв'яжеться з Вами скоро за вказаним номером телефону для уточнення деталей замовлення.</p>
-                <br>
-                <p>Якщо ви хочете відмовитися від отримання електронних листів, будь ласка, натисніть <a href='{unsubscribe_link}'>тут</a>.</p>
+                <p><strong>Загальна сума:</strong> {total_sum} {currency}</p>
+                <p>Для відписки перейдіть за посиланням <a href="{unsubscribe_link}">{unsubscribe_link}</a>.</p>
             </body>
             </html>
             """
-            # Define the email data
-            subject = f"KOLORYT. Замовлення № {order.id}"
             recipient_list = [order.email]
 
-            # Send the email
-            try:
-                email = EmailMessage(subject, email_body, settings.DEFAULT_FROM_EMAIL, recipient_list)
-                email.content_subtype = "html"
-                email.send()
-                logger.info(f"Order email sent to {order.email}")
-            except Exception as e:
-                logger.error(f"Failed to send email: {e}")
+            # Send email with order details
+            email = EmailMessage(
+                subject=f"Замовлення {order.id} на сайті KOLORYT!",
+                body=email_body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=recipient_list,
+                headers={'Content-Type': 'text/html'}
+            )
+            email.send()
 
-            telegram_message = f"Ви створили нове замовлення № {order.id} на сайті <a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. Деталі замовлення відправлено на email: {order.email}"
-            send_telegram_message(telegram_message)
+            # Send a Telegram message about the new order
+            send_telegram_message(order.id, order.email)
 
-            return Response({'message': 'Order created successfully'}, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         logger.error(f"Error creating order: {e}")
-        return Response({'message': 'An error occurred while creating the order'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'error': 'Error creating order'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
