@@ -13,10 +13,12 @@ Django==4.2.14
 django-admin-interface==0.28.6
 django-allauth==0.63.6
 django-anymail==11.0
+django-appconf==1.0.6
 django-colorfield==0.11.0
 django-cors-headers==4.3.1
 django-extensions==3.2.3
 django-filter==24.2
+django-imagekit==5.0.0
 django-mailersend==0.2.1
 django-mailgun-mime==0.1.7
 django-phonenumber-field==8.0.0
@@ -43,6 +45,7 @@ nodeenv==1.9.1
 oauthlib==3.2.2
 packaging==24.0
 phonenumbers==8.13.39
+pilkit==3.0
 pillow==10.3.0
 platformdirs==4.2.2
 pre-commit==2.21.0
