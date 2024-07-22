@@ -6,15 +6,58 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status, viewsets
-from .models import Order, OrderItem
+from .models import Order, OrderItem, TelegramUser
 from .serializers import OrderSerializer, OrderItemSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.permissions import IsAuthenticated
-
-# Set up logging
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+from django.views import View
 import logging
+import requests
+import json
+
 logger = logging.getLogger(__name__)
+def set_telegram_webhook():
+    url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/setWebhook"
+    webhook_url = f"{settings.VERCEL_DOMAIN}/telegram-webhook/"  # Ensure this endpoint matches your Django webhook view
+    payload = {'url': webhook_url}
+    response = requests.post(url, json=payload)
+    response.raise_for_status()
+    print('Webhook set:', response.json())
+
+@method_decorator(csrf_exempt, name='dispatch')
+class TelegramWebhook(View):
+    def post(self, request, *args, **kwargs):
+        data = json.loads(request.body)
+        chat_id = data['message']['chat']['id']
+        phone = data['message']['contact']['phone_number']
+        
+        TelegramUser.objects.update_or_create(phone=phone, defaults={'chat_id': chat_id})
+        return JsonResponse({'status': 'ok'})
+
+telegram_webhook = TelegramWebhook.as_view()
+def send_telegram_message(message):
+    bot_token = settings.TELEGRAM_BOT_TOKEN
+    chat_id = settings.TELEGRAM_CHAT_ID
+    url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
+    payload = {
+        'chat_id': chat_id,
+        'text': message,
+        'parse_mode': 'HTML'
+    }
+    try:
+        response = requests.post(url, data=payload)
+        response.raise_for_status()
+        result = response.json()
+        if not result.get('ok'):
+            logger.error(f"Telegram API returned an error: {result.get('description')}")
+        return result
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Request to Telegram API failed: {e}")
+        raise
 
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
@@ -151,24 +194,18 @@ def create_order(request):
             # Define the email data
             subject = f"KOLORYT. Замовлення № {order.id}"
             recipient_list = [order.email]
-            from_email = settings.DEFAULT_FROM_EMAIL
 
-            # Send email using EmailMessage for HTML content
-            email = EmailMessage(
-                subject=subject,
-                body=email_body,
-                from_email=from_email,
-                to=recipient_list
-            )
-            email.content_subtype = "html"  # Specify that the email body is HTML
+            # Send the email
+            email = EmailMessage(subject, email_body, settings.DEFAULT_FROM_EMAIL, recipient_list)
+            email.content_subtype = "html"  # Set the content type to HTML
             email.send()
 
-            logger.info("Email sent successfully")
-
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            telegram_message = f"Ви отримали нове замовлення № {order.id}. Від <a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>"
+            send_telegram_message(telegram_message)
+            
+            return Response({'message': 'Order created successfully'}, status=status.HTTP_201_CREATED)
         else:
-            logger.error(f"Order data is invalid: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        logger.exception("Error processing order")
-        return Response({'message': f'Error processing order: {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f"Error creating order: {e}")
+        return Response({'message': 'An error occurred while creating the order'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
