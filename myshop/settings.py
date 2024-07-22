@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'storages',
+    'imagekit',
     'drf_yasg',
     'django_filters',
     "phonenumber_field",
