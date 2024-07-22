@@ -17,11 +17,11 @@ class AdditionalFieldInline(admin.TabularInline):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     form = ProductForm
-    list_display = ('id', 'name', 'collection', 'main_product_image', 'price', 'currency', 'stock', 'available', 'sales_count', 'popularity')
+    list_display = ('id', 'name', 'collection', 'main_product_image', 'price', 'currency', 'discount', 'stock', 'available', 'sales_count', 'popularity')
     search_fields = ['name']
     readonly_fields = ('id', 'slug', 'main_product_image_display', 'display_gallery')
     fields = (
-        'id', 'name', 'collection', 'description', 'price', 'currency', 'stock', 'available', 'sales_count',
+        'id', 'name', 'collection', 'description', 'price', 'currency', 'discount', 'stock', 'available', 'sales_count',
         'popularity', 'color_name', 'color_value', 'size', 'slug', 'photo',
         'main_product_image_display', 'display_gallery'
     )
