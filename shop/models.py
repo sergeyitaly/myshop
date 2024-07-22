@@ -1,8 +1,8 @@
+import os
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.html import format_html
 from django.utils.text import slugify
-import os
 from storages.backends.s3boto3 import S3Boto3Storage
 from dotenv import load_dotenv
 from distutils.util import strtobool
@@ -10,6 +10,9 @@ from django.core.files.images import get_image_dimensions
 from colorfield.fields import ColorField
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
+from imagekit.cachefiles import ImageCacheFile
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 load_dotenv()
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
@@ -38,8 +41,6 @@ def validate_svg(value):
     if ext != '.svg':
         raise ValidationError('Unsupported file extension.')
 
-
-
 class Category(models.Model):
     name = models.CharField(max_length=255)
 
@@ -54,10 +55,15 @@ class Category(models.Model):
 class Collection(models.Model):
     if USE_S3:
         photo = models.ImageField(upload_to="photos/collection", storage=MediaStorage(), null=True, blank=True, validators=[validate_file_extension])
-        photo_thumbnail = ImageSpecField(source='photo', storage=MediaStorage(), processors=[ResizeToFill(100, 100)], format='JPEG', options={'quality': 60})
     else:
         photo = models.ImageField(upload_to="photos/collection", null=True, blank=True, validators=[validate_file_extension])
-        photo_thumbnail = ImageSpecField(source='photo', processors=[ResizeToFill(100, 100)], format='JPEG', options={'quality': 60})
+
+    photo_thumbnail = ImageSpecField(
+        source='photo',
+        processors=[ResizeToFill(100, 50)],
+        format='JPEG',
+        options={'quality': 60}
+    )
 
     name = models.CharField(max_length=255)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -99,14 +105,24 @@ class AdditionalField(models.Model):
 class Product(models.Model):
     if USE_S3:
         photo = models.ImageField(upload_to="photos/product", storage=MediaStorage(), null=True, blank=True, validators=[validate_file_extension])
-        photo_thumbnail = ImageSpecField(source='photo', storage=MediaStorage(), processors=[ResizeToFill(100, 100)], format='JPEG', options={'quality': 60})
         brandimage = models.ImageField(upload_to="photos/svg", storage=MediaStorage(), null=True, blank=True, validators=[validate_file_extension])
-        brandimage_thumbnail = ImageSpecField(source='brandimage', storage=MediaStorage(), processors=[ResizeToFill(100, 100)], format='JPEG', options={'quality': 60})
     else:
         photo = models.ImageField(upload_to="photos/product", null=True, blank=True, validators=[validate_file_extension])
-        photo_thumbnail = ImageSpecField(source='photo', processors=[ResizeToFill(100, 100)], format='JPEG', options={'quality': 60})
         brandimage = models.ImageField(upload_to="photos/svg", null=True, blank=True, validators=[validate_file_extension])
-        brandimage_thumbnail = ImageSpecField(source='brandimage', processors=[ResizeToFill(100, 100)], format='JPEG', options={'quality': 60})
+
+    photo_thumbnail = ImageSpecField(
+        source='photo',
+        processors=[ResizeToFill(100, 50)],
+        format='JPEG',
+        options={'quality': 60}
+    )
+    
+    brandimage_thumbnail = ImageSpecField(
+        source='brandimage',
+        processors=[ResizeToFill(100, 50)],
+        format='JPEG',
+        options={'quality': 60}
+    )
 
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=255)
@@ -175,10 +191,15 @@ class Product(models.Model):
 class ProductImage(models.Model):
     if USE_S3:
         images = models.FileField(upload_to='photos/product', storage=MediaStorage(), validators=[validate_file_extension])
-        images_thumbnail = ImageSpecField(source='images', storage=MediaStorage(), processors=[ResizeToFill(100, 100)], format='JPEG', options={'quality': 60})
     else:
         images = models.FileField(upload_to='photos/product', validators=[validate_file_extension])
-        images_thumbnail = ImageSpecField(source='images', processors=[ResizeToFill(100, 100)], format='JPEG', options={'quality': 60})
+
+    images_thumbnail = ImageSpecField(
+        source='images',
+        processors=[ResizeToFill(100, 50)],
+        format='JPEG',
+        options={'quality': 60}
+    )
 
     product = models.ForeignKey(Product, default=None, on_delete=models.CASCADE)
 
@@ -195,3 +216,25 @@ class ProductImage(models.Model):
         if self.images:
             self.images.delete(save=False)
         super().delete(*args, **kwargs)
+
+# Signal handlers
+@receiver(post_save, sender=Collection)
+def generate_collection_thumbnails(sender, instance, **kwargs):
+    if instance.photo:
+        thumbnail = ImageCacheFile(instance.photo_thumbnail)
+        thumbnail.generate()
+
+@receiver(post_save, sender=Product)
+def generate_product_thumbnails(sender, instance, **kwargs):
+    if instance.photo:
+        thumbnail = ImageCacheFile(instance.photo_thumbnail)
+        thumbnail.generate()
+    if instance.brandimage:
+        thumbnail = ImageCacheFile(instance.brandimage_thumbnail)
+        thumbnail.generate()
+
+@receiver(post_save, sender=ProductImage)
+def generate_product_image_thumbnails(sender, instance, **kwargs):
+    if instance.images:
+        thumbnail = ImageCacheFile(instance.images_thumbnail)
+        thumbnail.generate()

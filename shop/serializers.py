@@ -19,9 +19,8 @@ class CollectionSerializer(serializers.ModelSerializer):
         return None
 
     def get_photo_thumbnail_url(self, obj):
-        if obj.photo:
-            # Assuming the thumbnail URL follows the naming pattern or storage conventions
-            return obj.photo.url.replace('photos/collection', 'photos/collection/thumbnails')
+        if obj.photo_thumbnail:
+            return obj.photo_thumbnail.url
         return None
 
     class Meta:
@@ -61,9 +60,8 @@ class ProductSerializer(serializers.ModelSerializer):
         return None
 
     def get_photo_thumbnail_url(self, obj):
-        if obj.photo:
-            # Assuming the thumbnail URL follows the naming pattern or storage conventions
-            return obj.photo.url.replace('photos/product', 'photos/product/thumbnails')
+        if obj.photo_thumbnail:
+            return obj.photo_thumbnail.url
         return None
 
     class Meta:
@@ -80,9 +78,8 @@ class CreateCollectionSerializer(serializers.ModelSerializer):
         return None
 
     def get_photo_thumbnail_url(self, obj):
-        if obj.photo:
-            # Assuming the thumbnail URL follows the naming pattern or storage conventions
-            return obj.photo.url.replace('photos/collection', 'photos/collection/thumbnails')
+        if obj.photo_thumbnail:
+            return obj.photo_thumbnail.url
         return None
 
     class Meta:
