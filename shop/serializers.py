@@ -14,13 +14,19 @@ class CollectionSerializer(serializers.ModelSerializer):
     photo_thumbnail_url = serializers.SerializerMethodField()
 
     def get_photo_url(self, obj):
-        if obj.photo:
-            return obj.photo.url
+        try:
+            if obj.photo:
+                return obj.photo.url
+        except FileNotFoundError:
+            return None
         return None
 
     def get_photo_thumbnail_url(self, obj):
-        if obj.photo_thumbnail:
-            return obj.photo_thumbnail.url
+        try:
+            if obj.photo_thumbnail:
+                return obj.photo_thumbnail.url
+        except FileNotFoundError:
+            return None
         return None
 
     class Meta:
@@ -31,8 +37,11 @@ class ProductImageSerializer(serializers.ModelSerializer):
     images_thumbnail_url = serializers.SerializerMethodField()
 
     def get_images_thumbnail_url(self, obj):
-        if obj.images_thumbnail:
-            return obj.images_thumbnail.url
+        try:
+            if obj.images_thumbnail:
+                return obj.images_thumbnail.url
+        except FileNotFoundError:
+            return None
         return None
 
     class Meta:
@@ -55,13 +64,19 @@ class ProductSerializer(serializers.ModelSerializer):
     additional_fields = AdditionalFieldSerializer(many=True, read_only=True)
 
     def get_photo_url(self, obj):
-        if obj.photo:
-            return obj.photo.url
+        try:
+            if obj.photo:
+                return obj.photo.url
+        except FileNotFoundError:
+            return None
         return None
 
     def get_photo_thumbnail_url(self, obj):
-        if obj.photo_thumbnail:
-            return obj.photo_thumbnail.url
+        try:
+            if obj.photo_thumbnail:
+                return obj.photo_thumbnail.url
+        except FileNotFoundError:
+            return None
         return None
 
     class Meta:
@@ -73,13 +88,19 @@ class CreateCollectionSerializer(serializers.ModelSerializer):
     photo_thumbnail_url = serializers.SerializerMethodField()
 
     def get_photo_url(self, obj):
-        if obj.photo:
-            return obj.photo.url
+        try:
+            if obj.photo:
+                return obj.photo.url
+        except FileNotFoundError:
+            return None
         return None
 
     def get_photo_thumbnail_url(self, obj):
-        if obj.photo_thumbnail:
-            return obj.photo_thumbnail.url
+        try:
+            if obj.photo_thumbnail:
+                return obj.photo_thumbnail.url
+        except FileNotFoundError:
+            return None
         return None
 
     class Meta:
