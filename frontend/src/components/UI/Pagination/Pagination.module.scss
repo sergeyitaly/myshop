@@ -5,12 +5,12 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 30px
+    gap: clamp(0.625rem, 1.064vw + 0.293rem, 1.25rem)
 }
 
 .pageContainer {
     display: flex;
-    gap: 15px;
+    gap: clamp(0.625rem, 0.532vw + 0.459rem, 0.938rem);
     
     
     
@@ -18,7 +18,7 @@
 
 .pageButton {
     transition: 0.2s;
-    font-size: 24px;
+    font-size: clamp(1rem, 0.851vw + 0.734rem, 1.5rem);
     font-weight: 400;
     color: $color-gray-200;
     &.active {
@@ -29,6 +29,8 @@
 
 .arrowButton {
     svg{
+        width: clamp(1.25rem, 2.128vw + 0.585rem, 2.5rem);
+        height: clamp(1.25rem, 2.128vw + 0.585rem, 2.5rem);
         transition: 0.2s;
     }
 
@@ -43,5 +45,17 @@
             fill: $color-gray-200;
             stroke: $color-gray-200;
         }
+    }
+}
+
+.dot {
+    transition: .3;
+    width: 7px;
+    height: 7px;
+    background: $color-gray-200;
+    border-radius: 50%;
+    &.active {
+        background: $color-black;
+        scale: 1.2;
     }
 }

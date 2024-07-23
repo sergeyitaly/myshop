@@ -26,6 +26,8 @@ const ProductPage: React.FC = () => {
 
   const {data: productsData} = useGetAllProductsFromCollectionQuery(collection?.id ?? skipToken)
   
+  console.log(product);
+  
 
   if (isLoading) {
     return <div >Loading...</div>;
