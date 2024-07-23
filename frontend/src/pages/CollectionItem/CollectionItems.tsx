@@ -1,21 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import style from './style.module.scss';
 import { PreviewCard } from '../../components/Cards/PreviewCard/PreviewCard';
 import { NamedSection } from '../../components/NamedSection/NamedSection';
 import { AppCarousel } from '../../components/AppCarousel/AppCarousel';
-import { useGetAllProductsFromCollectionQuery, useGetOneCollectionByIdQuery } from '../../api/collectionSlice';
+import { useGetOneCollectionByIdQuery, useGetProductsFromCollectionByProductFilterQuery } from '../../api/collectionSlice';
 import { skipToken } from '@reduxjs/toolkit/query';
 import { PreviewItemsContainer } from '../../components/containers/PreviewItemsContainer/PreviewItemsContainer';
 import { ROUTE } from '../../constants';
 import { formatNumber } from '../../functions/formatNumber';
 import { formatCurrency } from '../../functions/formatCurrency';
+import style from './style.module.scss';
+import { Pagination } from '../../components/UI/Pagination/Pagination';
 
 
 
 const CollectionItemsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate()
+
+  const limit = 3
+
+  const [currentPage, setCurrentPage] = useState<number>(1)
 
   const {
     data:collection, 
@@ -28,7 +33,12 @@ const CollectionItemsPage: React.FC = () => {
      isSuccess: isSuccessProductFetshing,
      isLoading: isLoadingProducts,
      isError: isErrorProducts,
-  } = useGetAllProductsFromCollectionQuery( id ? +id : skipToken )
+  } = useGetProductsFromCollectionByProductFilterQuery( collection ? 
+    {collectionId: collection.id,
+      page_size: limit,
+      page: currentPage
+    } 
+    : skipToken )
 
   const products = isSuccessProductFetshing ? productResponce.results : []
   
@@ -36,6 +46,16 @@ const CollectionItemsPage: React.FC = () => {
     navigate(`${ROUTE.PRODUCT}${productId}`)
   }
 
+
+  let totalPages = 0
+
+  if(productResponce){
+    totalPages = Math.ceil(productResponce.count / limit)
+  }
+
+  const handleChangePage = (page: number ) => {
+    setCurrentPage(page)
+  }
 
   return (
     <main className={style.main}>
@@ -62,6 +82,15 @@ const CollectionItemsPage: React.FC = () => {
                 ))
               }
             </PreviewItemsContainer>
+            {
+              productResponce && totalPages > 1 &&
+              <Pagination
+                className={style.pagination}
+                totalPages={totalPages}
+                currentPage={currentPage}
+                onChange = {handleChangePage}
+              />
+            }
           </NamedSection>
       }
         <NamedSection title='Бестселери'>
