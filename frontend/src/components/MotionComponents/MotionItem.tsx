@@ -1,5 +1,5 @@
 
-import {motion} from 'framer-motion'
+import {motion, Variants} from 'framer-motion'
 
 
 interface MotionItemProps {
@@ -18,13 +18,15 @@ export const MotionItem = ({
     index
 }: MotionItemProps) => {
 
-    const variants = {
-        visible: (i: number) => ({
+    const variants: Variants = {
+        visible: (i: number)  => ({
             opacity: 1,
             y: 0,
             transition: {
             delay: i * delay,
+            ease: 'linear'   
             },
+             
         }),
 
         hidden: { opacity: 0, y: offset },

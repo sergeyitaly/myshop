@@ -11,6 +11,7 @@ import { useCounter } from '../../../../hooks/useCounter'
 import { formatPrice } from '../../../../functions/formatPrice'
 import { useNavigate } from 'react-router-dom'
 import { ROUTE } from '../../../../constants'
+import { useEffect } from 'react'
 
 interface ProductControlProps {
     product: Product
@@ -34,6 +35,11 @@ export const ProductControl = ({
       qty,
       setCounter
     } = useCounter(1)
+
+    useEffect(() => {
+      setCounter(1)
+    }, [product.id])
+
 
     const {addToBasket, openBasket} = useBasket()
 

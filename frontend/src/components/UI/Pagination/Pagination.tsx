@@ -1,6 +1,9 @@
 import clsx from 'clsx'
 import { AppIcon } from '../../SvgIconComponents/AppIcon'
 import styles from './Pagination.module.scss'
+import { useMediaQuery } from '@mui/material'
+import { screens } from '../../../constants'
+import { Fragment } from 'react/jsx-runtime'
 
 interface PaginationProps {
     className?: string
@@ -17,8 +20,9 @@ export const Pagination = ({
     onChange
 }: PaginationProps) => {
 
-    const pageArray = Array.from({length: totalPages}, (_, i) => i + 1)
+    const isMobile = useMediaQuery(screens.maxMobile)
 
+    const pageArray = Array.from({length: totalPages}, (_, i) => i + 1)
     const isFirstPage = currentPage === pageArray[0]
     const isLastPage = currentPage === pageArray[pageArray.length - 1]
 
@@ -49,15 +53,27 @@ export const Pagination = ({
             <div className={styles.pageContainer}>
                 {
                     pageArray.map((number) => (
-                    <button 
-                        key = {number}
-                        className={clsx(styles.pageButton, {
-                            [styles.active]: currentPage === number
-                        })}
-                        onClick={() => handleClickPage(number)}
-                    >
-                            {number}
-                    </button>
+                        <Fragment key={number}>
+                            {
+                                isMobile ?
+                                <button
+                                    className={clsx(styles.dot, {
+                                        [styles.active]: currentPage === number
+                                    })}
+                                    onClick={() => handleClickPage(number)}
+                                />
+                                :
+
+                                <button 
+                                    className={clsx(styles.pageButton, {
+                                        [styles.active]: currentPage === number
+                                    })}
+                                    onClick={() => handleClickPage(number)}
+                                >
+                                        {number}
+                                </button>
+                            }
+                        </Fragment>
                     )) 
                 }
             </div>
