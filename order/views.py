@@ -42,7 +42,6 @@ def get_random_saying(file_path):
         logger.error(f"Error reading sayings file: {e}")
         return "No sayings available."
 
-    
 def set_telegram_webhook():
     url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/setWebhook"
     webhook_url = f"{settings.VERCEL_DOMAIN}/telegram-webhook/"  # Ensure this endpoint matches your Django webhook view
@@ -128,7 +127,6 @@ class OrderViewSet(viewsets.ModelViewSet):
     )
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
-
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_order(request):
@@ -142,12 +140,12 @@ def create_order(request):
             formatted_date = localtime(order.submitted_at).strftime('%Y-%m-%d %H:%M')
 
             order_details = f"""
-            <p><strong>Замовлення:</strong> {order.id} на сайті <a href='{settings.VERCEL_DOMAIN}'>KOLORYT!</a> </p>
+            <p><strong>Замовлення:</strong> № {order.id} на сайті <a href='{settings.VERCEL_DOMAIN}'>KOLORYT!</a></p>
             <p><strong>Ім'я:</strong> {order.name}</p>
             <p><strong>Прізвище:</strong> {order.surname}</p>
             <p><strong>Телефон:</strong> {order.phone}</p>
             <p><strong>Email:</strong> {order.email}</p>
-            <p><strong>Отримувач той самий:</strong> {"Так" if order.receiver else "Ні"}</p>
+            <p><strong>Отримувач той самий:</strong> {"Ні" if order.receiver else "Так"}</p>
             <p><strong>Коментар:</strong> {order.receiver_comments}</p>
             <p><strong>Створено:</strong> {formatted_date}</p>
             <p><strong>Пакування як подарунок:</strong> {"Так" if order.present else "Ні"}</p>
@@ -161,7 +159,7 @@ def create_order(request):
                 f"""
                 <tr>
                     <td>{index + 1}</td>
-                    <td><img src="{item.product.photo.url}" alt="{item.product.name}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
+                    <td><img src="{settings.VERCEL_DOMAIN}/media/photos/{item.product.photo.name}" alt="{item.product.name}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
                     <td>{item.product.name}</td>
                     <td>{item.product.collection.name}</td>
                     <td>{item.quantity}</td>
@@ -197,7 +195,7 @@ def create_order(request):
             """
 
             # Complete HTML content with total sum and KOLORYT as a link
-            unsubscribe_link = settings.VERCEL_DOMAIN
+            unsubscribe_link = settings.VERCEL_DOMAIN  # Change to actual unsubscribe URL if available
             email_body = f"""
             <html>
             <head>
@@ -206,38 +204,34 @@ def create_order(request):
                 </style>
             </head>
             <body>
-                <p><strong>Замовлення:</strong> {order.id} на сайті <a href='{settings.VERCEL_DOMAIN}'>KOLORYT!</a></p>
-                <p><strong>Ім'я:</strong> {order.name}</p>
-                <p><strong>Прізвище:</strong> {order.surname}</p>
-                <p><strong>Телефон:</strong> {order.phone}</p>
-                <p><strong>Email:</strong> {order.email}</p>
-                <p><strong>Отримувач той самий:</strong> {"Так" if order.receiver else "Ні"}</p>
-                <p><strong>Коментар:</strong> {order.receiver_comments}</p>
-                <p><strong>Створено:</strong> {formatted_date}</p>
-                <p><strong>Пакування як подарунок:</strong> {"Так" if order.present else "Ні"}</p>
+                <h2>Підтвердження замовлення #{order.id} на сайті KOLORYT</h2>
+                {order_details}
                 {order_items_table}
-                <p><strong>Загальна сума:</strong> {total_sum} {currency}</p>
-                <p>Для відписки перейдіть за посиланням <a href="{unsubscribe_link}">{unsubscribe_link}</a>.</p>
+                <p><strong>Разом:</strong> {total_sum} {currency}</p>
+                <p>Якщо у вас є питання, не вагайтеся зв'язатися з нами.</p>
+                <p>З найкращими побажаннями,<br>
+                Команда <a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a></p>
+                <p><a href='{unsubscribe_link}'>Відмовитися від підписок</a></p>
             </body>
             </html>
             """
-            recipient_list = [order.email]
 
-            # Send email with order details
+            # Send confirmation email to the user
             email = EmailMessage(
-                subject=f"Замовлення {order.id} на сайті KOLORYT!",
+                subject=f'Підтвердження замовлення #{order.id}',
                 body=email_body,
                 from_email=settings.DEFAULT_FROM_EMAIL,
-                to=recipient_list,
-                headers={'Content-Type': 'text/html'}
+                to=[order.email],
+                headers={'Content-Type': 'text/html; charset=utf-8'}
             )
-            email.send()
+            email.content_subtype = "html"  # Specify that the email body is HTML
+            email.send(fail_silently=False)
 
-            # Send a Telegram message about the new order
+            # Send Telegram notification
             send_telegram_message(order.id, order.email)
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response({'status': 'Order created', 'order_id': order.id}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         logger.error(f"Error creating order: {e}")
-        return Response({'error': 'Error creating order'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
