@@ -159,7 +159,7 @@ def create_order(request):
                 f"""
                 <tr>
                     <td>{index + 1}</td>
-                    <td><img src="{settings.VERCEL_DOMAIN}/media/photos/{item.product.photo.name}" alt="{item.product.name}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
+                    <td><img src="{item.product.photo.url}" alt="{item.product.name}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
                     <td>{item.product.name}</td>
                     <td>{item.product.collection.name}</td>
                     <td>{item.quantity}</td>
