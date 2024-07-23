@@ -32,6 +32,9 @@ USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
 AWS_FRONTEND_DOMAIN = f"https://{AWS_S3_CUSTOM_DOMAIN}"
 VERCEL_DOMAIN = os.getenv('VERCEL_DOMAIN')
 LOCAL_HOST = os.getenv('LOCAL_HOST')
+TELEGRAM_CHAT_ID=os.getenv('NOTIFICATIONS_BOT')
+TELEGRAM_BOT_TOKEN=os.getenv('NOTIFICATIONS_API')
+SAYINGS_FILE_PATH = os.path.join(BASE_DIR, 'order', 'sayings.txt')
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
@@ -74,6 +77,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'storages',
+    'imagekit',
     'drf_yasg',
     'django_filters',
     "phonenumber_field",
@@ -145,7 +149,7 @@ if USE_S3:
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/'
 else:
     # Local static file settings
-    MEDIA_URL = '/media/'
+    MEDIA_URL = 'media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     #    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # Use whitenoise for serving static files
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
@@ -180,16 +184,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
-# REST_FRAMEWORK = {
-#    'DEFAULT_AUTHENTICATION_CLASSES': [
-#        'rest_framework.authentication.TokenAuthentication',
-#        'rest_framework.authentication.SessionAuthentication',
-#    ],
-#    'DEFAULT_PERMISSION_CLASSES': [
-#        'rest_framework.permissions.IsAuthenticated',
-#    ],
-# }
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -275,6 +269,7 @@ EMAIL_TIMEOUT = 60  # 60 seconds
 EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 DEFAULT_FROM_EMAIL = os.getenv('MAILGUN_SMTP_USERNAME')
 SERVER_EMAIL = os.getenv('MAILGUN_SMTP_USERNAME')
+
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
