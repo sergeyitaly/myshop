@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Skeleton } from '../Skeleton/Skeleton'
 import clsx from 'clsx'
 import style from './AppImage.module.scss'
+import {motion} from 'framer-motion'
 
 
 interface AppImageProps {
@@ -32,11 +32,21 @@ export const AppImage = ({
             <div className={clsx(style.imgWrapper, className)}>
                 {
                     isLoading ?
-                    <Skeleton
-                        className={style.skeleton}
-                    />
+                    // <Skeleton
+                    //     className={style.skeleton}
+                    // />
+                    null
                     :
-                    <img
+                    <motion.img
+                        initial= {{
+                            opacity: 0
+                        }}
+                        animate = {{
+                            opacity: 1
+                        }}
+                        transition={{
+                            duration: 2
+                        }}
                         src={src}
                         alt={alt}
                         loading="lazy"

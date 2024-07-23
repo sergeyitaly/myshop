@@ -29,6 +29,9 @@ const CollectionsPage: React.FC = () => {
     navigate(ROUTE.COLLECTION + id)
   }
 
+  console.log(data);
+  
+
   let totalPages = 0
 
   if(data){
