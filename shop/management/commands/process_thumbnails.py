@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from distutils.util import strtobool
 
 load_dotenv()
+
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
 AWS_MEDIA_LOCATION = os.getenv('AWS_MEDIA', 'media')
 USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
@@ -44,27 +45,23 @@ class Command(BaseCommand):
 
     def process_thumbnails(self, queryset, s3_storage, local_storage, local_media_root, category):
         for obj in queryset:
-            file_name = obj.photo.name if obj.photo else None
+            file_name = obj.photo.name if hasattr(obj, 'photo') and obj.photo else None
             if file_name:
-                self.process_thumbnail(s3_storage, local_storage, local_media_root, file_name, category, 'photo')
+                self.process_image(s3_storage, local_storage, local_media_root, file_name, category)
 
             if hasattr(obj, 'images') and obj.images:
                 file_name = obj.images.name
                 if file_name:
-                    self.process_thumbnail(s3_storage, local_storage, local_media_root, file_name, category)
+                    self.process_image(s3_storage, local_storage, local_media_root, file_name, category)
 
     def process_product_images(self, queryset, s3_storage, local_storage, local_media_root):
         for obj in queryset:
             file_name = obj.images.name if obj.images else None
             if file_name:
-                self.process_image(s3_storage, local_storage, local_media_root, file_name,'product')
-
-    def process_thumbnail(self, s3_storage, local_storage, local_media_root, file_name, category, file_type):
-        self.process_image(s3_storage, local_storage, local_media_root, file_name, category)
+                self.process_image(s3_storage, local_storage, local_media_root, file_name, 'product')
 
     def process_image(self, s3_storage, local_storage, local_media_root, file_name, category):
-        # Correct the path by removing the leading '/'
-        s3_path = file_name.lstrip('/')  # Ensure the path is correctly formatted
+        s3_path = file_name.lstrip('/')  # Correct path for S3
 
         if s3_storage.exists(s3_path):
             self.stdout.write(self.style.SUCCESS(f'Processing file: {s3_path}'))
@@ -73,7 +70,7 @@ class Command(BaseCommand):
             with s3_storage.open(s3_path) as file:
                 image = Image.open(file)
                 
-                # Convert to RGB if the image has an alpha channel
+                # Convert to RGB if necessary
                 if image.mode in ("RGBA", "P"):
                     image = image.convert("RGB")
                 
@@ -86,7 +83,6 @@ class Command(BaseCommand):
                 thumbnail.save(thumbnail_file, format='JPEG')
                 thumbnail_file.seek(0)
                 
-                # Ensure safe file path for thumbnails on S3
                 s3_thumbnail_dir = os.path.join('thumbnails', category)
                 s3_thumbnail_path = os.path.join(s3_thumbnail_dir, os.path.basename(file_name))
                 s3_storage.save(s3_thumbnail_path, thumbnail_file)
@@ -107,7 +103,6 @@ class Command(BaseCommand):
                 image.save(original_image_file, format='JPEG')
                 original_image_file.seek(0)
                 
-                # Ensure safe file path for original images on S3
                 s3_image_dir = os.path.join('photos', category)
                 s3_image_path = os.path.join(s3_image_dir, os.path.basename(file_name))
                 s3_storage.save(s3_image_path, original_image_file)
