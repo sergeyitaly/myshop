@@ -2,20 +2,23 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Collection } from '../../models/entities';
 import { PreviewCard } from '../../components/Cards/PreviewCard/PreviewCard';
-import { ROUTE } from '../../constants';
+import { ROUTE, screens } from '../../constants';
 import { useGetCollectionsByFilterQuery } from '../../api/collectionSlice';
 import { NamedSection } from '../../components/NamedSection/NamedSection';
 import { PreviewItemsContainer } from '../../components/containers/PreviewItemsContainer/PreviewItemsContainer';
 import { Pagination } from '../../components/UI/Pagination/Pagination';
 import styles from './style.module.scss'
 import { MotionItem } from '../../components/MotionComponents/MotionItem';
+import { useMediaQuery } from '@mui/material';
 
 
 
 const CollectionsPage: React.FC = () => {
 
-  const limit = 9
-
+  
+  const isMobile = useMediaQuery(screens.maxMobile)
+  
+  const limit = isMobile ? 8 : 9
 
   const navigate = useNavigate()
 
