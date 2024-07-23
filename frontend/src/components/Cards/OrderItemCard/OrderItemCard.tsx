@@ -2,7 +2,6 @@ import { Product } from "../../../models/entities"
 import defaultPhoto from '../../../assets/default.png'
 import styles from './OrderItemCard.module.scss'
 import { Counter } from "../../Counter/Counter"
-import { AvailableLable } from "../../AvailableLabel/AvailableLabel"
 import { formatPrice } from "../../../functions/formatPrice"
 
 
@@ -20,7 +19,7 @@ export const OrderItemCard = ({
     onChangeCounter
 }: OrderItemCardProps) => {
 
-    const { photo, name, available, price, currency } = product
+    const { photo, name, price, currency } = product
 
     const handleClickDelete = () => {
         onClickDelete && onClickDelete(product)
@@ -41,6 +40,8 @@ export const OrderItemCard = ({
             </div>
             <div className={styles.info}>
                 <div className={styles.title}>{name}</div>
+                <p className={styles.price}>{formatPrice(price, currency)}</p>
+
                 <div className={styles.control}>
                     <Counter
                         className={styles.counter}
@@ -52,8 +53,6 @@ export const OrderItemCard = ({
                         onClick={handleClickDelete}
                     >Видалити</button>
                 </div>
-                <AvailableLable className={styles.available} isAvailable={available}/>
-                <p className={styles.price}>{formatPrice(price, currency)}</p>
             </div>
         </div>
     )
