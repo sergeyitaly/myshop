@@ -10,9 +10,9 @@ from django.core.files.images import get_image_dimensions
 from colorfield.fields import ColorField
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
-from imagekit.cachefiles import ImageCacheFile
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
 
 load_dotenv()
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
@@ -77,7 +77,7 @@ class Collection(models.Model):
             return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(url))
         else:
             return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format('default_collection.jpg'))
-        
+
     def __str__(self):
         return self.name
 
@@ -116,7 +116,7 @@ class Product(models.Model):
         format='JPEG',
         options={'quality': 60}
     )
-    
+
     brandimage_thumbnail = ImageSpecField(
         source='brandimage',
         processors=[ResizeToFill(100, 50)],
@@ -217,24 +217,25 @@ class ProductImage(models.Model):
             self.images.delete(save=False)
         super().delete(*args, **kwargs)
 
-# Signal handlers
+
+from imagekit.processors import ResizeToFill
+from imagekit.models import ImageSpecField
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 @receiver(post_save, sender=Collection)
 def generate_collection_thumbnails(sender, instance, **kwargs):
     if instance.photo:
-        thumbnail = ImageCacheFile(instance.photo_thumbnail)
-        thumbnail.generate()
+        instance.photo_thumbnail.generate()
 
 @receiver(post_save, sender=Product)
 def generate_product_thumbnails(sender, instance, **kwargs):
     if instance.photo:
-        thumbnail = ImageCacheFile(instance.photo_thumbnail)
-        thumbnail.generate()
+        instance.photo_thumbnail.generate()
     if instance.brandimage:
-        thumbnail = ImageCacheFile(instance.brandimage_thumbnail)
-        thumbnail.generate()
+        instance.brandimage_thumbnail.generate()
 
 @receiver(post_save, sender=ProductImage)
 def generate_product_image_thumbnails(sender, instance, **kwargs):
     if instance.images:
-        thumbnail = ImageCacheFile(instance.images_thumbnail)
-        thumbnail.generate()
+        instance.images_thumbnail.generate()
