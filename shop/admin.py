@@ -1,4 +1,3 @@
-# admin.py
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import Product, ProductImage, Category, Collection, AdditionalField
@@ -66,7 +65,7 @@ class CollectionAdmin(admin.ModelAdmin):
 
     def image_tag(self, obj):
         if obj.photo:
-            return format_html('<img src="{}" style="max-height:150px; max-width:150px;" />'.format(obj.photo.url))
+            return format_html('<img src="{}" style="max-height:150px; max-width:150px;" />'.format(obj.photo_thumbnail.url))
         else:
             return format_html('<img src="{}" style="max-height:150px; max-width:150px;" />'.format('collection.jpg'))
     image_tag.short_description = "Image"
