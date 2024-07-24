@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Product } from '../../models/entities';
 import { ProductSlider } from '../../components/ProductSlider/ProductSlider';
-import { ProductSlide } from '../../components/Cards/ProductSlide/ProductSlide';
 import { ProductInfoSection } from '../../components/ProductInfoSection/ProductInfoSection';
 import { MainContainer } from './components/MainContainer';
 import { useProduct } from '../../hooks/useProduct';
 import { ROUTE } from '../../constants';
 import { useGetAllProductsFromCollectionQuery, useGetCollectionByNameQuery } from '../../api/collectionSlice';
 import { skipToken } from '@reduxjs/toolkit/query';
+import { PreviewCard } from '../../components/Cards/PreviewCard/PreviewCard';
+import styles from './ProductPage.module.scss'
 
 
 
@@ -26,7 +27,6 @@ const ProductPage: React.FC = () => {
 
   const {data: productsData} = useGetAllProductsFromCollectionQuery(collection?.id ?? skipToken)
   
-  console.log(product);
   
 
   if (isLoading) {
@@ -58,11 +58,16 @@ const ProductPage: React.FC = () => {
        >
          {
            productsData?.results.map((product) => (
-               <ProductSlide
-                   key={product.id}   
-                   product={product}
-                   onClick={handleClickSlide}
-               />
+              <PreviewCard
+                className={styles.card}
+                key={product.id}
+                title={product.name}
+                discount = {product.discount}
+                price={product.price}
+                currency={product.currency}
+                photoSrc={product.photo}
+                onClick={() => handleClickSlide(product)}
+              />
            ))
          }
        </ProductSlider>
