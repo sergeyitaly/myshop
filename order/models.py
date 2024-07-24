@@ -2,11 +2,14 @@ from django.db import models
 from shop.models import Product
 from phonenumber_field.modelfields import PhoneNumberField
 
-
 class TelegramUser(models.Model):
-    phone = models.CharField(max_length=15, unique=True)
-    chat_id = models.CharField(max_length=50, unique=True)
+    chat_id = models.CharField(max_length=255, unique=True)
+    phone = models.CharField(max_length=20, unique=True)
+
+    def __str__(self):
+        return f"{self.phone} - {self.chat_id}"
     
+
 class Order(models.Model):
     name = models.CharField(max_length=100, default='Default Name')
     surname = models.CharField(max_length=100, default='Default Surname')
