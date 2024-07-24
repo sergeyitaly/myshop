@@ -1,11 +1,16 @@
 import clsx from 'clsx'
 import { AppImage } from '../../AppImage/AppImage'
 import style from './PreviewCard.module.scss'
+import { Currency } from '../../../models/entities'
+import { formatPrice } from '../../../functions/formatPrice'
 
 
 interface PreviewCardProps {
     className?: string
-    photoSrc: string
+    photoSrc: string | null
+    discount?: string
+    currency?: Currency
+    price?: string
     title: string
     subTitle?: string 
     loading?: boolean
@@ -17,7 +22,10 @@ export const PreviewCard = ({
     className,
     photoSrc,
     title,
+    discount,
+    price,
     loading,
+    currency,
     subTitle,
     onClick
 }: PreviewCardProps) => {
@@ -26,7 +34,17 @@ export const PreviewCard = ({
         onClick && onClick()
     }
 
+    const transformedDicount = discount ? Math.ceil(+discount) : null;
 
+    let newPrice = null
+
+    if(price && transformedDicount){
+        newPrice = +price - +price*transformedDicount/100
+    }
+
+    console.log(price, newPrice);
+    
+    
 
     return (
         <div 
@@ -39,10 +57,25 @@ export const PreviewCard = ({
                 className={style.imageSize}
                 src={photoSrc}
                 alt={title}
-
               />
             <p className={style.title}>{title}</p>
-            <p className={style.subTitle}>{subTitle}</p>
+            {subTitle && <p className={style.subTitle}>{subTitle}</p>}
+            {
+                price && currency &&
+                <div className={style.priceContainer}>
+                    <p 
+                        className={clsx(style.subTitle, {[style.crossText]: !!newPrice} )}
+                    >
+                        {formatPrice(price, currency)}
+                    </p>
+                    {newPrice && 
+                        <p 
+                            className={clsx(style.subTitle, style.currentPrice)}
+                        >
+                            {formatPrice(newPrice, currency)}
+                        </p>}
+                </div>
+            }
         </div>
     )
 }

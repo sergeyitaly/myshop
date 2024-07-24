@@ -13,6 +13,7 @@ export interface Product {
     photo: string | null,
     brandimage: string | null,
     name: string,
+    discount: string
     description: string | null,
     price: string,
     stock: number,
