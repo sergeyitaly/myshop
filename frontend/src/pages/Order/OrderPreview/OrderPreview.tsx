@@ -3,6 +3,9 @@ import { useBasket } from '../../../hooks/useBasket'
 import styles from './OrderPreview.module.scss'
 import { formatPrice } from '../../../functions/formatPrice'
 import { OrderItemCard } from '../../../components/Cards/OrderItemCard/OrderItemCard'
+import { ROUTE } from '../../../constants'
+import { Product } from '../../../models/entities'
+import { useNavigate } from 'react-router-dom'
 
 interface OrderPreviewProps {
     className?: string
@@ -14,7 +17,13 @@ export const OrderPreview = ({
     className
 }: OrderPreviewProps) => {
 
+    const navigate = useNavigate()
+
     const { basketItems, totalPrice, deleteFromBasket, changeCounter} = useBasket()
+
+    const handleClickCard = (product: Product) => {
+        navigate(ROUTE.PRODUCT+product.id)
+    }
 
 
     return (
@@ -32,6 +41,8 @@ export const OrderPreview = ({
                         qty={qty}
                         onClickDelete={deleteFromBasket}
                         onChangeCounter={(val) => changeCounter(product, val)}
+                        onClickName={handleClickCard}
+                        onClickPhoto={handleClickCard}
                     />
                 ))
             }
