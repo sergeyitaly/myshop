@@ -18,7 +18,7 @@ const CollectionItemsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate()
 
-  const limit = 3
+  const limit = 4
 
   const [currentPage, setCurrentPage] = useState<number>(1)
 
