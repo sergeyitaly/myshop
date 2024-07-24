@@ -1,10 +1,15 @@
 import { Link } from 'react-router-dom';
 import styles from './Footer.module.scss';
 import VisaImg from './visa.svg';
+import { Logo } from '../../components/Logo/Logo';
 
 export const Footer = () => {
     return (
         <footer className={styles.footer}>
+            <Logo 
+                className={styles.logo}    
+                type='short'
+            />
             <div className={styles.content}>
                 <nav className={styles.nav}>
                     <p className={styles.title}>Зв’язатись з нами</p>
