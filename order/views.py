@@ -1,28 +1,25 @@
-from django.utils.dateformat import format
-from django.utils.timezone import localtime
+import os
+import random
+import logging
+import json
+import requests
 from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import EmailMessage
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework import status, viewsets
-from .models import Order, OrderItem, TelegramUser
-from .serializers import OrderSerializer, OrderItemSerializer
+from rest_framework import status
+from django.utils.timezone import localtime
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.permissions import IsAuthenticated
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-from django.utils.decorators import method_decorator
-from django.views import View
-import logging
-import requests
-import json
-import random
-import os
+from rest_framework import viewsets
+from .models import Order, OrderItem, TelegramUser
+from .serializers import OrderSerializer, OrderItemSerializer
 
 logger = logging.getLogger(__name__)
-
 def get_random_saying(file_path):
     """Read sayings from a file and return a single random saying."""
     if not os.path.exists(file_path):
@@ -41,60 +38,102 @@ def get_random_saying(file_path):
     except Exception as e:
         logger.error(f"Error reading sayings file: {e}")
         return "No sayings available."
+@csrf_exempt
+def telegram_webhook(request):
+    """Handle incoming Telegram webhook updates."""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            logger.debug(f"Webhook Data: {data}")
 
-def set_telegram_webhook():
-    url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/setWebhook"
-    webhook_url = f"{settings.VERCEL_DOMAIN}/telegram-webhook/"  # Ensure this endpoint matches your Django webhook view
-    payload = {'url': webhook_url}
-    response = requests.post(url, json=payload)
-    response.raise_for_status()
-    logger.info('Webhook set: %s', response.json())
+            message = data.get('message', {})
+            chat_id = message.get('chat', {}).get('id')
+            text = message.get('text', '')
+            contact = message.get('contact', {})
 
-@method_decorator(csrf_exempt, name='dispatch')
-class TelegramWebhook(View):
-    def post(self, request, *args, **kwargs):
-        data = json.loads(request.body)
-        chat_id = data['message']['chat']['id']
-        phone = data['message']['contact']['phone_number']
-        
-        TelegramUser.objects.update_or_create(phone=phone, defaults={'chat_id': chat_id})
-        return JsonResponse({'status': 'ok'})
+            if chat_id and contact.get('phone_number'):
+                phone_number = contact.get('phone_number')
+                update_chat_id(phone_number, chat_id)
+                reply_to_user(chat_id, "Thank you! Your phone number has been recorded.")
+            elif chat_id and text.startswith('/start'):
+                reply_to_user(chat_id, "Welcome! Please send your phone number.")
+            else:
+                logger.warning("Message received without phone number or invalid command.")
 
-telegram_webhook = TelegramWebhook.as_view()
+            return JsonResponse({'status': 'ok'})
+        except json.JSONDecodeError:
+            logger.error("Failed to decode JSON from webhook request.")
+            return JsonResponse({'status': 'invalid JSON'}, status=400)
+        except Exception as e:
+            logger.error(f"Error processing webhook: {e}")
+            return JsonResponse({'status': 'error'}, status=500)
 
-def send_telegram_message(order_id, email):
-    bot_token = settings.TELEGRAM_BOT_TOKEN
-    chat_id = settings.TELEGRAM_CHAT_ID
-    url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
-    
-    # Get a single random saying from the sayings.txt file
-    sayings_file_path = settings.SAYINGS_FILE_PATH
-    random_saying = get_random_saying(sayings_file_path)
-    
-    message = (f"<b>Вітаємо!</b>\n\n"
-               f"Ви створили нове замовлення № <b>{order_id}</b> на сайті "
-               f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>.\n"
-               f"Деталі замовлення відправлено на email: <b>{email}</b>.\n\n"
-               f"<i>💬 {random_saying}</i>\n\n"  
-               f"<b>Дякуємо, що обрали нас!</b> 🌟")
-        
+    return JsonResponse({'status': 'invalid request'}, status=400)
+
+def update_chat_id(phone, chat_id):
+    """Update or create a Telegram user with the given chat ID."""
+    user, created = TelegramUser.objects.get_or_create(phone=phone)
+    user.chat_id = chat_id
+    user.save()
+    logger.info(f"Updated chat ID for phone: {phone}")
+
+def reply_to_user(chat_id, text):
+    """Send a reply message to a Telegram user."""
+    url = f'https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/sendMessage'
     payload = {
         'chat_id': chat_id,
-        'text': message,
-        'parse_mode': 'HTML'
+        'text': text,
     }
-    
     try:
         response = requests.post(url, data=payload)
         response.raise_for_status()
         result = response.json()
         if not result.get('ok'):
             logger.error(f"Telegram API returned an error: {result.get('description')}")
-        return result
     except requests.exceptions.RequestException as e:
         logger.error(f"Request to Telegram API failed: {e}")
-        raise
 
+
+
+def get_telegram_chat_id(phone):
+    """Retrieve the chat ID for a given phone number."""
+    try:
+        user = TelegramUser.objects.get(phone=phone)
+        return user.chat_id
+    except TelegramUser.DoesNotExist:
+        logger.error(f"Chat ID not found for phone number: {phone}")
+        return None
+
+def send_telegram_message(order_id, chat_id, email):
+    """Send a message to a Telegram user with order details."""
+    bot_token = settings.TELEGRAM_BOT_TOKEN
+    url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
+    
+    random_saying = get_random_saying(settings.SAYINGS_FILE_PATH)
+
+    message = (f"<b>Вітаємо!</b>\n\n"
+               f"Ви створили нове замовлення № <b>{order_id}</b> на сайті "
+               f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>.\n"
+               f"Деталі замовлення відправлено на email: <b>{email}</b>.\n\n"
+               f"<i>💬 {random_saying}</i>\n\n"  
+               f"<b>Дякуємо, що обрали нас!</b> 🌟")
+
+    payload = {
+        'chat_id': chat_id,
+        'text': message,
+        'parse_mode': 'HTML'
+    }
+
+    try:
+        response = requests.post(url, data=payload)
+        response.raise_for_status()
+        result = response.json()
+        if not result.get('ok'):
+            logger.error(f"Telegram API returned an error: {result.get('description')}")
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Request to Telegram API failed: {e}")
+        if response:
+            logger.debug(f"Response content: {response.content}")
 
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
@@ -130,13 +169,13 @@ class OrderViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_order(request):
+    """Create an order and send a confirmation message to Telegram."""
     try:
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
             order = serializer.save()
-            order_items = order.order_items.all()  # Fetch related order items
+            order_items = order.order_items.all()
 
-            # Format the order creation datetime with timezone-aware local time
             formatted_date = localtime(order.submitted_at).strftime('%Y-%m-%d %H:%M')
 
             order_details = f"""
@@ -145,16 +184,14 @@ def create_order(request):
             <p><strong>Прізвище:</strong> {order.surname}</p>
             <p><strong>Телефон:</strong> {order.phone}</p>
             <p><strong>Email:</strong> {order.email}</p>
-            <p><strong>Отримувач той самий:</strong> {"Ні" if order.receiver else "Так"}</p>
+            <p><strong>Отримувач той самий:</strong> {"Ні" if not order.receiver else "Так"}</p>
             <p><strong>Коментар:</strong> {order.receiver_comments}</p>
             <p><strong>Створено:</strong> {formatted_date}</p>
             <p><strong>Пакування як подарунок:</strong> {"Так" if order.present else "Ні"}</p>
             """
 
-            # Assume all items have the same currency; get it from the first item
-            currency = order_items.first().product.currency if order_items.exists() else "UAH"  # Default to UAH if no items
+            currency = order_items.first().product.currency if order_items.exists() else "UAH"
 
-            # Generate HTML table for order items with columns rearranged
             order_items_rows = "".join([
                 f"""
                 <tr>
@@ -171,67 +208,59 @@ def create_order(request):
                 for index, item in enumerate(order_items)
             ])
 
-            # Calculate the total sum of all order items
             total_sum = sum(item.total_sum for item in order_items)
 
-            order_items_table = f"""
-            <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
-                <thead>
-                    <tr>
-                        <th>Номер</th>
-                        <th>Фото продукту</th>
-                        <th>Назва продукту</th>
-                        <th>Колекція</th>
-                        <th>Кількість</th>
-                        <th>Розмір</th>
-                        <th>Колір</th>
-                        <th>Ціна</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {order_items_rows}
-                </tbody>
-            </table>
+            order_details += f"""
+            <p><strong>Всього товарів:</strong> {len(order_items)}</p>
+            <p><strong>Загальна сума:</strong> {total_sum} {currency}</p>
             """
 
-            # Complete HTML content with total sum and KOLORYT as a link
-            unsubscribe_link = settings.VERCEL_DOMAIN  # Change to actual unsubscribe URL if available
             email_body = f"""
             <html>
-            <head>
-                <style>
-                    /* Add any CSS styling here */
-                </style>
-            </head>
             <body>
-                <h2>Підтвердження замовлення #{order.id} на сайті KOLORYT</h2>
+                <h2>Ваше замовлення!</h2>
                 {order_details}
-                {order_items_table}
-                <p><strong>Разом:</strong> {total_sum} {currency}</p>
-                <p>Якщо у вас є питання, не вагайтеся зв'язатися з нами.</p>
-                <p>З найкращими побажаннями,<br>
-                Команда <a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a></p>
-                <p><a href='{unsubscribe_link}'>Відмовитися від підписок</a></p>
+                <h3>Деталі замовлення:</h3>
+                <table border="1" cellpadding="5" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Фото</th>
+                            <th>Назва</th>
+                            <th>Колекція</th>
+                            <th>Кількість</th>
+                            <th>Розмір</th>
+                            <th>Колір</th>
+                            <th>Ціна</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {order_items_rows}
+                    </tbody>
+                </table>
             </body>
             </html>
             """
 
-            # Send confirmation email to the user
-            email = EmailMessage(
-                subject=f'Підтвердження замовлення #{order.id}',
+            # Send Telegram message
+            chat_id = get_telegram_chat_id(order.phone)
+            if chat_id:
+                send_telegram_message(order.id, chat_id, order.email)
+
+            # Send email
+            email_message = EmailMessage(
+                subject=f"Ваше замовлення № {order.id}",
                 body=email_body,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[order.email],
-                headers={'Content-Type': 'text/html; charset=utf-8'}
             )
-            email.content_subtype = "html"  # Specify that the email body is HTML
-            email.send(fail_silently=False)
+            email_message.content_subtype = 'html'
+            email_message.send()
 
-            # Send Telegram notification
-            send_telegram_message(order.id, order.email)
+            return Response({'status': 'Order created successfully.'}, status=status.HTTP_201_CREATED)
 
-            return Response({'status': 'Order created', 'order_id': order.id}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     except Exception as e:
         logger.error(f"Error creating order: {e}")
-        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'status': 'error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

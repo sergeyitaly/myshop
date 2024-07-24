@@ -32,7 +32,6 @@ USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
 AWS_FRONTEND_DOMAIN = f"https://{AWS_S3_CUSTOM_DOMAIN}"
 VERCEL_DOMAIN = os.getenv('VERCEL_DOMAIN')
 LOCAL_HOST = os.getenv('LOCAL_HOST')
-TELEGRAM_CHAT_ID=os.getenv('NOTIFICATIONS_BOT')
 TELEGRAM_BOT_TOKEN=os.getenv('NOTIFICATIONS_API')
 SAYINGS_FILE_PATH = os.path.join(BASE_DIR, 'order', 'sayings.txt')
 

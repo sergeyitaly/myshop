@@ -1,5 +1,11 @@
 from rest_framework import serializers
 from .models import Order, OrderItem
+from .models import TelegramUser
+
+class TelegramUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TelegramUser
+        fields = ['id', 'phone', 'chat_id']
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product_id = serializers.IntegerField(write_only=True)
