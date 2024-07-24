@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react'
 import clsx from 'clsx'
 import style from './AppImage.module.scss'
 import {motion} from 'framer-motion'
+import defaultPhoto from '../../assets/default.png'
 
 
 interface AppImageProps {
     className?: string
-    src: string
+    src: string | null
     alt: string
 }
 
@@ -20,7 +21,7 @@ export const AppImage = ({
 
     useEffect(() => {
         const img = new Image()
-        img.src = src
+        img.src = src ? src : defaultPhoto
         img.onload = () => {
             setIsLoading(false)
         }
@@ -28,7 +29,6 @@ export const AppImage = ({
 
 
     return (
-        <div className={style.container}>
             <div className={clsx(style.imgWrapper, className)}>
                 {
                     isLoading ?
@@ -47,12 +47,11 @@ export const AppImage = ({
                         transition={{
                             duration: 2
                         }}
-                        src={src}
+                        src={src ? src : defaultPhoto}
                         alt={alt}
                         loading="lazy"
                     />
                 }
             </div>
-        </div>
     )
 }

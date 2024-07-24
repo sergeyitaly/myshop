@@ -1,6 +1,7 @@
 import { formatCurrency } from "../../../functions/formatCurrency"
 import { formatNumber } from "../../../functions/formatNumber"
 import { Color, Product } from "../../../models/entities"
+import { AppImage } from "../../AppImage/AppImage"
 import { AvailableLable } from "../../AvailableLabel/AvailableLabel"
 import { Counter } from "../../Counter/Counter"
 import { ProductVariants } from "../../ProductVariants/ProductVariants"
@@ -15,6 +16,7 @@ interface BasketItemProps {
     size: string
     onClickDelete: (product: Product) => void 
     onClickName?: (product: Product) => void
+    onClickPhoto?: (product: Product) => void
     onChangeCounter?: (product: Product, qty: number) => void
 }
 
@@ -26,6 +28,7 @@ export const BasketItem = ({
     qty,
     onClickDelete,
     onClickName,
+    onClickPhoto,
     onChangeCounter
 }: BasketItemProps) => {
 
@@ -40,17 +43,26 @@ export const BasketItem = ({
         onClickName && onClickName(product)
     }
 
+    const handleClickPhoto = () => {
+        onClickPhoto && onClickPhoto(product)
+    } 
+    
     const handleChangeCounter = (value: number) => {
         onChangeCounter && onChangeCounter(product, value)
     }
 
+
     return (
         <div className={styles.container}>
-            <div className={styles.imgWrapper}>
-                <div className={styles.image}>
-                    {photo && <img src={photo}/>}
-                </div>
-            </div>
+            <button 
+                className={styles.imgWrapper}
+                onClick={handleClickPhoto}
+            >
+                <AppImage
+                    src={photo}
+                    alt={name}
+                />
+            </button>
             <div className={styles.info}>
                 <div className={styles.header}>
                     <h4 
