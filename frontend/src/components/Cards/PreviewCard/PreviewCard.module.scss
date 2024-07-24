@@ -127,5 +127,19 @@
     }
   }
 
+  .priceContainer {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .crossText {
+    text-decoration: line-through;
+  }
+
+  .currentPrice {
+    color: $color-black
+  }
+
 
 

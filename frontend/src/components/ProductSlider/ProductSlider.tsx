@@ -1,8 +1,8 @@
 import Slider from "react-slick"
 import { ReactNode } from "react"
 import { settings } from "./sliderSettings"
-import style from './ProductSlider.module.scss'
 import { PageContainer } from "../containers/PageContainer"
+import style from './ProductSlider.module.scss'
 
 interface ProductSliderProps {
     title: string
@@ -21,9 +21,11 @@ export const ProductSlider = ({
         <PageContainer>
             <h2 className={style.title}>{title}</h2>
             <Slider 
-            {...settings} 
-            beforeChange={() => onAllowClick(false)}  
-            afterChange={() => onAllowClick(true)} >
+                className={style.slider}
+                {...settings} 
+                beforeChange={() => onAllowClick(false)}  
+                afterChange={() => onAllowClick(true)} 
+            >
               {children}
             </Slider>
         </PageContainer>
