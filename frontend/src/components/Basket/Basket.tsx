@@ -106,6 +106,7 @@ export const Basket = (): JSX.Element => {
                                                 onClickDelete={deleteFromBasket}
                                                 onClickName={handleCkickName}
                                                 onChangeCounter={changeCounter}
+                                                onClickPhoto={handleCkickName}
                                             />
                                         </motion.div>
                                     )})

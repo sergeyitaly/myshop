@@ -18,7 +18,7 @@ const CollectionsPage: React.FC = () => {
   
   const isMobile = useMediaQuery(screens.maxMobile)
   
-  const limit = isMobile ? 8 : 9
+  const limit = isMobile ? 8 : 8
 
   const navigate = useNavigate()
 

@@ -1,8 +1,8 @@
 import { Product } from "../../../models/entities"
-import defaultPhoto from '../../../assets/default.png'
 import styles from './OrderItemCard.module.scss'
 import { Counter } from "../../Counter/Counter"
 import { formatPrice } from "../../../functions/formatPrice"
+import { AppImage } from "../../AppImage/AppImage"
 
 
 interface OrderItemCardProps {
@@ -10,13 +10,17 @@ interface OrderItemCardProps {
     qty: number
     onClickDelete?: (product: Product) => void
     onChangeCounter?: (value: number) => void
+    onClickName?: (product: Product) => void
+    onClickPhoto?: (product: Product) => void
 }
 
 export const OrderItemCard = ({
     product,
     qty,
     onClickDelete,
-    onChangeCounter
+    onChangeCounter,
+    onClickName,
+    onClickPhoto
 }: OrderItemCardProps) => {
 
     const { photo, name, price, currency } = product
@@ -25,21 +29,31 @@ export const OrderItemCard = ({
         onClickDelete && onClickDelete(product)
     }
     
+    const handleClickName = () => {
+        onClickName && onClickName(product)
+    }
+
+    const handleClickPhoto = () => {
+        onClickPhoto && onClickPhoto(product)
+    } 
    
 
     return (
         <div className={styles.card}>
-            <div className={styles.imageBox}>
-                <div className={styles.imageWrapper}>
-                    <img 
-                        className={styles.image}
-                        src={photo || defaultPhoto} 
-                        alt={name}
-                    />
-                </div>
-            </div>
+            <button 
+                className={styles.imageBox}
+                onClick={handleClickPhoto}
+            >
+                <AppImage 
+                    src={photo} 
+                    alt={name}
+                />
+            </button>
             <div className={styles.info}>
-                <div className={styles.title}>{name}</div>
+                <div 
+                    className={styles.title}
+                    onClick={handleClickName}
+                >{name}</div>
                 <p className={styles.price}>{formatPrice(price, currency)}</p>
 
                 <div className={styles.control}>

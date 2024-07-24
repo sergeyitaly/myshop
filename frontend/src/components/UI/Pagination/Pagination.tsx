@@ -1,8 +1,6 @@
 import clsx from 'clsx'
 import { AppIcon } from '../../SvgIconComponents/AppIcon'
 import styles from './Pagination.module.scss'
-import { useMediaQuery } from '@mui/material'
-import { screens } from '../../../constants'
 import { Fragment } from 'react/jsx-runtime'
 
 interface PaginationProps {
@@ -20,7 +18,6 @@ export const Pagination = ({
     onChange
 }: PaginationProps) => {
 
-    const isMobile = useMediaQuery(screens.maxMobile)
 
     const pageArray = Array.from({length: totalPages}, (_, i) => i + 1)
     const isFirstPage = currentPage === pageArray[0]
@@ -55,15 +52,6 @@ export const Pagination = ({
                     pageArray.map((number) => (
                         <Fragment key={number}>
                             {
-                                isMobile ?
-                                <button
-                                    className={clsx(styles.dot, {
-                                        [styles.active]: currentPage === number
-                                    })}
-                                    onClick={() => handleClickPage(number)}
-                                />
-                                :
-
                                 <button 
                                     className={clsx(styles.pageButton, {
                                         [styles.active]: currentPage === number
