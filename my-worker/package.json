@@ -1,0 +1,20 @@
+{
+  "name": "my-worker",
+  "version": "0.0.0",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240722.0",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.4",
+    "wrangler": "3.66.0"
+  },
+  "private": true,
+  "scripts": {
+    "start": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
+}
