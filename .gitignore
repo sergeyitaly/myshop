@@ -40,4 +40,5 @@ migrations/
 .wrangler/config.json
 .wrangler/metrics.json
 .wrangler/logs/
+wrangler.toml
 
