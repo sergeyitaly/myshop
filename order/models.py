@@ -3,17 +3,17 @@ from shop.models import Product
 from phonenumber_field.modelfields import PhoneNumberField
 
 class TelegramUser(models.Model):
-    chat_id = models.CharField(max_length=255, unique=True)
-    phone = models.CharField(max_length=20, unique=True)
+    phone = models.CharField(max_length=15, unique=True)  # Store phone numbers
+    chat_id = models.CharField(max_length=255, unique=True)  # Store chat IDs
 
     def __str__(self):
-        return f"{self.phone} - {self.chat_id}"
+        return f'{self.phone} - {self.chat_id}'
     
 
 class Order(models.Model):
     name = models.CharField(max_length=100, default='Default Name')
     surname = models.CharField(max_length=100, default='Default Surname')
-    phone = PhoneNumberField(null=False, blank=False, help_text='Contact phone number', default='+123456789')
+    phone = models.CharField(max_length=20, help_text='Contact phone number')  # Changed from PhoneNumberField
     email = models.EmailField()
     address = models.TextField(null=True, blank=True)
     receiver = models.BooleanField(null=True, help_text='Other person')

@@ -1,0 +1,16 @@
+name = "koloryt-notifications"
+type = "javascript"
+
+# Use a boolean value for workers_dev
+workers_dev = true
+
+# Remove build.upload and use the main field directly
+main = "dist/worker.js"
+compatibility_date = "2024-07-25"
+
+# Use environment variables set in Cloudflare Workers dashboard
+[env.production]
+# No variables here
+
+[env.staging]
+# No variables here

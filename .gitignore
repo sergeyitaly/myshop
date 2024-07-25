@@ -35,4 +35,9 @@ dist/
 media/
 migrations/
 
+# Wrangler logs
+.wrangler/
+.wrangler/config.json
+.wrangler/metrics.json
+.wrangler/logs/
 
