@@ -1,135 +1,124 @@
-"use strict";
+import dotenv from 'dotenv';
+import { URL } from 'url';
 
-// Define types
-interface Contact {
-  phone_number: string;
+// Load environment variables
+dotenv.config({ path: './.env' });
+
+const WEBHOOK = '/telegram_webhook/';
+const SECRET_TOKEN = process.env.SECRET_TOKEN;
+const NOTIFICATIONS_API = process.env.NOTIFICATIONS_API;
+const VERCEL_DOMAIN = process.env.VERCEL_DOMAIN;
+
+addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+
+  if (url.pathname === WEBHOOK) {
+    event.respondWith(handleWebhook(event));
+  } else if (url.pathname === '/registerWebhook') {
+    event.respondWith(registerWebhook(event, url, WEBHOOK, SECRET_TOKEN));
+  } else if (url.pathname === '/unRegisterWebhook') {
+    event.respondWith(unRegisterWebhook(event));
+  } else if (url.pathname === '/favicon.ico') {
+    // Serve favicon.ico with minimal overhead
+    event.respondWith(new Response('Favicon not available', { status: 404 }));
+  } else {
+    event.respondWith(new Response('Not Found', { status: 404 }));
+  }
+});
+
+async function handleWebhook(event: FetchEvent): Promise<Response> {
+  // Check secret token
+  const secretToken = event.request.headers.get('X-Telegram-Bot-Api-Secret-Token');
+  if (secretToken !== SECRET_TOKEN) {
+    return new Response('Unauthorized', { status: 403 });
+  }
+
+  try {
+    const update = await event.request.json();
+    console.log('Update received:', update);
+
+    if ('message' in update) {
+      await processMessage(update.message);
+    }
+    
+    return new Response('Ok');
+  } catch (error) {
+    console.error('Error handling webhook:', error);
+    return new Response('Internal Server Error', { status: 500 });
+  }
 }
 
-interface Message {
-  chat: {
-    id: string;
-  };
-  contact?: Contact;
-  text?: string;
+async function processMessage(message: any): Promise<void> {
+  if (message.contact) {
+    const phoneNumber = message.contact.phone_number;
+    await sendChatIdAndPhoneToVercel(message.chat.id, phoneNumber);
+    await sendMessage(message.chat.id, 'Thank you! Your phone number has been recorded.');
+  } else if (message.text === '/start') {
+    await sendMessage(message.chat.id, 'Please share your phone number using the contact button below.');
+    await sendContactRequest(message.chat.id);
+  }
 }
 
-interface Update {
-  message?: Message;
-}
-
-(async () => {
-  async function handleRequest(request: Request): Promise<Response> {
-    const url = new URL(request.url);
-
-    if (url.pathname === "/favicon.ico") {
-      return new Response("Favicon not found", { status: 404 });
-    }
-
-    if (request.method === "POST") {
-      try {
-        const update: Update = await request.json(); // Use Update type
-        console.log("Received update:", update);
-
-        if (update.message) {
-          const chatId: string = update.message.chat.id;
-
-          if (update.message.contact) {
-            const phoneNumber: string = update.message.contact.phone_number;
-            await sendChatIdAndPhoneToVercel(chatId, phoneNumber);
-            await sendMessage(chatId, "Thank you! Your phone number has been recorded.");
-          } else if (update.message.text === "/start") {
-            await sendMessage(chatId, "Please share your phone number using the contact button below.");
-            await sendContactRequest(chatId);
-          }
-          return new Response("OK", { status: 200 });
-        }
-
-        return new Response("Invalid update", { status: 400 });
-      } catch (error) {
-        console.error("Error handling request:", error);
-        if (error instanceof Error) {
-          return new Response(`Error: ${error.message}`, { status: 500 });
-        }
-        return new Response("Error: Unknown error", { status: 500 });
-      }
-    }
-
-    return new Response("Method Not Allowed", { status: 405 });
-  }
-
-  async function sendMessage(chatId: string, text: string): Promise<void> {
-    try {
-      const url = `https://api.telegram.org/bot${process.env.NOTIFICATIONS_API}/sendMessage`;
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: chatId, text })
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to send message: ${response.statusText}`);
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(`Error in sendMessage: ${error.message}`);
-        throw error;
-      }
-      console.error("Unknown error in sendMessage");
-      throw new Error("Unknown error in sendMessage");
-    }
-  }
-
-  async function sendContactRequest(chatId: string): Promise<void> {
-    try {
-      const url = `https://api.telegram.org/bot${process.env.NOTIFICATIONS_API}/sendMessage`;
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: "Please share your phone number:",
-          reply_markup: {
-            one_time_keyboard: true,
-            keyboard: [[{ text: "Share phone number", request_contact: true }]]
-          }
-        })
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to send contact request: ${response.statusText}`);
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(`Error in sendContactRequest: ${error.message}`);
-        throw error;
-      }
-      console.error("Unknown error in sendContactRequest");
-      throw new Error("Unknown error in sendContactRequest");
-    }
-  }
-
-  async function sendChatIdAndPhoneToVercel(chatId: string, phoneNumber: string): Promise<void> {
-    try {
-      const vercelUrl = `https://${process.env.VERCEL_DOMAIN}/telegram_webhook/`;
-      const response = await fetch(vercelUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ chatId, phoneNumber })
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to send data to Vercel: ${response.statusText}`);
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(`Error in sendChatIdAndPhoneToVercel: ${error.message}`);
-        throw error;
-      }
-      console.error("Unknown error in sendChatIdAndPhoneToVercel");
-      throw new Error("Unknown error in sendChatIdAndPhoneToVercel");
-    }
-  }
-
-  addEventListener("fetch", (event: FetchEvent) => {
-    event.respondWith(handleRequest(event.request));
+async function sendMessage(chatId: string, text: string): Promise<void> {
+  const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: chatId, text })
   });
-})();
+
+  if (!response.ok) {
+    throw new Error(`Failed to send message: ${response.statusText}`);
+  }
+}
+
+async function sendContactRequest(chatId: string): Promise<void> {
+  const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: 'Please share your phone number:',
+      reply_markup: {
+        one_time_keyboard: true,
+        keyboard: [[{ text: 'Share phone number', request_contact: true }]]
+      }
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to send contact request: ${response.statusText}`);
+  }
+}
+
+async function sendChatIdAndPhoneToVercel(chatId: string, phoneNumber: string): Promise<void> {
+  const vercelUrl = `${VERCEL_DOMAIN}/telegram_webhook/`;
+  const response = await fetch(vercelUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chatId, phoneNumber })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to send data to Vercel: ${response.statusText}`);
+  }
+}
+
+async function registerWebhook(event: FetchEvent, requestUrl: URL, suffix: string, secret: string): Promise<Response> {
+  const webhookUrl = `${requestUrl.protocol}//${requestUrl.hostname}${suffix}`;
+  const response = await fetch(apiUrl('setWebhook', { url: webhookUrl, secret_token: secret }));
+  const result = await response.json();
+  return new Response(result.ok ? 'Ok' : JSON.stringify(result, null, 2));
+}
+
+async function unRegisterWebhook(event: FetchEvent): Promise<Response> {
+  const response = await fetch(apiUrl('setWebhook', { url: '' }));
+  const result = await response.json();
+  return new Response(result.ok ? 'Ok' : JSON.stringify(result, null, 2));
+}
+
+function apiUrl(methodName: string, params: any = null): string {
+  const query = params ? '?' + new URLSearchParams(params).toString() : '';
+  return `https://api.telegram.org/bot${NOTIFICATIONS_API}/${methodName}${query}`;
+}
