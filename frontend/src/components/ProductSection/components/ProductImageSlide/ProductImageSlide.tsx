@@ -1,10 +1,12 @@
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import clsx from 'clsx';
 import styles from './ProductImageSlide.module.scss'
+import { Plug } from '../../../Plug/Plug';
 
 interface ProductImageProps {
     src: string
     alt: string
+    discount?: boolean
     className?: string
     onClickZoom: (src: string) => void
 }
@@ -12,6 +14,7 @@ interface ProductImageProps {
 export const ProductImageSlide = ({
     alt,
     src,
+    discount,
     className,
     onClickZoom
 }: ProductImageProps) => {
@@ -26,6 +29,9 @@ export const ProductImageSlide = ({
             >
                 <ZoomInIcon/>
             </button>
+            {
+                discount && <Plug className={styles.plug}/>
+            }
         </div>
     )
 }

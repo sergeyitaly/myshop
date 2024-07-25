@@ -3,6 +3,8 @@ import { AppImage } from '../../AppImage/AppImage'
 import style from './PreviewCard.module.scss'
 import { Currency } from '../../../models/entities'
 import { formatPrice } from '../../../functions/formatPrice'
+import { Plug } from '../../Plug/Plug'
+import { countDiscountPrice } from '../../../functions/countDiscountPrice'
 
 
 interface PreviewCardProps {
@@ -34,15 +36,7 @@ export const PreviewCard = ({
         onClick && onClick()
     }
 
-    const transformedDicount = discount ? Math.ceil(+discount) : null;
-
-    let newPrice = null
-
-    if(price && transformedDicount){
-        newPrice = +price - +price*transformedDicount/100
-    }
-
-    console.log(price, newPrice);
+   const discountPrice = countDiscountPrice(price, discount)
     
     
 
@@ -64,17 +58,23 @@ export const PreviewCard = ({
                 price && currency &&
                 <div className={style.priceContainer}>
                     <p 
-                        className={clsx(style.subTitle, {[style.crossText]: !!newPrice} )}
+                        className={clsx(style.subTitle, {[style.crossText]: !!discountPrice} )}
                     >
                         {formatPrice(price, currency)}
                     </p>
-                    {newPrice && 
+                    {discountPrice && 
                         <p 
                             className={clsx(style.subTitle, style.currentPrice)}
                         >
-                            {formatPrice(newPrice, currency)}
+                            {formatPrice(discountPrice, currency)}
                         </p>}
                 </div>
+            }
+            {
+                discountPrice &&
+                <Plug
+                    className={style.plug}
+                />
             }
         </div>
     )
