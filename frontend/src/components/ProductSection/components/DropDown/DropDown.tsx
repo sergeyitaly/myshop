@@ -41,18 +41,18 @@ export const DropDown = ({
             <div className={clsx(style.drop, {
                 [style.active]: active
             })}>
-                <p className={style.content}>
+                <div className={style.content}>
 
                     {content ? 
                         splitText(content).map((paragraph, i) => {
-                            if(!paragraph) return <br/>
+                            if(!paragraph) return <br key={i}/>
                             return <p key={i}>{paragraph}</p>
                         }
                     )
                      : 
-                     `Опис поки що відсутній`
+                     <p>Опис поки що відсутній</p>
                     }
-                </p>
+                </div>
             </div>
         </div>
     )

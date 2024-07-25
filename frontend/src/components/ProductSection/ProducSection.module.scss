@@ -163,3 +163,14 @@
     grid-column: 1/-1;
   }
 }
+
+
+
+.aaa {
+  display: flex;
+  gap: 30px;
+
+  @media (max-width: $screen-mobile) {
+    flex-wrap: wrap;
+  }
+}
