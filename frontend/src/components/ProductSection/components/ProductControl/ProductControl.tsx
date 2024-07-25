@@ -14,6 +14,7 @@ import { ROUTE } from '../../../../constants'
 import { useEffect } from 'react'
 
 interface ProductControlProps {
+    discountPrice?: number | null
     product: Product
     variants: ProductVariantsModel
     onChangeColor?: (color: string) => void
@@ -21,6 +22,7 @@ interface ProductControlProps {
 }
 
 export const ProductControl = ({
+    discountPrice,
     product,
     variants,
     onChangeColor,
@@ -59,7 +61,10 @@ export const ProductControl = ({
     return (
         <div className={style.container}>
           <h2 className={style.title}>{name}</h2>
-          <div className={style.price}>{formatPrice(price, currency)}</div>
+          <div className={style.price}>
+            {formatPrice(discountPrice ? discountPrice : price, currency)}
+            {discountPrice &&<span className={style.discount}>{formatPrice(price, currency)}</span>}
+          </div>
           <AvailableLable 
             className={style.available}
             isAvailable={available}

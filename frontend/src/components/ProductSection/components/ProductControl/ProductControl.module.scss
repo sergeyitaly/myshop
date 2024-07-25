@@ -22,6 +22,7 @@
   }
 
   .price {
+    position: relative;
     grid-area: price;
     font-weight: 500;
     font-size: clamp(20px, 2.5vw, 32px);
@@ -58,4 +59,15 @@
 
 .counter {
   align-self: flex-end;
+}
+
+.discount {
+  text-align: end;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  text-decoration: line-through;
+  color: $color-gray-200;
+  font-size: 0.8em;
+  transform: translateY(90%);
 }

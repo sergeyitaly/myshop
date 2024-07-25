@@ -1,0 +1,30 @@
+.container {
+    flex-grow: 1;
+    width: 80%;
+}
+
+.productInfo {
+    grid-column: span 5;
+    grid-row: span 2;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    container-type: inline-size;
+}
+
+.description {
+    h3{ 
+        font-size: clamp(16px, 2.5vw, 32px);
+        font-weight: 400;
+        margin-bottom: clamp(8px, 2vw, 25px);
+    }
+
+    p{
+        font-size: clamp(14px, 1.5vw, 20px);
+        font-weight: 400;
+    }
+}
+
+.applyDropdown {
+grid-column: -1/-6;
+}
