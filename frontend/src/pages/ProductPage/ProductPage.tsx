@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Product } from '../../models/entities';
 import { ProductSlider } from '../../components/ProductSlider/ProductSlider';
-import { ProductInfoSection } from '../../components/ProductInfoSection/ProductInfoSection';
+import { ProductSection } from '../../components/ProductSection/ProductSection'; 
 import { MainContainer } from './components/MainContainer';
 import { useProduct } from '../../hooks/useProduct';
 import { ROUTE } from '../../constants';
@@ -16,12 +16,13 @@ import styles from './ProductPage.module.scss'
 const ProductPage: React.FC = () => {
 
   const { id } = useParams<{ id: string }>();
+
   const navigate = useNavigate();
 
 
   const [allowClick, setAllowClick] = useState<boolean>(true)
 
-  const {product, isLoading, isFetching, variants, changeColor, changeSize} = useProduct(+id!)
+  const {product, isLoading, isFetching} = useProduct(+id!)
 
   const {data: collection} = useGetCollectionByNameQuery(product?.collection ?? skipToken)
 
@@ -46,12 +47,7 @@ const ProductPage: React.FC = () => {
     <MainContainer
       isLoading = {isFetching}
     >
-      <ProductInfoSection
-        product={product}
-        productVariants={variants}
-        onChangeColor={changeColor}
-        onChangeSize={changeSize}
-      />
+      <ProductSection/>
       <ProductSlider 
          title='Також з цієї колекції'
          onAllowClick={setAllowClick}

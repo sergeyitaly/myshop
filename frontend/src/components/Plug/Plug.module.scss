@@ -1,0 +1,8 @@
+@import '../../variables';
+.plug {
+    display: inline-block;
+    padding: clamp(0.188rem, 0.745vw - 0.045rem, 0.625rem) clamp(0.438rem, 2.979vw - 0.493rem, 2.188rem);
+    border-radius: 20px;
+    background: $color-gray-250;
+    font-size: clamp(0.75rem, 0.426vw + 0.617rem, 1rem);
+}
