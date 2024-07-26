@@ -82,7 +82,7 @@ def get_random_saying(file_path):
     
 def set_telegram_webhook():
     url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/setWebhook"
-    webhook_url = f"{settings.VERCEL_DOMAIN}/telegram-webhook/"  # Ensure this endpoint matches your Django webhook view
+    webhook_url = f"{settings.VERCEL_DOMAIN}/telegram_webhook/"  # Ensure this endpoint matches your Django webhook view
     payload = {'url': webhook_url}
     response = requests.post(url, json=payload)
     response.raise_for_status()
