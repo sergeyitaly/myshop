@@ -1,46 +1,52 @@
-import dotenv from 'dotenv';
-import { URL } from 'url';
+// Define environment variable interface
+interface Env {
+  VERCEL_DOMAIN: string;
+  NOTIFICATIONS_API: string;
+  SECRET_TOKEN: string;
+}
 
-// Load environment variables
-dotenv.config({ path: './.env' });
-
-const WEBHOOK = '/telegram_webhook/';
-const SECRET_TOKEN = process.env.SECRET_TOKEN;
-const NOTIFICATIONS_API = process.env.NOTIFICATIONS_API;
-const VERCEL_DOMAIN = process.env.VERCEL_DOMAIN;
-
-addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
-
-  if (url.pathname === WEBHOOK) {
-    event.respondWith(handleWebhook(event));
-  } else if (url.pathname === '/registerWebhook') {
-    event.respondWith(registerWebhook(event, url, WEBHOOK, SECRET_TOKEN));
-  } else if (url.pathname === '/unRegisterWebhook') {
-    event.respondWith(unRegisterWebhook(event));
-  } else if (url.pathname === '/favicon.ico') {
-    // Serve favicon.ico with minimal overhead
-    event.respondWith(new Response('Favicon not available', { status: 404 }));
-  } else {
-    event.respondWith(new Response('Not Found', { status: 404 }));
-  }
+// Correct way to access environment variables in Cloudflare Workers
+addEventListener('fetch', (event: FetchEvent) => {
+  event.respondWith(handleRequest(event));
 });
 
-async function handleWebhook(event: FetchEvent): Promise<Response> {
-  // Check secret token
+async function handleRequest(event: FetchEvent): Promise<Response> {
+  const url = new URL(event.request.url);
+
+  // Access environment variables directly or via `self`
+  const env = self as unknown as Env; // Casting `self` to `Env` interface
+  const { VERCEL_DOMAIN, NOTIFICATIONS_API, SECRET_TOKEN } = env;
+
+  const WEBHOOK = '/telegram_webhook/';
+
+  if (url.pathname === WEBHOOK) {
+    return handleWebhook(event, SECRET_TOKEN, NOTIFICATIONS_API, VERCEL_DOMAIN);
+  } else if (url.pathname === '/registerWebhook') {
+    return registerWebhook(event, url, WEBHOOK, SECRET_TOKEN, NOTIFICATIONS_API);
+  } else if (url.pathname === '/unRegisterWebhook') {
+    return unRegisterWebhook(event, NOTIFICATIONS_API);
+  } else if (url.pathname === '/favicon.ico') {
+    return new Response('Favicon not available', { status: 404 });
+  } else {
+    return new Response('Not Found', { status: 404 });
+  }
+}
+
+// Handle webhook requests
+async function handleWebhook(event: FetchEvent, SECRET_TOKEN: string, NOTIFICATIONS_API: string, VERCEL_DOMAIN: string): Promise<Response> {
   const secretToken = event.request.headers.get('X-Telegram-Bot-Api-Secret-Token');
   if (secretToken !== SECRET_TOKEN) {
     return new Response('Unauthorized', { status: 403 });
   }
 
   try {
-    const update = await event.request.json();
+    const update: TelegramUpdate = await event.request.json();
     console.log('Update received:', update);
 
-    if ('message' in update) {
-      await processMessage(update.message);
+    if (update.message) {
+      await processMessage(update.message, NOTIFICATIONS_API, VERCEL_DOMAIN);
     }
-    
+
     return new Response('Ok');
   } catch (error) {
     console.error('Error handling webhook:', error);
@@ -48,18 +54,20 @@ async function handleWebhook(event: FetchEvent): Promise<Response> {
   }
 }
 
-async function processMessage(message: any): Promise<void> {
+// Process incoming messages
+async function processMessage(message: TelegramMessage, NOTIFICATIONS_API: string, VERCEL_DOMAIN: string): Promise<void> {
   if (message.contact) {
     const phoneNumber = message.contact.phone_number;
-    await sendChatIdAndPhoneToVercel(message.chat.id, phoneNumber);
-    await sendMessage(message.chat.id, 'Thank you! Your phone number has been recorded.');
+    await sendChatIdAndPhoneToVercel(message.chat.id, phoneNumber, VERCEL_DOMAIN);
+    await sendMessage(message.chat.id, 'Thank you! Your phone number has been recorded.', NOTIFICATIONS_API);
   } else if (message.text === '/start') {
-    await sendMessage(message.chat.id, 'Please share your phone number using the contact button below.');
-    await sendContactRequest(message.chat.id);
+    await sendMessage(message.chat.id, 'Please share your phone number using the contact button below.', NOTIFICATIONS_API);
+    await sendContactRequest(message.chat.id, NOTIFICATIONS_API);
   }
 }
 
-async function sendMessage(chatId: string, text: string): Promise<void> {
+// Send a message to a chat
+async function sendMessage(chatId: string, text: string, NOTIFICATIONS_API: string): Promise<void> {
   const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
   const response = await fetch(url, {
     method: 'POST',
@@ -72,7 +80,8 @@ async function sendMessage(chatId: string, text: string): Promise<void> {
   }
 }
 
-async function sendContactRequest(chatId: string): Promise<void> {
+// Send a contact request to a chat
+async function sendContactRequest(chatId: string, NOTIFICATIONS_API: string): Promise<void> {
   const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
   const response = await fetch(url, {
     method: 'POST',
@@ -92,7 +101,8 @@ async function sendContactRequest(chatId: string): Promise<void> {
   }
 }
 
-async function sendChatIdAndPhoneToVercel(chatId: string, phoneNumber: string): Promise<void> {
+// Send chat ID and phone number to Vercel
+async function sendChatIdAndPhoneToVercel(chatId: string, phoneNumber: string, VERCEL_DOMAIN: string): Promise<void> {
   const vercelUrl = `${VERCEL_DOMAIN}/telegram_webhook/`;
   const response = await fetch(vercelUrl, {
     method: 'POST',
@@ -105,20 +115,44 @@ async function sendChatIdAndPhoneToVercel(chatId: string, phoneNumber: string): 
   }
 }
 
-async function registerWebhook(event: FetchEvent, requestUrl: URL, suffix: string, secret: string): Promise<Response> {
+// Register a webhook with Telegram
+async function registerWebhook(event: FetchEvent, requestUrl: URL, suffix: string, secret: string, NOTIFICATIONS_API: string): Promise<Response> {
   const webhookUrl = `${requestUrl.protocol}//${requestUrl.hostname}${suffix}`;
-  const response = await fetch(apiUrl('setWebhook', { url: webhookUrl, secret_token: secret }));
-  const result = await response.json();
+  const response = await fetch(apiUrl('setWebhook', { url: webhookUrl, secret_token: secret }, NOTIFICATIONS_API));
+  const result = await response.json() as TelegramApiResponse;
+
   return new Response(result.ok ? 'Ok' : JSON.stringify(result, null, 2));
 }
 
-async function unRegisterWebhook(event: FetchEvent): Promise<Response> {
-  const response = await fetch(apiUrl('setWebhook', { url: '' }));
-  const result = await response.json();
+// Unregister a webhook with Telegram
+async function unRegisterWebhook(event: FetchEvent, NOTIFICATIONS_API: string): Promise<Response> {
+  const response = await fetch(apiUrl('setWebhook', { url: '' }, NOTIFICATIONS_API));
+  const result = await response.json() as TelegramApiResponse;
+
   return new Response(result.ok ? 'Ok' : JSON.stringify(result, null, 2));
 }
 
-function apiUrl(methodName: string, params: any = null): string {
+// Build the API URL
+function apiUrl(methodName: string, params: any = null, NOTIFICATIONS_API: string): string {
   const query = params ? '?' + new URLSearchParams(params).toString() : '';
   return `https://api.telegram.org/bot${NOTIFICATIONS_API}/${methodName}${query}`;
+}
+
+// Define interfaces
+interface TelegramApiResponse {
+  ok: boolean;
+  result?: any;
+  description?: string;
+}
+
+interface TelegramUpdate {
+  message?: TelegramMessage;
+  // Add other properties if needed
+}
+
+interface TelegramMessage {
+  chat: { id: string };
+  text?: string;
+  contact?: { phone_number: string };
+  // Add other properties if needed
 }
