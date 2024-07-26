@@ -103,7 +103,7 @@ async function sendContactRequest(chatId: string, NOTIFICATIONS_API: string): Pr
 
 // Send chat ID and phone number to Vercel
 async function sendChatIdAndPhoneToVercel(chatId: string, phoneNumber: string, VERCEL_DOMAIN: string): Promise<void> {
-  const vercelUrl = `${VERCEL_DOMAIN}/telegram_webhook/`;
+  const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
   const response = await fetch(vercelUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
