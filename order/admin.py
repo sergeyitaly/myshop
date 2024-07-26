@@ -1,7 +1,13 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
-from .models import Order, OrderItem
+from .models import *
 from .serializers import OrderSerializer  # Import OrderSerializer
+
+@admin.register(TelegramUser)
+class TelegramUserAdmin(admin.ModelAdmin):
+    list_display = ('phone', 'chat_id')
+    search_fields = ('phone', 'chat_id')
+
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem

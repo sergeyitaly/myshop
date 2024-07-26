@@ -6,8 +6,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status, viewsets
-from .models import Order, OrderItem, TelegramUser
-from .serializers import OrderSerializer, OrderItemSerializer
+from .models import *
+from .serializers import *
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.permissions import IsAuthenticated
@@ -22,6 +22,12 @@ import random
 import os
 
 logger = logging.getLogger(__name__)
+
+
+class TelegramUserViewSet(viewsets.ModelViewSet): 
+    queryset = TelegramUser.objects.all()
+    serializer_class = TelegramUserSerializer
+    permission_classes = [IsAuthenticated]  # Ensure this matches your settings
 
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
@@ -81,6 +87,7 @@ def set_telegram_webhook():
     response = requests.post(url, json=payload)
     response.raise_for_status()
     logger.info('Webhook set: %s', response.json())
+
 @method_decorator(csrf_exempt, name='dispatch')
 class TelegramWebhook(View):
     def post(self, request, *args, **kwargs):
