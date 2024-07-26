@@ -2,18 +2,13 @@
 	"compilerOptions": {
 	  "target": "es2021",
 	  "lib": ["es2021"],
-	  "jsx": "react-jsx",
 	  "module": "ESNext",
 	  "moduleResolution": "Bundler",
-	  "types": ["@cloudflare/workers-types", "node"],
+	  "types": ["@cloudflare/workers-types"],
 	  "resolveJsonModule": true,
-	  "allowJs": true,
-	  "noEmit": false,  // Change this to false
+	  "noEmit": false,
 	  "outDir": "./dist",
-	  "isolatedModules": true,
-	  "allowSyntheticDefaultImports": true,
 	  "strict": true,
-	  "noUncheckedIndexedAccess": true,
 	  "skipLibCheck": true
 	},
 	"include": ["src/**/*.ts"],
