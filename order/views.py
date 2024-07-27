@@ -4,8 +4,9 @@ from django.conf import settings
 from django.core.mail import EmailMessage
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, permissions
 from .models import *
 from .serializers import *
 from drf_yasg.utils import swagger_auto_schema
@@ -24,10 +25,15 @@ import os
 logger = logging.getLogger(__name__)
 
 
-class TelegramUserViewSet(viewsets.ModelViewSet): 
+class TelegramUserViewSet(viewsets.ModelViewSet):
     queryset = TelegramUser.objects.all()
     serializer_class = TelegramUserSerializer
-    permission_classes = [IsAuthenticated]  # Ensure this matches your settings
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def create(self, request, *args, **kwargs):
+        logger.info(f"Request headers: {request.headers}")
+        return super().create(request, *args, **kwargs)
 
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()

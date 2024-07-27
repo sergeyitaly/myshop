@@ -1,30 +1,26 @@
-// Define environment variable interface
-interface Env {
-  VERCEL_DOMAIN: string;
-  NOTIFICATIONS_API: string;
-  SECRET_TOKEN: string;
-}
-
-// Correct way to access environment variables in Cloudflare Workers
-addEventListener('fetch', (event: FetchEvent) => {
+self.addEventListener('fetch', (event: FetchEvent) => {
   event.respondWith(handleRequest(event));
 });
 
 async function handleRequest(event: FetchEvent): Promise<Response> {
   const url = new URL(event.request.url);
 
-  // Access environment variables directly or via `self`
-  const env = self as unknown as Env; // Casting `self` to `Env` interface
-  const { VERCEL_DOMAIN, NOTIFICATIONS_API, SECRET_TOKEN } = env;
+  // Access environment variables
+  const VERCEL_DOMAIN = (globalThis as any).VERCEL_DOMAIN as string;
+  const NOTIFICATIONS_API = (globalThis as any).NOTIFICATIONS_API as string;
+  const SECRET_TOKEN = (globalThis as any).SECRET_TOKEN as string;
+  const AUTH_TOKEN = (globalThis as any).AUTH_TOKEN as string;
 
-  const WEBHOOK = '/telegram_webhook/';
+  const WEBHOOK = "/telegram_webhook/";
 
   if (url.pathname === WEBHOOK) {
-    return handleWebhook(event, SECRET_TOKEN, NOTIFICATIONS_API, VERCEL_DOMAIN);
+    return handleWebhook(event, SECRET_TOKEN, NOTIFICATIONS_API, VERCEL_DOMAIN, AUTH_TOKEN);
   } else if (url.pathname === '/registerWebhook') {
     return registerWebhook(event, url, WEBHOOK, SECRET_TOKEN, NOTIFICATIONS_API);
   } else if (url.pathname === '/unRegisterWebhook') {
     return unRegisterWebhook(event, NOTIFICATIONS_API);
+  } else if (url.pathname === '/processUpdates') {
+    return processPendingUpdates(NOTIFICATIONS_API, VERCEL_DOMAIN, AUTH_TOKEN);
   } else if (url.pathname === '/favicon.ico') {
     return new Response('Favicon not available', { status: 404 });
   } else {
@@ -33,7 +29,7 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
 }
 
 // Handle webhook requests
-async function handleWebhook(event: FetchEvent, SECRET_TOKEN: string, NOTIFICATIONS_API: string, VERCEL_DOMAIN: string): Promise<Response> {
+async function handleWebhook(event: FetchEvent, SECRET_TOKEN: string, NOTIFICATIONS_API: string, VERCEL_DOMAIN: string, AUTH_TOKEN: string): Promise<Response> {
   const secretToken = event.request.headers.get('X-Telegram-Bot-Api-Secret-Token');
   if (secretToken !== SECRET_TOKEN) {
     return new Response('Unauthorized', { status: 403 });
@@ -44,7 +40,7 @@ async function handleWebhook(event: FetchEvent, SECRET_TOKEN: string, NOTIFICATI
     console.log('Update received:', update);
 
     if (update.message) {
-      await processMessage(update.message, NOTIFICATIONS_API, VERCEL_DOMAIN);
+      await processMessage(update.message, NOTIFICATIONS_API, VERCEL_DOMAIN, AUTH_TOKEN);
     }
 
     return new Response('Ok');
@@ -54,11 +50,30 @@ async function handleWebhook(event: FetchEvent, SECRET_TOKEN: string, NOTIFICATI
   }
 }
 
+// Process pending updates
+async function processPendingUpdates(NOTIFICATIONS_API: string, VERCEL_DOMAIN: string, AUTH_TOKEN: string): Promise<Response> {
+  const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/getUpdates`;
+  const response = await fetch(url);
+  const result = await response.json() as TelegramApiResponse;
+
+  if (result.ok && result.result) {
+    const updates = result.result;
+    for (const update of updates) {
+      if (update.message) {
+        await processMessage(update.message, NOTIFICATIONS_API, VERCEL_DOMAIN, AUTH_TOKEN);
+      }
+    }
+    return new Response('Updates processed');
+  } else {
+    return new Response('Failed to fetch updates', { status: 500 });
+  }
+}
+
 // Process incoming messages
-async function processMessage(message: TelegramMessage, NOTIFICATIONS_API: string, VERCEL_DOMAIN: string): Promise<void> {
+async function processMessage(message: TelegramMessage, NOTIFICATIONS_API: string, VERCEL_DOMAIN: string, AUTH_TOKEN: string): Promise<void> {
   if (message.contact) {
     const phoneNumber = message.contact.phone_number;
-    await sendChatIdAndPhoneToVercel(message.chat.id, phoneNumber, VERCEL_DOMAIN);
+    await sendChatIdAndPhoneToVercel(message.chat.id, phoneNumber, VERCEL_DOMAIN, AUTH_TOKEN);
     await sendMessage(message.chat.id, 'Thank you! Your phone number has been recorded.', NOTIFICATIONS_API);
   } else if (message.text === '/start') {
     await sendMessage(message.chat.id, 'Please share your phone number using the contact button below.', NOTIFICATIONS_API);
@@ -102,15 +117,23 @@ async function sendContactRequest(chatId: string, NOTIFICATIONS_API: string): Pr
 }
 
 // Send chat ID and phone number to Vercel
-async function sendChatIdAndPhoneToVercel(chatId: string, phoneNumber: string, VERCEL_DOMAIN: string): Promise<void> {
+async function sendChatIdAndPhoneToVercel(chatId: string, phoneNumber: string, VERCEL_DOMAIN: string, AUTH_TOKEN: string): Promise<void> {
   const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
+  console.log(`Posting data to Vercel API: ${vercelUrl}`);
+  
   const response = await fetch(vercelUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Token ${AUTH_TOKEN}`  // Pass the AUTH_TOKEN as a parameter
+    },
     body: JSON.stringify({ chatId, phoneNumber })
   });
 
+  console.log(`Response status: ${response.status}`);
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`Failed to send data to Vercel: ${response.statusText}. Response body: ${errorText}`);
     throw new Error(`Failed to send data to Vercel: ${response.statusText}`);
   }
 }
@@ -146,6 +169,7 @@ interface TelegramApiResponse {
 }
 
 interface TelegramUpdate {
+  update_id: number;
   message?: TelegramMessage;
   // Add other properties if needed
 }
