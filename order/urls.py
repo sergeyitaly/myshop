@@ -13,4 +13,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('order/', create_order, name='create-order'),
     path('telegram_webhook/', telegram_webhook, name='telegram_webhook'),
+    path('health_check/', health_check, name='health_check'),
+
 ]
+

@@ -25,6 +25,7 @@
     "dotenv": "^16.4.5",
     "formik": "^2.4.6",
     "libphonenumber-js": "^1.11.4",
+    "object-query-string": "^1.2.0",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.2",
     "react-dom": "^18.3.1",
@@ -32,13 +33,13 @@
     "react-router-dom": "^6.23.0",
     "sass": "^1.71.1",
     "vite-plugin-commonjs": "^0.10.1",
-    "yup": "^1.4.0",
-    "object-query-string": "^1.2.0"
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@eslint/config-array": "^0.17.0",
     "@eslint/object-schema": "^2.1.4",
     "@originjs/vite-plugin-commonjs": "^1.0.3",
+    "@types/next": "^9.0.0",
     "@types/node": "^20.12.7",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",

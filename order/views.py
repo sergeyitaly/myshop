@@ -21,7 +21,10 @@ import requests
 import json
 import random
 import os
+from django.http import JsonResponse
 
+def health_check(request):
+    return JsonResponse({'status': 'ok'})
 logger = logging.getLogger(__name__)
 
 
