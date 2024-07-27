@@ -3,8 +3,8 @@
 	  "target": "es2021",
 	  "lib": ["es2021"],
 	  "module": "ESNext",
-	  "moduleResolution": "Bundler",
-	  "types": ["@cloudflare/workers-types"],
+	  "moduleResolution": "bundler",  // Fix: Use 'bundler' instead of 'Bundler'
+	  "types": ["@cloudflare/workers-types", "node"],
 	  "resolveJsonModule": true,
 	  "noEmit": false,
 	  "outDir": "./dist",
