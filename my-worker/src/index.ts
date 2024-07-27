@@ -1,5 +1,9 @@
-self.addEventListener('fetch', (event: FetchEvent) => {
+addEventListener('fetch', (event: FetchEvent) => {
   event.respondWith(handleRequest(event));
+});
+
+addEventListener('scheduled', (event: ScheduledEvent) => {
+  event.waitUntil(handleScheduled(event));
 });
 
 async function handleRequest(event: FetchEvent): Promise<Response> {
@@ -25,6 +29,25 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
     return new Response('Favicon not available', { status: 404 });
   } else {
     return new Response('Not Found', { status: 404 });
+  }
+}
+async function handleScheduled(event: ScheduledEvent): Promise<void> {
+  console.log('Cron job triggered');
+  await performHealthCheck();
+}
+
+async function performHealthCheck(): Promise<void> {
+  const VERCEL_DOMAIN = (globalThis as any).VERCEL_DOMAIN as string;
+  const healthCheckUrl = `${VERCEL_DOMAIN}/api/health_check`;
+  try {
+    const response = await fetch(healthCheckUrl);
+    if (response.ok) {
+      console.log('Health check successful');
+    } else {
+      console.error('Health check failed:', response.statusText);
+    }
+  } catch (error) {
+    console.error('Error performing health check:', error);
   }
 }
 
