@@ -11,6 +11,8 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.exceptions import AuthenticationFailed
+
 
 def index(request):
     return render(request, "index.html")
@@ -31,11 +33,15 @@ class CustomTokenRefreshView(APIView):
 
     def post(self, request, *args, **kwargs):
         refresh = request.data.get('refresh')
-        token = RefreshToken(refresh)
+        print(f"Received refresh token: {refresh}")
 
-        new_access_token = {
-            'access': str(token.access_token),
-        }
-
-        return Response(new_access_token)
-
+        try:
+            token = RefreshToken(refresh)
+            print(f"Access token generated: {str(token.access_token)}")
+            new_access_token = {
+                'access': str(token.access_token),
+            }
+            return Response(new_access_token)
+        except Exception as e:
+            print(f"Error during token refresh: {str(e)}")
+            raise AuthenticationFailed(f"Token refresh failed: {str(e)}")

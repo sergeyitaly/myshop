@@ -1,10 +1,17 @@
+// Register the fetch event listener
+addEventListener('fetch', (event: FetchEvent) => {
+  event.respondWith(handleRequest(event));
+});
+
+// Register the scheduled event listener
 addEventListener('scheduled', (event: ScheduledEvent) => {
   event.waitUntil(handleScheduled(event));
 });
 
 async function handleScheduled(event: ScheduledEvent): Promise<void> {
-  console.log('Cron job triggered');
+  console.log('Scheduled event triggered');
   await performHealthCheck();
+  await updateGlobalAuthToken();
 }
 
 async function performHealthCheck(): Promise<void> {
@@ -22,14 +29,58 @@ async function performHealthCheck(): Promise<void> {
   }
 }
 
-interface Order {
-  id: number;
-  // Add other order properties as needed
+interface TokenResponse {
+  access: string;
+  detail?: string;
+}
+async function refreshToken(): Promise<string | void> {
+  const VERCEL_DOMAIN = (globalThis as any).VERCEL_DOMAIN as string;
+  const refreshToken = (globalThis as any).REFRESH_TOKEN as string;
+  const tokenRefreshUrl = `${VERCEL_DOMAIN}/api/token/refresh/`;
+
+  try {
+    const response = await fetch(tokenRefreshUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${refreshToken}` // Ensure this is the correct format
+
+      },
+      body: JSON.stringify({ refresh: refreshToken }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      const errorDetail = (errorData as { detail?: string }).detail || 'Unknown error';
+      throw new Error(`Token refresh failed: ${errorDetail}`);
+    }
+
+    const data = await response.json() as TokenResponse;
+    
+    if (data.access) {
+      // Return the access token
+      return data.access;
+    } else {
+      throw new Error('Invalid response format: Access token missing.');
+    }
+  } catch (error) {
+    console.error('Error refreshing token:', error);
+  }
 }
 
-addEventListener('fetch', (event: FetchEvent) => {
-  event.respondWith(handleRequest(event));
-});
+async function updateGlobalAuthToken(): Promise<void> {
+  try {
+    const authToken = await refreshToken();
+    
+    if (authToken) {
+      // Set the global or environment-specific auth token
+      (globalThis as any).AUTH_TOKEN = authToken;
+    }
+  } catch (error) {
+    console.error('Error updating global auth token:', error);
+  }
+}
+
 
 async function setWebhook(event: FetchEvent, hashValue: string, webhookUrl: string): Promise<Response> {
   const url = new URL(event.request.url);
@@ -113,8 +164,6 @@ interface Update {
   message?: Message;
 }
 
-
-
 interface OrderDetails {
   id: number;
   email: string;
@@ -125,6 +174,7 @@ interface Order {
   email:string;
   phone:string;
 }
+
 async function handleRequest(event: FetchEvent): Promise<Response> {
   const url = new URL(event.request.url);
   const path = url.pathname;
@@ -185,6 +235,7 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
   console.log('Path not found:', path);
   return new Response("Not found", { status: 404 });
 }
+
 async function processUpdate(update: any, NOTIFICATIONS_API: string, VERCEL_DOMAIN: string, AUTH_TOKEN: string): Promise<void> {
   console.log('Processing update:', update);
 
