@@ -113,6 +113,19 @@ interface Update {
   message?: Message;
 }
 
+
+
+interface OrderDetails {
+  id: number;
+  email: string;
+  phone:string;
+}
+interface Order {
+  id:number;
+  email:string;
+  phone:string;
+}
+
 async function handleRequest(event: FetchEvent): Promise<Response> {
   const url = new URL(event.request.url);
   const path = url.pathname;
@@ -275,8 +288,8 @@ async function sendOrderDetails(chatId: string, phoneNumber: string, VERCEL_DOMA
     });
 
     if (!response.ok) {
-      console.error(`Failed to retrieve order details. Status: ${response.status} ${response.statusText}`);
-      await sendMessage(chatId, 'Failed to retrieve order details. Please try again later.', NOTIFICATIONS_API);
+      console.error(`Failed to retrieve orders. Status: ${response.status} ${response.statusText}`);
+      await sendMessage(chatId, 'Failed to retrieve orders. Please try again later.', NOTIFICATIONS_API);
       return;
     }
 
@@ -287,12 +300,28 @@ async function sendOrderDetails(chatId: string, phoneNumber: string, VERCEL_DOMA
     const matchingOrder = orders.find(order => order.phone === formattedPhoneNumber);
 
     if (matchingOrder) {
-      const orderDetails = `
-        Order ID: ${matchingOrder.id}
-        Email: ${matchingOrder.email}
+      const orderDetailsUrl = `${VERCEL_DOMAIN}/api/order/${matchingOrder.id}/`;
+      console.log(`Fetching order details from: ${orderDetailsUrl}`);
+      
+      const orderDetailsResponse = await fetch(orderDetailsUrl, {
+        headers: { 'Authorization': `Token ${AUTH_TOKEN}` }
+      });
+
+      if (!orderDetailsResponse.ok) {
+        console.error(`Failed to retrieve order details. Status: ${orderDetailsResponse.status} ${orderDetailsResponse.statusText}`);
+        await sendMessage(chatId, 'Failed to retrieve order details. Please try again later.', NOTIFICATIONS_API);
+        return;
+      }
+
+      const orderDetails = await orderDetailsResponse.json() as OrderDetails;
+      console.log(`Order details retrieved: ${JSON.stringify(orderDetails)}`);
+
+      const orderDetailsMessage = `
+        Order ID: ${orderDetails.id}
+        Email: ${orderDetails.email}
         // Add more details as needed
       `;
-      await sendMessage(chatId, `Thank you! Here is your last order: ${orderDetails}`, NOTIFICATIONS_API);
+      await sendMessage(chatId, `Thank you! Here is your last order: ${orderDetailsMessage}`, NOTIFICATIONS_API);
     } else {
       console.log('No orders found for this phone number.');
       await sendMessage(chatId, 'No orders found for this phone number.', NOTIFICATIONS_API);
@@ -303,6 +332,11 @@ async function sendOrderDetails(chatId: string, phoneNumber: string, VERCEL_DOMA
   }
 }
 
+interface OrderDetails {
+  id: number;
+  email: string;
+  phone:string;
+}
 interface Order {
   id:number;
   email:string;

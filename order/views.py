@@ -143,7 +143,6 @@ def send_telegram_message(order_id, phone, email):
         telegram_user = TelegramUser.objects.get(phone=phone)
         chat_id = telegram_user.chat_id
     except TelegramUser.DoesNotExist:
-        request_phone_number_from_user(phone)
         return None
 
     url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
@@ -174,37 +173,6 @@ def send_telegram_message(order_id, phone, email):
     except requests.exceptions.RequestException as e:
         logger.error(f"Request to Telegram API failed: {e}")
         raise
-
-def request_phone_number_from_user(phone):
-    bot_token = settings.TELEGRAM_BOT_TOKEN
-    chat_id = phone  # Assuming chat_id is the same as the phone number in this case
-
-    url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
-    message = "Please share your phone number with us to complete your order."
-
-    reply_markup = {
-        'keyboard': [[{'text': 'Share phone number', 'request_contact': True}]],
-        'one_time_keyboard': True,
-        'resize_keyboard': True
-    }
-
-    payload = {
-        'chat_id': chat_id,
-        'text': message,
-        'reply_markup': json.dumps(reply_markup)
-    }
-
-    try:
-        response = requests.post(url, data=payload)
-        response.raise_for_status()
-        result = response.json()
-        if not result.get('ok'):
-            logger.error(f"Telegram API returned an error: {result.get('description')}")
-        return result
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Request to Telegram API failed: {e}")
-        raise
-
     
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -316,7 +284,7 @@ def create_order(request):
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def get_order(request, order_id):
     try:
         order = Order.objects.get(id=order_id)
