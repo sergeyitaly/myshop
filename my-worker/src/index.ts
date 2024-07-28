@@ -125,7 +125,6 @@ interface Order {
   email:string;
   phone:string;
 }
-
 async function handleRequest(event: FetchEvent): Promise<Response> {
   const url = new URL(event.request.url);
   const path = url.pathname;
@@ -146,10 +145,11 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
       const chatId = update.message.chat.id;
 
       try {
-        const result = await sendChatIdAndPhoneToVercel(chatId, phoneNumber, VERCEL_DOMAIN, AUTH_TOKEN);
-        if (result === 'exists') {
-          const message = update.message;
+        if (await userExists(phoneNumber, chatId, VERCEL_DOMAIN, AUTH_TOKEN)) {
+          console.warn(`User with phone: ${phoneNumber} and chat ID: ${chatId} already exists.`);
           await sendOrderDetails(chatId, phoneNumber, VERCEL_DOMAIN, AUTH_TOKEN, NOTIFICATIONS_API); // Assuming order details are in update.message.text
+        } else {
+          await sendChatIdAndPhoneToVercel(chatId, phoneNumber, VERCEL_DOMAIN, AUTH_TOKEN);
         }
       } catch (error) {
         if (error instanceof Error) {
@@ -185,7 +185,6 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
   console.log('Path not found:', path);
   return new Response("Not found", { status: 404 });
 }
-
 async function processUpdate(update: any, NOTIFICATIONS_API: string, VERCEL_DOMAIN: string, AUTH_TOKEN: string): Promise<void> {
   console.log('Processing update:', update);
 
@@ -236,11 +235,44 @@ async function sendContactRequest(chatId: string, NOTIFICATIONS_API: string): Pr
     throw new Error(`Failed to send contact request: ${response.statusText}`);
   }
 }
-async function sendChatIdAndPhoneToVercel(chatId: string, phoneNumber: string, VERCEL_DOMAIN: string, AUTH_TOKEN: string): Promise<string | void> {
+async function userExists(phoneNumber: string, chatId: string, VERCEL_DOMAIN: string, AUTH_TOKEN: string): Promise<boolean> {
+  const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
+  console.log(`Checking if user exists in Vercel API: ${vercelUrl}`);
+
+  const formattedPhoneNumber = `+${phoneNumber.replace(/^\+/, '')}`;
+
+  try {
+    const response = await fetch(`${vercelUrl}?phone=${formattedPhoneNumber}&chat_id=${chatId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Token ${AUTH_TOKEN}`
+      }
+    });
+
+    console.error(`Failed to check if user exists: ${response.statusText}`);
+    return false;
+  } catch (error) {
+    console.error(`Error checking if user exists: ${error}`);
+    return false;
+  }
+}
+
+async function sendChatIdAndPhoneToVercel(
+  chatId: string,
+  phoneNumber: string,
+  VERCEL_DOMAIN: string,
+  AUTH_TOKEN: string
+): Promise<string | void> {
+  const userExistsAlready = await userExists(phoneNumber, chatId, VERCEL_DOMAIN, AUTH_TOKEN);
+
+  if (userExistsAlready) {
+    console.warn(`User with phone: ${phoneNumber} and chat ID: ${chatId} already exists.`);
+    return 'exists';
+  }
+
   const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
   console.log(`Posting data to Vercel API: ${vercelUrl}`);
 
-  // Ensure phone number starts with a '+'
   const formattedPhoneNumber = `+${phoneNumber.replace(/^\+/, '')}`;
 
   try {
@@ -254,7 +286,7 @@ async function sendChatIdAndPhoneToVercel(chatId: string, phoneNumber: string, V
     });
 
     console.log(`Response status: ${response.status}`);
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`Failed to send data to Vercel: ${response.statusText}. Response body: ${errorText}`);
@@ -277,13 +309,21 @@ async function sendChatIdAndPhoneToVercel(chatId: string, phoneNumber: string, V
     throw error;
   }
 }
-async function sendOrderDetails(chatId: string, phoneNumber: string, VERCEL_DOMAIN: string, AUTH_TOKEN: string, NOTIFICATIONS_API: string): Promise<void> {
+
+async function sendOrderDetails(
+  chatId: string,
+  phoneNumber: string,
+  VERCEL_DOMAIN: string,
+  AUTH_TOKEN: string,
+  NOTIFICATIONS_API: string
+): Promise<void> {
   const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
-  const ordersUrl = `${VERCEL_DOMAIN}/api/order/`;
+  const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
 
   try {
     console.log(`Fetching orders from: ${ordersUrl}`);
     const response = await fetch(ordersUrl, {
+      method: 'GET',
       headers: { 'Authorization': `Token ${AUTH_TOKEN}` }
     });
 
@@ -296,14 +336,14 @@ async function sendOrderDetails(chatId: string, phoneNumber: string, VERCEL_DOMA
     const orders = await response.json() as Order[];
     console.log(`Orders retrieved: ${JSON.stringify(orders)}`);
 
-    // Find the most recent order that matches the phone number
     const matchingOrder = orders.find(order => order.phone === formattedPhoneNumber);
 
     if (matchingOrder) {
       const orderDetailsUrl = `${VERCEL_DOMAIN}/api/order/${matchingOrder.id}/`;
       console.log(`Fetching order details from: ${orderDetailsUrl}`);
-      
+
       const orderDetailsResponse = await fetch(orderDetailsUrl, {
+        method: 'GET',
         headers: { 'Authorization': `Token ${AUTH_TOKEN}` }
       });
 
@@ -335,12 +375,12 @@ async function sendOrderDetails(chatId: string, phoneNumber: string, VERCEL_DOMA
 interface OrderDetails {
   id: number;
   email: string;
-  phone:string;
+  phone: string;
 }
 interface Order {
-  id:number;
-  email:string;
-  phone:string;
+  id: number;
+  email: string;
+  phone: string;
 }
 
 interface TelegramUpdate {
