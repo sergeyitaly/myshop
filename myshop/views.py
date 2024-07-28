@@ -4,6 +4,8 @@
 
 from django.shortcuts import render
 import os
+from rest_framework_simplejwt.exceptions import TokenError
+
 from dotenv import load_dotenv
 from distutils.util import strtobool
 from rest_framework.views import APIView
@@ -33,15 +35,16 @@ class CustomTokenRefreshView(APIView):
 
     def post(self, request, *args, **kwargs):
         refresh = request.data.get('refresh')
-        print(f"Received refresh token: {refresh}")
-
+        if not refresh:
+            return Response({'error': 'Refresh token is required'}, status=400)
+        
         try:
             token = RefreshToken(refresh)
-            print(f"Access token generated: {str(token.access_token)}")
             new_access_token = {
                 'access': str(token.access_token),
             }
             return Response(new_access_token)
-        except Exception as e:
-            print(f"Error during token refresh: {str(e)}")
+        except TokenError as e:
+            print(f"Error details: {str(e)}")
             raise AuthenticationFailed(f"Token refresh failed: {str(e)}")
+
