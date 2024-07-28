@@ -37,6 +37,18 @@ class TelegramUserViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         logger.info(f"Request headers: {request.headers}")
         return super().create(request, *args, **kwargs)
+    
+    def retrieve(self, request, *args, **kwargs):
+        phone = request.query_params.get('phone')
+        chat_id = request.query_params.get('chat_id')
+        if phone and chat_id:
+            try:
+                user = TelegramUser.objects.get(phone=phone, chat_id=chat_id)
+                serializer = self.get_serializer(user)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except TelegramUser.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
