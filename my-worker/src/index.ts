@@ -236,26 +236,36 @@ async function sendContactRequest(chatId: string, NOTIFICATIONS_API: string): Pr
   }
 }
 async function userExists(phoneNumber: string, chatId: string, VERCEL_DOMAIN: string, AUTH_TOKEN: string): Promise<boolean> {
-  const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
-  console.log(`Checking if user exists in Vercel API: ${vercelUrl}`);
-
-  const formattedPhoneNumber = `+${phoneNumber.replace(/^\+/, '')}`;
-
-  try {
-    const response = await fetch(`${vercelUrl}?phone=${formattedPhoneNumber}&chat_id=${chatId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Token ${AUTH_TOKEN}`
+    const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
+    console.log(`Checking if user exists in Vercel API: ${vercelUrl}`);
+  
+    const formattedPhoneNumber = `+${phoneNumber.replace(/^\+/, '')}`;
+  
+    try {
+      const response = await fetch(`${vercelUrl}?phone=${formattedPhoneNumber}&chat_id=${chatId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${AUTH_TOKEN}`
+        }
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        console.log('User exists in the Vercel API', data);
+        return true;
+      } else if (response.status === 404) {
+        console.log('User does not exist in the Vercel API');
+        return false;
+      } else {
+        console.error(`Failed to check if user exists: ${response.statusText}`);
+        return false;
       }
-    });
-
-    console.error(`Failed to check if user exists: ${response.statusText}`);
-    return false;
-  } catch (error) {
-    console.error(`Error checking if user exists: ${error}`);
-    return false;
+    } catch (error) {
+      console.error(`Error checking if user exists: ${error}`);
+      return false;
+    }
   }
-}
+  
 
 async function sendChatIdAndPhoneToVercel(
   chatId: string,
