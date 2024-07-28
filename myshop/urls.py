@@ -11,6 +11,7 @@ from . import views
 from django.views.generic import RedirectView
 from .views import CustomTokenObtainPairView, CustomTokenRefreshView
 from django.conf.urls.i18n import i18n_patterns
+from rest_framework_simplejwt.views import TokenRefreshView
 
 load_dotenv()
 
@@ -38,8 +39,7 @@ urlpatterns = [
     path('auth/', include('djoser.urls.authtoken')),
 
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
-
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     # App-specific URLs
     path('api', include('accounts.urls')),  # Example: /accounts/
     path('api/', include('shop.urls')),  # Example: /products/
