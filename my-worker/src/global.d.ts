@@ -6,8 +6,8 @@ declare global {
     interface ProcessEnv {
       VERCEL_DOMAIN: string;
       NOTIFICATIONS_API: string;
-      SECRET_TOKEN: string;
-      AUTH_TOKEN: string; 
+      USERNAME: string;
+      PASWORD: string;
     }
   }
 }

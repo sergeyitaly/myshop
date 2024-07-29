@@ -1,3 +1,71 @@
+const VERCEL_DOMAIN = (globalThis as any).VERCEL_DOMAIN as string;
+const NOTIFICATIONS_API = (globalThis as any).NOTIFICATIONS_API as string;
+const username = (globalThis as any).USERNAME as string;
+const password = (globalThis as any).PASSWORD as string;
+
+interface AuthData {
+  access_token: string;
+  refresh_token: string;
+}
+
+let accessToken: string = '';
+let refreshToken: string = '';
+let authToken: string = '';
+
+interface TokenResponse {
+  access?: string; 
+}
+
+let tokenExpiration: number | null = null;
+
+const ACCESS_TOKEN_LIFETIME_IN_MINUTES = 4;
+const ACCESS_TOKEN_LIFETIME_IN_MS = ACCESS_TOKEN_LIFETIME_IN_MINUTES * 60 * 1000;
+
+interface Contact {
+  phone_number: string;
+}
+
+interface Message {
+  contact?: Contact;
+  chat: {
+    id: string;
+  };
+}
+
+interface Update {
+  message?: Message;
+}
+
+
+interface AuthTokenResponse {
+  auth_token: string;
+}
+
+interface User {
+  phone: string;
+  chat_id: string;
+}
+
+interface UserResponse {
+  results: User[];
+}
+
+interface TelegramUpdate {
+  update_id: number;
+  message?: TelegramMessage;
+}
+
+interface TelegramMessage {
+  message_id: number;
+  chat: {
+    id: string;
+  };
+  text?: string;
+  contact?: {
+    phone_number: string;
+  };
+}
+
 // Register the fetch event listener
 addEventListener('fetch', (event: FetchEvent) => {
   event.respondWith(handleRequest(event));
@@ -15,7 +83,6 @@ async function handleScheduled(event: ScheduledEvent): Promise<void> {
 }
 
 async function performHealthCheck(): Promise<void> {
-  const VERCEL_DOMAIN = (globalThis as any).VERCEL_DOMAIN as string;
   const healthCheckUrl = `${VERCEL_DOMAIN}/api/health_check`;
   try {
     const response = await fetch(healthCheckUrl);
@@ -29,58 +96,107 @@ async function performHealthCheck(): Promise<void> {
   }
 }
 
-interface TokenResponse {
-  access: string;
-  detail?: string;
+async function authenticateWithCredentials(): Promise<AuthData | void> {
+  const authUrl = `${(globalThis as any).VERCEL_DOMAIN}/api/token/`;
+  try {
+    const response = await fetch(authUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        username: username,
+        password: password,
+      }),
+    });
+
+    console.log('Authentication response status:', response.status);
+    if (!response.ok) { throw new Error(`Authentication failed with status ${response.status}`);}
+
+    const data = await response.json() as AuthData;
+
+    if (data.access_token && data.refresh_token) {return data;} 
+    else {throw new Error('Invalid response format: Access token or refresh token missing.');}
+    } catch (error) {console.error('Authenticate with cridentials. Error during authentication:', error);}
 }
-async function refreshToken(): Promise<string | void> {
-  const VERCEL_DOMAIN = (globalThis as any).VERCEL_DOMAIN as string;
-  const refreshToken = (globalThis as any).REFRESH_TOKEN as string;
-  const tokenRefreshUrl = `${VERCEL_DOMAIN}/api/token/refresh/`;
+
+function isTokenResponse(data: any): data is TokenResponse {
+  return data && typeof data === 'object' && 'access' in data;
+}
+
+async function getRefreshedToken(refreshToken: string | undefined): Promise<string | void> {
+  const tokenRefreshUrl = `${(globalThis as any).VERCEL_DOMAIN}/api/token/refresh/`;
+
+  if (!refreshToken) {
+    console.error('GetRefreshedToken. No refresh token provided.');
+    return;
+  }
+
+  console.log('Attempting to refresh token with refresh token:', refreshToken);
 
   try {
     const response = await fetch(tokenRefreshUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${refreshToken}` // Ensure this is the correct format
-
       },
       body: JSON.stringify({ refresh: refreshToken }),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      const errorDetail = (errorData as { detail?: string }).detail || 'Unknown error';
-      throw new Error(`Token refresh failed: ${errorDetail}`);
-    }
+    console.log('GetRefreshedToken. Token refresh response status:', response.status);
 
-    const data = await response.json() as TokenResponse;
-    
-    if (data.access) {
-      // Return the access token
+    if (!response.ok) {
+      const responseClone = response.clone();
+      const errorText = await responseClone.text();
+      console.error(`Failed to refresh token: ${response.status} ${response.statusText}. Response body: ${errorText}`);
+      return;
+    }
+    const data: unknown = await response.json();
+    console.log('Token refresh response data:', data);
+
+    if (isTokenResponse(data) && data.access) {
+      console.log('Successfully refreshed token:', data.access);
       return data.access;
     } else {
-      throw new Error('Invalid response format: Access token missing.');
+      console.error('Invalid response format: Access token missing.');
     }
   } catch (error) {
     console.error('Error refreshing token:', error);
   }
 }
 
-async function updateGlobalAuthToken(): Promise<void> {
+async function updateGlobalAuthToken() {
   try {
-    const authToken = await refreshToken();
-    
-    if (authToken) {
-      // Set the global or environment-specific auth token
-      (globalThis as any).AUTH_TOKEN = authToken;
+    if (!accessToken || isTokenExpired()) {
+      console.log('No valid auth token found or token expired. Authenticating with username and password...');
+      const authData = await authenticateWithCredentials();
+
+      if (authData) {
+        refreshToken = authData.refresh_token;
+        accessToken = authData.access_token;
+        tokenExpiration = Date.now() + ACCESS_TOKEN_LIFETIME_IN_MS;
+        console.log('Global access and refresh token updated successfully');
+      } else {
+        throw new Error('GlobalAuthToken. Authentication failed. No auth data received.');
+      }
+    } else {
+      const newAccesToken = await getRefreshedToken(refreshToken);
+      if (newAccesToken) {
+        accessToken = newAccesToken;
+        tokenExpiration = Date.now() + ACCESS_TOKEN_LIFETIME_IN_MS;
+        console.log('Global access token updated successfully');
+      } else {
+        throw new Error('GlobalAuthToken.Failed to refresh auth token.');
+      }
     }
   } catch (error) {
-    console.error('Error updating global auth token:', error);
+    console.error('GlobalAuthToken. Error updating global auth token:', error);
   }
 }
 
+function isTokenExpired(): boolean {
+  return tokenExpiration === null || Date.now() > tokenExpiration;
+}
 
 async function setWebhook(event: FetchEvent, hashValue: string, webhookUrl: string): Promise<Response> {
   const url = new URL(event.request.url);
@@ -149,40 +265,12 @@ async function getMe(event: FetchEvent, hashValue: string): Promise<Response> {
   }
 }
 
-interface Contact {
-  phone_number: string;
-}
-
-interface Message {
-  contact?: Contact;
-  chat: {
-    id: string;
-  };
-}
-
-interface Update {
-  message?: Message;
-}
-
-interface OrderDetails {
-  id: number;
-  email: string;
-  phone:string;
-}
-interface Order {
-  id:number;
-  email:string;
-  phone:string;
-}
 
 async function handleRequest(event: FetchEvent): Promise<Response> {
   const url = new URL(event.request.url);
   const path = url.pathname;
   const method = event.request.method;
   const workerUrl = `${url.protocol}//${url.host}`;
-  const VERCEL_DOMAIN = (globalThis as any).VERCEL_DOMAIN as string;
-  const NOTIFICATIONS_API = (globalThis as any).NOTIFICATIONS_API as string;
-  const AUTH_TOKEN = (globalThis as any).AUTH_TOKEN as string;
 
   const webhookEndpoint = "/telegram_webhook/";
 
@@ -195,22 +283,27 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
       const chatId = update.message.chat.id;
 
       try {
-        if (await userExists(phoneNumber, chatId, VERCEL_DOMAIN, AUTH_TOKEN)) {
+        const userExistsFlag = await userExists(phoneNumber, chatId);
+
+        if (userExistsFlag) {
           console.warn(`User with phone: ${phoneNumber} and chat ID: ${chatId} already exists.`);
-          await sendOrderDetails(chatId, phoneNumber, VERCEL_DOMAIN, AUTH_TOKEN, NOTIFICATIONS_API); // Assuming order details are in update.message.text
+          await updateGlobalAuthToken();
+          await sendOrderDetails(phoneNumber, chatId); // Fetch and send order details based on phone number
         } else {
-          await sendChatIdAndPhoneToVercel(chatId, phoneNumber, VERCEL_DOMAIN, AUTH_TOKEN);
+          console.log('Posting new user data to Vercel API');
+          await updateGlobalAuthToken();
+          await sendChatIdAndPhoneToVercel(phoneNumber, chatId);
         }
       } catch (error) {
         if (error instanceof Error) {
-          console.error(`Error sending data to Vercel: ${error.message}`);
+          console.error(`Error handling request: ${error.message}`);
         } else {
           console.error('An unknown error occurred');
         }
       }
     }
 
-    event.waitUntil(processUpdate(update, NOTIFICATIONS_API, VERCEL_DOMAIN, AUTH_TOKEN));
+    event.waitUntil(processUpdate(update));
     return new Response("Ok");
   } else if (method === "GET") {
     const command = url.searchParams.get("command");
@@ -236,25 +329,41 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
   return new Response("Not found", { status: 404 });
 }
 
-async function processUpdate(update: any, NOTIFICATIONS_API: string, VERCEL_DOMAIN: string, AUTH_TOKEN: string): Promise<void> {
+async function processUpdate(update: any): Promise<void> {
   console.log('Processing update:', update);
 
   if (update.message) {
-    await processMessage(update.message, NOTIFICATIONS_API, VERCEL_DOMAIN, AUTH_TOKEN);
+    await processMessage(update.message);
   }
 }
 
-async function processMessage(message: any, NOTIFICATIONS_API: string, VERCEL_DOMAIN: string, AUTH_TOKEN: string): Promise<void> {
+
+
+async function processMessage(message: any): Promise<void> {
   if (message.contact) {
     const phoneNumber = message.contact.phone_number;
-    await sendChatIdAndPhoneToVercel(message.chat.id, phoneNumber, VERCEL_DOMAIN, AUTH_TOKEN);
-  } else if (message.text === '/start') {
-    await sendMessage(message.chat.id, 'To get notifications we need you share a phone number.', NOTIFICATIONS_API);
-    await sendContactRequest(message.chat.id, NOTIFICATIONS_API);
+    const chatId = message.chat.id;
+    const userExistsFlag = await userExists(phoneNumber, chatId);
+
+    if (userExistsFlag) {
+    //   await sendOrderDetails(phoneNumber, chatId);
+      console.warn(`User with phone: ${phoneNumber} and chat ID: ${chatId} already exists.`);
+  
   }
+      else {
+        console.log('Posting new user data to Vercel API');
+        await sendChatIdAndPhoneToVercel(phoneNumber, chatId);
+          }
+    }   
+    
+  else
+        if (message.text === '/start') {
+           await sendMessage(message.chat.id, 'To get notifications we need you share a phone number.');
+           await sendContactRequest(message.chat.id);
+          }
 }
 
-async function sendMessage(chatId: string, text: string, NOTIFICATIONS_API: string): Promise<void> {
+async function sendMessage(chatId: string, text: string): Promise<void> {
   const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
   const response = await fetch(url, {
     method: 'POST',
@@ -267,7 +376,7 @@ async function sendMessage(chatId: string, text: string, NOTIFICATIONS_API: stri
   }
 }
 
-async function sendContactRequest(chatId: string, NOTIFICATIONS_API: string): Promise<void> {
+async function sendContactRequest(chatId: string): Promise<void> {
   const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
   const response = await fetch(url, {
     method: 'POST',
@@ -286,62 +395,97 @@ async function sendContactRequest(chatId: string, NOTIFICATIONS_API: string): Pr
     throw new Error(`Failed to send contact request: ${response.statusText}`);
   }
 }
-async function userExists(phoneNumber: string, chatId: string, VERCEL_DOMAIN: string, AUTH_TOKEN: string): Promise<boolean> {
-    const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
-    console.log(`Checking if user exists in Vercel API: ${vercelUrl}`);
-  
-    const formattedPhoneNumber = `+${phoneNumber.replace(/^\+/, '')}`;
-  
-    try {
-      const response = await fetch(`${vercelUrl}?phone=${formattedPhoneNumber}&chat_id=${chatId}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Token ${AUTH_TOKEN}`
-        }
-      });
-  
-      if (response.ok) {
-        const data = await response.json();
-        console.log('User exists in the Vercel API', data);
-        return true;
-      } else if (response.status === 404) {
-        console.log('User does not exist in the Vercel API');
-        return false;
-      } else {
-        console.error(`Failed to check if user exists: ${response.statusText}`);
-        return false;
-      }
-    } catch (error) {
-      console.error(`Error checking if user exists: ${error}`);
-      return false;
-    }
-  }
-  
 
-async function sendChatIdAndPhoneToVercel(
-  chatId: string,
-  phoneNumber: string,
-  VERCEL_DOMAIN: string,
-  AUTH_TOKEN: string
-): Promise<string | void> {
-  const userExistsAlready = await userExists(phoneNumber, chatId, VERCEL_DOMAIN, AUTH_TOKEN);
 
-  if (userExistsAlready) {
-    console.warn(`User with phone: ${phoneNumber} and chat ID: ${chatId} already exists.`);
-    return 'exists';
-  }
-
-  const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
-  console.log(`Posting data to Vercel API: ${vercelUrl}`);
-
-  const formattedPhoneNumber = `+${phoneNumber.replace(/^\+/, '')}`;
+// Function to get the auth token
+async function getAuthToken(): Promise<string> {
+  const LOGIN_URL = `${VERCEL_DOMAIN}/auth/token/login/`;
 
   try {
-    const response = await fetch(vercelUrl, {
+    const response = await fetch(LOGIN_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Token ${AUTH_TOKEN}`
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Failed to authenticate: ${response.statusText}. Response body: ${errorText}`);
+      throw new Error(`Failed to authenticate: ${response.statusText}`);
+    }
+    const data = await response.json() as AuthTokenResponse; // Type assertion here
+    authToken = data.auth_token;
+    if (!authToken) {
+      throw new Error('Token not found in response');
+    }
+
+    return authToken;
+  } catch (error) {
+    console.error(`Error getting auth token: ${error}`);
+    throw error;
+  }
+}// Function to check if a user exists
+async function userExists(phoneNumber: string, chatId: string): Promise<boolean> {
+  const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
+  const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+
+  try {
+    // Get the auth token
+    const authToken = await getAuthToken();
+    
+    // Fetch users with the token
+    const response = await fetch(vercelUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Token ${authToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Failed to fetch users from Vercel: ${response.statusText}. Response body: ${errorText}`);
+      throw new Error(`Failed to fetch users from Vercel: ${response.statusText}`);
+    }
+
+    const data = await response.json() as UserResponse; // Type assertion here
+    const users: User[] = data.results;
+
+    // Check if a user with the given phone number or chat ID exists
+    const userExistsByPhone = users.some(user => user.phone === formattedPhoneNumber);
+    const userExistsByChatId = users.some(user => user.chat_id === chatId);
+
+    return userExistsByPhone || userExistsByChatId;
+  } catch (error) {
+    console.error(`Error checking if user exists: ${error}`);
+    throw error;
+  }
+}
+
+// Function to send chat ID and phone number to Vercel
+async function sendChatIdAndPhoneToVercel(phoneNumber: string, chatId: string): Promise<string | void> {
+  try {
+    // Check if the user already exists
+    const userExistsAlready = await userExists(phoneNumber, chatId);
+    if (userExistsAlready) {
+      console.warn(`User with phone: ${phoneNumber} and chat ID: ${chatId} already exists.`);
+      return 'exists';
+    }
+
+    const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
+    console.log(`Posting data to Vercel API: ${vercelUrl}`);
+    const formattedPhoneNumber = `+${phoneNumber.replace(/^\+/, '')}`;
+    // Send data to Vercel
+    const response = await fetch(vercelUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Token ${authToken}`, // Use TokenAuthentication
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({ phone: formattedPhoneNumber, chat_id: chatId })
     });
@@ -371,91 +515,119 @@ async function sendChatIdAndPhoneToVercel(
   }
 }
 
-async function sendOrderDetails(
-  chatId: string,
-  phoneNumber: string,
-  VERCEL_DOMAIN: string,
-  AUTH_TOKEN: string,
-  NOTIFICATIONS_API: string
-): Promise<void> {
-  const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
-  const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
+interface OrderItem {
+  quantity: number;
+  product_name: string;
+  collection_name: string;
+  size: string;
+  color_name: string;
+  color_value: string;
+  item_price: string;
+  total_sum: number;
+}
 
-  try {
-    console.log(`Fetching orders from: ${ordersUrl}`);
-    const response = await fetch(ordersUrl, {
-      method: 'GET',
-      headers: { 'Authorization': `Token ${AUTH_TOKEN}` }
-    });
+interface Order {
+  id: number;
+  name: string;
+  surname: string;
+  phone: string;
+  email: string;
+  address: string | null;
+  receiver: boolean;
+  receiver_comments: string;
+  submitted_at: string;
+  parent_order: string | null;
+  present: boolean;
+  order_items: OrderItem[];
+}
 
-    if (!response.ok) {
-      console.error(`Failed to retrieve orders. Status: ${response.status} ${response.statusText}`);
-      await sendMessage(chatId, 'Failed to retrieve orders. Please try again later.', NOTIFICATIONS_API);
-      return;
-    }
-
-    const orders = await response.json() as Order[];
-    console.log(`Orders retrieved: ${JSON.stringify(orders)}`);
-
-    const matchingOrder = orders.find(order => order.phone === formattedPhoneNumber);
-
-    if (matchingOrder) {
-      const orderDetailsUrl = `${VERCEL_DOMAIN}/api/order/${matchingOrder.id}/`;
-      console.log(`Fetching order details from: ${orderDetailsUrl}`);
-
-      const orderDetailsResponse = await fetch(orderDetailsUrl, {
-        method: 'GET',
-        headers: { 'Authorization': `Token ${AUTH_TOKEN}` }
-      });
-
-      if (!orderDetailsResponse.ok) {
-        console.error(`Failed to retrieve order details. Status: ${orderDetailsResponse.status} ${orderDetailsResponse.statusText}`);
-        await sendMessage(chatId, 'Failed to retrieve order details. Please try again later.', NOTIFICATIONS_API);
-        return;
-      }
-
-      const orderDetails = await orderDetailsResponse.json() as OrderDetails;
-      console.log(`Order details retrieved: ${JSON.stringify(orderDetails)}`);
-
-      const orderDetailsMessage = `
-        Order ID: ${orderDetails.id}
-        Email: ${orderDetails.email}
-        // Add more details as needed
-      `;
-      await sendMessage(chatId, `Thank you! Here is your last order: ${orderDetailsMessage}`, NOTIFICATIONS_API);
-    } else {
-      console.log('No orders found for this phone number.');
-      await sendMessage(chatId, 'No orders found for this phone number.', NOTIFICATIONS_API);
-    }
-  } catch (error) {
-    console.error(`Error retrieving order details: ${error}`);
-    await sendMessage(chatId, 'An error occurred while retrieving order details. Please try again later.', NOTIFICATIONS_API);
-  }
+interface OrdersResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Order[];
 }
 
 interface OrderDetails {
   id: number;
   email: string;
-  phone: string;
-}
-interface Order {
-  id: number;
-  email: string;
-  phone: string;
-}
+  order_items: OrderItem[];
+  // Add other fields as needed
+}async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<void> {
+  const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+  const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
 
-interface TelegramUpdate {
-  update_id: number;
-  message?: TelegramMessage;
-}
+  try {
+    // Ensure that accessToken is available and valid
+    if (!accessToken) {
+      console.error('No access token available.');
+      await sendMessage(chatId, 'Authorization error. Please try again later.');
+      return;
+    }
 
-interface TelegramMessage {
-  message_id: number;
-  chat: {
-    id: string;
-  };
-  text?: string;
-  contact?: {
-    phone_number: string;
-  };
+    console.log(`Fetching orders from: ${ordersUrl}`);
+    const response = await fetch(ordersUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`, // Use Bearer scheme for JWT
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Failed to retrieve orders. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
+      await sendMessage(chatId, 'Failed to retrieve orders. Please try again later.');
+      return;
+    }
+
+    const ordersResponse = await response.json() as OrdersResponse; // Type assertion here
+    const orders = ordersResponse.results;
+    console.log(`Orders retrieved: ${JSON.stringify(orders)}`);
+
+    const matchingOrder = orders.find(order => order.phone === formattedPhoneNumber);
+
+    if (matchingOrder) {
+      const orderDetailsUrl = `${VERCEL_DOMAIN}/api/orders/${matchingOrder.id}/`;
+      console.log(`Fetching order details from: ${orderDetailsUrl}`);
+
+      const orderDetailsResponse = await fetch(orderDetailsUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`, // Use Bearer scheme for JWT
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!orderDetailsResponse.ok) {
+        const errorText = await orderDetailsResponse.text();
+        console.error(`Failed to retrieve order details. Status: ${orderDetailsResponse.status} ${orderDetailsResponse.statusText}. Response body: ${errorText}`);
+        await sendMessage(chatId, 'Failed to retrieve order details. Please try again later.');
+        return;
+      }
+
+      const orderDetails = await orderDetailsResponse.json() as OrderDetails; // Type assertion here
+      console.log(`Order details retrieved: ${JSON.stringify(orderDetails)}`);
+
+      const orderItemsSummary = orderDetails.order_items.map(item => 
+        `${item.product_name} (${item.collection_name}, ${item.size}, ${item.color_name}, Quantity: ${item.quantity}, Price: ${parseFloat(item.item_price).toFixed(2)})`
+      ).join(', ');
+
+      const orderDetailsMessage = `
+      Order ID: ${orderDetails.id}
+      Email: ${orderDetails.email}
+      
+      Order Items:
+      ${orderItemsSummary}
+      `;
+      
+      await sendMessage(chatId, `Thank you! Here are your last order details:\n${orderDetailsMessage}`);
+    } else {
+      console.log('No orders found for this phone number.');
+      await sendMessage(chatId, 'No orders found for this phone number.');
+    }
+  } catch (error) {
+    console.error(`Error retrieving order details: ${error}`);
+    await sendMessage(chatId, 'An error occurred while retrieving order details. Please try again later.');
+  }
 }
