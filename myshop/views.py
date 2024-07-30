@@ -5,7 +5,6 @@
 from django.shortcuts import render
 import os
 from rest_framework_simplejwt.exceptions import TokenError
-
 from dotenv import load_dotenv
 from distutils.util import strtobool
 from rest_framework.views import APIView
