@@ -328,13 +328,7 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
   return new Response("Not found", { status: 404 });
 }
 
-async function processUpdate(update: any): Promise<void> {
-  console.log('Processing update:', update);
 
-  if (update.message) {
-    await processMessage(update.message);
-  }
-}
 
 interface User {
   phone: string;
@@ -376,13 +370,20 @@ async function fetchPhoneNumbersFromVercel(): Promise<string[]> {
   }
 }
 
-
+async function processUpdate(update: any): Promise<void> {
+  if (update.message) {
+    await processMessage(update.message);
+  } else if (update.callback_query) {
+    await processCallbackQuery(update.callback_query);
+  }
+}
 const phoneNumbers = new Map<string, string>();
 
 async function processMessage(message: any): Promise<void> {
   const chatId = message.chat.id;
 
   if (message.contact) {
+    await updateGlobalAuthToken();
     const phoneNumber = message.contact.phone_number;
     const userExistsFlag = await userExists(phoneNumber, chatId);
     await sendChatIdAndPhoneToVercel(phoneNumber, chatId);
@@ -391,17 +392,36 @@ async function processMessage(message: any): Promise<void> {
       console.warn(`User with phone: ${phoneNumber} and chat ID: ${chatId} already exists.`);
     } else {
       console.log('Posting new user data to Vercel API');
-      await updateGlobalAuthToken();
       await sendChatIdAndPhoneToVercel(phoneNumber, chatId);
     }
 
     // Store the phone number in the map
     phoneNumbers.set(chatId, phoneNumber);
-    // Send the custom keyboard with "Order" and "Orders" buttons
+    // Send the custom keyboard with "Order", "Orders", "Start", and "KOLORYT" buttons
     await sendCustomKeyboard(chatId);
-  } else if (message.text === '/start') {
+  } else if (message.text === 'Start') {
     await sendMessage(message.chat.id, 'To get notifications, please share your phone number.');
     await sendContactRequest(message.chat.id);
+  } else if (message.text === 'Order') {
+    const phoneNumber = phoneNumbers.get(chatId);
+    if (phoneNumber) {
+      await updateGlobalAuthToken();
+      await sendOrderDetails(phoneNumber, message.chat.id);
+    } else {
+      await sendMessage(message.chat.id, 'Phone number not found. Please share your phone number first.');
+      await sendContactRequest(message.chat.id);
+    }
+  } else if (message.text === 'Orders') {
+    const phoneNumber = phoneNumbers.get(chatId);
+    if (phoneNumber) {
+      await updateGlobalAuthToken();
+      await sendAllOrdersDetails(phoneNumber, message.chat.id);
+    } else {
+      await sendMessage(message.chat.id, 'Phone number not found. Please share your phone number first.');
+      await sendContactRequest(message.chat.id);
+    }
+  } else if (message.text === 'KOLORYT') {
+    await sendMessage(message.chat.id, `You can proceed to KOLORYT here: \n${VERCEL_DOMAIN}`);
   } else if (message.text === '/telegram_users') {
     try {
       await updateGlobalAuthToken();
@@ -412,32 +432,52 @@ async function processMessage(message: any): Promise<void> {
     } catch (error) {
       await sendMessage(chatId, 'Failed to retrieve phone numbers. Please try again later.');
     }
-  } else if (message.text === 'Order') {
-    const phoneNumber = phoneNumbers.get(chatId);
-    if (phoneNumber) {
-      await sendCustomKeyboard(message.chat.id);
-      await updateGlobalAuthToken();
-      await sendOrderDetails(phoneNumber, message.chat.id);
-    } else {
-      await sendMessage(message.chat.id, 'Phone number not found. Please share your phone number first.');
-      await sendContactRequest(message.chat.id);
-    }
-  } else if (message.text === 'Orders') {
-    const phoneNumber = phoneNumbers.get(chatId);
-    if (phoneNumber) {
-      await sendCustomKeyboard(message.chat.id);
-      await updateGlobalAuthToken();
-      await sendAllOrdersDetails(phoneNumber, message.chat.id);
-    } else {
-      await sendMessage(message.chat.id, 'Phone number not found. Please share your phone number first.');
-      await sendContactRequest(message.chat.id);
-    }
   } else {
+    // Send the custom keyboard in case of unrecognized text
     await sendCustomKeyboard(message.chat.id);
   }
 }
 
+async function processCallbackQuery(callbackQuery: any): Promise<void> {
+  const chatId = callbackQuery.message.chat.id;
+  const callbackData = callbackQuery.data;
 
+  if (callbackData === 'Order') {
+    const phoneNumber = phoneNumbers.get(chatId);
+    if (phoneNumber) {
+      await sendCustomKeyboard(chatId);
+      await updateGlobalAuthToken();
+      await sendOrderDetails(phoneNumber, chatId);
+    } else {
+      await sendMessage(chatId, 'Phone number not found. Please share your phone number first.');
+      await sendContactRequest(chatId);
+    }
+  } else if (callbackData === 'Orders') {
+    const phoneNumber = phoneNumbers.get(chatId);
+    if (phoneNumber) {
+      await sendCustomKeyboard(chatId);
+      await updateGlobalAuthToken();
+      await sendAllOrdersDetails(phoneNumber, chatId);
+    } else {
+      await sendMessage(chatId, 'Phone number not found. Please share your phone number first.');
+      await sendContactRequest(chatId);
+    }
+  } else if (callbackData === '/start') {
+    await sendMessage(chatId, 'To get notifications, please share your phone number.');
+    await sendContactRequest(chatId);
+  } else {
+    await sendCustomKeyboard(chatId);
+  }
+  
+  // Acknowledge callback query to Telegram
+  await fetch(`https://api.telegram.org/bot${NOTIFICATIONS_API}/answerCallbackQuery`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      callback_query_id: callbackQuery.id
+    })
+  });
+}
 async function sendCustomKeyboard(chatId: string): Promise<void> {
   const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
   const response = await fetch(url, {
@@ -445,14 +485,20 @@ async function sendCustomKeyboard(chatId: string): Promise<void> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       chat_id: chatId,
-      text: 'Choose an action:',
+      //text: 'Choose an action:',
       reply_markup: {
-        one_time_keyboard: true,
-        resize_keyboard: true,
         keyboard: [
-          [{ text: 'Order' }],
-          [{ text: 'Orders' }]
-        ]
+          [
+            { text: 'Order' },
+            { text: 'Orders' }
+          ],
+          [
+            { text: 'Start' },
+            { text: 'KOLORYT', url: VERCEL_DOMAIN }
+          ]
+        ],
+        one_time_keyboard: false, // Set to false to keep the keyboard visible
+        resize_keyboard: true // Adjusts the size of the keyboard
       }
     })
   });
