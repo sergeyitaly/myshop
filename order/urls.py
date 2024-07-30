@@ -15,6 +15,7 @@ urlpatterns = [
     path('order/<int:order_id>/', get_order, name='get_order'),
     path('telegram_webhook/', telegram_webhook, name='telegram_webhook'),
     path('health_check/', health_check, name='health_check'),
+    path('orders/', get_orders, name='get_orders'),  # New path for get_orders
 
 ]
 

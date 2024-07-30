@@ -339,6 +339,8 @@ async function processUpdate(update: any): Promise<void> {
 
 
 
+const phoneNumbers = new Map<string, string>();
+
 async function processMessage(message: any): Promise<void> {
   if (message.contact) {
     const phoneNumber = message.contact.phone_number;
@@ -346,21 +348,90 @@ async function processMessage(message: any): Promise<void> {
     const userExistsFlag = await userExists(phoneNumber, chatId);
 
     if (userExistsFlag) {
-    //   await sendOrderDetails(phoneNumber, chatId);
       console.warn(`User with phone: ${phoneNumber} and chat ID: ${chatId} already exists.`);
-  
+    } else {
+      console.log('Posting new user data to Vercel API');
+      await sendChatIdAndPhoneToVercel(phoneNumber, chatId);
+    }
+
+    // Store the phone number in the map
+    phoneNumbers.set(chatId.toString(), phoneNumber);
+
+    // Send the custom keyboard with "Order" and "Orders" buttons
+    await sendCustomKeyboard(chatId);
+  } else if (message.text === '/start') {
+    await sendMessage(message.chat.id, 'To get notifications, please share your phone number.');
+    await sendContactRequest(message.chat.id);
+  } else if (message.text === 'Order') {
+    const phoneNumber = phoneNumbers.get(message.chat.id.toString());
+    if (phoneNumber) {
+       await sendCustomKeyboard(message.chat.id);
+       await updateGlobalAuthToken();
+       await sendOrderDetails(phoneNumber, message.chat.id);
+      // Ensure the custom keyboard is shown after sending the order details
+    } else {
+      await sendMessage(message.chat.id, 'Phone number not found. Please share your phone number first.');
+      await sendContactRequest(message.chat.id);
+    }
+  } else if (message.text === 'Orders') {
+    const phoneNumber = phoneNumbers.get(message.chat.id.toString());
+    if (phoneNumber) {
+      // Ensure the custom keyboard is shown after sending all orders details
+      await sendCustomKeyboard(message.chat.id);
+      await updateGlobalAuthToken();
+      await sendAllOrdersDetails(phoneNumber, message.chat.id);
+
+    } else {
+      await sendMessage(message.chat.id, 'Phone number not found. Please share your phone number first.');
+      await sendContactRequest(message.chat.id);
+    }
   }
-      else {
-        console.log('Posting new user data to Vercel API');
-        await sendChatIdAndPhoneToVercel(phoneNumber, chatId);
-          }
-    }   
-    
-  else
-        if (message.text === '/start') {
-           await sendMessage(message.chat.id, 'To get notifications we need you share a phone number.');
-           await sendContactRequest(message.chat.id);
-          }
+}
+
+async function sendCustomKeyboard(chatId: string): Promise<void> {
+  const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: 'Choose an action:',
+      reply_markup: {
+        one_time_keyboard: true,
+        resize_keyboard: true,
+        keyboard: [
+          [{ text: 'Order' }],
+          [{ text: 'Orders' }]
+        ]
+      }
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to send custom keyboard: ${response.statusText}`);
+  }
+}
+
+
+async function sendContactRequest(chatId: string): Promise<void> {
+  const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: 'Please share your phone number:',
+      reply_markup: {
+        one_time_keyboard: true,
+        resize_keyboard: true,
+        keyboard: [[{ text: 'Share phone number', request_contact: true }]]
+      }
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to send contact request: ${response.statusText}`);
+  }
 }
 
 async function sendMessage(chatId: string, text: string): Promise<void> {
@@ -375,28 +446,6 @@ async function sendMessage(chatId: string, text: string): Promise<void> {
     throw new Error(`Failed to send message: ${response.statusText}`);
   }
 }
-
-async function sendContactRequest(chatId: string): Promise<void> {
-  const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text: 'Please share your phone number:',
-      reply_markup: {
-        one_time_keyboard: true,
-        keyboard: [[{ text: 'Share phone number', request_contact: true }]]
-      }
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to send contact request: ${response.statusText}`);
-  }
-}
-
-
 // Function to get the auth token
 async function getAuthToken(): Promise<string> {
   const LOGIN_URL = `${VERCEL_DOMAIN}/auth/token/login/`;
@@ -553,7 +602,8 @@ interface OrderDetails {
   email: string;
   order_items: OrderItem[];
   // Add other fields as needed
-}async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<void> {
+}
+async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<void> {
   const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
   const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
 
@@ -610,15 +660,15 @@ interface OrderDetails {
       console.log(`Order details retrieved: ${JSON.stringify(orderDetails)}`);
 
       const orderItemsSummary = orderDetails.order_items.map(item => 
-        `${item.product_name} (${item.collection_name}, ${item.size}, ${item.color_name}, Quantity: ${item.quantity}, Price: ${parseFloat(item.item_price).toFixed(2)})`
-      ).join(', ');
-
+        `- ${item.product_name}, ${item.collection_name}, ${item.size}, ${item.color_name}, ${item.quantity} pcs, ${parseFloat(item.item_price).toFixed(2)}`
+      ).join('\n');
       const orderDetailsMessage = `
       Order ID: ${orderDetails.id}
       Email: ${orderDetails.email}
       
       Order Items:
       ${orderItemsSummary}
+
       `;
       
       await sendMessage(chatId, `Thank you! Here are your last order details:\n${orderDetailsMessage}`);
@@ -629,5 +679,54 @@ interface OrderDetails {
   } catch (error) {
     console.error(`Error retrieving order details: ${error}`);
     await sendMessage(chatId, 'An error occurred while retrieving order details. Please try again later.');
+  }
+}
+
+async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promise<void> {
+  const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
+  const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+
+  try {
+    if (!accessToken) {
+      console.error('No access token available.');
+      await sendMessage(chatId, 'Authorization error. Please try again later.');
+      return;
+    }
+
+    const response = await fetch(ordersUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Failed to retrieve orders. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
+      await sendMessage(chatId, 'Failed to retrieve orders. Please try again later.');
+      return;
+    }
+
+    const ordersResponse = await response.json() as OrdersResponse;
+    const orders = ordersResponse.results.filter(order => order.phone === formattedPhoneNumber);
+
+    // Function to format date
+    const formatDate = (dateString: string): string => {
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0]; // YYYY-MM-DD format
+    };
+
+    if (orders.length > 0) {
+      const ordersSummary = orders.map(order => 
+        `Order ID: ${order.id}, Submitted at: ${formatDate(order.submitted_at)}`
+      ).join('\n');
+      await sendMessage(chatId, `Here are all your orders:\n${ordersSummary}`);
+    } else {
+      await sendMessage(chatId, 'No orders found for this phone number.');
+    }
+  } catch (error) {
+    console.error(`Error retrieving orders: ${error}`);
+    await sendMessage(chatId, 'An error occurred while retrieving orders. Please try again later.');
   }
 }
