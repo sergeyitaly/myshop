@@ -79,7 +79,7 @@ addEventListener('scheduled', (event: ScheduledEvent) => {
 async function handleScheduled(event: ScheduledEvent): Promise<void> {
   console.log('Scheduled event triggered');
   await performHealthCheck();
-  await updateGlobalAuthToken();
+ // await updateGlobalAuthToken();
 }
 let lastHealthCheckStatus: 'success' | 'failure' = 'success';
 
@@ -114,12 +114,12 @@ async function performHealthCheck(): Promise<void> {
 
       if (lastHealthCheckStatus === 'failure') {
         // Notify all users that the health check is back up
-        const successMessage = 'Vercel health check is back up and running!';
+        const successMessage = '✅ Server up and running!';
         await sendNotificationToAllUsers(successMessage);
         lastHealthCheckStatus = 'success';
       }
     } else {
-      const errorMessage = `Vercel health check failed: ${response.statusText}`;
+      const errorMessage = `🚨 Server is down: ${response.statusText}`;
       console.error(errorMessage);
 
       if (lastHealthCheckStatus === 'success') {
@@ -129,7 +129,7 @@ async function performHealthCheck(): Promise<void> {
       }
     }
   } catch (error) {
-    const errorMessage = `Error performing health check: ${error}`;
+    const errorMessage = `❗ Error performing health check: ${error}`;
     console.error(errorMessage);
 
     if (lastHealthCheckStatus === 'success') {
@@ -137,6 +137,20 @@ async function performHealthCheck(): Promise<void> {
       await sendNotificationToAllUsers(errorMessage);
       lastHealthCheckStatus = 'failure';
     }
+  }
+}
+
+async function getHealthStatus(): Promise<string> {
+  const healthCheckUrl = `${VERCEL_DOMAIN}/api/health_check`;
+  try {
+    const response = await fetch(healthCheckUrl);
+    if (response.ok) {
+      return 'Server is up and running!';
+    } else {
+      return `Server is down: ${response.statusText}`;
+    }
+  } catch (error) {
+    return `Error performing health check: ${error}`;
   }
 }
 
@@ -473,6 +487,8 @@ async function processMessage(message: any): Promise<void> {
     }
   } else if (message.text === 'KOLORYT') {
     await sendMessage(message.chat.id, `You can proceed to KOLORYT here: \n${VERCEL_DOMAIN}`);
+    const healthStatus = await getHealthStatus();
+    await sendMessage(chatId, `Current status:\n${healthStatus}`);
   } else if (message.text === '/telegram_users') {
     try {
       await updateGlobalAuthToken();
