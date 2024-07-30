@@ -18,7 +18,7 @@ interface TokenResponse {
 
 let tokenExpiration: number | null = null;
 
-const ACCESS_TOKEN_LIFETIME_IN_MINUTES = 4;
+const ACCESS_TOKEN_LIFETIME_IN_MINUTES = 5;
 const ACCESS_TOKEN_LIFETIME_IN_MS = ACCESS_TOKEN_LIFETIME_IN_MINUTES * 60 * 1000;
 
 interface Contact {
@@ -81,6 +81,29 @@ async function handleScheduled(event: ScheduledEvent): Promise<void> {
   await performHealthCheck();
   await updateGlobalAuthToken();
 }
+let lastHealthCheckStatus: 'success' | 'failure' = 'success';
+
+async function sendNotificationToAllUsers(message: string): Promise<void> {
+  for (const chatId of chatIds) {
+    try {
+      const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: message,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to send Telegram notification to chat ID ${chatId}: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error(`Error sending notification to chat ID ${chatId}: ${error}`);
+    }
+  }
+}
 
 async function performHealthCheck(): Promise<void> {
   const healthCheckUrl = `${VERCEL_DOMAIN}/api/health_check`;
@@ -88,11 +111,32 @@ async function performHealthCheck(): Promise<void> {
     const response = await fetch(healthCheckUrl);
     if (response.ok) {
       console.log('Vercel health check successful');
+
+      if (lastHealthCheckStatus === 'failure') {
+        // Notify all users that the health check is back up
+        const successMessage = 'Vercel health check is back up and running!';
+        await sendNotificationToAllUsers(successMessage);
+        lastHealthCheckStatus = 'success';
+      }
     } else {
-      console.error('Vercel health check failed:', response.statusText);
+      const errorMessage = `Vercel health check failed: ${response.statusText}`;
+      console.error(errorMessage);
+
+      if (lastHealthCheckStatus === 'success') {
+        // Notify all users that the health check has failed
+        await sendNotificationToAllUsers(errorMessage);
+        lastHealthCheckStatus = 'failure';
+      }
     }
   } catch (error) {
-    console.error('Error performing health check:', error);
+    const errorMessage = `Error performing health check: ${error}`;
+    console.error(errorMessage);
+
+    if (lastHealthCheckStatus === 'success') {
+      // Notify all users that the health check has failed
+      await sendNotificationToAllUsers(errorMessage);
+      lastHealthCheckStatus = 'failure';
+    }
   }
 }
 
@@ -374,21 +418,27 @@ async function processUpdate(update: any): Promise<void> {
   if (update.message) {
     await processMessage(update.message);
   } else if (update.callback_query) {
+
     await processCallbackQuery(update.callback_query);
   }
 }
+
 const phoneNumbers = new Map<string, string>();
+const chatIds = new Set<string>();
 
 async function processMessage(message: any): Promise<void> {
   const chatId = message.chat.id;
+  await updateGlobalAuthToken();
 
   if (message.contact) {
     await updateGlobalAuthToken();
     const phoneNumber = message.contact.phone_number;
     const userExistsFlag = await userExists(phoneNumber, chatId);
     await sendChatIdAndPhoneToVercel(phoneNumber, chatId);
+    await sendCustomKeyboard(chatId);
 
     if (userExistsFlag) {
+
       console.warn(`User with phone: ${phoneNumber} and chat ID: ${chatId} already exists.`);
     } else {
       console.log('Posting new user data to Vercel API');
@@ -397,8 +447,9 @@ async function processMessage(message: any): Promise<void> {
 
     // Store the phone number in the map
     phoneNumbers.set(chatId, phoneNumber);
-    // Send the custom keyboard with "Order", "Orders", "Start", and "KOLORYT" buttons
-    await sendCustomKeyboard(chatId);
+    chatIds.add(chatId);
+
+    // Send the custom keyboard with "Order", "Orders", and "KOLORYT" buttons
   } else if (message.text === 'Start') {
     await sendMessage(message.chat.id, 'To get notifications, please share your phone number.');
     await sendContactRequest(message.chat.id);
@@ -425,7 +476,6 @@ async function processMessage(message: any): Promise<void> {
   } else if (message.text === '/telegram_users') {
     try {
       await updateGlobalAuthToken();
-
       const allPhoneNumbers = await fetchPhoneNumbersFromVercel();
       const phoneNumberList = allPhoneNumbers.join('\n');
       await sendMessage(chatId, `Registered phone numbers:\n${phoneNumberList}`);
@@ -433,18 +483,20 @@ async function processMessage(message: any): Promise<void> {
       await sendMessage(chatId, 'Failed to retrieve phone numbers. Please try again later.');
     }
   } else {
-    // Send the custom keyboard in case of unrecognized text
+    // Send the custom keyboard with correct options
     await sendCustomKeyboard(message.chat.id);
   }
 }
-
 async function processCallbackQuery(callbackQuery: any): Promise<void> {
   const chatId = callbackQuery.message.chat.id;
   const callbackData = callbackQuery.data;
+  const phoneNumber = phoneNumbers.get(chatId); // Get phone number from the stored map
+  // Check if the phone number exists in the map or perform user existence check
+  await updateGlobalAuthToken();
+  const userExistsFlag = phoneNumber ? true : await userExists(phoneNumber as string, chatId);
 
   if (callbackData === 'Order') {
-    const phoneNumber = phoneNumbers.get(chatId);
-    if (phoneNumber) {
+    if (phoneNumber && userExistsFlag) {
       await sendCustomKeyboard(chatId);
       await updateGlobalAuthToken();
       await sendOrderDetails(phoneNumber, chatId);
@@ -453,8 +505,7 @@ async function processCallbackQuery(callbackQuery: any): Promise<void> {
       await sendContactRequest(chatId);
     }
   } else if (callbackData === 'Orders') {
-    const phoneNumber = phoneNumbers.get(chatId);
-    if (phoneNumber) {
+    if (phoneNumber && userExistsFlag) {
       await sendCustomKeyboard(chatId);
       await updateGlobalAuthToken();
       await sendAllOrdersDetails(phoneNumber, chatId);
@@ -463,12 +514,16 @@ async function processCallbackQuery(callbackQuery: any): Promise<void> {
       await sendContactRequest(chatId);
     }
   } else if (callbackData === '/start') {
-    await sendMessage(chatId, 'To get notifications, please share your phone number.');
-    await sendContactRequest(chatId);
+    if (!phoneNumber || !userExistsFlag) {
+      await sendMessage(chatId, 'To get notifications, please share your phone number.');
+      await sendContactRequest(chatId);
+    } else {
+      await sendCustomKeyboard(chatId);
+    }
   } else {
     await sendCustomKeyboard(chatId);
   }
-  
+
   // Acknowledge callback query to Telegram
   await fetch(`https://api.telegram.org/bot${NOTIFICATIONS_API}/answerCallbackQuery`, {
     method: 'POST',
@@ -478,6 +533,8 @@ async function processCallbackQuery(callbackQuery: any): Promise<void> {
     })
   });
 }
+
+
 async function sendCustomKeyboard(chatId: string): Promise<void> {
   const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
   const response = await fetch(url, {
@@ -485,7 +542,7 @@ async function sendCustomKeyboard(chatId: string): Promise<void> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       chat_id: chatId,
-      //text: 'Choose an action:',
+      text: 'Choose an action:',
       reply_markup: {
         keyboard: [
           [
@@ -756,7 +813,7 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
       console.log(`Order details retrieved: ${JSON.stringify(orderDetails)}`);
 
       const orderItemsSummary = orderDetails.order_items.map(item => 
-        `- ${item.product_name}, ${item.collection_name}, ${item.size}, ${item.color_name}, ${item.quantity} pcs, ${parseFloat(item.item_price).toFixed(2)}`
+        `- ${item.product_name}, ${item.collection_name}, Size: ${item.size}, Color: ${item.color_name}, ${item.quantity} pcs, ${parseFloat(item.item_price).toFixed(2)}`
       ).join('\n');
       const orderDetailsMessage = `
       Order ID: ${orderDetails.id}
@@ -815,7 +872,7 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promis
 
     if (orders.length > 0) {
       const ordersSummary = orders.map(order => 
-        `Order ID: ${order.id}, Submitted at: ${formatDate(order.submitted_at)}`
+        `Order ID: ${order.id}, Submitted on: ${formatDate(order.submitted_at)}`
       ).join('\n');
       await sendMessage(chatId, `Here are all your orders:\n${ordersSummary}`);
     } else {
