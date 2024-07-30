@@ -144,6 +144,7 @@ if USE_S3:
     # DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     # STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    IMAGEKIT_DEFAULT_CACHEFILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/'
 else:
@@ -219,44 +220,6 @@ DJOSER = {
 }
 
 
-#SENDGRID_EMAIL_HOST = "smtp.sendgrid.net"
-#SENDGRID_EMAIL_PORT = 587
-#SENDGRID_EMAIL_USERNAME = "apikey"
-#SENDGRID_EMAIL_PASSWORD = os.getenv('SENDGRID_API_KEY')
-
-
-#EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
-#SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
-
-#EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
-# Optional settings (adjust as needed)
-#SENDGRID_SANDBOX_MODE_IN_DEBUG = True  # Set to False to allow sending emails in DEBUG mode
-#SENDGRID_ECHO_TO_STDOUT = False  # Set to True to print emails to stdout
-#SENDGRID_TRACK_EMAIL_OPENS = True  # Track email opens
-#SENDGRID_TRACK_CLICKS_HTML = True  # Track HTML email clicks
-#SENDGRID_TRACK_CLICKS_PLAIN = True  # Track plain text email clicks
-#MAILCHIMP_API_KEY = os.getenv('MAILCIP_API_KEY')
-#MAILCHIMP_REGION = os.getenv('MAILCHIMP_REGION')
-#MAILCHIMP_MARKETING_AUDIENCE_ID =os.getenv('MAILCHIMP_MARKETING_AUDIENCE_ID')
-
-
-#ANYMAIL = {
-#    "MAILERSEND_API_TOKEN": os.getenv('MAILERSEND_API_TOKEN'),
-#    }
-
-#EMAIL_BACKEND = "anymail.backends.mailersend.EmailBackend"
-#EMAIL_BACKEND = 'django_mailersend.backend.MailerSendEmailBackend'
-
-#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-#EMAIL_USE_TLS = True
-#MAILERSEND_API_KEY=os.getenv('MAILERSEND_API_KEY')
-#MAILERSEND_SMTP_PORT = 587
-#MAILERSEND_SMTP_USERNAME = os.getenv('MAILERSEND_SMTP_USERNAME')
-#MAILERSEND_PASSWORD=os.getenv('MAILERSEND_PASSWORD')
-#MAILERSEND_SMTP_HOST = 'smtp.mailersend.net'
-
-
-
 ANYMAIL = {
     "MAILGUN_API_KEY": os.getenv('MAILGUN_API_KEY'),
     "MAILGUN_SENDER_DOMAIN": os.getenv('MAILGUN_SENDER_DOMAIN'),
@@ -324,10 +287,3 @@ CACHES = {
         'TIMEOUT': 60 * 15,  # Cache timeout in seconds (e.g., 30 minutes)
     }
 }
-
-# CACHES = {
-#    'default': {
-#        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-#        'LOCATION': os.path.join(BASE_DIR, 'site_cache'),
-#    }
-# }
