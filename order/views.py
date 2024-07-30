@@ -302,19 +302,24 @@ def create_order(request):
             )
             email.content_subtype = "html"
             email.send(fail_silently=False)
-
-            # Now handle sending a Telegram message
-            chat_id = request.data.get('chat_id')  # Assume chat_id is provided in the request
-            if chat_id:
+            
+            # Handle sending a Telegram message
+            phone = order.phone
+            try:
+                telegram_user = TelegramUser.objects.get(phone=phone)
+                chat_id = telegram_user.chat_id
                 telegram_message = f"Ваше замовлення №{order.id} було успішно створено. Дякуємо за покупку!"
                 send_telegram_message(chat_id, telegram_message)
+            except TelegramUser.DoesNotExist:
+                logger.warning(f"TelegramUser with phone {phone} not found. No Telegram message sent.")
 
             return Response({'status': 'Order created', 'order_id': order.id}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         logger.error(f"Error creating order: {e}")
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_order(request, order_id):
