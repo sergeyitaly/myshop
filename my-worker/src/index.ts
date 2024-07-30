@@ -342,50 +342,57 @@ async function processUpdate(update: any): Promise<void> {
 const phoneNumbers = new Map<string, string>();
 
 async function processMessage(message: any): Promise<void> {
+  const chatId = message.chat.id;
+
   if (message.contact) {
     const phoneNumber = message.contact.phone_number;
-    const chatId = message.chat.id;
     const userExistsFlag = await userExists(phoneNumber, chatId);
 
     if (userExistsFlag) {
       console.warn(`User with phone: ${phoneNumber} and chat ID: ${chatId} already exists.`);
-    } else {
-      console.log('Posting new user data to Vercel API');
-      await sendChatIdAndPhoneToVercel(phoneNumber, chatId);
-    }
+       } else {
+               console.log('Posting new user data to Vercel API');
+                await sendChatIdAndPhoneToVercel(phoneNumber, chatId);
+               }
 
     // Store the phone number in the map
-    phoneNumbers.set(chatId.toString(), phoneNumber);
-
+    phoneNumbers.set(chatId, phoneNumber);
     // Send the custom keyboard with "Order" and "Orders" buttons
-    await sendCustomKeyboard(chatId);
-  } else if (message.text === '/start') {
-    await sendMessage(message.chat.id, 'To get notifications, please share your phone number.');
-    await sendContactRequest(message.chat.id);
-  } else if (message.text === 'Order') {
-    const phoneNumber = phoneNumbers.get(message.chat.id.toString());
-    if (phoneNumber) {
-       await sendCustomKeyboard(message.chat.id);
-       await updateGlobalAuthToken();
-       await sendOrderDetails(phoneNumber, message.chat.id);
+       await sendCustomKeyboard(chatId);
+       } // eof message.contact
+  else if (message.text === '/start') {
+        await sendMessage(message.chat.id, 'To get notifications, please share your phone number.');
+        await sendContactRequest(message.chat.id);
+         } 
+        else if (message.text === 'Order') {
+          const phoneNumber = phoneNumbers.get(chatId);
+          if (phoneNumber) {
+            await sendCustomKeyboard(message.chat.id);
+            await updateGlobalAuthToken();
+            await sendOrderDetails(phoneNumber, message.chat.id);
       // Ensure the custom keyboard is shown after sending the order details
-    } else {
-      await sendMessage(message.chat.id, 'Phone number not found. Please share your phone number first.');
-      await sendContactRequest(message.chat.id);
-    }
-  } else if (message.text === 'Orders') {
-    const phoneNumber = phoneNumbers.get(message.chat.id.toString());
-    if (phoneNumber) {
-      // Ensure the custom keyboard is shown after sending all orders details
-      await sendCustomKeyboard(message.chat.id);
-      await updateGlobalAuthToken();
-      await sendAllOrdersDetails(phoneNumber, message.chat.id);
+               } 
+            else {
+               await sendMessage(message.chat.id, 'Phone number not found. Please share your phone number first.');
+               await sendContactRequest(message.chat.id);
+                  }
+          } 
+        else if (message.text === 'Orders') {
+          const phoneNumber = phoneNumbers.get(chatId);
+          if (phoneNumber) {
+            // Ensure the custom keyboard is shown after sending all orders details
+            await sendCustomKeyboard(message.chat.id);
+            await updateGlobalAuthToken();
+            await sendAllOrdersDetails(phoneNumber, message.chat.id);
 
-    } else {
-      await sendMessage(message.chat.id, 'Phone number not found. Please share your phone number first.');
-      await sendContactRequest(message.chat.id);
-    }
-  }
+            } 
+            else {
+
+               await sendMessage(message.chat.id, 'Phone number not found. Please share your phone number first.');
+               await sendContactRequest(message.chat.id);
+                }    
+           } //eof message.text
+        else {            await sendCustomKeyboard(message.chat.id);}
 }
 
 async function sendCustomKeyboard(chatId: string): Promise<void> {
