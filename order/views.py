@@ -168,14 +168,9 @@ class TelegramWebhook(View):
 
 telegram_webhook = TelegramWebhook.as_view()
 
-def send_telegram_message(order_id, phone, email):
+def send_telegram_message(order_id, chat_id, email):
     bot_token = settings.TELEGRAM_BOT_TOKEN
     
-    try:
-        telegram_user = TelegramUser.objects.get(phone=phone)
-        chat_id = telegram_user.chat_id
-    except TelegramUser.DoesNotExist:
-        return None
 
     url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
     
@@ -309,7 +304,7 @@ def create_order(request):
                 telegram_user = TelegramUser.objects.get(phone=phone)
                 chat_id = telegram_user.chat_id
                 telegram_message = f"Ваше замовлення №{order.id} було успішно створено. Дякуємо за покупку!"
-                send_telegram_message(chat_id, telegram_message)
+                send_telegram_message(order.id, chat_id, telegram_message)
             except TelegramUser.DoesNotExist:
                 logger.warning(f"TelegramUser with phone {phone} not found. No Telegram message sent.")
 
