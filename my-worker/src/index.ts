@@ -517,7 +517,7 @@ async function processCallbackQuery(callbackQuery: any): Promise<void> {
       await updateGlobalAuthToken();
       await sendOrderDetails(phoneNumber, chatId);
     } else {
-      await sendMessage(chatId, 'Phone number not found. Please share your phone number first.');
+      await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
       await sendContactRequest(chatId);
     }
   } else if (callbackData === 'Orders') {
@@ -526,12 +526,12 @@ async function processCallbackQuery(callbackQuery: any): Promise<void> {
       await updateGlobalAuthToken();
       await sendAllOrdersDetails(phoneNumber, chatId);
     } else {
-      await sendMessage(chatId, 'Phone number not found. Please share your phone number first.');
+      await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
       await sendContactRequest(chatId);
     }
   } else if (callbackData === '/start') {
     if (!phoneNumber || !userExistsFlag) {
-      await sendMessage(chatId, 'To get notifications, please share your phone number.');
+      await sendMessage(chatId, '📞 To get notifications, please share your phone number.');
       await sendContactRequest(chatId);
     } else {
       await sendCustomKeyboard(chatId);

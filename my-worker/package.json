@@ -19,7 +19,6 @@
     "wrangler": "^3.67.0"
   },
   "dependencies": {
-    "dotenv": "^16.4.5",
-    "grammy": "^1.27.0"
+    "dotenv": "^16.4.5"
   }
 }
