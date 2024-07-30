@@ -1,7 +1,7 @@
 #!/bin/bash
-cd frontendd
-npmm run vercel-build
-npmm audit fix
+cd frontend
+npm run vercel-build
+npm audit fix
 cd ..
 pip install -r requirements.txt
 python3 manage.py makemigrations

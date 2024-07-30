@@ -78,12 +78,48 @@ addEventListener('scheduled', (event: ScheduledEvent) => {
 
 async function handleScheduled(event: ScheduledEvent): Promise<void> {
   console.log('Scheduled event triggered');
+  await updateGlobalAuthToken();
   await performHealthCheck();
- // await updateGlobalAuthToken();
 }
-let lastHealthCheckStatus: 'success' | 'failure' = 'success';
 
-async function sendNotificationToAllUsers(message: string): Promise<void> {
+let lastHealthCheckStatus = 'unknown';
+let cachedChatIds: Set<string> = new Set();
+
+async function fetchChatIds(): Promise<Set<string>> {
+  const chatIds = new Set<string>();
+  const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
+
+  try {
+    const response = await fetch(vercelUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Token ${authToken}`, // Use TokenAuthentication
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch chat IDs from Vercel: ${response.statusText}`);
+    }
+
+    const data = await response.json() as ApiResponse; // Explicitly cast the response to ApiResponse
+    console.log('Fetched chat IDs:', data);
+
+    if (data.results && Array.isArray(data.results)) {
+      data.results.forEach((user: User) => chatIds.add(user.chat_id));
+    } else if (data.users && Array.isArray(data.users)) {
+      data.users.forEach((user: User) => chatIds.add(user.chat_id));
+    } else {
+      throw new Error('Unexpected data structure');
+    }
+  } catch (error) {
+    console.error(`Error fetching chat IDs from Vercel: ${error}`);
+  }
+
+  return chatIds;
+}
+
+async function sendNotificationToAllUsers(chatIds: Set<string>, message: string): Promise<void> {
   for (const chatId of chatIds) {
     try {
       const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
@@ -115,16 +151,19 @@ async function performHealthCheck(): Promise<void> {
       if (lastHealthCheckStatus === 'failure') {
         // Notify all users that the health check is back up
         const successMessage = '✅ Server up and running!';
-        await sendNotificationToAllUsers(successMessage);
+        await sendNotificationToAllUsers(cachedChatIds, successMessage);
         lastHealthCheckStatus = 'success';
       }
+
+      // Update cached chat IDs when the server is up
+      cachedChatIds = await fetchChatIds();
     } else {
       const errorMessage = `🚨 Server is down: ${response.statusText}`;
       console.error(errorMessage);
 
-      if (lastHealthCheckStatus === 'success') {
+      if (lastHealthCheckStatus !== 'failure') {
         // Notify all users that the health check has failed
-        await sendNotificationToAllUsers(errorMessage);
+        await sendNotificationToAllUsers(cachedChatIds, errorMessage);
         lastHealthCheckStatus = 'failure';
       }
     }
@@ -132,25 +171,26 @@ async function performHealthCheck(): Promise<void> {
     const errorMessage = `❗ Error performing health check: ${error}`;
     console.error(errorMessage);
 
-    if (lastHealthCheckStatus === 'success') {
+    if (lastHealthCheckStatus !== 'failure') {
       // Notify all users that the health check has failed
-      await sendNotificationToAllUsers(errorMessage);
+      await sendNotificationToAllUsers(cachedChatIds, errorMessage);
       lastHealthCheckStatus = 'failure';
     }
   }
 }
+
 
 async function getHealthStatus(): Promise<string> {
   const healthCheckUrl = `${VERCEL_DOMAIN}/api/health_check`;
   try {
     const response = await fetch(healthCheckUrl);
     if (response.ok) {
-      return 'Server is up and running!';
+      return '✅ Server up and running!';
     } else {
-      return `Server is down: ${response.statusText}`;
+      return `🚨 Server is down: ${response.statusText}`;
     }
   } catch (error) {
-    return `Error performing health check: ${error}`;
+    return `❗ Error performing health check: ${error}`;
   }
 }
 
@@ -386,8 +426,6 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
   return new Response("Not found", { status: 404 });
 }
 
-
-
 interface User {
   phone: string;
 }
@@ -439,20 +477,16 @@ async function processUpdate(update: any): Promise<void> {
 
 const phoneNumbers = new Map<string, string>();
 const chatIds = new Set<string>();
-
 async function processMessage(message: any): Promise<void> {
   const chatId = message.chat.id;
   await updateGlobalAuthToken();
 
   if (message.contact) {
-    await updateGlobalAuthToken();
     const phoneNumber = message.contact.phone_number;
     const userExistsFlag = await userExists(phoneNumber, chatId);
     await sendChatIdAndPhoneToVercel(phoneNumber, chatId);
-    await sendCustomKeyboard(chatId);
 
     if (userExistsFlag) {
-
       console.warn(`User with phone: ${phoneNumber} and chat ID: ${chatId} already exists.`);
     } else {
       console.log('Posting new user data to Vercel API');
@@ -464,57 +498,58 @@ async function processMessage(message: any): Promise<void> {
     chatIds.add(chatId);
 
     // Send the custom keyboard with "Order", "Orders", and "KOLORYT" buttons
+    await sendCustomKeyboard(chatId);
+
   } else if (message.text === 'Start') {
-    await sendMessage(message.chat.id, 'To get notifications, please share your phone number.');
-    await sendContactRequest(message.chat.id);
+    await sendMessage(chatId, '📞 To get notifications, please share your phone number.');
+    await sendContactRequest(chatId);
   } else if (message.text === 'Order') {
     const phoneNumber = phoneNumbers.get(chatId);
     if (phoneNumber) {
-      await updateGlobalAuthToken();
-      await sendOrderDetails(phoneNumber, message.chat.id);
+      await sendOrderDetails(phoneNumber, chatId);
     } else {
-      await sendMessage(message.chat.id, 'Phone number not found. Please share your phone number first.');
-      await sendContactRequest(message.chat.id);
+      await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
+      await sendContactRequest(chatId);
     }
   } else if (message.text === 'Orders') {
     const phoneNumber = phoneNumbers.get(chatId);
     if (phoneNumber) {
-      await updateGlobalAuthToken();
-      await sendAllOrdersDetails(phoneNumber, message.chat.id);
+      await sendAllOrdersDetails(phoneNumber, chatId);
     } else {
-      await sendMessage(message.chat.id, 'Phone number not found. Please share your phone number first.');
-      await sendContactRequest(message.chat.id);
+      await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
+      await sendContactRequest(chatId);
     }
   } else if (message.text === 'KOLORYT') {
-    await sendMessage(message.chat.id, `You can proceed to KOLORYT here: \n${VERCEL_DOMAIN}`);
-    const healthStatus = await getHealthStatus();
-    await sendMessage(chatId, `Current status:\n${healthStatus}`);
+    await sendMessage(chatId, `You can proceed to KOLORYT here: \n${VERCEL_DOMAIN}`);
+    try {
+      const healthStatus = await getHealthStatus();
+      await sendMessage(chatId, `Current status:\n${healthStatus}`);
+    } catch (error) {
+      await sendMessage(chatId, '⚠️ Unable to fetch server status at the moment.');
+    }
   } else if (message.text === '/telegram_users') {
     try {
-      await updateGlobalAuthToken();
       const allPhoneNumbers = await fetchPhoneNumbersFromVercel();
       const phoneNumberList = allPhoneNumbers.join('\n');
       await sendMessage(chatId, `Registered phone numbers:\n${phoneNumberList}`);
     } catch (error) {
-      await sendMessage(chatId, 'Failed to retrieve phone numbers. Please try again later.');
+      await sendMessage(chatId, '⚠️ Failed to retrieve phone numbers. Please try again later.');
     }
   } else {
     // Send the custom keyboard with correct options
-    await sendCustomKeyboard(message.chat.id);
+    await sendCustomKeyboard(chatId);
   }
 }
+
 async function processCallbackQuery(callbackQuery: any): Promise<void> {
   const chatId = callbackQuery.message.chat.id;
   const callbackData = callbackQuery.data;
-  const phoneNumber = phoneNumbers.get(chatId); // Get phone number from the stored map
-  // Check if the phone number exists in the map or perform user existence check
+  const phoneNumber = phoneNumbers.get(chatId);
   await updateGlobalAuthToken();
   const userExistsFlag = phoneNumber ? true : await userExists(phoneNumber as string, chatId);
 
   if (callbackData === 'Order') {
     if (phoneNumber && userExistsFlag) {
-      await sendCustomKeyboard(chatId);
-      await updateGlobalAuthToken();
       await sendOrderDetails(phoneNumber, chatId);
     } else {
       await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
@@ -522,23 +557,20 @@ async function processCallbackQuery(callbackQuery: any): Promise<void> {
     }
   } else if (callbackData === 'Orders') {
     if (phoneNumber && userExistsFlag) {
-      await sendCustomKeyboard(chatId);
-      await updateGlobalAuthToken();
       await sendAllOrdersDetails(phoneNumber, chatId);
     } else {
       await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
       await sendContactRequest(chatId);
     }
-  } else if (callbackData === '/start') {
+  } else if (callbackData === 'Start') {
     if (!phoneNumber || !userExistsFlag) {
       await sendMessage(chatId, '📞 To get notifications, please share your phone number.');
       await sendContactRequest(chatId);
-    } else {
-      await sendCustomKeyboard(chatId);
     }
-  } else {
-    await sendCustomKeyboard(chatId);
-  }
+  } 
+
+  // Send the custom keyboard regardless of the callback data
+  await sendCustomKeyboard(chatId);
 
   // Acknowledge callback query to Telegram
   await fetch(`https://api.telegram.org/bot${NOTIFICATIONS_API}/answerCallbackQuery`, {
