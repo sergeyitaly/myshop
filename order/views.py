@@ -22,6 +22,8 @@ import json
 import random
 import os
 from django.http import JsonResponse
+from rest_framework.decorators import action
+
 
 def health_check(request):
     return JsonResponse({'status': 'ok'})
@@ -81,6 +83,24 @@ class OrderViewSet(viewsets.ModelViewSet):
     )
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
+
+    @action(detail=False, methods=['get'])
+    @swagger_auto_schema(
+        operation_description="Retrieve orders by phone number",
+        responses={200: OrderSerializer(many=True), 400: 'Bad Request'}
+    )
+    def by_phone_number(self, request):
+        phone_number = request.query_params.get('phone_number', None)
+        if not phone_number:
+            return Response({'error': 'Phone number is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            orders = Order.objects.filter(phone=phone_number)
+            serializer = self.get_serializer(orders, many=True)
+            return Response({'count': orders.count(), 'results': serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error fetching orders: {e}")
+            return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 def get_random_saying(file_path):
     """Read sayings from a file and return a single random saying."""
@@ -103,7 +123,7 @@ def get_random_saying(file_path):
     
 def set_telegram_webhook():
     url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/setWebhook"
-    webhook_url = f"{settings.VERCEL_DOMAIN}/telegram_webhook/"  # Ensure this endpoint matches your Django webhook view
+    webhook_url = f"{settings.VERCEL_DOMAIN}/api/telegram_webhook/"  # Ensure this endpoint matches your Django webhook view
     payload = {'url': webhook_url}
     response = requests.post(url, json=payload)
     response.raise_for_status()
@@ -306,4 +326,20 @@ def get_order(request, order_id):
         return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         logger.error(f"Error fetching order: {e}")
+        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_orders(request):
+    phone_number = request.query_params.get('phone_number', None)
+    if not phone_number:
+        return Response({'error': 'Phone number is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        orders = Order.objects.filter(phone=phone_number)
+        serializer = OrderSerializer(orders, many=True)
+        return Response({'count': orders.count(), 'results': serializer.data}, status=status.HTTP_200_OK)
+    except Exception as e:
+        logger.error(f"Error fetching orders: {e}")
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
