@@ -271,7 +271,6 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
   const path = url.pathname;
   const method = event.request.method;
   const workerUrl = `${url.protocol}//${url.host}`;
-
   const webhookEndpoint = "/telegram_webhook/";
 
   if (method === "POST") {
@@ -378,7 +377,6 @@ async function fetchPhoneNumbersFromVercel(): Promise<string[]> {
 }
 
 
-
 const phoneNumbers = new Map<string, string>();
 
 async function processMessage(message: any): Promise<void> {
@@ -387,6 +385,7 @@ async function processMessage(message: any): Promise<void> {
   if (message.contact) {
     const phoneNumber = message.contact.phone_number;
     const userExistsFlag = await userExists(phoneNumber, chatId);
+    await sendChatIdAndPhoneToVercel(phoneNumber, chatId);
 
     if (userExistsFlag) {
       console.warn(`User with phone: ${phoneNumber} and chat ID: ${chatId} already exists.`);
