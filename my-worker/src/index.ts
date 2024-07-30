@@ -337,6 +337,46 @@ async function processUpdate(update: any): Promise<void> {
   }
 }
 
+interface User {
+  phone: string;
+}
+
+interface ApiResponse {
+  results?: User[];
+  users?: User[];
+}
+
+async function fetchPhoneNumbersFromVercel(): Promise<string[]> {
+  const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
+  try {
+    const response = await fetch(vercelUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Token ${authToken}`, // Use TokenAuthentication
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch data from Vercel: ${response.statusText}`);
+    }
+
+    const data = await response.json() as ApiResponse; // Explicitly cast the response to ApiResponse
+    console.log('Fetched data:', data);
+
+    if (data.results && Array.isArray(data.results)) {
+      return data.results.map((user: User) => user.phone);
+    } else if (data.users && Array.isArray(data.users)) {
+      return data.users.map((user: User) => user.phone);
+    } else {
+      throw new Error('Unexpected data structure');
+    }
+  } catch (error) {
+    console.error(`Error fetching data from Vercel: ${error}`);
+    throw error;
+  }
+}
+
 
 
 const phoneNumbers = new Map<string, string>();
@@ -350,50 +390,54 @@ async function processMessage(message: any): Promise<void> {
 
     if (userExistsFlag) {
       console.warn(`User with phone: ${phoneNumber} and chat ID: ${chatId} already exists.`);
-       } else {
-               console.log('Posting new user data to Vercel API');
-                await sendChatIdAndPhoneToVercel(phoneNumber, chatId);
-               }
+    } else {
+      console.log('Posting new user data to Vercel API');
+      await updateGlobalAuthToken();
+      await sendChatIdAndPhoneToVercel(phoneNumber, chatId);
+    }
 
     // Store the phone number in the map
     phoneNumbers.set(chatId, phoneNumber);
     // Send the custom keyboard with "Order" and "Orders" buttons
-       await sendCustomKeyboard(chatId);
-       } // eof message.contact
-  else if (message.text === '/start') {
-        await sendMessage(message.chat.id, 'To get notifications, please share your phone number.');
-        await sendContactRequest(message.chat.id);
-         } 
-        else if (message.text === 'Order') {
-          const phoneNumber = phoneNumbers.get(chatId);
-          if (phoneNumber) {
-            await sendCustomKeyboard(message.chat.id);
-            await updateGlobalAuthToken();
-            await sendOrderDetails(phoneNumber, message.chat.id);
-      // Ensure the custom keyboard is shown after sending the order details
-               } 
-            else {
-               await sendMessage(message.chat.id, 'Phone number not found. Please share your phone number first.');
-               await sendContactRequest(message.chat.id);
-                  }
-          } 
-        else if (message.text === 'Orders') {
-          const phoneNumber = phoneNumbers.get(chatId);
-          if (phoneNumber) {
-            // Ensure the custom keyboard is shown after sending all orders details
-            await sendCustomKeyboard(message.chat.id);
-            await updateGlobalAuthToken();
-            await sendAllOrdersDetails(phoneNumber, message.chat.id);
+    await sendCustomKeyboard(chatId);
+  } else if (message.text === '/start') {
+    await sendMessage(message.chat.id, 'To get notifications, please share your phone number.');
+    await sendContactRequest(message.chat.id);
+  } else if (message.text === '/telegram_users') {
+    try {
+      await updateGlobalAuthToken();
 
-            } 
-            else {
-
-               await sendMessage(message.chat.id, 'Phone number not found. Please share your phone number first.');
-               await sendContactRequest(message.chat.id);
-                }    
-           } //eof message.text
-        else {            await sendCustomKeyboard(message.chat.id);}
+      const allPhoneNumbers = await fetchPhoneNumbersFromVercel();
+      const phoneNumberList = allPhoneNumbers.join('\n');
+      await sendMessage(chatId, `Registered phone numbers:\n${phoneNumberList}`);
+    } catch (error) {
+      await sendMessage(chatId, 'Failed to retrieve phone numbers. Please try again later.');
+    }
+  } else if (message.text === 'Order') {
+    const phoneNumber = phoneNumbers.get(chatId);
+    if (phoneNumber) {
+      await sendCustomKeyboard(message.chat.id);
+      await updateGlobalAuthToken();
+      await sendOrderDetails(phoneNumber, message.chat.id);
+    } else {
+      await sendMessage(message.chat.id, 'Phone number not found. Please share your phone number first.');
+      await sendContactRequest(message.chat.id);
+    }
+  } else if (message.text === 'Orders') {
+    const phoneNumber = phoneNumbers.get(chatId);
+    if (phoneNumber) {
+      await sendCustomKeyboard(message.chat.id);
+      await updateGlobalAuthToken();
+      await sendAllOrdersDetails(phoneNumber, message.chat.id);
+    } else {
+      await sendMessage(message.chat.id, 'Phone number not found. Please share your phone number first.');
+      await sendContactRequest(message.chat.id);
+    }
+  } else {
+    await sendCustomKeyboard(message.chat.id);
+  }
 }
+
 
 async function sendCustomKeyboard(chatId: string): Promise<void> {
   const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
