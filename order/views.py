@@ -303,8 +303,7 @@ def create_order(request):
             try:
                 telegram_user = TelegramUser.objects.get(phone=phone)
                 chat_id = telegram_user.chat_id
-                telegram_message = f"Ваше замовлення №{order.id} було успішно створено. Дякуємо за покупку!"
-                send_telegram_message(order.id, chat_id, telegram_message)
+                send_telegram_message(order.id, chat_id, order.email)
             except TelegramUser.DoesNotExist:
                 logger.warning(f"TelegramUser with phone {phone} not found. No Telegram message sent.")
 
