@@ -133,17 +133,7 @@ async function fetchChatIds(): Promise<Set<string>> {
     }
 
     const data = await response.json() as ApiResponse;
-
-    // Process the API response based on the structure
-    if (data.results) {
-      data.results.forEach(user => chatIds.add(user.chat_id));
-    } else if (data.users) {
-      data.users.forEach(user => chatIds.add(user.chat_id));
-    } else {
-      console.error('Unexpected API response format');
-    }
-
-    return chatIds;
+    return processApiResponse(data, chatIds);
   } catch (error) {
     console.error(`Error fetching chat IDs from Vercel: ${error}`);
     return chatIds; // Return the empty set on error
@@ -162,8 +152,6 @@ function processApiResponse(data: ApiResponse, chatIds: Set<string>): Set<string
 
   return chatIds;
 }
-
-
 
 async function sendNotificationToAllUsers(chatIds: Set<string>, message: string): Promise<void> {
   for (const chatId of chatIds) {
@@ -853,11 +841,14 @@ interface OrderDetails {
   order_items: OrderItem[];
   // Add other fields as needed
 }
-
-
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
-  return date.toLocaleDateString(); // Adjust formatting as needed
+  const now = new Date();
+  const diffMs = Math.abs(now.getTime() - date.getTime());
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+  return `${diffHours}h ${diffMinutes}m ago (${date.toLocaleDateString()} ${date.toLocaleTimeString()})`;
 }
 
 async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<void> {
@@ -935,26 +926,27 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
         'canceled': orderDetails.canceled_at
       };
 
-      await updateOrderStatus(orderDetails.id, 'processed', 'processed_at');
+      await updateOrderStatus(matchingOrder.id, orderDetails.status, 'updated_at'); // Adjust 'updated_at' as needed
 
       const statusSummary = Object.entries(statusDates)
-        .filter(([_, date]) => date !== null)
-        .map(([status, date]) => {
-          const statusEmoji = statusEmojis[status] || '🔍';
-          return `${statusEmoji} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
-        })
-        .join('\n');
+      .filter(([_, date]) => date !== null)
+      .sort(([_, dateA], [__, dateB]) => new Date(dateB!).getTime() - new Date(dateA!).getTime())
+      .map(([status, date]) => {
+        const statusEmoji = statusEmojis[status] || '🔍';
+        return `${statusEmoji} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
+      })
+      .join('\n');
 
-      const orderDetailsMessage = `
-        Order ID: ${orderDetails.id}
-        Email: ${orderDetails.email}
-        
-        Order Items:
-        ${orderItemsSummary}
-        
-        Status History:
-        ${statusSummary}
-      `;
+    const orderDetailsMessage = `
+      Order ID: ${orderDetails.id}
+      Email: ${orderDetails.email}
+      
+      Order Items:
+      ${orderItemsSummary}
+      
+      Status History:
+      ${statusSummary.split('\n').map(line => `   ${line}`).join('\n')}
+    `;
       
       await sendMessage(chatId, `Thank you! Here are your order details:\n${orderDetailsMessage}`);
     } else {
@@ -966,6 +958,7 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
     await sendMessage(chatId, 'An error occurred while retrieving order details. Please try again later.');
   }
 }
+
 async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promise<void> {
   const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
   const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
