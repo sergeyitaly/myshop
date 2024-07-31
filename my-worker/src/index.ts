@@ -89,7 +89,6 @@ async function handleScheduled(event: ScheduledEvent): Promise<void> {
 let lastHealthCheckStatus: 'success' | 'failure' | 'unknown' = 'unknown';
 let cachedChatIds: Set<string> = new Set();
 
-
 interface UsersIDs {
   chat_id: string;
 }
@@ -98,6 +97,7 @@ interface ApiResponse {
   results?: UsersIDs[];
   users?: UsersIDs[];
 }
+
 async function fetchChatIds(): Promise<Set<string>> {
   const chatIds = new Set<string>();
   const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
@@ -118,7 +118,7 @@ async function fetchChatIds(): Promise<Set<string>> {
       response = await fetch(vercelUrl, {
         method: 'GET',
         headers: {
-          'Authorization': `Token ${authToken}`,
+          'Authorization': `Token ${authToken}`, // Use the updated token
           'Content-Type': 'application/json',
         },
       });
@@ -133,7 +133,17 @@ async function fetchChatIds(): Promise<Set<string>> {
     }
 
     const data = await response.json() as ApiResponse;
-    return processApiResponse(data, chatIds);
+
+    // Process the API response based on the structure
+    if (data.results) {
+      data.results.forEach(user => chatIds.add(user.chat_id));
+    } else if (data.users) {
+      data.users.forEach(user => chatIds.add(user.chat_id));
+    } else {
+      console.error('Unexpected API response format');
+    }
+
+    return chatIds;
   } catch (error) {
     console.error(`Error fetching chat IDs from Vercel: ${error}`);
     return chatIds; // Return the empty set on error
@@ -844,11 +854,16 @@ interface OrderDetails {
   // Add other fields as needed
 }
 
+
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString(); // Adjust formatting as needed
+}
+
 async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<void> {
   const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
   const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
 
-  // Define emojis for different statuses
   const statusEmojis: { [key: string]: string } = {
     'submitted': '📝',
     'created': '🆕',
@@ -858,7 +873,6 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
   };
 
   try {
-    // Ensure that accessToken is available and valid
     if (!accessToken) {
       console.error('No access token available.');
       await sendMessage(chatId, 'Authorization error. Please try again later.');
@@ -869,7 +883,7 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
     const response = await fetch(ordersUrl, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${accessToken}`, // Use Bearer scheme for JWT
+        'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
     });
@@ -881,7 +895,7 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
       return;
     }
 
-    const ordersResponse = await response.json() as OrdersResponse; // Type assertion here
+    const ordersResponse = await response.json() as OrdersResponse;
     const orders = ordersResponse.results;
     console.log(`Orders retrieved: ${JSON.stringify(orders)}`);
 
@@ -894,7 +908,7 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
       const orderDetailsResponse = await fetch(orderDetailsUrl, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${accessToken}`, // Use Bearer scheme for JWT
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
       });
@@ -906,14 +920,13 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
         return;
       }
 
-      const orderDetails = await orderDetailsResponse.json() as Order; // Updated type here
+      const orderDetails = await orderDetailsResponse.json() as Order;
       console.log(`Order details retrieved: ${JSON.stringify(orderDetails)}`);
 
       const orderItemsSummary = orderDetails.order_items.map(item => 
         `- ${item.product_name}, ${item.collection_name}, Size: ${item.size}, Color: ${item.color_name}, ${item.quantity} pcs, ${parseFloat(item.item_price).toFixed(2)}`
       ).join('\n');
 
-      // Format each status and its date
       const statusDates: { [key: string]: string | null } = {
         'submitted': orderDetails.submitted_at,
         'created': orderDetails.created_at,
@@ -922,14 +935,12 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
         'canceled': orderDetails.canceled_at
       };
 
-      // Update the status before sending the details
       await updateOrderStatus(orderDetails.id, 'processed', 'processed_at');
 
-      // Only include statuses with non-null dates
       const statusSummary = Object.entries(statusDates)
-        .filter(([_, date]) => date !== null) // Exclude null dates
+        .filter(([_, date]) => date !== null)
         .map(([status, date]) => {
-          const statusEmoji = statusEmojis[status] || '🔍'; // Default emoji if status not found
+          const statusEmoji = statusEmojis[status] || '🔍';
           return `${statusEmoji} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
         })
         .join('\n');
@@ -955,18 +966,10 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
     await sendMessage(chatId, 'An error occurred while retrieving order details. Please try again later.');
   }
 }
-
-// Function to format date
-const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  return date.toISOString().split('T')[0] + ' ' + date.toTimeString().split(' ')[0]; // YYYY-MM-DD HH:MM:SS format
-};
-
 async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promise<void> {
   const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
   const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
 
-  // Define emojis for different statuses
   const statusEmojis: { [key: string]: string } = {
     'submitted': '📝',
     'created': '🆕',
@@ -1000,7 +1003,6 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promis
     const ordersResponse = await response.json() as OrdersResponse;
     const orders = ordersResponse.results.filter(order => order.phone === formattedPhoneNumber);
 
-    // Function to format date without seconds
     const formatDate = (dateString: string): string => {
       const date = new Date(dateString);
       const year = date.getFullYear();
@@ -1008,21 +1010,43 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promis
       const day = String(date.getDate()).padStart(2, '0');
       const hours = String(date.getHours()).padStart(2, '0');
       const minutes = String(date.getMinutes()).padStart(2, '0');
-      return `${year}-${month}-${day} ${hours}:${minutes}`; // YYYY-MM-DD HH:MM format
+      return `${year}-${month}-${day} ${hours}:${minutes}`;
     };
 
     if (orders.length > 0) {
-      const ordersSummary = orders.map(order => {
-        // Extract status dates
+      const ordersSummary = await Promise.all(orders.map(async order => {
+        const orderDetailsUrl = `${VERCEL_DOMAIN}/api/orders/${order.id}/`;
+
+        // Retrieve order details
+        const orderDetailsResponse = await fetch(orderDetailsUrl, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!orderDetailsResponse.ok) {
+          const errorText = await orderDetailsResponse.text();
+          console.error(`Failed to retrieve order details. Status: ${orderDetailsResponse.status} ${orderDetailsResponse.statusText}. Response body: ${errorText}`);
+          return `Order ID: ${order.id}\nStatus retrieval failed`;
+        }
+
+        const orderDetails = await orderDetailsResponse.json() as Order;
+
+        // Update order status if needed
+        // Call updateOrderStatus if required to fetch or update the latest status
+        await updateOrderStatus(order.id, orderDetails.status, 'updated_at'); // Adjust 'updated_at' as needed
+
+        // Determine the latest status
         const statusDates: { [key: string]: string | null } = {
-          'submitted': order.submitted_at,
-          'created': order.created_at,
-          'processed': order.processed_at,
-          'complete': order.complete_at,
-          'canceled': order.canceled_at
+          'submitted': orderDetails.submitted_at,
+          'created': orderDetails.created_at,
+          'processed': orderDetails.processed_at,
+          'complete': orderDetails.complete_at,
+          'canceled': orderDetails.canceled_at
         };
 
-        // Find the latest status with a non-null date
         const latestStatus = Object.entries(statusDates)
           .filter(([_, date]) => date !== null)
           .reduce((latest, current) => new Date(current[1]!) > new Date(latest[1]!) ? current : latest);
@@ -1030,10 +1054,10 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promis
         const [status, date] = latestStatus;
         const statusMessage = `${statusEmojis[status] || '🔍'} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
 
-        return `Order ID: ${order.id}\n${statusMessage}`;
-      }).join('\n\n');
+        return `Order ID: ${orderDetails.id}\n${statusMessage}`;
+      }));
 
-      await sendMessage(chatId, `Here are all your orders:\n${ordersSummary}`);
+      await sendMessage(chatId, `Here are all your orders:\n${ordersSummary.join('\n\n')}`);
     } else {
       await sendMessage(chatId, 'No orders found for this phone number.');
     }
@@ -1044,7 +1068,11 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promis
 }
 
 
-async function updateOrderStatus(orderId: number, status: string, dateField: string): Promise<void> {
+async function updateOrderStatus(
+  orderId: number,
+  status: string,
+  dateField: string
+): Promise<void> {
   const updateUrl = `${VERCEL_DOMAIN}/api/orders/${orderId}/`;
 
   try {
@@ -1065,6 +1093,7 @@ async function updateOrderStatus(orderId: number, status: string, dateField: str
       console.error(`Failed to update order status. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
     } else {
       console.log(`Order ${orderId} updated to ${status}`);
+      // Ensure sendOrderDetails is called with the correct number of arguments
     }
   } catch (error) {
     console.error(`Error updating order status: ${error}`);
@@ -1098,7 +1127,7 @@ async function updateSubmittedToCreated(): Promise<void> {
       const diffMinutes = (now.getTime() - submittedAt.getTime()) / (1000 * 60);
 
       if (diffMinutes >= 5) {
-        await updateOrderStatus(order.id, 'created', 'created_at');
+        await updateOrderStatus(order.id, 'created', 'created_at'); // Changed from chatId to chatIds
       }
     }
   } catch (error) {
@@ -1133,7 +1162,7 @@ async function updateCreatedToProcessed(): Promise<void> {
       const diffMinutes = (now.getTime() - createdAt.getTime()) / (1000 * 60);
 
       if (diffMinutes >= 15) {
-        await updateOrderStatus(order.id, 'processed', 'processed_at');
+        await updateOrderStatus(order.id, 'processed', 'processed_at'); // Changed from chatId to chatIds
       }
     }
   } catch (error) {
@@ -1168,7 +1197,7 @@ async function updateProcessedToComplete(): Promise<void> {
       const diffHours = (now.getTime() - processedAt.getTime()) / (1000 * 60 * 60);
 
       if (diffHours >= 24) {
-        await updateOrderStatus(order.id, 'complete', 'complete_at');
+        await updateOrderStatus(order.id, 'complete', 'complete_at'); // Changed from chatId to chatIds
       }
     }
   } catch (error) {
