@@ -1067,39 +1067,7 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promis
   }
 }
 
-
-async function updateOrderStatus(
-  orderId: number,
-  status: string,
-  dateField: string
-): Promise<void> {
-  const updateUrl = `${VERCEL_DOMAIN}/api/orders/${orderId}/`;
-
-  try {
-    const response = await fetch(updateUrl, {
-      method: 'PATCH',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        status: status,
-        [dateField]: new Date().toISOString() // Ensure this is a string
-      })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Failed to update order status. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
-    } else {
-      console.log(`Order ${orderId} updated to ${status}`);
-      // Ensure sendOrderDetails is called with the correct number of arguments
-    }
-  } catch (error) {
-    console.error(`Error updating order status: ${error}`);
-  }
-}
-
+// Function to update orders from 'submitted' to 'created'
 async function updateSubmittedToCreated(): Promise<void> {
   const ordersUrl = `${VERCEL_DOMAIN}/api/orders/?status=submitted`;
 
@@ -1121,13 +1089,20 @@ async function updateSubmittedToCreated(): Promise<void> {
     const ordersResponse = await response.json() as OrdersResponse;
     const orders = ordersResponse.results;
 
+    console.log(`Retrieved ${orders.length} submitted orders.`);
+
     for (const order of orders) {
       const submittedAt = new Date(order.submitted_at);
       const now = new Date();
       const diffMinutes = (now.getTime() - submittedAt.getTime()) / (1000 * 60);
 
-      if (diffMinutes >= 5) {
-        await updateOrderStatus(order.id, 'created', 'created_at'); // Changed from chatId to chatIds
+      console.log(`Order ID ${order.id}: Submitted at ${submittedAt.toISOString()}, now ${now.toISOString()}, diffMinutes ${diffMinutes}`);
+
+      if (diffMinutes >= 10) {
+        if (order.status === 'submitted') {  // Ensure status is 'submitted'
+          console.log(`Updating Order ID ${order.id} from 'submitted' to 'created'.`);
+          await updateOrderStatus(order.id, 'created', 'created_at');
+        }
       }
     }
   } catch (error) {
@@ -1135,6 +1110,7 @@ async function updateSubmittedToCreated(): Promise<void> {
   }
 }
 
+// Function to update orders from 'created' to 'processed'
 async function updateCreatedToProcessed(): Promise<void> {
   const ordersUrl = `${VERCEL_DOMAIN}/api/orders/?status=created`;
 
@@ -1156,13 +1132,18 @@ async function updateCreatedToProcessed(): Promise<void> {
     const ordersResponse = await response.json() as OrdersResponse;
     const orders = ordersResponse.results;
 
+    console.log(`Retrieved ${orders.length} created orders.`);
+
     for (const order of orders) {
       const createdAt = new Date(order.created_at);
       const now = new Date();
       const diffMinutes = (now.getTime() - createdAt.getTime()) / (1000 * 60);
 
-      if (diffMinutes >= 15) {
-        await updateOrderStatus(order.id, 'processed', 'processed_at'); // Changed from chatId to chatIds
+      if (diffMinutes >= 20) {
+        if (order.status === 'created') {  // Ensure status is 'created'
+          console.log(`Updating Order ID ${order.id} from 'created' to 'processed'.`);
+          await updateOrderStatus(order.id, 'processed', 'processed_at');
+        }
       }
     }
   } catch (error) {
@@ -1170,6 +1151,7 @@ async function updateCreatedToProcessed(): Promise<void> {
   }
 }
 
+// Function to update orders from 'processed' to 'complete'
 async function updateProcessedToComplete(): Promise<void> {
   const ordersUrl = `${VERCEL_DOMAIN}/api/orders/?status=processed`;
 
@@ -1191,16 +1173,49 @@ async function updateProcessedToComplete(): Promise<void> {
     const ordersResponse = await response.json() as OrdersResponse;
     const orders = ordersResponse.results;
 
+    console.log(`Retrieved ${orders.length} processed orders.`);
+
     for (const order of orders) {
       const processedAt = new Date(order.processed_at);
       const now = new Date();
       const diffHours = (now.getTime() - processedAt.getTime()) / (1000 * 60 * 60);
 
       if (diffHours >= 24) {
-        await updateOrderStatus(order.id, 'complete', 'complete_at'); // Changed from chatId to chatIds
+        if (order.status === 'processed') {  // Ensure status is 'processed'
+          console.log(`Updating Order ID ${order.id} from 'processed' to 'complete'.`);
+          await updateOrderStatus(order.id, 'complete', 'complete_at');
+        }
       }
     }
   } catch (error) {
     console.error(`Error retrieving orders: ${error}`);
+  }
+}
+
+// Helper function to update order status
+async function updateOrderStatus(orderId: number, newStatus: string, timestampField: string): Promise<void> {
+  const updateUrl = `${VERCEL_DOMAIN}/api/orders/${orderId}/`;
+
+  try {
+    const response = await fetch(updateUrl, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        status: newStatus,
+        [timestampField]: new Date().toISOString(),
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Failed to update order status. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
+    } else {
+      console.log(`Order ID ${orderId} updated to ${newStatus}`);
+    }
+  } catch (error) {
+    console.error(`Error updating order status: ${error}`);
   }
 }
