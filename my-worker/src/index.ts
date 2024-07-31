@@ -816,6 +816,11 @@ interface Order {
   receiver: boolean;
   receiver_comments: string;
   submitted_at: string;
+  created_at: string;
+  processed_at: string;
+  complete_at: string;
+  canceled_at: string;
+  status: string; // Add this field
   parent_order: string | null;
   present: boolean;
   order_items: OrderItem[];
@@ -837,6 +842,15 @@ interface OrderDetails {
 async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<void> {
   const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
   const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
+
+  // Define emojis for different statuses
+  const statusEmojis: { [key: string]: string } = {
+    'submitted': '📝',
+    'created': '🆕',
+    'processed': '🔄',
+    'complete': '✅',
+    'canceled': '❌'
+  };
 
   try {
     // Ensure that accessToken is available and valid
@@ -887,22 +901,43 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
         return;
       }
 
-      const orderDetails = await orderDetailsResponse.json() as OrderDetails; // Type assertion here
+      const orderDetails = await orderDetailsResponse.json() as Order; // Updated type here
       console.log(`Order details retrieved: ${JSON.stringify(orderDetails)}`);
 
       const orderItemsSummary = orderDetails.order_items.map(item => 
         `- ${item.product_name}, ${item.collection_name}, Size: ${item.size}, Color: ${item.color_name}, ${item.quantity} pcs, ${parseFloat(item.item_price).toFixed(2)}`
       ).join('\n');
-      const orderDetailsMessage = `
-      Order ID: ${orderDetails.id}
-      Email: ${orderDetails.email}
-      
-      Order Items:
-      ${orderItemsSummary}
 
+      // Format each status and its date
+      const statusDates: { [key: string]: string | null } = {
+        'submitted': orderDetails.submitted_at,
+        'created': orderDetails.created_at,
+        'processed': orderDetails.processed_at,
+        'complete': orderDetails.complete_at,
+        'canceled': orderDetails.canceled_at
+      };
+
+      // Only include statuses with non-null dates
+      const statusSummary = Object.entries(statusDates)
+        .filter(([_, date]) => date !== null) // Exclude null dates
+        .map(([status, date]) => {
+          const statusEmoji = statusEmojis[status] || '🔍'; // Default emoji if status not found
+          return `${statusEmoji} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
+        })
+        .join('\n');
+
+      const orderDetailsMessage = `
+        Order ID: ${orderDetails.id}
+        Email: ${orderDetails.email}
+        
+        Order Items:
+        ${orderItemsSummary}
+        
+        Status History:
+        ${statusSummary}
       `;
       
-      await sendMessage(chatId, `Thank you! Here are your last order details:\n${orderDetailsMessage}`);
+      await sendMessage(chatId, `Thank you! Here are your order details:\n${orderDetailsMessage}`);
     } else {
       console.log('No orders found for this phone number.');
       await sendMessage(chatId, 'No orders found for this phone number.');
@@ -913,9 +948,25 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
   }
 }
 
+// Function to format date
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toISOString().split('T')[0] + ' ' + date.toTimeString().split(' ')[0]; // YYYY-MM-DD HH:MM:SS format
+};
+
+
 async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promise<void> {
   const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
   const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+
+  // Define emojis for different statuses
+  const statusEmojis: { [key: string]: string } = {
+    'submitted': '📝',
+    'created': '🆕',
+    'processed': '🔄',
+    'complete': '✅',
+    'canceled': '❌'
+  };
 
   try {
     if (!accessToken) {
@@ -945,13 +996,37 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promis
     // Function to format date
     const formatDate = (dateString: string): string => {
       const date = new Date(dateString);
-      return date.toISOString().split('T')[0]; // YYYY-MM-DD format
+      return date.toISOString().split('T')[0] + ' ' + date.toTimeString().split(' ')[0]; // YYYY-MM-DD HH:MM:SS format
     };
 
     if (orders.length > 0) {
-      const ordersSummary = orders.map(order => 
-        `Order ID: ${order.id}, Submitted on: ${formatDate(order.submitted_at)}`
-      ).join('\n');
+      const ordersSummary = orders.map(order => {
+        const statusHistory: { [key: string]: string } = {
+          'submitted': order.submitted_at,
+          'created': order.created_at,
+          'processed': order.processed_at,
+          'complete': order.complete_at,
+          'canceled': order.canceled_at
+        };
+
+        // Get the last updated status and its corresponding date
+        let latestStatus = '';
+        let latestDate = '';
+
+        for (const [status, date] of Object.entries(statusHistory)) {
+          if (date) {
+            if (!latestDate || new Date(date) > new Date(latestDate)) {
+              latestStatus = status;
+              latestDate = date;
+            }
+          }
+        }
+
+        const statusEmoji = statusEmojis[latestStatus] || '🔍'; // Default emoji if status not found
+
+        return `Order ID: ${order.id}, Last Status: ${statusEmoji} ${latestStatus.charAt(0).toUpperCase() + latestStatus.slice(1)}, Status Changed On: ${formatDate(latestDate)}`;
+      }).join('\n');
+
       await sendMessage(chatId, `Here are all your orders:\n${ordersSummary}`);
     } else {
       await sendMessage(chatId, 'No orders found for this phone number.');

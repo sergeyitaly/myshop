@@ -44,10 +44,10 @@ class OrderItemInline(admin.TabularInline):
 
 class OrderAdmin(admin.ModelAdmin):
     list_display = ['id', 'status', 'last_updated']
-    readonly_fields = ['id', 'name', 'surname', 'phone', 'email', 'receiver', 'receiver_comments', 'total_quantity', 'total_price', 'created_at', 'submitted_at', 'processed_at', 'complete_at', 'canceled_at']
+    readonly_fields = ['id', 'name', 'surname', 'phone', 'email', 'receiver', 'receiver_comments', 'total_quantity', 'total_price', 'submitted_at', 'created_at',  'processed_at', 'complete_at', 'canceled_at']
     fields = [
         'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments', 
-        'present', 'status', 'total_quantity', 'total_price',  'submitted_at','created_at', 'processed_at', 'complete_at', 'canceled_at'
+        'present', 'status', 'total_quantity', 'total_price', 'submitted_at','created_at',  'processed_at', 'complete_at', 'canceled_at'
     ]
     inlines = [OrderItemInline]
 
@@ -73,10 +73,19 @@ class OrderAdmin(admin.ModelAdmin):
 
 
     def save_model(self, request, obj, form, change):
-        if change:  # This means we are editing an existing object
-            new_status = form.cleaned_data.get('status')
-            if new_status and new_status != obj.status:
-                obj.update_status(new_status)
+        if change:  # Only if we're editing an existing record
+            old_obj = self.model.objects.get(pk=obj.pk)
+            if old_obj.status != obj.status or old_obj.status == obj.status:
+                # Update fields based on the new status
+                if obj.status == 'processed':
+                    obj.processed_at = timezone.now()
+                elif obj.status == 'complete':
+                    obj.complete_at = timezone.now()
+                elif obj.status == 'canceled':
+                    obj.canceled_at = timezone.now()
+                # Add more conditions if needed
+
+        # Call the parent class's save_model method
         super().save_model(request, obj, form, change)
         
 admin.site.register(Order, OrderAdmin)

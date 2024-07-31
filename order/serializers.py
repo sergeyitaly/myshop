@@ -1,7 +1,6 @@
 from rest_framework import serializers
-from .models import Order, OrderItem
-from .models import TelegramUser
 from django.utils import timezone
+from .models import Order, OrderItem, TelegramUser
 
 class TelegramUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -51,28 +50,15 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         items_data = validated_data.pop('order_items', [])
-        instance.name = validated_data.get('name', instance.name)
-        instance.surname = validated_data.get('surname', instance.surname)
-        instance.phone = validated_data.get('phone', instance.phone)
-        instance.email = validated_data.get('email', instance.email)
-        instance.address = validated_data.get('address', instance.address)
-        instance.receiver = validated_data.get('receiver', instance.receiver)
-        instance.receiver_comments = validated_data.get('receiver_comments', instance.receiver_comments)
-        instance.parent_order = validated_data.get('parent_order', instance.parent_order)
-        instance.present = validated_data.get('present', instance.present)
-        instance.status = validated_data.get('status', instance.status)
 
+        # Update basic fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        # Handle status changes and update timestamps
         new_status = validated_data.get('status', instance.status)
         if new_status and new_status != instance.status:
-            instance.status = new_status
-            if new_status == 'created':
-                instance.created_at = timezone.now()
-            elif new_status == 'processed':
-                instance.processed_at = timezone.now()
-            elif new_status == 'complete':
-                instance.complete_at = timezone.now()
-            elif new_status == 'canceled':
-                instance.canceled_at = timezone.now()
+            instance.update_status(new_status)
 
         instance.save()
 

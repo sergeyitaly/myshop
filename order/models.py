@@ -2,6 +2,7 @@ from django.db import models
 from shop.models import Product
 from phonenumber_field.modelfields import PhoneNumberField
 from django.utils import timezone
+import logging
 
 class TelegramUser(models.Model):
     phone = models.CharField(max_length=15, unique=True)  # Store phone numbers
@@ -53,7 +54,6 @@ class Order(models.Model):
             return self.created_at
         if self.status == 'submitted':
             return self.submitted_at
-        return None
 
     def update_status(self, new_status):
         now = timezone.now()
