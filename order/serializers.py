@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Order, OrderItem
 from .models import TelegramUser
+from django.utils import timezone
 
 class TelegramUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -36,7 +37,8 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = [
             'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments', 
-            'submitted_at', 'parent_order', 'present', 'order_items'
+            'submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at', 'parent_order', 
+            'present', 'status', 'order_items'
         ]
 
     def create(self, validated_data):
@@ -58,6 +60,20 @@ class OrderSerializer(serializers.ModelSerializer):
         instance.receiver_comments = validated_data.get('receiver_comments', instance.receiver_comments)
         instance.parent_order = validated_data.get('parent_order', instance.parent_order)
         instance.present = validated_data.get('present', instance.present)
+        instance.status = validated_data.get('status', instance.status)
+
+        new_status = validated_data.get('status', instance.status)
+        if new_status and new_status != instance.status:
+            instance.status = new_status
+            if new_status == 'created':
+                instance.created_at = timezone.now()
+            elif new_status == 'processed':
+                instance.processed_at = timezone.now()
+            elif new_status == 'complete':
+                instance.complete_at = timezone.now()
+            elif new_status == 'canceled':
+                instance.canceled_at = timezone.now()
+
         instance.save()
 
         # Delete existing order items

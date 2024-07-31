@@ -285,3 +285,20 @@ CACHES = {
         'TIMEOUT': 60 * 15,  # Cache timeout in seconds (e.g., 30 minutes)
     }
 }
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
