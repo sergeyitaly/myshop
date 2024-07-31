@@ -99,9 +99,7 @@ interface ApiResponse {
 }
 
 async function fetchChatIds(): Promise<Set<string>> {
-  const chatIds = new Set<string>();
   const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
-
   try {
     let response = await fetch(vercelUrl, {
       method: 'GET',
@@ -133,10 +131,10 @@ async function fetchChatIds(): Promise<Set<string>> {
     }
 
     const data = await response.json() as ApiResponse;
-    return processApiResponse(data, chatIds);
+    return processApiResponse(data, cachedChatIds);
   } catch (error) {
     console.error(`Error fetching chat IDs from Vercel: ${error}`);
-    return chatIds; // Return the empty set on error
+    return cachedChatIds; // Return the empty set on error
   }
 }
 
@@ -154,7 +152,8 @@ function processApiResponse(data: ApiResponse, chatIds: Set<string>): Set<string
 }
 
 async function sendNotificationToAllUsers(chatIds: Set<string>, message: string): Promise<void> {
-  for (const chatId of chatIds) {
+  console.log(cachedChatIds);
+  for (const chatId of cachedChatIds) {
     try {
       const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
       const response = await fetch(url, {
@@ -190,7 +189,7 @@ async function performHealthCheck(): Promise<void> {
       }
 
       // Update cached chat IDs when the server is up
-      cachedChatIds = await fetchChatIds();
+      //cachedChatIds = await fetchChatIds();
     } else {
       const errorMessage = `🚨 Server is down: ${response.statusText}`;
       console.error(errorMessage);
