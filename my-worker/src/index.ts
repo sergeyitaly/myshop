@@ -16,7 +16,7 @@ interface TokenResponse {
   access?: string; 
 }
 
-let tokenExpiration: number | null = null;
+let tokenExpiration: number = 0;
 
 const ACCESS_TOKEN_LIFETIME_IN_MINUTES = 5;
 const ACCESS_TOKEN_LIFETIME_IN_MS = ACCESS_TOKEN_LIFETIME_IN_MINUTES * 60 * 1000;
@@ -45,6 +45,7 @@ interface User {
   phone: string;
   chat_id: string;
 }
+
 
 interface UserResponse {
   results: User[];
@@ -82,42 +83,74 @@ async function handleScheduled(event: ScheduledEvent): Promise<void> {
   await performHealthCheck();
 }
 
-let lastHealthCheckStatus = 'unknown';
+let lastHealthCheckStatus: 'success' | 'failure' | 'unknown' = 'unknown';
 let cachedChatIds: Set<string> = new Set();
 
+
+interface UsersIDs {
+  chat_id: string;
+}
+
+interface ApiResponse {
+  results?: UsersIDs[];
+  users?: UsersIDs[];
+}
 async function fetchChatIds(): Promise<Set<string>> {
   const chatIds = new Set<string>();
   const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
 
   try {
-    const response = await fetch(vercelUrl, {
+    let response = await fetch(vercelUrl, {
       method: 'GET',
       headers: {
-        'Authorization': `Token ${authToken}`, // Use TokenAuthentication
+        'Authorization': `Token ${authToken}`,
         'Content-Type': 'application/json',
       },
     });
+
+    if (response.status === 401) { // Handle token expiration
+      console.log('Token expired, re-authenticating...');
+      await updateGlobalAuthToken();
+
+      response = await fetch(vercelUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch chat IDs from Vercel after re-authentication: ${response.statusText}`);
+      }
+    }
 
     if (!response.ok) {
       throw new Error(`Failed to fetch chat IDs from Vercel: ${response.statusText}`);
     }
 
-    const data = await response.json() as ApiResponse; // Explicitly cast the response to ApiResponse
-    console.log('Fetched chat IDs:', data);
-
-    if (data.results && Array.isArray(data.results)) {
-      data.results.forEach((user: User) => chatIds.add(user.chat_id));
-    } else if (data.users && Array.isArray(data.users)) {
-      data.users.forEach((user: User) => chatIds.add(user.chat_id));
-    } else {
-      throw new Error('Unexpected data structure');
-    }
+    const data = await response.json() as ApiResponse;
+    return processApiResponse(data, chatIds);
   } catch (error) {
     console.error(`Error fetching chat IDs from Vercel: ${error}`);
+    return chatIds; // Return the empty set on error
+  }
+}
+
+// Function to process the API response
+function processApiResponse(data: ApiResponse, chatIds: Set<string>): Set<string> {
+  const users = data.results || data.users;
+
+  if (Array.isArray(users)) {
+    users.forEach((user: UsersIDs) => chatIds.add(user.chat_id));
+  } else {
+    throw new Error('Unexpected data structure');
   }
 
   return chatIds;
 }
+
+
 
 async function sendNotificationToAllUsers(chatIds: Set<string>, message: string): Promise<void> {
   for (const chatId of chatIds) {
@@ -293,7 +326,7 @@ async function updateGlobalAuthToken() {
 }
 
 function isTokenExpired(): boolean {
-  return tokenExpiration === null || Date.now() > tokenExpiration;
+  return accessToken === null || Date.now() > tokenExpiration;
 }
 
 async function setWebhook(event: FetchEvent, hashValue: string, webhookUrl: string): Promise<Response> {
@@ -426,14 +459,11 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
   return new Response("Not found", { status: 404 });
 }
 
-interface User {
-  phone: string;
-}
-
-interface ApiResponse {
+interface ApiResponseVercel {
   results?: User[];
   users?: User[];
 }
+
 
 async function fetchPhoneNumbersFromVercel(): Promise<string[]> {
   const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
@@ -450,7 +480,7 @@ async function fetchPhoneNumbersFromVercel(): Promise<string[]> {
       throw new Error(`Failed to fetch data from Vercel: ${response.statusText}`);
     }
 
-    const data = await response.json() as ApiResponse; // Explicitly cast the response to ApiResponse
+    const data = await response.json() as ApiResponseVercel; // Explicitly cast the response to ApiResponse
     console.log('Fetched data:', data);
 
     if (data.results && Array.isArray(data.results)) {

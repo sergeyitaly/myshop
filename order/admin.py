@@ -42,14 +42,18 @@ class OrderItemInline(admin.TabularInline):
         return obj.quantity * obj.product.price
     subtotal.short_description = 'Subtotal'
 
-
 class OrderAdmin(admin.ModelAdmin):
-    inlines = [OrderItemInline]
-    readonly_fields = ['id', 'name', 'surname', 'phone', 'email', 'receiver', 'receiver_comments', 'submitted_at', 'present', 'total_quantity', 'total_price']
+    list_display = ['id', 'status', 'last_updated']
+    readonly_fields = ['id', 'name', 'surname', 'phone', 'email', 'receiver', 'receiver_comments', 'total_quantity', 'total_price', 'created_at', 'submitted_at', 'processed_at', 'complete_at', 'canceled_at']
     fields = [
         'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments', 
-        'present', 'submitted_at', 'total_quantity', 'total_price'
-    ]  # Include all necessary fields
+        'present', 'status', 'total_quantity', 'total_price',  'submitted_at','created_at', 'processed_at', 'complete_at', 'canceled_at'
+    ]
+    inlines = [OrderItemInline]
+
+    def last_updated(self, obj):
+        return obj.last_updated
+    last_updated.short_description = 'Last Updated'
 
     def total_quantity(self, obj):
         return sum(item.quantity for item in obj.order_items.all())
@@ -59,20 +63,20 @@ class OrderAdmin(admin.ModelAdmin):
         return sum(item.quantity * item.product.price for item in obj.order_items.all())
     total_price.short_description = 'Total Price'
 
+#    def get_queryset(self, request):
+#        qs = super().get_queryset(request)
+#        for order in qs:
+#            if order.status == 'created' and not order.created_at:
+#                order.created_at = timezone.now()
+#                order.save(update_fields=['created_at'])
+ #       return qs
+
+
     def save_model(self, request, obj, form, change):
-        # Ensure receiver_comments is empty if receiver is False
-        if not obj.receiver:
-            obj.receiver_comments = ''
+        if change:  # This means we are editing an existing object
+            new_status = form.cleaned_data.get('status')
+            if new_status and new_status != obj.status:
+                obj.update_status(new_status)
         super().save_model(request, obj, form, change)
-
-    def save_related(self, request, form, formsets, change):
-        # Manually save related order items using serializer
-        if form.instance.pk is None:
-            # Only create order items when creating a new order
-            serializer = OrderSerializer(data=form.cleaned_data)
-            if serializer.is_valid():
-                order = serializer.save()
-                form.instance.pk = order.pk
-                super().save_related(request, form, formsets, change)
-
+        
 admin.site.register(Order, OrderAdmin)
