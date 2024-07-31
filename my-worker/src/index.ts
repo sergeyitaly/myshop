@@ -508,6 +508,7 @@ async function processUpdate(update: any): Promise<void> {
   }
 }
 
+
 const phoneNumbers = new Map<string, string>();
 const chatIds = new Set<string>();
 async function processMessage(message: any): Promise<void> {
@@ -843,7 +844,6 @@ interface OrderDetails {
   // Add other fields as needed
 }
 
-
 async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<void> {
   const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
   const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
@@ -922,6 +922,9 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
         'canceled': orderDetails.canceled_at
       };
 
+      // Update the status before sending the details
+      await updateOrderStatus(orderDetails.id, 'processed', 'processed_at');
+
       // Only include statuses with non-null dates
       const statusSummary = Object.entries(statusDates)
         .filter(([_, date]) => date !== null) // Exclude null dates
@@ -958,6 +961,7 @@ const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
   return date.toISOString().split('T')[0] + ' ' + date.toTimeString().split(' ')[0]; // YYYY-MM-DD HH:MM:SS format
 };
+
 async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promise<void> {
   const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
   const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
@@ -1021,7 +1025,7 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promis
         // Find the latest status with a non-null date
         const latestStatus = Object.entries(statusDates)
           .filter(([_, date]) => date !== null)
-          .reduce((latest, current) => current[1]! > latest[1]! ? current : latest);
+          .reduce((latest, current) => new Date(current[1]!) > new Date(latest[1]!) ? current : latest);
 
         const [status, date] = latestStatus;
         const statusMessage = `${statusEmojis[status] || '🔍'} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
@@ -1038,6 +1042,7 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promis
     await sendMessage(chatId, 'An error occurred while retrieving orders. Please try again later.');
   }
 }
+
 
 async function updateOrderStatus(orderId: number, status: string, dateField: string): Promise<void> {
   const updateUrl = `${VERCEL_DOMAIN}/api/orders/${orderId}/`;
