@@ -32,9 +32,6 @@ const CollectionsPage: React.FC = () => {
     navigate(ROUTE.COLLECTION + id)
   }
 
-  console.log(data);
-  
-
   let totalPages = 0
 
   if(data){
@@ -44,6 +41,8 @@ const CollectionsPage: React.FC = () => {
   const handleChangePage = (page: number ) => {
     setCurrentPage(page)
   }
+  
+  console.log(collections);
   
  
   return (
@@ -63,6 +62,7 @@ const CollectionsPage: React.FC = () => {
                   >
                     <PreviewCard
                         photoSrc={collection.photo}
+                        previewSrc={collection.photo_thumbnail_url}
                         title={collection.name}
                         loading={isFetching}
                         subTitle={collection.category}

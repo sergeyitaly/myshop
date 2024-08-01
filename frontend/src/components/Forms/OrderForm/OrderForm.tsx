@@ -81,11 +81,6 @@ export const OrderForm = ({
                     <OrderFormBox
                         title='Отримувач'
                     >
-                        <button type='button'
-                            onClick={() => {
-                                clearBasket()
-                            }}
-                        >Button</button>
                         <div className={styles.inputsContainer}>
                             <FormikInput label="Ім'я" name='name'/>
                             <FormikInput label="Прізвище" name='surname'/>

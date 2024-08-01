@@ -10,6 +10,7 @@ import { countDiscountPrice } from '../../../functions/countDiscountPrice'
 interface PreviewCardProps {
     className?: string
     photoSrc: string | null
+    previewSrc: string | null
     discount?: string
     currency?: Currency
     price?: string
@@ -25,6 +26,7 @@ export const PreviewCard = ({
     photoSrc,
     title,
     discount,
+    previewSrc,
     price,
     loading,
     currency,
@@ -38,7 +40,6 @@ export const PreviewCard = ({
 
    const discountPrice = countDiscountPrice(price, discount)
     
-    
 
     return (
         <div 
@@ -50,6 +51,7 @@ export const PreviewCard = ({
               <AppImage
                 className={style.imageSize}
                 src={photoSrc}
+                previewSrc={previewSrc}
                 alt={title}
               />
             <p className={style.title}>{title}</p>

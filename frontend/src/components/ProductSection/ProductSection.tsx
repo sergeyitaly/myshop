@@ -16,6 +16,8 @@ export const ProductSection = () => {
 
     const discountPrice = product ? countDiscountPrice(product.price, product.discount) : null
   
+    console.log(product);
+    
 
     return (
         <section>
@@ -24,7 +26,8 @@ export const ProductSection = () => {
                 product &&
                     <>
                         <ProductGallery
-                            defaultImage={product.photo}
+                            defaultImage={product.photo_url}
+                            smallImg={product.photo_thumbnail_url}
                             images={product.images}
                             discount = {!!discountPrice}
                         />

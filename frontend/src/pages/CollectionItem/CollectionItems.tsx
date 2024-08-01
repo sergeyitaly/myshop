@@ -75,8 +75,11 @@ const CollectionItemsPage: React.FC = () => {
                   <PreviewCard
                       key={product.id}
                       photoSrc={product.photo || ''}
+                      previewSrc={product.photo_thumbnail_url}
                       title={product.name}
-                      subTitle={`${formatNumber(product.price)} ${formatCurrency(product.currency)}`}
+                      price={product.price}
+                      currency={product.currency}
+                      discount={product.discount}
                       onClick={() => handleClickProduct(product.id)}
                   />
                 ))
@@ -101,6 +104,7 @@ const CollectionItemsPage: React.FC = () => {
                       className={style.item}
                       key={product.id}
                       photoSrc={product.photo || ''}
+                      previewSrc={product.photo_thumbnail_url}
                       title={product.name}
                       subTitle={`${formatNumber(product.price)} ${formatCurrency(product.currency)}`}
                       onClick={() => handleClickProduct(product.id)}
