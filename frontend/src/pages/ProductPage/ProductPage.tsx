@@ -24,6 +24,9 @@ const ProductPage: React.FC = () => {
 
   const {product, isLoading, isFetching} = useProduct(+id!)
 
+  console.log(product);
+  
+
   const {data: collection} = useGetCollectionByNameQuery(product?.collection ?? skipToken)
 
   const {data: productsData} = useGetAllProductsFromCollectionQuery(collection?.id ?? skipToken)

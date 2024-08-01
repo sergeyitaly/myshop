@@ -38,7 +38,6 @@ export const PreviewCard = ({
 
    const discountPrice = countDiscountPrice(price, discount)
     
-    
 
     return (
         <div 
