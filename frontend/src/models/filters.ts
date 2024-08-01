@@ -3,6 +3,7 @@ export interface ProductFilter {
     category?: string
     price?: string
     sales_count?: string
+    discount?: string
     popularity?: string
     search?: string
     ordering?: string

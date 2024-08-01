@@ -187,3 +187,24 @@
         font-size: 14px;
     }
 }
+
+.oldPrice {
+    text-decoration: line-through;
+    color: grey;
+    margin-right: 8px;
+}
+
+.newPrice {
+    color: red;
+    font-weight: bold;
+}
+
+.oldPrice {
+    text-decoration: line-through;
+    color: #999;
+    margin-right: 8px;
+}
+
+.newPrice {
+    color: #e60000;
+}

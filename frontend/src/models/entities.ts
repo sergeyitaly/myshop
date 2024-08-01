@@ -15,6 +15,7 @@ export interface Product {
     name: string,
     description: string | null,
     price: string,
+    discount: string,
     stock: number,
     available: boolean,
     created: Date,

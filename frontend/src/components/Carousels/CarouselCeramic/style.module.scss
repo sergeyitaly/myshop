@@ -1,57 +1,65 @@
-.sliderContainer {
-    margin-top: 70px;
-    padding: 0 10px;
+.container {
+  padding: 0 5px;
+
+  .card:first-child {
+      padding-left: 5px;
+  }
 }
 
-.title {
-    font-size: 32px;
-    font-weight: 500;
-    margin: 20px 0 20px 5px
-}
+//.sliderContainer {
+//    margin-top: 70px;
+//    padding: 0 10px;
+//}
 
-.card:first-child {
-    padding-left: 5px;
-}
-
-.card {
-    font-size: 18px;
-    text-align: center;
-    margin-bottom: 20px;
-    font-weight: 400;
-}
-
-.cardImage {
-    padding-right: 5px;
-}
-
-.name {
-    margin-top: 15px;
-}
-
-.image {
-    max-width: 100%;
-}
-
-.price {
-    margin: 10px 0;
-    color: #787878;
-}
-
-
-@media screen and (max-width: 600px) {
-    .sliderContainer {
-        margin-top: 30px;
-    }
-
-    .title {
-        font-size: 26px;
-    }
-
-    .card{
-        font-size: 16px;
-    }
-
-    .price {
-        margin-top: 5px;
-    }
-}
+//.title {
+//    font-size: 32px;
+//    font-weight: 500;
+//    margin: 20px 0 20px 5px
+//}
+//
+//.card:first-child {
+//    padding-left: 5px;
+//}
+//
+//.card {
+//    font-size: 18px;
+//    text-align: center;
+//    margin-bottom: 20px;
+//    font-weight: 400;
+//}
+//
+//.cardImage {
+//    padding-right: 5px;
+//}
+//
+//.name {
+//    margin-top: 15px;
+//}
+//
+//.image {
+//    max-width: 100%;
+//}
+//
+//.price {
+//    margin: 10px 0;
+//    color: #787878;
+//}
+//
+//
+//@media screen and (max-width: 600px) {
+//    .sliderContainer {
+//        margin-top: 30px;
+//    }
+//
+//    .title {
+//        font-size: 26px;
+//    }
+//
+//    .card{
+//        font-size: 16px;
+//    }
+//
+//    .price {
+//        margin-top: 5px;
+//    }
+//}
