@@ -26,14 +26,10 @@ export const AppImage = ({
         const img = new Image()
         img.src = src ? src : defaultPhoto
         img.onload = () => {
-            console.log('Loaded');
-            
             setIsLoading(false)
         }
     }, [src]) 
 
-    console.log(isLoading);
-    
 
 
     return (

@@ -76,7 +76,9 @@ const CollectionItemsPage: React.FC = () => {
                       key={product.id}
                       photoSrc={product.photo || ''}
                       title={product.name}
-                      subTitle={`${formatNumber(product.price)} ${formatCurrency(product.currency)}`}
+                      price={product.price}
+                      currency={product.currency}
+                      discount={product.discount}
                       onClick={() => handleClickProduct(product.id)}
                   />
                 ))
