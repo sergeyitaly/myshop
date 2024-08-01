@@ -35,12 +35,14 @@ export interface Product {
 export interface ProductImage {
     id: string;
     images: string; 
+    images_thumbnail_url: string
 }
 
 export interface Collection {
     id: number
     category: string
     photo_url: string
+    photo_thumbnail_url: string
     photo: string
     name: string
     created: Date
