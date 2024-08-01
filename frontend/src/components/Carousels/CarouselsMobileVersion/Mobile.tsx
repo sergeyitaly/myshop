@@ -3,8 +3,33 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import style from './style.module.scss'
 import {mockDataAllCollection, mockDataDiscount, mockDataProducts} from "../carouselMock";
+import {PreviewCard} from "../../Cards/PreviewCard/PreviewCard";
+import React from "react";
+import {useNavigate, useParams} from "react-router-dom";
+import {
+    useGetAllCollectionsQuery,
+    useGetAllProductsFromCollectionQuery,
+    useGetOneCollectionByIdQuery,
+    useGetProductsByPopularityQuery,
+    useGetProductsFromCollectionByProductFilterQuery
+} from "../../../api/collectionSlice";
+import {Collection} from "../../../models/entities";
+import {ROUTE} from "../../../constants";
+import {formatNumber} from "../../../functions/formatNumber";
+import {formatCurrency} from "../../../functions/formatCurrency";
 
 export function AllCollection() {
+
+    const navigate = useNavigate()
+
+    const {data, isLoading} = useGetAllCollectionsQuery()
+
+    const collections: Collection[] = data?.results || []
+
+    const handleClickCollectionCard = (id: number) => {
+        navigate(ROUTE.COLLECTION + id)
+    }
+
     const settings = {
         dots: true,
         infinite: true,
@@ -18,25 +43,47 @@ export function AllCollection() {
         <div className={style.sliderContainer}>
             <p className={style.title}>Всі колекції</p>
             <Slider {...settings}>
-                {mockDataAllCollection.map((product, index) => (
-                    <div key={index} className={style.card}>
-                        <div className={style.cardImage}>
-                            <img src={product.imageUrl} alt={product.name} className={style.imageCollection}/>
-                            <p className={style.name}>{product.name}</p>
-                            <p className={style.category}>{product.category}</p>
+                {
+                    collections.map((collection) => (
+                        <div className={style.container}>
+                            <PreviewCard
+                                key={collection.id}
+                                photoSrc={collection.photo}
+                                title={collection.name}
+                                subTitle={collection.category}
+                                onClick={() => handleClickCollectionCard(collection.id)}
+                            />
                         </div>
-                    </div>
-                ))}
+                    ))
+                }
             </Slider>
         </div>
     );
 }
 
-
 export function Popular () {
+
+    const navigate = useNavigate();
+
+    const {
+        data: productResponce,
+        isSuccess: isSuccessProductFetshing,
+        isLoading: isLoadingProducts,
+        isError: isErrorProducts,
+        error
+    } = useGetProductsByPopularityQuery({ popularity: '6' });
+
+    console.log(error);
+
+    const products = isSuccessProductFetshing ? productResponce.results : [];
+
+    const handleClickProduct = (productId: number) => {
+        navigate(`${ROUTE.PRODUCT}${productId}`)
+    }
+
     const settings = {
         infinite: true,
-        slidesPerRow: 2,
+        slidesToShow: 2,
         rows: 2,
         speed: 500,
         dots: true,
@@ -45,17 +92,20 @@ export function Popular () {
     return (
         <div className={style.sliderContainer}>
             <p className={style.title}>Найпопулярніші товари</p>
-            <Slider {...settings}>
-                {mockDataProducts.map((product, index) => (
-                    <div key={index} className={style.cardRow}>
-                        <div className={style.cardImage}>
-                            <img src={product.imageUrl} alt={product.name} className={style.image}/>
-                            <p className={style.name}>{product.name}</p>
-                            <p className={style.price}>{product.price}</p>
+            {isSuccessProductFetshing && (
+                <Slider {...settings}>
+                    {products.map((product) => (
+                        <div className={style.container} key={product.id}>
+                            <PreviewCard
+                                photoSrc={product.photo || ''}
+                                title={product.name}
+                                subTitle={`${formatNumber(product.price)} ${formatCurrency(product.currency)}`}
+                                onClick={() => handleClickProduct(product.id)}
+                            />
                         </div>
-                    </div>
-                ))}
-            </Slider>
+                    ))}
+                </Slider>
+            )}
         </div>
     );
 }

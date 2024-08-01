@@ -11,8 +11,6 @@ import { ROUTE } from '../../constants';
 import { formatNumber } from '../../functions/formatNumber';
 import { formatCurrency } from '../../functions/formatCurrency';
 
-
-
 const CollectionItemsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate()
@@ -39,7 +37,6 @@ const CollectionItemsPage: React.FC = () => {
   const handleClickProduct = (productId: number) => {
     navigate(`${ROUTE.PRODUCT}${productId}`)
   }
-
 
   return (
     <main className={style.main}>

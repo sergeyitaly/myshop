@@ -41,7 +41,19 @@ export const collectionApiSlice = apiSlice.injectEndpoints({
                 const qs = queryString(productQueryObj)
                 return `${ENDPOINTS.COLLECTION}/${collectionId}/${ENDPOINTS.PRODUCTS}/?${qs}`
             }
-        })
+        }),
+
+        getProductsByPopularity: builder.query<ShortServerResponce<Product[]>, ProductFilter>({
+            query: (filter) => {
+                const qs = queryString(filter);
+                return `${ENDPOINTS.PRODUCTS}/?${qs}`;
+            }
+        }),
+
+        getDiscountProducts: builder.query<ShortServerResponce<Product[]>, void>({
+            query: () => `${ENDPOINTS.PRODUCTS}/?discount=true`
+        }),
+
     })
 })
 
@@ -51,5 +63,7 @@ export const {
     useGetOneCollectionByIdQuery,
     useGetProductsFromCollectionByProductFilterQuery,
     useGetAllProductsFromCollectionQuery,
-    useGetCollectionByNameQuery
+    useGetCollectionByNameQuery,
+    useGetProductsByPopularityQuery,
+    useGetDiscountProductsQuery
 } = collectionApiSlice
