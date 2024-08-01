@@ -8,16 +8,19 @@ import defaultPhoto from '../../assets/default.png'
 interface AppImageProps {
     className?: string
     src: string | null
+    smallSrc: string | null
     alt: string
 }
 
 export const AppImage = ({
     alt,
     src,
+    smallSrc,
     className
 }: AppImageProps) => {
 
     const [isLoading, setIsLoading] = useState<boolean>(true)
+
 
     useEffect(() => {
         console.log(src);
@@ -39,6 +42,22 @@ export const AppImage = ({
                     // <Skeleton
                     //     className={style.skeleton}
                     // />
+                    smallSrc ?
+                    <motion.img
+                        initial= {{
+                            opacity: 0
+                        }}
+                        animate = {{
+                            opacity: 1
+                        }}
+                        transition={{
+                            duration: 2
+                        }}
+                        src={smallSrc}
+                        alt={alt}
+                        loading="lazy"
+                    />
+                    :
                     null
                     :
                     <motion.img
