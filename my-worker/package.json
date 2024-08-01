@@ -1,0 +1,24 @@
+{
+  "name": "my-worker",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "wrangler dev",
+    "build": "tsc && mv dist/index.js dist/worker.js",
+    "test": "vitest",
+    "deploy": "wrangler deploy --env production"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240725.0",
+    "@types/service_worker_api": "^0.0.9",
+    "rollup-plugin-visualizer": "^5.12.0",
+    "typescript": "^5.5.4",
+    "vite": "^5.3.5",
+    "vitest": "^2.0.4",
+    "wrangler": "^3.67.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "telegraf": "^4.16.3"
+  }
+}

@@ -7,7 +7,7 @@ import styles from './PreviewCard.module.scss'
 export const PreviewLoadingCard = () => {
     return (
         <div className={styles.card}>
-            <div className={styles.imgWrapper}>
+            <div className={styles.imageSize}>
                 <Skeleton className={styles.skeleton}/>
             </div>
             <Skeleton className={clsx(styles.title, styles.skeleton)}/>

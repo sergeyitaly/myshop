@@ -1,6 +1,7 @@
 import { formatCurrency } from "../../../functions/formatCurrency"
 import { formatNumber } from "../../../functions/formatNumber"
-import { Product, ProductVariantsModel } from "../../../models/entities"
+import { Color, Product } from "../../../models/entities"
+import { AppImage } from "../../AppImage/AppImage"
 import { AvailableLable } from "../../AvailableLabel/AvailableLabel"
 import { Counter } from "../../Counter/Counter"
 import { ProductVariants } from "../../ProductVariants/ProductVariants"
@@ -11,46 +12,64 @@ import styles from './BasketItem.module.scss'
 interface BasketItemProps {
     product: Product
     qty: number
-    variants: ProductVariantsModel
+    color: Color
+    size: string
     onClickDelete: (product: Product) => void 
-    onClickIncrement: (product: Product) => void 
-    onClickDecrement: (product: Product) => void 
+    onClickName?: (product: Product) => void
+    onClickPhoto?: (product: Product) => void
+    onChangeCounter?: (product: Product, qty: number) => void
 }
 
 
 export const BasketItem = ({
     product,
-    variants,
+    color,
+    size,
     qty,
     onClickDelete,
-    onClickIncrement,
-    onClickDecrement
+    onClickName,
+    onClickPhoto,
+    onChangeCounter
 }: BasketItemProps) => {
 
-    const {photo, name, available, price, currency} = product
+    const {photo, photo_thumbnail_url, name, available, price, currency} = product
+
 
     const handleClickDelete = () => {
         onClickDelete && onClickDelete(product)
     }
 
-    const handleClickIncrement = () => {
-        onClickIncrement && onClickIncrement(product)
+    const handleClickName = () => {
+        onClickName && onClickName(product)
     }
 
-    const handleClickDecrement = () => {
-        onClickDecrement && onClickDecrement(product)
+    const handleClickPhoto = () => {
+        onClickPhoto && onClickPhoto(product)
+    } 
+    
+    const handleChangeCounter = (value: number) => {
+        onChangeCounter && onChangeCounter(product, value)
     }
+
 
     return (
         <div className={styles.container}>
-            <div className={styles.imgWrapper}>
-                <div className={styles.image}>
-                    {photo && <img src={photo}/>}
-                </div>
-            </div>
+            <button 
+                className={styles.imgWrapper}
+                onClick={handleClickPhoto}
+            >
+                <AppImage
+                    src={photo}
+                    previewSrc={photo_thumbnail_url}
+                    alt={name}
+                />
+            </button>
             <div className={styles.info}>
                 <div className={styles.header}>
-                    <h4 className={styles.title}>{name}</h4>
+                    <h4 
+                        className={styles.title}
+                        onClick={handleClickName}
+                    >{name}</h4>
                     <IconButton
                         className={styles.icon}
                         iconName="delete"
@@ -60,39 +79,31 @@ export const BasketItem = ({
                 <ProductVariants
                     className={styles.characteristic}
                     title="Колір"
+                    value={color.name}
                 >
-                    {
-                        variants.colors.map(({color}) => (
-                            <ValueBox
-                                key={color}
-                                value={color}
-                                color={color}
-                                isActive={color === product.color_value}
-                            />
-                        ))
-                    }
+                    <ValueBox
+                        className={styles.noPointer}
+                        value={color.color}
+                        color={color.color}
+                    />
                 </ProductVariants>
                 <div className={styles. counterBox}>
                     <ProductVariants
                         className={styles.characteristic}
                         title="Розмір"
                     >
-                       {
-                        variants.sizes.map((size) => (
-                            <ValueBox
-                                key={size}
-                                value={size}
-                                title={size}
-                                isActive={size === product.size}
-                            />
-                        ))
-                    }
+                        <ValueBox
+                            className={styles.noPointer}
+                            key={size}
+                            value={size}
+                            title={size}
+                            isActive
+                        />
                     </ProductVariants>
                     <Counter
                         className={styles.selfTop}
                         value={qty}
-                        onIncrement={handleClickIncrement}
-                        onReduce={handleClickDecrement}
+                        onChangeCounter={handleChangeCounter}
                     />  
                 </div>
                 <AvailableLable

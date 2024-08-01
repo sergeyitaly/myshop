@@ -13,8 +13,6 @@ interface OrderItemWrapperProps {
 export const OrderItemWrapper = ({
     basketItem,
     onClickDelete,
-    onClickDecrement,
-    onClickIncrement
 }: OrderItemWrapperProps) => {
 
     const { productId, qty } = basketItem
@@ -25,13 +23,6 @@ export const OrderItemWrapper = ({
         onClickDelete && product && onClickDelete(product)
     }
 
-    const handleClickIncrement = () => {
-        onClickIncrement && product && onClickIncrement(product)
-    }
-    
-    const handleClickDecrement = () => {
-        onClickDecrement && product && onClickDecrement(product)
-    }
 
     return (
         <>
@@ -41,8 +32,6 @@ export const OrderItemWrapper = ({
                     product={product}
                     qty={qty}
                     onClickDelete={handleClickDeleteItem}
-                    onClickDecrement={handleClickDecrement}
-                    onClickIncrement={handleClickIncrement}
                 />
             }
         </>

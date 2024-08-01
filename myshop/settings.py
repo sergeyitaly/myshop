@@ -6,14 +6,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from shop.loadimages_tos3 import LoadImagesToS3
 from distutils.util import strtobool
-from django.core.validators import FileExtensionValidator
 import os
-import ssl
-import smtplib
-import certifi
-from urllib.request import build_opener, HTTPSHandler
-from urllib.request import urlopen
-import json
+
 
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -38,6 +32,8 @@ USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
 AWS_FRONTEND_DOMAIN = f"https://{AWS_S3_CUSTOM_DOMAIN}"
 VERCEL_DOMAIN = os.getenv('VERCEL_DOMAIN')
 LOCAL_HOST = os.getenv('LOCAL_HOST')
+TELEGRAM_BOT_TOKEN=os.getenv('NOTIFICATIONS_API')
+SAYINGS_FILE_PATH = os.path.join(BASE_DIR, 'order', 'sayings.txt')
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
@@ -80,11 +76,12 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'storages',
+    'imagekit',
     'drf_yasg',
     'django_filters',
     "phonenumber_field",
     "anymail",
-    # "debug_toolbar",
+      # "debug_toolbar",
 
 ]
 
@@ -142,16 +139,15 @@ DATABASES = {
 
 if USE_S3:
     # LoadImagesToS3().copy_local_media_to_s3(os.path.join(BASE_DIR, 'media'))
-    STATICFILES_STORAGE = "storages.backends.s3.S3Storage"
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
-    # DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    # STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
+    # STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    IMAGEKIT_DEFAULT_CACHEFILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/'
 else:
     # Local static file settings
-    MEDIA_URL = '/media/'
+    MEDIA_URL = 'media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     #    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # Use whitenoise for serving static files
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
@@ -187,16 +183,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# REST_FRAMEWORK = {
-#    'DEFAULT_AUTHENTICATION_CLASSES': [
-#        'rest_framework.authentication.TokenAuthentication',
-#        'rest_framework.authentication.SessionAuthentication',
-#    ],
-#    'DEFAULT_PERMISSION_CLASSES': [
-#        'rest_framework.permissions.IsAuthenticated',
-#    ],
-# }
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -231,24 +217,19 @@ DJOSER = {
     'SERIALAZERS': {}
 }
 
-# Email Backend Configuration
-#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-#EMAIL_HOST = 'smtp.gmail.com'  # Gmail SMTP server
-#EMAIL_PORT = 587  # Gmail SMTP port (TLS)
-#EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')  # Your Gmail address
-#EMAIL_HOST_PASSWORD = os.getenv('GMAIL_SERVICE_KEY')  # Your Gmail app password
-#EMAIL_USE_TLS = True  # Use TLS for secure connection
-#DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-MAILGUN_API_KEY = os.getenv('MAILGUN_API_KEY')
-MAILGUN_DOMAIN = os.getenv('MAILGUN_DOMAIN')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
-
-EMAIL_BACKEND = 'django_mailgun_mime.backends.MailgunMIMEBackend'
 ANYMAIL = {
-    "MAILGUN_API_KEY": MAILGUN_API_KEY,
-    "MAILGUN_SENDER_DOMAIN": MAILGUN_DOMAIN,
+    "MAILGUN_API_KEY": os.getenv('MAILGUN_API_KEY'),
+    "MAILGUN_SENDER_DOMAIN": os.getenv('MAILGUN_SENDER_DOMAIN'),
+      
 }
+EMAIL_TIMEOUT = 60  # 60 seconds
+
+
+EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+DEFAULT_FROM_EMAIL = os.getenv('MAILGUN_SMTP_USERNAME')
+SERVER_EMAIL = os.getenv('MAILGUN_SMTP_USERNAME')
+
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
@@ -263,7 +244,7 @@ SIMPLE_JWT = {
     'ISSUER': None,
     'JWK_URL': None,
     'LEEWAY': 0,
-    'AUTH_HEADER_TYPES': ('Bearer'),
+    'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
@@ -305,9 +286,19 @@ CACHES = {
     }
 }
 
-# CACHES = {
-#    'default': {
-#        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-#        'LOCATION': os.path.join(BASE_DIR, 'site_cache'),
-#    }
-# }
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}

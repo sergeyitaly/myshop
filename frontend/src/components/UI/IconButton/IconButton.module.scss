@@ -6,6 +6,10 @@
     &:hover {
         scale: 1.1;
     }
+    &:disabled {
+        background: gray;
+        border-radius: 50%;
+    }
 }
 
 .badge {

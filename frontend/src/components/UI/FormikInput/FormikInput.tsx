@@ -35,8 +35,6 @@ export const FormikInput = ({
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
             if(field.name === 'phone'){
                 helpers.setValue(formatPhoneNumber(e.target.value).phone)
-                console.log(formatPhoneNumber(e.target.value));
-                
                 return
             }
             field.onChange(e)

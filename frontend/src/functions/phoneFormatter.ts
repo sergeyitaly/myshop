@@ -5,7 +5,7 @@ export function formatPhoneNumber(phoneNumber: string) {
     let phoneWithoutPlus = ''
     let fullNumber = ''
 
-    let hasPlus = phoneNumber[0] === '+'
+    const hasPlus = phoneNumber[0] === '+'
 
     if(hasPlus) {
         phoneWithoutPlus = phoneNumber.replace(regEx, '').slice(1)
@@ -22,11 +22,11 @@ export function formatPhoneNumber(phoneNumber: string) {
 
 
     if(phoneNumber){
-        let countryCode = phoneWithoutPlus.slice(0,2)
-        let operatorCode = phoneWithoutPlus.slice(2,5)
-        let number1 = phoneWithoutPlus.slice(5,8)
-        let number2 = phoneWithoutPlus.slice(8,10)
-        let number3 = phoneWithoutPlus.slice(10,12)
+        const countryCode = phoneWithoutPlus.slice(0,2)
+        const operatorCode = phoneWithoutPlus.slice(2,5)
+        const number1 = phoneWithoutPlus.slice(5,8)
+        const number2 = phoneWithoutPlus.slice(8,10)
+        const number3 = phoneWithoutPlus.slice(10,12)
         fullNumber = `+${countryCode} ${operatorCode} ${number1} ${number2} ${number3}`
     }
 

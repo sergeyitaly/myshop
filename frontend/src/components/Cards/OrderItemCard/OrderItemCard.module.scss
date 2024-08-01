@@ -35,12 +35,12 @@
 
 .title {
     font-weight: 500;
+    cursor: pointer;
 }
 
 .control {
     display: flex;
     gap: 25px;
-    flex-grow: 1;
 }
 
 .counter {

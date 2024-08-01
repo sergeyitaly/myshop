@@ -1,0 +1,27 @@
+@import '../../../../variables';
+
+.slide{
+    position: relative;
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+  
+  .zoomButton{
+    padding: 5px;
+    position: absolute;
+    top: 20px;
+    left: 30px;
+    svg {
+      fill: $color-button;
+    }
+  }
+
+.plug {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
