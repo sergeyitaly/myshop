@@ -3,46 +3,39 @@ import clsx from 'clsx'
 import style from './AppImage.module.scss'
 import {motion} from 'framer-motion'
 import defaultPhoto from '../../assets/default.png'
+import { transformURL } from '../../functions/transformURL'
 
 
 interface AppImageProps {
     className?: string
     src: string | null
-    smallSrc: string | null
+    previewSrc?: string | null
     alt: string
 }
 
 export const AppImage = ({
     alt,
     src,
-    smallSrc,
+    previewSrc,
     className
 }: AppImageProps) => {
 
     const [isLoading, setIsLoading] = useState<boolean>(true)
 
-
     useEffect(() => {
-        console.log(src);
-        console.log(defaultPhoto);
-        
         const img = new Image()
-        img.src = src ? src : defaultPhoto
+        img.src =  src ? transformURL(src) : defaultPhoto
         img.onload = () => {
             setIsLoading(false)
         }
     }, [src]) 
 
 
-
     return (
             <div className={clsx(style.imgWrapper, className)}>
                 {
                     isLoading ?
-                    // <Skeleton
-                    //     className={style.skeleton}
-                    // />
-                    smallSrc ?
+                    previewSrc ?
                     <motion.img
                         initial= {{
                             opacity: 0
@@ -53,9 +46,8 @@ export const AppImage = ({
                         transition={{
                             duration: 2
                         }}
-                        src={smallSrc}
+                        src={transformURL(previewSrc)}
                         alt={alt}
-                        loading="lazy"
                     />
                     :
                     null
@@ -70,9 +62,8 @@ export const AppImage = ({
                         transition={{
                             duration: 2
                         }}
-                        src={src ? src : defaultPhoto}
+                        src={src ? transformURL(src) : defaultPhoto}
                         alt={alt}
-                        loading="lazy"
                     />
                 }
             </div>

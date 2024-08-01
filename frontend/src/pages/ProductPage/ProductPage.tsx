@@ -24,12 +24,12 @@ const ProductPage: React.FC = () => {
 
   const {product, isLoading, isFetching} = useProduct(+id!)
 
-  console.log(product);
   
 
   const {data: collection} = useGetCollectionByNameQuery(product?.collection ?? skipToken)
 
   const {data: productsData} = useGetAllProductsFromCollectionQuery(collection?.id ?? skipToken)
+  
   
   
 
@@ -65,6 +65,7 @@ const ProductPage: React.FC = () => {
                 price={product.price}
                 currency={product.currency}
                 photoSrc={product.photo_url}
+                previewSrc={product.photo_thumbnail_url}
                 onClick={() => handleClickSlide(product)}
               />
            ))

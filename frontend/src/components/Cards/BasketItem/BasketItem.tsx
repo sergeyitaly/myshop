@@ -32,7 +32,7 @@ export const BasketItem = ({
     onChangeCounter
 }: BasketItemProps) => {
 
-    const {photo, name, available, price, currency} = product
+    const {photo, photo_thumbnail_url, name, available, price, currency} = product
 
 
     const handleClickDelete = () => {
@@ -60,6 +60,7 @@ export const BasketItem = ({
             >
                 <AppImage
                     src={photo}
+                    previewSrc={photo_thumbnail_url}
                     alt={name}
                 />
             </button>
