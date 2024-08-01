@@ -11,7 +11,7 @@ from .serializers import ProductSerializer, CollectionSerializer, CategorySerial
 from .models import Product, Collection, Category
 
 class CustomPageNumberPagination(PageNumberPagination):
-    default_page_size = 6
+    default_page_size = 4
     page_size_query_param = 'page_size'
     max_page_size = 100
 
@@ -27,7 +27,7 @@ class CustomPageNumberPagination(PageNumberPagination):
         })
 
 class CollectionPageNumberPagination(PageNumberPagination):
-    page_size = 9
+    page_size = 8
     page_size_query_param = 'page_size'
     max_page_size = 100
 

@@ -2,14 +2,17 @@ import { ChangeEvent } from 'react'
 import { useGetManyProductsByFilterQuery } from '../../api/productSlice'
 import { ResultCard } from './ResultCard/ResultCard'
 import { SearchInput } from './SearchInput/SearchInput'
-import styles from './SearchWindow.module.scss'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { ResultCardSkeleton } from './ResultCard/ResultCardSkeleton'
 import { MapComponent } from '../MapComponent'
 import { Product } from '../../models/entities'
+import styles from './SearchWindow.module.scss'
+import { MotionItem } from '../MotionComponents/MotionItem'
+import { MotionSearch } from '../MotionComponents/MotionSearch'
 
 interface SearchWindowProps {
     value: string
+    queryText: string
     onChange: (e: ChangeEvent<HTMLInputElement>) => void
     onClickClose?: () => void
     onClickProduct?: (product: Product) => void
@@ -17,6 +20,7 @@ interface SearchWindowProps {
 
 export const SearchWindow = ({
     value,
+    queryText,
     onChange,
     onClickClose,
     onClickProduct
@@ -27,8 +31,8 @@ export const SearchWindow = ({
         isSuccess,
         isLoading,
         isFetching
-    } = useGetManyProductsByFilterQuery(value ? {search: value} : skipToken)
-    
+    } = useGetManyProductsByFilterQuery(queryText ? { search: queryText } : skipToken)
+
     const handleClickClose = () => {
         onClickClose && onClickClose()
     }
@@ -37,19 +41,25 @@ export const SearchWindow = ({
         onClickProduct && onClickProduct(product)
     }
 
+    const handleSearch = (query: string) => {
+        // Handle the search query here if needed
+        console.log('Search query:', query)
+    }
+
     return (
-        <div className={styles.container}>
+        <MotionSearch className={styles.container}>
             <SearchInput 
                 id='search'
                 value={value}
                 onChange={onChange}
                 onClickClose={handleClickClose}
+                onSearch={handleSearch}  // Add the onSearch prop here
             />
             {
                 isLoading ? 
                 <div className={styles.resultContainer}>
                     <MapComponent
-                        component={<ResultCardSkeleton/>}
+                        component={<ResultCardSkeleton />}
                         qty={4}
                     />
                 </div>
@@ -57,13 +67,20 @@ export const SearchWindow = ({
                 products && !!products.results.length && 
                 <div className={styles.resultContainer}>
                     {
-                        products.results.map((product) => (
-                            <ResultCard
-                                src={product.photo_url}
-                                title={product.name}
-                                loading={isFetching}
-                                onClick={() => handleClickProduct(product)}
-                            />
+                        products.results.map((product, i) => (
+                            <MotionItem
+                                key={product.id}
+                                index={i}
+                                offset={50}
+                            >
+                                <ResultCard
+                                    key={product.id}
+                                    src={product.photo_url}
+                                    title={product.name}
+                                    loading={isFetching}
+                                    onClick={() => handleClickProduct(product)}
+                                />
+                            </MotionItem>
                         ))
                     }
                 </div>
@@ -79,6 +96,6 @@ export const SearchWindow = ({
                     }
                 </>
             }
-        </div>
+        </MotionSearch>
     )
 }

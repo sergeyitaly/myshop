@@ -82,3 +82,14 @@
         font-size: clamp(0.875rem, 0.213vw + 0.809rem, 1rem);
     }
 }
+
+.noPointer {
+    cursor: auto;
+}
+
+.title {
+    font-size: clamp(0.875rem, 0.638vw + 0.676rem, 1.25rem);
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+}

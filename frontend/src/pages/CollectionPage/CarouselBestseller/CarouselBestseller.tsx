@@ -59,6 +59,7 @@ const CarouselBestseller: React.FC = () => {
                 className={style.item}
                 key={product.id}
                 photoSrc={product.photo || ''}
+                previewSrc={product.photo_thumbnail_url}
                 title={product.name}
                 subTitle={product.price}
                 // onClick={() => handleClickCollectionCard(collection.id)}

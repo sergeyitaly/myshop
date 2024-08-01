@@ -1,3 +1,16 @@
+@import '../../variables';
+
+$topSpace: -125px;
+
+@mixin halfLine {
+    position: absolute;
+    content: "";
+    background-color: var(--blue);
+    height: 2px;
+    width: clamp(30%, 58.511vw - 8.91rem, 40%);
+    top: $topSpace;
+}
+
 .footer {
     margin-top: 250px;
     position: relative;
@@ -6,24 +19,23 @@
 
     padding-bottom: clamp(14px,3vw,64px);
     &::before {
-        content: "";
-        background-color: var(--blue);
-        height: 2px;
-        width: 100%;
-        position: absolute;
-        top: -125px;
+        @include halfLine;
+        left: 0;
     }
 
     &::after {
-        content: url('./img.svg');
+        @include halfLine;
+        right: 0;
+    }
+
+    .logo {
         position: absolute;
-        background-color: #fff;
+        top: $topSpace;
         left: 50%;
-        translate: -50% 0;
-        top: -175px;
-        width: 20%;
-        min-width: 250px;
-        text-align: center;
+        translate: -50% -45%;
+        img{
+            height: clamp(5rem, 8.511vw + 2.34rem, 10rem);
+        }
     }
 }
 

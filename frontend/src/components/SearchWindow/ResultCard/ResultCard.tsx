@@ -3,7 +3,7 @@ import defaultFoto from '../../../assets/default.png'
 import clsx from 'clsx'
 
 interface ResultCardProps {
-    src: string
+    src: string | null
     title: string
     loading?: boolean
     onClick?: () => void

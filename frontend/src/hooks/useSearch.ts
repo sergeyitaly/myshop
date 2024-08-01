@@ -1,15 +1,18 @@
 import { ChangeEvent, useEffect } from "react"
 import { useAppDispatch, useAppSelector } from "../store/hooks"
 import { setOpenState, setValue } from "../store/searchSlice"
+import { useDebounce } from 'use-debounce'
 
 export const useSearch = () => {
 
     const {open, value} = useAppSelector(state => state.searchBar)
     const dispatch = useAppDispatch()
+    const [debounceValue] = useDebounce(value, 500)
+    
 
     useEffect(() => {
         dispatch(setValue(''))
-    }, [open])
+    }, [open, dispatch])
 
     const openSearchBar = () => {
         dispatch(setOpenState(true))
@@ -30,6 +33,7 @@ export const useSearch = () => {
     return {
         open,
         value,
+        debounceValue,
         openSearchBar,
         closeSearchBar,
         toggleSearchBar,

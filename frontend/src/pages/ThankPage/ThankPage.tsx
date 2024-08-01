@@ -20,6 +20,10 @@ export const ThankPage = () => {
                             Якщо ви не отримали жодного листа зв‘яжіться з 
                             <span className={styles.email}> KOLORYT@gmail.com</span>
                         </p>
+                        <p>
+                        <a href="https://t.me/KOLORYT_notifications_bot" target="_blank" rel="noopener noreferrer">Telegram bot</a>
+                        </p>
+
                         <Link
                             to={ROUTE.HOME}
                             className={styles.link}

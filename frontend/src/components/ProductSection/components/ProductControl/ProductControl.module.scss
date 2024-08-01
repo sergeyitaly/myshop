@@ -1,0 +1,73 @@
+@import '../../../../variables';
+
+.container{
+    font-size: 1em;
+    display: grid;
+    gap: 35px 24px;
+    gap: clamp(22px, 2.5vw, 36px) 18px clamp(16px, 2vw, 24px);;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: 
+    'title price'
+    'availability .'
+    'color color'
+    'size size'
+    'add buy'
+    ;
+  }
+
+  .title {
+    grid-area: title;
+    font-weight: 500;
+    font-size: clamp(20px, 2.5vw, 36px);
+  }
+
+  .price {
+    position: relative;
+    grid-area: price;
+    font-weight: 500;
+    font-size: clamp(20px, 2.5vw, 32px);
+    justify-self: end;
+  }
+
+  .color{
+    grid-area: color;
+  }
+
+  .sizeArea {
+    grid-area: size;
+    display: flex;
+    gap: 17px;
+  }
+
+  .add{
+    grid-area: add;
+  }
+ 
+  .buy{
+    grid-area: buy;
+  }
+
+
+@container (max-width: 363px) {
+  .add{
+    font-size: 16px;
+  }
+  .buy{
+    font-size: 16px;
+  }
+}
+
+.counter {
+  align-self: flex-end;
+}
+
+.discount {
+  text-align: end;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  text-decoration: line-through;
+  color: $color-gray-200;
+  font-size: 0.8em;
+  transform: translateY(90%);
+}

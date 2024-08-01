@@ -11,11 +11,19 @@ import { useSearch } from '../../hooks/useSearch';
 import { useNavigate } from 'react-router-dom';
 import { ROUTE } from '../../constants';
 import { Product } from '../../models/entities';
+import { AnimatePresence } from 'framer-motion';
 
-export const Header = () => {
+interface HeaderProps {
+    basketLoadingStatus: boolean
+}
+
+
+export const Header = ({
+    basketLoadingStatus
+}: HeaderProps) => {
     const {openBasket, productQty} = useBasket()
 
-    const {open, value, toggleSearchBar, handleChange, closeSearchBar} = useSearch()
+    const {open, value, debounceValue, toggleSearchBar, handleChange, closeSearchBar} = useSearch()
 
     const navigate = useNavigate()
 
@@ -38,6 +46,7 @@ export const Header = () => {
                     />
                     {/* <Cart onClose={handleCloseCart} isOpen={cartOpen} /> */}
                     <IconButton
+                        disabled = {basketLoadingStatus}
                         className={styles.headerButton}
                         iconName='cart'
                         badgeValue={productQty}
@@ -45,17 +54,18 @@ export const Header = () => {
                     />
                 </div>
             </PageContainer>
-            {
-                open &&    
-                <SearchWindow
-                    value={value}
-                    onChange={handleChange}
-                    onClickClose={closeSearchBar}
-                    onClickProduct={handleClickProduct}
-                />
-            }
-
-            
+            <AnimatePresence>
+                {
+                    open &&    
+                    <SearchWindow
+                        value={value}
+                        queryText={debounceValue}
+                        onChange={handleChange}
+                        onClickClose={closeSearchBar}
+                        onClickProduct={handleClickProduct}
+                    />
+                }
+            </AnimatePresence>
         </header>
     );
 };

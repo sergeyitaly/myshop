@@ -4,12 +4,15 @@ import { useBasket } from '../../hooks/useBasket'
 import useClickOutside from '../../hooks/useClickOutside'
 import { MainButton } from '../UI/MainButton/MainButton'
 import { AppIcon } from '../SvgIconComponents/AppIcon'
-import { BasketItemWrapper } from './components/BasketItemWrapper'
 import { EmptyBasket } from './components/EmptyBasket/EmptyBasket'
 import clsx from 'clsx'
 import { useNavigate } from 'react-router-dom'
 import { ROUTE } from '../../constants'
 import { formatNumber } from '../../functions/formatNumber'
+import { BasketItem } from '../Cards/BasketItem/BasketItem'
+import {AnimatePresence, motion} from 'framer-motion'
+import { box, item, modal } from './motion.setings'
+import { Product } from '../../models/entities'
 
 export const Basket = (): JSX.Element => {
 
@@ -23,9 +26,7 @@ export const Basket = (): JSX.Element => {
         productQty,
         closeBasket, 
         deleteFromBasket, 
-        increaceCounter, 
-        reduceCounter
-
+        changeCounter,
     } = useBasket()
 
     const basketBox = useRef<HTMLDivElement | null>(null)
@@ -48,14 +49,26 @@ export const Basket = (): JSX.Element => {
         navigate(ROUTE.ORDER)
     }
 
+    const handleCkickName = (product: Product) => {
+        navigate(ROUTE.PRODUCT+product.id)
+        closeBasket()
+    }
+
     return (
-        <>
+        <AnimatePresence>
             {
                 openStatus && 
-                <div className={styles.container}>
-                    <div 
+                <motion.div 
+                    className={styles.container}
+                    variants={modal}
+                    initial='hidden'
+                    animate='visible'
+                    exit='hidden'
+                >
+                    <motion.div 
                         ref={basketBox}
                         className={styles.box}
+                        variants={box}
                     >
                         <header className={clsx(styles.header, {
                             [styles.endline]: isEmptyBasket
@@ -68,25 +81,40 @@ export const Basket = (): JSX.Element => {
                                 <AppIcon iconName='cross'/>
                             </button>
                         </header>
-                        <div className={clsx(styles.content, {
-                            [styles.center]: isEmptyBasket
-                        })}>
+                                   
+                        <div  
+                            className={clsx(styles.content, {
+                                    [styles.center]: isEmptyBasket
+                                })}
+                        >
                             {
                                 !isEmptyBasket ?
-                                basketItems.map(({productId, qty}) => (
-                                    <BasketItemWrapper
-                                        key={productId}
-                                        productId={productId}
-                                        qty={qty}
-                                        onClickDelete={deleteFromBasket}
-                                        onClickIncrement={increaceCounter}
-                                        onClickDecrement={reduceCounter}
-                                    />
-                                ))
+                                basketItems.map((basketItem) => {
+                                    const {product, qty, productId} = basketItem
+                                    return (
+                                    product &&
+                                        <motion.div 
+                                            key={productId}
+                                            variants={item}
+                                            layout = {true}
+                                        >
+                                            <BasketItem
+                                                product={product}
+                                                qty={qty}
+                                                color={{color: product.color_value || '', name: product.color_name || ''}}
+                                                size={product.size || ''}
+                                                onClickDelete={deleteFromBasket}
+                                                onClickName={handleCkickName}
+                                                onChangeCounter={changeCounter}
+                                                onClickPhoto={handleCkickName}
+                                            />
+                                        </motion.div>
+                                    )})
                                 :
                                 <EmptyBasket/>
                             }
                         </div>
+                        
                         {
                             !isEmptyBasket &&
                             <div className={styles.totalPrice}>
@@ -105,9 +133,9 @@ export const Basket = (): JSX.Element => {
                                 onClick={closeBasket}
                             />
                         </div>
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
             }
-        </>
+        </AnimatePresence>
     )
 } 

@@ -9,7 +9,6 @@ import { MainButton } from '../../UI/MainButton/MainButton'
 import { OrderInfo } from '../../OrderInfo/OrderInfo'
 import { CheckBoxComment } from '../../CheckBoxComment/CheckBoxComment'
 import styles from './OrderForm.module.scss'
-import { ProductAndPriceFormikUpdate } from './ProductAndPriceFormikUpdate/ProductAndPriceFormikUpdate'
 import { OrderDTO } from '../../../models/dto'
 import { CreateOrderErrorResponce, useCreateOrderMutation } from '../../../api/orderSlice'
 import { orderValidSchema } from './validationSchema'
@@ -17,6 +16,8 @@ import { ServerErrorHandling } from './ServerErrorHandling'
 import { useNavigate } from 'react-router-dom'
 import { ROUTE } from '../../../constants'
 import { useBasket } from '../../../hooks/useBasket'
+import { EmptyItemsErrorHandler } from '../EmptyItemsErrorHandler'
+import { ProductAndPriceFormikUpdate } from './ProductAndPriceFormikUpdate/ProductAndPriceFormikUpdate'
 
 
 const initialValues: OrderDTO = {
@@ -44,7 +45,7 @@ export const OrderForm = ({
 
     const {clearBasket} = useBasket()
 
-    const [createOrder, {isSuccess, error, isError}] = useCreateOrderMutation()
+    const [createOrder, {isSuccess, error, isError, isLoading}] = useCreateOrderMutation()
 
     let errorResponce: CreateOrderErrorResponce | null = null
     if(isError){
@@ -58,21 +59,20 @@ export const OrderForm = ({
             clearBasket()
         }
 
-    }, [isSuccess])
+    }, [isSuccess ])
     
 
     const handleClickAddComment = () => {
         setOpenComment(!isOpenComment)
     }
 
+
     return (
         
             <Formik
                 initialValues={initialValues}
                 validationSchema={orderValidSchema}
-
                 onSubmit={(form) => {
-                    console.log(form);
                     createOrder(form)
                 }}
             >
@@ -81,11 +81,6 @@ export const OrderForm = ({
                     <OrderFormBox
                         title='Отримувач'
                     >
-                        <button type='button'
-                            onClick={() => {
-                                clearBasket()
-                            }}
-                        >Button</button>
                         <div className={styles.inputsContainer}>
                             <FormikInput label="Ім'я" name='name'/>
                             <FormikInput label="Прізвище" name='surname'/>
@@ -111,6 +106,7 @@ export const OrderForm = ({
                                         placeholder='Тут можна написати коментар'
                                     />
                                 }
+                                <EmptyItemsErrorHandler name='order_items'/>
                             </div>
                         </div>
                     </OrderFormBox>
@@ -140,13 +136,14 @@ export const OrderForm = ({
                         </div>
                     </OrderFormBox>
                     <MainButton
-                        title='Оформити замовлення'
+                        title={isLoading ? 'Завантажую...' : 'Оформити замовлення'}
                         color='black'
+                        disabled={isLoading}
                     />
-                    <ProductAndPriceFormikUpdate/>
                     <ServerErrorHandling
                         errors={errorResponce && errorResponce.data}
                     />
+                    <ProductAndPriceFormikUpdate/>
                 </Form>
             </Formik>
     )
