@@ -3,17 +3,20 @@ import clsx from 'clsx'
 import style from './AppImage.module.scss'
 import {motion} from 'framer-motion'
 import defaultPhoto from '../../assets/default.png'
+import { transformURL } from '../../functions/transformURL'
 
 
 interface AppImageProps {
     className?: string
     src: string | null
+    previewSrc?: string | null
     alt: string
 }
 
 export const AppImage = ({
     alt,
     src,
+    previewSrc,
     className
 }: AppImageProps) => {
 
@@ -21,7 +24,7 @@ export const AppImage = ({
 
     useEffect(() => {
         const img = new Image()
-        img.src = src ? src : defaultPhoto
+        img.src =  src ? transformURL(src) : defaultPhoto
         img.onload = () => {
             setIsLoading(false)
         }
@@ -32,9 +35,21 @@ export const AppImage = ({
             <div className={clsx(style.imgWrapper, className)}>
                 {
                     isLoading ?
-                    // <Skeleton
-                    //     className={style.skeleton}
-                    // />
+                    previewSrc ?
+                    <motion.img
+                        initial= {{
+                            opacity: 0
+                        }}
+                        animate = {{
+                            opacity: 1
+                        }}
+                        transition={{
+                            duration: 2
+                        }}
+                        src={transformURL(previewSrc)}
+                        alt={alt}
+                    />
+                    :
                     null
                     :
                     <motion.img
@@ -47,9 +62,8 @@ export const AppImage = ({
                         transition={{
                             duration: 2
                         }}
-                        src={src ? src : defaultPhoto}
+                        src={src ? transformURL(src) : defaultPhoto}
                         alt={alt}
-                        loading="lazy"
                     />
                 }
             </div>

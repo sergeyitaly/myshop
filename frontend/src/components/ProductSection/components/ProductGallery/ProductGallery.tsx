@@ -7,8 +7,10 @@ import { ProductImage } from '../../../../models/entities'
 import { AppImage } from '../../../AppImage/AppImage'
 import ZoomIn from '@mui/icons-material/ZoomIn'
 import { Plug } from '../../../Plug/Plug'
+import { transformURL } from '../../../../functions/transformURL'
 
 interface ProductGalleryProps {
+    smallImg?: string | null
     defaultImage: string | null
     images: ProductImage[]
     discount: boolean
@@ -16,6 +18,7 @@ interface ProductGalleryProps {
 
 export const ProductGallery = ({
     defaultImage,
+    smallImg,
     images,
     discount
 }: ProductGalleryProps) => {
@@ -66,6 +69,7 @@ export const ProductGallery = ({
                                 >
                                     <AppImage
                                         src={image.images}
+                                        previewSrc={image.images_thumbnail_url}
                                         alt='product'
                                     />
                                 </div>
@@ -76,6 +80,7 @@ export const ProductGallery = ({
                     <div className={styles.currentImageContainer}>
                         <AppImage
                             src={currentImage}
+                            previewSrc={smallImg}
                             alt='product'
                         />
                         <button
@@ -98,7 +103,7 @@ export const ProductGallery = ({
                     currentImage ?
                     <img 
                         className={styles.modalContent}
-                        src={currentImage}
+                        src={transformURL(currentImage)}
                     />
                     :
                     <p>No image</p>

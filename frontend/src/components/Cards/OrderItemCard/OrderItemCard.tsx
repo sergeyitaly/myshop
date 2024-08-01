@@ -23,7 +23,7 @@ export const OrderItemCard = ({
     onClickPhoto
 }: OrderItemCardProps) => {
 
-    const { photo, name, price, currency } = product
+    const { photo, name, price, currency, photo_thumbnail_url } = product
 
     const handleClickDelete = () => {
         onClickDelete && onClickDelete(product)
@@ -46,6 +46,7 @@ export const OrderItemCard = ({
             >
                 <AppImage 
                     src={photo} 
+                    previewSrc={photo_thumbnail_url}
                     alt={name}
                 />
             </button>
