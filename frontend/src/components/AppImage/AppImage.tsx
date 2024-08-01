@@ -20,12 +20,20 @@ export const AppImage = ({
     const [isLoading, setIsLoading] = useState<boolean>(true)
 
     useEffect(() => {
+        console.log(src);
+        console.log(defaultPhoto);
+        
         const img = new Image()
         img.src = src ? src : defaultPhoto
         img.onload = () => {
+            console.log('Loaded');
+            
             setIsLoading(false)
         }
     }, [src]) 
+
+    console.log(isLoading);
+    
 
 
     return (

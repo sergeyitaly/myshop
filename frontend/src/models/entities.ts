@@ -7,10 +7,11 @@ export interface AdditionalField {
 
 export interface Product {
     id: number,
-    photo_url: string,
     collection: string,
     images: ProductImage[],
     photo: string | null,
+    photo_url: string | null,
+    photo_thumbnail_url: string | null
     brandimage: string | null,
     name: string,
     discount: string
