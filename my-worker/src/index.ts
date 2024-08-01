@@ -66,6 +66,38 @@ interface TelegramMessage {
     phone_number: string;
   };
 }
+interface TelegramUser {
+  chat_id: string;
+}
+
+let lastHealthCheckStatus: 'success' | 'failure' | 'unknown' = 'unknown';
+let cachedChatIds: Set<string> = new Set();
+
+
+
+interface ApiResponse {
+  results?: UsersIDs[];
+  users?: UsersIDs[];
+}
+
+interface UsersIDs {
+  chat_id: string;
+}
+
+interface ApiResponseVercel {
+  results?: User[];
+  users?: User[];
+}
+
+interface UserNotify {
+  chat_id: string;
+  phone: string;
+}
+
+interface ApiResponseVercelNotify {
+  results?: UserNotify[];
+  users?: UserNotify[];
+}
 
 // Register the fetch event listener
 addEventListener('fetch', (event: FetchEvent) => {
@@ -86,74 +118,43 @@ async function handleScheduled(event: ScheduledEvent): Promise<void> {
   await updateProcessedToComplete();
 }
 
-let lastHealthCheckStatus: 'success' | 'failure' | 'unknown' = 'unknown';
-let cachedChatIds: Set<string> = new Set();
-
-interface UsersIDs {
-  chat_id: string;
-}
-
-interface ApiResponse {
-  results?: UsersIDs[];
-  users?: UsersIDs[];
-}
-
 async function fetchChatIds(): Promise<Set<string>> {
   const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
+
   try {
-    let response = await fetch(vercelUrl, {
+    const response = await fetch(vercelUrl, {
       method: 'GET',
       headers: {
-        'Authorization': `Token ${authToken}`,
+        'Authorization': `Token ${authToken}`, // Use TokenAuthentication
         'Content-Type': 'application/json',
       },
     });
 
-    if (response.status === 401) { // Handle token expiration
-      console.log('Token expired, re-authenticating...');
-      await updateGlobalAuthToken();
-
-      response = await fetch(vercelUrl, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Token ${authToken}`, // Use the updated token
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch chat IDs from Vercel after re-authentication: ${response.statusText}`);
-      }
-    }
-
     if (!response.ok) {
-      throw new Error(`Failed to fetch chat IDs from Vercel: ${response.statusText}`);
+      throw new Error(`Failed to fetch data from Vercel: ${response.statusText}`);
     }
 
-    const data = await response.json() as ApiResponse;
-    return processApiResponse(data, cachedChatIds);
+    const data = await response.json() as ApiResponseVercelNotify;
+    console.log('Fetched data:', data);
+
+    let chatIds: string[] = [];
+    if (data.results && Array.isArray(data.results)) {
+      chatIds = data.results.map((user: UserNotify) => user.chat_id);
+    } else if (data.users && Array.isArray(data.users)) {
+      chatIds = data.users.map((user: UserNotify) => user.chat_id);
+    } else {
+      throw new Error('Unexpected data structure');
+    }
+
+    return new Set(chatIds);
   } catch (error) {
     console.error(`Error fetching chat IDs from Vercel: ${error}`);
-    return cachedChatIds; // Return the empty set on error
+    return new Set(); // Return the empty set on error
   }
-}
-
-// Function to process the API response
-function processApiResponse(data: ApiResponse, chatIds: Set<string>): Set<string> {
-  const users = data.results || data.users;
-
-  if (Array.isArray(users)) {
-    users.forEach((user: UsersIDs) => chatIds.add(user.chat_id));
-  } else {
-    throw new Error('Unexpected data structure');
-  }
-
-  return chatIds;
 }
 
 async function sendNotificationToAllUsers(chatIds: Set<string>, message: string): Promise<void> {
-  console.log(cachedChatIds);
-  for (const chatId of cachedChatIds) {
+  for (const chatId of chatIds) {
     try {
       const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
       const response = await fetch(url, {
@@ -173,7 +174,6 @@ async function sendNotificationToAllUsers(chatIds: Set<string>, message: string)
     }
   }
 }
-
 async function performHealthCheck(): Promise<void> {
   const healthCheckUrl = `${VERCEL_DOMAIN}/api/health_check`;
   try {
@@ -182,21 +182,24 @@ async function performHealthCheck(): Promise<void> {
       console.log('Vercel health check successful');
 
       if (lastHealthCheckStatus === 'failure') {
-        // Notify all users that the health check is back up
         const successMessage = '✅ Server up and running!';
-        await sendNotificationToAllUsers(cachedChatIds, successMessage);
+        // Ensure cachedChatIds is not empty before sending notifications
+        if (cachedChatIds.size > 0) {
+          await sendNotificationToAllUsers(cachedChatIds, successMessage);
+        }
         lastHealthCheckStatus = 'success';
       }
 
-      // Update cached chat IDs when the server is up
-      //cachedChatIds = await fetchChatIds();
+      cachedChatIds = await fetchChatIds();
     } else {
       const errorMessage = `🚨 Server is down: ${response.statusText}`;
       console.error(errorMessage);
 
       if (lastHealthCheckStatus !== 'failure') {
-        // Notify all users that the health check has failed
-        await sendNotificationToAllUsers(cachedChatIds, errorMessage);
+        // Ensure cachedChatIds is not empty before sending notifications
+        if (cachedChatIds.size > 0) {
+          await sendNotificationToAllUsers(cachedChatIds, errorMessage);
+        }
         lastHealthCheckStatus = 'failure';
       }
     }
@@ -205,13 +208,17 @@ async function performHealthCheck(): Promise<void> {
     console.error(errorMessage);
 
     if (lastHealthCheckStatus !== 'failure') {
-      // Notify all users that the health check has failed
-      await sendNotificationToAllUsers(cachedChatIds, errorMessage);
+      // Ensure cachedChatIds is not empty before sending notifications
+      if (cachedChatIds.size > 0) {
+        await sendNotificationToAllUsers(cachedChatIds, errorMessage);
+      }
       lastHealthCheckStatus = 'failure';
     }
   }
 }
 
+
+// Other functions (updateGlobalAuthToken, updateSubmittedToCreated, etc.) should be defined elsewhere in your code.
 
 async function getHealthStatus(): Promise<string> {
   const healthCheckUrl = `${VERCEL_DOMAIN}/api/health_check`;
@@ -459,10 +466,6 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
   return new Response("Not found", { status: 404 });
 }
 
-interface ApiResponseVercel {
-  results?: User[];
-  users?: User[];
-}
 
 
 async function fetchPhoneNumbersFromVercel(): Promise<string[]> {
@@ -508,6 +511,8 @@ async function processUpdate(update: any): Promise<void> {
 
 const phoneNumbers = new Map<string, string>();
 const chatIds = new Set<string>();
+let orderPageNumber: number = 1;
+
 async function processMessage(message: any): Promise<void> {
   const chatId = message.chat.id;
   await updateGlobalAuthToken();
@@ -534,6 +539,7 @@ async function processMessage(message: any): Promise<void> {
   } else if (message.text === 'Start') {
     await sendMessage(chatId, '📞 To get notifications, please share your phone number.');
     await sendContactRequest(chatId);
+
   } else if (message.text === 'Order') {
     const phoneNumber = phoneNumbers.get(chatId);
     if (phoneNumber) {
@@ -542,14 +548,36 @@ async function processMessage(message: any): Promise<void> {
       await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
       await sendContactRequest(chatId);
     }
+
   } else if (message.text === 'Orders') {
     const phoneNumber = phoneNumbers.get(chatId);
     if (phoneNumber) {
-      await sendAllOrdersDetails(phoneNumber, chatId);
+      await sendAllOrdersDetails(phoneNumber, chatId, orderPageNumber);
     } else {
       await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
       await sendContactRequest(chatId);
     }
+
+  } else if (message.text === '<') {
+    const phoneNumber = phoneNumbers.get(chatId);
+    if (phoneNumber) {
+      orderPageNumber = Math.max(orderPageNumber - 1, 1);
+      await sendAllOrdersDetails(phoneNumber, chatId, orderPageNumber);
+    } else {
+      await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
+      await sendContactRequest(chatId);
+    }
+
+  } else if (message.text === '>') {
+    const phoneNumber = phoneNumbers.get(chatId);
+    if (phoneNumber) {
+      orderPageNumber++;
+      await sendAllOrdersDetails(phoneNumber, chatId, orderPageNumber);
+    } else {
+      await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
+      await sendContactRequest(chatId);
+    }
+
   } else if (message.text === 'KOLORYT') {
     await sendMessage(chatId, `You can proceed to KOLORYT here: \n${VERCEL_DOMAIN}`);
     try {
@@ -558,6 +586,7 @@ async function processMessage(message: any): Promise<void> {
     } catch (error) {
       await sendMessage(chatId, '⚠️ Unable to fetch server status at the moment.');
     }
+
   } else if (message.text === '/telegram_users') {
     try {
       const allPhoneNumbers = await fetchPhoneNumbersFromVercel();
@@ -576,42 +605,50 @@ async function processCallbackQuery(callbackQuery: any): Promise<void> {
   const chatId = callbackQuery.message.chat.id;
   const callbackData = callbackQuery.data;
   const phoneNumber = phoneNumbers.get(chatId);
+
   await updateGlobalAuthToken();
-  const userExistsFlag = phoneNumber ? true : await userExists(phoneNumber as string, chatId);
 
-  if (callbackData === 'Order') {
-    if (phoneNumber && userExistsFlag) {
-      await sendOrderDetails(phoneNumber, chatId);
-    } else {
-      await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
-      await sendContactRequest(chatId);
-    }
+  if (!phoneNumber) {
+    await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
+    await sendContactRequest(chatId);
+    return;
+  }
+
+  if (callbackData === '<') {
+    orderPageNumber = Math.max(orderPageNumber - 1, 1);
+    await sendAllOrdersDetails(phoneNumber, chatId, orderPageNumber);
+  } else if (callbackData === '>') {
+    orderPageNumber++;
+    await sendAllOrdersDetails(phoneNumber, chatId, orderPageNumber);
+  } else if (callbackData === 'Order') {
+    await sendOrderDetails(phoneNumber, chatId);
   } else if (callbackData === 'Orders') {
-    if (phoneNumber && userExistsFlag) {
-      await sendAllOrdersDetails(phoneNumber, chatId);
-    } else {
-      await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
-      await sendContactRequest(chatId);
-    }
+    await sendAllOrdersDetails(phoneNumber, chatId, orderPageNumber);
   } else if (callbackData === 'Start') {
-    if (!phoneNumber || !userExistsFlag) {
-      await sendMessage(chatId, '📞 To get notifications, please share your phone number.');
-      await sendContactRequest(chatId);
-    }
-  } 
+    await sendMessage(chatId, '📞 To get notifications, please share your phone number.');
+    await sendContactRequest(chatId);
+  } else {
+    await sendMessage(chatId, '⚠️ Unknown action.');
+  }
 
-  // Send the custom keyboard regardless of the callback data
-  await sendCustomKeyboard(chatId);
+  // Acknowledge that the callback query has been processed
+  await acknowledgeCallbackQuery(callbackQuery.id);
+}
 
-  // Acknowledge callback query to Telegram
-  await fetch(`https://api.telegram.org/bot${NOTIFICATIONS_API}/answerCallbackQuery`, {
+async function acknowledgeCallbackQuery(callbackQueryId: string): Promise<void> {
+  const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/answerCallbackQuery`;
+  await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      callback_query_id: callbackQuery.id
-    })
+      callback_query_id: callbackQueryId,
+      text: 'Processing your request...',
+      show_alert: false, // You can set to true if you want to show an alert
+    }),
   });
 }
+
+
 
 
 async function sendCustomKeyboard(chatId: string): Promise<void> {
@@ -626,11 +663,13 @@ async function sendCustomKeyboard(chatId: string): Promise<void> {
         keyboard: [
           [
             { text: 'Order' },
-            { text: 'Orders' }
+            { text: 'Orders' },
+            { text: '<' },
+            { text: '>' }
           ],
           [
             { text: 'Start' },
-            { text: 'KOLORYT', url: VERCEL_DOMAIN }
+            { text: 'KOLORYT' }
           ]
         ],
         one_time_keyboard: false, // Set to false to keep the keyboard visible
@@ -643,7 +682,6 @@ async function sendCustomKeyboard(chatId: string): Promise<void> {
     throw new Error(`Failed to send custom keyboard: ${response.statusText}`);
   }
 }
-
 
 async function sendContactRequest(chatId: string): Promise<void> {
   const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
@@ -666,18 +704,25 @@ async function sendContactRequest(chatId: string): Promise<void> {
   }
 }
 
-async function sendMessage(chatId: string, text: string): Promise<void> {
+async function sendMessage(chatId: string, text: string, keyboard?: any): Promise<void> {
   const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text })
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: text,
+      reply_markup: keyboard ? {
+        inline_keyboard: keyboard
+      } : undefined
+    })
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to send message: ${response.statusText}`);
+    console.error(`Failed to send message: ${response.statusText}`);
   }
 }
+
 // Function to get the auth token
 async function getAuthToken(): Promise<string> {
   const LOGIN_URL = `${VERCEL_DOMAIN}/auth/token/login/`;
@@ -850,6 +895,7 @@ function formatDate(dateString: string): string {
   return `${diffHours}h ${diffMinutes}m ago (${date.toLocaleDateString()} ${date.toLocaleTimeString()})`;
 }
 
+
 async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<void> {
   const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
   const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
@@ -886,8 +932,29 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
     }
 
     const ordersResponse = await response.json() as OrdersResponse;
-    const orders = ordersResponse.results;
-    console.log(`Orders retrieved: ${JSON.stringify(orders)}`);
+    console.log(`Orders retrieved: ${JSON.stringify(ordersResponse.results)}`);
+
+    const foundPage = await findOrderPage(phoneNumber);
+    const ordersPageUrl = `${VERCEL_DOMAIN}/api/orders/?page=${foundPage}`;
+    
+    const ordersPageResponse = await fetch(ordersPageUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!ordersPageResponse.ok) {
+      const errorText = await ordersPageResponse.text();
+      console.error(`Failed to retrieve orders page. Status: ${ordersPageResponse.status} ${ordersPageResponse.statusText}. Response body: ${errorText}`);
+      await sendMessage(chatId, 'Failed to retrieve orders. Please try again later.');
+      return;
+    }
+
+    const ordersPageResponseJson = await ordersPageResponse.json() as OrdersResponse;
+    const orders = ordersPageResponseJson.results;
+    console.log(`Orders on page ${foundPage}: ${JSON.stringify(orders)}`);
 
     const matchingOrder = orders.find(order => order.phone === formattedPhoneNumber);
 
@@ -928,25 +995,25 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
       await updateOrderStatus(matchingOrder.id, orderDetails.status, 'updated_at'); // Adjust 'updated_at' as needed
 
       const statusSummary = Object.entries(statusDates)
-      .filter(([_, date]) => date !== null)
-      .sort(([_, dateA], [__, dateB]) => new Date(dateB!).getTime() - new Date(dateA!).getTime())
-      .map(([status, date]) => {
-        const statusEmoji = statusEmojis[status] || '🔍';
-        return `${statusEmoji} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
-      })
-      .join('\n');
+        .filter(([_, date]) => date !== null)
+        .sort(([_, dateA], [__, dateB]) => new Date(dateB!).getTime() - new Date(dateA!).getTime())
+        .map(([status, date]) => {
+          const statusEmoji = statusEmojis[status] || '🔍';
+          return `${statusEmoji} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
+        })
+        .join('\n');
 
-    const orderDetailsMessage = `
-      Order ID: ${orderDetails.id}
-      Email: ${orderDetails.email}
-      
-      Order Items:
-      ${orderItemsSummary}
-      
-      Status History:
-      ${statusSummary.split('\n').map(line => `   ${line}`).join('\n')}
-    `;
-      
+      const orderDetailsMessage = `
+        Order ID: ${orderDetails.id}
+        Email: ${orderDetails.email}
+        
+        Order Items:
+        ${orderItemsSummary}
+        
+        Status History:
+        ${statusSummary.split('\n').map(line => `   ${line}`).join('\n')}
+      `;
+        
       await sendMessage(chatId, `Thank you! Here are your order details:\n${orderDetailsMessage}`);
     } else {
       console.log('No orders found for this phone number.');
@@ -958,10 +1025,72 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
   }
 }
 
-async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promise<void> {
-  const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
-  const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+const userPages = new Map<string, number>();
+let  totalOrderPages : number = 1;
+interface OrdersResponse {
+  results: Order[];
+  total_pages: number;
 
+}
+
+async function findOrderPage(phoneNumber: string): Promise<number> {
+  const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+  const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
+
+  const ordersPerPage = 6;
+
+  try {
+    // Fetch the first page to determine the total number of pages
+    const firstPageResponse = await fetch(ordersUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!firstPageResponse.ok) {
+      console.error(`Failed to retrieve the first page of orders. Status: ${firstPageResponse.status} ${firstPageResponse.statusText}`);
+      throw new Error('Failed to retrieve orders.');
+    }
+
+    const firstPageData = await firstPageResponse.json() as OrdersResponse;
+    const totalOrders = firstPageData.count;
+    totalOrderPages = Math.ceil(totalOrders / ordersPerPage);
+
+    // Search through all pages for the order
+    for (let page = 1; page <= totalOrderPages; page++) {
+      const pageUrl = `${ordersUrl}?page=${page}`;
+
+      const pageResponse = await fetch(pageUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!pageResponse.ok) {
+        console.error(`Failed to retrieve orders on page ${page}. Status: ${pageResponse.status} ${pageResponse.statusText}`);
+        continue;
+      }
+
+      const pageData = await pageResponse.json() as OrdersResponse;
+      const orders = pageData.results.filter(order => order.phone === formattedPhoneNumber);
+
+      if (orders.length > 0) {
+        return page;
+      }
+    }
+
+    return -1; // Return -1 if no orders are found on any page
+  } catch (error) {
+    console.error(`Error in findOrderPage function: ${error}`);
+    throw new Error('An error occurred while finding the order page.');
+  }
+}
+
+async function sendAllOrdersDetails(phoneNumber: string, chatId: string, page: number): Promise<void> {
   const statusEmojis: { [key: string]: string } = {
     'submitted': '📝',
     'created': '🆕',
@@ -976,6 +1105,31 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promis
       await sendMessage(chatId, 'Authorization error. Please try again later.');
       return;
     }
+
+    if (!userPages.has(phoneNumber)) {
+      const initialOrdersUrl = `${VERCEL_DOMAIN}/api/orders/?page=1`;
+      const initialResponse = await fetch(initialOrdersUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!initialResponse.ok) {
+        console.error(`Failed to retrieve initial orders. Status: ${initialResponse.status} ${initialResponse.statusText}`);
+        await sendMessage(chatId, 'Failed to retrieve orders. Please try again later.');
+        return;
+      }
+
+      const initialOrdersResponse = await initialResponse.json() as OrdersResponse;
+      const foundPage = await findOrderPage(phoneNumber);
+      userPages.set(phoneNumber, foundPage);
+      page = foundPage;
+    }
+
+    const ordersUrl = `${VERCEL_DOMAIN}/api/orders/?page=${page}`;
+    const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
 
     const response = await fetch(ordersUrl, {
       method: 'GET',
@@ -995,21 +1149,10 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promis
     const ordersResponse = await response.json() as OrdersResponse;
     const orders = ordersResponse.results.filter(order => order.phone === formattedPhoneNumber);
 
-    const formatDate = (dateString: string): string => {
-      const date = new Date(dateString);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      return `${year}-${month}-${day} ${hours}:${minutes}`;
-    };
-
     if (orders.length > 0) {
       const ordersSummary = await Promise.all(orders.map(async order => {
         const orderDetailsUrl = `${VERCEL_DOMAIN}/api/orders/${order.id}/`;
 
-        // Retrieve order details
         const orderDetailsResponse = await fetch(orderDetailsUrl, {
           method: 'GET',
           headers: {
@@ -1026,11 +1169,6 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promis
 
         const orderDetails = await orderDetailsResponse.json() as Order;
 
-        // Update order status if needed
-        // Call updateOrderStatus if required to fetch or update the latest status
-        await updateOrderStatus(order.id, orderDetails.status, 'updated_at'); // Adjust 'updated_at' as needed
-
-        // Determine the latest status
         const statusDates: { [key: string]: string | null } = {
           'submitted': orderDetails.submitted_at,
           'created': orderDetails.created_at,
@@ -1049,15 +1187,15 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promis
         return `Order ID: ${orderDetails.id}\n${statusMessage}`;
       }));
 
-      await sendMessage(chatId, `Here are all your orders:\n${ordersSummary.join('\n\n')}`);
-    } else {
-      await sendMessage(chatId, 'No orders found for this phone number.');
-    }
-  } catch (error) {
-    console.error(`Error retrieving orders: ${error}`);
-    await sendMessage(chatId, 'An error occurred while retrieving orders. Please try again later.');
+      let messageText = `Here are your orders (Page ${page}/${totalOrderPages}):\n${ordersSummary.join('\n\n')}`;
+        await sendMessage(chatId, messageText);
+      } else {
+        
+        let messageText = `You do not have orders on this page (Page ${page}/${totalOrderPages}}`;
+        await sendMessage(chatId, messageText);      }
+    } 
+    catch {}
   }
-}
 
 // Function to update orders from 'submitted' to 'created'
 async function updateSubmittedToCreated(): Promise<void> {
