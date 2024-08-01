@@ -64,7 +64,7 @@ const ProductPage: React.FC = () => {
                 discount = {product.discount}
                 price={product.price}
                 currency={product.currency}
-                photoSrc={product.photo}
+                photoSrc={product.photo_url}
                 onClick={() => handleClickSlide(product)}
               />
            ))
