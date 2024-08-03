@@ -55,7 +55,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     order_items = OrderItemSerializer(many=True)
-    chat_id = serializers.CharField(write_only=True)  # Add chat_id field to the serializer
+    chat_id = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = Order
