@@ -122,6 +122,8 @@ async function fetchChatIds(): Promise<Set<string>> {
   const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
 
   try {
+    await updateGlobalAuthToken();
+
     const response = await fetch(vercelUrl, {
       method: 'GET',
       headers: {
@@ -470,7 +472,9 @@ async function handleRequest(event: FetchEvent): Promise<Response> {
 
 async function fetchPhoneNumbersFromVercel(): Promise<string[]> {
   const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
+
   try {
+    await updateGlobalAuthToken();
     const response = await fetch(vercelUrl, {
       method: 'GET',
       headers: {
@@ -513,6 +517,55 @@ const phoneNumbers = new Map<string, string>();
 const chatIds = new Set<string>();
 let orderPageNumber: number = 1;
 
+
+// Define the expected response type from the API
+interface ChatIdResponse {
+  chat_ids: string[]; // Assuming the response contains a `chat_ids` array
+}
+
+// Function to check if a chat ID is registered
+async function isChatIdRegistered(chatId: string): Promise<boolean> {
+  const url = `${VERCEL_DOMAIN}/api/telegram_users`;
+
+  try {
+    await updateGlobalAuthToken();
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (response.ok) {
+      // Parse the JSON response
+      const data = await response.json();
+
+      // Type guard function to check if data matches ChatIdResponse
+      function isChatIdResponse(data: any): data is ChatIdResponse {
+        return data && Array.isArray(data.chat_ids);
+      }
+
+      if (isChatIdResponse(data)) {
+        // Check if the chatId is included in the array of registered chat IDs
+        return data.chat_ids.includes(chatId);
+      } else {
+        console.error('Unexpected response format from API.');
+        return false;
+      }
+    } else {
+      console.error(`Failed to fetch chat IDs: ${response.statusText}`);
+      return false;
+    }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error(`Error fetching chat IDs: ${error.message}`);
+    } else {
+      console.error(`Unknown error occurred: ${error}`);
+    }
+    return false;
+  }
+}
+
+
+
 async function processMessage(message: any): Promise<void> {
   const chatId = message.chat.id;
   await updateGlobalAuthToken();
@@ -537,8 +590,13 @@ async function processMessage(message: any): Promise<void> {
     await sendCustomKeyboard(chatId);
 
   } else if (message.text === 'Start') {
-    await sendMessage(chatId, '📞 To get notifications, please share your phone number.');
-    await sendContactRequest(chatId);
+    const isRegistered = await isChatIdRegistered(chatId);
+    if (!isRegistered) {
+      await sendMessage(chatId, '📞 To get notifications, please share your phone number.');
+      await sendContactRequest(chatId);
+    } else {
+      await sendMessage(chatId, 'You are already registered.');
+    }
 
   } else if (message.text === 'Order') {
     const phoneNumber = phoneNumbers.get(chatId);
@@ -552,33 +610,13 @@ async function processMessage(message: any): Promise<void> {
   } else if (message.text === 'Orders') {
     const phoneNumber = phoneNumbers.get(chatId);
     if (phoneNumber) {
-      await sendAllOrdersDetails(phoneNumber, chatId, orderPageNumber);
+      await sendAllOrdersDetails(phoneNumber, chatId);
     } else {
       await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
       await sendContactRequest(chatId);
     }
 
-  } else if (message.text === '<') {
-    const phoneNumber = phoneNumbers.get(chatId);
-    if (phoneNumber) {
-      orderPageNumber = Math.max(orderPageNumber - 1, 1);
-      await sendAllOrdersDetails(phoneNumber, chatId, orderPageNumber);
-    } else {
-      await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
-      await sendContactRequest(chatId);
-    }
-
-  } else if (message.text === '>') {
-    const phoneNumber = phoneNumbers.get(chatId);
-    if (phoneNumber) {
-      orderPageNumber++;
-      await sendAllOrdersDetails(phoneNumber, chatId, orderPageNumber);
-    } else {
-      await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
-      await sendContactRequest(chatId);
-    }
-
-  } else if (message.text === 'KOLORYT') {
+  }else if (message.text === 'KOLORYT') {
     await sendMessage(chatId, `You can proceed to KOLORYT here: \n${VERCEL_DOMAIN}`);
     try {
       const healthStatus = await getHealthStatus();
@@ -589,6 +627,7 @@ async function processMessage(message: any): Promise<void> {
 
   } else if (message.text === '/telegram_users') {
     try {
+      await updateGlobalAuthToken();
       const allPhoneNumbers = await fetchPhoneNumbersFromVercel();
       const phoneNumberList = allPhoneNumbers.join('\n');
       await sendMessage(chatId, `Registered phone numbers:\n${phoneNumberList}`);
@@ -600,6 +639,7 @@ async function processMessage(message: any): Promise<void> {
     await sendCustomKeyboard(chatId);
   }
 }
+
 
 async function processCallbackQuery(callbackQuery: any): Promise<void> {
   const chatId = callbackQuery.message.chat.id;
@@ -614,16 +654,10 @@ async function processCallbackQuery(callbackQuery: any): Promise<void> {
     return;
   }
 
-  if (callbackData === '<') {
-    orderPageNumber = Math.max(orderPageNumber - 1, 1);
-    await sendAllOrdersDetails(phoneNumber, chatId, orderPageNumber);
-  } else if (callbackData === '>') {
-    orderPageNumber++;
-    await sendAllOrdersDetails(phoneNumber, chatId, orderPageNumber);
-  } else if (callbackData === 'Order') {
+  if (callbackData === 'Order') {
     await sendOrderDetails(phoneNumber, chatId);
   } else if (callbackData === 'Orders') {
-    await sendAllOrdersDetails(phoneNumber, chatId, orderPageNumber);
+    await sendAllOrdersDetails(phoneNumber, chatId);
   } else if (callbackData === 'Start') {
     await sendMessage(chatId, '📞 To get notifications, please share your phone number.');
     await sendContactRequest(chatId);
@@ -648,9 +682,6 @@ async function acknowledgeCallbackQuery(callbackQueryId: string): Promise<void> 
   });
 }
 
-
-
-
 async function sendCustomKeyboard(chatId: string): Promise<void> {
   const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
   const response = await fetch(url, {
@@ -663,9 +694,7 @@ async function sendCustomKeyboard(chatId: string): Promise<void> {
         keyboard: [
           [
             { text: 'Order' },
-            { text: 'Orders' },
-            { text: '<' },
-            { text: '>' }
+            { text: 'Orders' }
           ],
           [
             { text: 'Start' },
@@ -762,6 +791,7 @@ async function userExists(phoneNumber: string, chatId: string): Promise<boolean>
 
   try {
     // Get the auth token
+    await updateGlobalAuthToken();
     const authToken = await getAuthToken();
     
     // Fetch users with the token
@@ -802,6 +832,7 @@ async function sendChatIdAndPhoneToVercel(phoneNumber: string, chatId: string): 
       console.warn(`User with phone: ${phoneNumber} and chat ID: ${chatId} already exists.`);
       return 'exists';
     }
+    await updateGlobalAuthToken();
 
     const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
     console.log(`Posting data to Vercel API: ${vercelUrl}`);
@@ -870,6 +901,7 @@ interface Order {
   parent_order: string | null;
   present: boolean;
   order_items: OrderItem[];
+  chat_id: string;
 }
 
 interface OrdersResponse {
@@ -894,7 +926,6 @@ function formatDate(dateString: string): string {
 
   return `${diffHours}h ${diffMinutes}m ago (${date.toLocaleDateString()} ${date.toLocaleTimeString()})`;
 }
-
 
 async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<void> {
   const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
@@ -934,29 +965,7 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
     const ordersResponse = await response.json() as OrdersResponse;
     console.log(`Orders retrieved: ${JSON.stringify(ordersResponse.results)}`);
 
-    const foundPage = await findOrderPage(phoneNumber);
-    const ordersPageUrl = `${VERCEL_DOMAIN}/api/orders/?page=${foundPage}`;
-    
-    const ordersPageResponse = await fetch(ordersPageUrl, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!ordersPageResponse.ok) {
-      const errorText = await ordersPageResponse.text();
-      console.error(`Failed to retrieve orders page. Status: ${ordersPageResponse.status} ${ordersPageResponse.statusText}. Response body: ${errorText}`);
-      await sendMessage(chatId, 'Failed to retrieve orders. Please try again later.');
-      return;
-    }
-
-    const ordersPageResponseJson = await ordersPageResponse.json() as OrdersResponse;
-    const orders = ordersPageResponseJson.results;
-    console.log(`Orders on page ${foundPage}: ${JSON.stringify(orders)}`);
-
-    const matchingOrder = orders.find(order => order.phone === formattedPhoneNumber);
+    const matchingOrder = ordersResponse.results.find(order => order.phone === formattedPhoneNumber && order.chat_id === chatId);
 
     if (matchingOrder) {
       const orderDetailsUrl = `${VERCEL_DOMAIN}/api/orders/${matchingOrder.id}/`;
@@ -992,8 +1001,6 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
         'canceled': orderDetails.canceled_at
       };
 
-      await updateOrderStatus(matchingOrder.id, orderDetails.status, 'updated_at'); // Adjust 'updated_at' as needed
-
       const statusSummary = Object.entries(statusDates)
         .filter(([_, date]) => date !== null)
         .sort(([_, dateA], [__, dateB]) => new Date(dateB!).getTime() - new Date(dateA!).getTime())
@@ -1016,99 +1023,113 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
         
       await sendMessage(chatId, `Thank you! Here are your order details:\n${orderDetailsMessage}`);
     } else {
-      console.log('No orders found for this phone number.');
-      await sendMessage(chatId, 'No orders found for this phone number.');
+      console.log('No orders found for this phone number and chat ID.');
+      await sendMessage(chatId, 'No orders found for this phone number and chat ID.');
     }
   } catch (error) {
     console.error(`Error retrieving order details: ${error}`);
     await sendMessage(chatId, 'An error occurred while retrieving order details. Please try again later.');
   }
 }
-
-const userPages = new Map<string, number>();
-let  totalOrderPages : number = 1;
-interface OrdersResponse {
-  results: Order[];
-  total_pages: number;
-
-}
-
-async function findOrderPage(phoneNumber: string): Promise<number> {
-  const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
-  const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
-
-  const ordersPerPage = 6;
-
-  try {
-    // Fetch the first page to determine the total number of pages
-    const firstPageResponse = await fetch(ordersUrl, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!firstPageResponse.ok) {
-      console.error(`Failed to retrieve the first page of orders. Status: ${firstPageResponse.status} ${firstPageResponse.statusText}`);
-      throw new Error('Failed to retrieve orders.');
-    }
-
-    const firstPageData = await firstPageResponse.json() as OrdersResponse;
-    const totalOrders = firstPageData.count;
-    totalOrderPages = Math.ceil(totalOrders / ordersPerPage);
-
-    // Search through all pages for the order
-    for (let page = 1; page <= totalOrderPages; page++) {
-      const pageUrl = `${ordersUrl}?page=${page}`;
-
-      const pageResponse = await fetch(pageUrl, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!pageResponse.ok) {
-        console.error(`Failed to retrieve orders on page ${page}. Status: ${pageResponse.status} ${pageResponse.statusText}`);
-        continue;
-      }
-
-      const pageData = await pageResponse.json() as OrdersResponse;
-      const orders = pageData.results.filter(order => order.phone === formattedPhoneNumber);
-
-      if (orders.length > 0) {
-        return page;
-      }
-    }
-
-    return -1; // Return -1 if no orders are found on any page
-  } catch (error) {
-    console.error(`Error in findOrderPage function: ${error}`);
-    throw new Error('An error occurred while finding the order page.');
-  }
-}
-
-async function sendAllOrdersDetails(phoneNumber: string, chatId: string, page: number): Promise<void> {
+async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promise<void> {
   const statusEmojis: { [key: string]: string } = {
-    'submitted': '📝',
-    'created': '🆕',
-    'processed': '🔄',
-    'complete': '✅',
-    'canceled': '❌'
+      'submitted': '📝',
+      'created': '🆕',
+      'processed': '🔄',
+      'complete': '✅',
+      'canceled': '❌'
   };
 
   try {
-    if (!accessToken) {
-      console.error('No access token available.');
-      await sendMessage(chatId, 'Authorization error. Please try again later.');
-      return;
-    }
+      if (!accessToken) {
+          console.error('No access token available.');
+          await sendMessage(chatId, 'Authorization error. Please try again later.');
+          return;
+      }
 
-    if (!userPages.has(phoneNumber)) {
-      const initialOrdersUrl = `${VERCEL_DOMAIN}/api/orders/?page=1`;
-      const initialResponse = await fetch(initialOrdersUrl, {
+      const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
+      const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+
+      const response = await fetch(ordersUrl, {
+          method: 'GET',
+          headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+          },
+      });
+
+      if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`Failed to retrieve orders. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
+          await sendMessage(chatId, 'Failed to retrieve orders. Please try again later.');
+          return;
+      }
+
+      const ordersResponse = await response.json() as Order[];
+      const orders = ordersResponse.filter(order => order.phone === formattedPhoneNumber);
+
+      if (orders.length > 0) {
+          const ordersSummary = await Promise.all(orders.map(async order => {
+              const statusDates: { [key: string]: string | null } = {
+                  'submitted': order.submitted_at,
+                  'created': order.created_at,
+                  'processed': order.processed_at,
+                  'complete': order.complete_at,
+                  'canceled': order.canceled_at
+              };
+
+              const latestStatus = Object.entries(statusDates)
+                  .filter(([_, date]) => date !== null)
+                  .reduce((latest, current) => new Date(current[1]!) > new Date(latest[1]!) ? current : latest);
+
+              const [status, date] = latestStatus;
+              const statusMessage = `${statusEmojis[status] || '🔍'} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
+
+              return `Order ID: ${order.id}\n${statusMessage}`;
+          }));
+
+          let messageText = `Here are your orders:\n${ordersSummary.join('\n\n')}`;
+          await sendMessage(chatId, messageText);
+      } else {
+          await sendMessage(chatId, 'You do not have any orders.');
+      }
+  } catch (error) {
+      console.error('Error:', error);
+      await sendMessage(chatId, 'An error occurred while retrieving your orders. Please try again later.');
+  }
+}
+
+// Function to generate a random delay between min and max milliseconds
+function getRandomDelay(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Global variable to track the last successfully updated page
+let lastUpdatedPage: number = 0;
+
+// Maximum number of requests per batch
+const MAX_REQUESTS_PER_BATCH = 5;
+const THROTTLE_DELAY = 1000; // 1 second throttle delay
+const MAX_RETRIES = 3; // Maximum number of retries
+
+// Function to simulate a delay (sleep)
+async function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Function to fetch and process orders
+// Function to fetch and process orders with pagination
+async function fetchAndProcessOrders(status: string, processOrder: (order: Order) => Promise<void>): Promise<void> {
+  const ordersPerPage = 6;
+  let page = 1; // Start from the first page
+  let hasMorePages = true;
+  let requestCount = 0;
+  let retryCount = 0;
+
+  while (hasMorePages) {
+    const ordersUrl = `${VERCEL_DOMAIN}/api/orders/?status=${status}&page=${page}&page_size=${ordersPerPage}`;
+    try {
+      const response = await fetch(ordersUrl, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -1116,215 +1137,71 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string, page: n
         },
       });
 
-      if (!initialResponse.ok) {
-        console.error(`Failed to retrieve initial orders. Status: ${initialResponse.status} ${initialResponse.statusText}`);
-        await sendMessage(chatId, 'Failed to retrieve orders. Please try again later.');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Failed to retrieve orders. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
+        hasMorePages = false; // Stop processing further pages on failure
         return;
       }
 
-      const initialOrdersResponse = await initialResponse.json() as OrdersResponse;
-      const foundPage = await findOrderPage(phoneNumber);
-      userPages.set(phoneNumber, foundPage);
-      page = foundPage;
-    }
+      const ordersResponse = await response.json() as OrdersResponse;
+      const orders = ordersResponse.results;
 
-    const ordersUrl = `${VERCEL_DOMAIN}/api/orders/?page=${page}`;
-    const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+      if (orders.length > 0) {
+        console.log(`Retrieved ${orders.length} ${status} orders.`);
 
-    const response = await fetch(ordersUrl, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Failed to retrieve orders. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
-      await sendMessage(chatId, 'Failed to retrieve orders. Please try again later.');
-      return;
-    }
-
-    const ordersResponse = await response.json() as OrdersResponse;
-    const orders = ordersResponse.results.filter(order => order.phone === formattedPhoneNumber);
-
-    if (orders.length > 0) {
-      const ordersSummary = await Promise.all(orders.map(async order => {
-        const orderDetailsUrl = `${VERCEL_DOMAIN}/api/orders/${order.id}/`;
-
-        const orderDetailsResponse = await fetch(orderDetailsUrl, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!orderDetailsResponse.ok) {
-          const errorText = await orderDetailsResponse.text();
-          console.error(`Failed to retrieve order details. Status: ${orderDetailsResponse.status} ${orderDetailsResponse.statusText}. Response body: ${errorText}`);
-          return `Order ID: ${order.id}\nStatus retrieval failed`;
+        // Process orders in batches
+        const batchSize = Math.min(orders.length, MAX_REQUESTS_PER_BATCH);
+        for (let i = 0; i < batchSize; i++) {
+          await processOrder(orders[i]);
         }
 
-        const orderDetails = await orderDetailsResponse.json() as Order;
-
-        const statusDates: { [key: string]: string | null } = {
-          'submitted': orderDetails.submitted_at,
-          'created': orderDetails.created_at,
-          'processed': orderDetails.processed_at,
-          'complete': orderDetails.complete_at,
-          'canceled': orderDetails.canceled_at
-        };
-
-        const latestStatus = Object.entries(statusDates)
-          .filter(([_, date]) => date !== null)
-          .reduce((latest, current) => new Date(current[1]!) > new Date(latest[1]!) ? current : latest);
-
-        const [status, date] = latestStatus;
-        const statusMessage = `${statusEmojis[status] || '🔍'} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
-
-        return `Order ID: ${orderDetails.id}\n${statusMessage}`;
-      }));
-
-      let messageText = `Here are your orders (Page ${page}/${totalOrderPages}):\n${ordersSummary.join('\n\n')}`;
-        await sendMessage(chatId, messageText);
-      } else {
+        // Update page number and check for more pages
+        page++;
+        hasMorePages = ordersResponse.next !== null;
         
-        let messageText = `You do not have orders on this page (Page ${page}/${totalOrderPages}}`;
-        await sendMessage(chatId, messageText);      }
-    } 
-    catch {}
-  }
-
-// Function to update orders from 'submitted' to 'created'
-async function updateSubmittedToCreated(): Promise<void> {
-  const ordersUrl = `${VERCEL_DOMAIN}/api/orders/?status=submitted`;
-
-  try {
-    const response = await fetch(ordersUrl, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Failed to retrieve orders. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
-      return;
-    }
-
-    const ordersResponse = await response.json() as OrdersResponse;
-    const orders = ordersResponse.results;
-
-    console.log(`Retrieved ${orders.length} submitted orders.`);
-
-    for (const order of orders) {
-      const submittedAt = new Date(order.submitted_at);
-      const now = new Date();
-      const diffMinutes = (now.getTime() - submittedAt.getTime()) / (1000 * 60);
-
-      console.log(`Order ID ${order.id}: Submitted at ${submittedAt.toISOString()}, now ${now.toISOString()}, diffMinutes ${diffMinutes}`);
-
-      if (diffMinutes >= 10) {
-        if (order.status === 'submitted') {  // Ensure status is 'submitted'
-          console.log(`Updating Order ID ${order.id} from 'submitted' to 'created'.`);
-          await updateOrderStatus(order.id, 'created', 'created_at');
+        requestCount++;
+        if (requestCount >= MAX_REQUESTS_PER_BATCH) {
+          // Reset count and throttle
+          requestCount = 0;
+          console.log(`Throttle pause for ${THROTTLE_DELAY} milliseconds...`);
+          await sleep(THROTTLE_DELAY);
         }
+
+        // Simulate a human-like pause between requests
+        const delay = getRandomDelay(2000, 5000); // Delay between 2 to 5 seconds
+        console.log(`Pausing for ${delay} milliseconds...`);
+        await sleep(delay);
+      } else {
+        hasMorePages = false; // No more orders to process
+      }
+      
+    } catch (error) {
+      console.error(`Error retrieving orders: ${error instanceof Error ? error.message : error}`);
+      if (error instanceof Error && error.message.includes("Too many subrequests")) {
+        retryCount++;
+        if (retryCount <= MAX_RETRIES) {
+          // Exponential backoff delay
+          const retryDelay = getRandomDelay(5000 * retryCount, 10000 * retryCount); // Exponential backoff
+          console.log(`Too many subrequests. Retrying after ${retryDelay} milliseconds...`);
+          await sleep(retryDelay);
+          // Continue from the last successful page
+        } else {
+          console.error('Max retries reached. Stopping further attempts.');
+          hasMorePages = false; // Stop after reaching max retries
+        }
+      } else {
+        hasMorePages = false; // Stop on other errors
       }
     }
-  } catch (error) {
-    console.error(`Error retrieving orders: ${error}`);
   }
 }
 
-// Function to update orders from 'created' to 'processed'
-async function updateCreatedToProcessed(): Promise<void> {
-  const ordersUrl = `${VERCEL_DOMAIN}/api/orders/?status=created`;
 
-  try {
-    const response = await fetch(ordersUrl, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Failed to retrieve orders. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
-      return;
-    }
-
-    const ordersResponse = await response.json() as OrdersResponse;
-    const orders = ordersResponse.results;
-
-    console.log(`Retrieved ${orders.length} created orders.`);
-
-    for (const order of orders) {
-      const createdAt = new Date(order.created_at);
-      const now = new Date();
-      const diffMinutes = (now.getTime() - createdAt.getTime()) / (1000 * 60);
-
-      if (diffMinutes >= 20) {
-        if (order.status === 'created') {  // Ensure status is 'created'
-          console.log(`Updating Order ID ${order.id} from 'created' to 'processed'.`);
-          await updateOrderStatus(order.id, 'processed', 'processed_at');
-        }
-      }
-    }
-  } catch (error) {
-    console.error(`Error retrieving orders: ${error}`);
-  }
-}
-
-// Function to update orders from 'processed' to 'complete'
-async function updateProcessedToComplete(): Promise<void> {
-  const ordersUrl = `${VERCEL_DOMAIN}/api/orders/?status=processed`;
-
-  try {
-    const response = await fetch(ordersUrl, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Failed to retrieve orders. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
-      return;
-    }
-
-    const ordersResponse = await response.json() as OrdersResponse;
-    const orders = ordersResponse.results;
-
-    console.log(`Retrieved ${orders.length} processed orders.`);
-
-    for (const order of orders) {
-      const processedAt = new Date(order.processed_at);
-      const now = new Date();
-      const diffHours = (now.getTime() - processedAt.getTime()) / (1000 * 60 * 60);
-
-      if (diffHours >= 24) {
-        if (order.status === 'processed') {  // Ensure status is 'processed'
-          console.log(`Updating Order ID ${order.id} from 'processed' to 'complete'.`);
-          await updateOrderStatus(order.id, 'complete', 'complete_at');
-        }
-      }
-    }
-  } catch (error) {
-    console.error(`Error retrieving orders: ${error}`);
-  }
-}
-
-// Helper function to update order status
+// Function to update order status
 async function updateOrderStatus(orderId: number, newStatus: string, timestampField: string): Promise<void> {
   const updateUrl = `${VERCEL_DOMAIN}/api/orders/${orderId}/`;
+  await updateGlobalAuthToken();
 
   try {
     const response = await fetch(updateUrl, {
@@ -1346,6 +1223,87 @@ async function updateOrderStatus(orderId: number, newStatus: string, timestampFi
       console.log(`Order ID ${orderId} updated to ${newStatus}`);
     }
   } catch (error) {
-    console.error(`Error updating order status: ${error}`);
+    console.error(`Error updating order status: ${error instanceof Error ? error.message : error}`);
   }
+}
+
+// Function to send order status change notifications
+async function sendOrderStatusNotification(chatId: string, orderId: number, status: string, dateTime: string): Promise<void> {
+  const statusEmojis: { [key: string]: string } = {
+    'submitted': '📝',
+    'created': '🆕',
+    'processed': '🔄',
+    'complete': '✅',
+    'canceled': '❌'
+  };
+
+  const statusEmoji = statusEmojis[status] || '🔍';
+  const formattedStatus = status.charAt(0).toUpperCase() + status.slice(1);
+  const message = `Order #${orderId} status is changed to ${statusEmoji} ${formattedStatus} at ${dateTime}`;
+
+  const isRegistered = await isChatIdRegistered(chatId);
+  if (isRegistered) {
+    await sendMessage(chatId, message);
+  } else {
+    console.log(`Chat ID ${chatId} is not registered.`);
+  }
+}
+
+// Function to update order status and send notification
+async function updateOrderStatusWithNotification(orderId: number, status: string, dateTimeField: string, chatId: string): Promise<void> {
+  await updateOrderStatus(orderId, status, dateTimeField);
+
+  const now = new Date().toISOString();
+  await sendOrderStatusNotification(chatId, orderId, status, now);
+}
+
+// Function to update 'submitted' to 'created'
+async function updateSubmittedToCreated(): Promise<void> {
+  await fetchAndProcessOrders('submitted', async (order) => {
+    const submittedAt = new Date(order.submitted_at);
+    const now = new Date();
+    const diffMinutes = (now.getTime() - submittedAt.getTime()) / (1000 * 60);
+
+    if (diffMinutes >= 10 && order.status === 'submitted') {
+      console.log(`Updating Order ID ${order.id} from 'submitted' to 'created'.`);
+      const chatId = await getChatIdForOrder(order.id); // Assume a function to fetch chatId for the order
+      await updateOrderStatusWithNotification(order.id, 'created', 'created_at', chatId);
+    }
+  });
+}
+
+// Function to update 'created' to 'processed'
+async function updateCreatedToProcessed(): Promise<void> {
+  await fetchAndProcessOrders('created', async (order) => {
+    const submittedAt = new Date(order.submitted_at);
+    const now = new Date();
+    const diffMinutes = (now.getTime() - submittedAt.getTime()) / (1000 * 60);
+
+    if (diffMinutes >= 20 && order.status === 'created') {
+      console.log(`Updating Order ID ${order.id} from 'created' to 'processed'.`);
+      const chatId = await getChatIdForOrder(order.id); // Assume a function to fetch chatId for the order
+      await updateOrderStatusWithNotification(order.id, 'processed', 'processed_at', chatId);
+    }
+  });
+}
+
+// Function to update 'processed' to 'complete'
+async function updateProcessedToComplete(): Promise<void> {
+  await fetchAndProcessOrders('processed', async (order) => {
+    const submittedAt = new Date(order.submitted_at);
+    const now = new Date();
+    const diffHours = (now.getTime() - submittedAt.getTime()) / (1000 * 60 * 60);
+
+    if (diffHours >= 24 && order.status === 'processed') {
+      console.log(`Updating Order ID ${order.id} from 'processed' to 'complete'.`);
+      const chatId = await getChatIdForOrder(order.id); // Assume a function to fetch chatId for the order
+      await updateOrderStatusWithNotification(order.id, 'complete', 'complete_at', chatId);
+    }
+  });
+}
+
+// Helper function to fetch chat ID for an order
+async function getChatIdForOrder(orderId: number): Promise<string> {
+  // Implement logic to fetch chat ID for the order
+  return ''; // Return appropriate chat ID
 }
