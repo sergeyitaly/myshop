@@ -42,15 +42,48 @@ class OrderItemInline(admin.TabularInline):
         return obj.quantity * obj.product.price
     subtotal.short_description = 'Subtotal'
 
-class OrderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'status', 'last_updated', 'chat_id']
-    readonly_fields = ['id', 'name', 'surname', 'phone', 'email', 'receiver', 'receiver_comments', 'total_quantity', 'total_price', 'submitted_at', 'created_at',  'processed_at', 'complete_at', 'canceled_at', 'chat_id']
-    fields = [
-        'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments', 
-        'present', 'status', 'total_quantity', 'total_price', 'submitted_at','created_at',  'processed_at', 'complete_at', 'canceled_at'
-    ]
-    inlines = [OrderItemInline]
+class TelegramUserFilter(admin.SimpleListFilter):
+    title = 'chat_id'
+    parameter_name = 'chat_id'
 
+    def lookups(self, request, model_admin):
+        # Create a list of distinct phone numbers with chat_ids
+        telegram_users = TelegramUser.objects.all()
+        return [
+            (f"{user.phone} - {user.chat_id}", f"{user.chat_id}")
+            for user in telegram_users
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            phone, chat_id = self.value().split(' - ')
+            return queryset.filter(telegram_user__phone=phone, telegram_user__chat_id=chat_id)
+        return queryset
+
+
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ['id', 'status', 'last_updated', 'phone', 'chat_id']
+    readonly_fields = ['id', 'name', 'surname', 'phone', 'email', 'receiver', 'receiver_comments', 'total_quantity', 'total_price', 'submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at', 'chat_id']
+    fields = [
+        'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments',
+        'present', 'status', 'total_quantity', 'total_price', 'submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at'
+    ]
+    list_filter = [
+        'status',
+        'phone',  # Add filtering by phone directly
+        TelegramUserFilter,  # Add custom filter for TelegramUser
+        'created_at',
+        'processed_at',
+        'complete_at',
+        'canceled_at',
+        'present',
+    ]
+    search_fields = ['phone', 'email', 'name', 'surname']
+    inlines = [OrderItemInline]
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        # Use prefetch_related for related fields if needed
+        return qs.prefetch_related('telegram_user')
     def chat_id(self, obj):
         return obj.chat_id if obj.chat_id else None
     chat_id.short_description = 'Chat ID'

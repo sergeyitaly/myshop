@@ -23,11 +23,12 @@ import random
 import os
 from django.http import JsonResponse
 from rest_framework.decorators import action
+import logging
+logger = logging.getLogger(__name__)
 
 
 def health_check(request):
     return JsonResponse({'status': 'ok'})
-logger = logging.getLogger(__name__)
 
 class TelegramUserViewSet(viewsets.ModelViewSet):
     queryset = TelegramUser.objects.all()
@@ -350,12 +351,12 @@ def create_order(request):
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
-logger = logging.getLogger(__name__)
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_order(request, order_id):
+    """
+    Retrieve a specific order by its ID.
+    """
     try:
         order = Order.objects.get(id=order_id)
         serializer = OrderSerializer(order)
@@ -369,19 +370,20 @@ def get_order(request, order_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_orders(request):
+    """
+    Retrieve all orders related to a specific Telegram user.
+    """
     chat_id = request.query_params.get('chat_id', None)
     if not chat_id:
         return Response({'error': 'Chat ID is required'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        try:
-            telegram_user = TelegramUser.objects.get(chat_id=chat_id)
-        except TelegramUser.DoesNotExist:
-            return Response({'error': 'Telegram user not found'}, status=status.HTTP_404_NOT_FOUND)
-
+        telegram_user = TelegramUser.objects.get(chat_id=chat_id)
         orders = Order.objects.filter(telegram_user=telegram_user)
         serializer = OrderSerializer(orders, many=True)
         return Response({'count': orders.count(), 'results': serializer.data}, status=status.HTTP_200_OK)
+    except TelegramUser.DoesNotExist:
+        return Response({'error': 'Telegram user not found'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         logger.error(f"Error fetching orders: {e}")
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
