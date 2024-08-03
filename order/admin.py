@@ -43,13 +43,17 @@ class OrderItemInline(admin.TabularInline):
     subtotal.short_description = 'Subtotal'
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'status', 'last_updated']
+    list_display = ['id', 'status', 'last_updated', 'chat_id']
     readonly_fields = ['id', 'name', 'surname', 'phone', 'email', 'receiver', 'receiver_comments', 'total_quantity', 'total_price', 'submitted_at', 'created_at',  'processed_at', 'complete_at', 'canceled_at', 'chat_id']
     fields = [
         'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments', 
         'present', 'status', 'total_quantity', 'total_price', 'submitted_at','created_at',  'processed_at', 'complete_at', 'canceled_at'
     ]
     inlines = [OrderItemInline]
+
+    def chat_id(self, obj):
+        return obj.chat_id if obj.chat_id else None
+    chat_id.short_description = 'Chat ID'
 
     def last_updated(self, obj):
         return obj.last_updated
@@ -77,6 +81,10 @@ class OrderAdmin(admin.ModelAdmin):
             old_obj = self.model.objects.get(pk=obj.pk)
             if old_obj.status != obj.status or old_obj.status == obj.status:
                 # Update fields based on the new status
+                if obj.status == 'submited':
+                    obj.processed_at = timezone.now()
+                if obj.status == 'created':
+                    obj.processed_at = timezone.now()
                 if obj.status == 'processed':
                     obj.processed_at = timezone.now()
                 elif obj.status == 'complete':

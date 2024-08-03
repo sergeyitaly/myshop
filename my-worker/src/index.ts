@@ -67,6 +67,7 @@ interface TelegramMessage {
   };
 }
 interface TelegramUser {
+  phone_number: string;
   chat_id: string;
 }
 
@@ -962,10 +963,12 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
       return;
     }
 
-    const ordersResponse = await response.json() as OrdersResponse;
+    const ordersResponse = await response.json() as { results: Order[] };
     console.log(`Orders retrieved: ${JSON.stringify(ordersResponse.results)}`);
 
-    const matchingOrder = ordersResponse.results.find(order => order.phone === formattedPhoneNumber && order.chat_id === chatId);
+    const matchingOrder = ordersResponse.results.find(order => 
+      order.phone === formattedPhoneNumber && order.chat_id === chatId
+    );
 
     if (matchingOrder) {
       const orderDetailsUrl = `${VERCEL_DOMAIN}/api/orders/${matchingOrder.id}/`;
@@ -1031,73 +1034,78 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
     await sendMessage(chatId, 'An error occurred while retrieving order details. Please try again later.');
   }
 }
+
 async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promise<void> {
   const statusEmojis: { [key: string]: string } = {
-      'submitted': '📝',
-      'created': '🆕',
-      'processed': '🔄',
-      'complete': '✅',
-      'canceled': '❌'
+    'submitted': '📝',
+    'created': '🆕',
+    'processed': '🔄',
+    'complete': '✅',
+    'canceled': '❌'
   };
 
   try {
-      if (!accessToken) {
-          console.error('No access token available.');
-          await sendMessage(chatId, 'Authorization error. Please try again later.');
-          return;
-      }
+    if (!accessToken) {
+      console.error('No access token available.');
+      await sendMessage(chatId, 'Authorization error. Please try again later.');
+      return;
+    }
 
-      const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
-      const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+    const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
+    const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
 
-      const response = await fetch(ordersUrl, {
-          method: 'GET',
-          headers: {
-              'Authorization': `Bearer ${accessToken}`,
-              'Content-Type': 'application/json',
-          },
-      });
+    const response = await fetch(ordersUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
 
-      if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`Failed to retrieve orders. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
-          await sendMessage(chatId, 'Failed to retrieve orders. Please try again later.');
-          return;
-      }
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Failed to retrieve orders. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
+      await sendMessage(chatId, 'Failed to retrieve orders. Please try again later.');
+      return;
+    }
 
-      const ordersResponse = await response.json() as Order[];
-      const orders = ordersResponse.filter(order => order.phone === formattedPhoneNumber);
+    const ordersResponse = await response.json() as { results: Order[] };
+    const orders = ordersResponse.results.filter(order => 
+      order.phone === formattedPhoneNumber
+    );
 
-      if (orders.length > 0) {
-          const ordersSummary = await Promise.all(orders.map(async order => {
-              const statusDates: { [key: string]: string | null } = {
-                  'submitted': order.submitted_at,
-                  'created': order.created_at,
-                  'processed': order.processed_at,
-                  'complete': order.complete_at,
-                  'canceled': order.canceled_at
-              };
+    if (orders.length > 0) {
+      const ordersSummary = await Promise.all(orders.map(async order => {
+        const statusDates: { [key: string]: string | null } = {
+          'submitted': order.submitted_at,
+          'created': order.created_at,
+          'processed': order.processed_at,
+          'complete': order.complete_at,
+          'canceled': order.canceled_at
+        };
 
-              const latestStatus = Object.entries(statusDates)
-                  .filter(([_, date]) => date !== null)
-                  .reduce((latest, current) => new Date(current[1]!) > new Date(latest[1]!) ? current : latest);
+        const latestStatus = Object.entries(statusDates)
+          .filter(([_, date]) => date !== null)
+          .reduce((latest, current) => new Date(current[1]!) > new Date(latest[1]!) ? current : latest);
 
-              const [status, date] = latestStatus;
-              const statusMessage = `${statusEmojis[status] || '🔍'} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
+        const [status, date] = latestStatus;
+        const statusMessage = `${statusEmojis[status] || '🔍'} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
 
-              return `Order ID: ${order.id}\n${statusMessage}`;
-          }));
+        return `Order ID: ${order.id}\n${statusMessage}`;
+      }));
 
-          let messageText = `Here are your orders:\n${ordersSummary.join('\n\n')}`;
-          await sendMessage(chatId, messageText);
-      } else {
-          await sendMessage(chatId, 'You do not have any orders.');
-      }
+      let messageText = `Here are your orders:\n${ordersSummary.join('\n\n')}`;
+      await sendMessage(chatId, messageText);
+    } else {
+      await sendMessage(chatId, 'You do not have any orders.');
+    }
   } catch (error) {
-      console.error('Error:', error);
-      await sendMessage(chatId, 'An error occurred while retrieving your orders. Please try again later.');
+    console.error('Error:', error);
+    await sendMessage(chatId, 'An error occurred while retrieving your orders. Please try again later.');
   }
 }
+
+
 
 // Function to generate a random delay between min and max milliseconds
 function getRandomDelay(min: number, max: number): number {

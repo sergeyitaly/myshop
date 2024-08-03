@@ -38,8 +38,11 @@ class Order(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='submitted')
     parent_order = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     present = models.BooleanField(null=True, help_text='Package as a present')
-    chat_id = models.ForeignKey('TelegramUser', on_delete=models.SET_NULL, null=True, blank=True, related_name='telegram_users')
-
+    telegram_user = models.ForeignKey(TelegramUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders')
+    @property
+    def chat_id(self):
+        return self.telegram_user.chat_id if self.telegram_user else None
+    
     def __str__(self):
         return f"Order {self.id}"
 
