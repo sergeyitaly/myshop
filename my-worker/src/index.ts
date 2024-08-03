@@ -927,10 +927,9 @@ function formatDate(dateString: string): string {
 
   return `${diffHours}h ${diffMinutes}m ago (${date.toLocaleDateString()} ${date.toLocaleTimeString()})`;
 }
-
 async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<void> {
   const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
-  const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
+  const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/?chat_id=${encodeURIComponent(chatId)}`;
 
   const statusEmojis: { [key: string]: string } = {
     'submitted': '📝',
@@ -947,8 +946,8 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
       return;
     }
 
-    console.log(`Fetching orders from: ${ordersUrl}`);
-    const response = await fetch(ordersUrl, {
+    console.log(`Fetching order summary from: ${summaryUrl}`);
+    const response = await fetch(summaryUrl, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -958,17 +957,17 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`Failed to retrieve orders. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
-      await sendMessage(chatId, 'Failed to retrieve orders. Please try again later.');
+      console.error(`Failed to retrieve order summary. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
+      await sendMessage(chatId, 'Failed to retrieve order summary. Please try again later.');
       return;
     }
 
-    const ordersResponse = await response.json() as { results: Order[] };
-    console.log(`Orders retrieved: ${JSON.stringify(ordersResponse.results)}`);
+    const summaryResponse = await response.json() as { orders: Order[] };
+    console.log(`Order summary retrieved: ${JSON.stringify(summaryResponse.orders)}`);
 
-    const matchingOrder = ordersResponse.results.find(order => 
-      order.phone === formattedPhoneNumber && order.chat_id === chatId
-    );
+    const matchingOrder = summaryResponse.orders
+      .filter(order => order.phone === formattedPhoneNumber)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]; // Get the most recent order
 
     if (matchingOrder) {
       const orderDetailsUrl = `${VERCEL_DOMAIN}/api/orders/${matchingOrder.id}/`;
@@ -1035,7 +1034,7 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
   }
 }
 
-async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promise<void> {
+async function sendAllOrdersDetails(phoneNumber: string, chatId: string, lastFetchTime: Date = new Date()): Promise<void> {
   const statusEmojis: { [key: string]: string } = {
     'submitted': '📝',
     'created': '🆕',
@@ -1051,10 +1050,9 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promis
       return;
     }
 
-    const ordersUrl = `${VERCEL_DOMAIN}/api/orders/`;
-    const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
-
-    const response = await fetch(ordersUrl, {
+    // Fetch the summary from the API
+    const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/?chat_id=${encodeURIComponent(chatId)}`;
+    const response = await fetch(summaryUrl, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -1064,18 +1062,18 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promis
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`Failed to retrieve orders. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
-      await sendMessage(chatId, 'Failed to retrieve orders. Please try again later.');
+      console.error(`Failed to retrieve order summary. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
+      await sendMessage(chatId, 'Failed to retrieve order summary. Please try again later.');
       return;
     }
 
-    const ordersResponse = await response.json() as { results: Order[] };
-    const orders = ordersResponse.results.filter(order => 
-      order.phone === formattedPhoneNumber
+    const summaryResponse = await response.json() as { orders: any[] };
+    const orders = summaryResponse.orders.filter(order => 
+      order.phone === phoneNumber
     );
 
     if (orders.length > 0) {
-      const ordersSummary = await Promise.all(orders.map(async order => {
+      const ordersSummary = orders.map(order => {
         const statusDates: { [key: string]: string | null } = {
           'submitted': order.submitted_at,
           'created': order.created_at,
@@ -1092,9 +1090,9 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promis
         const statusMessage = `${statusEmojis[status] || '🔍'} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
 
         return `Order ID: ${order.id}\n${statusMessage}`;
-      }));
+      }).join('\n\n');
 
-      let messageText = `Here are your orders:\n${ordersSummary.join('\n\n')}`;
+      const messageText = `Here are your orders:\n${ordersSummary}`;
       await sendMessage(chatId, messageText);
     } else {
       await sendMessage(chatId, 'You do not have any orders.');
@@ -1104,8 +1102,6 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promis
     await sendMessage(chatId, 'An error occurred while retrieving your orders. Please try again later.');
   }
 }
-
-
 
 // Function to generate a random delay between min and max milliseconds
 function getRandomDelay(min: number, max: number): number {

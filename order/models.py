@@ -10,9 +10,6 @@ class TelegramUser(models.Model):
 
     def __str__(self):
         return f'{self.phone} - {self.chat_id}'
-    
-from django.db import models
-from django.utils import timezone
 
 class Order(models.Model):
     STATUS_CHOICES = (
@@ -35,7 +32,7 @@ class Order(models.Model):
     processed_at = models.DateTimeField(null=True, blank=True)
     complete_at = models.DateTimeField(null=True, blank=True)
     canceled_at = models.DateTimeField(null=True, blank=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='submitted')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='submitted', db_index=True)
     parent_order = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     present = models.BooleanField(null=True, help_text='Package as a present')
     telegram_user = models.ForeignKey(TelegramUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders')
@@ -76,6 +73,14 @@ class Order(models.Model):
         ordering = ('-submitted_at',)
         verbose_name = 'Order'
         verbose_name_plural = 'Orders'
+
+
+class OrderSummary(models.Model):
+    chat_id = models.CharField(max_length=255, unique=True)
+    orders = models.JSONField()  # Store a list of order summaries
+
+    def __str__(self):
+        return self.chat_id
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='order_items', on_delete=models.CASCADE)
