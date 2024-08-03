@@ -1,10 +1,35 @@
 from rest_framework import serializers
-from .models import Order, OrderItem, TelegramUser
+from .models import *
 
 class TelegramUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = TelegramUser
         fields = ['id', 'phone', 'chat_id']
+
+class OrderSummarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderSummary
+        fields = ['chat_id', 'orders']
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        # Ensure Decimal values are serialized properly if necessary
+        representation['orders'] = self._convert_decimals(representation['orders'])
+        return representation
+
+    def _convert_decimals(self, data):
+        if isinstance(data, dict):
+            return {key: self._convert_decimals(value) for key, value in data.items()}
+        elif isinstance(data, list):
+            return [self._convert_decimals(item) for item in data]
+        elif isinstance(data, decimal.Decimal):
+            return float(data)
+        return data
+    
+    def validate_chat_id(self, value):
+        if not value:
+            raise serializers.ValidationError("chat_id cannot be null.")
+        return value
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product_id = serializers.IntegerField(write_only=True)

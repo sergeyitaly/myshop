@@ -927,6 +927,9 @@ function formatDate(dateString: string): string {
 
   return `${diffHours}h ${diffMinutes}m ago (${date.toLocaleDateString()} ${date.toLocaleTimeString()})`;
 }
+
+
+
 async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<void> {
   const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
   const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/?chat_id=${encodeURIComponent(chatId)}`;
@@ -965,6 +968,7 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
     const summaryResponse = await response.json() as { orders: Order[] };
     console.log(`Order summary retrieved: ${JSON.stringify(summaryResponse.orders)}`);
 
+    // Filter orders based on phone number and sort to get the most recent order
     const matchingOrder = summaryResponse.orders
       .filter(order => order.phone === formattedPhoneNumber)
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]; // Get the most recent order
@@ -1034,7 +1038,8 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
   }
 }
 
-async function sendAllOrdersDetails(phoneNumber: string, chatId: string, lastFetchTime: Date = new Date()): Promise<void> {
+
+async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promise<void> {
   const statusEmojis: { [key: string]: string } = {
     'submitted': '📝',
     'created': '🆕',
@@ -1050,8 +1055,9 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string, lastFet
       return;
     }
 
-    // Fetch the summary from the API
     const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/?chat_id=${encodeURIComponent(chatId)}`;
+
+    console.log(`Fetching order summary from: ${summaryUrl}`);
     const response = await fetch(summaryUrl, {
       method: 'GET',
       headers: {
@@ -1067,7 +1073,9 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string, lastFet
       return;
     }
 
-    const summaryResponse = await response.json() as { orders: any[] };
+    const summaryResponse = await response.json() as { orders: Order[] };
+    console.log(`Order summary retrieved: ${JSON.stringify(summaryResponse.orders)}`);
+
     const orders = summaryResponse.orders.filter(order => 
       order.phone === phoneNumber
     );
