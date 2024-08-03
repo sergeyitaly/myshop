@@ -16,6 +16,5 @@ urlpatterns = [
     path('telegram_webhook/', telegram_webhook, name='telegram_webhook'),
     path('health_check/', health_check, name='health_check'),
     path('orders/', get_orders, name='get_orders'),  # New path for get_orders
-
+    path('order_summary/', get_order_summary, name='get_order_summary'),  # New path for get_order_summary
 ]
-

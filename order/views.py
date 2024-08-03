@@ -24,11 +24,29 @@ import os
 from django.http import JsonResponse
 from rest_framework.decorators import action
 import logging
+
+
 logger = logging.getLogger(__name__)
-
-
 def health_check(request):
     return JsonResponse({'status': 'ok'})
+
+class OrderSummaryViewSet(viewsets.ModelViewSet):
+    queryset = OrderSummary.objects.all()
+    serializer_class = OrderSummarySerializer
+
+    def create(self, request, *args, **kwargs):
+        logger.debug("Received data: %s", request.data)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        chat_id = serializer.validated_data.get('chat_id')
+        if not chat_id:
+            logger.error("chat_id is missing in the request data.")
+            return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 class TelegramUserViewSet(viewsets.ModelViewSet):
     queryset = TelegramUser.objects.all()
@@ -387,3 +405,18 @@ def get_orders(request):
     except Exception as e:
         logger.error(f"Error fetching orders: {e}")
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_order_summary(request):
+    chat_id = request.query_params.get('chat_id')
+    if chat_id:
+        try:
+            summary = OrderSummary.objects.get(chat_id=chat_id)
+            serializer = OrderSummarySerializer(summary)
+            return JsonResponse(serializer.data, safe=False)
+        except OrderSummary.DoesNotExist:
+            return JsonResponse({'error': 'No orders found for this chat ID.'}, status=404)
+    else:
+        return JsonResponse({'error': 'Chat ID is required.'}, status=400)

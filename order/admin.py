@@ -2,6 +2,32 @@ from django.contrib import admin
 from django.utils.safestring import mark_safe
 from .models import *
 from .serializers import OrderSerializer  # Import OrderSerializer
+import json
+from django.utils.html import format_html
+
+@admin.register(OrderSummary)
+class OrderSummaryAdmin(admin.ModelAdmin):
+    list_display = ('chat_id',)
+    search_fields = ('chat_id',)
+    readonly_fields = ('order_summary_pretty',)
+
+    def order_summary_pretty(self, obj):
+        # Ensure 'orders' is the correct field name
+        return format_html('<pre>{}</pre>', json.dumps(obj.orders, indent=2, ensure_ascii=False))
+
+    order_summary_pretty.short_description = 'Order Summary (JSON)'
+
+    fieldsets = (
+        (None, {
+            'fields': ('chat_id', 'order_summary_pretty')
+        }),
+    )
+
+    def get_readonly_fields(self, request, obj=None):
+        # Add 'chat_id' to readonly fields when editing an existing object
+        if obj:
+            return self.readonly_fields + ('chat_id',)
+        return self.readonly_fields
 
 @admin.register(TelegramUser)
 class TelegramUserAdmin(admin.ModelAdmin):

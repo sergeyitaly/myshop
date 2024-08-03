@@ -3,6 +3,7 @@ from shop.models import Product
 from phonenumber_field.modelfields import PhoneNumberField
 from django.utils import timezone
 import logging
+import decimal
 
 class TelegramUser(models.Model):
     phone = models.CharField(max_length=15, unique=True)  # Store phone numbers
@@ -76,11 +77,26 @@ class Order(models.Model):
 
 
 class OrderSummary(models.Model):
-    chat_id = models.CharField(max_length=255, unique=True)
-    orders = models.JSONField()  # Store a list of order summaries
+    chat_id = models.CharField(max_length=255, unique=True, null=True, blank=True)  # Changed to CharField to handle string IDs
+    orders = models.JSONField()
 
     def __str__(self):
-        return self.chat_id
+        return str(self.chat_id)  # Ensure it returns a string representation
+
+    def save(self, *args, **kwargs):
+        # Convert Decimal values to float
+        self.orders = self._convert_decimals(self.orders)
+        super().save(*args, **kwargs)
+
+    def _convert_decimals(self, data):
+        if isinstance(data, dict):
+            return {key: self._convert_decimals(value) for key, value in data.items()}
+        elif isinstance(data, list):
+            return [self._convert_decimals(item) for item in data]
+        elif isinstance(data, decimal.Decimal):
+            return float(data)
+        return data
+    
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='order_items', on_delete=models.CASCADE)
