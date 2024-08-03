@@ -23,8 +23,6 @@ import random
 import os
 from django.http import JsonResponse
 from rest_framework.decorators import action
-import logging
-
 
 logger = logging.getLogger(__name__)
 def health_check(request):
@@ -88,7 +86,6 @@ class TelegramUserViewSet(viewsets.ModelViewSet):
             if not order.telegram_user:  # Ensure only orders without an associated TelegramUser are updated
                 order.telegram_user = telegram_user
                 order.save(update_fields=['telegram_user'])
-                self.stdout.write(f'Updated Order {order.id} with TelegramUser {telegram_user.id}\n')
 
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
@@ -220,10 +217,7 @@ telegram_webhook = TelegramWebhook.as_view()
 
 def send_telegram_message(order_id, chat_id, email):
     bot_token = settings.TELEGRAM_BOT_TOKEN
-    
-
-    url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
-    
+    url = f'https://api.telegram.org/bot{bot_token}/sendMessage'   
     sayings_file_path = settings.SAYINGS_FILE_PATH
     random_saying = get_random_saying(sayings_file_path)
     
@@ -246,10 +240,13 @@ def send_telegram_message(order_id, chat_id, email):
         result = response.json()
         if not result.get('ok'):
             logger.error(f"Telegram API returned an error: {result.get('description')}")
+        else:
+            logger.info(f"Telegram message sent successfully: {result}")
         return result
     except requests.exceptions.RequestException as e:
         logger.error(f"Request to Telegram API failed: {e}")
         raise
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -351,23 +348,29 @@ def create_order(request):
             email.content_subtype = "html"
             email.send(fail_silently=False)
 
-            # Send Telegram message if TelegramUser is associated
-            try:
-                telegram_user = order.telegram_user
-                chat_id = telegram_user.chat_id
-                send_telegram_message(order.id, chat_id, order.email)
-            except AttributeError:
-                logger.warning(f"TelegramUser for Order ID {order.id} not found. No Telegram message sent.")
-            except Exception as e:
-                logger.error(f"Error sending Telegram message: {e}")
+            # Check if chat_id is provided and valid
+            chat_id = request.data.get('chat_id')
+            logger.info(f"Chat ID from request: {chat_id}")
 
-            return Response({'status': 'Order created', 'order_id': order.id}, status=status.HTTP_201_CREATED)
+            if chat_id:
+                user = TelegramUser.objects.filter(chat_id=chat_id).first()
+                if user:
+                    # Associate the order with the registered user if needed
+                    order.telegram_user = user
+                    order.save()
+                    logger.info(f"TelegramUser found and associated: {user.chat_id}")
+                    
+                    # Send message logic
+                    send_telegram_message(user.chat_id, "Your order has been created.")
+                else:
+                    logger.warning(f"TelegramUser with chat_id {chat_id} not found.")
+            
+            return Response({'status': 'Order submitted', 'order_id': order.id}, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         logger.error(f"Error creating order: {e}")
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

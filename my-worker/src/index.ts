@@ -611,7 +611,7 @@ async function processMessage(message: any): Promise<void> {
   } else if (message.text === 'Orders') {
     const phoneNumber = phoneNumbers.get(chatId);
     if (phoneNumber) {
-      await sendAllOrdersDetails(phoneNumber, chatId);
+      await sendAllOrdersDetails(chatId);
     } else {
       await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
       await sendContactRequest(chatId);
@@ -658,7 +658,7 @@ async function processCallbackQuery(callbackQuery: any): Promise<void> {
   if (callbackData === 'Order') {
     await sendOrderDetails(phoneNumber, chatId);
   } else if (callbackData === 'Orders') {
-    await sendAllOrdersDetails(phoneNumber, chatId);
+    await sendAllOrdersDetails(chatId);
   } else if (callbackData === 'Start') {
     await sendMessage(chatId, '📞 To get notifications, please share your phone number.');
     await sendContactRequest(chatId);
@@ -893,11 +893,11 @@ interface Order {
   address: string | null;
   receiver: boolean;
   receiver_comments: string;
-  submitted_at: string;
-  created_at: string;
-  processed_at: string;
-  complete_at: string;
-  canceled_at: string;
+  submitted_at?: string | null;
+  created_at?: string | null;
+  processed_at?: string
+  complete_at?: string | null;
+  canceled_at?: string | null;
   status: string; // Add this field
   parent_order: string | null;
   present: boolean;
@@ -927,7 +927,6 @@ function formatDate(dateString: string): string {
 
   return `${diffHours}h ${diffMinutes}m ago (${date.toLocaleDateString()} ${date.toLocaleTimeString()})`;
 }
-
 
 
 async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<void> {
@@ -968,11 +967,13 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
     const summaryResponse = await response.json() as { orders: Order[] };
     console.log(`Order summary retrieved: ${JSON.stringify(summaryResponse.orders)}`);
 
-    // Filter orders based on phone number and sort to get the most recent order
     const matchingOrder = summaryResponse.orders
-      .filter(order => order.phone === formattedPhoneNumber)
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]; // Get the most recent order
-
+    .filter(order => order.phone === formattedPhoneNumber)
+    .sort((a, b) => {
+      const aDate = a.created_at ? new Date(a.created_at).getTime() : 0; // Handle null or undefined
+      const bDate = b.created_at ? new Date(b.created_at).getTime() : 0; // Handle null or undefined
+      return bDate - aDate;
+    })[0]; // Get the most recent order
     if (matchingOrder) {
       const orderDetailsUrl = `${VERCEL_DOMAIN}/api/orders/${matchingOrder.id}/`;
       console.log(`Fetching order details from: ${orderDetailsUrl}`);
@@ -1000,12 +1001,13 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
       ).join('\n');
 
       const statusDates: { [key: string]: string | null } = {
-        'submitted': orderDetails.submitted_at,
-        'created': orderDetails.created_at,
-        'processed': orderDetails.processed_at,
-        'complete': orderDetails.complete_at,
-        'canceled': orderDetails.canceled_at
+        'submitted': orderDetails.submitted_at ?? null,
+        'created': orderDetails.created_at ?? null,
+        'processed': orderDetails.processed_at ?? null,
+        'complete': orderDetails.complete_at ?? null,
+        'canceled': orderDetails.canceled_at ?? null
       };
+      
 
       const statusSummary = Object.entries(statusDates)
         .filter(([_, date]) => date !== null)
@@ -1037,15 +1039,14 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
     await sendMessage(chatId, 'An error occurred while retrieving order details. Please try again later.');
   }
 }
-
-
-async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promise<void> {
+async function sendAllOrdersDetails(chatId: string): Promise<void> {
   const statusEmojis: { [key: string]: string } = {
     'submitted': '📝',
     'created': '🆕',
     'processed': '🔄',
-    'complete': '✅',
+    'completed': '✅',
     'canceled': '❌'
+    // Add any additional statuses and their emojis here
   };
 
   try {
@@ -1076,26 +1077,21 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promis
     const summaryResponse = await response.json() as { orders: Order[] };
     console.log(`Order summary retrieved: ${JSON.stringify(summaryResponse.orders)}`);
 
-    const orders = summaryResponse.orders.filter(order => 
-      order.phone === phoneNumber
-    );
+    const orders = summaryResponse.orders;
 
     if (orders.length > 0) {
       const ordersSummary = orders.map(order => {
-        const statusDates: { [key: string]: string | null } = {
+        const statusEmoji = statusEmojis[order.status] || '🔍'; // Default emoji if status not found
+        // Use a mapping object to safely access the _at properties
+        const statusDates: { [key: string]: string | null | undefined } = {
           'submitted': order.submitted_at,
           'created': order.created_at,
           'processed': order.processed_at,
           'complete': order.complete_at,
           'canceled': order.canceled_at
         };
-
-        const latestStatus = Object.entries(statusDates)
-          .filter(([_, date]) => date !== null)
-          .reduce((latest, current) => new Date(current[1]!) > new Date(latest[1]!) ? current : latest);
-
-        const [status, date] = latestStatus;
-        const statusMessage = `${statusEmojis[status] || '🔍'} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
+        const statusDate = statusDates[order.status] || '';
+        const statusMessage = `${statusEmoji} ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}: ${formatDate(statusDate)}`;
 
         return `Order ID: ${order.id}\n${statusMessage}`;
       }).join('\n\n');
@@ -1111,109 +1107,10 @@ async function sendAllOrdersDetails(phoneNumber: string, chatId: string): Promis
   }
 }
 
-// Function to generate a random delay between min and max milliseconds
-function getRandomDelay(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
 
-// Global variable to track the last successfully updated page
-let lastUpdatedPage: number = 0;
-
-// Maximum number of requests per batch
-const MAX_REQUESTS_PER_BATCH = 5;
-const THROTTLE_DELAY = 1000; // 1 second throttle delay
-const MAX_RETRIES = 3; // Maximum number of retries
-
-// Function to simulate a delay (sleep)
-async function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// Function to fetch and process orders
-// Function to fetch and process orders with pagination
-async function fetchAndProcessOrders(status: string, processOrder: (order: Order) => Promise<void>): Promise<void> {
-  const ordersPerPage = 6;
-  let page = 1; // Start from the first page
-  let hasMorePages = true;
-  let requestCount = 0;
-  let retryCount = 0;
-
-  while (hasMorePages) {
-    const ordersUrl = `${VERCEL_DOMAIN}/api/orders/?status=${status}&page=${page}&page_size=${ordersPerPage}`;
-    try {
-      const response = await fetch(ordersUrl, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Failed to retrieve orders. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
-        hasMorePages = false; // Stop processing further pages on failure
-        return;
-      }
-
-      const ordersResponse = await response.json() as OrdersResponse;
-      const orders = ordersResponse.results;
-
-      if (orders.length > 0) {
-        console.log(`Retrieved ${orders.length} ${status} orders.`);
-
-        // Process orders in batches
-        const batchSize = Math.min(orders.length, MAX_REQUESTS_PER_BATCH);
-        for (let i = 0; i < batchSize; i++) {
-          await processOrder(orders[i]);
-        }
-
-        // Update page number and check for more pages
-        page++;
-        hasMorePages = ordersResponse.next !== null;
-        
-        requestCount++;
-        if (requestCount >= MAX_REQUESTS_PER_BATCH) {
-          // Reset count and throttle
-          requestCount = 0;
-          console.log(`Throttle pause for ${THROTTLE_DELAY} milliseconds...`);
-          await sleep(THROTTLE_DELAY);
-        }
-
-        // Simulate a human-like pause between requests
-        const delay = getRandomDelay(2000, 5000); // Delay between 2 to 5 seconds
-        console.log(`Pausing for ${delay} milliseconds...`);
-        await sleep(delay);
-      } else {
-        hasMorePages = false; // No more orders to process
-      }
-      
-    } catch (error) {
-      console.error(`Error retrieving orders: ${error instanceof Error ? error.message : error}`);
-      if (error instanceof Error && error.message.includes("Too many subrequests")) {
-        retryCount++;
-        if (retryCount <= MAX_RETRIES) {
-          // Exponential backoff delay
-          const retryDelay = getRandomDelay(5000 * retryCount, 10000 * retryCount); // Exponential backoff
-          console.log(`Too many subrequests. Retrying after ${retryDelay} milliseconds...`);
-          await sleep(retryDelay);
-          // Continue from the last successful page
-        } else {
-          console.error('Max retries reached. Stopping further attempts.');
-          hasMorePages = false; // Stop after reaching max retries
-        }
-      } else {
-        hasMorePages = false; // Stop on other errors
-      }
-    }
-  }
-}
-
-
-// Function to update order status
+// Helper function to update order status
 async function updateOrderStatus(orderId: number, newStatus: string, timestampField: string): Promise<void> {
   const updateUrl = `${VERCEL_DOMAIN}/api/orders/${orderId}/`;
-  await updateGlobalAuthToken();
 
   try {
     const response = await fetch(updateUrl, {
@@ -1235,7 +1132,7 @@ async function updateOrderStatus(orderId: number, newStatus: string, timestampFi
       console.log(`Order ID ${orderId} updated to ${newStatus}`);
     }
   } catch (error) {
-    console.error(`Error updating order status: ${error instanceof Error ? error.message : error}`);
+    console.error(`Error updating order status: ${error}`);
   }
 }
 
@@ -1271,12 +1168,12 @@ async function updateOrderStatusWithNotification(orderId: number, status: string
 
 // Function to update 'submitted' to 'created'
 async function updateSubmittedToCreated(): Promise<void> {
-  await fetchAndProcessOrders('submitted', async (order) => {
-    const submittedAt = new Date(order.submitted_at);
+  await fetchAndProcessOrders('submitted', async (order: Order) => {
+    const submittedAt = order.submitted_at ? new Date(order.submitted_at) : null;
     const now = new Date();
-    const diffMinutes = (now.getTime() - submittedAt.getTime()) / (1000 * 60);
+    const diffMinutes = (now.getTime() - (submittedAt?.getTime() || 0)) / (1000 * 60);
 
-    if (diffMinutes >= 10 && order.status === 'submitted') {
+    if (submittedAt && diffMinutes >= 10 && order.status === 'submitted') {
       console.log(`Updating Order ID ${order.id} from 'submitted' to 'created'.`);
       const chatId = await getChatIdForOrder(order.id); // Assume a function to fetch chatId for the order
       await updateOrderStatusWithNotification(order.id, 'created', 'created_at', chatId);
@@ -1286,12 +1183,12 @@ async function updateSubmittedToCreated(): Promise<void> {
 
 // Function to update 'created' to 'processed'
 async function updateCreatedToProcessed(): Promise<void> {
-  await fetchAndProcessOrders('created', async (order) => {
-    const submittedAt = new Date(order.submitted_at);
+  await fetchAndProcessOrders('created', async (order: Order) => {
+    const createdAt = order.created_at ? new Date(order.created_at) : null;
     const now = new Date();
-    const diffMinutes = (now.getTime() - submittedAt.getTime()) / (1000 * 60);
+    const diffMinutes = (now.getTime() - (createdAt?.getTime() || 0)) / (1000 * 60);
 
-    if (diffMinutes >= 20 && order.status === 'created') {
+    if (createdAt && diffMinutes >= 20 && order.status === 'created') {
       console.log(`Updating Order ID ${order.id} from 'created' to 'processed'.`);
       const chatId = await getChatIdForOrder(order.id); // Assume a function to fetch chatId for the order
       await updateOrderStatusWithNotification(order.id, 'processed', 'processed_at', chatId);
@@ -1301,12 +1198,12 @@ async function updateCreatedToProcessed(): Promise<void> {
 
 // Function to update 'processed' to 'complete'
 async function updateProcessedToComplete(): Promise<void> {
-  await fetchAndProcessOrders('processed', async (order) => {
-    const submittedAt = new Date(order.submitted_at);
+  await fetchAndProcessOrders('processed', async (order: Order) => {
+    const processedAt = order.processed_at ? new Date(order.processed_at) : null;
     const now = new Date();
-    const diffHours = (now.getTime() - submittedAt.getTime()) / (1000 * 60 * 60);
+    const diffHours = (now.getTime() - (processedAt?.getTime() || 0)) / (1000 * 60 * 60);
 
-    if (diffHours >= 24 && order.status === 'processed') {
+    if (processedAt && diffHours >= 24 && order.status === 'processed') {
       console.log(`Updating Order ID ${order.id} from 'processed' to 'complete'.`);
       const chatId = await getChatIdForOrder(order.id); // Assume a function to fetch chatId for the order
       await updateOrderStatusWithNotification(order.id, 'complete', 'complete_at', chatId);
@@ -1318,4 +1215,30 @@ async function updateProcessedToComplete(): Promise<void> {
 async function getChatIdForOrder(orderId: number): Promise<string> {
   // Implement logic to fetch chat ID for the order
   return ''; // Return appropriate chat ID
+}
+// Helper function to fetch and process orders based on status
+async function fetchAndProcessOrders(status: string, processOrder: (order: Order) => Promise<void>): Promise<void> {
+  const fetchUrl = `${VERCEL_DOMAIN}/api/orders?status=${status}`;
+
+  try {
+    const response = await fetch(fetchUrl, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      // Use type assertion to inform TypeScript about the expected type
+      const orders = await response.json() as Order[];
+      for (const order of orders) {
+        await processOrder(order);
+      }
+    } else {
+      const errorText = await response.text();
+      console.error(`Failed to fetch orders. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
+    }
+  } catch (error) {
+    console.error(`Error fetching orders: ${error}`);
+  }
 }
