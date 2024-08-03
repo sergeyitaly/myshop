@@ -44,7 +44,7 @@ class OrderItemInline(admin.TabularInline):
 
 class OrderAdmin(admin.ModelAdmin):
     list_display = ['id', 'status', 'last_updated']
-    readonly_fields = ['id', 'name', 'surname', 'phone', 'email', 'receiver', 'receiver_comments', 'total_quantity', 'total_price', 'submitted_at', 'created_at',  'processed_at', 'complete_at', 'canceled_at']
+    readonly_fields = ['id', 'name', 'surname', 'phone', 'email', 'receiver', 'receiver_comments', 'total_quantity', 'total_price', 'submitted_at', 'created_at',  'processed_at', 'complete_at', 'canceled_at', 'chat_id']
     fields = [
         'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments', 
         'present', 'status', 'total_quantity', 'total_price', 'submitted_at','created_at',  'processed_at', 'complete_at', 'canceled_at'
