@@ -141,9 +141,9 @@ class OrderAdmin(admin.ModelAdmin):
             if old_obj.status != obj.status or old_obj.status == obj.status:
                 # Update fields based on the new status
                 if obj.status == 'submited':
-                    obj.processed_at = timezone.now()
+                    obj.submitted_at = timezone.now()
                 if obj.status == 'created':
-                    obj.processed_at = timezone.now()
+                    obj.created_at = timezone.now()
                 if obj.status == 'processed':
                     obj.processed_at = timezone.now()
                 elif obj.status == 'complete':
