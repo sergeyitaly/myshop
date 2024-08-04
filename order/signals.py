@@ -18,7 +18,7 @@ def safe_make_naive(dt):
 def get_order_summary(order):
     submitted_at = safe_make_naive(order.submitted_at)
     processed_at = safe_make_naive(order.processed_at)
-    completed_at = safe_make_naive(order.completed_at)
+    complete_at = safe_make_naive(order.complete_at)
     canceled_at = safe_make_naive(order.canceled_at)
 
     # Convert datetime fields to formatted string
@@ -26,13 +26,13 @@ def get_order_summary(order):
         'order_id': order.id,
         'submitted_at': datetime_to_str(submitted_at),
         'processed_at': datetime_to_str(processed_at),
-        'completed_at': datetime_to_str(completed_at),
+        'complete_at': datetime_to_str(complete_at),
         'canceled_at': datetime_to_str(canceled_at),
         'order_items': [
             {
                 'product_name': item.product.name,
                 'quantity': item.quantity,
-                'price': item.price
+                'price': item.product.price
             }
             for item in order.order_items.all()
         ]

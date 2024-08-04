@@ -17,4 +17,6 @@ urlpatterns = [
     path('health_check/', health_check, name='health_check'),
     path('orders/', get_orders, name='get_orders'),  # New path for get_orders
     path('order_summary/', get_order_summary, name='get_order_summary'),  # New path for get_order_summary
+    path('update_order/', update_order, name='update_order'),  # New path for update_order
+
 ]

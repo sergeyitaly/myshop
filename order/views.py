@@ -87,6 +87,24 @@ class TelegramUserViewSet(viewsets.ModelViewSet):
                 order.telegram_user = telegram_user
                 order.save(update_fields=['telegram_user'])
 
+
+@api_view(['POST'])
+def update_order(request):
+    chat_id = request.data.get('chat_id')
+    orders = request.data.get('orders')
+
+    try:
+        order_summary = OrderSummary.objects.get(chat_id=chat_id)
+        order_summary.orders = orders
+        order_summary.save()
+        
+        return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
+    except OrderSummary.DoesNotExist:
+        return Response({"error": "Order summary not found."}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
