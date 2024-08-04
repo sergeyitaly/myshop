@@ -40,14 +40,15 @@ class Command(BaseCommand):
                 submitted_at = safe_make_naive(order.submitted_at)
                 created_at = safe_make_naive(order.created_at)
                 processed_at = safe_make_naive(order.processed_at)
-                completed_at = safe_make_naive(order.complete_at)
+                complete_at = safe_make_naive(order.complete_at)
                 canceled_at = safe_make_naive(order.canceled_at)
 
                 # Determine the latest timestamp
                 statuses = {
+                    'submitted_at': submitted_at,
                     'created_at': created_at,
                     'processed_at': processed_at,
-                    'completed_at': completed_at,
+                    'completed_at': complete_at,
                     'canceled_at': canceled_at
                 }
 
