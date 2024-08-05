@@ -9,6 +9,7 @@ from django.http import Http404
 from django_filters import rest_framework as filters
 from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer
 from .models import Product, Collection, Category
+from .filters import ProductFilter
 
 class CustomPageNumberPagination(PageNumberPagination):
     default_page_size = 4
@@ -41,14 +42,7 @@ class CollectionPageNumberPagination(PageNumberPagination):
             'previous_page_number': self.page.number - 1 if self.page.has_previous() else None,
             'page_size': self.page.paginator.per_page,
         })
-
-class ProductFilter(filters.FilterSet):
-    category = filters.CharFilter(field_name='category__name', lookup_expr='icontains')
-
-    class Meta:
-        model = Product
-        fields = ['category', 'name', 'price', 'sales_count', 'popularity']
-
+    
 class ProductList(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
