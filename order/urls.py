@@ -12,7 +12,7 @@ router.register(r'order_summary', OrderSummaryViewSet, basename='order_summary')
 urlpatterns = [
     # Include all routes registered with the router
     path('', include(router.urls)),
-    path('order/', create_order, name='create-order'),
+    path('order/', create_order, name='create_order'),
     path('order/<int:order_id>/', get_order, name='get_order'),
     path('orders/', get_orders, name='get_orders'),  # New path for get_orders
     path('order_summary/', get_order_summary, name='get_order_summary'),  # New path for get_order_summary

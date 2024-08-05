@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from shop.loadimages_tos3 import LoadImagesToS3
 from distutils.util import strtobool
 import os
+from celery.schedules import crontab
 
 
 load_dotenv()
@@ -286,10 +287,11 @@ CACHES = {
     }
 }
 
+CELERY_IMPORTS = ('order.task',)
 CELERY_BEAT_SCHEDULE = {
-    'update-order-statuses-every-10-minutes': {
+    'update-order-statuses-every-5-minutes': {
         'task': 'order.task.update_order_statuses_task',
-        'schedule': 60,  # 1 minute
+        'schedule': crontab(minute='*/5'),  # Run every 5 minutes
     },
 }
 
