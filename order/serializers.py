@@ -52,6 +52,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
         product_id = validated_data.pop('product_id')
         order_item = OrderItem.objects.create(product_id=product_id, **validated_data)
         return order_item
+    
+
 class OrderSerializer(serializers.ModelSerializer):
     order_items = OrderItemSerializer(many=True)
     telegram_user = TelegramUserSerializer(required=False, allow_null=True)

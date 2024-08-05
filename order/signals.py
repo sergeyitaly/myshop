@@ -2,6 +2,7 @@ import os
 import random
 import requests
 import logging
+from django.utils import timezone
 
 from django.conf import settings
 from django.core.cache import cache
@@ -65,21 +66,16 @@ def update_order_summary_for_chat_id(chat_id):
     logger.debug(f"Updating order summary for chat_id: {chat_id}")
     
     if chat_id:
-        # Get or create the OrderSummary object
         order_summary, created = OrderSummary.objects.get_or_create(chat_id=chat_id)
         logger.debug(f"OrderSummary created: {created}")
 
-        # Fetch all orders for the given chat_id
         orders = Order.objects.filter(telegram_user__chat_id=chat_id)
         
-        # Update the summary with current details and statuses of all orders
         order_summaries = [get_order_summary(order) for order in orders]
         
-        # Update or create summary of each order
         order_summary.orders = order_summaries
         order_summary.save()
 
-        # Cache the updated order summary
         cache_key = f'order_summary_{chat_id}'
         cache.set(cache_key, order_summary, timeout=60 * 15)
         logger.debug(f"OrderSummary saved and cached: {order_summary}")
@@ -128,7 +124,8 @@ def get_random_saying(file_path):
 def update_order_status_with_notification(order_id, new_status, status_field, chat_id):
     try:
         order = Order.objects.get(id=order_id)
-        setattr(order, status_field, new_status)
+        setattr(order, status_field, timezone.now())
+        order.status = new_status
         order.save()
 
         status = new_status.capitalize()
@@ -142,18 +139,13 @@ def update_order_status_with_notification(order_id, new_status, status_field, ch
     except Order.DoesNotExist:
         logger.error(f"Order with id {order_id} does not exist.")
 
-
 @receiver(post_save, sender=Order)
 def update_order_summary(sender, instance, created, **kwargs):
-    # Ensure that the instance has a primary key
-    logger.debug(f"Order instance saved: {instance.id}")
-
     if instance.pk:
         chat_id = instance.telegram_user.chat_id if instance.telegram_user else None
 
         if chat_id:
             if created:
-                # Handle new order creation
                 message = (f"<b>Вітаємо!</b>\n\n"
                            f"Ви створили нове замовлення № <b>{instance.id}</b> на сайті "
                            f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>.\n"
@@ -162,7 +154,6 @@ def update_order_summary(sender, instance, created, **kwargs):
                            f"<b>Дякуємо, що обрали нас!</b> 🌟")
                 send_telegram_message(chat_id, message)
             else:
-                # Handle status update for existing orders
                 status = instance.status.capitalize()
                 emoji = STATUS_EMOJIS.get(instance.status, '')
                 message = (f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>.\n"

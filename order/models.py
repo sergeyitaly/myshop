@@ -38,7 +38,7 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='submitted', db_index=True)
     parent_order = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     present = models.BooleanField(null=True, help_text='Package as a present')
-    telegram_user = models.ForeignKey(TelegramUser, on_delete=models.SET_NULL, null=True, blank=True)
+    telegram_user = models.ForeignKey(TelegramUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders')
     @property
     def chat_id(self):
         return self.telegram_user.chat_id if self.telegram_user else None
@@ -73,13 +73,6 @@ class Order(models.Model):
         self.save()
 
     def save(self, *args, **kwargs):
-        # Example: Calculate total amount based on related OrderItems
-        self.total_amount = sum(item.total_sum for item in self.order_items.all())
-        
-        # Ensure all other fields are not None before saving
-        if self.total_amount is None:
-            self.total_amount = Decimal('0.00')  # Default value if necessary
-
         # Call the parent class's save method
         super().save(*args, **kwargs)
 

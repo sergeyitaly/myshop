@@ -229,6 +229,8 @@ def create_order(request):
     logger.info(f"Order creation request data: {request.data}")
 
     try:
+        chat_id = request.data.get('chat_id')  # Retrieve chat_id from request data
+
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
             order = serializer.save()  # Save the order
@@ -237,12 +239,18 @@ def create_order(request):
             if not order.pk:
                 logger.error("Order instance does not have a primary key after saving.")
                 return Response({'error': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            if chat_id:
+                # Find or create the TelegramUser associated with chat_id
+                telegram_user, created = TelegramUser.objects.get_or_create(chat_id=chat_id)
+                # Assign TelegramUser to the order
+                order.telegram_user = telegram_user
+                order.save(update_fields=['telegram_user'])
 
             # Send the confirmation email
             formatted_date = localtime(order.submitted_at).strftime('%Y-%m-%d %H:%M')
             order_items = order.order_items.all()
+            total_sum = sum(item.quantity * item.product.price for item in order_items)
             currency = order_items.first().product.currency if order_items.exists() else "UAH"
-            total_sum = sum(item.total_sum for item in order_items)
             order_items_rows = "".join([
                 f"""
                 <tr>

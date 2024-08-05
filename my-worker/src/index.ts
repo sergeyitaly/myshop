@@ -119,7 +119,7 @@ addEventListener('scheduled', (event: ScheduledEvent) => {
 
 async function handleScheduled(event: ScheduledEvent): Promise<void> {
   console.log('Scheduled event triggered');
-//  await updateGlobalAuthToken();
+ // await updateGlobalAuthToken();
   await performHealthCheck();
  // await updateSubmittedToCreated();
  // await updateCreatedToProcessed();
