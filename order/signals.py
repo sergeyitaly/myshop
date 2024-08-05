@@ -8,6 +8,7 @@ from django.core.cache import cache
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils.timezone import is_aware, make_naive
+from django.utils.dateparse import parse_datetime
 
 from .models import Order, OrderSummary, OrderItem
 from .serializers import OrderItemSerializer
@@ -20,7 +21,14 @@ STATUS_EMOJIS = {
     'complete': '✅',
     'canceled': '❌'
 }
+
+def ensure_datetime(value):
+    if isinstance(value, str):
+        value = parse_datetime(value)
+    return value
+
 def datetime_to_str(dt):
+    dt = ensure_datetime(dt)
     if dt:
         if is_aware(dt):
             dt = make_naive(dt)
@@ -28,6 +36,7 @@ def datetime_to_str(dt):
     return None
 
 def safe_make_naive(dt):
+    dt = ensure_datetime(dt)
     if dt is None:
         return None
     return make_naive(dt) if is_aware(dt) else dt
@@ -53,14 +62,28 @@ def get_order_summary(order):
     return summary
 
 def update_order_summary_for_chat_id(chat_id):
+    logger.debug(f"Updating order summary for chat_id: {chat_id}")
+    
     if chat_id:
+        # Get or create the OrderSummary object
         order_summary, created = OrderSummary.objects.get_or_create(chat_id=chat_id)
-        orders = [get_order_summary(order) for order in Order.objects.filter(telegram_user__chat_id=chat_id)]
-        order_summary.orders = orders
-        order_summary.save()
+        logger.debug(f"OrderSummary created: {created}")
+
+        # Fetch all orders for the given chat_id
+        orders = Order.objects.filter(telegram_user__chat_id=chat_id)
         
+        # Update the summary with current details and statuses of all orders
+        order_summaries = [get_order_summary(order) for order in orders]
+        
+        # Update or create summary of each order
+        order_summary.orders = order_summaries
+        order_summary.save()
+
+        # Cache the updated order summary
         cache_key = f'order_summary_{chat_id}'
         cache.set(cache_key, order_summary, timeout=60 * 15)
+        logger.debug(f"OrderSummary saved and cached: {order_summary}")
+
 
 def send_telegram_message(chat_id, message):
     bot_token = settings.TELEGRAM_BOT_TOKEN
@@ -103,12 +126,29 @@ def get_random_saying(file_path):
         logger.error(f"Error reading sayings file: {e}")
         return "No sayings available."
 
+def update_order_status_with_notification(order_id, new_status, status_field, chat_id):
+    try:
+        order = Order.objects.get(id=order_id)
+        setattr(order, status_field, new_status)
+        order.save()
+
+        status = new_status.capitalize()
+        emoji = STATUS_EMOJIS.get(new_status, '')
+        message = (f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>.\n"
+                   f"Status of order #{order_id} has been changed to {emoji} {status}. \n\n"
+                   f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i>")
+        
+        send_telegram_message(chat_id, message)
+        update_order_summary_for_chat_id(chat_id)
+    except Order.DoesNotExist:
+        logger.error(f"Order with id {order_id} does not exist.")
+
 @receiver(post_save, sender=Order)
 def update_order_summary(sender, instance, **kwargs):
     chat_id = instance.telegram_user.chat_id if instance.telegram_user else None
     update_order_summary_for_chat_id(chat_id)
 
-    if kwargs.get('created', False):
+    if kwargs.get('submitted', False):
         message = (f"<b>Вітаємо!</b>\n\n"
                    f"Ви створили нове замовлення № <b>{instance.id}</b> на сайті "
                    f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>.\n"
@@ -122,7 +162,6 @@ def update_order_summary(sender, instance, **kwargs):
         message = (f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>.\n"
                    f"Status of order #{instance.id} has been changed to {emoji} {status}. \n\n"
                    f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i>")
-
         send_telegram_message(chat_id, message)
 
 @receiver(post_save, sender=OrderItem)
