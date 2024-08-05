@@ -52,60 +52,67 @@ class OrderItemSerializer(serializers.ModelSerializer):
         product_id = validated_data.pop('product_id')
         order_item = OrderItem.objects.create(product_id=product_id, **validated_data)
         return order_item
-
 class OrderSerializer(serializers.ModelSerializer):
     order_items = OrderItemSerializer(many=True)
-    chat_id = serializers.CharField(required=False, allow_blank=True)
+    telegram_user = TelegramUserSerializer(required=False, allow_null=True)
 
     class Meta:
         model = Order
         fields = [
             'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments',
             'submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at', 'parent_order',
-            'present', 'status', 'order_items', 'chat_id'
+            'present', 'status', 'order_items', 'telegram_user'
         ]
+
     def create(self, validated_data):
-        items_data = validated_data.pop('order_items')
+        order_items_data = validated_data.pop('order_items', [])
         telegram_user_data = validated_data.pop('telegram_user', None)
         
+        # Create or get TelegramUser
         if telegram_user_data:
             telegram_user, created = TelegramUser.objects.get_or_create(
-                phone=telegram_user_data['phone'],
-                defaults={'chat_id': telegram_user_data['chat_id']}
+                phone=telegram_user_data.get('phone'),
+                defaults={'chat_id': telegram_user_data.get('chat_id')}
             )
         else:
             telegram_user = None
 
+        # Create Order instance
         order = Order.objects.create(telegram_user=telegram_user, **validated_data)
 
-        for item_data in items_data:
+        # Create OrderItems with the newly created order instance
+        for item_data in order_items_data:
             product_id = item_data.pop('product_id')
             OrderItem.objects.create(order=order, product_id=product_id, **item_data)
 
         return order
 
     def update(self, instance, validated_data):
-        items_data = validated_data.pop('order_items', [])
+        order_items_data = validated_data.pop('order_items', [])
         telegram_user_data = validated_data.pop('telegram_user', None)
 
+        # Update TelegramUser
         if telegram_user_data:
             telegram_user, created = TelegramUser.objects.get_or_create(
-                phone=telegram_user_data['phone'],
-                defaults={'chat_id': telegram_user_data['chat_id']}
+                phone=telegram_user_data.get('phone'),
+                defaults={'chat_id': telegram_user_data.get('chat_id')}
             )
             instance.telegram_user = telegram_user
 
+        # Update Order fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
+        # Handle status update
         new_status = validated_data.get('status', instance.status)
         if new_status and new_status != instance.status:
             instance.update_status(new_status)
 
         instance.save()
 
+        # Update OrderItems
         instance.order_items.all().delete()
-        for item_data in items_data:
+        for item_data in order_items_data:
             product_id = item_data.pop('product_id')
             OrderItem.objects.create(order=instance, product_id=product_id, **item_data)
 

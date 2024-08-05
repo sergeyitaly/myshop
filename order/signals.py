@@ -84,7 +84,6 @@ def update_order_summary_for_chat_id(chat_id):
         cache.set(cache_key, order_summary, timeout=60 * 15)
         logger.debug(f"OrderSummary saved and cached: {order_summary}")
 
-
 def send_telegram_message(chat_id, message):
     bot_token = settings.TELEGRAM_BOT_TOKEN
     url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
@@ -143,32 +142,42 @@ def update_order_status_with_notification(order_id, new_status, status_field, ch
     except Order.DoesNotExist:
         logger.error(f"Order with id {order_id} does not exist.")
 
-@receiver(post_save, sender=Order)
-def update_order_summary(sender, instance, **kwargs):
-    chat_id = instance.telegram_user.chat_id if instance.telegram_user else None
-    update_order_summary_for_chat_id(chat_id)
 
-    if kwargs.get('submitted', False):
-        message = (f"<b>Вітаємо!</b>\n\n"
-                   f"Ви створили нове замовлення № <b>{instance.id}</b> на сайті "
-                   f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>.\n"
-                   f"Деталі замовлення відправлено на email {instance.email}.\n\n"
-                   f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i>\n\n"
-                   f"<b>Дякуємо, що обрали нас!</b> 🌟")
-        send_telegram_message(chat_id, message)
-    else:
-        status = instance.status.capitalize()
-        emoji = STATUS_EMOJIS.get(instance.status, '')
-        message = (f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>.\n"
-                   f"Status of order #{instance.id} has been changed to {emoji} {status}. \n\n"
-                   f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i>")
-        send_telegram_message(chat_id, message)
+@receiver(post_save, sender=Order)
+def update_order_summary(sender, instance, created, **kwargs):
+    # Ensure that the instance has a primary key
+    logger.debug(f"Order instance saved: {instance.id}")
+
+    if instance.pk:
+        chat_id = instance.telegram_user.chat_id if instance.telegram_user else None
+
+        if chat_id:
+            if created:
+                # Handle new order creation
+                message = (f"<b>Вітаємо!</b>\n\n"
+                           f"Ви створили нове замовлення № <b>{instance.id}</b> на сайті "
+                           f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>.\n"
+                           f"Деталі замовлення відправлено на email {instance.email}.\n\n"
+                           f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i>\n\n"
+                           f"<b>Дякуємо, що обрали нас!</b> 🌟")
+                send_telegram_message(chat_id, message)
+            else:
+                # Handle status update for existing orders
+                status = instance.status.capitalize()
+                emoji = STATUS_EMOJIS.get(instance.status, '')
+                message = (f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>.\n"
+                           f"Status of order #{instance.id} has been changed to {emoji} {status}. \n\n"
+                           f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i>")
+                send_telegram_message(chat_id, message)
+
+            update_order_summary_for_chat_id(chat_id)
 
 @receiver(post_save, sender=OrderItem)
 def update_order_summary_on_order_item_change(sender, instance, **kwargs):
     order = instance.order
     chat_id = order.telegram_user.chat_id if order.telegram_user else None
-    update_order_summary_for_chat_id(chat_id)
+    if chat_id:
+        update_order_summary_for_chat_id(chat_id)
 
 @receiver(post_delete, sender=Order)
 def remove_order_from_summary(sender, instance, **kwargs):
@@ -188,4 +197,5 @@ def remove_order_from_summary(sender, instance, **kwargs):
 def update_order_summary_on_order_item_delete(sender, instance, **kwargs):
     order = instance.order
     chat_id = order.telegram_user.chat_id if order.telegram_user else None
-    update_order_summary_for_chat_id(chat_id)
+    if chat_id:
+        update_order_summary_for_chat_id(chat_id)

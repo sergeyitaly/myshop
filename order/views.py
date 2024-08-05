@@ -200,9 +200,7 @@ class TelegramWebhook(View):
             if not phone:
                 logger.error("No phone number in contact information")
                 return JsonResponse({'status': 'error', 'message': 'No phone number in contact information'}, status=400)
-
             logger.debug(f"Extracted phone: {phone}, chat_id: {chat_id}")
-
             # Update or create TelegramUser
             telegram_user, created = TelegramUser.objects.update_or_create(
                 phone=phone, defaults={'chat_id': chat_id}
@@ -211,14 +209,6 @@ class TelegramWebhook(View):
                 logger.debug(f"Created new TelegramUser: {telegram_user}")
             else:
                 logger.debug(f"Updated existing TelegramUser: {telegram_user}")
-
-            # Retrieve the latest order associated with the telegram_user
-            order = Order.objects.filter(telegram_user=telegram_user).last()
-            if order:
-                send_telegram_message(order.id, chat_id, order.email)
-            else:
-                logger.warning(f"No order found for TelegramUser with chat_id {chat_id}. No Telegram message sent.")
-
             return JsonResponse({'status': 'ok'})
         except json.JSONDecodeError as e:
             logger.error(f"JSONDecodeError: {e}")
@@ -233,39 +223,6 @@ class TelegramWebhook(View):
 telegram_webhook = TelegramWebhook.as_view()
 
 
-def send_telegram_message(order_id, chat_id, email):
-    bot_token = settings.TELEGRAM_BOT_TOKEN
-    url = f'https://api.telegram.org/bot{bot_token}/sendMessage'   
-    sayings_file_path = settings.SAYINGS_FILE_PATH
-    random_saying = get_random_saying(sayings_file_path)
-    
-    message = (f"<b>Вітаємо!</b>\n\n"
-               f"Ви створили нове замовлення № <b>{order_id}</b> на сайті "
-               f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>.\n"
-               f"Деталі замовлення відправлено на email {email}.\n\n"
-               f"<i>💬 {random_saying}</i>\n\n"  
-               f"<b>Дякуємо, що обрали нас!</b> 🌟")
-        
-    payload = {
-        'chat_id': chat_id,
-        'text': message,
-        'parse_mode': 'HTML'
-    }
-    
-    try:
-        response = requests.post(url, data=payload)
-        response.raise_for_status()
-        result = response.json()
-        if not result.get('ok'):
-            logger.error(f"Telegram API returned an error: {result.get('description')}")
-        else:
-            logger.info(f"Telegram message sent successfully: {result}")
-        return result
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Request to Telegram API failed: {e}")
-        raise
-
-
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_order(request):
@@ -274,28 +231,18 @@ def create_order(request):
     try:
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
-            order = serializer.save()
-            order_items = order.order_items.all()  # Fetch related order items
+            order = serializer.save()  # Save the order
 
+            # Ensure the order instance has a primary key
+            if not order.pk:
+                logger.error("Order instance does not have a primary key after saving.")
+                return Response({'error': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            # Send the confirmation email
             formatted_date = localtime(order.submitted_at).strftime('%Y-%m-%d %H:%M')
-
-            order_details = f"""
-            <p><strong>Замовлення:</strong> № {order.id} на сайті <a href='{settings.VERCEL_DOMAIN}'>KOLORYT!</a></p>
-            <p><strong>Ім'я:</strong> {order.name}</p>
-            <p><strong>Прізвище:</strong> {order.surname}</p>
-            <p><strong>Телефон:</strong> {order.phone}</p>
-            <p><strong>Email:</strong> {order.email}</p>
-            <p><strong>Отримувач той самий:</strong> {"Ні" if order.receiver else "Так"}</p>
-            <p><strong>Коментар:</strong> {order.receiver_comments}</p>
-            <p><strong>Створено:</strong> {formatted_date}</p>
-            <p><strong>Пакування як подарунок:</strong> {"Так" if order.present else "Ні"}</p>
-            """
-
-            if order_items.exists():
-                currency = order_items.first().product.currency
-            else:
-                currency = "UAH"  # Default currency if no order items exist
-
+            order_items = order.order_items.all()
+            currency = order_items.first().product.currency if order_items.exists() else "UAH"
+            total_sum = sum(item.total_sum for item in order_items)
             order_items_rows = "".join([
                 f"""
                 <tr>
@@ -311,8 +258,6 @@ def create_order(request):
                 """
                 for index, item in enumerate(order_items)
             ])
-
-            total_sum = sum(item.total_sum for item in order_items)
 
             order_items_table = f"""
             <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
@@ -334,7 +279,6 @@ def create_order(request):
             </table>
             """
 
-            unsubscribe_link = settings.VERCEL_DOMAIN  # Change to actual unsubscribe URL if available
             email_body = f"""
             <html>
             <head>
@@ -344,18 +288,17 @@ def create_order(request):
             </head>
             <body>
                 <h2>Підтвердження замовлення #{order.id} на сайті KOLORYT</h2>
-                {order_details}
+                {formatted_date}
                 {order_items_table}
                 <p><strong>Разом:</strong> {total_sum} {currency}</p>
                 <p>Якщо у вас є питання, не вагайтеся зв'язатися з нами.</p>
                 <p>З найкращими побажаннями,<br>
                 Команда <a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a></p>
-                <p><a href='{unsubscribe_link}'>Відмовитися від підписок</a></p>
+                <p><a href='{settings.VERCEL_DOMAIN}'>Відмовитися від підписок</a></p>
             </body>
             </html>
             """
 
-            # Send confirmation email
             email = EmailMessage(
                 subject=f'Підтвердження замовлення #{order.id}',
                 body=email_body,
@@ -366,29 +309,14 @@ def create_order(request):
             email.content_subtype = "html"
             email.send(fail_silently=False)
 
-            # Check if chat_id is provided and valid
-            chat_id = request.data.get('chat_id')
-            logger.info(f"Chat ID from request: {chat_id}")
-
-            if chat_id:
-                user = TelegramUser.objects.filter(chat_id=chat_id).first()
-                if user:
-                    # Associate the order with the registered user if needed
-                    order.telegram_user = user
-                    order.save()
-                    logger.info(f"TelegramUser found and associated: {user.chat_id}")
-                    
-                    # Send message logic
-                    send_telegram_message(user.chat_id, "Your order has been created.")
-                else:
-                    logger.warning(f"TelegramUser with chat_id {chat_id} not found.")
-            
-            return Response({'status': 'Order submitted', 'order_id': order.id}, status=status.HTTP_201_CREATED)
+            return Response({'status': 'Order created', 'order_id': order.id}, status=status.HTTP_201_CREATED)
         else:
+            logger.error(f"Order creation failed: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        logger.error(f"Error creating order: {e}")
-        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f"Order creation exception: {e}")
+        return Response({'error': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
