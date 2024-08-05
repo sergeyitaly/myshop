@@ -286,6 +286,13 @@ CACHES = {
     }
 }
 
+CELERY_BEAT_SCHEDULE = {
+    'update-order-statuses-every-10-minutes': {
+        'task': 'order.task.update_order_statuses_task',
+        'schedule': 60,  # 1 minute
+    },
+}
+
 
 LOGGING = {
     'version': 1,
