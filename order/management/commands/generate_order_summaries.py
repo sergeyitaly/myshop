@@ -68,9 +68,9 @@ class Command(BaseCommand):
                 # Create order summary with only the required statuses
                 summary = {
                     'order_id': order.id,
-                    'submitted_at': datetime_to_str(submitted_at),
+                    'order_items': order_data['order_items'],
                     latest_status_field: datetime_to_str(latest_status_timestamp),
-                    'order_items': order_data['order_items']
+                    'submitted_at': datetime_to_str(submitted_at)
                 }
 
                 grouped_orders[chat_id].append(summary)

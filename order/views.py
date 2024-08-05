@@ -46,6 +46,25 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        
+        chat_id = serializer.validated_data.get('chat_id')
+        if not chat_id:
+            logger.error("chat_id is missing in the request data.")
+            return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        self.perform_update(serializer)
+        
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+        
+        return Response(serializer.data)
+
+
 class TelegramUserViewSet(viewsets.ModelViewSet):
     queryset = TelegramUser.objects.all()
     serializer_class = TelegramUserSerializer
@@ -92,6 +111,9 @@ class TelegramUserViewSet(viewsets.ModelViewSet):
 def update_order(request):
     chat_id = request.data.get('chat_id')
     orders = request.data.get('orders')
+
+    if not chat_id:
+        return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
         order_summary = OrderSummary.objects.get(chat_id=chat_id)
@@ -239,13 +261,13 @@ def create_order(request):
             
             # Set chat_id on the order if provided
             if chat_id:
-                order.telegram_user = TelegramUser.objects.filter(chat_id=chat_id).first()
-                order.save(update_fields=['telegram_user'])
-                
-            if not order.pk:
-                logger.error("Order instance does not have a primary key after saving.")
-                return Response({'error': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+                telegram_user = TelegramUser.objects.filter(chat_id=chat_id).first()
+                if telegram_user:
+                    order.telegram_user = telegram_user
+                    order.save(update_fields=['telegram_user'])
+                else:
+                    logger.warning(f"No TelegramUser found with chat_id: {chat_id}")
+            
 
             # Send the confirmation email
             formatted_date = localtime(order.submitted_at).strftime('%Y-%m-%d %H:%M')
