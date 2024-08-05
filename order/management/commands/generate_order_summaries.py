@@ -48,7 +48,7 @@ class Command(BaseCommand):
                     'submitted_at': submitted_at,
                     'created_at': created_at,
                     'processed_at': processed_at,
-                    'completed_at': complete_at,
+                    'complete_at': complete_at,
                     'canceled_at': canceled_at
                 }
 

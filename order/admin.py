@@ -34,39 +34,33 @@ class TelegramUserAdmin(admin.ModelAdmin):
     list_display = ('phone', 'chat_id')
     search_fields = ('phone', 'chat_id')
 
-
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 1
-    readonly_fields = ['product_photo', 'product_name', 'collection_name', 'quantity', 'size', 'color', 'item_price', 'subtotal']
+    readonly_fields = ['product_photo', 'product_name', 'collection_name', 'size', 'color', 'total_sum']
 
     def product_photo(self, obj):
-        return mark_safe(f'<img src="{obj.product.photo.url}" style="width: 50px; height: 50px; object-fit: cover;" />')
-    product_photo.short_description = 'Фото продукту'
+        if obj.product.photo:
+            return mark_safe(f'<img src="{obj.product.photo.url}" style="width: 50px; height: 50px; object-fit: cover;" />')
+        return 'No Image'
+    product_photo.short_description = 'Product Photo'
 
     def product_name(self, obj):
         return obj.product.name
-    product_name.short_description = 'Назва продукту'
+    product_name.short_description = 'Product Name'
 
     def collection_name(self, obj):
         return obj.product.collection.name
-    collection_name.short_description = 'Колекція'
+    collection_name.short_description = 'Collection'
 
     def size(self, obj):
         return obj.product.size
-    size.short_description = 'Розмір'
+    size.short_description = 'Size'
 
     def color(self, obj):
         return mark_safe(f'<div style="display: flex; align-items: center;"><div style="width: 10px; height: 10px; background-color: {obj.product.color_value}; margin-right: 5px;"></div>{obj.product.color_name}</div>')
-    color.short_description = 'Колір'
+    color.short_description = 'Color'
 
-    def item_price(self, obj):
-        return obj.product.price
-    item_price.short_description = 'Ціна'
-
-    def subtotal(self, obj):
-        return obj.quantity * obj.product.price
-    subtotal.short_description = 'Subtotal'
 
 class TelegramUserFilter(admin.SimpleListFilter):
     title = 'chat_id'

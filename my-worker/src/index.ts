@@ -663,7 +663,6 @@ async function processCallbackQuery(callbackQuery: any): Promise<void> {
     await sendAllOrdersDetails(chatId);
   } else if (callbackData === 'Start') {
     await updateGlobalAuthToken();
-    await sendChatIdAndPhoneToVercel(phoneNumber, chatId);
     await sendMessage(chatId, '📞 To get notifications, please share your phone number.');
     await sendContactRequest(chatId);
   } else {
@@ -909,7 +908,7 @@ interface Order {
     total_sum: number;
   }[];
   TelegramUser: TelegramUser[]; // Include this field
-  email: string;
+  email?: string;
   order_summary: OrderSummary;
 }
 interface OrderSummary {
@@ -953,16 +952,27 @@ function isSummaryResponse(obj: any): obj is SummaryResponse {
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
-  const diffMs = Math.abs(now.getTime() - date.getTime());
+
+  // Calculate the time difference in milliseconds
+  const diffMs = now.getTime() - date.getTime();
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
-  return `${diffHours}h ${diffMinutes}m ago (${date.toLocaleDateString()} ${date.toLocaleTimeString()})`;
+  // Ensure the difference is positive
+  const absHours = Math.abs(diffHours);
+  const absMinutes = Math.abs(diffMinutes);
+
+  // Format difference
+  const formattedDiff = `${absHours}h ${absMinutes}m ago`;
+
+  // Format the original date
+  const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+
+  return `on ${formattedDate}`;
 }
 
 
 
-// Updated function to send order details
 async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<void> {
   const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
   const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/?chat_id=${encodeURIComponent(chatId)}`;
@@ -1001,7 +1011,6 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
     const summaryResponse = await response.json() as { orders: Order[] };
     console.log(`Order summary retrieved: ${JSON.stringify(summaryResponse.orders)}`);
 
-    // Get the first order from the summary response
     const matchingOrder = summaryResponse.orders[0]; // Directly get the first order
 
     if (matchingOrder) {
@@ -1019,24 +1028,20 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
         'canceled': matchingOrder.canceled_at ?? null
       };
 
-      const statusSummary = Object.entries(statusDates)
+      // Get the latest status entry
+      const latestStatusEntry = Object.entries(statusDates)
         .filter(([_, date]) => date !== null)
         .sort(([_, dateA], [__, dateB]) => new Date(dateB!).getTime() - new Date(dateA!).getTime())
         .map(([status, date]) => {
           const statusEmoji = statusEmojis[status] || '🔍';
           return `${statusEmoji} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
-        })
-        .join('\n');
+        })[0]; // Get the latest status only
 
       const orderDetailsMessage = `
         Order ID: ${matchingOrder.order_id}
-        Email: ${matchingOrder.email}
-        
         Order Items:
         ${orderItemsSummary}
-        
-        Status History:
-        ${statusSummary.split('\n').map(line => `   ${line}`).join('\n')}
+        ${latestStatusEntry ? `   ${latestStatusEntry}` : ''}
       `;
 
       await sendMessage(chatId, `Thank you! Here are your order details:\n${orderDetailsMessage}`);
@@ -1049,7 +1054,6 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
     await sendMessage(chatId, 'An error occurred while retrieving order details. Please try again later.');
   }
 }
-
 
 async function sendAllOrdersDetails(chatId: string): Promise<void> {
   const statusEmojis: { [key: string]: string } = {
@@ -1102,19 +1106,23 @@ async function sendAllOrdersDetails(chatId: string): Promise<void> {
 
     if (Array.isArray(orders) && orders.length > 0) {
       const ordersSummary = orders.map(order => {
-        // Extract the status directly from the provided order summary
-        const statusLine = order.complete_at ? 'complete' :
-                            order.processed_at ? 'processed' :
-                            order.submitted_at ? 'submitted' :
-                            order.created_at ? 'created' :
-                            order.canceled_at ? 'canceled' :
-                            'Unknown';
+        // Determine the latest status
+        const statusDates: { [key: string]: string | null } = {
+          'submitted': order.submitted_at ?? null,
+          'created': order.created_at ?? null,
+          'processed': order.processed_at ?? null,
+          'complete': order.complete_at ?? null,
+          'canceled': order.canceled_at ?? null
+        };
 
-        // Use the predefined emoji based on the status line
-        const statusEmoji = statusEmojis[statusLine] || '🔍'; // Default emoji if status not found
-
-        // Get the latest status timestamp directly from the predefined field
-        const latestStatusTimestamp = order.complete_at || order.processed_at || order.submitted_at || order.created_at || order.canceled_at || 'Unknown';
+        // Get the latest status entry
+        const latestStatusEntry = Object.entries(statusDates)
+          .filter(([_, date]) => date !== null)
+          .sort(([_, dateA], [__, dateB]) => new Date(dateB!).getTime() - new Date(dateA!).getTime())
+          .map(([status, date]) => {
+            const statusEmoji = statusEmojis[status] || '🔍';
+            return `${statusEmoji} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
+          })[0]; // Get the latest status only
 
         // Create a detailed string for each order item
         const orderItemsSummary = (order.order_items || []).map(item =>
@@ -1125,9 +1133,9 @@ async function sendAllOrdersDetails(chatId: string): Promise<void> {
         return `
           Order ID: ${order.order_id || 'Unknown'}
           ${orderItemsSummary ? `Order Items:\n${orderItemsSummary}` : 'No items in this order'}
-          Status: ${statusEmoji} ${statusLine.charAt(0).toUpperCase() + statusLine.slice(1)} ${latestStatusTimestamp}
+          ${latestStatusEntry ? `Status: ${latestStatusEntry}` : 'Status: Unknown'}
         `;
-      }).join('\n');
+      }).join('\n\n'); // Separate orders with two newlines
 
       const messageText = `Here are your orders:\n${ordersSummary}`;
       await sendMessage(chatId, messageText);
@@ -1139,7 +1147,6 @@ async function sendAllOrdersDetails(chatId: string): Promise<void> {
     await sendMessage(chatId, 'An error occurred while retrieving your orders. Please try again later.');
   }
 }
-
 
 
 
