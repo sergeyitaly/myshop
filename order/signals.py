@@ -3,6 +3,7 @@ import random
 import requests
 import logging
 from django.utils import timezone
+from datetime import datetime
 
 from django.conf import settings
 from django.core.cache import cache
@@ -12,7 +13,7 @@ from django.utils.timezone import is_aware, make_naive
 from django.utils.dateparse import parse_datetime
 
 from .models import Order, OrderSummary, OrderItem
-from .serializers import OrderItemSerializer
+from .serializers import *
 
 logger = logging.getLogger(__name__)
 STATUS_EMOJIS = {
@@ -44,21 +45,18 @@ def safe_make_naive(dt):
 
 def get_order_summary(order):
     submitted_at = safe_make_naive(order.submitted_at)
-    created_at = safe_make_naive(order.created_at)
-    processed_at = safe_make_naive(order.processed_at)
-    complete_at = safe_make_naive(order.complete_at)
-    canceled_at = safe_make_naive(order.canceled_at)
+    last_status_time = safe_make_naive(
+        order.canceled_at or order.complete_at or order.processed_at or order.created_at or order.submitted_at
+    )
 
     order_items_data = OrderItemSerializer(order.order_items.all(), many=True).data
 
     summary = {
         'order_id': order.id,
+        'order_items': order_items_data,
+        'last_status': order.status,
         'submitted_at': datetime_to_str(submitted_at),
-        'created_at': datetime_to_str(created_at),
-        'processed_at': datetime_to_str(processed_at),
-        'complete_at': datetime_to_str(complete_at),
-        'canceled_at': datetime_to_str(canceled_at),
-        'order_items': order_items_data
+        'last_status_time': datetime_to_str(last_status_time)
     }
     return summary
 
@@ -69,16 +67,53 @@ def update_order_summary_for_chat_id(chat_id):
         order_summary, created = OrderSummary.objects.get_or_create(chat_id=chat_id)
         logger.debug(f"OrderSummary created: {created}")
 
-        orders = Order.objects.filter(telegram_user__chat_id=chat_id)
-        
-        order_summaries = [get_order_summary(order) for order in orders]
-        
-        order_summary.orders = order_summaries
+        orders = Order.objects.filter(telegram_user__chat_id=chat_id).prefetch_related('order_items__product')
+
+        grouped_orders = []
+        for order in orders:
+            submitted_at = safe_make_naive(order.submitted_at)
+            created_at = safe_make_naive(order.created_at)
+            processed_at = safe_make_naive(order.processed_at)
+            complete_at = safe_make_naive(order.complete_at)
+            canceled_at = safe_make_naive(order.canceled_at)
+
+            statuses = {
+                'submitted_at': submitted_at,
+                'created_at': created_at,
+                'processed_at': processed_at,
+                'complete_at': complete_at,
+                'canceled_at': canceled_at
+            }
+
+            latest_status_field = max(
+                statuses,
+                key=lambda s: statuses[s] or datetime.min
+            )
+            latest_status_timestamp = statuses[latest_status_field]
+
+            # Serialize order and its items
+            serializer = OrderSerializer(order)
+            order_data = serializer.data
+
+            logger.info(f'Order {order.id} has {len(order_data["order_items"])} items.')
+
+            summary = {
+                'order_id': order.id,
+                'order_items': order_data['order_items'],
+                latest_status_field: datetime_to_str(latest_status_timestamp),
+                'submitted_at': datetime_to_str(submitted_at)
+            }
+
+            grouped_orders.append(summary)
+
+        # Update OrderSummary
+        order_summary.orders = grouped_orders
         order_summary.save()
 
         cache_key = f'order_summary_{chat_id}'
         cache.set(cache_key, order_summary, timeout=60 * 15)
         logger.debug(f"OrderSummary saved and cached: {order_summary}")
+
 
 def send_telegram_message(chat_id, message):
     bot_token = settings.TELEGRAM_BOT_TOKEN
@@ -168,6 +203,8 @@ def update_order_summary_on_order_item_change(sender, instance, **kwargs):
     order = instance.order
     chat_id = order.telegram_user.chat_id if order.telegram_user else None
     if chat_id:
+        logger.debug(f"OrderItem change detected for Order ID: {order.id}, updating summary for chat_id: {chat_id}")
+
         update_order_summary_for_chat_id(chat_id)
 
 @receiver(post_delete, sender=Order)
@@ -175,6 +212,8 @@ def remove_order_from_summary(sender, instance, **kwargs):
     chat_id = instance.telegram_user.chat_id if instance.telegram_user else None
     if chat_id:
         try:
+            logger.debug(f"Removing Order ID: {instance.id} from summary for chat_id: {chat_id}")
+
             order_summary = OrderSummary.objects.get(chat_id=chat_id)
             order_summary.orders = [order for order in order_summary.orders if order['order_id'] != instance.id]
             order_summary.save()
@@ -190,3 +229,4 @@ def update_order_summary_on_order_item_delete(sender, instance, **kwargs):
     chat_id = order.telegram_user.chat_id if order.telegram_user else None
     if chat_id:
         update_order_summary_for_chat_id(chat_id)
+        logger.debug(f"OrderItem deleted for Order ID: {order.id}, updating summary for chat_id: {chat_id}")
