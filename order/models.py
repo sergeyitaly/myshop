@@ -4,6 +4,8 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.utils import timezone
 import logging
 import decimal
+from decimal import Decimal
+
 
 class TelegramUser(models.Model):
     phone = models.CharField(max_length=15, unique=True)  # Store phone numbers
@@ -70,6 +72,17 @@ class Order(models.Model):
         self.status = new_status
         self.save()
 
+    def save(self, *args, **kwargs):
+        # Example: Calculate total amount based on related OrderItems
+        self.total_amount = sum(item.total_sum for item in self.order_items.all())
+        
+        # Ensure all other fields are not None before saving
+        if self.total_amount is None:
+            self.total_amount = Decimal('0.00')  # Default value if necessary
+
+        # Call the parent class's save method
+        super().save(*args, **kwargs)
+
     class Meta:
         ordering = ('-submitted_at',)
         verbose_name = 'Order'
@@ -97,15 +110,15 @@ class OrderSummary(models.Model):
             return float(data)
         return data
     
-
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='order_items', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
-    total_sum = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_sum = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
 
     def save(self, *args, **kwargs):
-        self.total_sum = self.product.price * self.quantity
+        if self.product:
+            self.total_sum = self.quantity * self.product.price
         super().save(*args, **kwargs)
 
     def __str__(self):
