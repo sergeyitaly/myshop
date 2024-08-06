@@ -132,12 +132,18 @@ class OrderAdmin(admin.ModelAdmin):
                     obj.complete_at = timezone.now()
                 elif obj.status == 'canceled':
                     obj.canceled_at = timezone.now()
+                order_items = obj.order_items.all()
+
+            # Ensure that obj.telegram_user is not None and has chat_id attribute
+            if obj.telegram_user and obj.telegram_user.chat_id:
  # Send notification about status change
                 update_order_status_with_notification(
                     obj.id,
+                    order_items,
                     obj.status,
                     f'{obj.status}_at',
-                    obj.telegram_user.chat_id)
+                    obj.telegram_user.chat_id
+                )
 
         super().save_model(request, obj, form, change)
 
