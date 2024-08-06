@@ -294,7 +294,7 @@ CELERY_IMPORTS = ('order.tasks',)
 CELERY_BEAT_SCHEDULE = {
     'update-order-statuses-every-5-minutes': {
         'task': 'order.tasks.update_order_statuses_task',
-        'schedule': crontab(minute='*/5'),  # Run every 5 minutes
+        'schedule': crontab(minute='*/1'),  # Run every 5 minutes
     },
 }
 
