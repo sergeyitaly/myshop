@@ -85,15 +85,6 @@ class ProductListFilter(generics.ListAPIView):
             price_max=price_max
         )
         return self.filterset.qs
-        
-        self.filterset = self.filterset_class(
-            self.request.GET, 
-            queryset=queryset,
-            request=self.request,
-            price_min=price_min,
-            price_max=price_max
-        )
-        return self.filterset.qs
 
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
