@@ -54,3 +54,6 @@ class Command(BaseCommand):
             self.stderr.write(self.style.ERROR(f'File not found error: {e}'))
         except Exception as e:
             self.stderr.write(self.style.ERROR(f'An unexpected error occurred: {e}'))
+
+
+# python manage.py restore_db db_backup.dump

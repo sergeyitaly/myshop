@@ -226,29 +226,34 @@ def create_order(request):
     try:
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
-            # Extract chat_id from request data if available
-            chat_id = request.data.get('chat_id')
-            
-            # Save the order
+            # Save the order first
             order = serializer.save()
-            
-            # Set chat_id on the order if provided
-            if chat_id:
-                telegram_user = TelegramUser.objects.filter(chat_id=chat_id).first()
+
+            # Extract phone and get chat_id
+            phone = request.data.get('phone')
+            try:
+                telegram_user = TelegramUser.objects.get(phone=phone)
                 if telegram_user:
                     order.telegram_user = telegram_user
                     order.save(update_fields=['telegram_user'])
-                    
+
+                    # Prepare order items
+                    order_items = order.order_items.all()
+
                     # Notify the user about the new order status
                     update_order_status_with_notification(
                         order.id,
+                        order_items,
                         'submitted',  # Assuming 'submitted' is the initial status
                         'submitted_at',
-                        chat_id
+                        telegram_user.chat_id
                     )
                 else:
-                    logger.warning(f"No TelegramUser found with chat_id: {chat_id}")
-            
+                    logger.warning(f"No TelegramUser found with phone: {phone}")
+
+            except TelegramUser.DoesNotExist:
+                logger.warning(f"No TelegramUser found with phone: {phone}")
+
 
             # Send the confirmation email
             formatted_date = localtime(order.submitted_at).strftime('%Y-%m-%d %H:%M')

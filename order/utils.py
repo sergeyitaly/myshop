@@ -1,6 +1,8 @@
+# utils.py
 from django.utils import timezone
 from order.models import Order
-from order.signals import update_order_status_with_notification
+from .notifications import update_order_status_with_notification
+from .shared_utils import safe_make_naive, datetime_to_str
 
 def update_order_statuses():
     now = timezone.now()
