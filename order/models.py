@@ -38,7 +38,7 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='submitted', db_index=True)
     parent_order = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     present = models.BooleanField(null=True, help_text='Package as a present')
-    telegram_user = models.ForeignKey(TelegramUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders')
+    telegram_user = models.ForeignKey(TelegramUser, on_delete=models.SET_NULL, null=True, blank=True)
     @property
     def chat_id(self):
         return self.telegram_user.chat_id if self.telegram_user else None
@@ -75,6 +75,21 @@ class Order(models.Model):
     def save(self, *args, **kwargs):
         # Call the parent class's save method
         super().save(*args, **kwargs)
+                # Update or create the OrderSummary record
+        if self.chat_id:
+            order_summary, created = OrderSummary.objects.get_or_create(chat_id=self.chat_id)
+            orders = order_summary.orders or []
+            order_data = {
+                'order_id': self.id,
+                'status': self.status,
+                'created_at': self.created_at.isoformat() if self.created_at else None,
+                'processed_at': self.processed_at.isoformat() if self.processed_at else None,
+                'complete_at': self.complete_at.isoformat() if self.complete_at else None,
+                'canceled_at': self.canceled_at.isoformat() if self.canceled_at else None,
+            }
+            orders.append(order_data)
+            order_summary.orders = order_summary._convert_decimals(orders)
+            order_summary.save()
 
     class Meta:
         ordering = ('-submitted_at',)

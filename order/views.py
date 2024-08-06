@@ -23,6 +23,9 @@ import random
 import os
 from django.http import JsonResponse
 from rest_framework.decorators import action
+from .signals import update_order_status_with_notification
+
+
 
 logger = logging.getLogger(__name__)
 def health_check(request):
@@ -177,24 +180,6 @@ class OrderViewSet(viewsets.ModelViewSet):
             logger.error(f"Error fetching orders: {e}")
             return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-def get_random_saying(file_path):
-    """Read sayings from a file and return a single random saying."""
-    if not os.path.exists(file_path):
-        logger.error(f"Failed to read sayings file: [Errno 2] No such file or directory: '{file_path}'")
-        return "No sayings available."
-    
-    try:
-        with open(file_path, 'r', encoding='utf-8') as file:
-            sayings = [line.strip() for line in file if line.strip()]
-        
-        if not sayings:
-            logger.error("Sayings file is empty.")
-            return "No sayings available."
-        
-        return random.choice(sayings)
-    except Exception as e:
-        logger.error(f"Error reading sayings file: {e}")
-        return "No sayings available."
     
 def set_telegram_webhook():
     url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/setWebhook"
@@ -209,37 +194,25 @@ class TelegramWebhook(View):
     def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
-            logger.debug(f"Incoming data: {data}")
-
             chat_id = data['message']['chat']['id']
             contact = data['message'].get('contact')
 
             if not contact:
-                logger.error("No contact information in message")
                 return JsonResponse({'status': 'error', 'message': 'No contact information'}, status=400)
             
             phone = contact.get('phone_number')
             if not phone:
-                logger.error("No phone number in contact information")
                 return JsonResponse({'status': 'error', 'message': 'No phone number in contact information'}, status=400)
-            logger.debug(f"Extracted phone: {phone}, chat_id: {chat_id}")
-            # Update or create TelegramUser
+            
             telegram_user, created = TelegramUser.objects.update_or_create(
                 phone=phone, defaults={'chat_id': chat_id}
             )
-            if created:
-                logger.debug(f"Created new TelegramUser: {telegram_user}")
-            else:
-                logger.debug(f"Updated existing TelegramUser: {telegram_user}")
             return JsonResponse({'status': 'ok'})
         except json.JSONDecodeError as e:
-            logger.error(f"JSONDecodeError: {e}")
             return JsonResponse({'status': 'error', 'message': 'Invalid JSON format'}, status=400)
         except KeyError as e:
-            logger.error(f"KeyError: {e}")
             return JsonResponse({'status': 'error', 'message': 'Missing required field'}, status=400)
         except Exception as e:
-            logger.error(f"Unexpected error: {e}")
             return JsonResponse({'status': 'error', 'message': 'Internal server error'}, status=500)
 
 telegram_webhook = TelegramWebhook.as_view()
@@ -265,6 +238,14 @@ def create_order(request):
                 if telegram_user:
                     order.telegram_user = telegram_user
                     order.save(update_fields=['telegram_user'])
+                    
+                    # Notify the user about the new order status
+                    update_order_status_with_notification(
+                        order.id,
+                        'submitted',  # Assuming 'submitted' is the initial status
+                        'submitted_at',
+                        chat_id
+                    )
                 else:
                     logger.warning(f"No TelegramUser found with chat_id: {chat_id}")
             
@@ -400,3 +381,23 @@ def get_order_summary(request):
             return JsonResponse({'error': 'No orders found for this chat ID.'}, status=404)
     else:
         return JsonResponse({'error': 'Chat ID is required.'}, status=400)
+    
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def update_order_summary(request):
+    chat_id = request.data.get('chat_id')
+    orders = request.data.get('orders')
+
+    if not chat_id:
+        return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        order_summary = OrderSummary.objects.get(chat_id=chat_id)
+        order_summary.orders = orders
+        order_summary.save()
+        
+        return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
+    except OrderSummary.DoesNotExist:
+        return Response({"error": "Order summary not found."}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

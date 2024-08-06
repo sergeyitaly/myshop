@@ -1,9 +1,11 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
+from django.db.models import Sum  # Import Sum
 from .models import *
-from .serializers import OrderSerializer  # Import OrderSerializer
 import json
 from django.utils.html import format_html
+from .signals import update_order_status_with_notification
+
 
 @admin.register(OrderSummary)
 class OrderSummaryAdmin(admin.ModelAdmin):
@@ -12,7 +14,6 @@ class OrderSummaryAdmin(admin.ModelAdmin):
     readonly_fields = ('order_summary_pretty',)
 
     def order_summary_pretty(self, obj):
-        # Ensure 'orders' is the correct field name
         return format_html('<pre>{}</pre>', json.dumps(obj.orders, indent=2, ensure_ascii=False))
 
     order_summary_pretty.short_description = 'Order Summary (JSON)'
@@ -24,7 +25,6 @@ class OrderSummaryAdmin(admin.ModelAdmin):
     )
 
     def get_readonly_fields(self, request, obj=None):
-        # Add 'chat_id' to readonly fields when editing an existing object
         if obj:
             return self.readonly_fields + ('chat_id',)
         return self.readonly_fields
@@ -61,13 +61,11 @@ class OrderItemInline(admin.TabularInline):
         return mark_safe(f'<div style="display: flex; align-items: center;"><div style="width: 10px; height: 10px; background-color: {obj.product.color_value}; margin-right: 5px;"></div>{obj.product.color_name}</div>')
     color.short_description = 'Color'
 
-
 class TelegramUserFilter(admin.SimpleListFilter):
     title = 'chat_id'
     parameter_name = 'chat_id'
 
     def lookups(self, request, model_admin):
-        # Create a list of distinct phone numbers with chat_ids
         telegram_users = TelegramUser.objects.all()
         return [
             (f"{user.phone} - {user.chat_id}", f"{user.chat_id}")
@@ -80,7 +78,6 @@ class TelegramUserFilter(admin.SimpleListFilter):
             return queryset.filter(telegram_user__phone=phone, telegram_user__chat_id=chat_id)
         return queryset
 
-
 class OrderAdmin(admin.ModelAdmin):
     list_display = ['id', 'status', 'last_updated', 'phone', 'chat_id']
     readonly_fields = ['id', 'name', 'surname', 'phone', 'email', 'receiver', 'receiver_comments', 'total_quantity', 'total_price', 'submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at', 'chat_id']
@@ -90,8 +87,8 @@ class OrderAdmin(admin.ModelAdmin):
     ]
     list_filter = [
         'status',
-        'phone',  # Add filtering by phone directly
-        TelegramUserFilter,  # Add custom filter for TelegramUser
+        'phone',
+        TelegramUserFilter,
         'created_at',
         'processed_at',
         'complete_at',
@@ -100,10 +97,11 @@ class OrderAdmin(admin.ModelAdmin):
     ]
     search_fields = ['phone', 'email', 'name', 'surname']
     inlines = [OrderItemInline]
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        # Use prefetch_related for related fields if needed
-        return qs.prefetch_related('telegram_user')
+        return qs.prefetch_related('order_items')
+
     def chat_id(self, obj):
         return obj.chat_id if obj.chat_id else None
     chat_id.short_description = 'Chat ID'
@@ -113,27 +111,17 @@ class OrderAdmin(admin.ModelAdmin):
     last_updated.short_description = 'Last Updated'
 
     def total_quantity(self, obj):
-        return sum(item.quantity for item in obj.order_items.all())
+        return obj.order_items.aggregate(total=Sum('quantity'))['total'] or 0
     total_quantity.short_description = 'Total Quantity'
 
     def total_price(self, obj):
-        return sum(item.quantity * item.product.price for item in obj.order_items.all())
+        return obj.order_items.aggregate(total=Sum('quantity') * Sum('product__price'))['total'] or 0
     total_price.short_description = 'Total Price'
 
-#    def get_queryset(self, request):
-#        qs = super().get_queryset(request)
-#        for order in qs:
-#            if order.status == 'created' and not order.created_at:
-#                order.created_at = timezone.now()
-#                order.save(update_fields=['created_at'])
- #       return qs
-
-
     def save_model(self, request, obj, form, change):
-        if change:  # Only if we're editing an existing record
+        if change:
             old_obj = self.model.objects.get(pk=obj.pk)
             if old_obj.status != obj.status or old_obj.status == obj.status:
-                # Update fields based on the new status
                 if obj.status == 'submited':
                     obj.submitted_at = timezone.now()
                 if obj.status == 'created':
@@ -144,9 +132,13 @@ class OrderAdmin(admin.ModelAdmin):
                     obj.complete_at = timezone.now()
                 elif obj.status == 'canceled':
                     obj.canceled_at = timezone.now()
-                # Add more conditions if needed
+ # Send notification about status change
+                update_order_status_with_notification(
+                    obj.id,
+                    obj.status,
+                    f'{obj.status}_at',
+                    obj.telegram_user.chat_id)
 
-        # Call the parent class's save_model method
         super().save_model(request, obj, form, change)
-        
+
 admin.site.register(Order, OrderAdmin)

@@ -268,7 +268,7 @@ USE_TZ = True
 #    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,  # Only show toolbar in DEBUG mode
 # }
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-REDIS_CACHE_LOCATION = os.getenv('REDIS_CACHE_LOCATION')
+REDIS_CACHE_LOCATION = os.getenv('REDIS_CACHE_LOCATION', 'redis://localhost:6379/1')
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
@@ -286,14 +286,18 @@ CACHES = {
         'TIMEOUT': 60 * 15,  # Cache timeout in seconds (e.g., 30 minutes)
     }
 }
+# Celery configuration
+CELERY_BROKER_URL = os.getenv('REDIS_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 
-CELERY_IMPORTS = ('order.task',)
+CELERY_IMPORTS = ('order.tasks',)
 CELERY_BEAT_SCHEDULE = {
     'update-order-statuses-every-5-minutes': {
-        'task': 'order.task.update_order_statuses_task',
+        'task': 'order.tasks.update_order_statuses_task',
         'schedule': crontab(minute='*/5'),  # Run every 5 minutes
     },
 }
+
 
 
 LOGGING = {
