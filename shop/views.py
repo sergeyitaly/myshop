@@ -61,6 +61,8 @@ class ProductListFilter(generics.ListAPIView):
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ProductFilter
+    ordering_fields = ['price', 'popularity', 'sales_count']  # Allow ordering by these fields
+    ordering = ['price']  # Default ordering
 
     def get_queryset(self):
         queryset = super().get_queryset()
