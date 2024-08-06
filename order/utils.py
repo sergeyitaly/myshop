@@ -1,14 +1,14 @@
-# tasks.py
-from celery import shared_task
 from django.utils import timezone
 from order.models import Order
 from order.signals import update_order_status_with_notification
-from order.management.commands.update_order_statuses import Command as UpdateOrderStatusesCommand
 
-@shared_task
-def update_order_statuses_task():
-    command = UpdateOrderStatusesCommand()
-    command.handle()
+def update_order_statuses():
+    now = timezone.now()
+
+    # Update statuses
+    update_submitted_to_created(now)
+    update_created_to_processed(now)
+    update_processed_to_complete(now)
 
 def update_submitted_to_created(now):
     orders = Order.objects.filter(status='submitted')

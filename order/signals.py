@@ -13,7 +13,7 @@ from django.utils.timezone import is_aware, make_naive
 from django.utils.dateparse import parse_datetime
 
 from .models import Order, OrderSummary, OrderItem
-from .serializers import *
+from .serializers import OrderSerializer, OrderItemSerializer
 
 logger = logging.getLogger(__name__)
 STATUS_EMOJIS = {
@@ -30,7 +30,8 @@ def ensure_datetime(value):
     return value
 
 def datetime_to_str(dt):
-    dt = ensure_datetime(dt)
+    if isinstance(dt, str):
+        dt = parse_datetime(dt)
     if dt:
         if is_aware(dt):
             dt = make_naive(dt)
@@ -55,22 +56,56 @@ def get_order_summary(order):
         'order_id': order.id,
         'order_items': order_items_data,
         'last_status': order.status,
-        'submitted_at': datetime_to_str(submitted_at),
-        'last_status_time': datetime_to_str(last_status_time)
+        'last_status_time': datetime_to_str(last_status_time),
+        'submitted_at': datetime_to_str(submitted_at)
     }
     return summary
 
-def update_order_summary_for_chat_id(chat_id):
-    logger.debug(f"Updating order summary for chat_id: {chat_id}")
-    
+def get_chat_id_from_phone(phone_number):
+    try:
+        response = requests.get(f'{settings.VERCEL_DOMAIN}/api/telegram_user', params={'phone': phone_number})
+        response.raise_for_status()
+        data = response.json()
+        
+        if 'chat_id' in data:
+            return data['chat_id']
+        else:
+            logger.error(f"No chat_id found for phone number: {phone_number}")
+            return None
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Request to /api/telegram_user failed: {e}")
+        return None
+
+def update_order_summary_for_phone(phone_number):
+    chat_id = get_chat_id_from_phone(phone_number)
     if chat_id:
+        update_order_summary_for_chat_id(chat_id)
+    else:
+        logger.error(f"Failed to update order summary for phone number: {phone_number}")
+
+def update_order_summary_for_chat_id(chat_id):
+    if not chat_id:
+        logger.error("Chat ID is missing. Cannot update order summary.")
+        return
+
+    logger.debug(f"Updating order summary for chat_id: {chat_id}")
+
+    try:
         order_summary, created = OrderSummary.objects.get_or_create(chat_id=chat_id)
         logger.debug(f"OrderSummary created: {created}")
 
         orders = Order.objects.filter(telegram_user__chat_id=chat_id).prefetch_related('order_items__product')
 
+        if not orders.exists():
+            logger.error(f"No orders found for chat_id: {chat_id}")
+            return
+
         grouped_orders = []
         for order in orders:
+            if not order.telegram_user:
+                logger.error(f"TelegramUser for Order ID {order.id} not found. Skipping.")
+                continue
+
             submitted_at = safe_make_naive(order.submitted_at)
             created_at = safe_make_naive(order.created_at)
             processed_at = safe_make_naive(order.processed_at)
@@ -91,7 +126,6 @@ def update_order_summary_for_chat_id(chat_id):
             )
             latest_status_timestamp = statuses[latest_status_field]
 
-            # Serialize order and its items
             serializer = OrderSerializer(order)
             order_data = serializer.data
 
@@ -114,11 +148,13 @@ def update_order_summary_for_chat_id(chat_id):
         cache.set(cache_key, order_summary, timeout=60 * 15)
         logger.debug(f"OrderSummary saved and cached: {order_summary}")
 
+    except Exception as e:
+        logger.error(f"Error updating OrderSummary for chat_id {chat_id}: {e}")
 
 def send_telegram_message(chat_id, message):
     bot_token = settings.TELEGRAM_BOT_TOKEN
     url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
-        
+    
     payload = {
         'chat_id': chat_id,
         'text': message,
@@ -137,6 +173,7 @@ def send_telegram_message(chat_id, message):
     except requests.exceptions.RequestException as e:
         logger.error(f"Request to Telegram API failed: {e}")
         raise
+
 
 def get_random_saying(file_path):
     if not os.path.exists(file_path):
@@ -176,57 +213,58 @@ def update_order_status_with_notification(order_id, new_status, status_field, ch
 
 @receiver(post_save, sender=Order)
 def update_order_summary(sender, instance, created, **kwargs):
-    if instance.pk:
-        chat_id = instance.telegram_user.chat_id if instance.telegram_user else None
-
-        if chat_id:
-            if created:
-                message = (f"<b>Вітаємо!</b>\n\n"
-                           f"Ви створили нове замовлення № <b>{instance.id}</b> на сайті "
-                           f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>.\n"
-                           f"Деталі замовлення відправлено на email {instance.email}.\n\n"
-                           f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i>\n\n"
-                           f"<b>Дякуємо, що обрали нас!</b> 🌟")
-                send_telegram_message(chat_id, message)
+    if created:
+        phone_number = instance.phone
+        if phone_number:
+            chat_id = get_chat_id_from_phone(phone_number)
+            if chat_id:
+                update_order_status_with_notification(
+                    instance.id,
+                    instance.status,
+                    f'{instance.status}_at',
+                    chat_id
+                )
             else:
-                status = instance.status.capitalize()
-                emoji = STATUS_EMOJIS.get(instance.status, '')
-                message = (f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>.\n"
-                           f"Status of order #{instance.id} has been changed to {emoji} {status}. \n\n"
-                           f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i>")
-                send_telegram_message(chat_id, message)
-
-            update_order_summary_for_chat_id(chat_id)
+                logger.error(f"No chat_id found for phone number: {phone_number}")
+    else:
+        # Handle status changes if needed
+        pass
 
 @receiver(post_save, sender=OrderItem)
 def update_order_summary_on_order_item_change(sender, instance, **kwargs):
     order = instance.order
-    chat_id = order.telegram_user.chat_id if order.telegram_user else None
-    if chat_id:
-        logger.debug(f"OrderItem change detected for Order ID: {order.id}, updating summary for chat_id: {chat_id}")
-
-        update_order_summary_for_chat_id(chat_id)
+    phone_number = order.phone  # Make sure this field matches your model
+    if phone_number:
+        chat_id = get_chat_id_from_phone(phone_number)
+        if chat_id:
+            logger.debug(f"OrderItem change detected for Order ID: {order.id}, updating summary for chat_id: {chat_id}")
+            update_order_summary_for_chat_id(chat_id)
 
 @receiver(post_delete, sender=Order)
 def remove_order_from_summary(sender, instance, **kwargs):
-    chat_id = instance.telegram_user.chat_id if instance.telegram_user else None
-    if chat_id:
-        try:
-            logger.debug(f"Removing Order ID: {instance.id} from summary for chat_id: {chat_id}")
+    phone_number = instance.phone  # Make sure this field matches your model
+    if phone_number:
+        chat_id = get_chat_id_from_phone(phone_number)
+        if chat_id:
+            try:
+                logger.debug(f"Removing Order ID: {instance.id} from summary for chat_id: {chat_id}")
 
-            order_summary = OrderSummary.objects.get(chat_id=chat_id)
-            order_summary.orders = [order for order in order_summary.orders if order['order_id'] != instance.id]
-            order_summary.save()
-            
-            cache_key = f'order_summary_{chat_id}'
-            cache.delete(cache_key)
-        except OrderSummary.DoesNotExist:
-            pass
+                order_summary = OrderSummary.objects.get(chat_id=chat_id)
+                order_summary.orders = [order for order in order_summary.orders if order['order_id'] != instance.id]
+                order_summary.save()
+                
+                cache_key = f'order_summary_{chat_id}'
+                cache.delete(cache_key)
+            except OrderSummary.DoesNotExist:
+                pass
 
 @receiver(post_delete, sender=OrderItem)
 def update_order_summary_on_order_item_delete(sender, instance, **kwargs):
     order = instance.order
-    chat_id = order.telegram_user.chat_id if order.telegram_user else None
-    if chat_id:
-        update_order_summary_for_chat_id(chat_id)
-        logger.debug(f"OrderItem deleted for Order ID: {order.id}, updating summary for chat_id: {chat_id}")
+    phone_number = order.phone  # Make sure this field matches your model
+    if phone_number:
+        chat_id = get_chat_id_from_phone(phone_number)
+        if chat_id:
+            update_order_summary_for_chat_id(chat_id)
+
+            logger.debug(f"OrderItem deleted for Order ID: {order.id}, updating summary for chat_id: {chat_id}")

@@ -10,6 +10,7 @@ from django_filters import rest_framework as filters
 from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer
 from .models import Product, Collection, Category
 from .filters import ProductFilter
+from django.db.models import Min, Max
 
 class CustomPageNumberPagination(PageNumberPagination):
     default_page_size = 4
@@ -52,6 +53,45 @@ class ProductList(generics.ListCreateAPIView):
     filterset_class = ProductFilter
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'price', 'sales_count', 'popularity']
+
+class ProductListFilter(generics.ListAPIView):
+    queryset = Product.objects.all()
+    permission_classes = [AllowAny]
+    pagination_class = CustomPageNumberPagination  # Use custom pagination for products
+    serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = ProductFilter
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        price_min = self.request.query_params.get('price_min', None)
+        price_max = self.request.query_params.get('price_max', None)
+        
+        # Calculate default min and max price if not provided
+        if price_min is None or price_max is None:
+            price_range = queryset.aggregate(min_price=Min('price'), max_price=Max('price'))
+            if price_min is None:
+                price_min = price_range['min_price']
+            if price_max is None:
+                price_max = price_range['max_price']
+        
+        self.filterset = self.filterset_class(
+            self.request.GET, 
+            queryset=queryset,
+            request=self.request,
+            price_min=price_min,
+            price_max=price_max
+        )
+        return self.filterset.qs
+        
+        self.filterset = self.filterset_class(
+            self.request.GET, 
+            queryset=queryset,
+            request=self.request,
+            price_min=price_min,
+            price_max=price_max
+        )
+        return self.filterset.qs
 
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
