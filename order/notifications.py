@@ -13,11 +13,11 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 STATUS_EMOJIS = {
-    'submitted': '✅',
-    'created': '🛠️',
-    'processed': '📦',
-    'complete': '🎉',
-    'canceled': '❌',
+    'submitted': '📝',
+    'created': '🆕',
+    'processed': '🔄',
+    'complete': '✅',
+    'canceled': '❌'
 }
 
 def send_telegram_message(chat_id, message):

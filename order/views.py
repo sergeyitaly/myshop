@@ -377,15 +377,19 @@ def get_orders(request):
 @permission_classes([IsAuthenticated])
 def get_order_summary(request):
     chat_id = request.query_params.get('chat_id')
-    if chat_id:
-        try:
-            summary = OrderSummary.objects.get(chat_id=chat_id)
-            serializer = OrderSummarySerializer(summary)
-            return JsonResponse(serializer.data, safe=False)
-        except OrderSummary.DoesNotExist:
-            return JsonResponse({'error': 'No orders found for this chat ID.'}, status=404)
-    else:
-        return JsonResponse({'error': 'Chat ID is required.'}, status=400)
+    
+    if not chat_id:
+        return Response({'error': 'Chat ID is required.'}, status=400)
+
+    try:
+        summary = OrderSummary.objects.get(chat_id=chat_id)
+        serializer = OrderSummarySerializer(summary)
+        return Response(serializer.data)
+    except OrderSummary.DoesNotExist:
+        return Response({'error': 'No orders found for this chat ID.'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+    
     
 @api_view(['POST'])
 @permission_classes([AllowAny])

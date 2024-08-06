@@ -971,8 +971,6 @@ function formatDate(dateString: string): string {
   return `on ${formattedDate}`;
 }
 
-
-
 async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<void> {
   const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
   const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/?chat_id=${encodeURIComponent(chatId)}`;
@@ -1008,8 +1006,12 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
       return;
     }
 
-    const summaryResponse = await response.json() as { orders: Order[] };
-    console.log(`Order summary retrieved: ${JSON.stringify(summaryResponse.orders)}`);
+    const summaryResponse = await response.json();
+    if (!isSummaryResponse(summaryResponse)) {
+      console.error('Invalid API response:', summaryResponse);
+      await sendMessage(chatId, 'Failed to retrieve order summary. Please try again later.');
+      return;
+    }
 
     const matchingOrder = summaryResponse.orders[0]; // Directly get the first order
 
@@ -1017,7 +1019,7 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
       console.log(`Order details retrieved: ${JSON.stringify(matchingOrder)}`);
 
       const orderItemsSummary = matchingOrder.order_items.map(item => 
-        `- ${item.product_name}, ${item.collection_name}, Size: ${item.size}, Color: ${item.color_name}, ${item.quantity} pcs, ${parseFloat(item.item_price).toFixed(2)}`
+        `- ${item.product_name}, ${item.collection_name}, Size: ${item.size || 'N/A'}, Color: ${item.color_name || 'N/A'}, ${item.quantity} pcs, ${parseFloat(item.item_price).toFixed(2)}`
       ).join('\n');
 
       const statusDates: { [key: string]: string | null } = {
