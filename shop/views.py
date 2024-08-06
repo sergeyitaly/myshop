@@ -77,14 +77,10 @@ class ProductListFilter(generics.ListAPIView):
             if price_max is None:
                 price_max = price_range['max_price']
         
-        self.filterset = self.filterset_class(
-            self.request.GET, 
-            queryset=queryset,
-            request=self.request,
-            price_min=price_min,
-            price_max=price_max
-        )
-        return self.filterset.qs
+        # Filter queryset based on provided price range
+        queryset = queryset.filter(price__gte=price_min, price__lte=price_max)
+
+        return queryset
 
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
