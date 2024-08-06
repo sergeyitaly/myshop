@@ -3,7 +3,7 @@ from .models import Product
 
 class ProductFilter(django_filters.FilterSet):
     # Filter products by category name through the collection
-    category = django_filters.CharFilter(field_name='collection__category__name', lookup_expr='icontains')
+    category = django_filters.BaseInFilter(field_name='collection__category__name', lookup_expr='in')
     name = django_filters.CharFilter(lookup_expr='icontains')
     price_min = django_filters.NumberFilter(field_name='price', lookup_expr='gte')
     price_max = django_filters.NumberFilter(field_name='price', lookup_expr='lte')
