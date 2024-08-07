@@ -268,6 +268,7 @@ USE_TZ = True
 #    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,  # Only show toolbar in DEBUG mode
 # }
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 REDIS_CACHE_LOCATION = os.getenv('REDIS_CACHE_LOCATION', 'redis://localhost:6379/1')
 CACHES = {
     'default': {
@@ -276,29 +277,43 @@ CACHES = {
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'CONNECTION_POOL_KWARGS': {
-                'max_connections': 100,
+                'max_connections': 100,  # Increase if needed
                 'retry_on_timeout': True,
             },
             'SOCKET_CONNECT_TIMEOUT': 5,  # seconds
             'SOCKET_TIMEOUT': 5,  # seconds
         },
-        'KEY_PREFIX': 'imdb',  # Optional: Set a key prefix for all cache keys
-        'TIMEOUT': 60 * 15,  # Cache timeout in seconds (e.g., 30 minutes)
+        'KEY_PREFIX': 'imdb',
+        'TIMEOUT': 60 * 15,  # Cache timeout in seconds (e.g., 15 minutes)
     }
 }
+
 # Celery configuration
 CELERY_BROKER_URL = os.getenv('REDIS_BROKER_URL', 'redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 
 CELERY_IMPORTS = ('order.tasks',)
 CELERY_BEAT_SCHEDULE = {
-    'update-order-statuses-every-5-minutes': {
+    'update-order-statuses-every-minute': {
         'task': 'order.tasks.update_order_statuses_task',
-        'schedule': crontab(minute='*/1'),  # Run every 5 minutes
+        'schedule': crontab(minute='*/1'),  # Run every minute
     },
 }
 
 
+#CELERY_WORKER_CANCEL_LONG_RUNNING_TASKS_ON_CONNECTION_LOSS = True
+
+BROKER_POOL_LIMIT = None  # Adjust based on your needs
+CELERY_WORKER_POOL_RESTARTS = True
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 1000
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+CELERY_WORKER_CANCEL_LONG_RUNNING_TASKS_ON_CONNECTION_LOSS = True
+BROKER_TRANSPORT_OPTIONS = {
+    'fanout_prefix': True,
+    'fanout_patterns': True,
+    'max_connections': 50,  # Increase if needed
+    'socket_keepalive': True,
+}
 
 LOGGING = {
     'version': 1,
