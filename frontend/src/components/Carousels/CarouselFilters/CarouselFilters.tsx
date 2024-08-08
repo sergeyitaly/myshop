@@ -15,6 +15,9 @@ import {ROUTE} from "../../../constants";
 import {PreviewCard} from "../../Cards/PreviewCard/PreviewCard";
 import {formatNumber} from "../../../functions/formatNumber";
 import {formatCurrency} from "../../../functions/formatCurrency";
+import {PreviewLoadingCard} from "../../Cards/PreviewCard/PreviewLoagingCard";
+import styles from '../CarouselFilters/style.module.scss'
+import {NamedSection} from "../../NamedSection/NamedSection";
 
 function CarouselFilters() {
 
@@ -39,14 +42,12 @@ function CarouselFilters() {
     const navigate = useNavigate();
 
     const { data: collectionsData, isLoading: isLoadingCollections } = useGetAllCollectionsQuery();
-    const { data: popularProductsData, isLoading: isLoadingPopularProducts } = useGetProductsByPopularityQuery({ popularity: '6' });
+    const { data: popularProductsData, isLoading: isLoadingPopularProducts } = useGetProductsByPopularityQuery({ popularity: '4' });
     const { data: discountProductsData, isLoading: isLoadingDiscountProducts } = useGetDiscountProductsQuery();
 
     const collections = collectionsData?.results || [];
-    const popularProducts = popularProductsData?.results || [];
-    const discountProducts = discountProductsData?.results || [];
-
-    console.log(discountProducts)
+    const popularProducts = popularProductsData?.results.filter(product => parseFloat(product.discount) === 0) || [];
+    const discountProducts = discountProductsData?.results.filter(product => parseFloat(product.discount) > 0) || [];
 
     let displayedData;
     switch (selectedFilter) {
@@ -70,32 +71,50 @@ function CarouselFilters() {
 
 
     return (
-        <div className={style.sliderContainer} >
-            <div className={style.filters}>
-                <p className={selectedFilter === 'popular' ? style.selected : ''} style={{cursor:'pointer'}} onClick={() => handleFilterChange("popular")}>Найпопулярніші товари</p>
-                <p className={selectedFilter === 'allCollection' ? style.selected : ''} style={{cursor:'pointer'}} onClick={() => handleFilterChange("allCollection")}>Всі колекції</p>
-                <p className={selectedFilter === 'discount' ? style.selected : ''} style={{cursor:'pointer'}} onClick={() => handleFilterChange("discount")}>Знижки</p>
-            </div>
-            <Slider {...settings}>
-                {displayedData.map((item) => (
-                    <div key={item.id} className={style.card}>
+        <div className={styles.sliderContainer} >
+            <NamedSection>
+                <div className={style.filters}>
+                    <p className={selectedFilter === 'popular' ? style.selected : ''} style={{cursor:'pointer'}} onClick={() => handleFilterChange("popular")}>Найпопулярніші товари</p>
+                    <p className={selectedFilter === 'allCollection' ? style.selected : ''} style={{cursor:'pointer'}} onClick={() => handleFilterChange("allCollection")}>Всі колекції</p>
+                    <p className={selectedFilter === 'discount' ? style.selected : ''} style={{cursor:'pointer'}} onClick={() => handleFilterChange("discount")}>Знижки</p>
+                </div>
+                {
+                    selectedFilter === "discount" && discountProducts.length === 1 ? (
                         <PreviewCard
-                            key={item.id}
-                            photoSrc={item.photo || ''}
-                            title={item.name}
-                            subTitle={
-                                item.discountPercent
-                                    ? <>
-                                        <span className={style.oldPrice}>{formatNumber(item.price)} {formatCurrency(item.currency)}</span>
-                                        <span className={style.newPrice}>{formatNumber(item.price * (1 - item.discountPercent / 100))} {formatCurrency(item.currency)}</span>
-                                    </>
-                                    : `${formatNumber(item.price)} ${formatCurrency(item.currency)}`
-                            }
-                            onClick={() => handleClickItem(item.id)}
+                            className={style.cardNew}
+                            key={discountProducts[0].id}
+                            photoSrc={discountProducts[0].photo || ''}
+                            title={discountProducts[0].name}
+                            discount={discountProducts[0].discount}
+                            price={discountProducts[0].price}
+                            currency={discountProducts[0].currency}
+                            onClick={() => handleClickItem(discountProducts[0].id)}
                         />
-                    </div>
-                ))}
-            </Slider>
+                    ) : (
+                        <Slider {...settings}>
+                            {isLoadingCollections
+                                ? Array.from({ length: 3 }).map((_, index) => (
+                                    <div key={index} className={style.card}>
+                                        <PreviewLoadingCard />
+                                    </div>
+                                ))
+                                : displayedData.map((product) => (
+                                    <div key={product.id} className={style.card}>
+                                        <PreviewCard
+                                            key={product.id}
+                                            photoSrc={product.photo || ''}
+                                            title={product.name}
+                                            discount = {product.discount}
+                                            price={product.price}
+                                            currency={product.currency}
+                                            onClick={() => handleClickItem(product.id)}
+                                        />
+                                    </div>
+                                ))}
+                        </Slider>
+                    )
+                }
+            </NamedSection>
         </div>
     );
 }

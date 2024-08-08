@@ -14,9 +14,14 @@
 }
 
 .card {
+    max-width: 100%;
     padding-right: 10px;
     margin-bottom: 20px;
     text-align: center;
+}
+
+.cardNew {
+    //max-width: 335px;
 }
 
 .cardRow {
@@ -37,19 +42,6 @@
     font-size: 14px;
     margin-top: 10px;
     font-weight: 400;
-}
-
-.name {
-    margin-top: 15px;
-}
-
-.price {
-    color: #787878;
-    margin-top: 5px;
-}
-
-.image {
-    width: 100%;
 }
 
 .imageCollection {

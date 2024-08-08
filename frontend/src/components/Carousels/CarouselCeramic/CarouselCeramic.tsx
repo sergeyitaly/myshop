@@ -4,20 +4,14 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import style from './style.module.scss'
-import {mockDataProducts} from "../carouselMock";
 import {NamedSection} from "../../NamedSection/NamedSection";
 import {PreviewCard} from "../../Cards/PreviewCard/PreviewCard";
 import {
-    useGetAllCollectionsQuery,
     useGetAllProductsFromCollectionQuery,
     useGetOneCollectionByIdQuery
 } from "../../../api/collectionSlice";
-import {Collection} from "../../../models/entities";
 import {ROUTE} from "../../../constants";
-import {PreviewItemsContainer} from "../../containers/PreviewItemsContainer/PreviewItemsContainer";
-import {skipToken} from "@reduxjs/toolkit/query";
-import {formatNumber} from "../../../functions/formatNumber";
-import {formatCurrency} from "../../../functions/formatCurrency";
+import {PreviewLoadingCard} from "../../Cards/PreviewCard/PreviewLoagingCard";
 
 function CarouselCeramic () {
 
@@ -25,24 +19,9 @@ function CarouselCeramic () {
     const collectionId = 3;
     const navigate = useNavigate()
 
-    const {
-        data:collection,
-        isSuccess,
-        isLoading: isLoadingCollection
-    } = useGetOneCollectionByIdQuery( collectionId )
+    const { data, isLoading } = useGetAllProductsFromCollectionQuery(collectionId);
 
-    const {
-        data: productResponce,
-        isSuccess: isSuccessProductFetshing,
-        isLoading: isLoadingProducts,
-        isError: isErrorProducts,
-        error
-    } = useGetAllProductsFromCollectionQuery( collectionId )
-
-    console.log(error);
-
-
-    const products = isSuccessProductFetshing ? productResponce.results : []
+    const products = data?.results || [];
 
     const handleClickProduct = (productId: number) => {
         navigate(`${ROUTE.PRODUCT}${productId}`)
@@ -71,30 +50,30 @@ function CarouselCeramic () {
     };
 
     return (
-        <>
+        <div className={style.sliderContainer}>
             <NamedSection title="Кераміка" >
-                <PreviewItemsContainer
-                    isLoading={isLoadingProducts}
-                    isError={isErrorProducts}
-                    textWhenEmpty="No products available"
-                    textWhenError="Error loading products"
-                >
-                    <Slider {...settings}>
-                        {products.map((product) => (
+                <Slider {...settings}>
+                    {isLoading
+                        ? Array.from({ length: 3 }).map((_, index) => (
+                            <div key={index} className={style.container}>
+                                <PreviewLoadingCard />
+                            </div>
+                        ))
+                        : products.map((product) => (
                             <div key={product.id} className={style.container}>
                                 <PreviewCard
                                     key={product.id}
-                                    photoSrc={product.photo || ''}
+                                    photoSrc={product.photo_url}
                                     title={product.name}
-                                    subTitle={`${formatNumber(product.price)} ${formatCurrency(product.currency)}`}
+                                    price={product.price}
+                                    currency={product.currency}
                                     onClick={() => handleClickProduct(product.id)}
                                 />
                             </div>
                         ))}
-                    </Slider>
-                </PreviewItemsContainer>
+                </Slider>
             </NamedSection>
-        </>
+        </div>
 
     );
 }

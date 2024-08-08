@@ -1,7 +1,6 @@
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import style from './style.module.scss'
 import {mockDataCategories} from "../carouselMock";
 import {useNavigate} from "react-router-dom";
 import {useGetAllCollectionsQuery} from "../../../api/collectionSlice";
@@ -11,6 +10,8 @@ import {PreviewCard} from "../../Cards/PreviewCard/PreviewCard";
 import React from "react";
 import {NamedSection} from "../../NamedSection/NamedSection";
 import {PreviewItemsContainer} from "../../containers/PreviewItemsContainer/PreviewItemsContainer";
+import style from "../CarouselNewProduct/style.module.scss";
+import {PreviewLoadingCard} from "../../Cards/PreviewCard/PreviewLoagingCard";
 
 function CarouselNewProduct () {
     const navigate = useNavigate()
@@ -27,7 +28,6 @@ function CarouselNewProduct () {
         return array.sort(() => Math.random() - 0.5);
     };
 
-    // Перемешиваем коллекции
     const shuffledCollections = shuffleArray([...collections]);
 
     const totalCards = mockDataCategories.length;
@@ -58,34 +58,27 @@ function CarouselNewProduct () {
         ]
     };
     return (
-        <>
-            {/*<div className={style.sliderContainer}>*/}
-                <NamedSection title="Кераміка" >
-                    <PreviewItemsContainer
-                        isLoading={isLoading}
-                        // isError={isErrorProducts}
-                        // textWhenEmpty="No products available"
-                        // textWhenError="Error loading products"
-                    >
-                        <Slider {...settings}>
-                            {
-                                shuffledCollections.map((collection) => (
-                                    // <div key={collection.id} className={style.cardWrapper}>
-                                        <PreviewCard
-                                            key={collection.id}
-                                            photoSrc={collection.photo}
-                                            title={collection.name}
-                                            subTitle={collection.category}
-                                            onClick={() => handleClickCollectionCard(collection.id)}
-                                        />
-                                    // </div>
-                                ))
-                            }
-                        </Slider>
-                    </PreviewItemsContainer>
-                </NamedSection>
-            {/*</div>*/}
-        </>
+        <div className={style.sliderContainer}>
+            <NamedSection title="Нові надходження" >
+                <Slider {...settings}>
+                    {isLoading
+                        ? Array.from({ length: 3 }).map((_, index) => (
+                            <div key={index} className={style.card}>
+                                <PreviewLoadingCard />
+                            </div>
+                        ))
+                        : shuffledCollections.map((product) => (
+                                <PreviewCard
+                                    className={style.card}
+                                    key={product.id}
+                                    photoSrc={product.photo || ''}
+                                    title={product.name}
+                                    onClick={() => handleClickCollectionCard(product.id)}
+                                />
+                        ))}
+                </Slider>
+            </NamedSection>
+        </div>
 
     );
 }

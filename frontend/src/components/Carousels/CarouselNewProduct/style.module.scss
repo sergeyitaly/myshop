@@ -3,23 +3,15 @@
     padding: 0 10px;
 }
 
-.title {
-    font-size: 32px;
-    font-weight: 500;
-    margin: 20px 0 20px 5px
-}
-.sliderContainer {
-    width: 100%;
-    padding: 0 10px; // Опционально, если нужно добавить отступы
+.card {
+    max-width: 100%;
+    padding: 0 5px;
+
+    .card:first-child {
+        padding-left: 5px;
+    }
 }
 
-.cardWrapper {
-    width: 100%;
-    display: flex;
-    justify-content: center; // Центрируем карточку по горизонтали
-}
-
-.cardWrapper .card {
-    width: 100%;
-    box-sizing: border-box;
+.container {
+    max-width: 100% ;
 }
