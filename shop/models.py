@@ -12,6 +12,7 @@ from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+import django_filters
 
 
 load_dotenv()
@@ -216,12 +217,6 @@ class ProductImage(models.Model):
         if self.images:
             self.images.delete(save=False)
         super().delete(*args, **kwargs)
-
-
-from imagekit.processors import ResizeToFill
-from imagekit.models import ImageSpecField
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 @receiver(post_save, sender=Collection)
 def generate_collection_thumbnails(sender, instance, **kwargs):

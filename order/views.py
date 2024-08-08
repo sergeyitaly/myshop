@@ -23,11 +23,49 @@ import random
 import os
 from django.http import JsonResponse
 from rest_framework.decorators import action
+from .signals import update_order_status_with_notification
 
 
+
+logger = logging.getLogger(__name__)
 def health_check(request):
     return JsonResponse({'status': 'ok'})
-logger = logging.getLogger(__name__)
+
+class OrderSummaryViewSet(viewsets.ModelViewSet):
+    queryset = OrderSummary.objects.all()
+    serializer_class = OrderSummarySerializer
+
+    def create(self, request, *args, **kwargs):
+        logger.debug("Received data: %s", request.data)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        chat_id = serializer.validated_data.get('chat_id')
+        if not chat_id:
+            logger.error("chat_id is missing in the request data.")
+            return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        
+        chat_id = serializer.validated_data.get('chat_id')
+        if not chat_id:
+            logger.error("chat_id is missing in the request data.")
+            return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        self.perform_update(serializer)
+        
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+        
+        return Response(serializer.data)
 
 
 class TelegramUserViewSet(viewsets.ModelViewSet):
@@ -39,18 +77,58 @@ class TelegramUserViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         logger.info(f"Request headers: {request.headers}")
         return super().create(request, *args, **kwargs)
-    
+        
     def retrieve(self, request, *args, **kwargs):
         phone = request.query_params.get('phone')
         chat_id = request.query_params.get('chat_id')
+        logger.info(f"Retrieve request received with phone: {phone} and chat_id: {chat_id}")
         if phone and chat_id:
             try:
                 user = TelegramUser.objects.get(phone=phone, chat_id=chat_id)
                 serializer = self.get_serializer(user)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except TelegramUser.DoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": "TelegramUser not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Bad request. Phone and chat_id required."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def perform_create(self, serializer):
+        telegram_user = serializer.save()
+        orders = Order.objects.filter(phone=telegram_user.phone)
+        for order in orders:
+            if not order.telegram_user:  # Ensure only orders without an associated TelegramUser are updated
+                order.telegram_user = telegram_user
+                order.save(update_fields=['telegram_user'])
+                self.stdout.write(f'Updated Order {order.id} with TelegramUser {telegram_user.id}\n')
+
+    def perform_update(self, serializer):
+        telegram_user = serializer.save()
+        orders = Order.objects.filter(phone=telegram_user.phone)
+        for order in orders:
+            if not order.telegram_user:  # Ensure only orders without an associated TelegramUser are updated
+                order.telegram_user = telegram_user
+                order.save(update_fields=['telegram_user'])
+
+
+@api_view(['POST'])
+def update_order(request):
+    chat_id = request.data.get('chat_id')
+    orders = request.data.get('orders')
+
+    if not chat_id:
+        return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        order_summary = OrderSummary.objects.get(chat_id=chat_id)
+        order_summary.orders = orders
+        order_summary.save()
+        
+        return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
+    except OrderSummary.DoesNotExist:
+        return Response({"error": "Order summary not found."}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
@@ -102,24 +180,6 @@ class OrderViewSet(viewsets.ModelViewSet):
             logger.error(f"Error fetching orders: {e}")
             return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-def get_random_saying(file_path):
-    """Read sayings from a file and return a single random saying."""
-    if not os.path.exists(file_path):
-        logger.error(f"Failed to read sayings file: [Errno 2] No such file or directory: '{file_path}'")
-        return "No sayings available."
-    
-    try:
-        with open(file_path, 'r', encoding='utf-8') as file:
-            sayings = [line.strip() for line in file if line.strip()]
-        
-        if not sayings:
-            logger.error("Sayings file is empty.")
-            return "No sayings available."
-        
-        return random.choice(sayings)
-    except Exception as e:
-        logger.error(f"Error reading sayings file: {e}")
-        return "No sayings available."
     
 def set_telegram_webhook():
     url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/setWebhook"
@@ -134,101 +194,72 @@ class TelegramWebhook(View):
     def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
-            logger.debug(f"Incoming data: {data}")
-
             chat_id = data['message']['chat']['id']
             contact = data['message'].get('contact')
+
             if not contact:
-                logger.error("No contact information in message")
                 return JsonResponse({'status': 'error', 'message': 'No contact information'}, status=400)
             
-            phone = contact['phone_number']
-            logger.debug(f"Extracted phone: {phone}, chat_id: {chat_id}")
-
-            telegram_user, created = TelegramUser.objects.update_or_create(phone=phone, defaults={'chat_id': chat_id})
-            if created:
-                logger.debug(f"Created new TelegramUser: {telegram_user}")
-            else:
-                logger.debug(f"Updated existing TelegramUser: {telegram_user}")
-
-            order = Order.objects.filter(phone=phone).last()  # Get the latest order for the phone number
-            if order:
-                send_telegram_message(order.id, phone, order.email)
-
+            phone = contact.get('phone_number')
+            if not phone:
+                return JsonResponse({'status': 'error', 'message': 'No phone number in contact information'}, status=400)
+            
+            telegram_user, created = TelegramUser.objects.update_or_create(
+                phone=phone, defaults={'chat_id': chat_id}
+            )
             return JsonResponse({'status': 'ok'})
         except json.JSONDecodeError as e:
-            logger.error(f"JSONDecodeError: {e}")
             return JsonResponse({'status': 'error', 'message': 'Invalid JSON format'}, status=400)
         except KeyError as e:
-            logger.error(f"KeyError: {e}")
             return JsonResponse({'status': 'error', 'message': 'Missing required field'}, status=400)
         except Exception as e:
-            logger.error(f"Unexpected error: {e}")
             return JsonResponse({'status': 'error', 'message': 'Internal server error'}, status=500)
 
 telegram_webhook = TelegramWebhook.as_view()
 
-def send_telegram_message(order_id, chat_id, email):
-    bot_token = settings.TELEGRAM_BOT_TOKEN
-    
 
-    url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
-    
-    sayings_file_path = settings.SAYINGS_FILE_PATH
-    random_saying = get_random_saying(sayings_file_path)
-    
-    message = (f"<b>Вітаємо!</b>\n\n"
-               f"Ви створили нове замовлення № <b>{order_id}</b> на сайті "
-               f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>.\n"
-               f"Деталі замовлення відправлено на email {email}.\n\n"
-               f"<i>💬 {random_saying}</i>\n\n"  
-               f"<b>Дякуємо, що обрали нас!</b> 🌟")
-        
-    payload = {
-        'chat_id': chat_id,
-        'text': message,
-        'parse_mode': 'HTML'
-    }
-    
-    try:
-        response = requests.post(url, data=payload)
-        response.raise_for_status()
-        result = response.json()
-        if not result.get('ok'):
-            logger.error(f"Telegram API returned an error: {result.get('description')}")
-        return result
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Request to Telegram API failed: {e}")
-        raise
-    
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_order(request):
+    logger.info(f"Order creation request data: {request.data}")
+
     try:
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
+            # Save the order first
             order = serializer.save()
-            order_items = order.order_items.all()  # Fetch related order items
 
+            # Extract phone and get chat_id
+            phone = request.data.get('phone')
+            try:
+                telegram_user = TelegramUser.objects.get(phone=phone)
+                if telegram_user:
+                    order.telegram_user = telegram_user
+                    order.save(update_fields=['telegram_user'])
+
+                    # Prepare order items
+                    order_items = order.order_items.all()
+
+                    # Notify the user about the new order status
+                    update_order_status_with_notification(
+                        order.id,
+                        order_items,
+                        'submitted',  # Assuming 'submitted' is the initial status
+                        'submitted_at',
+                        telegram_user.chat_id
+                    )
+                else:
+                    logger.warning(f"No TelegramUser found with phone: {phone}")
+
+            except TelegramUser.DoesNotExist:
+                logger.warning(f"No TelegramUser found with phone: {phone}")
+
+
+            # Send the confirmation email
             formatted_date = localtime(order.submitted_at).strftime('%Y-%m-%d %H:%M')
-
-            order_details = f"""
-            <p><strong>Замовлення:</strong> № {order.id} на сайті <a href='{settings.VERCEL_DOMAIN}'>KOLORYT!</a></p>
-            <p><strong>Ім'я:</strong> {order.name}</p>
-            <p><strong>Прізвище:</strong> {order.surname}</p>
-            <p><strong>Телефон:</strong> {order.phone}</p>
-            <p><strong>Email:</strong> {order.email}</p>
-            <p><strong>Отримувач той самий:</strong> {"Ні" if order.receiver else "Так"}</p>
-            <p><strong>Коментар:</strong> {order.receiver_comments}</p>
-            <p><strong>Створено:</strong> {formatted_date}</p>
-            <p><strong>Пакування як подарунок:</strong> {"Так" if order.present else "Ні"}</p>
-            """
-
-            if order_items.exists():
-                currency = order_items.first().product.currency
-            else:
-                currency = "UAH"  # Default currency if no order items exist
-
+            order_items = order.order_items.all()
+            total_sum = sum(item.quantity * item.product.price for item in order_items)
+            currency = order_items.first().product.currency if order_items.exists() else "UAH"
             order_items_rows = "".join([
                 f"""
                 <tr>
@@ -244,8 +275,6 @@ def create_order(request):
                 """
                 for index, item in enumerate(order_items)
             ])
-
-            total_sum = sum(item.total_sum for item in order_items)
 
             order_items_table = f"""
             <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
@@ -267,7 +296,6 @@ def create_order(request):
             </table>
             """
 
-            unsubscribe_link = settings.VERCEL_DOMAIN  # Change to actual unsubscribe URL if available
             email_body = f"""
             <html>
             <head>
@@ -277,13 +305,13 @@ def create_order(request):
             </head>
             <body>
                 <h2>Підтвердження замовлення #{order.id} на сайті KOLORYT</h2>
-                {order_details}
+                {formatted_date}
                 {order_items_table}
                 <p><strong>Разом:</strong> {total_sum} {currency}</p>
                 <p>Якщо у вас є питання, не вагайтеся зв'язатися з нами.</p>
                 <p>З найкращими побажаннями,<br>
                 Команда <a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a></p>
-                <p><a href='{unsubscribe_link}'>Відмовитися від підписок</a></p>
+                <p><a href='{settings.VERCEL_DOMAIN}'>Відмовитися від підписок</a></p>
             </body>
             </html>
             """
@@ -297,26 +325,22 @@ def create_order(request):
             )
             email.content_subtype = "html"
             email.send(fail_silently=False)
-            
-            # Handle sending a Telegram message
-            phone = order.phone
-            try:
-                telegram_user = TelegramUser.objects.get(phone=phone)
-                chat_id = telegram_user.chat_id
-                send_telegram_message(order.id, chat_id, order.email)
-            except TelegramUser.DoesNotExist:
-                logger.warning(f"TelegramUser with phone {phone} not found. No Telegram message sent.")
 
             return Response({'status': 'Order created', 'order_id': order.id}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            logger.error(f"Order creation failed: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        logger.error(f"Error creating order: {e}")
-        return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f"Order creation exception: {e}")
+        return Response({'error': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_order(request, order_id):
+    """
+    Retrieve a specific order by its ID.
+    """
     try:
         order = Order.objects.get(id=order_id)
         serializer = OrderSerializer(order)
@@ -327,18 +351,62 @@ def get_order(request, order_id):
         logger.error(f"Error fetching order: {e}")
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_orders(request):
-    phone_number = request.query_params.get('phone_number', None)
-    if not phone_number:
-        return Response({'error': 'Phone number is required'}, status=status.HTTP_400_BAD_REQUEST)
+    """
+    Retrieve all orders related to a specific Telegram user.
+    """
+    chat_id = request.query_params.get('chat_id', None)
+    if not chat_id:
+        return Response({'error': 'Chat ID is required'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        orders = Order.objects.filter(phone=phone_number)
+        telegram_user = TelegramUser.objects.get(chat_id=chat_id)
+        orders = Order.objects.filter(telegram_user=telegram_user)
         serializer = OrderSerializer(orders, many=True)
         return Response({'count': orders.count(), 'results': serializer.data}, status=status.HTTP_200_OK)
+    except TelegramUser.DoesNotExist:
+        return Response({'error': 'Telegram user not found'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         logger.error(f"Error fetching orders: {e}")
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_order_summary(request):
+    chat_id = request.query_params.get('chat_id')
+    
+    if not chat_id:
+        return Response({'error': 'Chat ID is required.'}, status=400)
+
+    try:
+        summary = OrderSummary.objects.get(chat_id=chat_id)
+        serializer = OrderSummarySerializer(summary)
+        return Response(serializer.data)
+    except OrderSummary.DoesNotExist:
+        return Response({'error': 'No orders found for this chat ID.'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+    
+    
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def update_order_summary(request):
+    chat_id = request.data.get('chat_id')
+    orders = request.data.get('orders')
+
+    if not chat_id:
+        return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        order_summary = OrderSummary.objects.get(chat_id=chat_id)
+        order_summary.orders = orders
+        order_summary.save()
+        
+        return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
+    except OrderSummary.DoesNotExist:
+        return Response({"error": "Order summary not found."}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

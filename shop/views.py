@@ -9,6 +9,8 @@ from django.http import Http404
 from django_filters import rest_framework as filters
 from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer
 from .models import Product, Collection, Category
+from .filters import ProductFilter
+from django.db.models import Min, Max
 
 class CustomPageNumberPagination(PageNumberPagination):
     default_page_size = 4
@@ -41,14 +43,7 @@ class CollectionPageNumberPagination(PageNumberPagination):
             'previous_page_number': self.page.number - 1 if self.page.has_previous() else None,
             'page_size': self.page.paginator.per_page,
         })
-
-class ProductFilter(filters.FilterSet):
-    category = filters.CharFilter(field_name='category__name', lookup_expr='icontains')
-
-    class Meta:
-        model = Product
-        fields = ['category', 'name', 'price', 'sales_count', 'popularity']
-
+    
 class ProductList(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -58,6 +53,34 @@ class ProductList(generics.ListCreateAPIView):
     filterset_class = ProductFilter
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'price', 'sales_count', 'popularity']
+
+class ProductListFilter(generics.ListAPIView):
+    queryset = Product.objects.all()
+    permission_classes = [AllowAny]
+    pagination_class = CustomPageNumberPagination  # Use custom pagination for products
+    serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = ProductFilter
+    ordering_fields = ['price', 'popularity', 'sales_count']  # Allow ordering by these fields
+    ordering = ['price']  # Default ordering
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        price_min = self.request.query_params.get('price_min', None)
+        price_max = self.request.query_params.get('price_max', None)
+        
+        # Calculate default min and max price if not provided
+        if price_min is None or price_max is None:
+            price_range = queryset.aggregate(min_price=Min('price'), max_price=Max('price'))
+            if price_min is None:
+                price_min = price_range['min_price']
+            if price_max is None:
+                price_max = price_range['max_price']
+        
+        # Filter queryset based on provided price range
+        queryset = queryset.filter(price__gte=price_min, price__lte=price_max)
+
+        return queryset
 
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
