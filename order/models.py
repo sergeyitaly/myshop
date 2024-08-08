@@ -99,7 +99,7 @@ class Order(models.Model):
 
 class OrderSummary(models.Model):
     chat_id = models.CharField(max_length=255, unique=True, null=True, blank=True)  # Changed to CharField to handle string IDs
-    orders = models.JSONField()
+    orders = models.JSONField(default=dict)  # Ensures orders is not null
 
     def __str__(self):
         return str(self.chat_id)  # Ensure it returns a string representation
