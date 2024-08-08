@@ -119,7 +119,7 @@ addEventListener('scheduled', (event: ScheduledEvent) => {
 
 async function handleScheduled(event: ScheduledEvent): Promise<void> {
   console.log('Scheduled event triggered');
- // await updateGlobalAuthToken();
+  await updateGlobalAuthToken();
   await performHealthCheck();
  // await updateSubmittedToCreated();
  // await updateCreatedToProcessed();
@@ -877,6 +877,8 @@ async function sendChatIdAndPhoneToVercel(phoneNumber: string, chatId: string): 
   }
 }
 
+
+
 interface OrderItem {
   quantity: number;
   product_name: string;
@@ -897,16 +899,7 @@ interface Order {
   complete_at?: string;
   canceled_at?: string;
   submitted_at?: string;
-  order_items: {
-    product_name: string;
-    collection_name: string;
-    size: string | null;
-    color_name: string | null;
-    quantity: number;
-    item_price: string;
-    color_value: string;
-    total_sum: number;
-  }[];
+  order_items: OrderItem[];
   TelegramUser: TelegramUser[]; // Include this field
   email?: string;
   order_summary: OrderSummary;
@@ -938,16 +931,46 @@ interface OrderDetails {
   // Add other fields as needed
 }
 
-interface SummaryResponse {
-  orders: Order[];
-}
+
+type SummaryResponse = Order[];
 
 function isSummaryResponse(obj: any): obj is SummaryResponse {
-  return obj && Array.isArray(obj.orders) && obj.orders.every((order: any) =>
-    typeof order.order_id === 'number' &&
-    Array.isArray(order.order_items)
+  return Array.isArray(obj) && obj.every((item: any) =>
+    typeof item.order_id === 'number' &&
+    Array.isArray(item.order_items) &&
+    item.order_items.every((orderItem: any) =>
+      typeof orderItem.product_name === 'string' &&
+      typeof orderItem.collection_name === 'string' &&
+      typeof orderItem.item_price === 'string' &&
+      typeof orderItem.total_sum === 'number' &&
+      (orderItem.size === null || typeof orderItem.size === 'string') &&
+      (orderItem.color_name === null || typeof orderItem.color_name === 'string') &&
+      typeof orderItem.color_value === 'string' &&
+      typeof orderItem.quantity === 'number'
+    ) &&
+    (item.phone === undefined || typeof item.phone === 'string') &&
+    (item.status === undefined || typeof item.status === 'string') &&
+    (item.created_at === undefined || typeof item.created_at === 'string') &&
+    (item.processed_at === undefined || typeof item.processed_at === 'string') &&
+    (item.complete_at === undefined || typeof item.complete_at === 'string') &&
+    (item.canceled_at === undefined || typeof item.canceled_at === 'string') &&
+    (item.submitted_at === undefined || typeof item.submitted_at === 'string') &&
+    Array.isArray(item.TelegramUser) &&
+    item.TelegramUser.every((user: any) =>
+      typeof user.phone_number === 'string' &&
+      typeof user.chat_id === 'string'
+    ) &&
+    (item.email === undefined || typeof item.email === 'string') &&
+    (item.order_summary === undefined || typeof item.order_summary === 'object' &&
+      (item.order_summary.submitted_at === undefined || typeof item.order_summary.submitted_at === 'string') &&
+      (item.order_summary.created_at === undefined || typeof item.order_summary.created_at === 'string') &&
+      (item.order_summary.processed_at === undefined || typeof item.order_summary.processed_at === 'string') &&
+      (item.order_summary.complete_at === undefined || typeof item.order_summary.complete_at === 'string')
+    )
   );
 }
+
+
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
@@ -1006,19 +1029,24 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
       return;
     }
 
-    const summaryResponse = await response.json();
-    if (!isSummaryResponse(summaryResponse)) {
-      console.error('Invalid API response:', summaryResponse);
-      await sendMessage(chatId, 'Failed to retrieve order summary. Please try again later.');
+    const responseBody: any = await response.json();
+
+    console.log('Raw response body:', responseBody);
+
+    if (!isSummaryResponse(responseBody)) {
+      console.error('Unexpected response format:', responseBody);
+      await sendMessage(chatId, 'Failed to retrieve order summary. The response format is invalid.');
       return;
     }
 
-    const matchingOrder = summaryResponse.orders[0]; // Directly get the first order
+    const summaryResponse: SummaryResponse = responseBody;
 
-    if (matchingOrder) {
+    if (summaryResponse.length > 0) {
+      const matchingOrder = summaryResponse[0]; // Assuming you want the first order
+
       console.log(`Order details retrieved: ${JSON.stringify(matchingOrder)}`);
 
-      const orderItemsSummary = matchingOrder.order_items.map(item => 
+      const orderItemsSummary = matchingOrder.order_items.map(item =>
         `- ${item.product_name}, ${item.collection_name}, Size: ${item.size || 'N/A'}, Color: ${item.color_name || 'N/A'}, ${item.quantity} pcs, ${parseFloat(item.item_price).toFixed(2)}`
       ).join('\n');
 
@@ -1030,14 +1058,13 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
         'canceled': matchingOrder.canceled_at ?? null
       };
 
-      // Get the latest status entry
       const latestStatusEntry = Object.entries(statusDates)
         .filter(([_, date]) => date !== null)
         .sort(([_, dateA], [__, dateB]) => new Date(dateB!).getTime() - new Date(dateA!).getTime())
         .map(([status, date]) => {
           const statusEmoji = statusEmojis[status] || '🔍';
           return `${statusEmoji} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
-        })[0]; // Get the latest status only
+        })[0];
 
       const orderDetailsMessage = `
         Order ID: ${matchingOrder.order_id}
@@ -1056,7 +1083,6 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
     await sendMessage(chatId, 'An error occurred while retrieving order details. Please try again later.');
   }
 }
-
 async function sendAllOrdersDetails(chatId: string): Promise<void> {
   const statusEmojis: { [key: string]: string } = {
     'submitted': '📝',
@@ -1093,20 +1119,32 @@ async function sendAllOrdersDetails(chatId: string): Promise<void> {
     }
 
     const jsonResponse = await response.json();
+    console.log('Response JSON:', jsonResponse); // Log the actual JSON response
 
     // Validate the response
-    if (!isSummaryResponse(jsonResponse)) {
+    if (!Array.isArray(jsonResponse) || !jsonResponse.every((item: any) =>
+      typeof item.order_id === 'number' &&
+      Array.isArray(item.order_items) &&
+      item.order_items.every((orderItem: any) =>
+        typeof orderItem.product_name === 'string' &&
+        typeof orderItem.collection_name === 'string' &&
+        typeof orderItem.item_price === 'string' &&
+        typeof orderItem.total_sum === 'number' &&
+        (orderItem.size === null || typeof orderItem.size === 'string') &&
+        (orderItem.color_name === null || typeof orderItem.color_name === 'string') &&
+        typeof orderItem.color_value === 'string' &&
+        typeof orderItem.quantity === 'number'
+      )
+    )) {
       console.error('Invalid response format');
       await sendMessage(chatId, 'Failed to retrieve order summary. The response format is invalid.');
       return;
     }
 
-    const summaryResponse: SummaryResponse = jsonResponse;
-    console.log(`Order summary retrieved: ${JSON.stringify(summaryResponse)}`);
+    const orders: Order[] = jsonResponse;
+    console.log(`Order summary retrieved: ${JSON.stringify(orders)}`);
 
-    const orders: Order[] = summaryResponse.orders;
-
-    if (Array.isArray(orders) && orders.length > 0) {
+    if (orders.length > 0) {
       const ordersSummary = orders.map(order => {
         // Determine the latest status
         const statusDates: { [key: string]: string | null } = {
@@ -1294,6 +1332,9 @@ async function updateOrderSummary(chatId: string, order: Order, newStatus: strin
 function isOrderResponse(data: any): data is OrderResponse {
   return data && Array.isArray(data.TelegramUser);
 }
+function isOrdersResponse(data: any): data is OrdersResponse {
+  return data && Array.isArray(data.results);
+}
 
 async function getChatIdForOrder(orderId: number): Promise<string> {
   const url = `${VERCEL_DOMAIN}/api/orders/${orderId}`;
@@ -1312,9 +1353,7 @@ async function getChatIdForOrder(orderId: number): Promise<string> {
   return '';
 }
 
-function isOrdersResponse(data: any): data is OrdersResponse {
-  return data && Array.isArray(data.results);
-}
+
 
 async function fetchAndProcessOrders(status: string, processOrder: (order: Order) => Promise<void>) {
   const ordersUrl = `${VERCEL_DOMAIN}/api/orders?status=${status}`;

@@ -83,11 +83,7 @@ def get_chat_id_from_phone(phone_number):
         response.raise_for_status()
         data = response.json()
         
-        if 'chat_id' in data:
-            return data['chat_id']
-        else:
-            logger.error(f"No chat_id found for phone number: {phone_number}")
-            return None
+        return data.get('chat_id')
     except requests.exceptions.RequestException as e:
         logger.error(f"Request to /api/telegram_user failed: {e}")
         return None
@@ -120,34 +116,23 @@ def get_random_saying(file_path):
 
 @receiver(post_save, sender=Order)
 def update_order_summary(sender, instance, created, **kwargs):
-    if created:
-        phone_number = instance.phone
-        if phone_number:
-            chat_id = get_chat_id_from_phone(phone_number)
-            if chat_id:
-                order_items = instance.order_items.all()
-                update_order_status_with_notification(
-                    instance.id,
-                    order_items,
-                    instance.status,
-                    f'{instance.status}_at',
-                    chat_id
-                )
-            else:
-                logger.error(f"No chat_id found for phone number: {phone_number}")
-    else:
-        # Handle status changes if needed
-        pass
+    phone_number = instance.phone
+    if phone_number:
+        chat_id = get_chat_id_from_phone(phone_number)
+        if chat_id:
+            update_order_summary_for_chat_id(chat_id)
+        else:
+            logger.error(f"No chat_id found for phone number: {phone_number}")
 
 @receiver(post_save, sender=OrderItem)
 def update_order_summary_on_order_item_change(sender, instance, **kwargs):
     order = instance.order
-    phone_number = order.phone  # Make sure this field matches your model
+    phone_number = order.phone
     if phone_number:
         chat_id = get_chat_id_from_phone(phone_number)
         if chat_id:
-            logger.debug(f"OrderItem change detected for Order ID: {order.id}, updating summary for chat_id: {chat_id}")
             update_order_summary_for_chat_id(chat_id)
+            logger.debug(f"OrderItem change detected for Order ID: {order.id}, updating summary for chat_id: {chat_id}")
 
 @receiver(post_delete, sender=Order)
 def remove_order_from_summary(sender, instance, **kwargs):
@@ -158,14 +143,28 @@ def remove_order_from_summary(sender, instance, **kwargs):
             try:
                 logger.debug(f"Removing Order ID: {instance.id} from summary for chat_id: {chat_id}")
 
+                # Retrieve the OrderSummary instance
                 order_summary = OrderSummary.objects.get(chat_id=chat_id)
-                order_summary.orders = [order for order in order_summary.orders if order['order_id'] != instance.id]
+                
+                # Update the orders list to exclude the deleted order
+                updated_orders = [order for order in order_summary.orders if order['order_id'] != instance.id]
+                
+                # Update the OrderSummary instance with the new orders list
+                order_summary.orders = updated_orders
+                
+                # Save the updated OrderSummary instance
                 order_summary.save()
                 
+                # Invalidate the cache
                 cache_key = f'order_summary_{chat_id}'
                 cache.delete(cache_key)
+
             except OrderSummary.DoesNotExist:
-                pass
+                # Log the exception if needed
+                logger.warning(f"OrderSummary with chat_id {chat_id} does not exist")
+            except Exception as e:
+                # Log any other exceptions
+                logger.error(f"Error while removing Order ID: {instance.id} from summary: {str(e)}")
 
 @receiver(post_delete, sender=OrderItem)
 def update_order_summary_on_order_item_delete(sender, instance, **kwargs):
@@ -176,3 +175,17 @@ def update_order_summary_on_order_item_delete(sender, instance, **kwargs):
         if chat_id:
             update_order_summary_for_chat_id(chat_id)
             logger.debug(f"OrderItem deleted for Order ID: {order.id}, updating summary for chat_id: {chat_id}")
+
+def update_order_summary_for_chat_id(chat_id):
+    try:
+        orders = Order.objects.filter(telegram_user__chat_id=chat_id)
+        summaries = [get_order_summary(order) for order in orders]
+
+        OrderSummary.objects.update_or_create(
+            chat_id=chat_id,
+            defaults={'orders': summaries}
+        )
+        logger.info(f'Order summaries updated for chat ID {chat_id}')
+
+    except Exception as e:
+        logger.error(f"Error updating order summary for chat ID {chat_id}: {e}")
