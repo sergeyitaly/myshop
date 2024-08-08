@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     'django_filters',
     "phonenumber_field",
     "anymail",
+    'myshop',
       # "debug_toolbar",
 
 ]
