@@ -48,7 +48,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),     # Admin URLs: /admin/
     path("", views.index, name="index"),
     # Catch-all URL pattern (redirect to index.html)
-    re_path(r'^.*$', RedirectView.as_view(url='/')),
+#     re_path(r'^.*$', RedirectView.as_view(url='/')),
 ]
 
 urlpatterns += i18n_patterns(

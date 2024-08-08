@@ -51,8 +51,9 @@ export const collectionApiSlice = apiSlice.injectEndpoints({
         }),
 
         getDiscountProducts: builder.query<ShortServerResponce<Product[]>, void>({
-            query: () => `${ENDPOINTS.PRODUCTS}/?discount=true`
+            query: () => `${ENDPOINTS.PRODUCTS}/`
         }),
+
 
     })
 })

@@ -8,7 +8,7 @@ import React from "react";
 import {useNavigate, useParams} from "react-router-dom";
 import {
     useGetAllCollectionsQuery,
-    useGetAllProductsFromCollectionQuery,
+    useGetAllProductsFromCollectionQuery, useGetDiscountProductsQuery,
     useGetOneCollectionByIdQuery,
     useGetProductsByPopularityQuery,
     useGetProductsFromCollectionByProductFilterQuery
@@ -17,6 +17,8 @@ import {Collection} from "../../../models/entities";
 import {ROUTE} from "../../../constants";
 import {formatNumber} from "../../../functions/formatNumber";
 import {formatCurrency} from "../../../functions/formatCurrency";
+import styles from "../CarouselsMobileVersion/style.module.scss";
+import {PreviewLoadingCard} from "../../Cards/PreviewCard/PreviewLoagingCard";
 
 export function AllCollection() {
 
@@ -43,19 +45,23 @@ export function AllCollection() {
         <div className={style.sliderContainer}>
             <p className={style.title}>Всі колекції</p>
             <Slider {...settings}>
-                {
-                    collections.map((collection) => (
-                        <div className={style.container}>
-                            <PreviewCard
-                                key={collection.id}
-                                photoSrc={collection.photo}
-                                title={collection.name}
-                                subTitle={collection.category}
-                                onClick={() => handleClickCollectionCard(collection.id)}
-                            />
+                {isLoading
+                    ? Array.from({ length: 3 }).map((_, index) => (
+                        <div key={index} className={style.container}>
+                            <PreviewLoadingCard />
                         </div>
                     ))
-                }
+                    : collections.map((product) => (
+                        <div key={product.id} className={style.container}>
+                            <PreviewCard
+                                className={style.card}
+                                key={product.id}
+                                photoSrc={product.photo || ''}
+                                title={product.name}
+                                onClick={() => handleClickCollectionCard(product.id)}
+                            />
+                        </div>
+                    ))}
             </Slider>
         </div>
     );
@@ -92,11 +98,17 @@ export function Popular () {
     return (
         <div className={style.sliderContainer}>
             <p className={style.title}>Найпопулярніші товари</p>
-            {isSuccessProductFetshing && (
-                <Slider {...settings}>
-                    {products.map((product) => (
-                        <div className={style.container} key={product.id}>
+            <Slider {...settings}>
+                {isLoadingProducts
+                    ? Array.from({ length: 3 }).map((_, index) => (
+                        <div key={index} className={style.container}>
+                            <PreviewLoadingCard />
+                        </div>
+                    ))
+                    : products.map((product) => (
+                        <div key={product.id} className={style.container}>
                             <PreviewCard
+                                key={product.id}
                                 photoSrc={product.photo || ''}
                                 title={product.name}
                                 subTitle={`${formatNumber(product.price)} ${formatCurrency(product.currency)}`}
@@ -104,14 +116,21 @@ export function Popular () {
                             />
                         </div>
                     ))}
-                </Slider>
-            )}
+            </Slider>
         </div>
     );
 }
 
 
 export function Discount () {
+
+    const navigate = useNavigate();
+
+    const { data: discountProductsData, isLoading: isLoadingDiscountProducts } = useGetDiscountProductsQuery();
+    const discountProducts = discountProductsData?.results.filter(product => parseFloat(product.discount) > 0) || [];
+
+    console.log('Discount products:', discountProducts);  // Логируем полученные продукты
+
     const settings = {
         dots: true,
         infinite: true,
@@ -123,28 +142,52 @@ export function Discount () {
         centerPadding: "25%",
         arrows: false,
     };
+
+    const handleClickProduct = (productId: number) => {
+        navigate(`${ROUTE.PRODUCT}${productId}`)
+    }
+
     return (
         <div className={style.sliderContainer} >
             <p className={style.title}> Знижки </p>
-            <Slider {...settings}>
-                {mockDataDiscount.map((product, index) => (
-                    <div key={index} className={style.card}>
-                        <div className={style.cardImage}>
-                            {/*<img src={product.imageUrl} alt={product.name} style={{maxWidth:'100%'}}/>  */}
-                            <div className={style.imageContainer}>
-                                <p className={style.saleLabel}>Sale</p>
-                                <img src={product.imageUrl} alt={product.name} className={style.image} />
-                            </div>
-                            <p className={style.name} style={{marginTop:'15px', textAlign:'center'}}>{product.name}</p>
-                            <div className={style.priceContainer}>
-                                <p className={style.oldPrice}>{product.price}</p>
-                                <p className={style.newPrice}>{product.newPrice}</p>
-                            </div>
+            {
+                discountProducts.length === 1 ? (
+                    <PreviewCard
+                        className={style.cardNew}
+                        key={discountProducts[0].id}
+                        photoSrc={discountProducts[0].photo || ''}
+                        title={discountProducts[0].name}
+                        discount={discountProducts[0].discount}
+                        price={discountProducts[0].price}
+                        currency={discountProducts[0].currency}
+                        onClick={() => handleClickProduct(discountProducts[0].id)}
+                    />
+                ) : (
+                    <Slider {...settings}>
+                        {isLoadingDiscountProducts
+                            ? Array.from({ length: 3 }).map((_, index) => (
+                                <div key={index} className={style.container}>
+                                    <PreviewLoadingCard />
+                                </div>
+                            ))
+                            : discountProducts.map((product) => (
+                                <div key={product.id} className={style.container}>
+                                    <PreviewCard
+                                        className={styles.card}
+                                        key={product.id}
+                                        title={product.name}
+                                        discount = {product.discount}
+                                        price={product.price}
+                                        currency={product.currency}
+                                        photoSrc={product.photo_url}
+                                        previewSrc={product.photo_thumbnail_url}
+                                        onClick={() => handleClickProduct(product)}
+                                    />
+                                </div>
+                            ))}
+                    </Slider>
 
-                        </div>
-                    </div>
-                ))}
-            </Slider>
+                )}
         </div>
     );
 }
