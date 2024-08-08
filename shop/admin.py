@@ -25,7 +25,7 @@ class ProductAdmin(admin.ModelAdmin):
         'main_product_image_display', 'display_gallery'
     )
     list_display_links = ['name']
-    sortable_by = ['collection', 'price', 'sales_count', 'popularity']
+    sortable_by = ['category','collection', 'price', 'sales_count', 'popularity']
     show_full_result_count = False
     inlines = [ProductImageInline, AdditionalFieldInline]
 
