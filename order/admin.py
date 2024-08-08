@@ -14,7 +14,7 @@ class OrderSummaryAdmin(admin.ModelAdmin):
     readonly_fields = ('order_summary_pretty',)
 
     def order_summary_pretty(self, obj):
-        return format_html('<pre>{}</pre>', json.dumps(obj.orders, indent=2, ensure_ascii=False))
+        return format_html('<pre>{}</pre>', json.dumps(obj.orders, indent=2, ensure_ascii=False) if obj.orders else "No data available")
 
     order_summary_pretty.short_description = 'Order Summary (JSON)'
 
