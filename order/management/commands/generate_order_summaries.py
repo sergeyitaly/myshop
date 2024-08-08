@@ -79,7 +79,9 @@ class Command(BaseCommand):
             logger.info(f'Grouped Orders: {grouped_orders}')
 
             # Update OrderSummary
-            for chat_id, orders_summary in grouped_orders.items():
+            all_chat_ids = grouped_orders.keys()
+            for chat_id in all_chat_ids:
+                orders_summary = grouped_orders.get(chat_id, [])
                 OrderSummary.objects.update_or_create(
                     chat_id=chat_id,
                     defaults={'orders': orders_summary}

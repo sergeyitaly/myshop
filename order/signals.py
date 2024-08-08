@@ -115,14 +115,20 @@ def get_random_saying(file_path):
         return "No sayings available."
 
 @receiver(post_save, sender=Order)
-def update_order_summary(sender, instance, created, **kwargs):
-    phone_number = instance.phone
-    if phone_number:
-        chat_id = get_chat_id_from_phone(phone_number)
-        if chat_id:
-            update_order_summary_for_chat_id(chat_id)
+def update_order_summary(sender, instance, **kwargs):
+    # Only update the summary if the order is created or updated
+    if kwargs.get('created', False) or kwargs.get('update_fields'):
+        phone_number = instance.phone
+        if phone_number:
+            chat_id = get_chat_id_from_phone(phone_number)
+            if chat_id:
+                update_order_summary_for_chat_id(chat_id)
+            else:
+                # Handle case where chat_id is not found for the phone number
+                logger.error(f"No chat_id found for phone number: {phone_number}")
         else:
-            logger.error(f"No chat_id found for phone number: {phone_number}")
+            # Handle orders with no phone number
+            logger.error(f"No phone number found for order ID: {instance.id}")
 
 @receiver(post_save, sender=OrderItem)
 def update_order_summary_on_order_item_change(sender, instance, **kwargs):
@@ -179,13 +185,25 @@ def update_order_summary_on_order_item_delete(sender, instance, **kwargs):
 def update_order_summary_for_chat_id(chat_id):
     try:
         orders = Order.objects.filter(telegram_user__chat_id=chat_id)
-        summaries = [get_order_summary(order) for order in orders]
+        summary = []
+        for order in orders:
+            serializer = OrderSerializer(order)
+            order_data = serializer.data
+            summary.append({
+                'order_id': order.id,
+                'order_items': order_data['order_items'],
+                'submitted_at': order.submitted_at.strftime('%Y-%m-%d %H:%M') if order.submitted_at else None,
+                'created_at': order.created_at.strftime('%Y-%m-%d %H:%M') if order.created_at else None,
+                'processed_at': order.processed_at.strftime('%Y-%m-%d %H:%M') if order.processed_at else None,
+                'complete_at': order.complete_at.strftime('%Y-%m-%d %H:%M') if order.complete_at else None,
+                'canceled_at': order.canceled_at.strftime('%Y-%m-%d %H:%M') if order.canceled_at else None,
+            })
 
         OrderSummary.objects.update_or_create(
             chat_id=chat_id,
-            defaults={'orders': summaries}
+            defaults={'orders': summary}
         )
-        logger.info(f'Order summaries updated for chat ID {chat_id}')
-
+        logger.info(f'Order summary updated for chat ID {chat_id}')
+    
     except Exception as e:
-        logger.error(f"Error updating order summary for chat ID {chat_id}: {e}")
+        logger.error(f'Error updating order summary for chat ID {chat_id}: {e}')
