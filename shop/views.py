@@ -78,18 +78,23 @@ class ProductListFilter(generics.ListAPIView):
         # Apply filtering based on the ordering parameter
         ordering = self.request.query_params.get('ordering', None)
         if ordering:
-            if ordering == 'discounted_price':
-                queryset = queryset.filter(discount__gt=0).order_by('discounted_price')
-            elif ordering == '-discounted_price':
-                queryset = queryset.filter(discount__gt=0).order_by('-discounted_price')
-            elif ordering == 'price':
-                queryset = queryset.order_by('discounted_price')  # Use discounted_price for sorting
-            elif ordering == '-price':
-                queryset = queryset.order_by('-discounted_price')  # Use discounted_price for sorting
-            else:
-                queryset = queryset.order_by(ordering)
+            # Split the ordering fields by comma
+            ordering_fields = ordering.split(',')
+            for field in ordering_fields:
+                if field == 'discounted_price':
+                    queryset = queryset.filter(discount__gt=0).order_by('discounted_price')
+                elif field == '-discounted_price':
+                    queryset = queryset.filter(discount__gt=0).order_by('-discounted_price')
+                elif field == 'price':
+                    queryset = queryset.order_by('discounted_price')  # Use discounted_price for sorting
+                elif field == '-price':
+                    queryset = queryset.order_by('-discounted_price')  # Use discounted_price for sorting
+                else:
+                    queryset = queryset.order_by(field)
 
-        return queryset        
+        return queryset     
+
+
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
