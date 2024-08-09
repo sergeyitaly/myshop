@@ -14,6 +14,7 @@ class Command(BaseCommand):
         try:
             # Fetch all orders with related order items and products
             orders = Order.objects.prefetch_related('order_items__product').all()
+            logger.info(f'Fetched {orders.count()} orders.')
 
             # Group orders by chat_id
             grouped_orders = {}
@@ -22,28 +23,20 @@ class Command(BaseCommand):
                 if chat_id not in grouped_orders:
                     grouped_orders[chat_id] = []
 
-                # Convert datetime fields to formatted string
-                def datetime_to_str(dt):
-                    if dt:
-                        # Ensure the datetime is naive for consistent formatting
-                        if is_aware(dt):
-                            dt = make_naive(dt)
-                        return dt.strftime('%Y-%m-%d %H:%M')
-                    return None
-
-                # Handle None values and ensure all datetime fields are consistent
+                # Function to safely convert datetime to naive
                 def safe_make_naive(dt):
                     if dt is None:
                         return None
                     return make_naive(dt) if is_aware(dt) else dt
 
+                # Extract and format datetime fields
                 submitted_at = safe_make_naive(order.submitted_at)
                 created_at = safe_make_naive(order.created_at)
                 processed_at = safe_make_naive(order.processed_at)
                 complete_at = safe_make_naive(order.complete_at)
                 canceled_at = safe_make_naive(order.canceled_at)
 
-                # Determine the latest timestamp
+                # Determine the latest timestamp directly using datetime
                 statuses = {
                     'submitted_at': submitted_at,
                     'created_at': created_at,
@@ -51,12 +44,18 @@ class Command(BaseCommand):
                     'complete_at': complete_at,
                     'canceled_at': canceled_at
                 }
-
+                
                 latest_status_field = max(
                     statuses,
                     key=lambda s: statuses[s] or datetime.min
                 )
                 latest_status_timestamp = statuses[latest_status_field]
+
+                # Convert datetime to string for summary
+                def datetime_to_str(dt):
+                    if dt:
+                        return dt.strftime('%Y-%m-%d %H:%M')
+                    return None
 
                 # Use the serializer to format the order and items
                 serializer = OrderSerializer(order)
@@ -64,19 +63,25 @@ class Command(BaseCommand):
 
                 # Log the order items for debugging
                 logger.info(f'Order {order.id} has {len(order_data["order_items"])} items.')
+                logger.info(f'Serialized Order Data: {order_data}')
 
                 # Create order summary with only the required statuses
                 summary = {
                     'order_id': order.id,
                     'order_items': order_data['order_items'],
-                    latest_status_field: datetime_to_str(latest_status_timestamp),
-                    'submitted_at': datetime_to_str(submitted_at)
+                    'submitted_at': datetime_to_str(submitted_at),
+                    latest_status_field: datetime_to_str(latest_status_timestamp)
                 }
 
                 grouped_orders[chat_id].append(summary)
 
+            # Log grouped orders for debugging
+            logger.info(f'Grouped Orders: {grouped_orders}')
+
             # Update OrderSummary
-            for chat_id, orders_summary in grouped_orders.items():
+            all_chat_ids = grouped_orders.keys()
+            for chat_id in all_chat_ids:
+                orders_summary = grouped_orders.get(chat_id, [])
                 OrderSummary.objects.update_or_create(
                     chat_id=chat_id,
                     defaults={'orders': orders_summary}

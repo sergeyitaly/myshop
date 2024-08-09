@@ -38,7 +38,7 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='submitted', db_index=True)
     parent_order = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     present = models.BooleanField(null=True, help_text='Package as a present')
-    telegram_user = models.ForeignKey(TelegramUser, on_delete=models.SET_NULL, null=True, blank=True)
+    telegram_user = models.ForeignKey(TelegramUser, related_name='orders', on_delete=models.CASCADE, null=True, blank=True)
     @property
     def chat_id(self):
         return self.telegram_user.chat_id if self.telegram_user else None
@@ -99,7 +99,7 @@ class Order(models.Model):
 
 class OrderSummary(models.Model):
     chat_id = models.CharField(max_length=255, unique=True, null=True, blank=True)  # Changed to CharField to handle string IDs
-    orders = models.JSONField()
+    orders = models.JSONField(default=dict)  # Ensures orders is not null
 
     def __str__(self):
         return str(self.chat_id)  # Ensure it returns a string representation
