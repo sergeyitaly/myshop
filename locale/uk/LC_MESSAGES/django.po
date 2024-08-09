@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-09 23:59+0300\n"
+"POT-Creation-Date: 2024-08-10 01:46+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,6 +20,301 @@ msgstr ""
 "11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % "
 "100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
 "(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+
+#: myshop/settings.py:283
+msgid "English"
+msgstr ""
+
+#: myshop/settings.py:284
+msgid "Ukrainian"
+msgstr ""
+
+#: order/admin.py:23
+msgid "Order Summary (JSON)"
+msgstr ""
+
+#: order/admin.py:56
+msgid "Product Photo"
+msgstr ""
+
+#: order/admin.py:60
+msgid "Product Name"
+msgstr ""
+
+#: order/admin.py:64 shop/models.py:92 shop/models.py:128
+msgid "Collection"
+msgstr ""
+
+#: order/admin.py:68 shop/models.py:141
+msgid "Size"
+msgstr ""
+
+#: order/admin.py:72
+msgid "Color"
+msgstr ""
+
+#: order/admin.py:93
+msgid "Has Order Items"
+msgstr ""
+
+#: order/admin.py:94
+msgid "has_order_items"
+msgstr ""
+
+#: order/admin.py:98
+msgid "With Order Items"
+msgstr ""
+
+#: order/admin.py:99
+msgid "Without Order Items"
+msgstr ""
+
+#: order/admin.py:139 order/models.py:12 order/models.py:106
+msgid "Chat ID"
+msgstr ""
+
+#: order/admin.py:143
+msgid "Last Updated"
+msgstr ""
+
+#: order/admin.py:147
+msgid "Total Quantity"
+msgstr ""
+
+#: order/admin.py:151
+msgid "Total Price"
+msgstr ""
+
+#: order/models.py:11
+msgid "Phone"
+msgstr ""
+
+#: order/models.py:20
+msgid "Submitted"
+msgstr ""
+
+#: order/models.py:21 shop/models.py:134
+msgid "Created"
+msgstr ""
+
+#: order/models.py:22
+msgid "Processed"
+msgstr ""
+
+#: order/models.py:23
+msgid "Complete"
+msgstr ""
+
+#: order/models.py:24
+msgid "Canceled"
+msgstr ""
+
+#: order/models.py:28
+msgid "Default Name"
+msgstr ""
+
+#: order/models.py:29
+msgid "Default Surname"
+msgstr ""
+
+#: order/models.py:30
+msgid "Contact phone number"
+msgstr ""
+
+#: order/models.py:32
+msgid "Address"
+msgstr ""
+
+#: order/models.py:33
+msgid "Other person"
+msgstr ""
+
+#: order/models.py:34
+msgid "Comments about the receiver"
+msgstr ""
+
+#: order/models.py:35
+msgid "Submitted At"
+msgstr ""
+
+#: order/models.py:36
+msgid "Created At"
+msgstr ""
+
+#: order/models.py:37
+msgid "Processed At"
+msgstr ""
+
+#: order/models.py:38
+msgid "Complete At"
+msgstr ""
+
+#: order/models.py:39
+msgid "Canceled At"
+msgstr ""
+
+#: order/models.py:40
+msgid "Status"
+msgstr ""
+
+#: order/models.py:41
+msgid "Parent Order"
+msgstr ""
+
+#: order/models.py:42
+msgid "Package as a present"
+msgstr ""
+
+#: order/models.py:43
+msgid "Telegram User"
+msgstr ""
+
+#: order/models.py:101 order/models.py:127
+#: venv/lib/python3.9/site-packages/django/forms/formsets.py:484
+#: venv/lib/python3.9/site-packages/django/forms/formsets.py:491
+msgid "Order"
+msgstr ""
+
+#: order/models.py:102 order/models.py:107
+msgid "Orders"
+msgstr ""
+
+#: order/models.py:128 shop/models.py:186
+msgid "Product"
+msgstr ""
+
+#: order/models.py:129
+msgid "Quantity"
+msgstr ""
+
+#: order/models.py:130
+msgid "Total Sum"
+msgstr ""
+
+#: order/models.py:142
+msgid "Order Item"
+msgstr ""
+
+#: order/models.py:143
+msgid "Order Items"
+msgstr ""
+
+#: shop/admin.py:11
+msgid "Product Image"
+msgstr ""
+
+#: shop/admin.py:12 shop/admin.py:57
+msgid "Product Images"
+msgstr ""
+
+#: shop/admin.py:18
+msgid "Additional Field"
+msgstr ""
+
+#: shop/admin.py:19
+msgid "Additional Fields"
+msgstr ""
+
+#: shop/admin.py:43
+msgid "Main Image"
+msgstr ""
+
+#: shop/admin.py:47
+msgid "Main Image Preview"
+msgstr ""
+
+#: shop/admin.py:77 shop/models.py:95 shop/models.py:189
+#: venv/lib/python3.9/site-packages/django/db/models/fields/files.py:393
+msgid "Image"
+msgstr ""
+
+#: shop/models.py:53
+msgid "Category"
+msgstr ""
+
+#: shop/models.py:54
+msgid "Categories"
+msgstr ""
+
+#: shop/models.py:93
+msgid "Collections"
+msgstr ""
+
+#: shop/models.py:129
+msgid "Name"
+msgstr ""
+
+#: shop/models.py:130
+msgid "Description"
+msgstr ""
+
+#: shop/models.py:131
+msgid "Price"
+msgstr ""
+
+#: shop/models.py:132
+msgid "Stock"
+msgstr ""
+
+#: shop/models.py:133
+msgid "Available"
+msgstr ""
+
+#: shop/models.py:135
+msgid "Updated"
+msgstr ""
+
+#: shop/models.py:136
+msgid "Sales Count"
+msgstr ""
+
+#: shop/models.py:137
+msgid "Popularity"
+msgstr ""
+
+#: shop/models.py:138
+msgid "Slug"
+msgstr ""
+
+#: shop/models.py:139
+msgid "Enter the color name, e.g., magenta or purple"
+msgstr ""
+
+#: shop/models.py:139
+msgid "Color Name"
+msgstr ""
+
+#: shop/models.py:140
+msgid "Enter the color value in the format #RRGGBB"
+msgstr ""
+
+#: shop/models.py:140
+msgid "Color Value"
+msgstr ""
+
+#: shop/models.py:141
+msgid "Format: LxHxD (in mm or specify cm)"
+msgstr ""
+
+#: shop/models.py:142
+msgid "Discount percentage (e.g., 10.00 for 10%)"
+msgstr ""
+
+#: shop/models.py:142
+msgid "Discount"
+msgstr ""
+
+#: shop/models.py:187
+msgid "Products"
+msgstr ""
+
+#: templates/admin/base_site.html:5
+msgid "Django site admin"
+msgstr ""
+
+#: templates/admin/base_site.html:8
+msgid "Django administration"
+msgstr ""
 
 #: venv/lib/python3.9/site-packages/click/_termui_impl.py:518
 #, python-brace-format
@@ -708,10 +1003,6 @@ msgstr ""
 msgid "File"
 msgstr ""
 
-#: venv/lib/python3.9/site-packages/django/db/models/fields/files.py:393
-msgid "Image"
-msgstr ""
-
 #: venv/lib/python3.9/site-packages/django/db/models/fields/json.py:26
 msgid "A JSON object"
 msgstr ""
@@ -870,11 +1161,6 @@ msgid "Please submit at least %(num)d form."
 msgid_plural "Please submit at least %(num)d forms."
 msgstr[0] ""
 msgstr[1] ""
-
-#: venv/lib/python3.9/site-packages/django/forms/formsets.py:484
-#: venv/lib/python3.9/site-packages/django/forms/formsets.py:491
-msgid "Order"
-msgstr ""
 
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:499
 msgid "Delete"
