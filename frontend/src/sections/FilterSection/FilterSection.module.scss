@@ -1,0 +1,61 @@
+@import '../../variables';
+
+.section {
+    position: relative;
+}
+
+.control {
+    display: flex;
+    justify-content: space-between;
+}
+
+.tagContainer {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    padding: 0 0 10px 0;
+}
+
+.clearButton {
+    color: $color-gray-300;
+    font-size: 16px;
+}
+
+.pagination {
+    margin-top: 40px;
+  }
+  
+  @media screen and (max-width: 700px) {
+    .card {
+      width: calc(50% - 10px); /* Adjusting width for smaller screens */
+      margin-bottom: 40px;
+    }
+  
+    .name {
+      font-size: 24px;
+    }
+  }
+  
+  @media screen and (max-width: 500px) {
+    .name {
+      font-size: 18px;
+    }
+  
+    .category {
+      font-size: 16px;
+    }
+  }
+  
+  .item {
+    margin-left: 10px;
+  }
+
+
+
+
+
+
+
+
+
+

@@ -29,6 +29,7 @@ export enum ENDPOINTS {
     ORDER = 'order',
     PRODUCT = 'product',
     PRODUCTS = 'products',
+    FILTER = 'products/filter'
    
 }
 

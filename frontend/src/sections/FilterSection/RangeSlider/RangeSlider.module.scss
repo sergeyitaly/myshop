@@ -1,0 +1,42 @@
+@import '../../../variables';
+
+.appSlider {
+    .thumb {
+        background: $color-black;
+    }
+    
+    .active {
+        background: $color-button;
+    }
+    
+    .rail {
+        background: $color-gray-250;
+    }
+    
+    .track {
+        background: $color-black;
+        border-color: $color-black;
+    }
+}
+
+
+.priceRange {
+    display: flex;
+    justify-content: space-between;
+    font-size: clamp(1rem, 0.426vw + 0.867rem, 1.25rem);
+    margin-top: 5px;
+}
+
+.inputContainer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    input {
+        border: 1px solid $color-gray-250;
+        border-radius: 5px;
+        padding: 10px;
+        font-size: clamp(1rem, 0.426vw + 0.867rem, 1.25rem);
+        max-width: 217px;
+        text-align: center;
+    }
+}

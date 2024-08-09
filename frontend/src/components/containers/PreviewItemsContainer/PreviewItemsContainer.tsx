@@ -25,8 +25,6 @@ export const PreviewItemsContainer = ({
 
     const isArray = Array.isArray(children)
 
-   
-    
 
     if(isArray){
         isNotEmpty = !!children.length
