@@ -5,16 +5,19 @@ from .models import *
 import json
 from django.utils.html import format_html
 from .signals import update_order_status_with_notification
-
+from django.contrib.admin import SimpleListFilter
+from django.db.models import Sum, F
 
 @admin.register(OrderSummary)
 class OrderSummaryAdmin(admin.ModelAdmin):
     list_display = ('chat_id',)
     search_fields = ('chat_id',)
     readonly_fields = ('order_summary_pretty',)
+    list_filter = ('chat_id',)  # Optionally filter by chat_id, including null values
 
     def order_summary_pretty(self, obj):
-        return format_html('<pre>{}</pre>', json.dumps(obj.orders, indent=2, ensure_ascii=False))
+        # Format the orders JSON nicely
+        return format_html('<pre>{}</pre>', json.dumps(obj.orders, indent=2, ensure_ascii=False) if obj.orders else "No data available")
 
     order_summary_pretty.short_description = 'Order Summary (JSON)'
 
@@ -25,9 +28,15 @@ class OrderSummaryAdmin(admin.ModelAdmin):
     )
 
     def get_readonly_fields(self, request, obj=None):
+        # Make chat_id readonly when editing an object
         if obj:
             return self.readonly_fields + ('chat_id',)
         return self.readonly_fields
+
+    def get_queryset(self, request):
+        # Ensure that the queryset includes all OrderSummary objects, including those with null chat_id
+        queryset = super().get_queryset(request)
+        return queryset
 
 @admin.register(TelegramUser)
 class TelegramUserAdmin(admin.ModelAdmin):
@@ -78,6 +87,27 @@ class TelegramUserFilter(admin.SimpleListFilter):
             return queryset.filter(telegram_user__phone=phone, telegram_user__chat_id=chat_id)
         return queryset
 
+
+class HasOrderItemsFilter(SimpleListFilter):
+    title = 'Has Order Items'
+    parameter_name = 'has_order_items'
+
+    def lookups(self, request, model_admin):
+        return [
+            ('yes', 'With Order Items'),
+            ('no', 'Without Order Items'),
+        ]
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        if value == 'yes':
+            # Filter orders that have associated order items
+            return queryset.filter(order_items__isnull=False).distinct()
+        elif value == 'no':
+            # Filter orders that do not have associated order items
+            return queryset.filter(order_items__isnull=True)
+        return queryset
+
 class OrderAdmin(admin.ModelAdmin):
     list_display = ['id', 'status', 'last_updated', 'phone', 'chat_id']
     readonly_fields = ['id', 'name', 'surname', 'phone', 'email', 'receiver', 'receiver_comments', 'total_quantity', 'total_price', 'submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at', 'chat_id']
@@ -94,7 +124,8 @@ class OrderAdmin(admin.ModelAdmin):
         'complete_at',
         'canceled_at',
         'present',
-    ]
+        HasOrderItemsFilter,
+      ]
     search_fields = ['phone', 'email', 'name', 'surname']
     inlines = [OrderItemInline]
 
@@ -132,12 +163,18 @@ class OrderAdmin(admin.ModelAdmin):
                     obj.complete_at = timezone.now()
                 elif obj.status == 'canceled':
                     obj.canceled_at = timezone.now()
+                order_items = obj.order_items.all()
+
+            # Ensure that obj.telegram_user is not None and has chat_id attribute
+            if obj.telegram_user and obj.telegram_user.chat_id:
  # Send notification about status change
                 update_order_status_with_notification(
                     obj.id,
+                    order_items,
                     obj.status,
                     f'{obj.status}_at',
-                    obj.telegram_user.chat_id)
+                    obj.telegram_user.chat_id
+                )
 
         super().save_model(request, obj, form, change)
 

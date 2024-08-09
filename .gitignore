@@ -41,3 +41,5 @@ migrations/
 .wrangler/metrics.json
 .wrangler/logs/
 my-worker/wrangler.toml
+db_backup.dump
+dump.rdb

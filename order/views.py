@@ -226,29 +226,34 @@ def create_order(request):
     try:
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
-            # Extract chat_id from request data if available
-            chat_id = request.data.get('chat_id')
-            
-            # Save the order
+            # Save the order first
             order = serializer.save()
-            
-            # Set chat_id on the order if provided
-            if chat_id:
-                telegram_user = TelegramUser.objects.filter(chat_id=chat_id).first()
+
+            # Extract phone and get chat_id
+            phone = request.data.get('phone')
+            try:
+                telegram_user = TelegramUser.objects.get(phone=phone)
                 if telegram_user:
                     order.telegram_user = telegram_user
                     order.save(update_fields=['telegram_user'])
-                    
+
+                    # Prepare order items
+                    order_items = order.order_items.all()
+
                     # Notify the user about the new order status
                     update_order_status_with_notification(
                         order.id,
+                        order_items,
                         'submitted',  # Assuming 'submitted' is the initial status
                         'submitted_at',
-                        chat_id
+                        telegram_user.chat_id
                     )
                 else:
-                    logger.warning(f"No TelegramUser found with chat_id: {chat_id}")
-            
+                    logger.warning(f"No TelegramUser found with phone: {phone}")
+
+            except TelegramUser.DoesNotExist:
+                logger.warning(f"No TelegramUser found with phone: {phone}")
+
 
             # Send the confirmation email
             formatted_date = localtime(order.submitted_at).strftime('%Y-%m-%d %H:%M')
@@ -372,32 +377,40 @@ def get_orders(request):
 @permission_classes([IsAuthenticated])
 def get_order_summary(request):
     chat_id = request.query_params.get('chat_id')
-    if chat_id:
-        try:
-            summary = OrderSummary.objects.get(chat_id=chat_id)
-            serializer = OrderSummarySerializer(summary)
-            return JsonResponse(serializer.data, safe=False)
-        except OrderSummary.DoesNotExist:
-            return JsonResponse({'error': 'No orders found for this chat ID.'}, status=404)
-    else:
-        return JsonResponse({'error': 'Chat ID is required.'}, status=400)
     
+    if not chat_id:
+        return Response({'error': 'Chat ID is required.'}, status=400)
+
+    try:
+        summary = OrderSummary.objects.get(chat_id=chat_id)
+        serializer = OrderSummarySerializer(summary)
+        return Response(serializer.data)
+    except OrderSummary.DoesNotExist:
+        return Response({'error': 'No orders found for this chat ID.'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+    
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def update_order_summary(request):
     chat_id = request.data.get('chat_id')
-    orders = request.data.get('orders')
+    orders = request.data.get('orders', {})  # Ensure orders defaults to an empty dict
 
     if not chat_id:
         return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
 
+    # Log the incoming data
+    logger.info(f"Updating OrderSummary: chat_id={chat_id}, orders={orders}")
+
     try:
-        order_summary = OrderSummary.objects.get(chat_id=chat_id)
+        order_summary, created = OrderSummary.objects.get_or_create(chat_id=chat_id)
         order_summary.orders = orders
         order_summary.save()
-        
+
         return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
-    except OrderSummary.DoesNotExist:
-        return Response({"error": "Order summary not found."}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
+        logger.error(f"Error updating OrderSummary: {e}")
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+

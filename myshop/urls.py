@@ -49,9 +49,9 @@ urlpatterns = [
     path("", views.index, name="index"),
 
     # Catch-all URL pattern (redirect to index.html)
-   # re_path(r'^.*$', RedirectView.as_view(url='/')),
+#    re_path(r'^.*$', RedirectView.as_view(url='/')),
 
-    # Serve media files (must be before the catch-all redirect)
+    #Serve media files (must be before the catch-all redirect)
     re_path(r'^media/(?P<path>.*)$', serve, {
         'document_root': settings.MEDIA_ROOT,
         'show_indexes': True

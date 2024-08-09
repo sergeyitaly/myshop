@@ -1,3 +1,5 @@
+#order/tasks.py
+
 from celery import shared_task
 from order.utils import update_order_statuses
 
