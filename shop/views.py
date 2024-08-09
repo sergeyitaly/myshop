@@ -74,6 +74,8 @@ class ProductListFilter(generics.ListAPIView):
                 output_field=FloatField()
             )
         )
+        filterset = self.filterset_class(self.request.GET, queryset=queryset)
+        queryset = filterset.qs
 
         # Apply filtering based on the ordering parameter
         ordering = self.request.query_params.get('ordering', None)

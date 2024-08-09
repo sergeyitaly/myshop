@@ -1,14 +1,14 @@
 from django.urls import path, include, re_path
-from django.views.generic import TemplateView, RedirectView
+from django.views.generic import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
-from django.views.static import serve  # Import the serve view
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.contrib import admin
 from dotenv import load_dotenv
 from . import views
+from django.views.generic import RedirectView
 from .views import CustomTokenObtainPairView, CustomTokenRefreshView
 from django.conf.urls.i18n import i18n_patterns
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -47,23 +47,21 @@ urlpatterns = [
 
     path('admin/', admin.site.urls),     # Admin URLs: /admin/
     path("", views.index, name="index"),
-
     # Catch-all URL pattern (redirect to index.html)
-#    re_path(r'^.*$', RedirectView.as_view(url='/')),
+    re_path(r'^.*$', RedirectView.as_view(url='/')),
 
-    #Serve media files (must be before the catch-all redirect)
-    re_path(r'^media/(?P<path>.*)$', serve, {
-        'document_root': settings.MEDIA_ROOT,
-        'show_indexes': True
-    }),
+    
 ]
 
 urlpatterns += i18n_patterns(
     path('i18n/', include('django.conf.urls.i18n')),
 )
 
+# Serve media files in development only
 if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     # Serve static files collected in STATIC_ROOT after running collectstatic
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     # Optionally, serve assets from the second directory in STATICFILES_DIRS
-    urlpatterns += static('/assets/', document_root=settings.STATICFILES_DIRS[1])
+    if len(settings.STATICFILES_DIRS) > 1:
+        urlpatterns += static('/assets/', document_root=settings.STATICFILES_DIRS[1])
