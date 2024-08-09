@@ -6,11 +6,13 @@ from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import Http404
-from django_filters import rest_framework as filters
+from django_filters import FilterSet, NumberFilter
 from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer
 from .models import Product, Collection, Category
 from .filters import ProductFilter
 from django.db.models import Min, Max
+from django.db.models import F, FloatField, ExpressionWrapper, Min, Max
+
 
 class CustomPageNumberPagination(PageNumberPagination):
     default_page_size = 4
@@ -53,34 +55,62 @@ class ProductList(generics.ListCreateAPIView):
     filterset_class = ProductFilter
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'price', 'sales_count', 'popularity']
-
+    
 class ProductListFilter(generics.ListAPIView):
     queryset = Product.objects.all()
     permission_classes = [AllowAny]
-    pagination_class = CustomPageNumberPagination  # Use custom pagination for products
+    pagination_class = CustomPageNumberPagination
     serializer_class = ProductSerializer
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = ProductFilter
-    ordering_fields = ['price', 'popularity', 'sales_count']  # Allow ordering by these fields
-    ordering = ['price']  # Default ordering
+    ordering_fields = ['price', 'popularity', 'sales_count']
+    ordering = ['-discounted_price']  # Default ordering
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        
+        # Annotate with discounted price
+        queryset = queryset.annotate(
+            discounted_price=ExpressionWrapper(
+                F('price') * (1 - F('discount') / 100.0),
+                output_field=FloatField()
+            )
+        )
+
+        # Retrieve price range parameters
         price_min = self.request.query_params.get('price_min', None)
         price_max = self.request.query_params.get('price_max', None)
         
         # Calculate default min and max price if not provided
         if price_min is None or price_max is None:
-            price_range = queryset.aggregate(min_price=Min('price'), max_price=Max('price'))
+            price_range = queryset.aggregate(min_price=Min('discounted_price'), max_price=Max('discounted_price'))
             if price_min is None:
                 price_min = price_range['min_price']
             if price_max is None:
                 price_max = price_range['max_price']
         
         # Filter queryset based on provided price range
-        queryset = queryset.filter(price__gte=price_min, price__lte=price_max)
+        queryset = queryset.filter(discounted_price__gte=price_min, discounted_price__lte=price_max)
 
-        return queryset
+        # Handle custom ordering parameters
+        ordering = self.request.query_params.get('ordering', '-discounted_price')
+        
+        # Handle valid ordering fields
+        valid_ordering_fields = {
+            'popularity_up': 'popularity',
+            'popularity_down': '-popularity',
+            'sales_count_up': 'sales_count',
+            'sales_count_down': '-sales_count',
+            'price_up': 'discounted_price',
+            'price_down': '-discounted_price'
+        }
+        
+        if ordering in valid_ordering_fields:
+            ordering = valid_ordering_fields[ordering]
+        else:
+            ordering = '-discounted_price'  # Default ordering
+        
+        return queryset.order_by(ordering)
 
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()

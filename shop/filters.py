@@ -1,4 +1,5 @@
 import django_filters
+from django_filters import OrderingFilter
 from .models import Product
 
 class ProductFilter(django_filters.FilterSet):
@@ -10,6 +11,21 @@ class ProductFilter(django_filters.FilterSet):
     price_max = django_filters.NumberFilter(field_name='price', lookup_expr='lte')
     sales_count = django_filters.NumberFilter()
     popularity = django_filters.NumberFilter()
+    
+    ordering = OrderingFilter(
+        fields=(
+            ('popularity', 'popularity'),
+            ('-popularity', 'popularity_desc'),
+            ('sales_count', 'sales_count'),
+            ('-sales_count', 'sales_count_desc'),
+        ),
+        field_labels={
+            'popularity': 'Popularity',
+            'popularity_desc': 'Popularity (descending)',
+            'sales_count': 'Sales Count',
+            'sales_count_desc': 'Sales Count (descending)',
+        }
+    )
 
     class Meta:
         model = Product
