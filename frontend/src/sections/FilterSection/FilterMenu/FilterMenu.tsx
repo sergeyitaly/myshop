@@ -4,35 +4,45 @@ import { FilterDropDown } from "../FilterDropDown/FilterDropDown"
 import { FilterItem } from "../FilterItem/FilterItem"
 import {motion} from 'framer-motion'
 import styles from './FilterMenu.module.scss'
-import { Category } from "../../../models/entities"
+import { Category, Collection } from "../../../models/entities"
 import 'react-range-slider-input/dist/style.css';
 import { AppRangeSlider } from "../RangeSlider/RangeSlider"
+import { useGetCollectionsByFilterQuery } from "../../../api/collectionSlice"
 
 
 interface FilterMenuProps {
-    activeCategories: Category[]
+    showCollections?: boolean
+    activeCategories?: Category[]
+    activeCollections?: Collection[]
     minValue: number
     maxValue: number
     priceValue: [number, number]
     changePrice: (price: [number, number]) => void
     onClickHideFilters: () => void
     onClickCategory: (category: Category) => void
+    onClickCollection: (collection: Collection) => void
     onApply: () => void 
 }
 
 
 export const FilterMenu = ({
-    activeCategories,
+    showCollections,
+    activeCategories = [],
+    activeCollections = [],
     minValue,
     maxValue,
     priceValue,
     changePrice,
     onClickHideFilters,
+    onClickCollection,
     onClickCategory,
     onApply
 }: FilterMenuProps) => {
 
     const {data: categories, isSuccess} = useGetAllCategoriesQuery()
+    const {data: collections, isSuccess: isSuccessGettingCollections} = useGetCollectionsByFilterQuery({
+        page_size: 100
+    })
 
    
 
@@ -56,6 +66,31 @@ export const FilterMenu = ({
                 />
             </header>
             <div className={styles.container}>
+                {
+                    showCollections &&
+                <FilterDropDown
+                    title="Колекції"
+                > 
+                    <div className={styles.categoryList}>
+                        {
+                            isSuccessGettingCollections &&
+                            collections.results.map((collection) => {
+
+                                const isActive = activeCollections.some(({id}) => id === collection.id)
+
+                                return (
+                                    <FilterItem
+                                        key={collection.id}
+                                        title={collection.name}
+                                        isActive = {isActive}
+                                        onClick = {() => onClickCollection(collection)}
+                                    />
+                                )    
+                            })
+                        }
+                    </div>
+                </FilterDropDown>
+                }
                 <FilterDropDown
                     title="Категорія"
                 > 

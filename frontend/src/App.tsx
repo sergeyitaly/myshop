@@ -5,8 +5,6 @@ import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
 import ProductPage from './pages/ProductPage/ProductPage';
 import { Home } from './pages/home/home';
 import { NotFound } from './pages/not-found/not-found';
-import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/CarouselBestseller';
-// import OrderPage from './pages/OrderPage/OrderPage';
 import { OrderPage } from './pages/Order/OrderPage';
 import { ThankPage } from './pages/ThankPage/ThankPage';
 import { ROUTE } from './constants';
@@ -22,9 +20,8 @@ function App() {
         <Route path="/collections" element={<CollectionsPage/>}/>
         <Route path="/collection/:id" element={<CollectionItemsPage/>}/>
         <Route path="/product/:id" element={<ProductPage/>} />
-        <Route path="/products" element={<CarouselBestseller />} />
         <Route path="/order" element={<OrderPage />} />
-        <Route path="/filter" element={<FilterPage />} />
+        <Route path="/products" element={<FilterPage />} />
         <Route path={ROUTE.THANK} element={<ThankPage />} />
         <Route path="*" element={<NotFound />} />
       </Route>

@@ -10,18 +10,40 @@ import { AnimatePresence } from "framer-motion"
 import { useFilters } from "../../hooks/useFilters"
 import { Tag } from "./Tag/Tag"
 import { Pagination } from "../../components/UI/Pagination/Pagination"
+import { Collection } from "../../models/entities"
+import clsx from "clsx"
+
+interface FilterSectionProps {
+    initialCollection?: Collection
+}
 
 
-export const FilterSection = () => {
+export const FilterSection = ({
+    initialCollection
+}: FilterSectionProps) => {
 
     const LIMIT = 8
 
     const [open, setOpen] = useState<boolean>(false)
     const [currentPage, setCurrentPage] = useState<number>(1)
 
-    const {tagList, tempCategories, tempPriceValues, filter, minValue, maxValue, deleteTag, applyChanges, changeCategory, changePrice, clearAllFilters} = useFilters()
+    const {
+        tagList, 
+        tempCategories, 
+        tempPriceValues, 
+        tempCollections,
+        filter, 
+        minValue, 
+        maxValue, 
+        deleteTag, 
+        applyChanges, 
+        changeCategory, 
+        changeCollection,
+        changePrice, 
+        clearAllFilters,
+    } = useFilters(initialCollection)
 
-    console.log(tagList);
+    console.log(filter);
     
     const {
         data: productsResponce,
@@ -53,11 +75,9 @@ export const FilterSection = () => {
 
     
     return (
-        <section className={styles.section}>
-            {
-                isLoadingProducts && <p>Loading...</p>
-            }
-            {isFetchigProducts && <p>Fetching...</p>}
+        <section className={clsx(styles.section, {
+            [styles.blur]: isFetchigProducts
+        })}>
             <PageContainer>
                 <div className={styles.control}>
                     {
@@ -75,13 +95,13 @@ export const FilterSection = () => {
                 </div>
                 <div className={styles.tagContainer}>
                     {
-                        tagList.map((tag) => {
+                        tagList.map((tag, i) => {
 
-                        const {id, value} = tag
+                        const {value} = tag
 
                             return (
                                 <Tag
-                                    key={id}
+                                    key={i + value}
                                     title={value}
                                     onClickClose={() => deleteTag(tag)}
                                 />
@@ -138,13 +158,16 @@ export const FilterSection = () => {
                 {
                     open &&
                     <FilterMenu
+                        showCollections = {!initialCollection}
                         minValue={minValue}
                         maxValue={maxValue}
                         priceValue={tempPriceValues}
                         activeCategories={tempCategories}
+                        activeCollections={tempCollections}
                         changePrice={changePrice}
                         onClickHideFilters={handleCloseMenu}
                         onClickCategory={changeCategory}
+                        onClickCollection={changeCollection}
                         onApply={applyChanges}
                     />
                 }

@@ -24,6 +24,12 @@
 .pagination {
     margin-top: 40px;
   }
+
+  .blur {
+    transition: 0.5s;
+    filter: blur(5px);
+    pointer-events: none;
+  }
   
   @media screen and (max-width: 700px) {
     .card {

@@ -35,6 +35,7 @@ export interface CategoryFilter {
 
 export interface MainFilter {
     category?: string
+    collection?: string
     name?: string
     price_min?: number
     price_max?: number
