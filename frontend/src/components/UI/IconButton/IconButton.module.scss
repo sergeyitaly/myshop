@@ -3,6 +3,9 @@
 .button {
     position: relative;
     transition: .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     &:hover {
         scale: 1.1;
     }

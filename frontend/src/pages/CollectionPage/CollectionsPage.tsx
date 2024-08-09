@@ -34,6 +34,9 @@ const CollectionsPage: React.FC = () => {
 
   let totalPages = 0
 
+  console.log(collections);
+  
+
   if(data){
     totalPages = Math.ceil(data.count / limit)
   }
@@ -42,9 +45,6 @@ const CollectionsPage: React.FC = () => {
     setCurrentPage(page)
   }
   
-  console.log(collections);
-  
- 
   return (
     <main>
         <NamedSection 

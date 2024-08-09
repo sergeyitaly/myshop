@@ -1,3 +1,4 @@
+import { ROUTE } from '../../constants';
 import styles from './HeroSection.module.scss';
 import Arrow from './arrow.svg';
 import backgroundImage from './collection.jpg'
@@ -15,7 +16,7 @@ export const HeroSection = () => {
                 </p>
                 <Link
                     className={styles.link}
-                    to="/"
+                    to={ROUTE.PRODUCTS}
                 >
                     Дивитися всі товари{' '}
                     <img

@@ -1,0 +1,39 @@
+@import '../../../variables';
+
+.wrapper {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.header {
+    background: $color-background;
+    text-align: end;
+}
+
+.button {
+    align-self: flex-end;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 20px;
+    box-shadow: $shadow-main;
+    background-color: $color-background;
+    max-width: 500px;
+    width: 90vw;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.categoryList {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.313rem, 0.532vw + 0.146rem, 0.625rem);
+}
