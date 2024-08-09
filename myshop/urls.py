@@ -41,14 +41,16 @@ urlpatterns = [
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     # App-specific URLs
-    path('api', include('accounts.urls')),  # Example: /accounts/
-    path('api/', include('shop.urls')),  # Example: /products/
-    path('api/', include('order.urls')), # Example: /order/
+    path('api', include('accounts.urls')), 
+    path('api/', include('shop.urls')), 
+    path('api/', include('order.urls')),
 
-    path('admin/', admin.site.urls),     # Admin URLs: /admin/
+    path('admin/', admin.site.urls),
+    path('rosetta/', include('rosetta.urls')), 
+
     path("", views.index, name="index"),
     # Catch-all URL pattern (redirect to index.html)
-    re_path(r'^.*$', RedirectView.as_view(url='/')),
+   # re_path(r'^.*$', RedirectView.as_view(url='/')),
 
     
 ]
