@@ -46,7 +46,9 @@ const CollectionItemsPage: React.FC = () => {
 
   return (
     <main className={style.main}>
-        <FilterSection/>
+        <FilterSection
+          initialCollection={collection}
+        />
         <NamedSection title='Бестселери'>
           <AppCarousel>
             {
