@@ -128,9 +128,9 @@ async function handleScheduled(event: ScheduledEvent): Promise<void> {
 
 async function fetchChatIds(): Promise<Set<string>> {
   const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
+  await updateGlobalAuthToken();
 
   try {
-    await updateGlobalAuthToken();
 
     const response = await fetch(vercelUrl, {
       method: 'GET',
@@ -165,6 +165,8 @@ async function fetchChatIds(): Promise<Set<string>> {
 }
 
 async function sendNotificationToAllUsers(chatIds: Set<string>, message: string): Promise<void> {
+  await updateGlobalAuthToken();
+
   for (const chatId of chatIds) {
     try {
       const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
