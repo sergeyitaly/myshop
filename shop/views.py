@@ -57,7 +57,8 @@ class ProductList(generics.ListCreateAPIView):
     ordering_fields = ['name', 'price', 'sales_count', 'popularity']
 
 
-class ProductListFilter(generics.ListAPIView):
+class ProductListFilter(generics.ListCreateAPIView):
+    search_fields = ['name', 'description']
     permission_classes = [AllowAny]
     pagination_class = CustomPageNumberPagination
     serializer_class = ProductSerializer
@@ -96,6 +97,15 @@ class ProductListFilter(generics.ListAPIView):
 
         return queryset     
 
+class CollectionItemsFilterPage(generics.ListAPIView):
+    serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProductFilter
+
+    def get_queryset(self):
+        collection_id = self.kwargs.get('pk')
+        queryset = Product.objects.filter(collection__id=collection_id)
+        return queryset
 
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()

@@ -8,6 +8,7 @@ from shop.loadimages_tos3 import LoadImagesToS3
 from distutils.util import strtobool
 import os
 from celery.schedules import crontab
+from django.utils.translation import gettext_lazy as _
 
 
 load_dotenv()
@@ -86,9 +87,13 @@ INSTALLED_APPS = [
     "phonenumber_field",
     "anymail",
     'myshop',
+    'rosetta',
+
       # "debug_toolbar",
 
 ]
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -103,7 +108,7 @@ MIDDLEWARE = [
     'django.middleware.locale.LocaleMiddleware',
     #    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-
+    'myshop.middleware.CacheControlMiddleware',
 ]
 # DIRS = [AWS_TEMPLATES]
 
@@ -125,6 +130,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.i18n',
+
             ],
         },
     },
@@ -268,6 +275,14 @@ TIME_ZONE = 'Europe/Kiev'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
+
+LANGUAGES = [
+    ('en', _('English')),
+    ('uk', _('Ukrainian')),
+]
 # DEBUG_TOOLBAR_CONFIG = {
 #    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,  # Only show toolbar in DEBUG mode
 # }
