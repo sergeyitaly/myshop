@@ -21,7 +21,7 @@ AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
 AWS_DEFAULT_ACL = 'public-read'
 AWS_QUERYSTRING_AUTH = False  # needed for ckeditor with S3
-AWS_S3_FILE_OVERWRITE = True
+AWS_S3_FILE_OVERWRITE = False  # False to avoid overwriting files
 #AWS_DEFAULT_ACL = None
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
@@ -35,6 +35,9 @@ VERCEL_DOMAIN = os.getenv('VERCEL_DOMAIN')
 LOCAL_HOST = os.getenv('LOCAL_HOST')
 TELEGRAM_BOT_TOKEN=os.getenv('NOTIFICATIONS_API')
 SAYINGS_FILE_PATH = os.path.join(BASE_DIR, 'order', 'sayings.txt')
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=31536000, s-maxage=31536000, must-revalidate'
+}
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
