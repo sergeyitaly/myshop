@@ -10,6 +10,7 @@ import CarouselBestseller from './pages/CollectionPage/CarouselBestseller/Carous
 import { OrderPage } from './pages/Order/OrderPage';
 import { ThankPage } from './pages/ThankPage/ThankPage';
 import { ROUTE } from './constants';
+import { FilterPage } from './pages/FilterPage/FilterPage';
 
 function App() {
 
@@ -23,6 +24,7 @@ function App() {
         <Route path="/product/:id" element={<ProductPage/>} />
         <Route path="/products" element={<CarouselBestseller />} />
         <Route path="/order" element={<OrderPage />} />
+        <Route path="/filter" element={<FilterPage />} />
         <Route path={ROUTE.THANK} element={<ThankPage />} />
         <Route path="*" element={<NotFound />} />
       </Route>
