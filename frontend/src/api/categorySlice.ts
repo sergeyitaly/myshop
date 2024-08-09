@@ -24,3 +24,9 @@ export const categoryApiSlice = apiSlice.injectEndpoints({
         })
     })
 })
+
+export const {
+    useGetAllCategoriesQuery,
+    useGetCategoriesByFilterQuery,
+    useGetOneCategoryByIdQuery
+} = categoryApiSlice

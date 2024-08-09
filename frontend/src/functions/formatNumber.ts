@@ -1,8 +1,8 @@
 
-export const formatNumber = (number: number | string): string => {
+export const formatNumber = (number: number | string, digistsAfterComma: number | undefined = 2): string => {
     const formatter = new Intl.NumberFormat("uk-UA", {
         style: "decimal",
-        minimumFractionDigits: 2,
+        minimumFractionDigits: digistsAfterComma,
         maximumFractionDigits: 2,
       });
 

@@ -16,6 +16,7 @@ export const screens = {
 export enum ROUTE {
     HOME = '/',
     PRODUCT = '/product/',
+    PRODUCTS = '/products/',
     COLLECTION = '/collection/',
     ORDER = '/order',
     THANK = '/thank'
@@ -29,6 +30,7 @@ export enum ENDPOINTS {
     ORDER = 'order',
     PRODUCT = 'product',
     PRODUCTS = 'products',
+    FILTER = 'products/filter'
    
 }
 
