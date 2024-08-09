@@ -58,13 +58,11 @@ class ProductList(generics.ListCreateAPIView):
 
 
 class ProductListFilter(generics.ListAPIView):
-    queryset = Product.objects.all()
     permission_classes = [AllowAny]
     pagination_class = CustomPageNumberPagination
     serializer_class = ProductSerializer
-    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     filterset_class = ProductFilter
-
 
     def get_queryset(self):
         queryset = Product.objects.all()
@@ -77,19 +75,21 @@ class ProductListFilter(generics.ListAPIView):
             )
         )
 
-        # Apply ordering if specified
+        # Apply filtering based on the ordering parameter
         ordering = self.request.query_params.get('ordering', None)
         if ordering:
-            # Map ordering fields to annotations
             if ordering == 'discounted_price':
-                queryset = queryset.order_by('discounted_price')
+                queryset = queryset.filter(discount__gt=0).order_by('discounted_price')
             elif ordering == '-discounted_price':
-                queryset = queryset.order_by('-discounted_price')
+                queryset = queryset.filter(discount__gt=0).order_by('-discounted_price')
+            elif ordering == 'price':
+                queryset = queryset.order_by('discounted_price')  # Use discounted_price for sorting
+            elif ordering == '-price':
+                queryset = queryset.order_by('-discounted_price')  # Use discounted_price for sorting
             else:
                 queryset = queryset.order_by(ordering)
 
-        return queryset
-    
+        return queryset        
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
