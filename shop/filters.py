@@ -4,8 +4,8 @@ from .models import Product
 
 class ProductFilter(django_filters.FilterSet):
     # Filter products by category name through the collection
-    category = django_filters.BaseInFilter(field_name='collection__category__id', lookup_expr='in')
-    collection = django_filters.BaseInFilter(field_name='collection__id', lookup_expr='in')
+    category_id = django_filters.BaseInFilter(field_name='collection__category__id', lookup_expr='in')
+    collection_id = django_filters.BaseInFilter(field_name='collection__id', lookup_expr='in')
     name = django_filters.CharFilter(lookup_expr='icontains')
     price_min = django_filters.NumberFilter(field_name='price', lookup_expr='gte')
     price_max = django_filters.NumberFilter(field_name='price', lookup_expr='lte')
@@ -37,4 +37,4 @@ class ProductFilter(django_filters.FilterSet):
 
     class Meta:
         model = Product
-        fields = ['category', 'name', 'price_min', 'price_max', 'sales_count', 'popularity', 'ordering']
+        fields = ['category_id', 'collection_id', 'name', 'price_min', 'price_max', 'sales_count', 'popularity', 'ordering']
