@@ -32,6 +32,7 @@ django-filter==24.2
 django-imagekit==5.0.0
 django-mailersend==0.2.1
 django-mailgun-mime==0.1.7
+django-modeltranslation==0.19.6
 django-phonenumber-field==8.0.0
 django-redis==5.4.0
 django-rest-knox==4.2.0

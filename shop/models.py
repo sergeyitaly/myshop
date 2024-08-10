@@ -146,7 +146,7 @@ class Product(models.Model):
         ('USD', 'USD ($)'),
         ('EUR', 'EUR (€)'),
     )
-    currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default='UAH')
+    currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default='UAH', verbose_name=_('Currency'))
 
     def image_tag(self):
         if self.photo:
