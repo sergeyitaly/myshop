@@ -8,8 +8,8 @@ from .signals import update_order_status_with_notification
 from django.contrib.admin import SimpleListFilter
 from django.db.models import Sum, F
 from django.utils.translation import gettext_lazy as _
+from modeltranslation.admin import TranslationAdmin
 
-@admin.register(OrderSummary)
 class OrderSummaryAdmin(admin.ModelAdmin):
     list_display = ('chat_id',)
     search_fields = ('chat_id',)
@@ -39,7 +39,6 @@ class OrderSummaryAdmin(admin.ModelAdmin):
         queryset = super().get_queryset(request)
         return queryset
 
-@admin.register(TelegramUser)
 class TelegramUserAdmin(admin.ModelAdmin):
     list_display = ('phone', 'chat_id')
     search_fields = ('phone', 'chat_id')
@@ -108,6 +107,7 @@ class HasOrderItemsFilter(SimpleListFilter):
             # Filter orders that do not have associated order items
             return queryset.filter(order_items__isnull=True)
         return queryset
+
 
 class OrderAdmin(admin.ModelAdmin):
     list_display = ['id', 'status', 'last_updated', 'phone', 'chat_id']
@@ -179,4 +179,10 @@ class OrderAdmin(admin.ModelAdmin):
 
         super().save_model(request, obj, form, change)
 
+
+
+
 admin.site.register(Order, OrderAdmin)
+admin.site.register(TelegramUser, TelegramUserAdmin)
+admin.site.register(OrderSummary, OrderSummaryAdmin)
+

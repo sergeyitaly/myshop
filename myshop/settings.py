@@ -88,7 +88,7 @@ INSTALLED_APPS = [
     "anymail",
     'myshop',
     'rosetta',
-
+    'modeltranslation',
       # "debug_toolbar",
 
 ]
@@ -279,10 +279,14 @@ LOCALE_PATHS = [
     os.path.join(BASE_DIR, 'locale'),
 ]
 
+gettext = lambda s: s
+
 LANGUAGES = [
     ('en', _('English')),
     ('uk', _('Ukrainian')),
 ]
+
+MODELTRANSLATION_LANGUAGES = ('en', 'uk')
 # DEBUG_TOOLBAR_CONFIG = {
 #    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,  # Only show toolbar in DEBUG mode
 # }
