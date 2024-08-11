@@ -1,11 +1,18 @@
 {% extends "admin/base.html" %}
 
 {% load i18n %}  <!-- Add this line to load the i18n tags -->
-
+{% load static %}
 {% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
 
 {% block branding %}
-<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a></h1>
+<h1 id="KOLORYT">
+    <a href="{% url 'admin:index' %}">
+        <!-- Add your logo image here -->
+        <img src="{% static '/assets/img/logo.svg' %}" alt="{{ site_header|default:_('Logo') }}" style="height: 25px; vertical-align: middle; margin-right: 25px;" />
+        <!-- This text will appear next to the logo -->
+        {{ site_header|default:_('Django administration') }}
+    </a>
+</h1>
 {% if user.is_anonymous %}
   {% include "admin/color_theme_toggle.html" %}
 {% endif %}
