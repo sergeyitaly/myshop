@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-10 01:46+0300\n"
+"POT-Creation-Date: 2024-08-11 18:27+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,68 +21,57 @@ msgstr ""
 "100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
 "(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
 
-#: myshop/settings.py:283
+#: myshop/settings.py:285
 msgid "English"
 msgstr ""
 
-#: myshop/settings.py:284
+#: myshop/settings.py:286
 msgid "Ukrainian"
 msgstr ""
 
 #: order/admin.py:23
-msgid "Order summary"
+#, fuzzy
+#| msgid "Order summary"
+msgid "Order Summary (JSON)"
 msgstr "JSON замовлення"
 
-#: order/admin.py:56
+#: order/admin.py:55
 msgid "Product Photo"
 msgstr "Фото продукту"
 
-#: order/admin.py:60
+#: order/admin.py:59
 msgid "Product Name"
 msgstr "Назва продукту"
 
-#: order/admin.py:64 shop/models.py:92 shop/models.py:128
+#: order/admin.py:63 shop/models.py:69 shop/models.py:92 shop/models.py:128
 msgid "Collection"
 msgstr "Коллекція"
 
-#: order/admin.py:68 shop/models.py:141
+#: order/admin.py:67 shop/models.py:141
 msgid "Size"
 msgstr "Розмір"
 
-#: order/admin.py:72
-msgid "Order summarys"
-msgstr "JSON замовлень"
-
-
-#: order/admin.py:72
-msgid "Telegram user"
-msgstr "користувач Телеграм"
-
-#: order/admin.py:72
-msgid "Telegram users"
-msgstr "Телеграм користувачі"
-
-#: order/admin.py:72
+#: order/admin.py:71
 msgid "Color"
 msgstr "Колір"
 
-#: order/admin.py:93
+#: order/admin.py:92
 msgid "Has Order Items"
 msgstr "Має елементи замовлення"
 
-#: order/admin.py:94
+#: order/admin.py:93
 msgid "has_order_items"
 msgstr "Має елементи замовлення"
 
-#: order/admin.py:98
+#: order/admin.py:97
 msgid "With Order Items"
 msgstr "З"
 
-#: order/admin.py:99
+#: order/admin.py:98
 msgid "Without Order Items"
 msgstr "Без"
 
-#: order/admin.py:139 order/models.py:12 order/models.py:106
+#: order/admin.py:139 order/models.py:12 order/models.py:109
 msgid "Chat ID"
 msgstr "Чат ІД"
 
@@ -102,149 +91,164 @@ msgstr "Загальна ціна"
 msgid "Phone"
 msgstr "Телефон"
 
-#: order/models.py:20
+#: order/models.py:18
+msgid "Telegram user"
+msgstr "користувач Телеграм"
+
+#: order/models.py:19
+msgid "Telegram users"
+msgstr "Телеграм користувачі"
+
+#: order/models.py:23
 msgid "Submitted"
 msgstr "Оформлено"
 
-#: order/models.py:21 shop/models.py:134
+#: order/models.py:24 shop/models.py:134
 msgid "Created"
 msgstr "Створено"
 
-#: order/models.py:22
+#: order/models.py:25
 msgid "Processed"
 msgstr "В обробці"
 
-#: order/models.py:23
+#: order/models.py:26
 msgid "Complete"
 msgstr "Завершено"
 
-#: order/models.py:24
+#: order/models.py:27
 msgid "Canceled"
 msgstr "Скасовано"
 
-#: order/models.py:28
+#: order/models.py:31
 msgid "Default Name"
 msgstr "Назва за замовчуванням"
 
-#: order/models.py:29
+#: order/models.py:32
 msgid "Default Surname"
 msgstr "Пріізвищє"
 
-#: order/models.py:30
+#: order/models.py:33
 msgid "Contact phone number"
 msgstr "Контактний номер телефону"
 
-#: order/models.py:32
+#: order/models.py:35
 msgid "Address"
 msgstr "Адресса"
 
-#: order/models.py:33
+#: order/models.py:36
 msgid "Other person"
 msgstr "Інша особа"
 
-#: order/models.py:34
+#: order/models.py:37
 msgid "Comments about the receiver"
 msgstr "Коментар про отримувача"
 
-#: order/models.py:35
+#: order/models.py:38
 msgid "Submitted At"
 msgstr "оформлено"
 
-#: order/models.py:36
+#: order/models.py:39
 msgid "Created At"
 msgstr "cтворено"
 
-#: order/models.py:37
+#: order/models.py:40
 msgid "Processed At"
 msgstr "оброблено"
 
-#: order/models.py:38
+#: order/models.py:41
 msgid "Complete At"
 msgstr "завершено"
 
-#: order/models.py:39
+#: order/models.py:42
 msgid "Canceled At"
 msgstr "скасовано"
 
-#: order/models.py:40
+#: order/models.py:43
 msgid "Status"
 msgstr "Статус"
 
-#: order/models.py:41
+#: order/models.py:44
 msgid "Parent Order"
 msgstr "Батьківське замовлення"
 
-#: order/models.py:42
+#: order/models.py:45
 msgid "Package as a present"
 msgstr "Пакування як подарунок"
 
-#: order/models.py:43
-msgid "Telegram User"
-msgstr "Користувач Телеграм"
+#: order/models.py:46
+#, fuzzy
+#| msgid "Telegram user"
+msgid "telegram user"
+msgstr "користувач Телеграм"
 
-#: order/models.py:101 order/models.py:127
+#: order/models.py:104 order/models.py:134
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:484
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:491
 msgid "Order"
 msgstr "Замовлення"
 
-#: order/models.py:102 order/models.py:107
+#: order/models.py:105 order/models.py:110
 msgid "Orders"
 msgstr "Замовлення"
 
-#: order/models.py:128 shop/models.py:186
+#: order/models.py:130
+msgid "Order summary"
+msgstr "JSON замовлення"
+
+#: order/models.py:131
+msgid "Order summarys"
+msgstr "JSON замовлень"
+
+#: order/models.py:135 shop/models.py:186
 msgid "Product"
 msgstr "Продукт"
 
-#: order/models.py:129
+#: order/models.py:136
 msgid "Quantity"
 msgstr "Кількість"
 
-#: order/models.py:130
+#: order/models.py:137
 msgid "Total Sum"
 msgstr "Загальна сума"
 
-#: order/models.py:142
+#: order/models.py:149
 msgid "Order Item"
 msgstr "Елемент замовлення"
 
-#: order/models.py:143
+#: order/models.py:150
 msgid "Order Items"
 msgstr "Елементи замовлення"
 
-#: shop/admin.py:11
+#: shop/admin.py:16
 msgid "Product Image"
 msgstr "Фото продукту"
 
-#: shop/admin.py:12 shop/admin.py:57
+#: shop/admin.py:17 shop/admin.py:62
 msgid "Product Images"
 msgstr "Фото продукту"
 
-msgid "images"
-msgstr "картинкі"
-
-#: shop/admin.py:18
+#: shop/admin.py:23
 msgid "Additional Field"
 msgstr "Додаткове поле"
 
-#: shop/admin.py:19
+#: shop/admin.py:24
 msgid "Additional Fields"
 msgstr "Додаткові поля"
 
-#: shop/admin.py:43
+#: shop/admin.py:48
 msgid "Main Image"
 msgstr "Головне фото"
 
-#: shop/admin.py:47
+#: shop/admin.py:52
 msgid "Main Image Preview"
 msgstr "Прев'ю головного фото"
 
-#: shop/admin.py:77 shop/models.py:95 shop/models.py:189
+#: shop/admin.py:84 shop/models.py:95 shop/models.py:189
 #: venv/lib/python3.9/site-packages/django/db/models/fields/files.py:393
 msgid "Image"
 msgstr "Картинка"
 
-#: shop/models.py:53
+#: shop/models.py:46 shop/models.py:53 shop/models.py:70
 msgid "Category"
 msgstr "Категорія"
 
@@ -252,9 +256,38 @@ msgstr "Категорія"
 msgid "Categories"
 msgstr "Категорії"
 
+#: shop/models.py:58 shop/models.py:60 shop/models.py:108 shop/models.py:109
+#: shop/models.py:111 shop/models.py:112
+msgid "photo"
+msgstr "фото"
+
+#: shop/models.py:71
+#, fuzzy
+#| msgid "Created"
+msgid "created"
+msgstr "Створено"
+
+#: shop/models.py:72
+#, fuzzy
+#| msgid "Updated"
+msgid "updated"
+msgstr "Оновлено"
+
+#: shop/models.py:73
+msgid "Sales count"
+msgstr "Кількість продаж"
+
 #: shop/models.py:93
 msgid "Collections"
 msgstr "Колекції"
+
+#: shop/models.py:99
+msgid "name"
+msgstr ""
+
+#: shop/models.py:100
+msgid "value"
+msgstr ""
 
 #: shop/models.py:129
 msgid "Name"
@@ -284,14 +317,6 @@ msgstr "Оновлено"
 msgid "Sales Count"
 msgstr "Кількість продаж"
 
-#: shop/models.py:136
-msgid "Sales count"
-msgstr "Кількість продаж"
-
-#: shop/models.py:136
-msgid "photo"
-msgstr "фото"
-
 #: shop/models.py:137
 msgid "Popularity"
 msgstr "Популярність"
@@ -307,10 +332,6 @@ msgstr "Введіть назву кольору, наприклад рожев�
 #: shop/models.py:139
 msgid "Color Name"
 msgstr "Назва кольору"
-
-#: shop/models.py:139
-msgid "Currency"
-msgstr "Валюта"
 
 #: shop/models.py:140
 msgid "Enter the color value in the format #RRGGBB"
@@ -332,28 +353,29 @@ msgstr "Знажка в %"
 msgid "Discount"
 msgstr "Знижка"
 
+#: shop/models.py:149
+msgid "Currency"
+msgstr "Валюта"
+
 #: shop/models.py:187
 msgid "Products"
 msgstr "Продукти"
 
-
-#: shop/models.py:187
-msgid "FIELD NAME"
-msgstr "назва поля"
-
-#: shop/models.py:187
-msgid "FIELD VALUE"
-msgstr "значення поля"
-
-
+#: shop/models.py:194 shop/models.py:196
+msgid "images"
+msgstr "картинкі"
 
 #: templates/admin/base_site.html:5
 msgid "Django site admin"
 msgstr "Сайт адмін Джаного"
 
-#: templates/admin/base_site.html:8
+#: templates/admin/base_site.html:10
+msgid "Logo"
+msgstr ""
+
+#: templates/admin/base_site.html:12
 msgid "Django administration"
-msgstr "Адміністрування Джаного"
+msgstr "Адмін панель Джанго"
 
 #: venv/lib/python3.9/site-packages/click/_termui_impl.py:518
 #, python-brace-format
@@ -1896,6 +1918,10 @@ msgstr ""
 msgid "Unable to connect to qpid with SASL mechanism %s"
 msgstr ""
 
+#: venv/lib/python3.9/site-packages/modeltranslation/widgets.py:32
+msgid "None"
+msgstr ""
+
 #: venv/lib/python3.9/site-packages/tornado/locale.py:377
 msgid "1 second ago"
 msgstr ""
@@ -1984,3 +2010,12 @@ msgstr ""
 msgctxt "stick"
 msgid "club"
 msgstr ""
+
+#~ msgid "Telegram User"
+#~ msgstr "Користувач Телеграм"
+
+#~ msgid "FIELD NAME"
+#~ msgstr "назва поля"
+
+#~ msgid "FIELD VALUE"
+#~ msgstr "значення поля"

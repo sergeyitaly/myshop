@@ -111,6 +111,7 @@ MIDDLEWARE = [
     'myshop.middleware.CacheControlMiddleware',
 ]
 # DIRS = [AWS_TEMPLATES]
+MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
 
 ROOT_URLCONF = 'myshop.urls'
 WSGI_APPLICATION = 'myshop.wsgi.app'

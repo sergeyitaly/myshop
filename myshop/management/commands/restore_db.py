@@ -37,6 +37,8 @@ class Command(BaseCommand):
             f'--username={user}',
             f'--dbname={db_name}',
             '--verbose',
+            '--no-owner',
+            '--no-privileges',
             dump_file
         ]
 

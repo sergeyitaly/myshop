@@ -3,6 +3,11 @@ from django.utils.html import format_html
 from .models import Product, ProductImage, Category, Collection, AdditionalField
 from .forms import AdditionalFieldForm, ProductForm, CollectionForm, ProductImageForm
 from django.utils.translation import gettext_lazy as _  # Import gettext_lazy for translations
+from modeltranslation.admin import TranslationAdmin
+
+from modeltranslation.translator import translator, NotRegistered
+from .translator import *  # Ensure this is imported
+
 
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
@@ -20,7 +25,7 @@ class AdditionalFieldInline(admin.TabularInline):
 
 
 @admin.register(Product)
-class ProductAdmin(admin.ModelAdmin):
+class ProductAdmin(TranslationAdmin):
     form = ProductForm
     list_display = ('id', 'name', 'collection', 'main_product_image', 'price', 'currency', 'discount', 'stock', 'available', 'sales_count', 'popularity')
     search_fields = ['name']
@@ -56,14 +61,16 @@ class ProductAdmin(admin.ModelAdmin):
         return format_html(images_html)
     display_gallery.short_description = _("Product Images")
 
+
 @admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
+class CategoryAdmin(TranslationAdmin):
     list_display = ('id', 'name')
     search_fields = ['name']
     readonly_fields = ('id', 'name')
 
+
 @admin.register(Collection)
-class CollectionAdmin(admin.ModelAdmin):
+class CollectionAdmin(TranslationAdmin):
     form = CollectionForm
     list_display = ('id', 'name', 'category', 'image_tag')
     search_fields = ['name']
@@ -75,3 +82,15 @@ class CollectionAdmin(admin.ModelAdmin):
         else:
             return format_html('<img src="{}" style="max-height:150px; max-width:150px;" />'.format('collection.jpg'))
     image_tag.short_description = _("Image")
+
+# Register admin classes for translated models, handling potential errors
+def register_translation_admin(model, admin_class):
+    try:
+        admin.site.register(model, admin_class)
+    except NotRegistered:
+        admin.site.register(model, admin.ModelAdmin)
+
+@admin.register(AdditionalField)
+class AdditionalFieldAdmin(TranslationAdmin):
+    list_display = ('name', 'value')
+    search_fields = ('name', 'value')

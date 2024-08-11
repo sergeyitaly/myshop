@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-10 01:52+0300\n"
+"POT-Creation-Date: 2024-08-11 18:27+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: myshop/settings.py:283
+#: myshop/settings.py:285
 msgid "English"
 msgstr ""
 
-#: myshop/settings.py:284
+#: myshop/settings.py:286
 msgid "Ukrainian"
 msgstr ""
 
@@ -30,43 +30,43 @@ msgstr ""
 msgid "Order Summary (JSON)"
 msgstr ""
 
-#: order/admin.py:56
+#: order/admin.py:55
 msgid "Product Photo"
 msgstr ""
 
-#: order/admin.py:60
+#: order/admin.py:59
 msgid "Product Name"
 msgstr ""
 
-#: order/admin.py:64 shop/models.py:92 shop/models.py:128
+#: order/admin.py:63 shop/models.py:69 shop/models.py:92 shop/models.py:128
 msgid "Collection"
 msgstr ""
 
-#: order/admin.py:68 shop/models.py:141
+#: order/admin.py:67 shop/models.py:141
 msgid "Size"
 msgstr ""
 
-#: order/admin.py:72
+#: order/admin.py:71
 msgid "Color"
 msgstr ""
 
-#: order/admin.py:93
+#: order/admin.py:92
 msgid "Has Order Items"
 msgstr ""
 
-#: order/admin.py:94
+#: order/admin.py:93
 msgid "has_order_items"
 msgstr ""
 
-#: order/admin.py:98
+#: order/admin.py:97
 msgid "With Order Items"
 msgstr ""
 
-#: order/admin.py:99
+#: order/admin.py:98
 msgid "Without Order Items"
 msgstr ""
 
-#: order/admin.py:139 order/models.py:12 order/models.py:106
+#: order/admin.py:139 order/models.py:12 order/models.py:109
 msgid "Chat ID"
 msgstr ""
 
@@ -86,146 +86,162 @@ msgstr ""
 msgid "Phone"
 msgstr ""
 
-#: order/models.py:20
-msgid "Submitted"
+#: order/models.py:18
+msgid "Telegram user"
 msgstr ""
 
-#: order/models.py:21 shop/models.py:134
-msgid "Created"
-msgstr ""
-
-#: order/models.py:22
-msgid "Processed"
+#: order/models.py:19
+msgid "Telegram users"
 msgstr ""
 
 #: order/models.py:23
+msgid "Submitted"
+msgstr ""
+
+#: order/models.py:24 shop/models.py:134
+msgid "Created"
+msgstr ""
+
+#: order/models.py:25
+msgid "Processed"
+msgstr ""
+
+#: order/models.py:26
 msgid "Complete"
 msgstr ""
 
-#: order/models.py:24
+#: order/models.py:27
 msgid "Canceled"
 msgstr ""
 
-#: order/models.py:28
+#: order/models.py:31
 msgid "Default Name"
 msgstr ""
 
-#: order/models.py:29
+#: order/models.py:32
 msgid "Default Surname"
 msgstr ""
 
-#: order/models.py:30
+#: order/models.py:33
 msgid "Contact phone number"
 msgstr ""
 
-#: order/models.py:32
+#: order/models.py:35
 msgid "Address"
 msgstr ""
 
-#: order/models.py:33
+#: order/models.py:36
 msgid "Other person"
 msgstr ""
 
-#: order/models.py:34
+#: order/models.py:37
 msgid "Comments about the receiver"
 msgstr ""
 
-#: order/models.py:35
+#: order/models.py:38
 msgid "Submitted At"
 msgstr ""
 
-#: order/models.py:36
+#: order/models.py:39
 msgid "Created At"
 msgstr ""
 
-#: order/models.py:37
+#: order/models.py:40
 msgid "Processed At"
 msgstr ""
 
-#: order/models.py:38
+#: order/models.py:41
 msgid "Complete At"
 msgstr ""
 
-#: order/models.py:39
+#: order/models.py:42
 msgid "Canceled At"
 msgstr ""
 
-#: order/models.py:40
+#: order/models.py:43
 msgid "Status"
 msgstr ""
 
-#: order/models.py:41
+#: order/models.py:44
 msgid "Parent Order"
 msgstr ""
 
-#: order/models.py:42
+#: order/models.py:45
 msgid "Package as a present"
 msgstr ""
 
-#: order/models.py:43
-msgid "Telegram User"
+#: order/models.py:46
+msgid "telegram user"
 msgstr ""
 
-#: order/models.py:101 order/models.py:127
+#: order/models.py:104 order/models.py:134
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:484
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:491
 msgid "Order"
 msgstr ""
 
-#: order/models.py:102 order/models.py:107
+#: order/models.py:105 order/models.py:110
 msgid "Orders"
 msgstr ""
 
-#: order/models.py:128 shop/models.py:186
+#: order/models.py:130
+msgid "Order summary"
+msgstr ""
+
+#: order/models.py:131
+msgid "Order summarys"
+msgstr ""
+
+#: order/models.py:135 shop/models.py:186
 msgid "Product"
 msgstr ""
 
-#: order/models.py:129
+#: order/models.py:136
 msgid "Quantity"
 msgstr ""
 
-#: order/models.py:130
+#: order/models.py:137
 msgid "Total Sum"
 msgstr ""
 
-#: order/models.py:142
+#: order/models.py:149
 msgid "Order Item"
 msgstr ""
 
-#: order/models.py:143
+#: order/models.py:150
 msgid "Order Items"
 msgstr ""
 
-#: shop/admin.py:11
+#: shop/admin.py:16
 msgid "Product Image"
 msgstr ""
 
-#: shop/admin.py:12 shop/admin.py:57
+#: shop/admin.py:17 shop/admin.py:62
 msgid "Product Images"
 msgstr ""
 
-#: shop/admin.py:18
+#: shop/admin.py:23
 msgid "Additional Field"
 msgstr ""
 
-#: shop/admin.py:19
+#: shop/admin.py:24
 msgid "Additional Fields"
 msgstr ""
 
-#: shop/admin.py:43
+#: shop/admin.py:48
 msgid "Main Image"
 msgstr ""
 
-#: shop/admin.py:47
+#: shop/admin.py:52
 msgid "Main Image Preview"
 msgstr ""
 
-#: shop/admin.py:77 shop/models.py:95 shop/models.py:189
+#: shop/admin.py:84 shop/models.py:95 shop/models.py:189
 #: venv/lib/python3.9/site-packages/django/db/models/fields/files.py:393
 msgid "Image"
 msgstr ""
 
-#: shop/models.py:53
+#: shop/models.py:46 shop/models.py:53 shop/models.py:70
 msgid "Category"
 msgstr ""
 
@@ -233,8 +249,33 @@ msgstr ""
 msgid "Categories"
 msgstr ""
 
+#: shop/models.py:58 shop/models.py:60 shop/models.py:108 shop/models.py:109
+#: shop/models.py:111 shop/models.py:112
+msgid "photo"
+msgstr ""
+
+#: shop/models.py:71
+msgid "created"
+msgstr ""
+
+#: shop/models.py:72
+msgid "updated"
+msgstr ""
+
+#: shop/models.py:73
+msgid "Sales count"
+msgstr ""
+
 #: shop/models.py:93
 msgid "Collections"
+msgstr ""
+
+#: shop/models.py:99
+msgid "name"
+msgstr ""
+
+#: shop/models.py:100
+msgid "value"
 msgstr ""
 
 #: shop/models.py:129
@@ -301,15 +342,27 @@ msgstr ""
 msgid "Discount"
 msgstr ""
 
+#: shop/models.py:149
+msgid "Currency"
+msgstr ""
+
 #: shop/models.py:187
 msgid "Products"
+msgstr ""
+
+#: shop/models.py:194 shop/models.py:196
+msgid "images"
 msgstr ""
 
 #: templates/admin/base_site.html:5
 msgid "Django site admin"
 msgstr ""
 
-#: templates/admin/base_site.html:8
+#: templates/admin/base_site.html:10
+msgid "Logo"
+msgstr ""
+
+#: templates/admin/base_site.html:12
 msgid "Django administration"
 msgstr ""
 
@@ -1852,6 +1905,10 @@ msgstr ""
 #: venv/lib/python3.9/site-packages/kombu/transport/qpid.py:1334
 #, python-format
 msgid "Unable to connect to qpid with SASL mechanism %s"
+msgstr ""
+
+#: venv/lib/python3.9/site-packages/modeltranslation/widgets.py:32
+msgid "None"
 msgstr ""
 
 #: venv/lib/python3.9/site-packages/tornado/locale.py:377
