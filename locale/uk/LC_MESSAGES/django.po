@@ -220,6 +220,9 @@ msgstr "Фото продукту"
 msgid "Product Images"
 msgstr "Фото продукту"
 
+msgid "images"
+msgstr "картинкі"
+
 #: shop/admin.py:18
 msgid "Additional Field"
 msgstr "Додаткове поле"
@@ -280,6 +283,14 @@ msgstr "Оновлено"
 #: shop/models.py:136
 msgid "Sales Count"
 msgstr "Кількість продаж"
+
+#: shop/models.py:136
+msgid "Sales count"
+msgstr "Кількість продаж"
+
+#: shop/models.py:136
+msgid "photo"
+msgstr "фото"
 
 #: shop/models.py:137
 msgid "Popularity"
@@ -1241,7 +1252,7 @@ msgstr ""
 
 #: venv/lib/python3.9/site-packages/django/forms/widgets.py:464
 msgid "Currently"
-msgstr ""
+msgstr "Обрано"
 
 #: venv/lib/python3.9/site-packages/django/forms/widgets.py:465
 msgid "Change"

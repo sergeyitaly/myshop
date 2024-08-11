@@ -43,7 +43,7 @@ def validate_svg(value):
         raise ValidationError('Unsupported file extension.')
 
 class Category(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, verbose_name=_('Category'))
 
     def __str__(self):
         return self.name
@@ -55,9 +55,9 @@ class Category(models.Model):
 
 class Collection(models.Model):
     if USE_S3:
-        photo = models.ImageField(upload_to="photos/collection", storage=MediaStorage(), null=True, blank=True, validators=[validate_file_extension])
+        photo = models.ImageField(upload_to="photos/collection", storage=MediaStorage(), null=True, blank=True, validators=[validate_file_extension], verbose_name = _('photo'))
     else:
-        photo = models.ImageField(upload_to="photos/collection", null=True, blank=True, validators=[validate_file_extension])
+        photo = models.ImageField(upload_to="photos/collection", null=True, blank=True, validators=[validate_file_extension], verbose_name = _('photo'))
 
     photo_thumbnail = ImageSpecField(
         source='photo',
@@ -66,11 +66,11 @@ class Collection(models.Model):
         options={'quality': 60}
     )
 
-    name = models.CharField(max_length=255)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-    sales_count = models.PositiveIntegerField(default=0)
+    name = models.CharField(max_length=255, verbose_name=_('Collection'))
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name=_('Category'))
+    created = models.DateTimeField(auto_now_add=True, verbose_name=_('created'))
+    updated = models.DateTimeField(auto_now=True, verbose_name=_('updated'))
+    sales_count = models.PositiveIntegerField(default=0, verbose_name=_('Sales count'))
 
     def image_tag(self):
         if self.photo:
@@ -105,11 +105,11 @@ class AdditionalField(models.Model):
 
 class Product(models.Model):
     if USE_S3:
-        photo = models.ImageField(upload_to="photos/product", storage=MediaStorage(), null=True, blank=True, validators=[validate_file_extension])
-        brandimage = models.ImageField(upload_to="photos/svg", storage=MediaStorage(), null=True, blank=True, validators=[validate_file_extension])
+        photo = models.ImageField(upload_to="photos/product", storage=MediaStorage(), null=True, blank=True, validators=[validate_file_extension],  verbose_name=_('photo'))
+        brandimage = models.ImageField(upload_to="photos/svg", storage=MediaStorage(), null=True, blank=True, validators=[validate_file_extension],  verbose_name=_('photo'))
     else:
-        photo = models.ImageField(upload_to="photos/product", null=True, blank=True, validators=[validate_file_extension])
-        brandimage = models.ImageField(upload_to="photos/svg", null=True, blank=True, validators=[validate_file_extension])
+        photo = models.ImageField(upload_to="photos/product", null=True, blank=True, validators=[validate_file_extension],  verbose_name=_('photo'))
+        brandimage = models.ImageField(upload_to="photos/svg", null=True, blank=True, validators=[validate_file_extension],  verbose_name=_('photo'))
 
     photo_thumbnail = ImageSpecField(
         source='photo',
@@ -191,9 +191,9 @@ class Product(models.Model):
 
 class ProductImage(models.Model):
     if USE_S3:
-        images = models.FileField(upload_to='photos/product', storage=MediaStorage(), validators=[validate_file_extension])
+        images = models.FileField(upload_to='photos/product', storage=MediaStorage(), validators=[validate_file_extension], verbose_name=_('images'))
     else:
-        images = models.FileField(upload_to='photos/product', validators=[validate_file_extension])
+        images = models.FileField(upload_to='photos/product', validators=[validate_file_extension], verbose_name=_('images'))
 
     images_thumbnail = ImageSpecField(
         source='images',
