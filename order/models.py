@@ -11,9 +11,12 @@ class TelegramUser(models.Model):
     phone = models.CharField(max_length=15, unique=True, verbose_name=_('Phone'))
     chat_id = models.CharField(max_length=255, unique=True, verbose_name=_('Chat ID'))
 
-
     def __str__(self):
         return f'{self.phone} - {self.chat_id}'
+    
+    class Meta:
+        verbose_name = _('Telegram user')
+        verbose_name_plural = _('Telegram users')
 
 class Order(models.Model):
     STATUS_CHOICES = (
@@ -122,6 +125,10 @@ class OrderSummary(models.Model):
         elif isinstance(data, decimal.Decimal):
             return float(data)
         return data
+    
+    class Meta:
+        verbose_name = _('Order summary')
+        verbose_name_plural = _('Order summarys')
     
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='order_items', on_delete=models.CASCADE, verbose_name=_('Order'))

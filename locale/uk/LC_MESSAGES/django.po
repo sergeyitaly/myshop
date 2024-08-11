@@ -30,8 +30,8 @@ msgid "Ukrainian"
 msgstr ""
 
 #: order/admin.py:23
-msgid "Order Summary (JSON)"
-msgstr "Резюме замовлення (JSON)"
+msgid "Order summary"
+msgstr "JSON замовлення"
 
 #: order/admin.py:56
 msgid "Product Photo"
@@ -55,7 +55,7 @@ msgstr "JSON замовлень"
 
 
 #: order/admin.py:72
-msgid "telegram user"
+msgid "Telegram user"
 msgstr "користувач Телеграм"
 
 #: order/admin.py:72
@@ -76,11 +76,11 @@ msgstr "Має елементи замовлення"
 
 #: order/admin.py:98
 msgid "With Order Items"
-msgstr "З едементами"
+msgstr "З"
 
 #: order/admin.py:99
 msgid "Without Order Items"
-msgstr "Без едементів"
+msgstr "Без"
 
 #: order/admin.py:139 order/models.py:12 order/models.py:106
 msgid "Chat ID"
@@ -148,23 +148,23 @@ msgstr "Коментар про отримувача"
 
 #: order/models.py:35
 msgid "Submitted At"
-msgstr "Офорлено в"
+msgstr "оформлено"
 
 #: order/models.py:36
 msgid "Created At"
-msgstr "Створено в"
+msgstr "cтворено"
 
 #: order/models.py:37
 msgid "Processed At"
-msgstr "Оброблено в"
+msgstr "оброблено"
 
 #: order/models.py:38
 msgid "Complete At"
-msgstr "Завершено в"
+msgstr "завершено"
 
 #: order/models.py:39
 msgid "Canceled At"
-msgstr "Скасовано"
+msgstr "скасовано"
 
 #: order/models.py:40
 msgid "Status"
@@ -283,7 +283,7 @@ msgstr "Кількість продаж"
 
 #: shop/models.py:137
 msgid "Popularity"
-msgstr ""
+msgstr "Популярність"
 
 #: shop/models.py:138
 msgid "Slug"
@@ -324,6 +324,17 @@ msgstr "Знижка"
 #: shop/models.py:187
 msgid "Products"
 msgstr "Продукти"
+
+
+#: shop/models.py:187
+msgid "FIELD NAME"
+msgstr "назва поля"
+
+#: shop/models.py:187
+msgid "FIELD VALUE"
+msgstr "значення поля"
+
+
 
 #: templates/admin/base_site.html:5
 msgid "Django site admin"
