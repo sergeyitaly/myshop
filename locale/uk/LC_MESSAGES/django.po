@@ -60,7 +60,7 @@ msgstr "користувач Телеграм"
 
 #: order/admin.py:72
 msgid "Telegram users"
-msgstr "Користувачи Телеграм"
+msgstr "Телеграм користувачі"
 
 #: order/admin.py:72
 msgid "Color"
