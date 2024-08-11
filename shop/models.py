@@ -96,8 +96,8 @@ class Collection(models.Model):
     image_tag.allow_tags = True
 
 class AdditionalField(models.Model):
-    name = models.CharField(max_length=255)
-    value = models.TextField()
+    name = models.CharField(max_length=255, verbose_name=_('name'))
+    value = models.TextField(verbose_name=_('value'))
     product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='additional_fields')
 
     def __str__(self):
