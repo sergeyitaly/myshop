@@ -3,12 +3,12 @@ from .models import Product, Collection, Category, ProductImage, AdditionalField
 
 class CategorySerializer(serializers.ModelSerializer):
     name = serializers.CharField()
-    name_en = serializers.CharField(source='name_en', required=False)
-    name_uk = serializers.CharField(source='name_uk', required=False)
+    name_en = serializers.CharField(required=False)
+    name_uk = serializers.CharField(required=False)
 
     class Meta:
         model = Category
-        fields = ['id', 'name', 'name_en', 'name_uk']  # Adjust fields as needed
+        fields = ['id', 'name', 'name_en', 'name_uk']
         lookup_field = 'slug'
         extra_kwargs = {'url': {'lookup_field': 'slug'}}
 
@@ -17,11 +17,11 @@ class CollectionSerializer(serializers.ModelSerializer):
     photo_url = serializers.SerializerMethodField()
     photo_thumbnail_url = serializers.SerializerMethodField()
     name = serializers.CharField()
-    name_en = serializers.CharField(source='name_en', required=False)
-    name_uk = serializers.CharField(source='name_uk', required=False)
+    name_en = serializers.CharField(required=False)
+    name_uk = serializers.CharField(required=False)
     description = serializers.CharField(required=False)
-    description_en = serializers.CharField(source='description_en', required=False)
-    description_uk = serializers.CharField(source='description_uk', required=False)
+    description_en = serializers.CharField(required=False)
+    description_uk = serializers.CharField(required=False)
 
     def get_photo_url(self, obj):
         if obj.photo:
@@ -35,7 +35,10 @@ class CollectionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Collection
-        fields = ['id', 'name', 'name_en', 'name_uk', 'description', 'description_en', 'description_uk', 'photo_url', 'photo_thumbnail_url', 'category']
+        fields = [
+            'id', 'name', 'name_en', 'name_uk', 'description', 'description_en', 'description_uk',
+            'photo_url', 'photo_thumbnail_url', 'category'
+        ]
 
 class ProductImageSerializer(serializers.ModelSerializer):
     images_thumbnail_url = serializers.SerializerMethodField()
@@ -51,11 +54,11 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
 class AdditionalFieldSerializer(serializers.ModelSerializer):
     name = serializers.CharField()
-    name_en = serializers.CharField(source='name_en', required=False)
-    name_uk = serializers.CharField(source='name_uk', required=False)
+    name_en = serializers.CharField(required=False)
+    name_uk = serializers.CharField(required=False)
     value = serializers.CharField()
-    value_en = serializers.CharField(source='value_en', required=False)
-    value_uk = serializers.CharField(source='value_uk', required=False)
+    value_en = serializers.CharField(required=False)
+    value_uk = serializers.CharField(required=False)
 
     class Meta:
         model = AdditionalField
@@ -68,14 +71,14 @@ class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(source='productimage_set', many=True, read_only=True)
     additional_fields = AdditionalFieldSerializer(many=True, read_only=True)
     name = serializers.CharField()
-    name_en = serializers.CharField(source='name_en', required=False)
-    name_uk = serializers.CharField(source='name_uk', required=False)
+    name_en = serializers.CharField(required=False)
+    name_uk = serializers.CharField(required=False)
     description = serializers.CharField(required=False)
-    description_en = serializers.CharField(source='description_en', required=False)
-    description_uk = serializers.CharField(source='description_uk', required=False)
+    description_en = serializers.CharField(required=False)
+    description_uk = serializers.CharField(required=False)
     color_name = serializers.CharField(required=False)
-    color_name_en = serializers.CharField(source='color_name_en', required=False)
-    color_name_uk = serializers.CharField(source='color_name_uk', required=False)
+    color_name_en = serializers.CharField(required=False)
+    color_name_uk = serializers.CharField(required=False)
 
     def get_photo_url(self, obj):
         if obj.photo:
@@ -99,11 +102,11 @@ class CreateCollectionSerializer(serializers.ModelSerializer):
     photo_url = serializers.SerializerMethodField()
     photo_thumbnail_url = serializers.SerializerMethodField()
     name = serializers.CharField()
-    name_en = serializers.CharField(source='name_en', required=False)
-    name_uk = serializers.CharField(source='name_uk', required=False)
+    name_en = serializers.CharField(required=False)
+    name_uk = serializers.CharField(required=False)
     description = serializers.CharField(required=False)
-    description_en = serializers.CharField(source='description_en', required=False)
-    description_uk = serializers.CharField(source='description_uk', required=False)
+    description_en = serializers.CharField(required=False)
+    description_uk = serializers.CharField(required=False)
 
     def get_photo_url(self, obj):
         if obj.photo:
