@@ -6,11 +6,13 @@ from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import Http404
-from django_filters import rest_framework as filters
+from django_filters import FilterSet, NumberFilter
 from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer
 from .models import Product, Collection, Category
 from .filters import ProductFilter
 from django.db.models import Min, Max
+from django.db.models import F, FloatField, ExpressionWrapper, Min, Max
+
 
 class CustomPageNumberPagination(PageNumberPagination):
     default_page_size = 4
@@ -54,32 +56,55 @@ class ProductList(generics.ListCreateAPIView):
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'price', 'sales_count', 'popularity']
 
-class ProductListFilter(generics.ListAPIView):
-    queryset = Product.objects.all()
+
+class ProductListFilter(generics.ListCreateAPIView):
+    search_fields = ['name', 'description']
     permission_classes = [AllowAny]
-    pagination_class = CustomPageNumberPagination  # Use custom pagination for products
+    pagination_class = CustomPageNumberPagination
     serializer_class = ProductSerializer
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     filterset_class = ProductFilter
-    ordering_fields = ['price', 'popularity', 'sales_count']  # Allow ordering by these fields
-    ordering = ['price']  # Default ordering
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        price_min = self.request.query_params.get('price_min', None)
-        price_max = self.request.query_params.get('price_max', None)
-        
-        # Calculate default min and max price if not provided
-        if price_min is None or price_max is None:
-            price_range = queryset.aggregate(min_price=Min('price'), max_price=Max('price'))
-            if price_min is None:
-                price_min = price_range['min_price']
-            if price_max is None:
-                price_max = price_range['max_price']
-        
-        # Filter queryset based on provided price range
-        queryset = queryset.filter(price__gte=price_min, price__lte=price_max)
+        queryset = Product.objects.all()
 
+        # Annotate discounted_price
+        queryset = queryset.annotate(
+            discounted_price=ExpressionWrapper(
+                F('price') * (1 - F('discount') / 100.0),
+                output_field=FloatField()
+            )
+        )
+        filterset = self.filterset_class(self.request.GET, queryset=queryset)
+        queryset = filterset.qs
+
+        # Apply filtering based on the ordering parameter
+        ordering = self.request.query_params.get('ordering', None)
+        if ordering:
+            # Split the ordering fields by comma
+            ordering_fields = ordering.split(',')
+            for field in ordering_fields:
+                if field == 'discounted_price':
+                    queryset = queryset.filter(discount__gt=0).order_by('discounted_price')
+                elif field == '-discounted_price':
+                    queryset = queryset.filter(discount__gt=0).order_by('-discounted_price')
+                elif field == 'price':
+                    queryset = queryset.order_by('discounted_price')  # Use discounted_price for sorting
+                elif field == '-price':
+                    queryset = queryset.order_by('-discounted_price')  # Use discounted_price for sorting
+                else:
+                    queryset = queryset.order_by(field)
+
+        return queryset     
+
+class CollectionItemsFilterPage(generics.ListAPIView):
+    serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProductFilter
+
+    def get_queryset(self):
+        collection_id = self.kwargs.get('pk')
+        queryset = Product.objects.filter(collection__id=collection_id)
         return queryset
 
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):

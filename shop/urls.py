@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 from . import views
-from .views import ProductListFilter
+from .views import *
 from rest_framework.urlpatterns import format_suffix_patterns
 
 app_name = "products"
@@ -15,6 +15,8 @@ urlpatterns = [
     path('category/<int:pk>', views.CategoryDetail.as_view(), name='category'),
     path('collection/<int:pk>/products/', views.CollectionItemsPage.as_view(), name='collection_products'),
     path('products/filter/', ProductListFilter.as_view(), name='product-list-filter'),
+    path('collection/<int:pk>/filter/', CollectionItemsFilterPage.as_view(), name='collection_filtered_products'),
+
 
 #    path('', views.home, name='home'),  # Map root URL to home_view
 
