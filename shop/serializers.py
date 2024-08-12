@@ -24,9 +24,10 @@ class CollectionSerializer(serializers.ModelSerializer):
     description_uk = serializers.CharField(required=False)
 
     def get_photo_url(self, obj):
+        request = self.context.get('request')
         if obj.photo:
-            return obj.photo.url
-        return None
+            return request.build_absolute_uri(obj.photo.url)
+        return request.build_absolute_uri('photos/collection/default_collection.jpg')
 
     def get_photo_thumbnail_url(self, obj):
         if obj.photo_thumbnail:
@@ -96,31 +97,4 @@ class ProductSerializer(serializers.ModelSerializer):
             'id', 'name', 'name_en', 'name_uk', 'description', 'description_en', 'description_uk',
             'color_name', 'color_name_en', 'color_name_uk', 'photo_url', 'photo_thumbnail_url',
             'collection', 'images', 'additional_fields'
-        ]
-
-class CreateCollectionSerializer(serializers.ModelSerializer):
-    photo_url = serializers.SerializerMethodField()
-    photo_thumbnail_url = serializers.SerializerMethodField()
-    name = serializers.CharField()
-    name_en = serializers.CharField(required=False)
-    name_uk = serializers.CharField(required=False)
-    description = serializers.CharField(required=False)
-    description_en = serializers.CharField(required=False)
-    description_uk = serializers.CharField(required=False)
-
-    def get_photo_url(self, obj):
-        if obj.photo:
-            return obj.photo.url
-        return None
-
-    def get_photo_thumbnail_url(self, obj):
-        if obj.photo_thumbnail:
-            return obj.photo_thumbnail.url
-        return None
-
-    class Meta:
-        model = Collection
-        fields = [
-            'id', 'name', 'name_en', 'name_uk', 'description', 'description_en', 'description_uk',
-            'photo_url', 'photo_thumbnail_url'
         ]

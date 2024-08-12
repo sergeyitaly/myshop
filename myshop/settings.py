@@ -40,6 +40,9 @@ AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=31536000, s-maxage=31536000, must-revalidate'
 }
 
+IMAGEKIT_DEFAULT_CACHEFILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+IMAGEKIT_CACHEFILE_DIR = 'CACHE/images'
+
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
@@ -111,7 +114,6 @@ MIDDLEWARE = [
     'myshop.middleware.CacheControlMiddleware',
 ]
 # DIRS = [AWS_TEMPLATES]
-MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
 
 ROOT_URLCONF = 'myshop.urls'
 WSGI_APPLICATION = 'myshop.wsgi.app'
@@ -147,6 +149,8 @@ DATABASES = {
         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
         'HOST': os.getenv('POSTGRES_HOST'),
         'PORT': os.getenv('POSTGRES_PORT'),
+        'CONN_MAX_AGE': 600,  # Increase to 10 minutes
+
     }
 }
 
@@ -155,8 +159,6 @@ if USE_S3:
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    # STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    IMAGEKIT_DEFAULT_CACHEFILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/'
 else:
     # Local static file settings

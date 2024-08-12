@@ -50,7 +50,7 @@ urlpatterns = [
 
     path("", views.index, name="index"),
     # Catch-all URL pattern (redirect to index.html)
-   # re_path(r'^.*$', RedirectView.as_view(url='/')),
+#    re_path(r'^.*$', RedirectView.as_view(url='/')),
 
     
 ]
@@ -58,6 +58,8 @@ urlpatterns = [
 urlpatterns += i18n_patterns(
     path('i18n/', include('django.conf.urls.i18n')),
 )
+
+urlpatterns += [re_path(r'^.*$', RedirectView.as_view(url='/'))]
 
 # Serve media files in development only
 if settings.DEBUG:

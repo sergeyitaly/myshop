@@ -10,7 +10,7 @@ export const apiBaseUrl = import.meta.env.VITE_LOCAL_API_BASE_URL || import.meta
 // Function to fetch collection name by ID
 export async function getCollectionNameById(collectionId: number): Promise<Collection> {
   try {
-    const response = await axios.get<Collection>(`${apiBaseUrl}/api/collection/${collectionId}/`);
+    const response = await axios.get<Collection>(`${apiBaseUrl}/api/collections/${collectionId}/`);
     
     return response.data;
   } catch (error) {
