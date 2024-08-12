@@ -108,7 +108,7 @@ export function CustomSeparator() {
                             key="collection"
                             component={RouterLink}
                             underline="hover"
-                            to={`/collection/${collectionNum}`}
+                            to={`/collections/${collectionNum}`}
                             sx={{ marginLeft: '10px',fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}
                         >
                             {collectionName}
