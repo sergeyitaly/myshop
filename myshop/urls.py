@@ -57,11 +57,8 @@ urlpatterns = [
 ]
 
 
-# Serve media files in development only
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    # Serve static files collected in STATIC_ROOT after running collectstatic
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    # Optionally, serve assets from the second dir ectory in STATICFILES_DIRS
     if len(settings.STATICFILES_DIRS) > 1:
         urlpatterns += static('/assets/', document_root=settings.STATICFILES_DIRS[1])
