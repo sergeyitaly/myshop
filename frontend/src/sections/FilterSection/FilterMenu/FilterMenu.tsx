@@ -8,6 +8,8 @@ import { Category, Collection } from "../../../models/entities"
 import 'react-range-slider-input/dist/style.css';
 import { AppRangeSlider } from "../RangeSlider/RangeSlider"
 import { useGetCollectionsByFilterQuery } from "../../../api/collectionSlice"
+import { MainButton } from "../../../components/UI/MainButton/MainButton"
+
 
 
 interface FilterMenuProps {
@@ -43,8 +45,6 @@ export const FilterMenu = ({
     const {data: collections, isSuccess: isSuccessGettingCollections} = useGetCollectionsByFilterQuery({
         page_size: 100
     })
-
-   
 
     return (
         <motion.div 
@@ -123,11 +123,14 @@ export const FilterMenu = ({
                         changePrice={changePrice}
                     />
                 </FilterDropDown>
-                <button
+                <MainButton 
+                    className={styles.saveButton}
+                    title="Зберегти"
+                    color="blue"
                     onClick = {onApply}
                 >
                     Застосувати
-                </button>
+                </MainButton>
             </div>
         </motion.div>
     )

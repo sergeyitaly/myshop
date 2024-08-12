@@ -29,6 +29,8 @@ export const useFilters = (initialCollection?: Collection) => {
     const [filter, setFilter] = useState<MainFilter>({page_size: 100, ordering: 'popularity'})
     const [tagList, setTagList] = useState<Tag[]>([])
 
+    const [sortBy, setSortBy] = useState<string>('')
+
     const createTags = (categories: Category[] = [], collections: Collection[] = [], price: [number, number]) => {
         let list: Tag[] = []
         let categoryTags: Tag[]  = categories.map(({name}) => (
@@ -73,10 +75,11 @@ export const useFilters = (initialCollection?: Collection) => {
             category: activeCategories.map(({name}) => name).join(','),
             collection: activeCollections.map(({id}) => id).join(','),
             price_min: activePriceValues[0],
-            price_max: activePriceValues[1]
+            price_max: activePriceValues[1],
+            ordering: sortBy
         }))
 
-    }, [activeCategories, activePriceValues, activeCollections])
+    }, [activeCategories, activePriceValues, activeCollections, sortBy])
 
 
 
@@ -123,6 +126,10 @@ export const useFilters = (initialCollection?: Collection) => {
         }
     }
 
+    const changeOrdering = (ordering: string) => {
+        setSortBy(ordering)
+    }
+
     return {
         tempCategories,
         tempPriceValues,
@@ -134,6 +141,7 @@ export const useFilters = (initialCollection?: Collection) => {
         maxValue,
         filter,
         tagList,
+        changeOrdering,
         changeCategory,
         changeCollection,
         changePrice,
