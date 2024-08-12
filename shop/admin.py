@@ -7,6 +7,7 @@ from modeltranslation.admin import TranslationAdmin
 
 from modeltranslation.translator import translator, NotRegistered
 from .translator import *  # Ensure this is imported
+from django.urls import reverse
 
 
 class ProductImageInline(admin.TabularInline):
@@ -27,7 +28,7 @@ class AdditionalFieldInline(admin.TabularInline):
 @admin.register(Product)
 class ProductAdmin(TranslationAdmin):
     form = ProductForm
-    list_display = ('id', 'name', 'collection', 'main_product_image', 'price', 'currency', 'discount', 'stock', 'available', 'sales_count', 'popularity')
+    list_display = ('id_link', 'name', 'collection', 'main_product_image', 'price', 'currency', 'discount', 'stock', 'available', 'sales_count', 'popularity')
     search_fields = ['name']
     readonly_fields = ('id', 'slug', 'main_product_image_display', 'display_gallery')
     fields = (
@@ -39,6 +40,11 @@ class ProductAdmin(TranslationAdmin):
     sortable_by = ['category','collection', 'price', 'sales_count', 'popularity']
     show_full_result_count = False
     inlines = [ProductImageInline, AdditionalFieldInline]
+
+    def id_link(self, obj):
+        url = reverse('admin:%s_%s_change' % (obj._meta.app_label, obj._meta.model_name),  args=[obj.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.id)
+    id_link.short_description = 'ID'
 
     def main_product_image(self, obj):
         if obj.photo:
@@ -66,7 +72,6 @@ class ProductAdmin(TranslationAdmin):
 class CategoryAdmin(TranslationAdmin):
     list_display = ('id', 'name')
     search_fields = ['name']
-    readonly_fields = ('id', 'name')
 
 
 @admin.register(Collection)

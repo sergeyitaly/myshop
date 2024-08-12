@@ -9,11 +9,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         # Clear cache
-
-        self.stdout.write(self.style.NOTICE('Clearing Redis cache...'))
-        self.clear_redis_cache()
-        self.stdout.write(self.style.SUCCESS('Redis cache cleared.'))
-
+        
         cache.clear()
         self.stdout.write(self.style.NOTICE('Deleting old migration files and __pycache__ directories...'))
         
