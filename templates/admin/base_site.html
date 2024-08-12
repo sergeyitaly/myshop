@@ -1,0 +1,32 @@
+{% extends "admin/base.html" %}
+
+{% load i18n %}
+{% load static %}
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+<h1 id="KOLORYT">
+    <a href="{% url 'admin:index' %}">
+        <img src="{% static 'assets/img/logo.svg' %}" alt="{{ site_header|default:_('Logo') }}" style="height: 25px; vertical-align: middle; margin-right: 10px;" />
+
+        {{ site_header|default:_('Django administration') }}
+    </a>
+</h1>
+{% if user.is_anonymous %}
+  {% include "admin/color_theme_toggle.html" %}
+{% endif %}
+{% endblock %}
+
+{% block nav-global %}
+<form action="{% url 'set_language' %}" method="post" style="display: inline;">
+    {% csrf_token %}
+    <select name="language" onchange="this.form.submit()">
+        {% get_current_language as LANGUAGE_CODE %}
+        {% for lang in LANGUAGES %}
+            <option value="{{ lang.0 }}" {% if lang.0 == LANGUAGE_CODE %}selected{% endif %}>
+                {{ lang.1 }}
+            </option>
+        {% endfor %}
+    </select>
+</form>
+{% endblock %}

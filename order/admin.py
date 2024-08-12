@@ -7,8 +7,9 @@ from django.utils.html import format_html
 from .signals import update_order_status_with_notification
 from django.contrib.admin import SimpleListFilter
 from django.db.models import Sum, F
+from django.utils.translation import gettext_lazy as _
+from modeltranslation.admin import TranslationAdmin
 
-@admin.register(OrderSummary)
 class OrderSummaryAdmin(admin.ModelAdmin):
     list_display = ('chat_id',)
     search_fields = ('chat_id',)
@@ -19,7 +20,7 @@ class OrderSummaryAdmin(admin.ModelAdmin):
         # Format the orders JSON nicely
         return format_html('<pre>{}</pre>', json.dumps(obj.orders, indent=2, ensure_ascii=False) if obj.orders else "No data available")
 
-    order_summary_pretty.short_description = 'Order Summary (JSON)'
+    order_summary_pretty.short_description = _('Order Summary (JSON)')
 
     fieldsets = (
         (None, {
@@ -38,7 +39,6 @@ class OrderSummaryAdmin(admin.ModelAdmin):
         queryset = super().get_queryset(request)
         return queryset
 
-@admin.register(TelegramUser)
 class TelegramUserAdmin(admin.ModelAdmin):
     list_display = ('phone', 'chat_id')
     search_fields = ('phone', 'chat_id')
@@ -52,23 +52,23 @@ class OrderItemInline(admin.TabularInline):
         if obj.product.photo:
             return mark_safe(f'<img src="{obj.product.photo.url}" style="width: 50px; height: 50px; object-fit: cover;" />')
         return 'No Image'
-    product_photo.short_description = 'Product Photo'
+    product_photo.short_description = _('Product Photo')
 
     def product_name(self, obj):
         return obj.product.name
-    product_name.short_description = 'Product Name'
+    product_name.short_description = _('Product Name')
 
     def collection_name(self, obj):
         return obj.product.collection.name
-    collection_name.short_description = 'Collection'
+    collection_name.short_description = _('Collection')
 
     def size(self, obj):
         return obj.product.size
-    size.short_description = 'Size'
+    size.short_description = _('Size')
 
     def color(self, obj):
         return mark_safe(f'<div style="display: flex; align-items: center;"><div style="width: 10px; height: 10px; background-color: {obj.product.color_value}; margin-right: 5px;"></div>{obj.product.color_name}</div>')
-    color.short_description = 'Color'
+    color.short_description = _('Color')
 
 class TelegramUserFilter(admin.SimpleListFilter):
     title = 'chat_id'
@@ -89,13 +89,13 @@ class TelegramUserFilter(admin.SimpleListFilter):
 
 
 class HasOrderItemsFilter(SimpleListFilter):
-    title = 'Has Order Items'
-    parameter_name = 'has_order_items'
+    title = _('Has Order Items')
+    parameter_name = _('has_order_items')
 
     def lookups(self, request, model_admin):
         return [
-            ('yes', 'With Order Items'),
-            ('no', 'Without Order Items'),
+            ('yes', _('With Order Items')),
+            ('no', _('Without Order Items')),
         ]
 
     def queryset(self, request, queryset):
@@ -107,6 +107,7 @@ class HasOrderItemsFilter(SimpleListFilter):
             # Filter orders that do not have associated order items
             return queryset.filter(order_items__isnull=True)
         return queryset
+
 
 class OrderAdmin(admin.ModelAdmin):
     list_display = ['id', 'status', 'last_updated', 'phone', 'chat_id']
@@ -135,19 +136,19 @@ class OrderAdmin(admin.ModelAdmin):
 
     def chat_id(self, obj):
         return obj.chat_id if obj.chat_id else None
-    chat_id.short_description = 'Chat ID'
+    chat_id.short_description = _('Chat ID')
 
     def last_updated(self, obj):
         return obj.last_updated
-    last_updated.short_description = 'Last Updated'
+    last_updated.short_description = _('Last Updated')
 
     def total_quantity(self, obj):
         return obj.order_items.aggregate(total=Sum('quantity'))['total'] or 0
-    total_quantity.short_description = 'Total Quantity'
+    total_quantity.short_description = _('Total Quantity')
 
     def total_price(self, obj):
         return obj.order_items.aggregate(total=Sum('quantity') * Sum('product__price'))['total'] or 0
-    total_price.short_description = 'Total Price'
+    total_price.short_description = _('Total Price')
 
     def save_model(self, request, obj, form, change):
         if change:
@@ -178,4 +179,10 @@ class OrderAdmin(admin.ModelAdmin):
 
         super().save_model(request, obj, form, change)
 
+
+
+
 admin.site.register(Order, OrderAdmin)
+admin.site.register(TelegramUser, TelegramUserAdmin)
+admin.site.register(OrderSummary, OrderSummaryAdmin)
+
