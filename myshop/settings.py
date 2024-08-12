@@ -287,7 +287,11 @@ LANGUAGES = [
     ('uk', _('Ukrainian')),
 ]
 
+
+MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
 MODELTRANSLATION_LANGUAGES = ('en', 'uk')
+MODELTRANSLATION_FALLBACK_LANGUAGES = ('en',)
+
 # DEBUG_TOOLBAR_CONFIG = {
 #    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,  # Only show toolbar in DEBUG mode
 # }

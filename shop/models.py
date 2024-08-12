@@ -13,6 +13,7 @@ from imagekit.processors import ResizeToFill
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
+from modeltranslation.translator import translator, TranslationOptions
 
 
 load_dotenv()

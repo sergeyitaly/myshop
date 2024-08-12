@@ -8,7 +8,7 @@ class CollectionTranslationOptions(TranslationOptions):
     fields = ('name', )  # Assuming Collection has name and description fields
 
 class ProductTranslationOptions(TranslationOptions):
-    fields = ('name', 'description', 'color_value')  # Assuming Product has name, description, and color_value fields
+    fields = ('name', 'description', 'color_name')  # Assuming Product has name, description, and color_value fields
 
 class AdditionalFieldTranslationOptions(TranslationOptions):
     fields = ('name', 'value')  # Assuming AdditionalField has name and value fields
