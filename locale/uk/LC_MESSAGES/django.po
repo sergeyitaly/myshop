@@ -39,6 +39,10 @@ msgstr "JSON замовлення"
 msgid "Product Photo"
 msgstr "Фото продукту"
 
+#: order/admin.py:55
+msgid "Collection Photo"
+msgstr "Фото коллекції"
+
 #: order/admin.py:59
 msgid "Product Name"
 msgstr "Назва продукту"

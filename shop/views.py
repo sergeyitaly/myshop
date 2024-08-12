@@ -122,6 +122,10 @@ class CollectionList(generics.ListCreateAPIView):
     search_fields = ['name']
     ordering_fields = ['name']
 
+    
+    def get_queryset(self):
+        return Collection.objects.select_related('category').all()
+
 class CollectionItemsPage(generics.ListAPIView):
     serializer_class = ProductSerializer
     pagination_class = CustomPageNumberPagination  # Use custom pagination for products
