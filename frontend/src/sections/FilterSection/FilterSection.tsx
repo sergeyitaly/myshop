@@ -12,6 +12,8 @@ import { Tag } from "./Tag/Tag"
 import { Pagination } from "../../components/UI/Pagination/Pagination"
 import { Collection } from "../../models/entities"
 import clsx from "clsx"
+import { SortMenu } from "./SortMenu/SortMenu"
+import { sortList } from "./SortList"
 
 interface FilterSectionProps {
     initialCollection?: Collection
@@ -25,7 +27,9 @@ export const FilterSection = ({
     const LIMIT = 8
 
     const [open, setOpen] = useState<boolean>(false)
+    const [openSort, setOpenSort] = useState<boolean>(false)
     const [currentPage, setCurrentPage] = useState<number>(1)
+
 
     const {
         tagList, 
@@ -41,6 +45,7 @@ export const FilterSection = ({
         changeCollection,
         changePrice, 
         clearAllFilters,
+        changeOrdering
     } = useFilters(initialCollection)
 
     console.log(filter);
@@ -61,16 +66,25 @@ export const FilterSection = ({
   }
 
 
-    const handleOpenMenu = () => {
-        setOpen(true)
-    }
     const handleCloseMenu = () => {
         setOpen(false)
+    }
+
+    const handleToggleMenu = () => {
+        setOpen(!open)
     }
 
     const handleChangePage = (page: number ) => {
         setCurrentPage(page)
       }
+
+    const handleClickSort = () => {
+        setOpenSort(true)
+    }
+
+    const handleClickOutsideSort = () => {
+        setOpenSort(false)
+    }
     
 
     
@@ -80,18 +94,23 @@ export const FilterSection = ({
         })}>
             <PageContainer>
                 <div className={styles.control}>
-                    {
-                        open ?
-                        <span/>
-                        :
-                        <TextButton
-                            title={open ? 'Сховати' : 'Фільтри'}
-                            onClick={handleOpenMenu}
-                        />
-                    }
+                    <TextButton
+                        title={open ? 'Сховати' : 'Фільтри'}
+                        onClick={handleToggleMenu}
+                    />
                     <TextButton 
                         title="Сортувати"
+                        onClick={handleClickSort}
                     />
+                    {
+                        openSort &&
+                        <SortMenu
+                            className={styles.sortMenu}
+                            menuList={sortList}
+                            onClickOutside={handleClickOutsideSort}
+                            onClickMenu={(item) => changeOrdering(item.name)}
+                        />
+                    }
                 </div>
                 <div className={styles.tagContainer}>
                     {

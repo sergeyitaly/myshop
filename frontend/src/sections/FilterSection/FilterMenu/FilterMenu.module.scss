@@ -8,6 +8,8 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    width: 90vw;
+    max-width: 500px;
 }
 
 .header {
@@ -19,6 +21,12 @@
     align-self: flex-end;
 }
 
+.saveButton {
+    align-self: flex-end;
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+
 .container {
     display: flex;
     flex-direction: column;
@@ -26,14 +34,25 @@
     gap: 20px;
     box-shadow: $shadow-main;
     background-color: $color-background;
-    max-width: 500px;
-    width: 90vw;
+    
     padding: 20px;
     border-radius: 5px;
+
 }
 
 .categoryList {
     display: flex;
     flex-direction: column;
     gap: clamp(0.313rem, 0.532vw + 0.146rem, 0.625rem);
+}
+
+@media (max-width: $screen-mobile) {
+    .wrapper {
+        width: 100vw;
+        top: 35px;
+        height: auto;
+        .header {
+            display: none;
+        }
+    }
 }
