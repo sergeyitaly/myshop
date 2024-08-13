@@ -2,8 +2,11 @@ import { Link } from 'react-router-dom';
 import styles from './Footer.module.scss';
 import VisaImg from './visa.svg';
 import { Logo } from '../../components/Logo/Logo';
+import { useTranslation } from 'react-i18next'; // Import the useTranslation hook
 
 export const Footer = () => {
+    const { t } = useTranslation(); // Initialize translation hook
+
     return (
         <footer className={styles.footer}>
             <Logo 
@@ -12,12 +15,12 @@ export const Footer = () => {
             />
             <div className={styles.content}>
                 <nav className={styles.nav}>
-                    <p className={styles.title}>Зв’язатись з нами</p>
+                    <p className={styles.title}>{t('contact_us')}</p> {/* Localized text */}
                     <Link
                         className={styles.link}
                         to="/"
                     >
-                        Контакти
+                        {t('contacts')}
                     </Link>
                     <Link
                         className={styles.link}
@@ -33,24 +36,24 @@ export const Footer = () => {
                     </Link>
                 </nav>
                 <nav className={styles.nav}>
-                    <p className={styles.title}>Інфо</p>
+                    <p className={styles.title}>{t('info')}</p> {/* Localized text */}
                     <Link
                         className={styles.link}
                         to="/"
                     >
-                        Про нас
+                        {t('about_us')}
                     </Link>
                     <Link
                         className={styles.link}
                         to="/"
                     >
-                        Оплата і доставка
+                        {t('payment_delivery')}
                     </Link>
                     <Link
                         className={styles.link}
                         to="/"
                     >
-                        Повернення & Відшкодування
+                        {t('returns_refunds')}
                     </Link>
                 </nav>
                 <nav className={styles.nav}>
@@ -61,10 +64,10 @@ export const Footer = () => {
                         className={styles.link}
                         to="/"
                     >
-                        Політика конфіденційності
+                        {t('privacy_policy')}
                     </Link>
                     <p className={styles.payment}>
-                        Оплата:
+                        {t('payment')}: {/* Localized text */}
                         <img
                             src={VisaImg}
                             alt="visa icon"
