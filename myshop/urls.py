@@ -50,15 +50,19 @@ urlpatterns = [
 
     path("", views.index, name="index"),
     # Catch-all URL pattern (redirect to index.html)
-    re_path(r'^.*$', RedirectView.as_view(url='/')),
+   # re_path(r'^.*$', RedirectView.as_view(url='/')),
     path('i18n/', include('django.conf.urls.i18n')),
 
     
 ]
-
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     if len(settings.STATICFILES_DIRS) > 1:
         urlpatterns += static('/assets/', document_root=settings.STATICFILES_DIRS[1])
+
+# Catch-all URL pattern for handling unmatched URLs
+urlpatterns += [
+    re_path(r'^.*$', RedirectView.as_view(url='/')),
+]
