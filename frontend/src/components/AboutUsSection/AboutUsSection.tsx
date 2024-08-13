@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import styles from './AboutUsSection.module.scss';
 import { Link } from 'react-router-dom';
 import vase from './vase.jpg'
+import { useTranslation } from 'react-i18next';
 
 export const AboutUsSection = () => {
+    const { t } = useTranslation();
 
     let content =
         " — це унікальний проект, створений командою з шести осіб, які об'єднали свою пристрасть до української культури та бажання просувати її через домашній декор. Магазин спеціалізується на продукції з українською тематикою, пропонуючи широкий асортимент товарів для дому, включаючи кераміку, скло та різноманітні аксесуари.";
@@ -35,7 +37,7 @@ export const AboutUsSection = () => {
                 to="/"
                 className={styles.link}
             >
-                Більше про нас
+              {t('More about us')}
             </Link>
         </section>
     );
