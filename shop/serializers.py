@@ -26,14 +26,18 @@ class CollectionSerializer(serializers.ModelSerializer):
     def get_photo_url(self, obj):
         request = self.context.get('request')
         if obj.photo:
-            return request.build_absolute_uri(obj.photo.url)
+            photo_url = request.build_absolute_uri(obj.photo.url)
+            print(f"Generated photo URL: {photo_url}")
+            return photo_url
         return request.build_absolute_uri('photos/collection/default_collection.jpg')
 
     def get_photo_thumbnail_url(self, obj):
         if obj.photo_thumbnail:
-            return obj.photo_thumbnail.url
+            photo_thumbnail_url = obj.photo_thumbnail.url
+            print(f"Generated thumbnail URL: {photo_thumbnail_url}")
+            return photo_thumbnail_url
         return None
-
+    
     class Meta:
         model = Collection
         fields = [
