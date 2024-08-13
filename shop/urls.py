@@ -3,6 +3,8 @@ from rest_framework.routers import DefaultRouter
 from . import views
 from .views import *
 from rest_framework.urlpatterns import format_suffix_patterns
+from django.conf.urls.static import static
+from django.conf import settings
 
 app_name = "products"
 # app_name will help us do a reverse look-up latter.
@@ -16,11 +18,10 @@ urlpatterns = [
     path('collection/<int:pk>/products/', views.CollectionItemsPage.as_view(), name='collection_products'),
     path('products/filter/', ProductListFilter.as_view(), name='product-list-filter'),
     path('collection/<int:pk>/filter/', CollectionItemsFilterPage.as_view(), name='collection_filtered_products'),
-
-
 #    path('', views.home, name='home'),  # Map root URL to home_view
 
-]
+] #+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 
 urlpatterns = format_suffix_patterns(urlpatterns)
 
