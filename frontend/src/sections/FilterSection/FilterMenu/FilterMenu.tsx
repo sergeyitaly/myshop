@@ -1,29 +1,28 @@
-import { useGetAllCategoriesQuery } from "../../../api/categorySlice"
-import { TextButton } from "../../../components/UI/TextButton/TextButton"
-import { FilterDropDown } from "../FilterDropDown/FilterDropDown"
-import { FilterItem } from "../FilterItem/FilterItem"
-import {motion} from 'framer-motion'
-import styles from './FilterMenu.module.scss'
-import { Category, Collection } from "../../../models/entities"
-import 'react-range-slider-input/dist/style.css';
-import { AppRangeSlider } from "../RangeSlider/RangeSlider"
-import { useGetCollectionsByFilterQuery } from "../../../api/collectionSlice"
-
+import { useGetAllCategoriesQuery } from "../../../api/categorySlice";
+import { TextButton } from "../../../components/UI/TextButton/TextButton";
+import { FilterDropDown } from "../FilterDropDown/FilterDropDown";
+import { FilterItem } from "../FilterItem/FilterItem";
+import { motion } from "framer-motion";
+import styles from "./FilterMenu.module.scss";
+import { Category, Collection } from "../../../models/entities";
+import "react-range-slider-input/dist/style.css";
+import { AppRangeSlider } from "../RangeSlider/RangeSlider";
+import { useGetCollectionsByFilterQuery } from "../../../api/collectionSlice";
+import { useTranslation } from "react-i18next"; // Import the useTranslation hook
 
 interface FilterMenuProps {
-    showCollections?: boolean
-    activeCategories?: Category[]
-    activeCollections?: Collection[]
-    minValue: number
-    maxValue: number
-    priceValue: [number, number]
-    changePrice: (price: [number, number]) => void
-    onClickHideFilters: () => void
-    onClickCategory: (category: Category) => void
-    onClickCollection: (collection: Collection) => void
-    onApply: () => void 
+    showCollections?: boolean;
+    activeCategories?: Category[];
+    activeCollections?: Collection[];
+    minValue: number;
+    maxValue: number;
+    priceValue: [number, number];
+    changePrice: (price: [number, number]) => void;
+    onClickHideFilters: () => void;
+    onClickCategory: (category: Category) => void;
+    onClickCollection: (collection: Collection) => void;
+    onApply: () => void;
 }
-
 
 export const FilterMenu = ({
     showCollections,
@@ -36,85 +35,84 @@ export const FilterMenu = ({
     onClickHideFilters,
     onClickCollection,
     onClickCategory,
-    onApply
+    onApply,
 }: FilterMenuProps) => {
+    const { t } = useTranslation(); // Initialize translation hook
 
-    const {data: categories, isSuccess} = useGetAllCategoriesQuery()
-    const {data: collections, isSuccess: isSuccessGettingCollections} = useGetCollectionsByFilterQuery({
-        page_size: 100
-    })
-
-   
+    const { data: categories, isSuccess } = useGetAllCategoriesQuery();
+    const { data: collections, isSuccess: isSuccessGettingCollections } =
+        useGetCollectionsByFilterQuery({
+            page_size: 100,
+        });
 
     return (
-        <motion.div 
+        <motion.div
             className={styles.wrapper}
-            initial = {{x: '-100%'}}
-            animate = {
-                {
-                    x: 0
-                }
-            }
-            exit={{x: '-100%'}}
-            transition={{ease: 'linear'}}
+            initial={{ x: "-100%" }}
+            animate={{
+                x: 0,
+            }}
+            exit={{ x: "-100%" }}
+            transition={{ ease: "linear" }}
         >
             <header className={styles.header}>
                 <TextButton
                     className={styles.button}
-                    title={'Сховати'}
+                    title={t("hide")} // Localized text
                     onClick={onClickHideFilters}
                 />
             </header>
             <div className={styles.container}>
-                {
-                    showCollections &&
-                <FilterDropDown
-                    title="Колекції"
-                > 
-                    <div className={styles.categoryList}>
-                        {
-                            isSuccessGettingCollections &&
-                            collections.results.map((collection) => {
+                {showCollections && (
+                    <FilterDropDown
+                        title={t("collections")} // Localized text
+                    >
+                        <div className={styles.categoryList}>
+                            {isSuccessGettingCollections &&
+                                collections.results.map((collection) => {
+                                    const isActive = activeCollections.some(
+                                        ({ id }) => id === collection.id
+                                    );
 
-                                const isActive = activeCollections.some(({id}) => id === collection.id)
-
-                                return (
-                                    <FilterItem
-                                        key={collection.id}
-                                        title={collection.name}
-                                        isActive = {isActive}
-                                        onClick = {() => onClickCollection(collection)}
-                                    />
-                                )    
-                            })
-                        }
-                    </div>
-                </FilterDropDown>
-                }
+                                    return (
+                                        <FilterItem
+                                            key={collection.id}
+                                            title={collection.name}
+                                            isActive={isActive}
+                                            onClick={() =>
+                                                onClickCollection(collection)
+                                            }
+                                        />
+                                    );
+                                })}
+                        </div>
+                    </FilterDropDown>
+                )}
                 <FilterDropDown
-                    title="Категорія"
-                > 
+                    title={t("category")} // Localized text
+                >
                     <div className={styles.categoryList}>
-                        {
-                            isSuccess &&
+                        {isSuccess &&
                             categories.results.map((category) => {
-
-                                const isActive = activeCategories.some(({id}) => id === category.id)
+                                const isActive = activeCategories.some(
+                                    ({ id }) => id === category.id
+                                );
 
                                 return (
                                     <FilterItem
                                         key={category.id}
                                         title={category.name}
-                                        isActive = {isActive}
-                                        onClick = {() => onClickCategory(category)}
+                                        isActive={isActive}
+                                        onClick={() =>
+                                            onClickCategory(category)
+                                        }
                                     />
-                                )    
-                            })
-                        }
+                                );
+                            })}
                     </div>
                 </FilterDropDown>
                 <FilterDropDown
-                    title="Ціна"
+                    title={t("price")} // Localized text
                 >
                     <AppRangeSlider
                         minValue={minValue}
@@ -123,12 +121,10 @@ export const FilterMenu = ({
                         changePrice={changePrice}
                     />
                 </FilterDropDown>
-                <button
-                    onClick = {onApply}
-                >
-                    Застосувати
+                <button onClick={onApply}>
+                    {t("apply")} {/* Localized text */}
                 </button>
             </div>
         </motion.div>
-    )
-}
+    );
+};
