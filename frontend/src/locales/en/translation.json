@@ -25,7 +25,26 @@
     "arrowIcon": "arrow icon",
     "bestsellers": "Bestsellers",
     "home": "Home",
-    "contact": "Contact"
+    "contact": "Contact",
+    "not_found_message": "Oops, this page was not found",
+    "return_to_home": "Return to the home page",
+    "basket_title": "Basket",
+    "total_price": "Total Price",
+    "currency": "UAH",
+    "proceed_to_checkout": "Proceed to Checkout",
+    "continue_shopping": "Continue Shopping",
+    "loading": "Loading...",
+    "product_not_found": "Product not found.",
+    "also_from_this_collection": "Also from this collection",
+    "thank_you": "Thank you!",
+    "thank_you_message": "Thank you for visiting our online store. You will soon receive a status update about your order via email!",
+    "thank_you_image_alt": "Woman in computer giving heart-shaped present to man",
+    "check_email": "Check your email!",
+    "email": "KOLORYT@gmail.com",
+    "telegram_bot": "Telegram bot",
+    "scan_qr_code": "Scan this QR code to open our Telegram bot:",
+    "go_home": "Go to Home"
+  
 
   }
   
