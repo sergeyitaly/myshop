@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import styles from './AboutUsSection.module.scss';
 import { Link } from 'react-router-dom';
-import vase from './vase.jpg';
+import vase from './vase.jpg'
 import { useTranslation } from 'react-i18next';
 
 export const AboutUsSection = () => {
@@ -11,7 +11,7 @@ export const AboutUsSection = () => {
     const [width, setWidth] = useState(window.innerWidth);
 
     if (width < 515) {
-        content = content.slice(0, 158); // Adjust this as needed for localization
+        content = content.slice(0, 158);
     }
 
     useEffect(() => {
@@ -36,7 +36,7 @@ export const AboutUsSection = () => {
                 to="/"
                 className={styles.link}
             >
-                {t('more_about_us')}
+              {t('more_about_us')}
             </Link>
         </section>
     );
