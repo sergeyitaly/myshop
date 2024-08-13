@@ -46,9 +46,9 @@ const CollectionItemsPage: React.FC = () => {
                 <PreviewCard
                       className={style.item}
                       key={product.id}
-                      photoSrc={product.photo || ''}
+                      photoSrc={product.photo_url || ''}
                       previewSrc={product.photo_thumbnail_url}
-                      title={product.name}
+                      title={t(product.name)}
                       subTitle={`${formatNumber(product.price)} ${formatCurrency(product.currency)}`}
                       onClick={() => handleClickProduct(product.id)}
                   />
