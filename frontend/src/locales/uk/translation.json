@@ -40,10 +40,23 @@
     "thank_you_message": "Дякуємо, що завітали в наш онлайн-магазин. Незабаром ви отримаєте повідомлення про статус вашого замовлення на електронну пошту!",
     "thank_you_image_alt": "Жінка за комп'ютером дарує чоловіку подарунок у формі серця",
     "check_email": "Перевірте свою електронну пошту!",
-    "email": "KOLORYT@gmail.com",
+    "emailKOLORYT": "KOLORYT@gmail.com",
     "telegram_bot": "Телеграм бот",
     "scan_qr_code": "Відскануйте цей QR код, щоб відкрити наш Телеграм бот:",
-    "go_home": "На головну"
+    "go_home": "На головну",
+    "recipient": "Отримувач",
+    "first_name": "Ім'я",
+    "last_name": "Прізвище",
+    "phone": "Телефон",
+    "email": "Email",
+    "receiver_checkbox_label": "Отримувач - інша особа",
+    "add_comment": "Додати коментар",
+    "remove_comment": "Прибрати коментар",
+    "comment_placeholder": "Тут можна написати коментар",
+    "pickup_store": "Самовивіз з магазину",
+    "payment_on_delivery": "Оплата при отриманні",
+    "wrap_as_gift": "Запакувати як подарунок",
+    "place_order": "Оформити замовлення"
   
 
   

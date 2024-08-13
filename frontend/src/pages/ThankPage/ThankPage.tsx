@@ -26,7 +26,7 @@ export const ThankPage = () => {
                         <p className={styles.check}>{t('check_email')}</p> {/* Localization */}
                         <p className={styles.text}>
                             {t('contact_us')} 
-                            <span className={styles.email}> {t('email')}</span>
+                            <span className={styles.email}> {t('emailKOLORYT')}</span>
                         </p>
                         <div className={styles.telegramContainer}>
                             <FaTelegramPlane size={24} className={styles.telegramIcon} />

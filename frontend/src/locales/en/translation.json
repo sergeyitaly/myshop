@@ -40,10 +40,23 @@
     "thank_you_message": "Thank you for visiting our online store. You will soon receive a status update about your order via email!",
     "thank_you_image_alt": "Woman in computer giving heart-shaped present to man",
     "check_email": "Check your email!",
-    "email": "KOLORYT@gmail.com",
+    "emailKOLORYT": "KOLORYT@gmail.com",
     "telegram_bot": "Telegram bot",
     "scan_qr_code": "Scan this QR code to open our Telegram bot:",
-    "go_home": "Go to Home"
+    "go_home": "Go to Home",
+    "recipient": "Recipient",
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "phone": "Phone",
+    "email": "Email",
+    "receiver_checkbox_label": "Recipient is someone else",
+    "add_comment": "Add Comment",
+    "remove_comment": "Remove Comment",
+    "comment_placeholder": "You can write a comment here",
+    "pickup_store": "Store Pickup",
+    "payment_on_delivery": "Payment on Delivery",
+    "wrap_as_gift": "Wrap as Gift",
+    "place_order": "Place Order"
   
 
   }
