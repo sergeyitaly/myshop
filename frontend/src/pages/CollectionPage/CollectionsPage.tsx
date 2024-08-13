@@ -60,14 +60,14 @@ const CollectionsPage: React.FC = () => {
                     key={collection.id}
                     index={i}
                   >
-                    <PreviewCard
-                        photoSrc={collection.photo}
-                        previewSrc={collection.photo_thumbnail_url}
-                        title={collection.name}
-                        loading={isFetching}
-                        subTitle={collection.category}
-                        onClick={() => handleClickCollectionCard(collection.id)}
-                    />
+                  <PreviewCard
+                      photoSrc={collection.photo_url}
+                      previewSrc={collection.photo_thumbnail_url}
+                      title={collection.name}
+                      loading={isFetching}
+                      subTitle={collection.category}
+                      onClick={() => handleClickCollectionCard(collection.id)}
+                  />
                   </MotionItem>                   
                 ))
               }
