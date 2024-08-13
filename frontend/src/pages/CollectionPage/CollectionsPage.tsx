@@ -48,7 +48,7 @@ const CollectionsPage: React.FC = () => {
                 previewSrc={collection.photo_thumbnail_url}
                 title={collection.name} // This will be localized if backend returns localized name
                 loading={isFetching}
-                subTitle={`${t('category')}: ${collection.category}`} // Ensure backend returns localized category if needed
+                subTitle={collection.category} // Ensure backend returns localized category if needed
                 onClick={() => handleClickCollectionCard(collection.id)}
               />
             </MotionItem>
