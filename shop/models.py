@@ -13,7 +13,6 @@ from imagekit.processors import ResizeToFill
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
-from modeltranslation.translator import translator, TranslationOptions
 
 
 load_dotenv()
@@ -62,7 +61,7 @@ class Collection(models.Model):
 
     photo_thumbnail = ImageSpecField(
         source='photo',
-        processors=[ResizeToFill(100, 50)],
+        processors=[ResizeToFill(50, 50)],
         format='JPEG',
         options={'quality': 60}
     )
@@ -114,7 +113,7 @@ class Product(models.Model):
 
     photo_thumbnail = ImageSpecField(
         source='photo',
-        processors=[ResizeToFill(100, 50)],
+        processors=[ResizeToFill(50, 50)],
         format='JPEG',
         options={'quality': 60}
     )

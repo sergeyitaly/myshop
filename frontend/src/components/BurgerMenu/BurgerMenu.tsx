@@ -1,26 +1,28 @@
-// BurgerMenu.tsx
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './BurgerMenu.module.scss';
 import useBlockScroll from '../../hooks/useBlockScroll';
 import useClickOutside from '../../hooks/useClickOutside';
-
-const links = [
-    { name: 'Колекції', href: '/collections' },
-    { name: 'Нові надходження', href: '/new-arrivals' },
-    { name: 'Всі колекції', href: '/all-collections' },
-    { name: 'Знижки', href: '/discounts' },
-    { name: 'Про нас', href: '/about' },
-    { name: 'Контакти', href: '/contact' },
-    { name: 'Замовлення', href: '/order' },
-];
+import { useTranslation } from 'react-i18next'; // Import the useTranslation hook
 
 export const BurgerMenu = () => {
+    const { t } = useTranslation(); // Initialize translation hook
+
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const ref = useRef<HTMLDivElement>(null);
 
     useBlockScroll(isOpen);
     useClickOutside(ref, () => setIsOpen(false));
+
+    const links = [
+        { name: t('collections'), href: '/collections' }, // Localized text
+        { name: t('new_arrivals'), href: '/new-arrivals' },
+        { name: t('all_collections'), href: '/all-collections' },
+        { name: t('discounts'), href: '/discounts' },
+        { name: t('about_us'), href: '/about' },
+        { name: t('contacts'), href: '/contact' },
+        { name: t('order'), href: '/order' },
+    ];
 
     return (
         <div className={styles.burger_container}>

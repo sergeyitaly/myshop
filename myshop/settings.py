@@ -37,8 +37,9 @@ LOCAL_HOST = os.getenv('LOCAL_HOST')
 TELEGRAM_BOT_TOKEN=os.getenv('NOTIFICATIONS_API')
 SAYINGS_FILE_PATH = os.path.join(BASE_DIR, 'order', 'sayings.txt')
 AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=31536000, s-maxage=31536000, must-revalidate'
+    'CacheControl': 'max-age=86400, must-revalidate'  # Cache for 1 day
 }
+
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
@@ -111,7 +112,6 @@ MIDDLEWARE = [
     'myshop.middleware.CacheControlMiddleware',
 ]
 # DIRS = [AWS_TEMPLATES]
-MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
 
 ROOT_URLCONF = 'myshop.urls'
 WSGI_APPLICATION = 'myshop.wsgi.app'
@@ -147,6 +147,8 @@ DATABASES = {
         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
         'HOST': os.getenv('POSTGRES_HOST'),
         'PORT': os.getenv('POSTGRES_PORT'),
+        'CONN_MAX_AGE': 600,  # Increase to 10 minutes
+
     }
 }
 
@@ -155,18 +157,22 @@ if USE_S3:
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    # STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    IMAGEKIT_DEFAULT_CACHEFILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/'
+
+    IMAGEKIT_DEFAULT_CACHEFILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    IMAGEKIT_CACHEFILE_DIR = 'CACHE/images'
+
 else:
     # Local static file settings
-    MEDIA_URL = 'media/'
+    MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     #    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # Use whitenoise for serving static files
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'  # URL to serve static files
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
+    IMAGEKIT_DEFAULT_CACHEFILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    IMAGEKIT_CACHEFILE_DIR = 'images'  # Update this as per your requirement
 #    WHITENOISE_ROOT = STATIC_ROOT
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'dist'),  # Directory containing main.js and main.css

@@ -12,6 +12,7 @@ from .models import Product, Collection, Category
 from .filters import ProductFilter
 from django.db.models import Min, Max
 from django.db.models import F, FloatField, ExpressionWrapper, Min, Max
+from django.core.cache import cache
 
 
 class CustomPageNumberPagination(PageNumberPagination):
@@ -122,6 +123,33 @@ class CollectionList(generics.ListCreateAPIView):
     search_fields = ['name']
     ordering_fields = ['name']
 
+    
+    def get_queryset(self):
+        # Cache key for the queryset
+        cache_key = 'collection_list'
+        # Check if the queryset is already cached
+        queryset = cache.get(cache_key)
+        
+        if not queryset:
+            # If not cached, fetch the data and cache it
+            queryset = Collection.objects.select_related('category').all()
+            cache.set(cache_key, queryset, timeout=60 * 15)  # Cache timeout of 15 minutes
+        
+        return queryset
+    
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        # Invalidate the cache when a new collection is created
+        cache.delete('collection_list')
+        return instance
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        # Invalidate the cache when a collection is updated
+        cache.delete('collection_list')
+        return instance
+
+
 class CollectionItemsPage(generics.ListAPIView):
     serializer_class = ProductSerializer
     pagination_class = CustomPageNumberPagination  # Use custom pagination for products
@@ -147,6 +175,12 @@ class CollectionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
     permission_classes = [AllowAny]
+    
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        # Invalidate the cache when a collection is updated
+        cache.delete('collection_list')
+        return instance
 
 class CategoryList(generics.ListCreateAPIView):
     queryset = Category.objects.all()
