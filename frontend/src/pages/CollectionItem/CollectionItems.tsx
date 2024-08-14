@@ -10,6 +10,7 @@ import { formatNumber } from '../../functions/formatNumber';
 import { formatCurrency } from '../../functions/formatCurrency';
 import style from './style.module.scss';
 import { useTranslation } from 'react-i18next'; // Import the useTranslation hook
+import { FilterSection } from '../../sections/FilterSection/FilterSection';
 
 // Function to get translated product name
 const getTranslatedProductName = (product: any, language: string): string => {
