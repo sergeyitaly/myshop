@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLinks } from '../../utils/links';  // Ensure the path is correct
 import styles from './Navigation.module.scss';
