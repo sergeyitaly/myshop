@@ -1,14 +1,14 @@
+import { useTranslation } from "react-i18next"; // Import the useTranslation hook
+import { Category, Collection } from "../../../models/entities";
 import { useGetAllCategoriesQuery } from "../../../api/categorySlice";
+import { useGetCollectionsByFilterQuery } from "../../../api/collectionSlice";
 import { TextButton } from "../../../components/UI/TextButton/TextButton";
 import { FilterDropDown } from "../FilterDropDown/FilterDropDown";
 import { FilterItem } from "../FilterItem/FilterItem";
 import { motion } from "framer-motion";
 import styles from "./FilterMenu.module.scss";
-import { Category, Collection } from "../../../models/entities";
 import "react-range-slider-input/dist/style.css";
 import { AppRangeSlider } from "../RangeSlider/RangeSlider";
-import { useGetCollectionsByFilterQuery } from "../../../api/collectionSlice";
-import { useTranslation } from "react-i18next"; // Import the useTranslation hook
 
 interface FilterMenuProps {
     showCollections?: boolean;
@@ -37,21 +37,43 @@ export const FilterMenu = ({
     onClickCategory,
     onApply,
 }: FilterMenuProps) => {
-    const { t } = useTranslation(); // Initialize translation hook
+    const { i18n, t } = useTranslation(); // Initialize translation hook
 
-    const { data: categories, isSuccess } = useGetAllCategoriesQuery();
-    const { data: collections, isSuccess: isSuccessGettingCollections } =
+    const { data: categories, isSuccess: isSuccessCategories } = useGetAllCategoriesQuery();
+    const { data: collections, isSuccess: isSuccessCollections } =
         useGetCollectionsByFilterQuery({
             page_size: 100,
         });
+
+    // Function to get translated category name
+    const getCategoryName = (category: Category): string => {
+        switch (i18n.language) {
+            case 'uk':
+                return category.name_uk || category.name || '';
+            case 'en':
+                return category.name_en || category.name || '';
+            default:
+                return category.name_en || category.name || '';
+        }
+    };
+
+    // Function to get translated collection name
+    const getCollectionName = (collection: Collection): string => {
+        switch (i18n.language) {
+            case 'uk':
+                return collection.name_uk || collection.name || '';
+            case 'en':
+                return collection.name_en || collection.name || '';
+            default:
+                return collection.name_en || collection.name || '';
+        }
+    };
 
     return (
         <motion.div
             className={styles.wrapper}
             initial={{ x: "-100%" }}
-            animate={{
-                x: 0,
-            }}
+            animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ ease: "linear" }}
         >
@@ -68,7 +90,7 @@ export const FilterMenu = ({
                         title={t("collections")} // Localized text
                     >
                         <div className={styles.categoryList}>
-                            {isSuccessGettingCollections &&
+                            {isSuccessCollections &&
                                 collections.results.map((collection) => {
                                     const isActive = activeCollections.some(
                                         ({ id }) => id === collection.id
@@ -77,7 +99,7 @@ export const FilterMenu = ({
                                     return (
                                         <FilterItem
                                             key={collection.id}
-                                            title={collection.name}
+                                            title={getCollectionName(collection)} // Use the function to get the collection name
                                             isActive={isActive}
                                             onClick={() =>
                                                 onClickCollection(collection)
@@ -92,7 +114,7 @@ export const FilterMenu = ({
                     title={t("category")} // Localized text
                 >
                     <div className={styles.categoryList}>
-                        {isSuccess &&
+                        {isSuccessCategories &&
                             categories.results.map((category) => {
                                 const isActive = activeCategories.some(
                                     ({ id }) => id === category.id
@@ -101,7 +123,7 @@ export const FilterMenu = ({
                                 return (
                                     <FilterItem
                                         key={category.id}
-                                        title={category.name}
+                                        title={getCategoryName(category)} // Use the function to get the category name
                                         isActive={isActive}
                                         onClick={() =>
                                             onClickCategory(category)
