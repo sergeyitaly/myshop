@@ -23,6 +23,8 @@ const CollectionItemsPage: React.FC = () => {
     data: collection, 
   } = useGetOneCollectionByIdQuery(id ? +id : skipToken);
 
+  
+
   const {
      data: productResponse,
      isSuccess: isSuccessProductFetching,

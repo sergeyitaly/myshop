@@ -1,6 +1,4 @@
-import { useState } from "react"
 import { PageContainer } from "../../components/containers/PageContainer"
-import styles from './FilterSection.module.scss'
 import { TextButton } from "../../components/UI/TextButton/TextButton"
 import { useGetProductsByMainFilterQuery } from "../../api/productSlice"
 import { PreviewCard } from "../../components/Cards/PreviewCard/PreviewCard"
@@ -11,9 +9,12 @@ import { useFilters } from "../../hooks/useFilters"
 import { Tag } from "./Tag/Tag"
 import { Pagination } from "../../components/UI/Pagination/Pagination"
 import { Collection } from "../../models/entities"
-import clsx from "clsx"
 import { SortMenu } from "./SortMenu/SortMenu"
 import { sortList } from "./SortList"
+import { useToggler } from "../../hooks/useToggler"
+import { usePagination } from "../../hooks/usePagination"
+import clsx from "clsx"
+import styles from './FilterSection.module.scss'
 
 interface FilterSectionProps {
     initialCollection?: Collection
@@ -26,9 +27,17 @@ export const FilterSection = ({
 
     const LIMIT = 8
 
-    const [open, setOpen] = useState<boolean>(false)
-    const [openSort, setOpenSort] = useState<boolean>(false)
-    const [currentPage, setCurrentPage] = useState<number>(1)
+    const {
+        openStatus: open,
+        handleClose: handleCloseMenu,
+        handleToggle: handleToggleMenu,
+    } = useToggler()
+
+    const {
+        openStatus: openSort,
+        handleOpen: handleClickSort,
+        handleClose: handleClickOutsideSort
+    } = useToggler()
 
 
     const {
@@ -48,8 +57,6 @@ export const FilterSection = ({
         changeOrdering
     } = useFilters(initialCollection)
 
-    console.log(filter);
-    
     const {
         data: productsResponce,
         isSuccess: isSuccessGettingProducts,
@@ -58,39 +65,23 @@ export const FilterSection = ({
         isError: isErrorWhenFetchingProducts
     } = useGetProductsByMainFilterQuery(filter)
 
+    console.log(filter);
     
-    let totalPages = 0
+    const {currentPage, totalPages, handleChangePage} = usePagination({
+        limit: LIMIT,
+        numberOfItems: productsResponce?.count
+    })
 
-  if(productsResponce){
-    totalPages = Math.ceil(productsResponce.count / LIMIT)
-  }
-
-
-    const handleCloseMenu = () => {
-        setOpen(false)
+   
+    const handleApply = () => {
+        applyChanges()
+        handleCloseMenu()
     }
-
-    const handleToggleMenu = () => {
-        setOpen(!open)
-    }
-
-    const handleChangePage = (page: number ) => {
-        setCurrentPage(page)
-      }
-
-    const handleClickSort = () => {
-        setOpenSort(true)
-    }
-
-    const handleClickOutsideSort = () => {
-        setOpenSort(false)
-    }
-    
 
     
     return (
         <section className={clsx(styles.section, {
-            [styles.blur]: isFetchigProducts
+            [styles.blur]: !isLoadingProducts && isFetchigProducts
         })}>
             <PageContainer>
                 <div className={styles.control}>
@@ -146,12 +137,11 @@ export const FilterSection = ({
                         isSuccessGettingProducts &&
                         productsResponce.results.map((product) => {
 
-                            const {id, collection, discount, currency, price, photo_url, photo_thumbnail_url, name} = product
+                            const {id, discount, currency, price, photo_url, photo_thumbnail_url, name} = product
 
                             return (
                                 <PreviewCard
                                     key={id}
-                                    subTitle={collection}
                                     photoSrc={photo_url}
                                     previewSrc={photo_thumbnail_url}
                                     title={name}
@@ -187,7 +177,7 @@ export const FilterSection = ({
                         onClickHideFilters={handleCloseMenu}
                         onClickCategory={changeCategory}
                         onClickCollection={changeCollection}
-                        onApply={applyChanges}
+                        onApply={handleApply}
                     />
                 }
             </AnimatePresence>
