@@ -11,9 +11,19 @@ interface BreadcrumbTitles {
     [key: string]: string;
 }
 
+// Function to get translated product name
+const getTranslatedProductName = (product: any, language: string): string => {
+    return language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
+};
+
+// Function to get translated collection name
+const getTranslatedCollectionName = (collection: any, language: string): string => {
+    return language === 'uk' ? collection.name_uk || collection.name : collection.name_en || collection.name;
+};
+
 export function CustomSeparator() {
     const location = useLocation();
-    const { t } = useTranslation(); // Initialize translation hook
+    const { t, i18n } = useTranslation(); // Initialize translation hook
     const [productName, setProductName] = useState<string>('');
     const [collectionName, setCollectionName] = useState<string>('');
     const [collectionNum, setCollectionNum] = useState<string>(''); // Initialize collectionNum state
@@ -26,12 +36,12 @@ export function CustomSeparator() {
                 if (paths.includes('product')) {
                     const productId = paths[paths.indexOf('product') + 1];
                     const product = await getProductNameById(productId);
-                    setProductName(product.name);
+                    setProductName(getTranslatedProductName(product, i18n.language));
 
                 } else if (paths.includes('collection')) {
                     const collectionId = paths[paths.indexOf('collection') + 1];
                     const collection = await getCollectionNameById(+collectionId);
-                    setCollectionName(collection.name);
+                    setCollectionName(getTranslatedCollectionName(collection, i18n.language));
                     setCollectionNum(collectionId); // Set collectionNum from collectionId
                 } else {
                     setProductName('');
@@ -46,7 +56,7 @@ export function CustomSeparator() {
         return () => {
             setProductName('');
         };
-    }, [location.pathname]);
+    }, [location.pathname, i18n.language]);
 
     const breadcrumbTitles: BreadcrumbTitles = {
         '/': t('home'),

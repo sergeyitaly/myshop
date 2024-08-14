@@ -12,10 +12,15 @@ import { PreviewCard } from '../../components/Cards/PreviewCard/PreviewCard';
 import styles from './ProductPage.module.scss';
 import { useTranslation } from 'react-i18next';
 
+// Function to get translated product name
+const getTranslatedProductName = (product: Product, language: string): string => {
+  return language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
+};
+
 const ProductPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { t } = useTranslation();  // Hook for translation
+  const { t, i18n } = useTranslation();  // Hook for translation
 
   const [allowClick, setAllowClick] = useState<boolean>(true);
   const { product, isLoading, isFetching } = useProduct(+id!);
@@ -48,12 +53,12 @@ const ProductPage: React.FC = () => {
           <PreviewCard
             className={styles.card}
             key={product.id}
-            title={product.name}
+            title={getTranslatedProductName(product, i18n.language) || t('no_name')}  // Use translated name or fallback
             discount={product.discount}
             price={product.price}
             currency={product.currency}
-            photoSrc={product.photo_url}
-            previewSrc={product.photo_thumbnail_url}
+            photoSrc={product.photo_url || ''}
+            previewSrc={product.photo_thumbnail_url || ''}
             onClick={() => handleClickSlide(product)}
           />
         ))}
