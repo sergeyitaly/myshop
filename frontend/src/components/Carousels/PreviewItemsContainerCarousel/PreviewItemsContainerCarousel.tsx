@@ -1,5 +1,4 @@
 import { ReactNode } from "react"
-import { MapComponent } from "../../MapComponent"
 import { PreviewLoadingCard } from "../../Cards/PreviewCard/PreviewLoagingCard"
 import styles from './PreviewItemsContainer.module.scss'
 

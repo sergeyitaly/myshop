@@ -2,21 +2,15 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import style from './style.module.scss'
-import {mockDataAllCollection, mockDataDiscount, mockDataProducts} from "../carouselMock";
 import {PreviewCard} from "../../Cards/PreviewCard/PreviewCard";
-import React from "react";
-import {useNavigate, useParams} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import {
     useGetAllCollectionsQuery,
-    useGetAllProductsFromCollectionQuery, useGetDiscountProductsQuery,
-    useGetOneCollectionByIdQuery,
+    useGetDiscountProductsQuery,
     useGetProductsByPopularityQuery,
-    useGetProductsFromCollectionByProductFilterQuery
 } from "../../../api/collectionSlice";
 import {Collection} from "../../../models/entities";
 import {ROUTE} from "../../../constants";
-import {formatNumber} from "../../../functions/formatNumber";
-import {formatCurrency} from "../../../functions/formatCurrency";
 import styles from "../CarouselsMobileVersion/style.module.scss";
 import {PreviewLoadingCard} from "../../Cards/PreviewCard/PreviewLoagingCard";
 
@@ -58,6 +52,10 @@ export function AllCollection() {
                                 key={product.id}
                                 photoSrc={product.photo || ''}
                                 title={product.name}
+                                // discount = {product.discount}
+                                // price={product.price}
+                                // currency={product.currency}
+                                previewSrc={product.photo_thumbnail_url}
                                 onClick={() => handleClickCollectionCard(product.id)}
                             />
                         </div>
@@ -75,7 +73,6 @@ export function Popular () {
         data: productResponce,
         isSuccess: isSuccessProductFetshing,
         isLoading: isLoadingProducts,
-        isError: isErrorProducts,
         error
     } = useGetProductsByPopularityQuery({ popularity: '6' });
 
@@ -111,7 +108,10 @@ export function Popular () {
                                 key={product.id}
                                 photoSrc={product.photo || ''}
                                 title={product.name}
-                                subTitle={`${formatNumber(product.price)} ${formatCurrency(product.currency)}`}
+                                discount = {product.discount}
+                                price={product.price}
+                                currency={product.currency}
+                                previewSrc={product.photo_thumbnail_url}
                                 onClick={() => handleClickProduct(product.id)}
                             />
                         </div>
@@ -129,7 +129,7 @@ export function Discount () {
     const { data: discountProductsData, isLoading: isLoadingDiscountProducts } = useGetDiscountProductsQuery();
     const discountProducts = discountProductsData?.results.filter(product => parseFloat(product.discount) > 0) || [];
 
-    console.log('Discount products:', discountProducts);  // Логируем полученные продукты
+    console.log('Discount products:', discountProducts);
 
     const settings = {
         dots: true,
@@ -152,16 +152,17 @@ export function Discount () {
             <p className={style.title}> Знижки </p>
             {
                 discountProducts.length === 1 ? (
-                    <PreviewCard
-                        className={style.cardNew}
-                        key={discountProducts[0].id}
-                        photoSrc={discountProducts[0].photo || ''}
-                        title={discountProducts[0].name}
-                        discount={discountProducts[0].discount}
-                        price={discountProducts[0].price}
-                        currency={discountProducts[0].currency}
-                        onClick={() => handleClickProduct(discountProducts[0].id)}
-                    />
+                    // <PreviewCard
+                    //     className={style.cardNew}
+                    //     key={discountProducts[0].id}
+                    //     photoSrc={discountProducts[0].photo || ''}
+                    //     title={discountProducts[0].name}
+                    //     discount={discountProducts[0].discount}
+                    //     price={discountProducts[0].price}
+                    //     currency={discountProducts[0].currency}
+                    //     onClick={() => handleClickProduct(discountProducts[0].id)}
+                    // />
+                    <div></div>
                 ) : (
                     <Slider {...settings}>
                         {isLoadingDiscountProducts
@@ -181,7 +182,7 @@ export function Discount () {
                                         currency={product.currency}
                                         photoSrc={product.photo_url}
                                         previewSrc={product.photo_thumbnail_url}
-                                        onClick={() => handleClickProduct(product)}
+                                        onClick={() => handleClickProduct(product.id)}
                                     />
                                 </div>
                             ))}
