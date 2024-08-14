@@ -24,8 +24,10 @@ const ProductPage: React.FC = () => {
 
   const [allowClick, setAllowClick] = useState<boolean>(true);
   const { product, isLoading, isFetching } = useProduct(+id!);
+  // Assuming `product.collection` is of type `Collection`
+  const collectionName = product?.collection?.name ?? skipToken;
+  const { data: collection } = useGetCollectionByNameQuery(collectionName);
 
-  const { data: collection } = useGetCollectionByNameQuery(product?.collection ?? skipToken);
   const { data: productsData } = useGetAllProductsFromCollectionQuery(collection?.id ?? skipToken);
 
   if (isLoading) {
