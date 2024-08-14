@@ -9,8 +9,8 @@ import { ROUTE } from '../../constants';
 import { formatNumber } from '../../functions/formatNumber';
 import { formatCurrency } from '../../functions/formatCurrency';
 import style from './style.module.scss';
-import { FilterSection } from '../../sections/FilterSection/FilterSection';
 import { useTranslation } from 'react-i18next'; // Import the useTranslation hook
+import { FilterSection } from '../../sections/FilterSection/FilterSection';
 
 // Function to get translated product name
 const getTranslatedProductName = (product: any, language: string): string => {
@@ -29,6 +29,8 @@ const CollectionItemsPage: React.FC = () => {
     data: collection, 
   } = useGetOneCollectionByIdQuery(id ? +id : skipToken);
 
+  
+
   const {
     data: productResponse,
     isSuccess: isSuccessProductFetching,
@@ -41,6 +43,9 @@ const CollectionItemsPage: React.FC = () => {
   const handleClickProduct = (productId: number) => {
     navigate(`${ROUTE.PRODUCT}${productId}`);
   };
+
+  console.log(collection);
+  
 
   return (
     <main className={style.main}>
