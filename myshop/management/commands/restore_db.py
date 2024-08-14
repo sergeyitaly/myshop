@@ -36,6 +36,8 @@ class Command(BaseCommand):
             f'--port={port}',
             f'--username={user}',
             f'--dbname={db_name}',
+            '--no-owner',
+            '--no-acl',
             '--verbose',
             dump_file
         ]

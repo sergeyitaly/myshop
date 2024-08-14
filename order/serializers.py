@@ -11,6 +11,7 @@ class OrderSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderSummary
         fields = ['chat_id', 'orders']
+        
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)

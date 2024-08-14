@@ -3,24 +3,30 @@ import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { Breadcrumbs, Link, Stack } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { getProductNameById, getCollectionNameById } from '../../api/api';
-import styles from './style.module.scss'
+import styles from './style.module.scss';
 import { isHiddenIfLocationContainPath } from '../../functions/isHiddenIfLocationContainPath';
+import { useTranslation } from 'react-i18next'; // Import the useTranslation hook
 
 interface BreadcrumbTitles {
     [key: string]: string;
 }
 
+// Function to get translated product name
+const getTranslatedProductName = (product: any, language: string): string => {
+    return language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
+};
 
+// Function to get translated collection name
+const getTranslatedCollectionName = (collection: any, language: string): string => {
+    return language === 'uk' ? collection.name_uk || collection.name : collection.name_en || collection.name;
+};
 
 export function CustomSeparator() {
     const location = useLocation();
+    const { t, i18n } = useTranslation(); // Initialize translation hook
     const [productName, setProductName] = useState<string>('');
     const [collectionName, setCollectionName] = useState<string>('');
     const [collectionNum, setCollectionNum] = useState<string>(''); // Initialize collectionNum state
-
-    
-     
-    
 
     useEffect(() => {
         const fetchData = async () => {
@@ -30,12 +36,12 @@ export function CustomSeparator() {
                 if (paths.includes('product')) {
                     const productId = paths[paths.indexOf('product') + 1];
                     const product = await getProductNameById(productId);
-                    setProductName(product.name);
+                    setProductName(getTranslatedProductName(product, i18n.language));
 
                 } else if (paths.includes('collection')) {
                     const collectionId = paths[paths.indexOf('collection') + 1];
                     const collection = await getCollectionNameById(+collectionId);
-                    setCollectionName(collection.name);
+                    setCollectionName(getTranslatedCollectionName(collection, i18n.language));
                     setCollectionNum(collectionId); // Set collectionNum from collectionId
                 } else {
                     setProductName('');
@@ -50,13 +56,13 @@ export function CustomSeparator() {
         return () => {
             setProductName('');
         };
-    }, [location.pathname]);
+    }, [location.pathname, i18n.language]);
 
     const breadcrumbTitles: BreadcrumbTitles = {
-        '/': 'Головна',
-        '/collections': 'Колекції',
-        '/about': 'Про нас',
-        '/contact': 'Контакти',
+        '/': t('home'),
+        '/collections': t('collections'),
+        '/about': t('about_us'),
+        '/contact': t('contact'),
     };
 
     const generateBreadcrumbs = () => {
@@ -72,7 +78,7 @@ export function CustomSeparator() {
                     to="/"
                     sx={{ marginLeft: '30px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}
                 >
-                    Головна
+                    {t('home')}
                 </Link>
             );
         }
@@ -88,7 +94,7 @@ export function CustomSeparator() {
                         underline="hover"
                         to={currentPath}
                         sx={{ marginLeft: '10px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}
-                        >
+                    >
                         {breadcrumbTitles[currentPath]}
                     </Link>
                 );
@@ -100,16 +106,16 @@ export function CustomSeparator() {
                             component={RouterLink}
                             underline="hover"
                             to="/collections"
-                            sx={{  marginLeft: '10px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}
+                            sx={{ marginLeft: '10px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}
                         >
-                            Колекції
+                            {t('collections')}
                         </Link>,
                         <Link
                             key="collection"
                             component={RouterLink}
                             underline="hover"
-                            to={`/collection/${collectionNum}`}
-                            sx={{ marginLeft: '10px',fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}
+                            to={`/collections/${collectionNum}`}
+                            sx={{ marginLeft: '10px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}
                         >
                             {collectionName}
                         </Link>,
@@ -126,9 +132,9 @@ export function CustomSeparator() {
                             to="/collections"
                             sx={{ marginLeft: '10px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}
                         >
-                            Колекції
+                            {t('collections')}
                         </Link>,
-                        <span key="productName" style={{ marginLeft: '10px',fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}>
+                        <span key="productName" style={{ marginLeft: '10px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}>
                             {productName}
                         </span>
                     );
@@ -141,9 +147,9 @@ export function CustomSeparator() {
                             to="/collections"
                             sx={{ marginLeft: '10px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}
                         >
-                            Колекції
+                            {t('collections')}
                         </Link>,
-                        <span key="collectionName" style={{ marginLeft: '10px',fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}>
+                        <span key="collectionName" style={{ marginLeft: '10px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}>
                             {collectionName}
                         </span>
                     );
