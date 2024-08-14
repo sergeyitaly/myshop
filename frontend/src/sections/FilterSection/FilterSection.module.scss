@@ -5,6 +5,7 @@
 }
 
 .control {
+    position: relative;
     display: flex;
     justify-content: space-between;
 }
@@ -20,6 +21,16 @@
     color: $color-gray-300;
     font-size: 16px;
 }
+
+.sortMenu {
+  position: absolute;
+  z-index: 3;
+  box-shadow: $shadow-main;
+  top: 100%;
+  right: 0;
+}
+
+
 
 .pagination {
     margin-top: 40px;

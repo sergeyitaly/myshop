@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { PageContainer } from "../../components/containers/PageContainer";
 import styles from './FilterSection.module.scss';
 import { TextButton } from "../../components/UI/TextButton/TextButton";
@@ -13,6 +12,10 @@ import { Pagination } from "../../components/UI/Pagination/Pagination";
 import { Collection, Product } from '../../models/entities';
 import clsx from "clsx";
 import { useTranslation } from 'react-i18next';
+import { SortMenu } from "./SortMenu/SortMenu";
+import { sortList } from "./SortList";
+import { useToggler } from "../../hooks/useToggler";
+import { useState } from "react";
 
 interface FilterSectionProps {
     initialCollection?: Collection;
@@ -23,19 +26,26 @@ const getTranslatedProductName = (product: Product, language: string): string =>
     return language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
 };
 
-// Function to get translated collection name
-const getTranslatedCollectionName = (collection: Collection | undefined, language: string): string => {
-    if (!collection) return ''; // Handle the case when collection is undefined
-    return language === 'uk' ? collection.name_uk || collection.name : collection.name_en || collection.name;
-};
 
 export const FilterSection = ({
     initialCollection
 }: FilterSectionProps) => {
 
-    const LIMIT = 8;
-    const [open, setOpen] = useState<boolean>(false);
-    const [currentPage, setCurrentPage] = useState<number>(1);
+    const LIMIT = 3;
+
+    const [currentPage, setCurrentPage] = useState<number>(1)
+
+    const {
+        openStatus: open,
+        handleOpen: handleOpenMenu,
+        handleClose: handleCloseMenu
+    } = useToggler()
+
+    const {
+        openStatus: openSort,
+        handleClose:  handleClickOutsideSort,   
+        handleOpen: handleClickSort
+    } = useToggler()
 
     const { i18n } = useTranslation();
 
@@ -53,7 +63,10 @@ export const FilterSection = ({
         changeCollection,
         changePrice,
         clearAllFilters,
+        changeOrdering,
     } = useFilters(initialCollection);
+
+   
 
     const {
         data: productsResponse,
@@ -61,25 +74,28 @@ export const FilterSection = ({
         isLoading: isLoadingProducts,
         isFetching: isFetchingProducts,
         isError: isErrorWhenFetchingProducts
-    } = useGetProductsByMainFilterQuery(filter);
+    } = useGetProductsByMainFilterQuery({...filter, page: currentPage, page_size: LIMIT});
 
-    let totalPages = 0;
+    let totalPages = 0
 
-    if (productsResponse) {
-        totalPages = Math.ceil(productsResponse.count / LIMIT);
+    console.log(productsResponse);
+    
+
+    if(productsResponse){
+      totalPages = Math.ceil(productsResponse.count / LIMIT)
+      console.log(totalPages);
+      
+    }
+   
+    const handleChangePage = (page: number ) => {
+        setCurrentPage(page)
     }
 
-    const handleOpenMenu = () => {
-        setOpen(true);
-    };
+    const handleApply = () => {
+        applyChanges()
+        handleCloseMenu()
+    }
 
-    const handleCloseMenu = () => {
-        setOpen(false);
-    };
-
-    const handleChangePage = (page: number) => {
-        setCurrentPage(page);
-    };
 
     return (
         <section className={clsx(styles.section, {
@@ -98,7 +114,17 @@ export const FilterSection = ({
                     }
                     <TextButton
                         title="Сортувати"
+                        onClick={handleClickSort}
                     />
+                    {
+                        openSort &&
+                        <SortMenu
+                            className={styles.sortMenu}
+                            menuList={sortList}
+                            onClickOutside={handleClickOutsideSort}
+                            onClickMenu={(item) => changeOrdering(item.name)}
+                        />
+                    }
                 </div>
                 <div className={styles.tagContainer}>
                     {
@@ -132,12 +158,11 @@ export const FilterSection = ({
                     {
                         isSuccessGettingProducts &&
                         productsResponse.results.map((product) => {
-                            const { id, collection, discount, currency, price, photo_url, photo_thumbnail_url } = product;
+                            const { id, discount, currency, price, photo_url, photo_thumbnail_url } = product;
 
                             return (
                                 <PreviewCard
                                     key={id}
-                                    subTitle={collection ? getTranslatedCollectionName(collection, i18n.language) : ''}
                                     photoSrc={photo_url}
                                     previewSrc={photo_thumbnail_url}
                                     title={getTranslatedProductName(product, i18n.language)}
@@ -173,7 +198,7 @@ export const FilterSection = ({
                         onClickHideFilters={handleCloseMenu}
                         onClickCategory={changeCategory}
                         onClickCollection={changeCollection}
-                        onApply={applyChanges}
+                        onApply={handleApply}
                     />
                 }
             </AnimatePresence>
