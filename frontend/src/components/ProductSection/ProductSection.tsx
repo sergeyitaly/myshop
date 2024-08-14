@@ -16,7 +16,6 @@ export const ProductSection = () => {
 
     const discountPrice = product ? countDiscountPrice(product.price, product.discount) : null
   
-    console.log(product);
     
 
     return (

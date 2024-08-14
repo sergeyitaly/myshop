@@ -1,117 +1,69 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PreviewCard } from '../../components/Cards/PreviewCard/PreviewCard';
 import { NamedSection } from '../../components/NamedSection/NamedSection';
 import { AppCarousel } from '../../components/AppCarousel/AppCarousel';
 import { useGetOneCollectionByIdQuery, useGetProductsFromCollectionByProductFilterQuery } from '../../api/collectionSlice';
 import { skipToken } from '@reduxjs/toolkit/query';
-import { PreviewItemsContainer } from '../../components/containers/PreviewItemsContainer/PreviewItemsContainer';
 import { ROUTE } from '../../constants';
 import { formatNumber } from '../../functions/formatNumber';
 import { formatCurrency } from '../../functions/formatCurrency';
 import style from './style.module.scss';
-import { Pagination } from '../../components/UI/Pagination/Pagination';
+import { useTranslation } from 'react-i18next'; // Import the useTranslation hook
+import { FilterSection } from '../../sections/FilterSection/FilterSection';
+
+// Function to get translated product name
+const getTranslatedProductName = (product: any, language: string): string => {
+    return language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
+};
 
 const CollectionItemsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const { t, i18n } = useTranslation(); // Initialize translation hook
+  const language = i18n.language; // Get current language
 
-  const limit = 4
-
-  const [currentPage, setCurrentPage] = useState<number>(1)
-
-  const {
-    data:collection, 
-    isSuccess, 
-    isLoading: isLoadingCollection
-  } = useGetOneCollectionByIdQuery( id ? +id : skipToken)
+  const limit = 4;
 
   const {
-     data: productResponce,
-     isSuccess: isSuccessProductFetshing,
-     isLoading: isLoadingProducts,
-     isError: isErrorProducts,
-  } = useGetProductsFromCollectionByProductFilterQuery( collection ? 
-    {collectionId: collection.id,
-      page_size: limit,
-      page: currentPage
-    } 
-    : skipToken )
+    data: collection, 
+  } = useGetOneCollectionByIdQuery(id ? +id : skipToken);
 
-  const products = isSuccessProductFetshing ? productResponce.results : []
   
+
+  const {
+    data: productResponse,
+    isSuccess: isSuccessProductFetching,
+  } = useGetProductsFromCollectionByProductFilterQuery(
+    collection ? { collectionId: collection.id, page_size: limit } : skipToken
+  );
+
+  const products = isSuccessProductFetching ? productResponse.results : [];
+
   const handleClickProduct = (productId: number) => {
-    navigate(`${ROUTE.PRODUCT}${productId}`)
-  }
+    navigate(`${ROUTE.PRODUCT}${productId}`);
+  };
 
-
-
-  let totalPages = 0
-
-  if(productResponce){
-    totalPages = Math.ceil(productResponce.count / limit)
-  }
-
-  const handleChangePage = (page: number ) => {
-    setCurrentPage(page)
-  }
+  console.log(collection);
 
   return (
     <main className={style.main}>
-      {
-        <NamedSection 
-          title={isSuccess ? collection.name : ''}
-          isLoading = {isLoadingCollection}
-        >
-            <PreviewItemsContainer
-              isLoading={isLoadingProducts}
-              isError = {isErrorProducts}
-              textWhenEmpty='Ця колекція поки що не має продуктів'
-              textWhenError='Помилка!'
-            >
-              {
-                products.map((product) => (
-                  <PreviewCard
-                      key={product.id}
-                      photoSrc={product.photo || ''}
-                      previewSrc={product.photo_thumbnail_url}
-                      title={product.name}
-                      price={product.price}
-                      currency={product.currency}
-                      discount={product.discount}
-                      onClick={() => handleClickProduct(product.id)}
-                  />
-                ))
-              }
-            </PreviewItemsContainer>
-            {
-              productResponce && totalPages > 1 &&
-              <Pagination
-                className={style.pagination}
-                totalPages={totalPages}
-                currentPage={currentPage}
-                onChange = {handleChangePage}
-              />
-            }
-          </NamedSection>
-      }
-        <NamedSection title='Бестселери'>
-          <AppCarousel>
-            {
-              products.map((product) => (
-                <PreviewCard
-                      className={style.item}
-                      key={product.id}
-                      photoSrc={product.photo || ''}
-                      previewSrc={product.photo_thumbnail_url}
-                      title={product.name}
-                      subTitle={`${formatNumber(product.price)} ${formatCurrency(product.currency)}`}
-                      onClick={() => handleClickProduct(product.id)}
-                  />
-              ))
-            }
-          </AppCarousel>
-        </NamedSection>
+      <FilterSection initialCollection={collection} />
+      <NamedSection title={t('bestsellers')}>
+        <AppCarousel>
+          {products.map((product) => (
+            <PreviewCard
+              className={style.item}
+              key={product.id}
+              photoSrc={product.photo_url || ''}
+              previewSrc={product.photo_thumbnail_url || ''}
+              title={product.name ? getTranslatedProductName(product, language) : t('noName')} // Use translated name
+              subTitle={`${formatNumber(product.price)} ${formatCurrency(product.currency)}`}
+              onClick={() => handleClickProduct(product.id)}
+            />
+          ))}
+        </AppCarousel>
+      </NamedSection>
     </main>
   );
 };

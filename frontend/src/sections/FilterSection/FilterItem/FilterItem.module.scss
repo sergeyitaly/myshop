@@ -1,0 +1,26 @@
+@import '../../../variables';
+
+.container {
+    border-bottom: 1px solid $color-gray-100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .icon {
+        width: clamp(1.125rem, 0.638vw + 0.926rem, 1.5rem);
+    }
+}
+
+.title {
+    font-size: clamp(0.875rem, 1.064vw + 0.543rem, 1.5rem);
+    &::first-letter {
+        text-transform: capitalize;
+    }
+}
+
+
+
+.active {
+    color: $color-gray-200
+}
+

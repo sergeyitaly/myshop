@@ -1,88 +1,86 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Collection } from '../../models/entities';
+import { Collection, Category } from '../../models/entities';
 import { PreviewCard } from '../../components/Cards/PreviewCard/PreviewCard';
 import { ROUTE, screens } from '../../constants';
 import { useGetCollectionsByFilterQuery } from '../../api/collectionSlice';
 import { NamedSection } from '../../components/NamedSection/NamedSection';
 import { PreviewItemsContainer } from '../../components/containers/PreviewItemsContainer/PreviewItemsContainer';
 import { Pagination } from '../../components/UI/Pagination/Pagination';
-import styles from './style.module.scss'
+import styles from './style.module.scss';
 import { MotionItem } from '../../components/MotionComponents/MotionItem';
 import { useMediaQuery } from '@mui/material';
-
-
+import { useTranslation } from 'react-i18next';
 
 const CollectionsPage: React.FC = () => {
+  const { t, i18n } = useTranslation();
+  const isMobile = useMediaQuery(screens.maxMobile);
+  const limit = isMobile ? 8 : 8; // Adjust limit based on screen size
+  const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
-  
-  const isMobile = useMediaQuery(screens.maxMobile)
-  
-  const limit = isMobile ? 8 : 8
+  // Fetch collections
+  const {
+    data: collectionsData,
+    isLoading,
+    isFetching,
+    refetch: refetchCollections
+  } = useGetCollectionsByFilterQuery(
+    { page_size: limit, page: currentPage },
+    { refetchOnMountOrArgChange: true }
+  );
 
-  const navigate = useNavigate()
+  useEffect(() => {
+    refetchCollections();
+  }, [i18n.language, currentPage, refetchCollections]);
 
-  const [currentPage, setCurrentPage] = useState<number>(1)
+  // Memoize functions to avoid recalculations
+  const getTranslatedCollectionName = useCallback((collection: Collection): string => {
+    return i18n.language === 'uk' ? collection.name_uk || collection.name : collection.name_en || collection.name;
+  }, [i18n.language]);
 
-  const {data, isLoading, isFetching} = useGetCollectionsByFilterQuery({page_size: limit, page: currentPage})
+  const getTranslatedCategoryName = useCallback((category: Category | undefined): string => {
+    return i18n.language === 'uk'
+      ? category?.name_uk || category?.name || ''
+      : category?.name_en || category?.name || '';
+  }, [i18n.language]);
 
-  const collections: Collection[] = data?.results || []
+  const handleClickCollectionCard = useCallback((id: number) => {
+    navigate(`${ROUTE.COLLECTION}${id}`);
+  }, [navigate]);
 
-  const handleClickCollectionCard = (id: number) => {
-    navigate(ROUTE.COLLECTION + id)
-  }
+  const totalPages = collectionsData ? Math.ceil(collectionsData.count / limit) : 0;
 
+  const handleChangePage = (page: number) => {
+    setCurrentPage(page);
+  };
 
-  let totalPages = 0
-
-  if(data){
-    totalPages = Math.ceil(data.count / limit)
-  }
-
-  const handleChangePage = (page: number ) => {
-    setCurrentPage(page)
-  }
-  
-  console.log(collections);
-  
- 
   return (
     <main>
-        <NamedSection 
-          title='Колекції'
-        >
-          <PreviewItemsContainer
-            isLoading = {isLoading}
-            itemsQtyWhenLoading={limit}
-          >
-              {
-                collections.map((collection, i) => (
-                  <MotionItem
-                    key={collection.id}
-                    index={i}
-                  >
-                    <PreviewCard
-                        photoSrc={collection.photo}
-                        previewSrc={collection.photo_thumbnail_url}
-                        title={collection.name}
-                        loading={isFetching}
-                        subTitle={collection.category}
-                        onClick={() => handleClickCollectionCard(collection.id)}
-                    />
-                  </MotionItem>                   
-                ))
-              }
-          </PreviewItemsContainer>
-          {
-            data && totalPages > 1 &&
-            <Pagination
-              className={styles.pagination}
-              totalPages={totalPages}
-              currentPage={currentPage}
-              onChange = {handleChangePage}
-            />
-          }
-        </NamedSection>
+      <NamedSection title={t('collections')}>
+        <PreviewItemsContainer isLoading={isLoading} itemsQtyWhenLoading={limit}>
+          {collectionsData?.results.map((collection, i) => (
+            <MotionItem key={collection.id} index={i}>
+              <PreviewCard
+                photoSrc={collection.photo_url}
+                previewSrc={collection.photo_thumbnail_url}
+                title={getTranslatedCollectionName(collection)}
+                loading={isFetching}
+                subTitle={getTranslatedCategoryName(collection.category)}
+                onClick={() => handleClickCollectionCard(collection.id)}
+              />
+            </MotionItem>
+          ))}
+        </PreviewItemsContainer>
+        {collectionsData && totalPages > 1 && (
+          <Pagination
+            className={styles.pagination}
+            totalPages={totalPages}
+            currentPage={currentPage}
+            onChange={handleChangePage}
+          />
+        )}
+      </NamedSection>
     </main>
   );
 };

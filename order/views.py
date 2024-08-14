@@ -390,23 +390,27 @@ def get_order_summary(request):
     except Exception as e:
         return Response({'error': str(e)}, status=500)
     
-    
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def update_order_summary(request):
     chat_id = request.data.get('chat_id')
-    orders = request.data.get('orders')
+    orders = request.data.get('orders', {})  # Ensure orders defaults to an empty dict
 
     if not chat_id:
         return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
 
+    # Log the incoming data
+    logger.info(f"Updating OrderSummary: chat_id={chat_id}, orders={orders}")
+
     try:
-        order_summary = OrderSummary.objects.get(chat_id=chat_id)
+        order_summary, created = OrderSummary.objects.get_or_create(chat_id=chat_id)
         order_summary.orders = orders
         order_summary.save()
-        
+
         return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
-    except OrderSummary.DoesNotExist:
-        return Response({"error": "Order summary not found."}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
+        logger.error(f"Error updating OrderSummary: {e}")
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
