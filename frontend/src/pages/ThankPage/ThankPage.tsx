@@ -6,8 +6,10 @@ import { ROUTE } from '../../constants';
 import { useMediaQuery } from 'react-responsive';
 import QRCode from 'qrcode.react';
 import { FaTelegramPlane } from 'react-icons/fa'; // Import Telegram icon
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 
 export const ThankPage = () => {
+    const { t } = useTranslation(); // Use useTranslation hook
     const isLaptop = useMediaQuery({ query: '(min-width: 1024px)' });
     const telegramLink = "https://t.me/KOLORYT_notifications_bot";
 
@@ -16,25 +18,27 @@ export const ThankPage = () => {
             <section>
                 <PageContainer className={styles.wrapper}>
                     <div className={styles.container}>
-                        <h1 className={styles.title}>Дякуємо!</h1>
+                        <h1 className={styles.title}>{t('thank_you')}</h1> {/* Localization */}
                         <p className={styles.p}>
-                            Дякуємо що завітали в наш онлайн магазин. Незабаром ви отримаєте повідомлення про статус вашого замовлення на електронну пошту!
+                            {t('thank_you_message')} {/* Localization */}
                         </p>
-                        <img className={styles.image} src={img} alt="Woman in computer giving heart-shaped present to man" />
-                        <p className={styles.check}>Перевірте свою електронну пошту!</p>
+                        <img className={styles.image} src={img} alt={t('thank_you_image_alt')} /> {/* Localization */}
+                        <p className={styles.check}>{t('check_email')}</p> {/* Localization */}
                         <p className={styles.text}>
-                            Якщо ви не отримали жодного листа зв‘яжіться з 
-                            <span className={styles.email}> KOLORYT@gmail.com</span>
+                            {t('contact_us')} 
+                            <span className={styles.email}> {t('emailKOLORYT')}</span>
                         </p>
                         <div className={styles.telegramContainer}>
                             <FaTelegramPlane size={24} className={styles.telegramIcon} />
                             <p>
-                                <a href={telegramLink} target="_blank" rel="noopener noreferrer"><span className={styles.KOLORYT_notifications_bot}>Telegram бот</span></a>
+                                <a href={telegramLink} target="_blank" rel="noopener noreferrer">
+                                    <span className={styles.KOLORYT_notifications_bot}>{t('telegram_bot')}</span>
+                                </a>
                             </p>
                         </div>
                         {isLaptop && (
                             <div className={styles.qrCode}>
-                                <p>Відскануйте цей QR код щоб відкрити наш Telegram бот:</p>
+                                <p>{t('scan_qr_code')}</p>
                                 <br/>
                                 <QRCode value={telegramLink} size={128} />
                             </div>
@@ -43,7 +47,7 @@ export const ThankPage = () => {
                             to={ROUTE.HOME}
                             className={styles.link}
                         >
-                            На головну
+                            {t('go_home')} {/* Localization */}
                         </Link>
                     </div>
                 </PageContainer>

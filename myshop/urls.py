@@ -63,6 +63,7 @@ if settings.DEBUG:
         urlpatterns += static('/assets/', document_root=settings.STATICFILES_DIRS[1])
 
 # Catch-all URL pattern for handling unmatched URLs
-#urlpatterns += [
-#    re_path(r'^.*$', RedirectView.as_view(url='/')),
-#]
+#
+urlpatterns += [
+    re_path(r'^.*$', RedirectView.as_view(url='/')),
+]
