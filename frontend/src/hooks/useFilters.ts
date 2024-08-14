@@ -26,10 +26,11 @@ export const useFilters = (initialCollection?: Collection) => {
     const [activeCollections, setActiveCollections] = useState<Collection[]>([])
     const [activePriceValues, setActivePriceValues] = useState<[number, number]>([minValue, maxValue]);
 
-    const [filter, setFilter] = useState<MainFilter>({page_size: 100, ordering: 'popularity'})
+    const [filter, setFilter] = useState<MainFilter>({})
     const [tagList, setTagList] = useState<Tag[]>([])
-
+    
     const [sortBy, setSortBy] = useState<string>('')
+    
 
     const createTags = (categories: Category[] = [], collections: Collection[] = [], price: [number, number]) => {
         let list: Tag[] = []
@@ -56,6 +57,9 @@ export const useFilters = (initialCollection?: Collection) => {
        
         return list
     }
+
+    console.log(initialCollection);
+    
 
     useEffect(() => {
         initialCollection && 
@@ -105,6 +109,7 @@ export const useFilters = (initialCollection?: Collection) => {
     const clearAllFilters = () => {
         setActiveCategories([])
         setActivePriceValues([minValue, maxValue])
+        setActiveCollections([])
     }    
 
     
