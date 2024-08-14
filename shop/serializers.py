@@ -8,12 +8,12 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ['id', 'name', 'name_en', 'name_uk']
+        fields = '__all__'
         lookup_field = 'slug'
         extra_kwargs = {'url': {'lookup_field': 'slug'}}
 
 class CollectionSerializer(serializers.ModelSerializer):
-    category = serializers.ReadOnlyField(source='category.name')
+    category = CategorySerializer(required=False, allow_null=True)
     photo_url = serializers.SerializerMethodField()
     photo_thumbnail_url = serializers.SerializerMethodField()
     name = serializers.CharField()
@@ -35,10 +35,7 @@ class CollectionSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Collection
-        fields = [
-            'id', 'name', 'name_en', 'name_uk', 'description', 'description_en', 'description_uk',
-            'photo_url', 'photo_thumbnail_url', 'category'
-        ]
+        fields = '__all__'
 
 class ProductImageSerializer(serializers.ModelSerializer):
     images_thumbnail_url = serializers.SerializerMethodField()
@@ -52,24 +49,12 @@ class ProductImageSerializer(serializers.ModelSerializer):
         model = ProductImage
         fields = ['id', 'images', 'images_thumbnail_url']
 
-class AdditionalFieldSerializer(serializers.ModelSerializer):
-    name = serializers.CharField()
-    name_en = serializers.CharField(required=False)
-    name_uk = serializers.CharField(required=False)
-    value = serializers.CharField()
-    value_en = serializers.CharField(required=False)
-    value_uk = serializers.CharField(required=False)
-
-    class Meta:
-        model = AdditionalField
-        fields = ['id', 'name', 'name_en', 'name_uk', 'value', 'value_en', 'value_uk']
-
 class ProductSerializer(serializers.ModelSerializer):
     photo_url = serializers.SerializerMethodField()
     photo_thumbnail_url = serializers.SerializerMethodField()
-    collection = serializers.ReadOnlyField(source='collection.name')
+    collection = CollectionSerializer(required=False, allow_null=True)
+    category = CategorySerializer(required=False, allow_null=True)
     images = ProductImageSerializer(source='productimage_set', many=True, read_only=True)
-    additional_fields = AdditionalFieldSerializer(many=True, read_only=True)
     name = serializers.CharField()
     name_en = serializers.CharField(required=False)
     name_uk = serializers.CharField(required=False)
@@ -92,8 +77,19 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = [
-            'id', 'name', 'name_en', 'name_uk', 'description', 'description_en', 'description_uk',
-            'color_name', 'color_name_en', 'color_name_uk', 'photo_url', 'photo_thumbnail_url',
-            'collection', 'images', 'additional_fields'
-        ]
+        fields = '__all__'
+
+class AdditionalFieldSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(required=False, allow_null=True)
+    collection = CollectionSerializer(required=False, allow_null=True)
+    product = ProductSerializer(required=False, allow_null=True)
+    name = serializers.CharField()
+    name_en = serializers.CharField(required=False)
+    name_uk = serializers.CharField(required=False)
+    value = serializers.CharField()
+    value_en = serializers.CharField(required=False)
+    value_uk = serializers.CharField(required=False)
+
+    class Meta:
+        model = AdditionalField
+        fields = '__all__'
