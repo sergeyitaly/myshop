@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import styles from "./FilterMenu.module.scss";
 import "react-range-slider-input/dist/style.css";
 import { AppRangeSlider } from "../RangeSlider/RangeSlider";
+import { MainButton } from "../../../components/UI/MainButton/MainButton";
 
 interface FilterMenuProps {
     showCollections?: boolean;
@@ -148,9 +149,7 @@ export const FilterMenu = ({
                     title="Зберегти"
                     color="blue"
                     onClick = {onApply}
-                >
-                    Застосувати
-                </MainButton>
+                />
             </div>
         </motion.div>
     );
