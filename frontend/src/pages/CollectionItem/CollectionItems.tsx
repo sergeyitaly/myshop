@@ -9,7 +9,6 @@ import { ROUTE } from '../../constants';
 import { formatNumber } from '../../functions/formatNumber';
 import { formatCurrency } from '../../functions/formatCurrency';
 import style from './style.module.scss';
-import { FilterSection } from '../../sections/FilterSection/FilterSection';
 import { useTranslation } from 'react-i18next'; // Import the useTranslation hook
 
 // Function to get translated product name
