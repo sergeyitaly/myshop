@@ -65,7 +65,6 @@ export const FilterSection = ({
         isError: isErrorWhenFetchingProducts
     } = useGetProductsByMainFilterQuery(filter)
 
-    console.log(filter);
     
     const {currentPage, totalPages, handleChangePage} = usePagination({
         limit: LIMIT,

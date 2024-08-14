@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Collection } from '../../models/entities';
+import { Collection, Category } from '../../models/entities';
 import { PreviewCard } from '../../components/Cards/PreviewCard/PreviewCard';
 import { ROUTE, screens } from '../../constants';
 import { useGetCollectionsByFilterQuery } from '../../api/collectionSlice';
@@ -10,7 +10,7 @@ import { Pagination } from '../../components/UI/Pagination/Pagination';
 import styles from './style.module.scss';
 import { MotionItem } from '../../components/MotionComponents/MotionItem';
 import { useMediaQuery } from '@mui/material';
-import { useTranslation } from 'react-i18next'; // Import useTranslation for translations
+import { useTranslation } from 'react-i18next';
 
 const CollectionsPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -18,20 +18,33 @@ const CollectionsPage: React.FC = () => {
   const limit = isMobile ? 8 : 8;
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const { data, isLoading, isFetching, refetch } = useGetCollectionsByFilterQuery({ page_size: limit, page: currentPage }, { refetchOnMountOrArgChange: true });
 
-  // Re-fetch data when language changes
+  // Fetch collections
+  const { data: collectionsData, isLoading, isFetching, refetch: refetchCollections } = useGetCollectionsByFilterQuery(
+    { page_size: limit, page: currentPage },
+    { refetchOnMountOrArgChange: true }
+  );
+
   useEffect(() => {
-    refetch(); // Refetch data to get translated fields
-  }, [i18n.language, refetch]);
+    refetchCollections();
+  }, [i18n.language, refetchCollections]);
 
-  const collections: Collection[] = data?.results || [];
+  // Function to get translated collection name
+  const getTranslatedCollectionName = (collection: Collection): string => {
+    return i18n.language === 'uk' ? collection.name_uk || collection.name : collection.name_en || collection.name;
+  };
 
+  // Function to get translated category name
+  const getTranslatedCategoryName = (category: Category | undefined): string => {
+    return i18n.language === 'uk' 
+      ? category?.name_uk || category?.name || '' 
+      : category?.name_en || category?.name || '';
+  };
   const handleClickCollectionCard = (id: number) => {
     navigate(ROUTE.COLLECTION + id);
   };
 
-  const totalPages = data ? Math.ceil(data.count / limit) : 0;
+  const totalPages = collectionsData ? Math.ceil(collectionsData.count / limit) : 0;
 
   const handleChangePage = (page: number) => {
     setCurrentPage(page);
@@ -40,24 +53,21 @@ const CollectionsPage: React.FC = () => {
   return (
     <main>
       <NamedSection title={t('collections')}>
-        <PreviewItemsContainer
-          isLoading={isLoading}
-          itemsQtyWhenLoading={limit}
-        >
-          {collections.map((collection, i) => (
+        <PreviewItemsContainer isLoading={isLoading} itemsQtyWhenLoading={limit}>
+          {collectionsData?.results.map((collection, i) => (
             <MotionItem key={collection.id} index={i}>
               <PreviewCard
                 photoSrc={collection.photo_url}
-                previewSrc={collection.photo_thumbnail_url}
-                title={collection.name} // Use translated collection name from the database
+                previewSrc={collection.photo_thumbnail_url} // Use the same for previewSrc if no separate field
+                title={getTranslatedCollectionName(collection)}
                 loading={isFetching}
-                subTitle={t(collection.category)} // Use translated category name from the database
+                subTitle={getTranslatedCategoryName(collection.category)} // Use category field
                 onClick={() => handleClickCollectionCard(collection.id)}
               />
             </MotionItem>
           ))}
         </PreviewItemsContainer>
-        {data && totalPages > 1 && (
+        {collectionsData && totalPages > 1 && (
           <Pagination
             className={styles.pagination}
             totalPages={totalPages}
