@@ -1,23 +1,38 @@
-import React, { useState } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import style from './style.module.scss'
-import {mockDataAllCollection, mockDataDiscount, mockDataPopular} from "../carouselMock";
-import {useNavigate, useParams} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import {
     useGetAllCollectionsQuery,
-    useGetAllProductsFromCollectionQuery, useGetDiscountProductsQuery,
-    useGetOneCollectionByIdQuery, useGetProductsByPopularityQuery
+    useGetDiscountProductsQuery,
+    useGetProductsByPopularityQuery
 } from "../../../api/collectionSlice";
-import {Collection} from "../../../models/entities";
 import {ROUTE} from "../../../constants";
 import {PreviewCard} from "../../Cards/PreviewCard/PreviewCard";
-import {formatNumber} from "../../../functions/formatNumber";
-import {formatCurrency} from "../../../functions/formatCurrency";
 import {PreviewLoadingCard} from "../../Cards/PreviewCard/PreviewLoagingCard";
 import styles from '../CarouselFilters/style.module.scss'
-import {NamedSection} from "../../NamedSection/NamedSection";
+import {useState} from "react";
+
+interface Product {
+    id: number;
+    photo: string | null;
+    photo_thumbnail_url: string | null;
+    name: string;
+    discount: string;
+    price: string;
+    currency: string;
+}
+
+interface Collection {
+    id: number;
+    photo: string | null;
+    photo_thumbnail_url: string | null;
+    name: string;
+    // Коллекция может не иметь свойства discount, price, currency
+}
+
+type DisplayedItem = Product | Collection;
 
 function CarouselFilters() {
 
@@ -42,14 +57,14 @@ function CarouselFilters() {
     const navigate = useNavigate();
 
     const { data: collectionsData, isLoading: isLoadingCollections } = useGetAllCollectionsQuery();
-    const { data: popularProductsData, isLoading: isLoadingPopularProducts } = useGetProductsByPopularityQuery({ popularity: '4' });
-    const { data: discountProductsData, isLoading: isLoadingDiscountProducts } = useGetDiscountProductsQuery();
+    const { data: popularProductsData } = useGetProductsByPopularityQuery({ popularity: '4' });
+    const { data: discountProductsData } = useGetDiscountProductsQuery();
 
-    const collections = collectionsData?.results || [];
-    const popularProducts = popularProductsData?.results.filter(product => parseFloat(product.discount) === 0) || [];
-    const discountProducts = discountProductsData?.results.filter(product => parseFloat(product.discount) > 0) || [];
+    const collections: Collection[] = collectionsData?.results || [];
+    const popularProducts: Product[] = popularProductsData?.results.filter(product => parseFloat(product.discount) === 0) || [];
+    const discountProducts: Product[] = discountProductsData?.results.filter(product => parseFloat(product.discount) > 0) || [];
 
-    let displayedData;
+    let displayedData: DisplayedItem[];
     switch (selectedFilter) {
         case "popular":
             displayedData = popularProducts;
@@ -72,49 +87,49 @@ function CarouselFilters() {
 
     return (
         <div className={styles.sliderContainer} >
-            <NamedSection>
-                <div className={style.filters}>
-                    <p className={selectedFilter === 'popular' ? style.selected : ''} style={{cursor:'pointer'}} onClick={() => handleFilterChange("popular")}>Найпопулярніші товари</p>
-                    <p className={selectedFilter === 'allCollection' ? style.selected : ''} style={{cursor:'pointer'}} onClick={() => handleFilterChange("allCollection")}>Всі колекції</p>
-                    <p className={selectedFilter === 'discount' ? style.selected : ''} style={{cursor:'pointer'}} onClick={() => handleFilterChange("discount")}>Знижки</p>
-                </div>
-                {
-                    selectedFilter === "discount" && discountProducts.length === 1 ? (
-                        <PreviewCard
-                            className={style.cardNew}
-                            key={discountProducts[0].id}
-                            photoSrc={discountProducts[0].photo || ''}
-                            title={discountProducts[0].name}
-                            discount={discountProducts[0].discount}
-                            price={discountProducts[0].price}
-                            currency={discountProducts[0].currency}
-                            onClick={() => handleClickItem(discountProducts[0].id)}
-                        />
-                    ) : (
-                        <Slider {...settings}>
-                            {isLoadingCollections
-                                ? Array.from({ length: 3 }).map((_, index) => (
-                                    <div key={index} className={style.card}>
-                                        <PreviewLoadingCard />
-                                    </div>
-                                ))
-                                : displayedData.map((product) => (
-                                    <div key={product.id} className={style.card}>
-                                        <PreviewCard
-                                            key={product.id}
-                                            photoSrc={product.photo || ''}
-                                            title={product.name}
-                                            discount = {product.discount}
-                                            price={product.price}
-                                            currency={product.currency}
-                                            onClick={() => handleClickItem(product.id)}
-                                        />
-                                    </div>
-                                ))}
-                        </Slider>
-                    )
-                }
-            </NamedSection>
+            <div className={style.filters}>
+                <p className={selectedFilter === 'popular' ? style.selected : ''} style={{cursor:'pointer'}} onClick={() => handleFilterChange("popular")}>Найпопулярніші товари</p>
+                <p className={selectedFilter === 'allCollection' ? style.selected : ''} style={{cursor:'pointer'}} onClick={() => handleFilterChange("allCollection")}>Всі колекції</p>
+                <p className={selectedFilter === 'discount' ? style.selected : ''} style={{cursor:'pointer'}} onClick={() => handleFilterChange("discount")}>Знижки</p>
+            </div>
+            {
+                selectedFilter === "discount" && discountProducts.length === 1 ? (
+                    <PreviewCard
+                        className={style.cardNew}
+                        key={discountProducts[0].id}
+                        photoSrc={discountProducts[0].photo || ''}
+                        title={discountProducts[0].name}
+                        discount={discountProducts[0].discount}
+                        price={discountProducts[0].price}
+                        // currency={discountProducts[0].currency}
+                        previewSrc={discountProducts[0].photo_thumbnail_url}
+                        onClick={() => handleClickItem(discountProducts[0].id)}
+                    />
+                ) : (
+                    <Slider {...settings}>
+                        {isLoadingCollections
+                            ? Array.from({ length: 3 }).map((_, index) => (
+                                <div key={index} className={style.card}>
+                                    <PreviewLoadingCard />
+                                </div>
+                            ))
+                            : displayedData.map((product) => (
+                                <div key={product.id} className={style.card}>
+                                    {/*<PreviewCard*/}
+                                    {/*    key={product.id}*/}
+                                    {/*    photoSrc={product.photo || ''}*/}
+                                    {/*    title={product.name}*/}
+                                    {/*    discount = {product.discount}*/}
+                                    {/*    price={product.price}*/}
+                                    {/*    currency={product.currency}*/}
+                                    {/*    previewSrc={product.photo_thumbnail_url}*/}
+                                    {/*    onClick={() => handleClickItem(product.id)}*/}
+                                    {/*/>*/}
+                                </div>
+                            ))}
+                    </Slider>
+                )
+            }
         </div>
     );
 }

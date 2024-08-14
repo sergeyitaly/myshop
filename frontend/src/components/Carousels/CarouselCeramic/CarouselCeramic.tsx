@@ -1,21 +1,16 @@
-import React from "react";
-import {useNavigate, useParams} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import style from './style.module.scss'
 import {NamedSection} from "../../NamedSection/NamedSection";
 import {PreviewCard} from "../../Cards/PreviewCard/PreviewCard";
-import {
-    useGetAllProductsFromCollectionQuery,
-    useGetOneCollectionByIdQuery
-} from "../../../api/collectionSlice";
+import {useGetAllProductsFromCollectionQuery} from "../../../api/collectionSlice";
 import {ROUTE} from "../../../constants";
 import {PreviewLoadingCard} from "../../Cards/PreviewCard/PreviewLoagingCard";
 
 function CarouselCeramic () {
 
-    const { id } = useParams<{ id: string }>();
     const collectionId = 3;
     const navigate = useNavigate()
 
@@ -64,9 +59,11 @@ function CarouselCeramic () {
                                 <PreviewCard
                                     key={product.id}
                                     photoSrc={product.photo_url}
+                                    // discount = {product.discount}
                                     title={product.name}
                                     price={product.price}
                                     currency={product.currency}
+                                    previewSrc={product.photo_thumbnail_url}
                                     onClick={() => handleClickProduct(product.id)}
                                 />
                             </div>

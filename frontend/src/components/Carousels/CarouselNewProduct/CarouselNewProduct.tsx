@@ -2,16 +2,15 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import {mockDataCategories} from "../carouselMock";
-import {useNavigate} from "react-router-dom";
 import {useGetAllCollectionsQuery} from "../../../api/collectionSlice";
 import {Collection} from "../../../models/entities";
 import {ROUTE} from "../../../constants";
 import {PreviewCard} from "../../Cards/PreviewCard/PreviewCard";
-import React from "react";
 import {NamedSection} from "../../NamedSection/NamedSection";
-import {PreviewItemsContainer} from "../../containers/PreviewItemsContainer/PreviewItemsContainer";
 import style from "../CarouselNewProduct/style.module.scss";
 import {PreviewLoadingCard} from "../../Cards/PreviewCard/PreviewLoagingCard";
+import {useNavigate} from "react-router-dom";
+
 
 function CarouselNewProduct () {
     const navigate = useNavigate()
@@ -71,8 +70,12 @@ function CarouselNewProduct () {
                                 <PreviewCard
                                     className={style.card}
                                     key={product.id}
-                                    photoSrc={product.photo || ''}
                                     title={product.name}
+                                    discount = {product.discount}
+                                    price={product.price}
+                                    currency={product.currency}
+                                    photoSrc={product.photo_url}
+                                    previewSrc={product.photo_thumbnail_url}
                                     onClick={() => handleClickCollectionCard(product.id)}
                                 />
                         ))}

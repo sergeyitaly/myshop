@@ -14,7 +14,6 @@ export interface Product {
     photo_thumbnail_url: string | null
     brandimage: string | null,
     name: string,
-    discount: string
     description: string | null,
     price: string,
     discount: string,
