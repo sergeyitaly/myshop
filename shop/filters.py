@@ -1,12 +1,12 @@
 import django_filters
-from django_filters import OrderingFilter
+from django_filters.rest_framework import OrderingFilter
 from .models import Product
 
 class ProductFilter(django_filters.FilterSet):
-    # Filter products by category name through the collection
-    category_id = django_filters.BaseInFilter(field_name='collection__category__id', lookup_expr='in')
-    collection_id = django_filters.BaseInFilter(field_name='collection__id', lookup_expr='in')
-    
+    # Filter products by category and collection
+    category_id = django_filters.NumberFilter(field_name='collection__category__id', lookup_expr='exact')
+    collection_id = django_filters.NumberFilter(field_name='collection__id', lookup_expr='exact')
+
     # Filter by translated name fields
     name = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
     name_en = django_filters.CharFilter(field_name='name_en', lookup_expr='icontains')
@@ -19,8 +19,7 @@ class ProductFilter(django_filters.FilterSet):
     # Filter by sales count and popularity
     sales_count = django_filters.NumberFilter(field_name='sales_count', lookup_expr='exact')
     popularity = django_filters.NumberFilter(field_name='popularity', lookup_expr='exact')
-    
-    # Ordering
+
     ordering = OrderingFilter(
         fields=(
             ('popularity', 'popularity'),
@@ -46,4 +45,7 @@ class ProductFilter(django_filters.FilterSet):
 
     class Meta:
         model = Product
-        fields = ['category_id', 'collection_id', 'name', 'name_en', 'name_uk', 'price_min', 'price_max', 'sales_count', 'popularity', 'ordering']
+        fields = [
+            'category_id', 'collection_id', 'name', 'name_en', 'name_uk', 
+            'price_min', 'price_max', 'sales_count', 'popularity'
+        ]

@@ -80,8 +80,6 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class AdditionalFieldSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(required=False, allow_null=True)
-    collection = CollectionSerializer(required=False, allow_null=True)
     product = ProductSerializer(required=False, allow_null=True)
     name = serializers.CharField()
     name_en = serializers.CharField(required=False)
