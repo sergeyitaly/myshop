@@ -3,8 +3,7 @@
 .container{
     font-size: 1em;
     display: grid;
-    gap: 35px 24px;
-    gap: clamp(22px, 2.5vw, 36px) 18px clamp(16px, 2vw, 24px);;
+    gap: clamp(0.938rem, 2.128vw + 0.273rem, 2.188rem) clamp(16px, 2vw, 24px);
     grid-template-columns: 1fr 1fr;
     grid-template-areas: 
     'title price'

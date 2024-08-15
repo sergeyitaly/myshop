@@ -1,4 +1,3 @@
-import ArrowForwardIos from "@mui/icons-material/ArrowForwardIos"
 import styles from './FilterItem.module.scss'
 import clsx from "clsx"
 import { ButtonHTMLAttributes, DetailedHTMLProps } from "react"
@@ -24,7 +23,6 @@ export const FilterItem = ({
         [styles.active]: isActive
       })}>
         <span className={styles.title}>{t(title)}</span>
-        <ArrowForwardIos className={styles.icon}/>
       </button>  
     )
 }

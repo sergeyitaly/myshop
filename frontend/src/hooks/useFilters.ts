@@ -114,9 +114,9 @@ export const useFilters = (initialCollection?: Collection) => {
         setTempCollections(activeCollections);
 
         setFilter((state) => ({
-            ...state,
-            category: activeCategories.map(({ name }) => name).join(','),
-            collection: activeCollections.map(({ id }) => id).join(','),
+            ...state, 
+            category: activeCategories.map(({id}) => id).join(','),
+            collection: activeCollections.map(({id}) => id).join(','),
             price_min: activePriceValues[0],
             price_max: activePriceValues[1],
             ordering: sortBy

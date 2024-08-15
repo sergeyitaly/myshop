@@ -38,9 +38,10 @@ export const ProductInfo = ({
             </div>
 
             {
-                product.additional_fields.map(({name, value}) => (
+                product.additional_fields &&
+                product.additional_fields.map(({name, value}, index) => (
                     <DropDown
-                        key = {name}
+                        key = {index}
                         className={styles.applyDropdown}
                         changebleParam={product.id}
                         title={name}
