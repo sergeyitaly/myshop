@@ -1,6 +1,4 @@
 import { countDiscountPrice } from "../../../functions/countDiscountPrice"
-import { formatCurrency } from "../../../functions/formatCurrency"
-import { formatNumber } from "../../../functions/formatNumber"
 import { formatPrice } from "../../../functions/formatPrice"
 import { Color, Product } from "../../../models/entities"
 import { AppImage } from "../../AppImage/AppImage"
