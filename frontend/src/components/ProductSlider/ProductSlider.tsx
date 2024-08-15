@@ -1,34 +1,29 @@
 import Slider from "react-slick"
-import { ReactNode } from "react"
+import { ReactNode, useState } from "react"
 import { settings } from "./sliderSettings"
-import { PageContainer } from "../containers/PageContainer"
 import style from './ProductSlider.module.scss'
+import clsx from "clsx"
 
 interface ProductSliderProps {
-    title: string
     children: ReactNode
-    onAllowClick: (status: boolean) => void
 }
 
 export const ProductSlider = ({
-    title,
     children,
-    onAllowClick
 }: ProductSliderProps) => {
 
+    const [disabled, setDisabled] = useState<boolean>(false);
+
     return (
-    <section>
-        <PageContainer>
-            <h2 className={style.title}>{title}</h2>
-            <Slider 
-                className={style.slider}
-                {...settings} 
-                beforeChange={() => onAllowClick(false)}  
-                afterChange={() => onAllowClick(true)} 
-            >
-              {children}
-            </Slider>
-        </PageContainer>
-    </section>
+        <Slider 
+            className={clsx(style.slider, {
+                [style.disabled]: disabled
+            })}
+            {...settings} 
+            afterChange={() => setDisabled(false)} 
+            swipeEvent={() => setDisabled(true)}
+        >
+            {children}
+        </Slider>
     )
 }

@@ -16,8 +16,6 @@ export const ProductSection = () => {
 
     const discountPrice = product ? countDiscountPrice(product.price, product.discount) : null
   
-    
-
     return (
         <section>
             <PageContainer className={style.aaa}>
