@@ -117,29 +117,27 @@ class OrderItemViewSet(viewsets.ModelViewSet):
     serializer_class = OrderItemSerializer
     permission_classes = [IsAuthenticated]  # Ensure this matches your settings
 
+
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
-        operation_description="Retrieve an order by ID",
-        responses={200: OrderSerializer, 404: 'Not Found'}
+        operation_description="Retrieve an order by ID"
     )
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        operation_description="Delete an order by ID",
-        responses={204: 'No Content', 404: 'Not Found'}
+        operation_description="Delete an order by ID"
     )
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
 
     @swagger_auto_schema(
         operation_description="Partially update an order by ID",
-        request_body=OrderSerializer,
-        responses={200: OrderSerializer, 400: 'Bad Request', 404: 'Not Found'}
+        request_body=OrderSerializer
     )
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
@@ -147,7 +145,15 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     @swagger_auto_schema(
         operation_description="Retrieve orders by phone number",
-        responses={200: OrderSerializer(many=True), 400: 'Bad Request'}
+        manual_parameters=[
+            openapi.Parameter(
+                'phone_number',
+                openapi.IN_QUERY,
+                description="Phone number to filter orders",
+                type=openapi.TYPE_STRING,
+                required=True
+            )
+        ]
     )
     def by_phone_number(self, request):
         phone_number = request.query_params.get('phone_number', None)
@@ -160,8 +166,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'count': orders.count(), 'results': serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             logger.error(f"Error fetching orders: {e}")
-            return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+            return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)   
     
 def set_telegram_webhook():
     url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/setWebhook"
