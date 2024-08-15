@@ -146,7 +146,7 @@ export const FilterMenu = ({
                 </FilterDropDown>
                 <MainButton 
                     className={styles.saveButton}
-                    title="Зберегти"
+                    title={t("save")}
                     color="blue"
                     onClick = {onApply}
                 />
