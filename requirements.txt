@@ -41,7 +41,7 @@ django-rosetta==0.10.0
 django-storages==1.14.2
 django-svg-image-form-field==1.0.1
 django-templated-mail==1.1.1
-djangorestframework==3.15.2
+djangorestframework==3.15.1
 djangorestframework-simplejwt==5.3.1
 djoser==2.2.2
 drf-spectacular==0.27.2
