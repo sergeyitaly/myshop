@@ -57,6 +57,7 @@ class ProductList(generics.ListCreateAPIView):
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'price', 'sales_count', 'popularity']
 
+
 class ProductListFilter(generics.ListCreateAPIView):
     permission_classes = [AllowAny]
     pagination_class = CustomPageNumberPagination
