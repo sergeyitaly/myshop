@@ -76,7 +76,7 @@ export const useFilters = (initialCollection?: Collection) => {
 
         setFilter((state) => ({
             ...state, 
-            category: activeCategories.map(({name}) => name).join(','),
+            category: activeCategories.map(({id}) => id).join(','),
             collection: activeCollections.map(({id}) => id).join(','),
             price_min: activePriceValues[0],
             price_max: activePriceValues[1],
@@ -84,7 +84,6 @@ export const useFilters = (initialCollection?: Collection) => {
         }))
 
     }, [activeCategories, activePriceValues, activeCollections, sortBy])
-
 
 
     const changeCategory = (category: Category) => {
