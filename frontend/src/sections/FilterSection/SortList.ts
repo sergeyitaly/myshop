@@ -1,28 +1,33 @@
+import { useTranslation } from 'react-i18next';
 
-export interface SortMenuItem  {
-    title: string
-    name: string
+export interface SortMenuItem {
+  title: string;
+  name: string;
 }
 
-export const sortList: SortMenuItem[] = [
+export const useSortList = (): SortMenuItem[] => {
+  const { t } = useTranslation();
+
+  return [
     {
-        title: 'Від дорогого до дешевого',
-        name: 'price'
+      title: t('sort.price_descending'),
+      name: 'price'
     },
     {
-        title: 'Від дешевого до дорогого',
-        name: '-price'
+      title: t('sort.price_ascending'),
+      name: '-price'
     },
     {
-        title: 'Нові надходження',
-        name: 'sales_count'
+      title: t('sort.new_arrivals'),
+      name: 'sales_count'
     },
     {
-        title: 'Найпопулярніше',
-        name: 'popularity'
+      title: t('sort.most_popular'),
+      name: 'popularity'
     },
     {
-        title: 'Знижки',
-        name: '-discounted_price'
+      title: t('sort.discounts'),
+      name: '-discounted_price'
     },
-] 
+  ];
+};

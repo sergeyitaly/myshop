@@ -71,14 +71,14 @@ class ProductListFilter(generics.ListCreateAPIView):
         # Explicitly filter by collections if provided
         collection_ids = self.request.query_params.get('collection', None)
         if collection_ids:
-            collection_ids_list = [c for c in collection_ids.split(',') if c.isdigit()]
+            collection_ids_list = [int(c) for c in collection_ids.split(',') if c.isdigit()]
             if collection_ids_list:
                 queryset = queryset.filter(collection__id__in=collection_ids_list)
 
         # Explicitly filter by categories if provided
-        category_ids = self.request.query_params.getlist('category', None)
+        category_ids = self.request.query_params.get('category', None)
         if category_ids:
-            category_ids_list = [c for c in category_ids if c.isdigit()]
+            category_ids_list = [int(c) for c in category_ids.split(',') if c.isdigit()]
             if category_ids_list:
                 queryset = queryset.filter(collection__category__id__in=category_ids_list)
 
