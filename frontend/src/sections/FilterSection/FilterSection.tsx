@@ -13,7 +13,6 @@ import { Collection, Product } from '../../models/entities';
 import clsx from "clsx";
 import { useTranslation } from 'react-i18next';
 import { SortMenu } from "./SortMenu/SortMenu";
-import { sortList } from "./SortList";
 import { useToggler } from "../../hooks/useToggler";
 import { useState } from "react";
 
@@ -26,28 +25,27 @@ const getTranslatedProductName = (product: Product, language: string): string =>
     return language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
 };
 
-
 export const FilterSection = ({
     initialCollection
 }: FilterSectionProps) => {
 
     const LIMIT = 3;
 
-    const [currentPage, setCurrentPage] = useState<number>(1)
+    const [currentPage, setCurrentPage] = useState<number>(1);
+
+    const { t, i18n } = useTranslation();
 
     const {
         openStatus: open,
         handleOpen: handleOpenMenu,
         handleClose: handleCloseMenu
-    } = useToggler()
+    } = useToggler();
 
     const {
         openStatus: openSort,
-        handleClose:  handleClickOutsideSort,   
+        handleClose: handleClickOutsideSort,   
         handleOpen: handleClickSort
-    } = useToggler()
-
-    const { i18n } = useTranslation();
+    } = useToggler();
 
     const {
         tagList,
@@ -66,8 +64,6 @@ export const FilterSection = ({
         changeOrdering,
     } = useFilters(initialCollection);
 
-   
-
     const {
         data: productsResponse,
         isSuccess: isSuccessGettingProducts,
@@ -76,26 +72,44 @@ export const FilterSection = ({
         isError: isErrorWhenFetchingProducts
     } = useGetProductsByMainFilterQuery({...filter, page: currentPage, page_size: LIMIT});
 
-    let totalPages = 0
+    let totalPages = 0;
 
-    console.log(productsResponse);
-    
+    if (productsResponse) {
+        totalPages = Math.ceil(productsResponse.count / LIMIT);
+    }
 
-    if(productsResponse){
-      totalPages = Math.ceil(productsResponse.count / LIMIT)
-      console.log(totalPages);
-      
-    }
-   
-    const handleChangePage = (page: number ) => {
-        setCurrentPage(page)
-    }
+    const handleChangePage = (page: number) => {
+        setCurrentPage(page);
+    };
 
     const handleApply = () => {
-        applyChanges()
-        handleCloseMenu()
-    }
+        applyChanges();
+        handleCloseMenu();
+    };
 
+    // Define the sort menu items using translations
+    const sortList = [
+        {
+            title: t('sort.price_descending'),
+            name: 'price'
+        },
+        {
+            title: t('sort.price_ascending'),
+            name: '-price'
+        },
+        {
+            title: t('sort.new_arrivals'),
+            name: 'sales_count'
+        },
+        {
+            title: t('sort.most_popular'),
+            name: 'popularity'
+        },
+        {
+            title: t('sort.discounts'),
+            name: '-discounted_price'
+        },
+    ];
 
     return (
         <section className={clsx(styles.section, {
@@ -108,12 +122,12 @@ export const FilterSection = ({
                             <span />
                             :
                             <TextButton
-                                title={open ? 'Сховати' : 'Фільтри'}
+                                title={open ? t('filters.hide') : t('filters.show')}
                                 onClick={handleOpenMenu}
                             />
                     }
                     <TextButton
-                        title="Сортувати"
+                        title={t('sort.title')}
                         onClick={handleClickSort}
                     />
                     {
@@ -145,15 +159,17 @@ export const FilterSection = ({
                         <button
                             className={styles.clearButton}
                             onClick={clearAllFilters}
-                        >Очистити фільтри</button>
+                        >
+                            {t('filters.clear')}
+                        </button>
                     }
                 </div>
                 <PreviewItemsContainer
                     isLoading={isLoadingProducts}
                     itemsQtyWhenLoading={LIMIT}
                     isError={isErrorWhenFetchingProducts}
-                    textWhenError={'Виникла помилка :('}
-                    textWhenEmpty={'Поки що відсутні продукти за таким запитом'}
+                    textWhenError={t('products.error')}
+                    textWhenEmpty={t('products.empty')}
                 >
                     {
                         isSuccessGettingProducts &&
