@@ -2,10 +2,14 @@ import django_filters
 from django_filters.rest_framework import OrderingFilter
 from .models import Product
 
+class NumberInFilter(django_filters.BaseInFilter, django_filters.NumberFilter):
+    pass
+
+#was created to allow filtering by multiple numbers using in
 class ProductFilter(django_filters.FilterSet):
     # Filter products by category and collection
-    category_id = django_filters.NumberFilter(field_name='collection__category__id', lookup_expr='exact')
-    collection_id = django_filters.NumberFilter(field_name='collection__id', lookup_expr='exact')
+    category_id = NumberInFilter(field_name='collection__category__id', lookup_expr='in')
+    collection_id = NumberInFilter(field_name='collection__id', lookup_expr='in')
 
     # Filter by translated name fields
     name = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
