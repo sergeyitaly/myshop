@@ -3,6 +3,8 @@ import styles from './OrderItemCard.module.scss'
 import { Counter } from "../../Counter/Counter"
 import { formatPrice } from "../../../functions/formatPrice"
 import { AppImage } from "../../AppImage/AppImage"
+import { Plug } from "../../Plug/Plug"
+import { countDiscountPrice } from "../../../functions/countDiscountPrice"
 
 
 interface OrderItemCardProps {
@@ -37,6 +39,7 @@ export const OrderItemCard = ({
         onClickPhoto && onClickPhoto(product)
     } 
    
+    const discountPrice = product ? countDiscountPrice(product.price, product.discount) : null
 
     return (
         <div className={styles.card}>
@@ -49,13 +52,26 @@ export const OrderItemCard = ({
                     previewSrc={photo_thumbnail_url}
                     alt={name}
                 />
+                {
+                    discountPrice &&
+                    <Plug
+                        className={styles.plug}
+                    />
+                }
+              
             </button>
             <div className={styles.info}>
                 <div 
                     className={styles.title}
                     onClick={handleClickName}
                 >{name}</div>
-                <p className={styles.price}>{formatPrice(price, currency)}</p>
+                <div>
+                    <p className={styles.price}>{formatPrice(price, currency)}</p>
+                    {
+                        discountPrice && 
+                        <p className={styles.discountPrice}>{formatPrice(discountPrice, currency)}</p>
+                    }
+                </div>
 
                 <div className={styles.control}>
                     <Counter

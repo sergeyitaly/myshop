@@ -1,9 +1,10 @@
-import { formatCurrency } from "../../../functions/formatCurrency"
-import { formatNumber } from "../../../functions/formatNumber"
+import { countDiscountPrice } from "../../../functions/countDiscountPrice"
+import { formatPrice } from "../../../functions/formatPrice"
 import { Color, Product } from "../../../models/entities"
 import { AppImage } from "../../AppImage/AppImage"
 import { AvailableLable } from "../../AvailableLabel/AvailableLabel"
 import { Counter } from "../../Counter/Counter"
+import { Plug } from "../../Plug/Plug"
 import { ProductVariants } from "../../ProductVariants/ProductVariants"
 import { ValueBox } from "../../ProductVariants/ValueBox/ValueBox"
 import { IconButton } from "../../UI/IconButton/IconButton"
@@ -51,6 +52,7 @@ export const BasketItem = ({
         onChangeCounter && onChangeCounter(product, value)
     }
 
+    const discountPrice = product ? countDiscountPrice(product.price, product.discount) : null
 
     return (
         <div className={styles.container}>
@@ -62,6 +64,9 @@ export const BasketItem = ({
                     src={photo}
                     previewSrc={photo_thumbnail_url}
                     alt={name}
+                />
+                <Plug
+                    className={styles.plug}
                 />
             </button>
             <div className={styles.info}>
@@ -110,7 +115,11 @@ export const BasketItem = ({
                     isAvailable = {available}
                 />
                 <div className={styles.control}>
-                    <span>{formatNumber(price) } {formatCurrency(currency)}</span>
+                    <p>{formatPrice(price, currency)}</p>
+                    {
+                        discountPrice && 
+                        <p className={styles.discountPrice}>{formatPrice(discountPrice, currency)}</p>
+                    }
                 </div>
             </div>
         </div> 

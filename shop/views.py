@@ -10,10 +10,11 @@ from django_filters import FilterSet, NumberFilter
 from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer
 from .models import Product, Collection, Category
 from .filters import ProductFilter
-from django.db.models import Min, Max
-from django.db.models import F, FloatField, ExpressionWrapper, Min, Max
+from django.db.models import F, FloatField, ExpressionWrapper, Min, Max, Q
 from django.core.cache import cache
-
+from rest_framework import generics, permissions
+from .models import AdditionalField
+from .serializers import AdditionalFieldSerializer
 
 class CustomPageNumberPagination(PageNumberPagination):
     default_page_size = 4
@@ -53,21 +54,42 @@ class ProductList(generics.ListCreateAPIView):
     permission_classes = [AllowAny]
     pagination_class = CustomPageNumberPagination  # Use custom pagination for products
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_class = ProductFilter
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'price', 'sales_count', 'popularity']
 
 
 class ProductListFilter(generics.ListCreateAPIView):
-    search_fields = ['name', 'description']
     permission_classes = [AllowAny]
     pagination_class = CustomPageNumberPagination
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     filterset_class = ProductFilter
+    search_fields = ['name', 'description']
 
     def get_queryset(self):
         queryset = Product.objects.all()
+
+        # Explicitly filter by collections if provided
+        collection_ids = self.request.query_params.get('collection', None)
+        if collection_ids:
+            collection_ids_list = [int(c) for c in collection_ids.split(',') if c.isdigit()]
+            if collection_ids_list:
+                queryset = queryset.filter(collection__id__in=collection_ids_list)
+
+        # Explicitly filter by categories if provided
+        category_ids = self.request.query_params.get('category', None)
+        if category_ids:
+            category_ids_list = [int(c) for c in category_ids.split(',') if c.isdigit()]
+            if category_ids_list:
+                queryset = queryset.filter(collection__category__id__in=category_ids_list)
+
+        # Apply price range filter if provided
+        price_min = self.request.query_params.get('price_min', None)
+        price_max = self.request.query_params.get('price_max', None)
+        if price_min and price_min.isdigit():
+            queryset = queryset.filter(price__gte=float(price_min))
+        if price_max and price_max.isdigit():
+            queryset = queryset.filter(price__lte=float(price_max))
 
         # Annotate discounted_price
         queryset = queryset.annotate(
@@ -76,27 +98,31 @@ class ProductListFilter(generics.ListCreateAPIView):
                 output_field=FloatField()
             )
         )
-        filterset = self.filterset_class(self.request.GET, queryset=queryset)
-        queryset = filterset.qs
 
-        # Apply filtering based on the ordering parameter
+        # Apply additional filters from filterset_class
+        queryset = self.filterset_class(self.request.GET, queryset=queryset).qs
+
+        # Handle ordering based on query parameters
         ordering = self.request.query_params.get('ordering', None)
         if ordering:
-            # Split the ordering fields by comma
             ordering_fields = ordering.split(',')
-            for field in ordering_fields:
-                if field == 'discounted_price':
-                    queryset = queryset.filter(discount__gt=0).order_by('discounted_price')
-                elif field == '-discounted_price':
-                    queryset = queryset.filter(discount__gt=0).order_by('-discounted_price')
-                elif field == 'price':
-                    queryset = queryset.order_by('discounted_price')  # Use discounted_price for sorting
-                elif field == '-price':
-                    queryset = queryset.order_by('-discounted_price')  # Use discounted_price for sorting
-                else:
-                    queryset = queryset.order_by(field)
+            order_by_fields = []
 
-        return queryset     
+            for field in ordering_fields:
+                if field in ['discounted_price', '-discounted_price']:
+                    order_by_fields.append(field)
+                elif field == 'price':
+                    order_by_fields.append('discounted_price')
+                elif field == '-price':
+                    order_by_fields.append('-discounted_price')
+                else:
+                    order_by_fields.append(field)
+
+            if order_by_fields:
+                queryset = queryset.order_by(*order_by_fields)
+
+        return queryset
+ 
 
 class CollectionItemsFilterPage(generics.ListAPIView):
     serializer_class = ProductSerializer
@@ -229,3 +255,17 @@ class ProductView(APIView):
         product = self.get_object(pk)
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class AdditionalFieldListCreateView(generics.ListCreateAPIView):
+    queryset = AdditionalField.objects.all()
+    serializer_class = AdditionalFieldSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+
+class AdditionalFieldDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = AdditionalField.objects.all()
+    serializer_class = AdditionalFieldSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]

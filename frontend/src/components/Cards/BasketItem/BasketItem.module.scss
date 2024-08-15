@@ -19,10 +19,18 @@
 
 
 .imgWrapper {
+    position: relative;
     align-self: self-start;
     max-width: 156px;
     min-width: 100px;
     width: 100%;
+
+    .plug {
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        padding: 4px 10px;
+    }
 }
 
 .image {
@@ -59,9 +67,7 @@
 }
 
 .control {
-    display: flex;
-    justify-content: space-between;
-    span {
+    p {
         font-size: clamp(1rem, 0.426vw + 0.867rem, 1.25rem);
         font-weight: 500;
     }
@@ -93,3 +99,9 @@
     text-decoration: none;
     cursor: pointer;
 }
+
+.discountPrice {
+    color: $color-gray-200;
+    text-decoration: line-through;
+}
+

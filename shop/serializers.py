@@ -49,6 +49,18 @@ class ProductImageSerializer(serializers.ModelSerializer):
         model = ProductImage
         fields = ['id', 'images', 'images_thumbnail_url']
 
+class AdditionalFieldSerializer(serializers.ModelSerializer):
+    name = serializers.CharField()
+    name_en = serializers.CharField(required=False)
+    name_uk = serializers.CharField(required=False)
+    value = serializers.CharField()
+    value_en = serializers.CharField(required=False)
+    value_uk = serializers.CharField(required=False)
+
+    class Meta:
+        model = AdditionalField
+        fields = '__all__'
+
 class ProductSerializer(serializers.ModelSerializer):
     photo_url = serializers.SerializerMethodField()
     photo_thumbnail_url = serializers.SerializerMethodField()
@@ -64,6 +76,8 @@ class ProductSerializer(serializers.ModelSerializer):
     color_name = serializers.CharField(required=False)
     color_name_en = serializers.CharField(required=False)
     color_name_uk = serializers.CharField(required=False)
+    additional_fields = AdditionalFieldSerializer(many=True, read_only=True)
+
 
     def get_photo_url(self, obj):
         if obj.photo:
@@ -79,17 +93,3 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
 
-class AdditionalFieldSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(required=False, allow_null=True)
-    collection = CollectionSerializer(required=False, allow_null=True)
-    product = ProductSerializer(required=False, allow_null=True)
-    name = serializers.CharField()
-    name_en = serializers.CharField(required=False)
-    name_uk = serializers.CharField(required=False)
-    value = serializers.CharField()
-    value_en = serializers.CharField(required=False)
-    value_uk = serializers.CharField(required=False)
-
-    class Meta:
-        model = AdditionalField
-        fields = '__all__'

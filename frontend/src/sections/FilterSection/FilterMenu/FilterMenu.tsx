@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"; // Import the useTranslation hook
 import { Category, Collection } from "../../../models/entities";
-import { useGetAllCategoriesQuery } from "../../../api/categorySlice";
+import { useGetCategoriesByFilterQuery } from "../../../api/categorySlice";
 import { useGetCollectionsByFilterQuery } from "../../../api/collectionSlice";
 import { TextButton } from "../../../components/UI/TextButton/TextButton";
 import { FilterDropDown } from "../FilterDropDown/FilterDropDown";
@@ -40,7 +40,9 @@ export const FilterMenu = ({
 }: FilterMenuProps) => {
     const { i18n, t } = useTranslation(); // Initialize translation hook
 
-    const { data: categories, isSuccess: isSuccessCategories } = useGetAllCategoriesQuery();
+    const { data: categories, isSuccess: isSuccessCategories } = useGetCategoriesByFilterQuery({
+        page_size: 100,
+    });
     const { data: collections, isSuccess: isSuccessCollections } =
         useGetCollectionsByFilterQuery({
             page_size: 100,
@@ -146,7 +148,7 @@ export const FilterMenu = ({
                 </FilterDropDown>
                 <MainButton 
                     className={styles.saveButton}
-                    title="Зберегти"
+                    title={t("save")}
                     color="blue"
                     onClick = {onApply}
                 />
