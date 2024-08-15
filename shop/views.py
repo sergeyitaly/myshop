@@ -13,7 +13,9 @@ from .filters import ProductFilter
 from django.db.models import Min, Max
 from django.db.models import F, FloatField, ExpressionWrapper, Min, Max
 from django.core.cache import cache
-
+from rest_framework import generics, permissions
+from .models import AdditionalField
+from .serializers import AdditionalFieldSerializer
 
 class CustomPageNumberPagination(PageNumberPagination):
     default_page_size = 4
@@ -68,10 +70,17 @@ class ProductListFilter(generics.ListCreateAPIView):
     def get_queryset(self):
         queryset = Product.objects.all()
 
-        # Explicitly filter by collection if the parameter is provided
-        collection_id = self.request.query_params.get('collection', None)
-        if collection_id:
-            queryset = queryset.filter(collection_id=collection_id)
+        # Explicitly filter by multiple collections and categories if provided
+        collection_ids = self.request.query_params.get('collection', None)
+        if collection_ids:
+            collection_ids_list = collection_ids.split(',')
+            queryset = queryset.filter(collection_id__in=collection_ids_list)
+
+        category_ids = self.request.query_params.getlist('category', None)
+
+        if category_ids:
+            category_ids_list = category_ids.split(',')
+            queryset = queryset.filter(collection__category__id__in=category_ids_list)
 
         # Annotate discounted_price only if a discount exists
         queryset = queryset.annotate(
@@ -240,3 +249,17 @@ class ProductView(APIView):
         product = self.get_object(pk)
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class AdditionalFieldListCreateView(generics.ListCreateAPIView):
+    queryset = AdditionalField.objects.all()
+    serializer_class = AdditionalFieldSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+
+class AdditionalFieldDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = AdditionalField.objects.all()
+    serializer_class = AdditionalFieldSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
