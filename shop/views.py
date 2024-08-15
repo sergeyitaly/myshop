@@ -10,8 +10,7 @@ from django_filters import FilterSet, NumberFilter
 from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer
 from .models import Product, Collection, Category
 from .filters import ProductFilter
-from django.db.models import Min, Max
-from django.db.models import F, FloatField, ExpressionWrapper, Min, Max
+from django.db.models import F, FloatField, ExpressionWrapper, Min, Max, Q
 from django.core.cache import cache
 from rest_framework import generics, permissions
 from .models import AdditionalField
@@ -72,14 +71,24 @@ class ProductListFilter(generics.ListCreateAPIView):
         # Explicitly filter by collections if provided
         collection_ids = self.request.query_params.get('collection', None)
         if collection_ids:
-            collection_ids_list = collection_ids.split(',')
-            queryset = queryset.filter(collection__id__in=collection_ids_list)
+            collection_ids_list = [c for c in collection_ids.split(',') if c.isdigit()]
+            if collection_ids_list:
+                queryset = queryset.filter(collection__id__in=collection_ids_list)
 
         # Explicitly filter by categories if provided
         category_ids = self.request.query_params.getlist('category', None)
         if category_ids:
-            category_ids_list = [str(category_id) for category_id in category_ids]
-            queryset = queryset.filter(collection__category__id__in=category_ids_list)
+            category_ids_list = [c for c in category_ids if c.isdigit()]
+            if category_ids_list:
+                queryset = queryset.filter(collection__category__id__in=category_ids_list)
+
+        # Apply price range filter if provided
+        price_min = self.request.query_params.get('price_min', None)
+        price_max = self.request.query_params.get('price_max', None)
+        if price_min and price_min.isdigit():
+            queryset = queryset.filter(price__gte=float(price_min))
+        if price_max and price_max.isdigit():
+            queryset = queryset.filter(price__lte=float(price_max))
 
         # Annotate discounted_price
         queryset = queryset.annotate(
@@ -90,8 +99,7 @@ class ProductListFilter(generics.ListCreateAPIView):
         )
 
         # Apply additional filters from filterset_class
-        filterset = self.filterset_class(self.request.GET, queryset=queryset)
-        queryset = filterset.qs
+        queryset = self.filterset_class(self.request.GET, queryset=queryset).qs
 
         # Handle ordering based on query parameters
         ordering = self.request.query_params.get('ordering', None)
