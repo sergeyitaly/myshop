@@ -1,12 +1,15 @@
-import { Currency } from "../models/entities";
 
-export const formatCurrency = (input: Currency) => {
-    switch(input){
-        case 'UAH': 
-        // return '₴'
-        return 'грн'
-        case 'EUR': return '€'
-        case 'USD': return '$'
-        default: return ''
+import { Currency } from '../models/entities';
+
+export const formatCurrency = (currency: Currency): string => {
+    switch (currency) {
+        case 'UAH':
+            return '₴'; // Ukrainian Hryvnia symbol
+        case 'USD':
+            return '$'; // US Dollar symbol
+        case 'EUR':
+            return '€'; // Euro symbol
+        default:
+            return '$'; // Default to US Dollar symbol
     }
-}
+};
