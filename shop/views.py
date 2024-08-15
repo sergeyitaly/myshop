@@ -70,17 +70,17 @@ class ProductListFilter(generics.ListCreateAPIView):
     def get_queryset(self):
         queryset = Product.objects.all()
 
-        # Explicitly filter by multiple collections and categories if provided
-        collection_ids = self.request.query_params.get('collection', None)
-        if collection_ids:
-            collection_ids_list = collection_ids.split(',')
-            queryset = queryset.filter(collection_id__in=collection_ids_list)
+        # Handle multiple collection IDs passed as comma-separated values
+        collection_param = self.request.query_params.get('collection', None)
+        if collection_param:
+            collection_ids = collection_param.split(',')
+            queryset = queryset.filter(collection_id__in=collection_ids)
 
-        category_ids = self.request.query_params.getlist('category', None)
-
-        if category_ids:
-            category_ids_list = category_ids.split(',')
-            queryset = queryset.filter(collection__category__id__in=category_ids_list)
+        # Handle multiple category IDs passed as comma-separated values
+        category_param = self.request.query_params.get('category', None)
+        if category_param:
+            category_ids = category_param.split(',')
+            queryset = queryset.filter(collection__category_id__in=category_ids)
 
         # Annotate discounted_price only if a discount exists
         queryset = queryset.annotate(
@@ -93,8 +93,6 @@ class ProductListFilter(generics.ListCreateAPIView):
         # Apply additional filters
         filterset = self.filterset_class(self.request.GET, queryset=queryset)
         queryset = filterset.qs
-        #print("Filtered Queryset:", queryset.query, filterset.filters)
-
         # Handle ordering based on query parameters
         ordering = self.request.query_params.get('ordering', None)
         if ordering:
