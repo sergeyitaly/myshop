@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     OrderViewSet, TelegramUserViewSet, OrderSummaryViewSet, 
-    create_order, get_order, get_orders, get_order_summary, 
+    create_order, get_order, get_orders, #get_order_summary, 
     update_order, telegram_webhook, health_check
 )
 
@@ -19,8 +19,8 @@ urlpatterns = [
     path('order/', create_order, name='create_order'),
     path('order/<int:order_id>/', get_order, name='get_order'),
     path('orders/', get_orders, name='get_orders'),
-    path('order_summary/', get_order_summary, name='get_order_summary'),
-    path('update_order_summary/', update_order, name='update_order_summary'),  # Add this line for update_order_summary
+   # path('order_summary/', get_order_summary, name='get_order_summary'),
+ #   path('update_order_summary/', update_order, name='update_order_summary'),  # Add this line for update_order_summary
     path('telegram_webhook/', telegram_webhook, name='telegram_webhook'),
     path('health_check/', health_check, name='health_check'),
 ]

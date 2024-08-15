@@ -9,6 +9,7 @@ from django.core.cache import cache
 from .models import Order, OrderSummary
 from .serializers import OrderSerializer
 from datetime import datetime
+from .shared_utils import get_random_saying
 
 logger = logging.getLogger(__name__)
 
