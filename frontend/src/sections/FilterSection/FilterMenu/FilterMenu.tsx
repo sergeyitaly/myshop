@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"; // Import the useTranslation hook
 import { Category, Collection } from "../../../models/entities";
-import { useGetAllCategoriesQuery, useGetCategoriesByFilterQuery } from "../../../api/categorySlice";
+import { useGetCategoriesByFilterQuery } from "../../../api/categorySlice";
 import { useGetCollectionsByFilterQuery } from "../../../api/collectionSlice";
 import { TextButton } from "../../../components/UI/TextButton/TextButton";
 import { FilterDropDown } from "../FilterDropDown/FilterDropDown";
