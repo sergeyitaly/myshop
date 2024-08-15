@@ -96,23 +96,23 @@ def update_order_summary_for_phone(phone_number):
         logger.error(f"Failed to update order summary for phone number: {phone_number}")
 
 
-def get_random_saying(file_path):
-    if not os.path.exists(file_path):
-        logger.error(f"Failed to read sayings file: [Errno 2] No such file or directory: '{file_path}'")
-        return "No sayings available."
-    
-    try:
-        with open(file_path, 'r', encoding='utf-8') as file:
-            sayings = [line.strip() for line in file if line.strip()]
-        
-        if not sayings:
-            logger.error("Sayings file is empty.")
-            return "No sayings available."
-        
-        return random.choice(sayings)
-    except Exception as e:
-        logger.error(f"Error reading sayings file: {e}")
-        return "No sayings available."
+#def get_random_saying(file_path):
+#    if not os.path.exists(file_path):
+#        logger.error(f"Failed to read sayings file: [Errno 2] No such file or directory: '{file_path}'")
+#        return "No sayings available."
+#    
+#    try:
+#        with open(file_path, 'r', encoding='utf-8') as file:
+#            sayings = [line.strip() for line in file if line.strip()]
+#        
+#        if not sayings:
+#            logger.error("Sayings file is empty.")
+#            return "No sayings available."
+#        
+#        return random.choice(sayings)
+#    except Exception as e:
+#        logger.error(f"Error reading sayings file: {e}")
+#        return "No sayings available."
 
 @receiver(post_save, sender=Order)
 def update_order_summary(sender, instance, **kwargs):
@@ -182,28 +182,28 @@ def update_order_summary_on_order_item_delete(sender, instance, **kwargs):
             update_order_summary_for_chat_id(chat_id)
             logger.debug(f"OrderItem deleted for Order ID: {order.id}, updating summary for chat_id: {chat_id}")
 
-def update_order_summary_for_chat_id(chat_id):
-    try:
-        orders = Order.objects.filter(telegram_user__chat_id=chat_id)
-        summary = []
-        for order in orders:
-            serializer = OrderSerializer(order)
-            order_data = serializer.data
-            summary.append({
-                'order_id': order.id,
-                'order_items': order_data['order_items'],
-                'submitted_at': order.submitted_at.strftime('%Y-%m-%d %H:%M') if order.submitted_at else None,
-                'created_at': order.created_at.strftime('%Y-%m-%d %H:%M') if order.created_at else None,
-                'processed_at': order.processed_at.strftime('%Y-%m-%d %H:%M') if order.processed_at else None,
-                'complete_at': order.complete_at.strftime('%Y-%m-%d %H:%M') if order.complete_at else None,
-                'canceled_at': order.canceled_at.strftime('%Y-%m-%d %H:%M') if order.canceled_at else None,
-            })
-
-        OrderSummary.objects.update_or_create(
-            chat_id=chat_id,
-            defaults={'orders': summary}
-        )
-        logger.info(f'Order summary updated for chat ID {chat_id}')
-    
-    except Exception as e:
-        logger.error(f'Error updating order summary for chat ID {chat_id}: {e}')
+#def update_order_summary_for_chat_id(chat_id):
+#    try:
+#        orders = Order.objects.filter(telegram_user__chat_id=chat_id)
+#        summary = []
+#        for order in orders:
+#            serializer = OrderSerializer(order)
+#            order_data = serializer.data
+#            summary.append({
+#                'order_id': order.id,
+#                'order_items': order_data['order_items'],
+#                'submitted_at': order.submitted_at.strftime('%Y-%m-%d %H:%M') if order.submitted_at else None,
+#                'created_at': order.created_at.strftime('%Y-%m-%d %H:%M') if order.created_at else None,
+#                'processed_at': order.processed_at.strftime('%Y-%m-%d %H:%M') if order.processed_at else None,
+#                'complete_at': order.complete_at.strftime('%Y-%m-%d %H:%M') if order.complete_at else None,
+#                'canceled_at': order.canceled_at.strftime('%Y-%m-%d %H:%M') if order.canceled_at else None,
+#            })
+#
+#        OrderSummary.objects.update_or_create(
+#            chat_id=chat_id,
+#            defaults={'orders': summary}
+#        )
+#        logger.info(f'Order summary updated for chat ID {chat_id}')
+#    
+#    except Exception as e:
+#        logger.error(f'Error updating order summary for chat ID {chat_id}: {e}')

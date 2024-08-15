@@ -1,4 +1,4 @@
-export type Currency = 'UAH' | 'USD' | 'EUR'
+export type Currency = 'UAH' | 'USD' | 'EUR';
 
 export interface AdditionalField {
     name: string
@@ -7,7 +7,7 @@ export interface AdditionalField {
 
 export interface Product {
     id: number,
-    collection?: Collection; // Corrected from сollection to collection
+    collection?: Collection; 
     images: ProductImage[],
     photo: string | null,
     photo_url: string | null,

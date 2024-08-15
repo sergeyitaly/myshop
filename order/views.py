@@ -110,24 +110,6 @@ class TelegramUserViewSet(viewsets.ModelViewSet):
                 order.save(update_fields=['telegram_user'])
 
 
-@api_view(['POST'])
-def update_order(request):
-    chat_id = request.data.get('chat_id')
-    orders = request.data.get('orders')
-
-    if not chat_id:
-        return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-    try:
-        order_summary = OrderSummary.objects.get(chat_id=chat_id)
-        order_summary.orders = orders
-        order_summary.save()
-        
-        return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
-    except OrderSummary.DoesNotExist:
-        return Response({"error": "Order summary not found."}, status=status.HTTP_404_NOT_FOUND)
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class OrderItemViewSet(viewsets.ModelViewSet):
@@ -135,29 +117,27 @@ class OrderItemViewSet(viewsets.ModelViewSet):
     serializer_class = OrderItemSerializer
     permission_classes = [IsAuthenticated]  # Ensure this matches your settings
 
+
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
-        operation_description="Retrieve an order by ID",
-        responses={200: OrderSerializer, 404: 'Not Found'}
+        operation_description="Retrieve an order by ID"
     )
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        operation_description="Delete an order by ID",
-        responses={204: 'No Content', 404: 'Not Found'}
+        operation_description="Delete an order by ID"
     )
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
 
     @swagger_auto_schema(
         operation_description="Partially update an order by ID",
-        request_body=OrderSerializer,
-        responses={200: OrderSerializer, 400: 'Bad Request', 404: 'Not Found'}
+        request_body=OrderSerializer
     )
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
@@ -165,7 +145,15 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     @swagger_auto_schema(
         operation_description="Retrieve orders by phone number",
-        responses={200: OrderSerializer(many=True), 400: 'Bad Request'}
+        manual_parameters=[
+            openapi.Parameter(
+                'phone_number',
+                openapi.IN_QUERY,
+                description="Phone number to filter orders",
+                type=openapi.TYPE_STRING,
+                required=True
+            )
+        ]
     )
     def by_phone_number(self, request):
         phone_number = request.query_params.get('phone_number', None)
@@ -178,8 +166,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'count': orders.count(), 'results': serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
             logger.error(f"Error fetching orders: {e}")
-            return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+            return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)   
     
 def set_telegram_webhook():
     url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/setWebhook"
@@ -373,44 +360,63 @@ def get_orders(request):
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_order_summary(request):
-    chat_id = request.query_params.get('chat_id')
-    
-    if not chat_id:
-        return Response({'error': 'Chat ID is required.'}, status=400)
-
-    try:
-        summary = OrderSummary.objects.get(chat_id=chat_id)
-        serializer = OrderSummarySerializer(summary)
-        return Response(serializer.data)
-    except OrderSummary.DoesNotExist:
-        return Response({'error': 'No orders found for this chat ID.'}, status=404)
-    except Exception as e:
-        return Response({'error': str(e)}, status=500)
-    
-
 @api_view(['POST'])
-@permission_classes([AllowAny])
-def update_order_summary(request):
+def update_order(request):
     chat_id = request.data.get('chat_id')
-    orders = request.data.get('orders', {})  # Ensure orders defaults to an empty dict
+    orders = request.data.get('orders')
 
     if not chat_id:
         return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Log the incoming data
-    logger.info(f"Updating OrderSummary: chat_id={chat_id}, orders={orders}")
-
     try:
-        order_summary, created = OrderSummary.objects.get_or_create(chat_id=chat_id)
+        order_summary = OrderSummary.objects.get(chat_id=chat_id)
         order_summary.orders = orders
         order_summary.save()
-
+        
         return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
+    except OrderSummary.DoesNotExist:
+        return Response({"error": "Order summary not found."}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
-        logger.error(f"Error updating OrderSummary: {e}")
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+#@api_view(['GET'])
+#@permission_classes([IsAuthenticated])
+#def get_order_summary(request):
+#    chat_id = request.query_params.get('chat_id')
+    
+#    if not chat_id:
+#        return Response({'error': 'Chat ID is required.'}, status=400)
+
+#    try:
+#        summary = OrderSummary.objects.get(chat_id=chat_id)
+#        serializer = OrderSummarySerializer(summary)
+#        return Response(serializer.data)
+#   except OrderSummary.DoesNotExist:
+#        return Response({'error': 'No orders found for this chat ID.'}, status=404)
+#    except Exception as e:
+#        return Response({'error': str(e)}, status=500)
+    
+
+#@api_view(['POST'])
+#@permission_classes([AllowAny])
+#def update_order_summary(request):
+#    chat_id = request.data.get('chat_id')
+#    orders = request.data.get('orders', {})  # Ensure orders defaults to an empty dict
+
+#    if not chat_id:
+#        return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Log the incoming data
+#    logger.info(f"Updating OrderSummary: chat_id={chat_id}, orders={orders}")
+
+#    try:
+#        order_summary, created = OrderSummary.objects.get_or_create(chat_id=chat_id)
+#        order_summary.orders = orders
+#        order_summary.save()
+
+#        return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
+#    except Exception as e:
+#        logger.error(f"Error updating OrderSummary: {e}")
+#        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 

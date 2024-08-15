@@ -67,7 +67,7 @@ class Collection(models.Model):
     )
 
     name = models.CharField(max_length=255, verbose_name=_('Collection'))
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name=_('Category'))
+    category = models.ForeignKey(Category,null=True, blank=True, on_delete=models.CASCADE, verbose_name=_('Category'))
     created = models.DateTimeField(auto_now_add=True, verbose_name=_('created'))
     updated = models.DateTimeField(auto_now=True, verbose_name=_('updated'))
     sales_count = models.PositiveIntegerField(default=0, verbose_name=_('Sales count'))
@@ -99,6 +99,7 @@ class AdditionalField(models.Model):
     name = models.CharField(max_length=255, verbose_name=_('name'))
     value = models.TextField(verbose_name=_('value'))
     product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='additional_fields')
+
 
     def __str__(self):
         return f"{self.name} - {self.value}"
