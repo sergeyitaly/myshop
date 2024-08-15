@@ -16,7 +16,6 @@ export interface Product {
     name: string,
     name_en?: string,
     name_uk?: string,
-    discount: string
     description: string | null,
     price: string,
     discount: string,

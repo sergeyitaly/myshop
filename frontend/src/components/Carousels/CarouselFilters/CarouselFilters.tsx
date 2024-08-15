@@ -29,7 +29,6 @@ interface Collection {
     photo: string | null;
     photo_thumbnail_url: string | null;
     name: string;
-    // Коллекция может не иметь свойства discount, price, currency
 }
 
 type DisplayedItem = Product | Collection;
@@ -57,7 +56,7 @@ function CarouselFilters() {
     const navigate = useNavigate();
 
     const { data: collectionsData, isLoading: isLoadingCollections } = useGetAllCollectionsQuery();
-    const { data: popularProductsData } = useGetProductsByPopularityQuery({ popularity: '4' });
+    const { data: popularProductsData } = useGetProductsByPopularityQuery({ popularity: '6' });
     const { data: discountProductsData } = useGetDiscountProductsQuery();
 
     const collections: Collection[] = collectionsData?.results || [];
