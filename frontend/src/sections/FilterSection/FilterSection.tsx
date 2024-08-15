@@ -91,11 +91,11 @@ export const FilterSection = ({
     const sortList = [
         {
             title: t('sort.price_descending'),
-            name: 'price'
+            name: '-price'
         },
         {
             title: t('sort.price_ascending'),
-            name: '-price'
+            name: 'price'
         },
         {
             title: t('sort.new_arrivals'),
@@ -107,7 +107,7 @@ export const FilterSection = ({
         },
         {
             title: t('sort.discounts'),
-            name: '-discounted_price'
+            name: 'discounted_price'
         },
     ];
 
