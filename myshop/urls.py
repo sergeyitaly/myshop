@@ -23,7 +23,18 @@ from dotenv import load_dotenv
 from drf_spectacular.views import SpectacularRedocView
 
 load_dotenv()
-
+schema_view = get_schema_view(
+    openapi.Info(
+        title="KOLORYT API",
+        default_version='v1',
+        description="Test description",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="contact@snippets.local"),
+        license=openapi.License(name="BSD License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
 urlpatterns = [
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
