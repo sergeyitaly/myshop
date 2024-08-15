@@ -78,7 +78,8 @@
     "show": "Show Filters",
     "hide": "Hide Filters",
     "clear": "Clear Filters"
-  }
+  },
+  "save" :"Save"
         
 
 }
