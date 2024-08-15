@@ -8,7 +8,15 @@
 }
 
 .imageBox {
+    position: relative;
     flex-basis: 164px;
+
+    .plug {
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        padding: 4px 10px;
+    }
 }
 
 .imageWrapper {
@@ -58,6 +66,11 @@
 
 .price {
     font-weight: 500;
+}
+
+.discountPrice {
+    color: $color-gray-200;
+    text-decoration: line-through;
 }
 
 .available {

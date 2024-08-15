@@ -7,7 +7,7 @@ interface PlugProps {
 }
 
 export const Plug = ({
-    title = 'Sale',
+    title = 'sale',
     className
 }: PlugProps) => {
     return (

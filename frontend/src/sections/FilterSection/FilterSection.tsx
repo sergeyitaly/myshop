@@ -15,6 +15,8 @@ import { useTranslation } from 'react-i18next';
 import { SortMenu } from "./SortMenu/SortMenu";
 import { useToggler } from "../../hooks/useToggler";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ROUTE } from "../../constants";
 
 interface FilterSectionProps {
     initialCollection?: Collection;
@@ -29,7 +31,10 @@ export const FilterSection = ({
     initialCollection
 }: FilterSectionProps) => {
 
-    const LIMIT = 3;
+    const LIMIT = 4;
+
+
+    const navigate = useNavigate()
 
     const [currentPage, setCurrentPage] = useState<number>(1);
 
@@ -72,7 +77,8 @@ export const FilterSection = ({
         isError: isErrorWhenFetchingProducts
     } = useGetProductsByMainFilterQuery({...filter, page: currentPage, page_size: LIMIT});
 
-    let totalPages = 0;
+    let totalPages = 0
+
 
     if (productsResponse) {
         totalPages = Math.ceil(productsResponse.count / LIMIT);
@@ -179,12 +185,14 @@ export const FilterSection = ({
                             return (
                                 <PreviewCard
                                     key={id}
+                                    subTitle={product.collection?.category?.name}
                                     photoSrc={photo_url}
                                     previewSrc={photo_thumbnail_url}
                                     title={getTranslatedProductName(product, i18n.language)}
                                     discount={discount}
                                     currency={currency}
                                     price={price}
+                                    onClick={() => navigate(`${ROUTE.PRODUCT}${id}`)}
                                 />
                             );
                         })
