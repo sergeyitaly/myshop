@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next"; // Import the useTranslation hook
 import { Category, Collection } from "../../../models/entities";
 import { useGetAllCategoriesQuery } from "../../../api/categorySlice";
+import { useGetCollectionsByFilterQuery } from "../../../api/collectionSlice";
 import { TextButton } from "../../../components/UI/TextButton/TextButton";
 import { FilterDropDown } from "../FilterDropDown/FilterDropDown";
 import { FilterItem } from "../FilterItem/FilterItem";
@@ -25,18 +26,25 @@ interface FilterMenuProps {
 }
 
 export const FilterMenu = ({
+    showCollections,
     activeCategories = [],
+    activeCollections = [],
     minValue,
     maxValue,
     priceValue,
     changePrice,
     onClickHideFilters,
+    onClickCollection,
     onClickCategory,
     onApply,
 }: FilterMenuProps) => {
     const { i18n, t } = useTranslation(); // Initialize translation hook
 
     const { data: categories, isSuccess: isSuccessCategories } = useGetAllCategoriesQuery();
+    const { data: collections, isSuccess: isSuccessCollections } =
+        useGetCollectionsByFilterQuery({
+            page_size: 100,
+        });
 
     // Function to get translated category name
     const getCategoryName = (category: Category): string => {
@@ -47,6 +55,18 @@ export const FilterMenu = ({
                 return category.name_en || category.name || '';
             default:
                 return category.name_en || category.name || '';
+        }
+    };
+
+    // Function to get translated collection name
+    const getCollectionName = (collection: Collection): string => {
+        switch (i18n.language) {
+            case 'uk':
+                return collection.name_uk || collection.name || '';
+            case 'en':
+                return collection.name_en || collection.name || '';
+            default:
+                return collection.name_en || collection.name || '';
         }
     };
 
@@ -66,7 +86,31 @@ export const FilterMenu = ({
                 />
             </header>
             <div className={styles.container}>
+                {showCollections && (
+                    <FilterDropDown
+                        title={t("collections")} // Localized text
+                    >
+                        <div className={styles.categoryList}>
+                            {isSuccessCollections &&
+                                collections.results.map((collection) => {
+                                    const isActive = activeCollections.some(
+                                        ({ id }) => id === collection.id
+                                    );
 
+                                    return (
+                                        <FilterItem
+                                            key={collection.id}
+                                            title={getCollectionName(collection)} // Use the function to get the collection name
+                                            isActive={isActive}
+                                            onClick={() =>
+                                                onClickCollection(collection)
+                                            }
+                                        />
+                                    );
+                                })}
+                        </div>
+                    </FilterDropDown>
+                )}
                 <FilterDropDown
                     title={t("category")} // Localized text
                 >
