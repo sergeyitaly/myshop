@@ -31,8 +31,6 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 script {
-                    echo "Building frontend..."
-                    docker.image('node:16').inside {
                         dir('frontend') {
                         sh 'docker --version'
                         sh 'docker pull node:18'
@@ -40,7 +38,6 @@ pipeline {
                     }
                 }
             }
-        }
 
         stage('Build Docker Image') {
             steps {
