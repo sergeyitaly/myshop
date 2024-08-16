@@ -2,7 +2,9 @@ pipeline {
     agent any
 
     environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         GITHUB_CREDENTIALS = credentials('github-credentials-id')
+        ENV_FILE = credentials('87f7447d-f83f-4552-a88c-1b0c235293c4') // Add the credentials for the .env file
     }
 
     stages {
@@ -26,9 +28,7 @@ pipeline {
                 }
             }
         }
-        environment {
-            DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
-        }
+
         stage('Build Frontend') {
             steps {
                 script {
@@ -38,11 +38,9 @@ pipeline {
                         sh 'docker pull node:18'
                     }
                 }
-                }
             }
-        environment {
-            DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         }
+
         stage('Build Docker Image') {
             steps {
                 script {
@@ -51,9 +49,7 @@ pipeline {
                 }
             }
         }
-        environment {
-            DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
-        }
+
         stage('Push to Docker Hub') {
             steps {
                 script {
@@ -70,6 +66,7 @@ pipeline {
                 script {
                     echo "Running Django migrations and collecting static files..."
                     docker.image('mydockerimage').inside {
+                        writeFile file: '.env', text: ENV_FILE
                         sh '''
                         export $(grep -v '^#' .env | xargs)
                         pip install --upgrade pip
