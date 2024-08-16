@@ -11,7 +11,7 @@ pipeline {
             steps {
                 script {
                     echo "Fetching GitHub repository information..."
-                    def githubToken = env.GITHUB_CREDENTIALS
+                    def githubToken = GITHUB_CREDENTIALS
                     sh """
                     curl -H "Authorization: token ${githubToken}" https://api.github.com/repos/sergeyitaly/myshop
                     """
@@ -19,11 +19,10 @@ pipeline {
             }
         }
 
-    stage('Checkout') {
+        stage('Checkout') {
             steps {
-                // Ensure this is inside a 'node' block
-                node {
-                    label 'my-defined-label'
+                script {
+                    echo "Checking out the repository..."
                     git branch: 'main', url: 'https://github.com/sergeyitaly/myshop.git'
                 }
             }
@@ -49,11 +48,13 @@ pipeline {
 
         stage('Build Frontend') {
             steps {
-                echo "Building frontend..."
-                dir('frontend') {
-                    sh 'npm install'
-                    sh 'npm run vercel-build'
-                    sh 'npm audit fix'
+                script {
+                    echo "Building frontend..."
+                    dir('frontend') {
+                        sh 'npm install'
+                        sh 'npm run vercel-build'
+                        sh 'npm audit fix'
+                    }
                 }
             }
         }
@@ -90,7 +91,6 @@ pipeline {
                         python3 manage.py makemigrations
                         python3 manage.py migrate
                         python3 manage.py compilemessages
-                        python3 manage.py compilemessages 
                         pip install awscli
                         aws s3 mv media s3://kolorytmedia/media --recursive
                         python3 manage.py collectstatic --noinput --clear
@@ -102,16 +102,18 @@ pipeline {
 
         stage('Cleanup') {
             steps {
-                echo "Cleaning up..."
-                sh 'rm -rf frontend'
-                sh 'du -h --max-depth=5 | sort -rh'
+                script {
+                    echo "Cleaning up..."
+                    sh 'rm -rf frontend'
+                    sh 'du -h --max-depth=5 | sort -rh'
+                }
             }
         }
     }
 
- }
-   post {
+    post {
         always {
             cleanWs()
         }
     }
+}
