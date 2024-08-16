@@ -2,9 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('DOCKERHUB_CREDENTIALS')
-        GITHUB_CREDENTIALS = credentials('KOLORYT_TOKEN') // Add this line
-
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
+        GITHUB_CREDENTIALS = credentials('KOLORYT_TOKEN') // Ensure this ID matches the configured credentials
     }
 
     stages {
@@ -28,7 +27,6 @@ pipeline {
                 }
             }
         }
-
 
         stage('Build Frontend') {
             steps {
@@ -56,7 +54,7 @@ pipeline {
             steps {
                 script {
                     echo "Pushing Docker image to Docker Hub..."
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
                         docker.image('mydockerimage').push('latest')
                     }
                 }
