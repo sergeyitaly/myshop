@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         GITHUB_CREDENTIALS = credentials('github-credentials-id')
     }
 
@@ -27,7 +26,9 @@ pipeline {
                 }
             }
         }
-
+        environment {
+            DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
+        }
         stage('Build Frontend') {
             steps {
                 script {
@@ -39,7 +40,9 @@ pipeline {
                 }
                 }
             }
-
+        environment {
+            DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
+        }
         stage('Build Docker Image') {
             steps {
                 script {
@@ -48,7 +51,9 @@ pipeline {
                 }
             }
         }
-
+        environment {
+            DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
+        }
         stage('Push to Docker Hub') {
             steps {
                 script {
