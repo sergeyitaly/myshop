@@ -32,11 +32,9 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 script {
-                    dir('frontend') {
                         sh 'which docker || (echo "Docker not found, exiting..." && exit 1)'
                         sh 'docker --version'
                         sh 'docker pull node:18'
-                    }
                 }
             }
         }
