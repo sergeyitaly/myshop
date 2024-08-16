@@ -1,10 +1,23 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-    }
-
+        stage('Load Environment Variables') {
+            steps {
+                script {
+                    echo "Loading environment variables..."
+                    withCredentials([string(credentialsId: '87f7447d-f83f-4552-a88c-1b0c235293c4', variable: 'ENV_CONTENT')]) {
+                        writeFile file: '.env', text: ENV_CONTENT
+                        def envVars = readFile('.env').trim().split('\n').collectEntries { line ->
+                            def (key, value) = line.split('=')
+                            [(key.trim()): value.trim()]
+                        }
+                        envVars.each { key, value -> env[key] = value }
+                    }
+                    echo "Environment variables loaded:"
+                    sh 'cat .env'
+                }
+            }
+        }
     stages {
         stage('Perform GitHub API Operations') {
             steps {
@@ -27,23 +40,6 @@ pipeline {
             }
         }
 
-        stage('Load Environment Variables') {
-            steps {
-                script {
-                    echo "Loading environment variables..."
-                    withCredentials([string(credentialsId: '87f7447d-f83f-4552-a88c-1b0c235293c4', variable: 'ENV_CONTENT')]) {
-                        writeFile file: '.env', text: ENV_CONTENT
-                        def envVars = readFile('.env').trim().split('\n').collectEntries { line ->
-                            def (key, value) = line.split('=')
-                            [(key.trim()): value.trim()]
-                        }
-                        envVars.each { key, value -> env[key] = value }
-                    }
-                    echo "Environment variables loaded:"
-                    sh 'cat .env'
-                }
-            }
-        }
 
         stage('Build Frontend') {
             steps {
