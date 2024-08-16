@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        GITHUB_CREDENTIALS = credentials('KOLORYT_TOKEN') // Ensure this ID matches the configured credentials
+        GITHUB_CREDENTIALS = credentials('KOLORYT_TOKEN')
     }
 
     stages {
