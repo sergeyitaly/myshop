@@ -10,9 +10,9 @@ pipeline {
         stage('Perform GitHub API Operations') {
             steps {
                 script {
+                    echo "Fetching GitHub repository information..."
                     def githubToken = env.GITHUB_CREDENTIALS
                     sh """
-                    echo "Fetching GitHub repository information..."
                     curl -H "Authorization: token ${githubToken}" https://api.github.com/repos/sergeyitaly/myshop
                     """
                 }
@@ -75,27 +75,21 @@ pipeline {
             }
         }
 
-        stage('Deploy to AWS') {
+        stage('Run Django Migrations and Collect Static') {
             steps {
-                withCredentials([
-                    string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
-                ]) {
-                    echo "Deploying to AWS..."
-                    sh '''
-                    export $(grep -v '^#' .env | xargs)
-                    cd frontend
-                    npm run vercel-build
-                    cd ..
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
-                    python3 manage.py makemigrations
-                    python3 manage.py migrate
-                    python3 manage.py compilemessages
-                    pip install awscli
-                    aws s3 mv media s3://kolorytmedia/media --recursive
-                    python3 manage.py collectstatic --noinput --clear
-                    '''
+                script {
+                    echo "Running Django migrations and collecting static files..."
+                    docker.image('mydockerimage').inside {
+                        sh '''
+                        export $(grep -v '^#' .env | xargs)
+                        pip install --upgrade pip
+                        pip install -r requirements.txt
+                        python3 manage.py makemigrations
+                        python3 manage.py migrate
+                        python3 manage.py compilemessages
+                        python3 manage.py collectstatic --noinput --clear
+                        '''
+                    }
                 }
             }
         }
@@ -105,13 +99,6 @@ pipeline {
                 echo "Cleaning up..."
                 sh 'rm -rf frontend'
                 sh 'du -h --max-depth=5 | sort -rh'
-            }
-        }
-
-        stage('Deploy Django Application') {
-            steps {
-                echo "Deploying Django application..."
-                sh 'gunicorn myshop.wsgi:application --bind 0.0.0.0:8000 --workers 3'
             }
         }
     }
