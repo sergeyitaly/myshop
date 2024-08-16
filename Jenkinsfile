@@ -19,8 +19,7 @@ pipeline {
             }
         }
 
-    stages {
-        stage('Checkout') {
+    stage('Checkout') {
             steps {
                 // Ensure this is inside a 'node' block
                 node {
@@ -115,4 +114,3 @@ pipeline {
             cleanWs()
         }
     }
-}
