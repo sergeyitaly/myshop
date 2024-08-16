@@ -19,10 +19,13 @@ pipeline {
             }
         }
 
+    stages {
         stage('Checkout') {
             steps {
-                echo "Checking out the Git repository..."
-                git branch: 'main', url: 'https://github.com/sergeyitaly/myshop.git'
+                // Ensure this is inside a 'node' block
+                node {
+                    git branch: 'main', url: 'https://github.com/sergeyitaly/myshop.git'
+                }
             }
         }
 
