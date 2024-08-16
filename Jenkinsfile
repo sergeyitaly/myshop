@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('DOCKERHUB_CRIDENTIALS')
+        DOCKERHUB_CREDENTIALS = credentials('DOCKERHUB_CREDENTIALS')
         GITHUB_CREDENTIALS = credentials('KOLORYT_TOKEN') // Add this line
 
     }
