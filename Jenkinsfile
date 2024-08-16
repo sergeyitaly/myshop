@@ -29,16 +29,6 @@ pipeline {
             }
         }
 
-        stage('Build Frontend') {
-            steps {
-                script {
-                        sh 'which docker || (echo "Docker not found, exiting..." && exit 1)'
-                        sh 'docker --version'
-                        sh 'docker pull node:18'
-                }
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 script {
