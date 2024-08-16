@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('DOCKERHUB_CRIDENTIALS')
+        GITHUB_CREDENTIALS = credentials('KOLORYT_TOKEN') // Add this line
+
+    }
         stage('Load Environment Variables') {
             steps {
                 script {
