@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        GITHUB_CREDENTIALS = credentials('KOLORYT_TOKEN')
+        GITHUB_CREDENTIALS = credentials('87f7447d-f83f-4552-a88c-1b0c235293c4') // Ensure this matches the ID in Jenkins credentials
     }
 
     stages {
@@ -54,7 +54,7 @@ pipeline {
             steps {
                 script {
                     echo "Pushing Docker image to Docker Hub..."
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
                         docker.image('mydockerimage').push('latest')
                     }
                 }
