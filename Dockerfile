@@ -5,7 +5,7 @@ WORKDIR /app
 COPY frontend/package*.json ./
 RUN npm install
 COPY frontend .
-RUN npm run vercel-build
+RUN npm run build
 
 # Stage 2: Setup Python Environment
 FROM python:3.11
