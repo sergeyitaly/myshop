@@ -77,7 +77,7 @@ polib==1.2.0
 pre-commit==2.21.0
 prometheus-client==0.20.0
 prompt-toolkit==3.0.47
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.8
 pycparser==2.22
 PyJWT==2.8.0
 pymemcache==4.0.0
