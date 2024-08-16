@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         GITHUB_CREDENTIALS = credentials('github-credentials-id')
-        ENV_FILE = credentials('87f7447d-f83f-4552-a88c-1b0c235293c4') // Add the credentials for the .env file
+        ENV_FILE = credentials('87f7447d-f83f-4552-a88c-1b0c235293c4') // Securely load the .env file
     }
 
     stages {
@@ -33,7 +33,7 @@ pipeline {
             steps {
                 script {
                     echo "Building Docker image..."
-                    docker.build('mydockerimage', '-f Dockerfile .')
+                    def customImage = docker.build('mydockerimage', '-f Dockerfile .')
                 }
             }
         }
@@ -54,16 +54,29 @@ pipeline {
                 script {
                     echo "Running Django migrations and collecting static files..."
                     docker.image('mydockerimage').inside {
+                        // Create .env file with credentials loaded from Jenkins
                         writeFile file: '.env', text: ENV_FILE
+
                         sh '''
+                        # Load environment variables from .env file
                         export $(grep -v '^#' .env | xargs)
+                        
+                        # Install required Python packages
                         pip install --upgrade pip
                         pip install -r requirements.txt
+
+                        # Run Django migrations
                         python3 manage.py makemigrations
                         python3 manage.py migrate
+
+                        # Compile message files
                         python3 manage.py compilemessages
+
+                        # Install AWS CLI and upload media files
                         pip install awscli
                         aws s3 mv media s3://kolorytmedia/media --recursive
+
+                        # Collect static files
                         python3 manage.py collectstatic --noinput --clear
                         '''
                     }
