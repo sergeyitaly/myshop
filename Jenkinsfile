@@ -32,7 +32,7 @@ pipeline {
             steps {
                 script {
                     echo "Building frontend..."
-                    docker.image('node:18').inside {
+                    docker.image('node:16').inside {
                         dir('frontend') {
                         sh 'docker --version'
                         sh 'docker pull node:18'
