@@ -48,3 +48,9 @@ export interface MainFilter {
 }
 
 
+export interface FilterResponse {
+    count: number;
+    results: Product[];
+    price_min: number;
+    price_max: number;
+}
