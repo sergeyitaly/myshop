@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        GITHUB_CREDENTIALS = credentials('87f7447d-f83f-4552-a88c-1b0c235293c4') // Ensure this matches the ID in Jenkins credentials
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
+        GITHUB_CREDENTIALS = credentials('github-credentials-id')
     }
 
     stages {
@@ -42,7 +42,6 @@ pipeline {
                 }
             }
         }
-
 
         stage('Build Docker Image') {
             steps {
