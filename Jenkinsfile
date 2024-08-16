@@ -23,6 +23,7 @@ pipeline {
             steps {
                 // Ensure this is inside a 'node' block
                 node {
+                    label 'my-defined-label'
                     git branch: 'main', url: 'https://github.com/sergeyitaly/myshop.git'
                 }
             }
