@@ -34,9 +34,8 @@ pipeline {
                     echo "Building frontend..."
                     docker.image('node:18').inside {
                         dir('frontend') {
-                            sh 'npm install'
-                            sh 'npm run vercel-build'
-                            sh 'npm audit fix'
+                        sh 'docker --version'
+                        sh 'docker pull node:18'
                         }
                     }
                 }
