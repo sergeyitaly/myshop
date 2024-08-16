@@ -32,14 +32,17 @@ pipeline {
             steps {
                 script {
                     echo "Building frontend..."
-                    dir('frontend') {
-                        sh 'npm install'
-                        sh 'npm run vercel-build'
-                        sh 'npm audit fix'
+                    docker.image('node:18').inside {
+                        dir('frontend') {
+                            sh 'npm install'
+                            sh 'npm run vercel-build'
+                            sh 'npm audit fix'
+                        }
                     }
                 }
             }
         }
+
 
         stage('Build Docker Image') {
             steps {
