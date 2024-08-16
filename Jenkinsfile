@@ -29,13 +29,11 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image on Remote Server') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    echo "Building Docker image on remote server..."
-                    docker.withServer('tcp://swarm.example.com:2376', 'swarm-certs') { // Replace with your server's details
-                        def customImage = docker.build('mydockerimage', '-f Dockerfile .')
-                    }
+                    echo "Building Docker image..."
+                    def customImage = docker.build('mydockerimage', '-f Dockerfile .')
                 }
             }
         }
