@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     environment {
-        GITHUB_CREDENTIALS = credentials('github-token') // Use the ID you set in Jenkins
+        GITHUB_CREDENTIALS = credentials('github-token')
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
     }
 
     stages {
-
         stage('Perform GitHub API Operations') {
             steps {
                 script {
@@ -23,20 +23,21 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/sergeyitaly/myshop.git'
             }
         }
-    stage('Load Environment Variables') {
-        steps {
-            script {
-                withCredentials([string(credentialsId: '87f7447d-f83f-4552-a88c-1b0c235293c4', variable: 'ENV_CONTENT')]) {
-                    writeFile file: '.env', text: ENV_CONTENT
-                    def envVars = readFile('.env').trim().split('\n').collectEntries { line ->
-                        def (key, value) = line.split('=')
-                        [(key.trim()): value.trim()]
+
+        stage('Load Environment Variables') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: '87f7447d-f83f-4552-a88c-1b0c235293c4', variable: 'ENV_CONTENT')]) {
+                        writeFile file: '.env', text: ENV_CONTENT
+                        def envVars = readFile('.env').trim().split('\n').collectEntries { line ->
+                            def (key, value) = line.split('=')
+                            [(key.trim()): value.trim()]
+                        }
+                        envVars.each { key, value -> env[key] = value }
                     }
-                    envVars.each { key, value -> env[key] = value }
                 }
             }
         }
-    }
 
         stage('Build Frontend') {
             steps {
@@ -51,7 +52,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build(DOCKER_IMAGE, '-f Dockerfile .')
+                    docker.build('mydockerimage', '-f Dockerfile .')
                 }
             }
         }
@@ -60,7 +61,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
-                        docker.image(DOCKER_IMAGE).push('latest')
+                        docker.image('mydockerimage').push('latest')
                     }
                 }
             }
@@ -73,9 +74,7 @@ pipeline {
                     string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
                 ]) {
                     sh '''
-                    # Source environment variables from .env file
                     export $(grep -v '^#' .env | xargs)
-
                     cd frontend
                     npm run vercel-build
                     cd ..
@@ -102,6 +101,13 @@ pipeline {
         stage('Deploy Django Application') {
             steps {
                 sh 'gunicorn myshop.wsgi:application --bind 0.0.0.0:8000 --workers 3'
+            }
+        }
+
+        stage('Debug') {
+            steps {
+                sh 'cat .env'
+                sh 'env'
             }
         }
     }
