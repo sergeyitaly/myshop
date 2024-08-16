@@ -12,7 +12,7 @@ pipeline {
                 script {
                     def githubToken = env.GITHUB_CREDENTIALS
                     sh """
-                    curl -H "Authorization: token ${githubToken}" https://api.github.com/repos/your-username/your-repo
+                    curl -H "Authorization: token ${githubToken}" https://api.github.com/repos/sergeyitaly/myshop
                     """
                 }
             }
@@ -20,14 +20,14 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/your-username/your-repo.git'
+                git branch: 'main', url: 'https://github.com/sergeyitaly/myshop.git'
             }
         }
-
-        stage('Load Environment Variables') {
-            steps {
-                script {
-                    // Load the .env file and set the environment variables
+    stage('Load Environment Variables') {
+        steps {
+            script {
+                withCredentials([string(credentialsId: '87f7447d-f83f-4552-a88c-1b0c235293c4', variable: 'ENV_CONTENT')]) {
+                    writeFile file: '.env', text: ENV_CONTENT
                     def envVars = readFile('.env').trim().split('\n').collectEntries { line ->
                         def (key, value) = line.split('=')
                         [(key.trim()): value.trim()]
@@ -35,6 +35,8 @@ pipeline {
                     envVars.each { key, value -> env[key] = value }
                 }
             }
+        }
+    }
 
         stage('Build Frontend') {
             steps {
