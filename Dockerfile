@@ -4,7 +4,7 @@ FROM node:18 AS frontend-build
 WORKDIR /app
 COPY frontend/package*.json ./
 RUN npm install
-COPY frontend .
+COPY . ./
 RUN npm run build
 
 # Stage 2: Setup Python Environment
