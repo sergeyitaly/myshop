@@ -22,13 +22,14 @@ RUN if [ -z "$ENV_ARGS" ]; then \
     fi
 
 # Create .env file from ENV_ARGS
-RUN echo "$ENV_ARGS" > .env
+RUN echo "$ENV_ARGS" > /tmp/env_args.env && \
+    while IFS= read -r line; do \
+        echo "$line" >> .env; \
+    done < /tmp/env_args.env && \
+    rm /tmp/env_args.env
 
 # Print .env file content for verification
 RUN cat .env
-
-# Print environment variables
-RUN printenv
 
 # Copy project files
 COPY . .
