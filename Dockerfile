@@ -19,8 +19,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy frontend build files from the previous stage
 COPY --from=frontend-build /app/frontend/dist /app/frontend/dist
-
-# Copy all project files (excluding frontend build files)
+RUN ls -al
+# Copy the rest of the project files
 COPY . .
 
 EXPOSE 8000
