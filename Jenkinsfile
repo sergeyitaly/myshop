@@ -43,13 +43,14 @@ pipeline {
                     withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARGS_FILE')]) {
                         // Run commands inside Docker container
                         docker.image(env.DOCKER_IMAGE).inside {
+                            // Install jq to process JSON
+                            sh 'apt-get update && apt-get install -y jq'
+
                             // Copy the JSON file into the container
                             sh "cp ${ENV_ARGS_FILE} /tmp/env_args.json"
 
                             // Create .env file from JSON and run Django commands
                             sh """
-                            apt-get update && apt-get install -y jq
-
                             jq -r 'to_entries | .[] | "\(.key)=\(.value)"' /tmp/env_args.json > .env
                             cat .env
 
