@@ -13,13 +13,16 @@ WORKDIR /app
 # Define build arguments
 ARG ENV_ARGS
 
+
 # Check if ENV_ARGS is not null or empty and print its value
 RUN if [ -z "$ENV_ARGS" ]; then echo "ENV_ARGS is not set or is empty"; exit 1; else echo "ENV_ARGS is set to $ENV_ARGS"; fi
 
 
 # Set environment variables from ENV_ARGS
-RUN echo ${ENV_ARGS} > /tmp/env_args.env
-RUN export $(cat /tmp/env_args.env | xargs) && rm /tmp/env_args.env
+RUN echo "${ENV_ARGS}" > /tmp/env_args.env
+
+# Use envsubst to replace variables and source them
+RUN cat /tmp/env_args.env | envsubst > /tmp/env_vars.sh && . /tmp/env_vars.sh && rm /tmp/env_args.env
 
 # Copy project files
 COPY . .
@@ -28,17 +31,17 @@ COPY . .
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Run Django commands
-RUN export $(cat /tmp/env_args.env | xargs) && python3 manage.py makemigrations
-RUN export $(cat /tmp/env_args.env | xargs) && python3 manage.py migrate
-RUN export $(cat /tmp/env_args.env | xargs) && python3 manage.py collectstatic --noinput
+# Run Django commands with environment variables set
+RUN . /tmp/env_vars.sh && python3 manage.py makemigrations
+RUN . /tmp/env_vars.sh && python3 manage.py migrate
+RUN . /tmp/env_vars.sh && python3 manage.py collectstatic --noinput
 
 # Clean up
 RUN rm -rf frontend
 RUN du -h --max-depth=5 | sort -rh
 
 # Optional: Move media files to S3 if needed
-RUN export $(cat /tmp/env_args.env | xargs) && aws s3 mv media s3://kolorytmedia/media --recursive
+RUN . /tmp/env_vars.sh && aws s3 mv media s3://kolorytmedia/media --recursive
 
 EXPOSE 8000
 CMD ["gunicorn", "myshop.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
