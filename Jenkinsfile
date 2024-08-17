@@ -54,7 +54,7 @@ pipeline {
                 script {
                     echo "Running Django migrations and collecting static files..."
                     docker.image('mydockerimage').inside {
-                        withEnv(["SECRET_KEY=${env.ENV_VARS}"]) {
+                        withEnv(${env.ENV_VARS}) {
                             sh '''
                             # Install required Python packages
                             pip install --upgrade pip
