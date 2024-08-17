@@ -3,12 +3,12 @@ FROM node:18 AS frontend-build
 
 WORKDIR /app
 
-# Copy everything from the build context except those in .dockerignore
-COPY . .
-
-# Install dependencies and build frontend
-RUN npm install --prefix frontend
-RUN npm run build --prefix frontend
+# Copy all files and install frontend dependencies
+COPY frontend/package*.json ./frontend/
+WORKDIR /app/frontend
+RUN npm install
+COPY frontend/ .
+RUN npm run build
 
 # Stage 2: Setup Python Environment
 FROM python:3.11
@@ -33,10 +33,11 @@ RUN jq . /tmp/env_args.json > /dev/null && \
 RUN cat .env
 
 # Install Python dependencies
+COPY requirements.txt ./
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the remaining project files
+# Copy all project files
 COPY . .
 
 # Run Django commands with environment variables set
