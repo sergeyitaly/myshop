@@ -37,7 +37,6 @@ pipeline {
    //     POSTGRES_HOST = credentials('postgres-host-id')
    //     POSTGRES_PORT = credentials('postgres-port-id')
    //     VITE_API_BASE_URL = credentials('vite-api-base-url-id')
-          DOCKER_IMAGE = "docker.io/sergeyitaly/koloryt:${BUILD_ID}" // Define Docker image
     }
 stages {
         stage('Perform GitHub API Operations') {
