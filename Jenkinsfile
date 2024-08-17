@@ -48,8 +48,7 @@ pipeline {
 
                             // Create .env file from JSON
                             sh """
-                            jq -r 'to_entries | .[] | "\(.key)=\(.value)"' /tmp/env_args.json > .env
-                            cat .env
+                            cat /tmp/env_args.json
                             """
 
                             // Run Django commands
