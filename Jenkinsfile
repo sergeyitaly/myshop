@@ -24,7 +24,7 @@ pipeline {
             agent {
                 docker {
                     image 'custom-jenkins:latest'
-                    args '-u root'
+                    args '-u root'  // Run the container as root
                 }
             }
             steps {
@@ -33,7 +33,7 @@ pipeline {
                         echo "Building Docker image..."
                         
                         // Save ENV_ARGS to a JSON file
-                        sh "sudo cp ${ENV_ARGS_FILE} /tmp/env_args.json"
+                        sh "cp ${ENV_ARGS_FILE} /tmp/env_args.json"
                         sh "cat /tmp/env_args.json"
 
                         // Build Docker image
@@ -47,6 +47,7 @@ pipeline {
                 }
             }
         }
+
 
         stage('Push to Docker Hub') {
             steps {
