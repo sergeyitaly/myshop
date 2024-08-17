@@ -14,9 +14,16 @@ ARG ENV_ARGS
 COPY . .
 # Create .env file
 RUN echo "ENV_ARGS=${ENV_ARGS}" > .env
-
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
+# Run Django commands
+RUN python3 manage.py makemigrations
+RUN python3 manage.py migrate
+RUN python3 manage.py collectstatic --noinput
+RUN rm -rf frontend
+RUN du -h --max-depth=5 | sort -rh
 
+# Optional: Move media files to S3 if needed
+RUN aws s3 mv media s3://kolorytmedia/media --recursive
 EXPOSE 8000
 CMD ["gunicorn", "myshop.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]

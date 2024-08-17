@@ -80,37 +80,6 @@ pipeline {
                 }
             }
         }
-
-        stage('Run Django Migrations and Collect Static') {
-            steps {
-                script {
-                    echo "Running Django migrations and collecting static files..."
-                    docker.image(env.DOCKER_IMAGE).inside {
-                        // Generate the .env file from Jenkins credentials
-                        sh '''
-                        echo "ENV_ARGS=${ENV_ARGS}" > .env
-                        # ...
-
-                        # Install dependencies
-                        pip install --upgrade pip
-                        pip install --no-cache-dir -r requirements.txt
-
-                        # Run Django commands
-                        python3 manage.py makemigrations
-                        python3 manage.py migrate
-                        python3 manage.py collectstatic --noinput
-
-                        # Optional: Move media files to S3 if needed
-                        # aws s3 mv media s3://kolorytmedia/media --recursive
-
-                        # Start Gunicorn server (if needed)
-                        # gunicorn myshop.wsgi:application --bind 0.0.0.0:8000 --workers 3
-                        '''
-                    }
-                }
-            }
-        }
-
         stage('Cleanup') {
             steps {
                 script {
