@@ -5,21 +5,10 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         GITHUB_CREDENTIALS = credentials('github-credentials-id')
         DOCKER_IMAGE = credentials('dockerhub-image-id')
-        ENV_ARGS = credentials('env-id')
+        ENV_ARGS = credentials('env-id') // Ensure this is valid JSON
     }
     
     stages {
-        stage('Perform GitHub API Operations') {
-            steps {
-                script {
-                    echo "Fetching GitHub repository information..."
-                    sh """
-                    curl -H "Authorization: token ${GITHUB_CREDENTIALS}" https://api.github.com/repos/sergeyitaly/myshop
-                    """
-                }
-            }
-        }
-
         stage('Checkout') {
             steps {
                 script {
@@ -35,22 +24,18 @@ pipeline {
                 script {
                     echo "Building Docker image..."
                     
-                    // Fetch and escape ENV_ARGS
-                    def envArgs = sh(script: 'echo "$ENV_ARGS"', returnStdout: true).trim()
-                    envArgs = envArgs.replaceAll('\'', '\"') // Replace single quotes with double quotes
-                    
                     // Print ENV_ARGS for debugging
-                    echo "ENV_ARGS content: ${envArgs}"
+                    sh "echo ${ENV_ARGS} > env_args.json"
+                    sh "cat env_args.json"
                     
                     // Build Docker image
                     def customImage = docker.build(
                         env.DOCKER_IMAGE, 
-                        "--build-arg ENV_ARGS='${envArgs}' -f Dockerfile ."
+                        "--build-arg ENV_ARGS='${ENV_ARGS}' -f Dockerfile ."
                     )
                     
                     echo "Docker image built: ${env.DOCKER_IMAGE}"
                 }
-
             }
         }
 
