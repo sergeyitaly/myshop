@@ -55,7 +55,7 @@ pipeline {
             steps {
                 script {
                     echo "Checking out the repository..."
-                    git branch: 'main', url: 'https://github.com/sergeyitaly/myshop.git'
+                    git credentialsId: 'github-credentials-id', branch: 'main', url: 'https://github.com/sergeyitaly/myshop.git'
                 }
             }
         }
