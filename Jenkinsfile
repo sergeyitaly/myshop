@@ -119,25 +119,8 @@ pipeline {
                         echo "POSTGRES_HOST=${POSTGRES_HOST}" >> .env
                         echo "POSTGRES_PORT=${POSTGRES_PORT}" >> .env
                         echo "VITE_API_BASE_URL=${VITE_API_BASE_URL}" >> .env
-                        cat .env
                         # Install required Python packages
-                        pip install --upgrade pip
-                        pip install -r requirements.txt
-
-                        # Run Django migrations
-                        python3 manage.py makemigrations
-                        python3 manage.py migrate
-
-                        # Compile message files
-                        python3 manage.py compilemessages
-
-                        # Install AWS CLI and upload media files
-                        pip install awscli
-                        aws s3 mv media s3://kolorytmedia/media --recursive
-
-                        # Collect static files
-                        python3 manage.py collectstatic --noinput --clear
-                        '''
+                     '''
                     }
                 }
             }
