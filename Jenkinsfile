@@ -26,7 +26,7 @@ pipeline {
                         echo "Building Docker image..."
                         
                         // Save ENV_ARGS to a JSON file
-                        sh "cp ${ENV_ARGS_FILE} /tmp/env_args.json"
+                        sh "sudo cp ${ENV_ARGS_FILE} /tmp/env_args.json"
                         sh "cat /tmp/env_args.json"
 
                         // Build Docker image
