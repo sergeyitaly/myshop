@@ -5,7 +5,7 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         GITHUB_CREDENTIALS = credentials('github-credentials-id')
         DOCKER_IMAGE = credentials('dockerhub-image-id')
-       // ENV_ARGS = credentials('env-id') 
+        // ENV_ARGS = credentials('env-id') // Uncomment this if you need ENV_ARGS as an environment variable
     }
 
     stages {
@@ -22,8 +22,9 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARGS')]) {
-
+                    withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARGS_FILE')]) {
+                        echo "Building Docker image..."
+                        
                         // Save ENV_ARGS to a JSON file
                         sh "cp ${ENV_ARGS_FILE} /tmp/env_args.json"
                         sh "cat /tmp/env_args.json"
@@ -34,6 +35,7 @@ pipeline {
                             "--build-arg ENV_ARGS_FILE=/tmp/env_args.json -f Dockerfile ."
                         )
 
+                        echo "Docker image built: ${env.DOCKER_IMAGE}"
                     }
                 }
             }
