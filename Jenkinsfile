@@ -39,6 +39,9 @@ pipeline {
                     def envArgs = sh(script: 'echo "$ENV_ARGS"', returnStdout: true).trim()
                     envArgs = envArgs.replaceAll('\'', '\"') // Replace single quotes with double quotes
                     
+                    // Print ENV_ARGS for debugging
+                    echo "ENV_ARGS content: ${envArgs}"
+                    
                     // Build Docker image
                     def customImage = docker.build(
                         env.DOCKER_IMAGE, 
@@ -47,6 +50,7 @@ pipeline {
                     
                     echo "Docker image built: ${env.DOCKER_IMAGE}"
                 }
+
             }
         }
 
