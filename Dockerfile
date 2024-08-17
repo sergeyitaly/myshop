@@ -16,20 +16,13 @@ RUN apt-get update && apt-get install -y jq
 # Define build arguments
 ARG ENV_ARGS
 
-# Check if ENV_ARGS is not null or empty and print its value
-RUN if [ -z "$ENV_ARGS" ]; then \
-        echo "ENV_ARGS is not set or is empty"; \
-        exit 1; \
-    else \
-        echo "ENV_ARGS is set to $ENV_ARGS"; \
-    fi
-
-# Debug: Output ENV_ARGS to verify format
+# Debug: Output ENV_ARGS to verify JSON format
 RUN echo "$ENV_ARGS" > /tmp/env_args.json
 RUN cat /tmp/env_args.json
 
-# Process JSON to create .env file
-RUN jq -r 'to_entries | .[] | "\(.key)=\(.value)"' /tmp/env_args.json > .env
+# Validate and process JSON
+RUN jq . /tmp/env_args.json > /dev/null && \
+    jq -r 'to_entries | .[] | "\(.key)=\(.value)"' /tmp/env_args.json > .env
 
 # Print .env file content for verification
 RUN cat .env
