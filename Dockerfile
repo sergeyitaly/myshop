@@ -20,7 +20,8 @@ RUN if [ -z "$ENV_ARGS" ]; then echo "ENV_ARGS is not set or is empty"; exit 1; 
 RUN echo "${ENV_ARGS}" > /tmp/env_args.env
 
 # Export each environment variable
-RUN while IFS= read -r line; do export "$line"; done < /tmp/env_args.env && rm /tmp/env_args.env
+RUN while IFS= read -r line; do echo "Processing: $line"; export "$line"; done < /tmp/env_args.env && rm /tmp/env_args.env
+RUN printenv
 
 # Copy project files
 COPY . .
