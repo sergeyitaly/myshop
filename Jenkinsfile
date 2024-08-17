@@ -4,25 +4,27 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         GITHUB_CREDENTIALS = credentials('github-credentials-id')
-        DOCKER_IMAGE = credentials('dockerhub-image-id')
+        DOCKER_IMAGE = 'custom-jenkins:latest' // Assuming this is the Docker image name, not credentials
         // ENV_ARGS = credentials('env-id') // Uncomment this if you need ENV_ARGS as an environment variable
     }
-    stage('Perform GitHub API Operations') {
-        steps {
-            script {
-                echo "Fetching GitHub repository information..."
-                sh """
-                curl -H "Authorization: token ${GITHUB_CREDENTIALS}" https://api.github.com/repos/sergeyitaly/myshop
-                """
+
+    stages {
+        stage('Perform GitHub API Operations') {
+            steps {
+                script {
+                    echo "Fetching GitHub repository information..."
+                    sh """
+                    curl -H "Authorization: token ${GITHUB_CREDENTIALS_PSW}" https://api.github.com/repos/sergeyitaly/myshop
+                    """
+                }
             }
         }
-    }
-    stages {
+
         stage('Checkout') {
             steps {
                 script {
                     echo "Checking out the repository..."
-                    git branch: 'main', credentialsId: GITHUB_CREDENTIALS, url: 'https://github.com/sergeyitaly/myshop.git'
+                    git branch: 'main', credentialsId: 'github-credentials-id', url: 'https://github.com/sergeyitaly/myshop.git'
                     sh "ls -lat"
                 }
             }
