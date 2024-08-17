@@ -14,24 +14,17 @@ WORKDIR /app
 ARG ENV_ARGS
 
 # Check if ENV_ARGS is not null or empty and print its value
-RUN if [ -z "$ENV_ARGS" ]; then echo "ENV_ARGS is not set or is empty"; exit 1; else echo "ENV_ARGS is set to $ENV_ARGS"; fi
+RUN if [ -z "$ENV_ARGS" ]; then \
+        echo "ENV_ARGS is not set or is empty"; \
+        exit 1; \
+    else \
+        echo "ENV_ARGS is set to $ENV_ARGS"; \
+    fi
 
-# Set environment variables from ENV_ARGS
-RUN echo "${ENV_ARGS}" > .env
+# Create .env file from ENV_ARGS
+RUN echo "$ENV_ARGS" > .env
 
-# Export each environment variable
-RUN while IFS= read -r line; do \
-        if [ "${line}" != "" ]; then \
-            if echo "$line" | grep -qE '^[A-Za-z_][A-Za-z0-9_]*=.*$'; then \
-                echo "Processing: $line"; \
-                export "$line"; \
-            else \
-                echo "Skipping invalid line: $line"; \
-            fi; \
-        fi; \
-    done < .env
-
-# Verify .env content
+# Print .env file content for verification
 RUN cat .env
 
 # Print environment variables
