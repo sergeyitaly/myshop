@@ -20,7 +20,16 @@ RUN if [ -z "$ENV_ARGS" ]; then echo "ENV_ARGS is not set or is empty"; exit 1; 
 RUN echo "${ENV_ARGS}" > /tmp/env_args.env
 
 # Export each environment variable
-RUN while IFS= read -r line; do echo "Processing: $line"; export "$line"; done < /tmp/env_args.env && rm /tmp/env_args.env
+RUN while IFS= read -r line; do \
+        if [[ "$line" =~ ^[A-Za-z_][A-Za-z0-9_]*=.*$ ]]; then \
+            echo "Processing: $line"; \
+            export "$line"; \
+        else \
+            echo "Skipping invalid line: $line"; \
+        fi; \
+    done < /tmp/env_args.env && rm /tmp/env_args.env
+
+
 RUN printenv
 
 # Copy project files
