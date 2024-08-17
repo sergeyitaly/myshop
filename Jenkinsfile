@@ -23,7 +23,6 @@ pipeline {
         stage('Build Docker Image') {
             agent {
                 docker {
-                    image 'custom-jenkins:latest'
                     args '-u root'  // Run the container as root
                 }
             }
