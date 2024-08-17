@@ -16,8 +16,10 @@ WORKDIR /app
 # Install necessary packages
 RUN apt-get update && apt-get install -y jq
 
+ARG ENV_ARGS
+
 # Copy the JSON file into the container and validate JSON format
-COPY env_args.json /tmp/env_args.json
+COPY ENV_ARGS /tmp/env_args.json
 RUN jq . /tmp/env_args.json || { echo "Invalid JSON format"; exit 1; }
 
 # Set environment variables from the JSON file
