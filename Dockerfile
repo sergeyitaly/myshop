@@ -13,8 +13,9 @@ WORKDIR /app
 # Define build arguments
 ARG ENV_ARGS
 
-# Check if ENV_ARGS is not null or empty
-RUN if [ -z "$ENV_ARGS" ]; then echo "ENV_ARGS is not set or is empty"; exit 1; fi
+# Check if ENV_ARGS is not null or empty and print its value
+RUN if [ -z "$ENV_ARGS" ]; then echo "ENV_ARGS is not set or is empty"; exit 1; else echo "ENV_ARGS is set to $ENV_ARGS"; fi
+
 
 # Copy project files
 COPY . .
