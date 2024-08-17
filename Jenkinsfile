@@ -4,30 +4,21 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         GITHUB_CREDENTIALS = credentials('github-credentials-id')
-        DOCKER_IMAGE = 'custom-jenkins:latest'
+        DOCKER_IMAGE = credentials('dockerhub-image-id')
+        // ENV_ARGS = credentials('env-id') // Uncomment this if you need ENV_ARGS as an environment variable
     }
 
     stages {
-        stage('Perform GitHub API Operations') {
-            steps {
-                script {
-                    echo "Fetching GitHub repository information..."
-                    sh """
-                    curl -H "Authorization: token ${GITHUB_CREDENTIALS_PSW}" https://api.github.com/repos/sergeyitaly/myshop || { echo "Failed to fetch GitHub repository information"; exit 1; }
-                    """
-                }
-            }
-        }
-
         stage('Checkout') {
             steps {
                 script {
                     echo "Checking out the repository..."
-                    git branch: 'main', credentialsId: 'github-credentials-id', url: 'https://github.com/sergeyitaly/myshop.git'
+                    git branch: 'main', credentialsId: GITHUB_CREDENTIALS, url: 'https://github.com/sergeyitaly/myshop.git'
                     sh "ls -lat"
                 }
             }
         }
+
 
         stage('Build Docker Image') {
             agent {
@@ -41,15 +32,16 @@ pipeline {
                     withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARGS_FILE')]) {
                         echo "Building Docker image..."
                         
-                        sh "cp ${ENV_ARGS_FILE} /tmp/env_args.json"
+                        // Save ENV_ARGS to a JSON file
+                        sh "sudo cp ${ENV_ARGS_FILE} /tmp/env_args.json"
                         sh "cat /tmp/env_args.json"
 
+                        // Build Docker image
                         def customImage = docker.build(
                             env.DOCKER_IMAGE, 
                             "--build-arg ENV_ARGS_FILE=/tmp/env_args.json -f Dockerfile ."
                         )
-                                            
-                        sh "ls -lat"
+
                         echo "Docker image built: ${env.DOCKER_IMAGE}"
                     }
                 }
