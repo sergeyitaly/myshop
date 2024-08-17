@@ -7,7 +7,7 @@ pipeline {
         DEBUG = credentials('debug-id')
         SECRET_KEY = credentials('secret-key-id')
         ALLOWED_HOSTS = credentials('allowed-hosts-id')
-        DOCKER_IMAGE = "docker.io/sergeyitaly/koloryt:${BUILD_ID}" // Define Docker image
+        DOCKER_IMAGE = credentials('docker-image-id') // Define Docker image
    
  //       AWS_S3_REGION_NAME = credentials('aws-s3-region-id')
  //       AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
