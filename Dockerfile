@@ -21,17 +21,21 @@ RUN echo "${ENV_ARGS}" > .env
 
 # Export each environment variable
 RUN while IFS= read -r line; do \
-        if [[ "$line" =~ ^[A-Za-z_][A-Za-z0-9_]*=.*$ ]]; then \
-            echo "Processing: $line"; \
-            export "$line"; \
-        else \
-            echo "Skipping invalid line: $line"; \
+        if [ "${line}" != "" ]; then \
+            if echo "$line" | grep -qE '^[A-Za-z_][A-Za-z0-9_]*=.*$'; then \
+                echo "Processing: $line"; \
+                export "$line"; \
+            else \
+                echo "Skipping invalid line: $line"; \
+            fi; \
         fi; \
-    done < .env && rm .env
+    done < .env
 
-
-RUN printenv
+# Verify .env content
 RUN cat .env
+
+# Print environment variables
+RUN printenv
 
 # Copy project files
 COPY . .
