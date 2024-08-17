@@ -21,7 +21,6 @@ ARG ENV_ARGS
 
 # Output ENV_ARGS to verify format
 RUN echo "$ENV_ARGS" > /tmp/env_args.json
-RUN cat /tmp/env_args.json
 
 # Validate JSON format
 RUN jq . /tmp/env_args.json || exit 1

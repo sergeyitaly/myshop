@@ -30,35 +30,37 @@ pipeline {
             }
         }
 
-stage('Build Docker Image') {
-    steps {
-        script {
-            echo "Building Docker image..."
-            // Ensure ENV_ARGS is properly quoted
-            def envArgs = sh(script: 'echo "$ENV_ARGS"', returnStdout: true).trim().replaceAll('"', '\\"')            
-            // Build Docker image
-            def customImage = docker.build(
-                env.DOCKER_IMAGE, 
-                "--build-arg ENV_ARGS='${envArgs}' -f Dockerfile ."
-            )
-            echo "Docker image built: ${env.DOCKER_IMAGE}"
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    echo "Building Docker image..."
+                    
+                    // Fetch and escape ENV_ARGS
+                    def envArgs = sh(script: 'echo "$ENV_ARGS"', returnStdout: true).trim()
+                    envArgs = envArgs.replaceAll('\'', '\"') // Replace single quotes with double quotes
+                    
+                    // Build Docker image
+                    def customImage = docker.build(
+                        env.DOCKER_IMAGE, 
+                        "--build-arg ENV_ARGS='${envArgs}' -f Dockerfile ."
+                    )
+                    
+                    echo "Docker image built: ${env.DOCKER_IMAGE}"
+                }
+            }
         }
-    }
-}
-
 
         stage('Push to Docker Hub') {
             steps {
                 script {
                     echo "Pushing Docker image to Docker Hub..."
                     docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
-                    echo DOCKER_IMAGE
-                    echo DOCKERHUB_CREDENTIALS
-                    docker.image(env.DOCKER_IMAGE).push()
+                        docker.image(env.DOCKER_IMAGE).push()
                     }
                 }
             }
         }
+
         stage('Cleanup') {
             steps {
                 script {
