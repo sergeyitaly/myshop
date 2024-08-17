@@ -48,10 +48,9 @@ pipeline {
 
                             // Copy the JSON file into the container
                             sh "cp ${ENV_ARGS_FILE} /tmp/env_args.json"
-
+                            sh """jq -r 'to_entries | .[] | "\(.key)=\(.value)"' /tmp/env_args.json > .env"""
                             // Create .env file from JSON and run Django commands
                             sh """
-                            jq -r 'to_entries | .[] | "\(.key)=\(.value)"' /tmp/env_args.json > .env
                             cat .env
 
                             python3 manage.py makemigrations
