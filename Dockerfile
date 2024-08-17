@@ -2,8 +2,6 @@
 FROM node:18 AS frontend-build
 
 WORKDIR /app
-
-# Copy all files and install frontend dependencies
 COPY frontend/package*.json ./frontend/
 WORKDIR /app/frontend
 RUN npm install
@@ -25,9 +23,11 @@ ARG ENV_ARGS
 RUN echo "$ENV_ARGS" > /tmp/env_args.json
 RUN cat /tmp/env_args.json
 
-# Validate and process JSON
-RUN jq . /tmp/env_args.json > /dev/null && \
-    jq -r 'to_entries | .[] | "\(.key)=\(.value)"' /tmp/env_args.json > .env
+# Validate JSON format
+RUN jq . /tmp/env_args.json || exit 1
+
+# Process JSON and export as .env
+RUN jq -r 'to_entries | .[] | "\(.key)=\(.value)"' /tmp/env_args.json > .env
 
 # Print .env file content for verification
 RUN cat .env
