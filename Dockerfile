@@ -20,17 +20,7 @@ RUN apt-get update && apt-get install -y jq
 ARG ENV_ARGS
 
 # Output ENV_ARGS to verify format
-RUN echo "$ENV_ARGS" > /tmp/env_args.json
-
-# Validate JSON format and print for debugging
-RUN cat /tmp/env_args.json
-RUN jq . /tmp/env_args.json || { echo "Invalid JSON format"; exit 1; }
-
-# Process JSON and export as .env
-RUN jq -r 'to_entries | .[] | "\(.key)=\(.value)"' /tmp/env_args.json > .env
-
-# Print .env file content for verification
-RUN cat .env
+RUN echo "$ENV_ARGS" > /.env
 
 # Install Python dependencies
 COPY requirements.txt ./
