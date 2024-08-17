@@ -23,15 +23,17 @@ pipeline {
             steps {
                 script {
                     withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARGS')]) {
-                        echo "Building Docker image..."
-                        sh "cat ${ENV_ARGS}" 
+
+                        // Save ENV_ARGS to a JSON file
+                        sh "cp ${ENV_ARGS_FILE} /tmp/env_args.json"
+                        sh "cat /tmp/env_args.json"
+
                         // Build Docker image
                         def customImage = docker.build(
                             env.DOCKER_IMAGE, 
-                            "--build-arg ENV_ARGS='${ENV_ARGS}' -f Dockerfile ."
+                            "--build-arg ENV_ARGS_FILE=/tmp/env_args.json -f Dockerfile ."
                         )
-                        
-                        echo "Docker image built: ${env.DOCKER_IMAGE}"
+
                     }
                 }
             }
