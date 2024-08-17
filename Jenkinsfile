@@ -67,7 +67,6 @@ pipeline {
                     echo "Building Docker image..."
                     // Pass environment variables as build arguments
                     def customImage = docker.build(env.DOCKER_IMAGE, "--build-arg DEBUG=${DEBUG} --build-arg SECRET_KEY=${SECRET_KEY} --build-arg ALLOWED_HOSTS=${ALLOWED_HOSTS} -f Dockerfile .")
-
                 }
             }
         }
