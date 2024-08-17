@@ -20,9 +20,12 @@ ARG ENV_ARGS
 RUN echo "$ENV_ARGS" > /tmp/env_args.json
 RUN cat /tmp/env_args.json
 
-# Validate and process JSON
-RUN jq . /tmp/env_args.json > /dev/null && \
-    jq -r 'to_entries | .[] | "\(.key)=\(.value)"' /tmp/env_args.json > .env
+# Copy the script into the Docker image
+COPY process_env.sh /app/process_env.sh
+RUN chmod +x /app/process_env.sh
+
+# Execute the script to process JSON and create .env file
+RUN /app/process_env.sh
 
 # Print .env file content for verification
 RUN cat .env
