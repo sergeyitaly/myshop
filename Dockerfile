@@ -10,6 +10,9 @@ RUN npm run build --prefix frontend
 FROM python:3.11
 WORKDIR /app
 
+# Install jq for JSON processing
+RUN apt-get update && apt-get install -y jq
+
 # Define build arguments
 ARG ENV_ARGS
 
@@ -21,22 +24,18 @@ RUN if [ -z "$ENV_ARGS" ]; then \
         echo "ENV_ARGS is set to $ENV_ARGS"; \
     fi
 
-# Create .env file from ENV_ARGS
-RUN echo "$ENV_ARGS" > /tmp/env_args.env && \
-    while IFS= read -r line; do \
-        echo "$line" >> .env; \
-    done < /tmp/env_args.env && \
-    rm /tmp/env_args.env
+# Process JSON to create .env file
+RUN echo "$ENV_ARGS" | jq -r 'to_entries | .[] | "\(.key)=\(.value)"' > .env
 
 # Print .env file content for verification
 RUN cat .env
 
-# Copy project files
-COPY . .
-
 # Install dependencies
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy project files
+COPY . .
 
 # Run Django commands with environment variables set
 RUN python3 manage.py makemigrations
