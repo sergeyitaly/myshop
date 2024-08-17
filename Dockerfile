@@ -31,6 +31,7 @@ RUN while IFS= read -r line; do \
 
 
 RUN printenv
+RUN cat env_args.env
 
 # Copy project files
 COPY . .
