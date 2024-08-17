@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         GITHUB_CREDENTIALS = credentials('github-credentials-id')
-        DOCKER_IMAGE = credentials('dockerhub-image-id')
+        DOCKER_IMAGE = credentials('dockerhub-image-id') // Replace with the actual Docker image name
     }
 
     stages {
@@ -22,14 +22,11 @@ pipeline {
             steps {
                 script {
                     echo "Building Docker image..."
-                    
-                    // Build Docker image with ENV_ARGS passed as build arguments
                     def customImage = docker.build(
-                        env.DOCKER_IMAGE, 
+                        "${DOCKER_IMAGE}", 
                         "--build-arg ENV_ARGS_FILE=/tmp/env_args.json -f Dockerfile ."
                     )
-
-                    echo "Docker image built: ${env.DOCKER_IMAGE}"
+                    echo "Docker image built: ${DOCKER_IMAGE}"
                 }
             }
         }
@@ -38,28 +35,17 @@ pipeline {
             steps {
                 script {
                     echo "Running Django commands..."
-
-                    // Use withCredentials to access the file
                     withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARGS_FILE')]) {
-                        // Run commands inside Docker container
-                        docker.image(env.DOCKER_IMAGE).inside {
+                        docker.image("${DOCKER_IMAGE}").inside {
                             sh "cp ${ENV_ARGS_FILE} .env"
                             sh """
                             cat .env
-
-                            python3 manage.py makemigrations
-                            python3 manage.py migrate
-                            python3 manage.py collectstatic --noinput
+                            python manage.py makemigrations
+                            python manage.py migrate
+                            python manage.py collectstatic --noinput
                             """
-
-                            // Clean up frontend build files
-                            sh 'rm -rf /app/frontend'
-                            
                             // Display disk usage for debugging
                             sh 'du -h --max-depth=5 | sort -rh'
-
-                            // Run Gunicorn to start the Django application
-                            sh 'gunicorn myshop.wsgi:application --bind 0.0.0.0:8000 --workers 3'
                         }
                     }
                 }
@@ -71,7 +57,7 @@ pipeline {
                 script {
                     echo "Pushing Docker image to Docker Hub..."
                     docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
-                        docker.image(env.DOCKER_IMAGE).push()
+                        docker.image("${DOCKER_IMAGE}").push('latest') // Adjust tag if needed
                     }
                 }
             }
