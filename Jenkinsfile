@@ -119,8 +119,23 @@ pipeline {
                         echo "POSTGRES_HOST=${POSTGRES_HOST}" >> .env
                         echo "POSTGRES_PORT=${POSTGRES_PORT}" >> .env
                         echo "VITE_API_BASE_URL=${VITE_API_BASE_URL}" >> .env
-                        # Install required Python packages
-                     '''
+                        # Install dependencies
+                        pip install --upgrade pip
+                        pip install gunicorn
+                        pip install awscli
+                        pip install --no-cache-dir -r requirements.txt
+
+                        # Run Django commands
+                        python3 manage.py makemigrations
+                        python3 manage.py migrate
+                        python3 manage.py compilemessages
+
+                        # Move media files to S3
+                        aws s3 mv media s3://kolorytmedia/media --recursive
+
+                        # Start Gunicorn server
+                        gunicorn myshop.wsgi:application --bind 0.0.0.0:8000 --workers 3
+                        '''
                     }
                 }
             }
