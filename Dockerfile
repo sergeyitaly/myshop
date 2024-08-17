@@ -12,16 +12,16 @@ RUN npm run build
 FROM python:3.11
 
 WORKDIR /app
+# Copy the JSON file into the container
+COPY env_args.json /tmp/env_args.json
 
-# Install jq for JSON processing
+# Install necessary packages
 RUN apt-get update && apt-get install -y jq
 
-# Define build arguments
-ARG ENV_ARGS
+# Validate JSON format (optional, for debugging)
+RUN jq . /tmp/env_args.json || { echo "Invalid JSON format"; exit 1; }
 
-# Output ENV_ARGS to verify format
-RUN echo "$ENV_ARGS" > /.env
-
+RUN cp /tmp/env_args.json .env
 # Install Python dependencies
 COPY requirements.txt ./
 RUN pip install --upgrade pip
