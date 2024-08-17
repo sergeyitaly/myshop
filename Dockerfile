@@ -17,26 +17,28 @@ ARG ENV_ARGS
 RUN if [ -z "$ENV_ARGS" ]; then echo "ENV_ARGS is not set or is empty"; exit 1; else echo "ENV_ARGS is set to $ENV_ARGS"; fi
 
 
+# Set environment variables from ENV_ARGS
+RUN echo ${ENV_ARGS} > /tmp/env_args.env
+RUN export $(cat /tmp/env_args.env | xargs) && rm /tmp/env_args.env
+
 # Copy project files
 COPY . .
 
-# Create .env file
-RUN echo "ENV_ARGS=${ENV_ARGS}" > .env
-
+# Install dependencies
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Run Django commands
-RUN python3 manage.py makemigrations
-RUN python3 manage.py migrate
-RUN python3 manage.py collectstatic --noinput
+RUN export $(cat /tmp/env_args.env | xargs) && python3 manage.py makemigrations
+RUN export $(cat /tmp/env_args.env | xargs) && python3 manage.py migrate
+RUN export $(cat /tmp/env_args.env | xargs) && python3 manage.py collectstatic --noinput
 
 # Clean up
 RUN rm -rf frontend
 RUN du -h --max-depth=5 | sort -rh
 
 # Optional: Move media files to S3 if needed
-RUN aws s3 mv media s3://kolorytmedia/media --recursive
+RUN export $(cat /tmp/env_args.env | xargs) && aws s3 mv media s3://kolorytmedia/media --recursive
 
 EXPOSE 8000
 CMD ["gunicorn", "myshop.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
