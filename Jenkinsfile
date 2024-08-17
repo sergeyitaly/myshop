@@ -7,7 +7,18 @@ pipeline {
         DOCKER_IMAGE = credentials('dockerhub-image-id')
         ENV_ARGS = credentials('env-id') // Ensure this is valid JSON
     }
-    
+
+       stage('Use Secret File') {
+            steps {
+                withCredentials([file(credentialsId: 'env-id', variable: 'SECRET_FILE')]) {
+                    script {
+                        // Example usage of the secret file
+                        sh 'cat $SECRET_FILE'
+                        // Perform other operations with the secret file
+                    }
+                }
+            }
+        }
     stages {
         stage('Checkout') {
             steps {
