@@ -5,9 +5,10 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         GITHUB_CREDENTIALS = credentials('github-credentials-id')
         DOCKER_IMAGE = credentials('dockerhub-image-id')
-       // ENV_ARGS = credentials('env-id') // Ensure this is valid JSON
+        ENV_ARGS = credentials('env-id') // Ensure this is valid JSON
     }
 
+    stages {
         stage('Checkout') {
             steps {
                 script {
@@ -21,23 +22,22 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                  withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARG')]) {
+                    withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARGS_FILE')]) {
+                        echo "Building Docker image..."
 
-                    echo "Building Docker image..."
-                    
-                    // Print ENV_ARGS for debugging
-                    sh "echo ${ENV_ARGS} > env_args.json"
-                    sh "cat env_args.json"
-                    
-                    // Build Docker image
-                    def customImage = docker.build(
-                        env.DOCKER_IMAGE, 
-                        "--build-arg ENV_ARGS='${ENV_ARGS}' -f Dockerfile ."
-                    )
-                    
-                    echo "Docker image built: ${env.DOCKER_IMAGE}"
+                        // Print ENV_ARGS for debugging
+                        sh "cat ${ENV_ARGS_FILE} > env_args.json"
+                        sh "cat env_args.json"
+
+                        // Build Docker image
+                        def customImage = docker.build(
+                            env.DOCKER_IMAGE, 
+                            "--build-arg ENV_ARGS='${ENV_ARGS_FILE}' -f Dockerfile ."
+                        )
+                        
+                        echo "Docker image built: ${env.DOCKER_IMAGE}"
+                    }
                 }
-            }
             }
         }
 
@@ -62,3 +62,4 @@ pipeline {
             }
         }
     }
+}
