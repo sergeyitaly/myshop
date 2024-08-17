@@ -35,6 +35,7 @@ tmp/
 dist/
 media/
 migrations/
+django_debug.log
 
 # Wrangler logs
 .wrangler/
