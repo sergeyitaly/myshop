@@ -2,9 +2,8 @@
 FROM node:18 AS frontend-build
 
 WORKDIR /app/frontend
-COPY frontend/package*.json ./
+COPY . .
 RUN npm install
-COPY frontend/ .
 RUN npm run build
 
 # Stage 2: Setup Python Environment
@@ -13,7 +12,7 @@ FROM python:3.11
 WORKDIR /app
 
 # Install Python dependencies
-COPY requirements.txt ./
+COPY . .
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
