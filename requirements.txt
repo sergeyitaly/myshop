@@ -6,6 +6,7 @@ attrs==24.2.0
 billiard==4.2.0
 boto3==1.34.83
 botocore==1.34.84
+build==1.2.1
 cairocffi==1.7.1
 CairoSVG==2.7.1
 celery==5.4.0
@@ -56,6 +57,7 @@ httpx==0.27.0
 humanize==4.10.0
 identify==2.6.0
 idna==3.7
+importlib_metadata==8.2.0
 inflection==0.5.1
 jmespath==1.0.1
 jsonfield==3.1.0
@@ -72,15 +74,17 @@ packaging==24.0
 phonenumbers==8.13.39
 pilkit==3.0
 pillow==10.3.0
+pip-tools==7.4.1
 platformdirs==4.2.2
 polib==1.2.0
 pre-commit==2.21.0
-prometheus-client==0.20.0
-prompt-toolkit==3.0.47
+prometheus_client==0.20.0
+prompt_toolkit==3.0.47
 psycopg2-binary==2.9.8
 pycparser==2.22
 PyJWT==2.8.0
 pymemcache==4.0.0
+pyproject_hooks==1.1.0
 python-dateutil==2.9.0.post0
 python-decouple==3.8
 python-dotenv==1.0.1
@@ -104,8 +108,9 @@ sqlparse==0.5.0
 starkbank-ecdsa==2.2.0
 text-unidecode==1.3
 tinycss2==1.3.0
+tomli==2.0.1
 tornado==6.4.1
-typing-extensions==4.11.0
+typing_extensions==4.11.0
 tzdata==2024.1
 uritemplate==4.1.1
 urllib3==1.26.18
@@ -116,3 +121,4 @@ wcwidth==0.2.13
 webassets==2.0
 webencodings==0.5.1
 whitenoise==6.6.0
+zipp==3.20.0
