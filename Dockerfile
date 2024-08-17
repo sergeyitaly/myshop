@@ -17,7 +17,7 @@ ARG ENV_ARGS
 RUN if [ -z "$ENV_ARGS" ]; then echo "ENV_ARGS is not set or is empty"; exit 1; else echo "ENV_ARGS is set to $ENV_ARGS"; fi
 
 # Set environment variables from ENV_ARGS
-RUN echo "${ENV_ARGS}" > /tmp/env_args.env
+RUN echo "${ENV_ARGS}" > .env
 
 # Export each environment variable
 RUN while IFS= read -r line; do \
@@ -27,11 +27,11 @@ RUN while IFS= read -r line; do \
         else \
             echo "Skipping invalid line: $line"; \
         fi; \
-    done < /tmp/env_args.env && rm /tmp/env_args.env
+    done < .env && rm .env
 
 
 RUN printenv
-RUN cat env_args.env
+RUN cat .env
 
 # Copy project files
 COPY . .
