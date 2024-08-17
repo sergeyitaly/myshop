@@ -24,8 +24,12 @@ RUN if [ -z "$ENV_ARGS" ]; then \
         echo "ENV_ARGS is set to $ENV_ARGS"; \
     fi
 
+# Debug: Output ENV_ARGS to verify format
+RUN echo "$ENV_ARGS" > /tmp/env_args.json
+RUN cat /tmp/env_args.json
+
 # Process JSON to create .env file
-RUN echo "$ENV_ARGS" | jq -r 'to_entries | .[] | "\(.key)=\(.value)"' > .env
+RUN jq -r 'to_entries | .[] | "\(.key)=\(.value)"' /tmp/env_args.json > .env
 
 # Print .env file content for verification
 RUN cat .env
