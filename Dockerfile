@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y jq
 # Define build arguments
 ARG ENV_ARGS
 
-# Debug: Output ENV_ARGS to verify JSON format
+# Output ENV_ARGS to verify format
 RUN echo "$ENV_ARGS" > /tmp/env_args.json
 RUN cat /tmp/env_args.json
 
