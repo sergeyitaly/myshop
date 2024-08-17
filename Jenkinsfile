@@ -8,6 +8,8 @@ pipeline {
         ENV_ARGS = credentials('env-id') // Ensure this is valid JSON
     }
 
+
+    stages {
        stage('Use Secret File') {
             steps {
                 withCredentials([file(credentialsId: 'env-id', variable: 'SECRET_FILE')]) {
@@ -19,7 +21,12 @@ pipeline {
                 }
             }
         }
-    stages {
+
+
+
+
+
+
         stage('Checkout') {
             steps {
                 script {
