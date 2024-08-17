@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         GITHUB_CREDENTIALS = credentials('github-credentials-id')
-        DOCKER_IMAGE = credentials('dockerhub-image-id')
+        DOCKER_IMAGE = 'custom-jenkins:latest'
         // ENV_ARGS = credentials('env-id') // Uncomment this if you need ENV_ARGS as an environment variable
     }
 
@@ -20,13 +20,19 @@ pipeline {
         }
 
         stage('Build Docker Image') {
+            agent {
+                docker {
+                    image 'custom-jenkins:latest'
+                    args '-u root'  // Use the root user to avoid permission issues
+                }
+            }
             steps {
                 script {
                     withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARGS_FILE')]) {
                         echo "Building Docker image..."
                         
                         // Save ENV_ARGS to a JSON file
-                        sh "sudo cp ${ENV_ARGS_FILE} /tmp/env_args.json"
+                        sh "cp ${ENV_ARGS_FILE} /tmp/env_args.json"
                         sh "cat /tmp/env_args.json"
 
                         // Build Docker image
