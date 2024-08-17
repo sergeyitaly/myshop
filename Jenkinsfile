@@ -119,7 +119,7 @@ pipeline {
                         echo "POSTGRES_HOST=${POSTGRES_HOST}" >> .env
                         echo "POSTGRES_PORT=${POSTGRES_PORT}" >> .env
                         echo "VITE_API_BASE_URL=${VITE_API_BASE_URL}" >> .env
-
+                        cat .env
                         # Install required Python packages
                         pip install --upgrade pip
                         pip install -r requirements.txt
