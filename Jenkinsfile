@@ -5,7 +5,6 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         GITHUB_CREDENTIALS = credentials('github-credentials-id')
         DOCKER_IMAGE = credentials('dockerhub-image-id')
-        // ENV_ARGS = credentials('env-id') // Uncomment this if you need ENV_ARGS as an environment variable
     }
 
     stages {
@@ -22,14 +21,53 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARGS')]) {
-                        echo "Building Docker image..."
-                        // Build Docker image
-                        def customImage = docker.build(
-                            env.DOCKER_IMAGE, 
-                            "--build-arg ENV_ARGS=${ENV_ARGS} -f Dockerfile ."
-                        )
-                        echo "Docker image built: ${env.DOCKER_IMAGE}"
+                    echo "Building Docker image..."
+                    
+                    // Build Docker image with ENV_ARGS passed as build arguments
+                    def customImage = docker.build(
+                        env.DOCKER_IMAGE, 
+                        "--build-arg ENV_ARGS_FILE=/tmp/env_args.json -f Dockerfile ."
+                    )
+
+                    echo "Docker image built: ${env.DOCKER_IMAGE}"
+                }
+            }
+        }
+
+        stage('Run Django Commands') {
+            steps {
+                script {
+                    echo "Running Django commands..."
+
+                    // Use withCredentials to access the file
+                    withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARGS_FILE')]) {
+                        // Run commands inside Docker container
+                        docker.image(env.DOCKER_IMAGE).inside {
+                            // Copy the JSON file into the container
+                            sh "cp ${ENV_ARGS_FILE} /tmp/env_args.json"
+
+                            // Create .env file from JSON
+                            sh """
+                            jq -r 'to_entries | .[] | "\(.key)=\(.value)"' /tmp/env_args.json > .env
+                            cat .env
+                            """
+
+                            // Run Django commands
+                            sh """
+                            python3 manage.py makemigrations
+                            python3 manage.py migrate
+                            python3 manage.py collectstatic --noinput
+                            """
+                            
+                            // Clean up frontend build files
+                            sh 'rm -rf /app/frontend'
+                            
+                            // Display disk usage for debugging
+                            sh 'du -h --max-depth=5 | sort -rh'
+
+                            // Run Gunicorn to start the Django application
+                            sh 'gunicorn myshop.wsgi:application --bind 0.0.0.0:8000 --workers 3'
+                        }
                     }
                 }
             }
@@ -42,16 +80,6 @@ pipeline {
                     docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
                         docker.image(env.DOCKER_IMAGE).push()
                     }
-                }
-            }
-        }
-
-        stage('Cleanup') {
-            steps {
-                script {
-                    echo "Cleaning up..."
-                    sh 'rm -rf frontend'
-                    sh 'du -h --max-depth=5 | sort -rh'
                 }
             }
         }
