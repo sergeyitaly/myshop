@@ -18,8 +18,6 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
-# Copy .env file to the Docker image
-COPY .env .env
 
 RUN python3 manage.py collectstatic --noinput --clear
 
