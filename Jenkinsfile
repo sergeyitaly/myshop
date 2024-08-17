@@ -4,9 +4,8 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         GITHUB_CREDENTIALS = credentials('github-credentials-id')
-        DEBUG = credentials('debug-id')
-        SECRET_KEY = credentials('secret-key-id')
-        ALLOWED_HOSTS = credentials('allowed-hosts-id')
+        DOCKER_IMAGE = credentials('dockerhub-image-id')
+        ENV_ARGS = credentials('env-id')
 
         // Define other environment variables as needed
         // AWS_S3_REGION_NAME = credentials('aws-s3-region-id')
@@ -64,9 +63,7 @@ pipeline {
             steps {
                 script {
                     echo "Building Docker image..."
-                    def DOCKER_IMAGE = 'sergeyitaly/koloryt:serhii_test' // Use the specific tag for the Docker image
-
-                    def customImage = docker.build(DOCKER_IMAGE, "--build-arg DEBUG=${DEBUG} --build-arg SECRET_KEY=${SECRET_KEY} --build-arg ALLOWED_HOSTS=${ALLOWED_HOSTS} -f Dockerfile .")
+                    def customImage = docker.build(env.DOCKER_IMAGE, "--build-arg ENV_ARGS=${ENV_ARGS} -f Dockerfile .")
                 }
             }
         }
@@ -75,9 +72,8 @@ pipeline {
             steps {
                 script {
                     echo "Pushing Docker image to Docker Hub..."
-                    def DOCKER_IMAGE = 'sergeyitaly/koloryt:serhii_test' // Use the specific tag for the Docker image
                     docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
-                        docker.image(DOCKER_IMAGE).push('serhii_test') // Push the image with the specific tag
+                    docker.image(env.DOCKER_IMAGE).push()
                     }
                 }
             }
@@ -87,15 +83,10 @@ pipeline {
             steps {
                 script {
                     echo "Running Django migrations and collecting static files..."
-                    def DOCKER_IMAGE = 'sergeyitaly/koloryt:serhii_test' // Use the specific tag for the Docker image
-                    docker.image(DOCKER_IMAGE).inside {
+                    docker.image(env.DOCKER_IMAGE).inside {
                         // Generate the .env file from Jenkins credentials
                         sh '''
-                        echo "DEBUG=${DEBUG}" > .env
-                        echo "SECRET_KEY=${SECRET_KEY}" >> .env
-                        echo "ALLOWED_HOSTS=${ALLOWED_HOSTS}" >> .env
-                        # Add other environment variables as needed
-                        # echo "AWS_S3_REGION_NAME=${AWS_S3_REGION_NAME}" >> .env
+                        echo "ENV_ARGS=${ENV_ARGS}" > .env
                         # ...
 
                         # Install dependencies
