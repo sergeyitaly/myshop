@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         GITHUB_CREDENTIALS = credentials('github-credentials-id')
-        DOCKER_IMAGE = 'custom-jenkins:latest'
+        DOCKER_IMAGE = credentials('dockerhub-image-id')
         // ENV_ARGS = credentials('env-id') // Uncomment this if you need ENV_ARGS as an environment variable
     }
 
