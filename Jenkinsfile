@@ -5,27 +5,8 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         GITHUB_CREDENTIALS = credentials('github-credentials-id')
         DOCKER_IMAGE = credentials('dockerhub-image-id')
-        ENV_ARGS = credentials('env-id') // Ensure this is valid JSON
+       // ENV_ARGS = credentials('env-id') // Ensure this is valid JSON
     }
-
-
-    stages {
-       stage('Use Secret File') {
-            steps {
-                withCredentials([file(credentialsId: 'env-id', variable: 'SECRET_FILE')]) {
-                    script {
-                        // Example usage of the secret file
-                        sh 'cat $SECRET_FILE'
-                        // Perform other operations with the secret file
-                    }
-                }
-            }
-        }
-
-
-
-
-
 
         stage('Checkout') {
             steps {
@@ -40,6 +21,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
+                  withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARG')]) {
+
                     echo "Building Docker image..."
                     
                     // Print ENV_ARGS for debugging
@@ -54,6 +37,7 @@ pipeline {
                     
                     echo "Docker image built: ${env.DOCKER_IMAGE}"
                 }
+            }
             }
         }
 
