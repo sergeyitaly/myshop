@@ -23,8 +23,7 @@ pipeline {
                 script {
                     echo "Building Docker image..."
                     def customImage = docker.build(
-                        "${DOCKER_IMAGE}", 
-                        "--build-arg ENV_ARGS_FILE=/tmp/env_args.json -f Dockerfile ."
+                        "${DOCKER_IMAGE}", " -f Dockerfile ."
                     )
                     echo "Docker image built: ${DOCKER_IMAGE}"
                 }
