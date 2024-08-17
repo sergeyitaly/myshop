@@ -2,12 +2,17 @@
 FROM node:18 AS frontend-build
 
 WORKDIR /app
+
+# Copy everything from the build context except those in .dockerignore
 COPY . .
+
+# Install dependencies and build frontend
 RUN npm install --prefix frontend
 RUN npm run build --prefix frontend
 
 # Stage 2: Setup Python Environment
 FROM python:3.11
+
 WORKDIR /app
 
 # Install jq for JSON processing
@@ -20,21 +25,18 @@ ARG ENV_ARGS
 RUN echo "$ENV_ARGS" > /tmp/env_args.json
 RUN cat /tmp/env_args.json
 
-# Copy the script into the Docker image
-COPY process_env.sh /app/process_env.sh
-RUN chmod +x /app/process_env.sh
-
-# Execute the script to process JSON and create .env file
-RUN /app/process_env.sh
+# Validate and process JSON
+RUN jq . /tmp/env_args.json > /dev/null && \
+    jq -r 'to_entries | .[] | "\(.key)=\(.value)"' /tmp/env_args.json > .env
 
 # Print .env file content for verification
 RUN cat .env
 
-# Install dependencies
+# Install Python dependencies
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project files
+# Copy the remaining project files
 COPY . .
 
 # Run Django commands with environment variables set
