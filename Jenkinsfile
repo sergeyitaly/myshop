@@ -37,8 +37,7 @@ pipeline {
    //     VITE_API_BASE_URL = credentials('vite-api-base-url-id')
           DOCKER_IMAGE = "docker.io/sergeyitaly/koloryt:${BUILD_ID}" // Define Docker image
     }
-
-    stages {
+stages {
         stage('Perform GitHub API Operations') {
             steps {
                 script {
@@ -56,7 +55,6 @@ pipeline {
                     echo "Checking out the repository..."
                     git branch: 'main', credentialsId: GITHUB_CREDENTIALS, url: 'https://github.com/sergeyitaly/myshop.git'
                     sh "ls -lat"
-
                 }
             }
         }
@@ -65,7 +63,6 @@ pipeline {
             steps {
                 script {
                     echo "Building Docker image..."
-                    // Pass environment variables as build arguments
                     def customImage = docker.build(env.DOCKER_IMAGE, "--build-arg DEBUG=${DEBUG} --build-arg SECRET_KEY=${SECRET_KEY} --build-arg ALLOWED_HOSTS=${ALLOWED_HOSTS} -f Dockerfile .")
                 }
             }
