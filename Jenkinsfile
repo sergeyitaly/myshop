@@ -30,14 +30,25 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    echo "Building Docker image..."
-                    def customImage = docker.build(env.DOCKER_IMAGE, "--build-arg ENV_ARGS=${ENV_ARGS} -f Dockerfile .")
-                }
-            }
+stage('Build Docker Image') {
+    steps {
+        script {
+            echo "Building Docker image..."
+            
+            // Ensure ENV_ARGS is properly quoted
+            def envArgs = sh(script: 'echo "$ENV_ARGS"', returnStdout: true).trim()
+            
+            // Build Docker image
+            def customImage = docker.build(
+                env.DOCKER_IMAGE, 
+                "--build-arg ENV_ARGS='${envArgs}' -f Dockerfile ."
+            )
+            
+            echo "Docker image built: ${env.DOCKER_IMAGE}"
         }
+    }
+}
+
 
         stage('Push to Docker Hub') {
             steps {
