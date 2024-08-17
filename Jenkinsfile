@@ -43,9 +43,8 @@ pipeline {
             steps {
                 script {
                     echo "Fetching GitHub repository information..."
-                    def githubToken = GITHUB_CREDENTIALS
                     sh """
-                    curl -H "Authorization: token ${githubToken}" https://api.github.com/repos/sergeyitaly/myshop
+                    curl -H "Authorization: token ${GITHUB_CREDENTIALS}" https://api.github.com/repos/sergeyitaly/myshop
                     """
                 }
             }
@@ -55,7 +54,7 @@ pipeline {
             steps {
                 script {
                     echo "Checking out the repository..."
-                    git branch: 'main', credentialsId: 'github-credentials-id', url: 'https://github.com/sergeyitaly/myshop.git'
+                    git branch: 'main', credentialsId: GITHUB_CREDENTIALS, url: 'https://github.com/sergeyitaly/myshop.git'
                     sh "ls -lat"
 
                 }
