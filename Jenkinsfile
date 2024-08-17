@@ -36,9 +36,8 @@ pipeline {
                     echo "Running Django commands..."
                     withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARGS_FILE')]) {
                         docker.image("${DOCKER_IMAGE}").inside {
-                            sh "cp ${ENV_ARGS_FILE} .env"
+                        //    sh "cp ${ENV_ARGS_FILE} .env"
                             sh """
-                            cat .env
                             python manage.py makemigrations
                             python manage.py migrate
                             python manage.py collectstatic --noinput
