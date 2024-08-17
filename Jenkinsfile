@@ -7,7 +7,16 @@ pipeline {
         DOCKER_IMAGE = credentials('dockerhub-image-id')
         // ENV_ARGS = credentials('env-id') // Uncomment this if you need ENV_ARGS as an environment variable
     }
-
+    stage('Perform GitHub API Operations') {
+        steps {
+            script {
+                echo "Fetching GitHub repository information..."
+                sh """
+                curl -H "Authorization: token ${GITHUB_CREDENTIALS}" https://api.github.com/repos/sergeyitaly/myshop
+                """
+            }
+        }
+    }
     stages {
         stage('Checkout') {
             steps {
@@ -40,7 +49,8 @@ pipeline {
                             env.DOCKER_IMAGE, 
                             "--build-arg ENV_ARGS_FILE=/tmp/env_args.json -f Dockerfile ."
                         )
-
+                                            
+                        sh "ls -lat"
                         echo "Docker image built: ${env.DOCKER_IMAGE}"
                     }
                 }
