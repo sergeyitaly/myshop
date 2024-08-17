@@ -46,18 +46,18 @@ pipeline {
                             // Copy the JSON file into the container
                             sh "cp ${ENV_ARGS_FILE} /tmp/env_args.json"
 
-                            // Create .env file from JSON
+                            // Create .env file from JSON and run Django commands
                             sh """
-                            cat /tmp/env_args.json
-                            """
+                            apt-get update && apt-get install -y jq
 
-                            // Run Django commands
-                            sh """
+                            jq -r 'to_entries | .[] | "\(.key)=\(.value)"' /tmp/env_args.json > .env
+                            cat .env
+
                             python3 manage.py makemigrations
                             python3 manage.py migrate
                             python3 manage.py collectstatic --noinput
                             """
-                            
+
                             // Clean up frontend build files
                             sh 'rm -rf /app/frontend'
                             
