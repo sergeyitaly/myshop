@@ -39,6 +39,7 @@ pipeline {
                     withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARGS_FILE')]) {
                         docker.image("${DOCKER_IMAGE}").inside {
                             sh "cp ${ENV_ARGS_FILE} .env"
+                            sh pwd
                             sh """
                             python manage.py makemigrations
                             python manage.py migrate
