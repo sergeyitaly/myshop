@@ -6,9 +6,14 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         for token in BlacklistedToken.objects.all():
             try:
+                # Print the token's jti value for debugging
+                self.stdout.write(f'Token ID: {token.id}, JTI: {token.jti}')
+
                 if isinstance(token.jti, bytes):
                     token.jti_hex = token.jti.hex()
                 else:
+                    # Print the type and value of jti
+                    self.stdout.write(f'JTI type: {type(token.jti)}, JTI value: {token.jti}')
                     token.jti_hex = token.jti
 
                 token.save()
@@ -16,5 +21,3 @@ class Command(BaseCommand):
 
             except Exception as e:
                 self.stderr.write(self.style.ERROR(f'Error updating token {token.id}: {e}'))
-
-# Comments:# Iterate over all tokens in BlacklistedToken.# Check if the jti field is of type bytes and convert it to hex if needed.# If jti is not bytes, assume it's already in a suitable format.# Save the updated token instance and provide success feedback.# Handle and log any exceptions that occur during the process.
