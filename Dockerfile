@@ -37,6 +37,14 @@ COPY . .
 # List directory contents for debugging
 RUN ls -al
 
+#makemigrations
+RUN python manage.py makemigrations
+RUN python manage.py migrate
+RUN python manage.py collectstatic --noinput
+
+# Display disk usage for debugging
+RUN sh 'du -h --max-depth=5 | sort -rh'
+
 # Activate virtual environment and run Django commands
 ENV PATH="/app/venv/bin:$PATH"
 

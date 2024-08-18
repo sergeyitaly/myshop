@@ -36,23 +36,6 @@ pipeline {
             }
         }
 
-        stage('Run Django Commands') {
-            steps {
-                script {
-                    echo "Running Django commands..."
-                    docker.image(DOCKER_IMAGE).inside {
-                        sh """
-                        python manage.py makemigrations
-                        python manage.py migrate
-                        python manage.py collectstatic --noinput
-                        """
-                        // Display disk usage for debugging
-                        sh 'du -h --max-depth=5 | sort -rh'
-                    }
-                }
-            }
-        }
-
         stage('Push to Docker Hub') {
             steps {
                 script {
