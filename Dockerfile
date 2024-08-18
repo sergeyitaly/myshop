@@ -29,7 +29,7 @@ WORKDIR /app
 COPY --from=python-build /app/venv /app/venv
 
 # Copy frontend build files from the frontend-build stage
-COPY --from=frontend-build /app/frontend/dist /app/dist
+COPY --from=frontend-build /app/dist /app/dist
 
 # Copy the rest of the project files
 COPY . .
