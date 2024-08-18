@@ -6,6 +6,9 @@ import { ProductSlider } from "../ProductSlider/ProductSlider"
 import { useTranslation } from "react-i18next";
 import { ROUTE } from "../../constants";
 import styles from './ProductSliderSection.module.scss'
+import { SwiperSlide } from "swiper/react";
+import { MapComponent } from "../MapComponent";
+import { PreviewLoadingCard } from "../Cards/PreviewCard/PreviewLoagingCard";
 
 
 // Function to get translated product name
@@ -16,11 +19,15 @@ const getTranslatedProductName = (product: Product, language: string): string =>
 interface ProductSliderSectionProps {
     translateField: string
     products?: Product[]
+    isSuccess: boolean
+    isLoading?: boolean
 }
 
 export const ProductSliderSection = ({
     products, 
-    translateField
+    translateField,
+    isSuccess,
+    isLoading
 }: ProductSliderSectionProps) => {
 
     const navigate = useNavigate()
@@ -36,21 +43,33 @@ export const ProductSliderSection = ({
             title={t(translateField)}
         > 
             {
-                products &&
+                isSuccess && products &&
                 <ProductSlider>
                     {products.map((product) => (
-                        <PreviewCard
-                            className={styles.card}
+                        <SwiperSlide
                             key={product.id}
-                            title={getTranslatedProductName(product, i18n.language) || t('no_name')}  // Use translated name or fallback
-                            discount={product.discount}
-                            price={product.price}
-                            currency={product.currency}
-                            photoSrc={product.photo_url || ''}
-                            previewSrc={product.photo_thumbnail_url || ''}
-                            onClick={() => handleClickSlide(product)}
-                        />
+                        >
+                            <PreviewCard
+                                className={styles.card}
+                                title={getTranslatedProductName(product, i18n.language) || t('no_name')}  // Use translated name or fallback
+                                discount={product.discount}
+                                price={product.price}
+                                currency={product.currency}
+                                photoSrc={product.photo_url || ''}
+                                previewSrc={product.photo_thumbnail_url || ''}
+                                onClick={() => handleClickSlide(product)}
+                            />
+                        </SwiperSlide>
                     ))}
+                </ProductSlider>
+            }
+            {
+                isLoading && 
+                <ProductSlider>
+                    <SwiperSlide><PreviewLoadingCard/></SwiperSlide>
+                    <SwiperSlide><PreviewLoadingCard/></SwiperSlide>
+                    <SwiperSlide><PreviewLoadingCard/></SwiperSlide>
+                    <SwiperSlide><PreviewLoadingCard/></SwiperSlide>
                 </ProductSlider>
             }
         </NamedSection>

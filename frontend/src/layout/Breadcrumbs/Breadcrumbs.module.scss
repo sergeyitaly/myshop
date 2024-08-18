@@ -1,0 +1,45 @@
+@import '../../variables';
+
+.section {
+    margin-top: clamp(0.625rem, 1.383vw + 0.193rem, 1.438rem);
+    margin-bottom: clamp(0.625rem, 1.383vw + 0.193rem, 1.438rem);
+    padding: clamp(0.438rem, 0.532vw + 0.271rem, 0.75rem) 0;
+    background: $color-gray-350;
+    font-size: clamp(0.875rem, 0.638vw + 0.676rem, 1.25rem);
+    
+}
+
+.container {
+    display: flex;
+    gap: 10px;
+    overflow: scroll;
+
+    &::-webkit-scrollbar {
+        width: 5px; 
+        height: 0px;              /* ширина всей полосы прокрутки */
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: $color-background;        /* цвет зоны отслеживания */
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background-color: blue;    /* цвет бегунка */
+        border-radius: 20px;       /* округлось бегунка */
+        border: 3px solid $color-gray-200;  /* отступ вокруг бегунка */
+      }
+}
+
+.noWrap {
+    text-overflow: break-word;
+    white-space: nowrap;
+}
+
+.link {
+    text-decoration: none;
+    color: $color-black;
+}
+
+.last {
+    color: $color-blue;
+}
