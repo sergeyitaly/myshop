@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
+        // Replace with your actual Docker Hub credentials ID
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id') 
         GITHUB_CREDENTIALS = credentials('github-credentials-id')
-        DOCKER_IMAGE = 'sergeyitaly/koloryt' // Base Docker image name, without tag
-        REGISTRY = 'sergeyitaly/koloryt' // Base registry name
-        REGISTRY_CREDENTIAL = 'dockerhub-credentials-id' // Docker Hub credentials ID
+        DOCKER_IMAGE = 'sergeyitaly/koloryt' // Base Docker image name without tag
+        TAG = 'serhii_test' // Tag for your Docker image
     }
 
     stages {
@@ -28,12 +28,9 @@ pipeline {
                     echo "Building Docker image..."
                     withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARGS_FILE')]) {
                         sh "cp ${ENV_ARGS_FILE} .env"
-                        // Specify the Dockerfile explicitly and use the current directory as the context
-                        dockerImage = docker.build(
-                            "${DOCKER_IMAGE}:${BUILD_NUMBER}",
-                            "-f Dockerfile ." // Dockerfile location and build context
-                        )
-                        echo "Docker image built: ${dockerImage.imageName()}"
+                        // Build Docker image with tag
+                        dockerImage = docker.build("${DOCKER_IMAGE}:${TAG}", "-f Dockerfile .")
+                        echo "Docker image built: ${DOCKER_IMAGE}:${TAG}"
                     }
                 }
             }
@@ -44,7 +41,8 @@ pipeline {
                 script {
                     echo "Pushing Docker image to Docker Hub..."
                     docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
-                        dockerImage.push() // Push the image with the tag from the build stage
+                        // Push the image with the tag from the build stage
+                        dockerImage.push("${TAG}")
                     }
                 }
             }
