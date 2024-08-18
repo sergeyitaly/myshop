@@ -47,6 +47,8 @@ RUN python manage.py migrate
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
+RUN rm -rf venv
+
 # Display disk usage for debugging
 RUN du -h --max-depth=5 | sort -rh
 

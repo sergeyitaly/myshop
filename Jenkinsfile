@@ -4,7 +4,9 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         GITHUB_CREDENTIALS = credentials('github-credentials-id')
-        DOCKER_IMAGE = credentials('dockerhub-image-id') // Replace with the actual Docker image name
+        DOCKER_IMAGE = 'sergeyitaly/koloryt' // Base Docker image name, without tag
+        REGISTRY = 'sergeyitaly/koloryt' // Base registry name
+        REGISTRY_CREDENTIAL = 'dockerhub-credentials-id' // Docker Hub credentials ID
     }
 
     stages {
@@ -26,11 +28,12 @@ pipeline {
                     echo "Building Docker image..."
                     withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARGS_FILE')]) {
                         sh "cp ${ENV_ARGS_FILE} .env"
-
-                        def customImage = docker.build(
-                            DOCKER_IMAGE, "-f Dockerfile ."
+                        // Specify the Dockerfile explicitly and use the current directory as the context
+                        dockerImage = docker.build(
+                            "${DOCKER_IMAGE}:${BUILD_NUMBER}",
+                            "-f Dockerfile ." // Dockerfile location and build context
                         )
-                        echo "Docker image built: ${DOCKER_IMAGE}"
+                        echo "Docker image built: ${dockerImage.imageName()}"
                     }
                 }
             }
@@ -41,7 +44,7 @@ pipeline {
                 script {
                     echo "Pushing Docker image to Docker Hub..."
                     docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
-                        docker.image(DOCKER_IMAGE).push() // Adjust tag if needed
+                        dockerImage.push() // Push the image with the tag from the build stage
                     }
                 }
             }
