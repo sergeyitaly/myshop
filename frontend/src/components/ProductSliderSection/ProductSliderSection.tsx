@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
 import { ROUTE } from "../../constants";
 import styles from './ProductSliderSection.module.scss'
 import { SwiperSlide } from "swiper/react";
-import { MapComponent } from "../MapComponent";
 import { PreviewLoadingCard } from "../Cards/PreviewCard/PreviewLoagingCard";
 
 

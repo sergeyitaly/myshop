@@ -1,5 +1,5 @@
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { useGetAllProductsQuery, useGetManyProductsByFilterQuery } from '../api/productSlice';
+import { useGetManyProductsByFilterQuery } from '../api/productSlice';
 import { PreviewCard } from '../components/Cards/PreviewCard/PreviewCard';
 import styles from './Test.module.scss'
 
