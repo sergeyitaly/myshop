@@ -41,7 +41,7 @@ pipeline {
                 script {
                     echo "Pushing Docker image to Docker Hub..."
                     docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
-                        docker.image(DOCKER_IMAGE).push('latest') // Adjust tag if needed
+                        docker.image(DOCKER_IMAGE).push() // Adjust tag if needed
                     }
                 }
             }
