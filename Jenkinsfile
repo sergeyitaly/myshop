@@ -2,9 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // Replace with your actual Docker Hub credentials ID
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id') 
-        GITHUB_CREDENTIALS = credentials('github-credentials-id')
+        GITHUB_CREDENTIALS = credentials('github-credentials-id') // Your GitHub credentials ID
         DOCKER_IMAGE = 'sergeyitaly/koloryt' // Base Docker image name without tag
         TAG = 'serhii_test' // Tag for your Docker image
     }
@@ -36,13 +34,15 @@ pipeline {
             }
         }
 
-        stage('Push to Docker Hub') {
+        stage('Docker Push') {
+            agent any
             steps {
-                script {
-                    echo "Pushing Docker image to Docker Hub..."
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
-                        // Push the image with the tag from the build stage
-                        dockerImage.push("${TAG}")
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials-id', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
+                    script {
+                        echo "Logging into Docker Hub..."
+                        sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
+                        echo "Pushing Docker image to Docker Hub..."
+                        sh "docker push ${DOCKER_IMAGE}:${TAG}"
                     }
                 }
             }
