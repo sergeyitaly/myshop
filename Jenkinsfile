@@ -40,10 +40,9 @@ pipeline {
                         docker.image("${DOCKER_IMAGE}").inside {
                             sh "cp ${ENV_ARGS_FILE} .env"
                             sh """
-                            python manage.py collectstatic --noinput
-
                             python manage.py makemigrations
                             python manage.py migrate
+                            python manage.py collectstatic --noinput
                             """
                             // Display disk usage for debugging
                             sh 'du -h --max-depth=5 | sort -rh'
