@@ -18,6 +18,7 @@ export enum ROUTE {
     PRODUCT = '/product/',
     PRODUCTS = '/products/',
     COLLECTION = '/collection/',
+    COLLECTIONS = '/collections/',
     ORDER = '/order',
     THANK = '/thank'
 }

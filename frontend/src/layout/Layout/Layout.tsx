@@ -6,6 +6,7 @@ import { Basket } from '../../components/Basket/Basket';
 import { AppSnackbar } from '../../components/Snackbar/Shackbar';
 import { useBootstrap } from '../../hooks/useBootstrap';
 import { useEffect } from 'react';
+import { Breadcrumbs } from '../Breadcrumbs/Breadcrumbs';
 // import { useHistory } from 'react-router-dom';
 
 export const Layout = ({
@@ -29,9 +30,10 @@ export const Layout = ({
     return (
         <>
             {withHeader && <Header basketLoadingStatus={isLoadingBasket}/>}
-            <CustomSeparator
+            {/* <CustomSeparator
                 // history={history}
-            />
+            /> */}
+            <Breadcrumbs/>
             <Outlet />
             {withFooter && <Footer />}
             {
