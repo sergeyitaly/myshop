@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
-        GITHUB_CREDENTIALS = 'github-credentials-id'
-        DOCKER_IMAGE = 'dockerhub-image-id' // Replace with the actual Docker image name
+        GITHUB_CREDENTIALS = credentials('github-credentials-id')
+        DOCKER_IMAGE = credentials('dockerhub-image-id') // Replace with the actual Docker image name
     }
 
     stages {
