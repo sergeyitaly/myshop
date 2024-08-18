@@ -12,10 +12,11 @@ import { ProductSliderSection } from "../../components/ProductSliderSection/Prod
 export const FromThisCollectionSection = ({collectionId}: FromThisCollectionProps) => {
 
     
-    const { data } = useGetAllProductsFromCollectionQuery(collectionId ?? skipToken);
+    const { data, isSuccess } = useGetAllProductsFromCollectionQuery(collectionId ?? skipToken);
 
     return (
        <ProductSliderSection
+            isSuccess = {isSuccess}
             translateField="also_from_this_collection"
             products={data?.results}
        />
