@@ -37,12 +37,15 @@ COPY . .
 # List directory contents for debugging
 RUN ls -al
 
-# Activate virtual environment and run Django commands
+# Activate virtual environment
 ENV PATH="/app/venv/bin:$PATH"
 
-# Run Django management commands
+# Apply Django migrations
 RUN python manage.py makemigrations
+RUN python manage.py migrate --fake account.0003_alter_emailaddress_create_unique_verified_email
 RUN python manage.py migrate
+
+# Collect static files
 RUN python manage.py collectstatic --noinput
 
 # Display disk usage for debugging
