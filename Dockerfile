@@ -41,9 +41,7 @@ RUN ls -al
 ENV PATH="/app/venv/bin:$PATH"
 
 # Apply Django migrations
-RUN python manage.py makemigrations
-RUN python manage.py migrate --fake account.0003_alter_emailaddress_create_unique_verified_email
-RUN python manage.py migrate
+RUN python manage.py db_cache_clean
 
 # Collect static files
 RUN python manage.py collectstatic --noinput
