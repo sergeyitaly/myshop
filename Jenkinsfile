@@ -5,8 +5,6 @@ pipeline {
         GITHUB_CREDENTIALS = credentials('github-credentials-id') // Your GitHub credentials ID
         DOCKER_IMAGE = 'sergeyitaly/koloryt' // Base Docker image name without tag
         TAG = 'serhii_test' // Tag for your Docker image
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id') // Docker Hub credentials ID
-        ENV_ARGS_FILE = credentials('env-id') // Environment variables file
     }
 
     stages {
@@ -26,8 +24,8 @@ pipeline {
             steps {
                 script {
                     echo "Building Docker image..."
-                    withCredentials([file(credentialsId: ENV_ARGS_FILE, variable: 'ENV_FILE')]) {
-                        sh "cp ${ENV_FILE} .env"
+                    withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARGS_FILE')]) {
+                        sh "cp ${ENV_ARGS_FILE} .env"
                         // Build Docker image with tag
                         dockerImage = docker.build("${DOCKER_IMAGE}:${TAG}", "-f Dockerfile .")
                         echo "Docker image built: ${DOCKER_IMAGE}:${TAG}"
@@ -36,9 +34,10 @@ pipeline {
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Docker Push') {
+            agent any
             steps {
-                withCredentials([usernamePassword(credentialsId: DOCKERHUB_CREDENTIALS, passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials-id', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
                     script {
                         echo "Logging into Docker Hub..."
                         sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
@@ -106,10 +105,7 @@ pipeline {
         }
     }
 
-    post {
-        always {
-            // Clean up Docker Compose resources
-            sh "docker-compose down || true"
-        }
+
+
     }
 }
