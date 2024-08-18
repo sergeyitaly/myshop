@@ -4,7 +4,7 @@ import { ProductSliderSection } from "../../components/ProductSliderSection/Prod
 
 export const BestSellersSection = () => {
 
-    const {data} = useGetProductsByMainFilterQuery({
+    const {data, isLoading, isSuccess} = useGetProductsByMainFilterQuery({
         page_size: 100
       })
 
@@ -13,6 +13,8 @@ export const BestSellersSection = () => {
 
     return (
         <ProductSliderSection
+            isSuccess = {isSuccess}
+            isLoading = {isLoading}
             translateField="bestsellers"
             products={data?.results}
         />
