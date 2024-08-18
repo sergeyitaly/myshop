@@ -18,6 +18,7 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy frontend build files from the previous stage
+COPY --from=frontend-build /app/dist /app/dist
 RUN ls -al
 # Copy the rest of the project files
 COPY . .
