@@ -25,9 +25,6 @@ WORKDIR /app
 # Copy Python dependencies from the build stage
 COPY --from=python-build /usr/local /usr/local
 
-# Copy frontend build files from the frontend-build stage
-COPY --from=frontend-build /app/frontend/dist /app/dist
-
 # Copy the rest of the project files
 COPY . .
 
