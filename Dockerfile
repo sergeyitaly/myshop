@@ -8,7 +8,7 @@ COPY frontend/ .
 RUN npm run build
 
 # Stage 2: Setup Python Environment
-FROM python:3.11
+FROM python:3.11 AS python-env
 
 WORKDIR /app
 
@@ -17,6 +17,8 @@ COPY requirements.txt ./
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy the Python environment from the previous stage
+COPY --from=python-env /usr/local /usr/local
 # Copy frontend build files from the previous stage
 COPY --from=frontend-build /app/dist /app/dist
 # Copy the rest of the project files
