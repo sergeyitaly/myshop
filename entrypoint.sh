@@ -35,6 +35,3 @@ grep -v '^session_key =' gunicorn_config.py > "$TMP_FILE"
 
 # Clean up the temporary file
 rm "$TMP_FILE"
-
-# Now that the session key is set, start Gunicorn
-exec gunicorn --config gunicorn_config.py myshop.wsgi:application
