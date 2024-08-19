@@ -52,6 +52,5 @@ RUN du -h --max-depth=5 | sort -rh
 
 EXPOSE 8000
 
-RUN gunicorn --bind 0.0.0.0:8000 myshop.wsgi 
 # Define the entry point for the container
-CMD ["gunicorn", "myshop.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+CMD ["gunicorn", "myshop.wsgi:application", "--bind", "0.0.0.0:8000"]
