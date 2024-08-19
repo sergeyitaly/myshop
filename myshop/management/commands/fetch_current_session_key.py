@@ -6,11 +6,13 @@ class Command(BaseCommand):
     help = 'Fetch the current active session key from the database'
 
     def handle(self, *args, **options):
-        # Assuming you want the most recent session or a specific session
+        # Get the most recent session
         now = timezone.now()
         session = Session.objects.filter(expire_date__gt=now).order_by('-expire_date').first()
 
         if session:
-            self.stdout.write(self.style.SUCCESS(f'Current session key: {session.session_key}'))
+            # Output only the session key
+            self.stdout.write(session.session_key)
         else:
-            self.stdout.write(self.style.ERROR('No active session found'))
+            # Indicate no active session found
+            self.stdout.write('No active session found')
