@@ -62,4 +62,4 @@ RUN du -h --max-depth=5 | sort -rh
 EXPOSE 8000
 
 # Define the entry point for the container
-CMD /app/venv/bin/gunicorn --config gunicorn_config.py myshop.wsgi:application
+CMD ["/app/venv/bin/gunicorn", "--config", "gunicorn_config.py", "myshop.wsgi:application"]
