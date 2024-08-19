@@ -33,6 +33,15 @@
 
 
 ## Docker
+
+Prerequsite: .env file is required.
+
 1. docker pull sergeyitaly/koloryt:serhii_test
-2. docker run -d -p 8000:8000 --name myshop sergeyitaly/koloryt:serhii_test
-3. visit localhost:8000
+2. Next command run in a directory where is .env file is located.
+3. docker run -d \
+  --name django_web \
+  --env-file .env \
+  -p 8000:8000 \
+  sergeyitaly/koloryt:serhii_test \
+  gunicorn myshop.wsgi:application --bind 0.0.0.0:8000 --workers 3
+4. visit localhost:8000
