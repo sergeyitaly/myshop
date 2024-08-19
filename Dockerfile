@@ -47,6 +47,10 @@ RUN python manage.py migrate
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
+
+# Remove the .env file to ensure it is not included in the final image
+RUN rm /app/.env
+
 # Display disk usage for debugging
 RUN du -h --max-depth=5 | sort -rh
 
