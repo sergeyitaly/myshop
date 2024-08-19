@@ -30,3 +30,9 @@
 ## Other info
 1. admin panel - localhost:8000/admin/
 2. swagger - localhost:8000/swagger/
+
+
+## Docker
+1. docker pull sergeyitaly/koloryt:serhii_test
+2. docker run -d -p 8000:8000 --name myshop sergeyitaly/koloryt:serhii_test
+3. visit localhost:8000
