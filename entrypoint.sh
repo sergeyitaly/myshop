@@ -42,5 +42,5 @@ export SESSION_KEY="$SESSION_KEY"
 # Debug output to ensure the environment variable is set
 echo "SESSION_KEY: $SESSION_KEY"
 
-# Execute the command passed to the Docker container (e.g., gunicorn)
-exec "$@"
+exec /app/venv/bin/gunicorn --config gunicorn_config.py myshop.wsgi:application
+

@@ -44,9 +44,6 @@ ENV PATH="/app/venv/bin:$PATH"
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-# Run entrypoint script to set session key and update gunicorn configuration
-ENTRYPOINT ["/app/entrypoint.sh"]
-
 # Apply Django migrations
 RUN python manage.py makemigrations
 RUN python manage.py migrate
@@ -63,5 +60,7 @@ RUN du -h --max-depth=5 | sort -rh
 
 EXPOSE 8000
 
+# Set the entrypoint
+ENTRYPOINT ["/entrypoint.sh"]
 # Define the entry point for the container
 CMD ["/app/venv/bin/gunicorn", "--config", "gunicorn_config.py", "myshop.wsgi:application"]
