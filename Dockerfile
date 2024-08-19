@@ -62,3 +62,6 @@ EXPOSE 8000
 
 # Define the entry point for the container
 ENTRYPOINT ["/app/entrypoint.sh"]
+
+#gunicorn_conig:
+RUN cat /app/gunicorn_config.py
