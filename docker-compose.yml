@@ -3,30 +3,15 @@ services:
   web:
     image: sergeyitaly/koloryt:serhii_test
     container_name: django_web
-    command: gunicorn myshop.wsgi:application --bind 0.0.0.0:8000 --workers 3
+    env_file: .env
+    command: gunicorn myshop.wsgi:application --bind 127.0.0.1:8000
     ports:
-      - "8000:8000"
-    volumes:
-      - .:/app
+    - "8000:8000"
+    volumes: 
+    - .:/app
     depends_on:
       - redis
-    env_file: -.env
-
-  redis:
+  redis: 
     image: redis:alpine
     container_name: redis
-
-  celery:
-    image: sergeyitaly/koloryt:serhii_test
-    container_name: django_celery
-    command: celery -A myshop worker --loglevel=info
-    depends_on:
-      - redis
-    env_file: -.env
-  celery-beat:
-    image: sergeyitaly/koloryt:serhii_test
-    container_name: django_celery_beat
-    command: celery -A myshop beat --loglevel=info
-    depends_on:
-      - redis
-    env_file: -.env
+    env_file: .env
