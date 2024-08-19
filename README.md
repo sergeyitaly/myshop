@@ -42,6 +42,5 @@ Prerequsite: .env file is required.
   --name django_web \
   --env-file .env \
   -p 8000:8000 \
-  sergeyitaly/koloryt:serhii_test \
-  gunicorn myshop.wsgi:application --bind 0.0.0.0:8000 --workers 3
+  sergeyitaly/koloryt:serhii_test
 4. visit localhost:8000
