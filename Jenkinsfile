@@ -29,6 +29,8 @@ pipeline {
                         // Build Docker image with tag
                         dockerImage = docker.build("${DOCKER_IMAGE}:${TAG}", "-f Dockerfile .")
                         echo "Docker image built: ${DOCKER_IMAGE}:${TAG}"
+                        sh "rm .env"
+                        echo ".env is removed from the image"
                     }
                 }
             }
