@@ -10,9 +10,7 @@ services:
       - .:/app
     depends_on:
       - redis
-    environment:
-      - DJANGO_SETTINGS_MODULE=myshop.settings
-      - REDIS_URL=redis://redis:6379/1
+    env_file: -.env
 
   redis:
     image: redis:alpine
@@ -24,16 +22,11 @@ services:
     command: celery -A myshop worker --loglevel=info
     depends_on:
       - redis
-    environment:
-      - DJANGO_SETTINGS_MODULE=myshop.settings
-      - REDIS_URL=redis://redis:6379/1
-
+    env_file: -.env
   celery-beat:
     image: sergeyitaly/koloryt:serhii_test
     container_name: django_celery_beat
     command: celery -A myshop beat --loglevel=info
     depends_on:
       - redis
-    environment:
-      - DJANGO_SETTINGS_MODULE=myshop.settings
-      - REDIS_URL=redis://redis:6379/1
+    env_file: -.env
