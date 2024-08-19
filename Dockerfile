@@ -53,4 +53,4 @@ RUN du -h --max-depth=5 | sort -rh
 EXPOSE 8000
 
 # Define the entry point for the container
-CMD ["gunicorn", "myshop.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD service redis-server start && gunicorn myshop.wsgi:application --bind 0.0.0.0:8000 --workers 3
