@@ -1,14 +1,14 @@
 version: '3.8'
 services:
   web:
+    volumes: 
+      - .:/app
     image: sergeyitaly/koloryt:serhii_test
     container_name: django_web
     env_file: .env
     command: gunicorn myshop.wsgi:application --bind 127.0.0.1:8000
     ports:
     - "8000:8000"
-    volumes: 
-    - .:/app
     depends_on:
       - redis
   redis: 
