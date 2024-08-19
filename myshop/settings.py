@@ -9,6 +9,9 @@ from distutils.util import strtobool
 import os
 from celery.schedules import crontab
 from django.utils.translation import gettext_lazy as _
+from .. import gunicorn_config
+
+SESSION_KEY = gunicorn_config.session_key
 
 
 load_dotenv()
