@@ -43,6 +43,7 @@ ENV PATH="/app/venv/bin:$PATH"
 # Copy the entrypoint script
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
+RUN /app/entrypoint.sh
 
 # Apply Django migrations
 RUN python manage.py makemigrations
