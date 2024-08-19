@@ -36,5 +36,11 @@ grep -v '^session_key =' gunicorn_config.py > "$TMP_FILE"
 # Clean up the temporary file
 rm "$TMP_FILE"
 
+# Export the session key as an environment variable
+export SESSION_KEY="$SESSION_KEY"
+
+# Debug output to ensure the environment variable is set
+echo "SESSION_KEY: $SESSION_KEY"
+
 # Execute the command passed to the Docker container (e.g., gunicorn)
 exec "$@"
