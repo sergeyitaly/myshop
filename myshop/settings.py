@@ -11,6 +11,9 @@ from celery.schedules import crontab
 from django.utils.translation import gettext_lazy as _
 
 SESSION_KEY = os.getenv('DJANGO_SESSION_KEY')
+if not SESSION_KEY:
+    raise ValueError("DJANGO_SESSION_KEY environment variable is not set or is empty.")
+
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

@@ -31,9 +31,10 @@ grep -v '^session_key =' gunicorn_config.py > "$TMP_FILE"
 {
     cat "$TMP_FILE"
     echo "session_key = \"$SESSION_KEY\""
-    export DJANGO_SESSION_KEY="$SESSION_KEY"
-
 } > gunicorn_config.py
 
 # Clean up the temporary file
 rm "$TMP_FILE"
+
+# Execute the command passed to the Docker container (e.g., gunicorn)
+exec "$@"
