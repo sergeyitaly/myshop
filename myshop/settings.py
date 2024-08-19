@@ -9,11 +9,8 @@ from distutils.util import strtobool
 import os
 from celery.schedules import crontab
 from django.utils.translation import gettext_lazy as _
-from .. import gunicorn_config
 
-SESSION_KEY = gunicorn_config.session_key
-
-
+SESSION_KEY = os.getenv('DJANGO_SESSION_KEY')
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
