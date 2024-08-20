@@ -42,5 +42,11 @@ export SESSION_KEY="$SESSION_KEY"
 # Debug output to ensure the environment variable is set
 echo "SESSION_KEY: $SESSION_KEY"
 
+
+# Clear the Django cache before making migrations
+echo "Clearing cache..."
+python manage.py shell -c "from django.core.cache import cache; cache.clear()"
+
+
 exec /app/venv/bin/gunicorn --config gunicorn_config.py myshop.wsgi:application
 
