@@ -43,14 +43,14 @@ ENV PATH="/app/venv/bin:$PATH"
 # Copy the entrypoint script
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
-RUN /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
 
 # Apply Django migrations
 RUN python manage.py makemigrations
 RUN python manage.py migrate
 
 # Collect static files
-RUN python manage.py collectstatic --noinput
+RUN python manage.py collectstatic --noinput --clear
 
 
 # Remove the .env file to ensure it is not included in the final image
