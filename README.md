@@ -43,4 +43,4 @@ Prerequsite: .env file is required.
   --env-file .env \
   -p 8000:8000 \
   sergeyitaly/koloryt:serhii_test
-4. visit localhost:8000
+4. visit: 127.0.0.1:8000
