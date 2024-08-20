@@ -46,6 +46,15 @@ pipeline {
                         fi
                         """
 
+                        // Remove dangling images
+                        sh """
+                        DANGLING_IMAGES=\$(docker images -f "dangling=true" -q)
+                        if [ ! -z "\$DANGLING_IMAGES" ]; then
+                            echo "Removing dangling images..."
+                            docker rmi -f \$DANGLING_IMAGES
+                        fi
+                        """
+
                         // Build the new Docker image with the specified tag
                         dockerImage = docker.build("${DOCKER_IMAGE}:${TAG}", "-f Dockerfile .")
                         echo "Docker image built: ${DOCKER_IMAGE}:${TAG}"
