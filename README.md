@@ -44,3 +44,13 @@ Prerequsite: .env file is required.
   -p 8000:8000 \
   sergeyitaly/koloryt:serhii_test
 4. visit: 127.0.0.1:8000
+
+
+*. To stay updated with docker image you need one more container, to do manage it every 10 minutes:
+5. docker run -d \
+  --name watchtower_koloryt \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  containrrr/watchtower \
+  django_web \
+  --interval 600 \
+  --cleanup
