@@ -9,9 +9,8 @@ import { AnimatePresence } from "framer-motion";
 import { useFilters } from "../../hooks/useFilters";
 import { Tag } from "./Tag/Tag";
 import { Pagination } from "../../components/UI/Pagination/Pagination";
-import { Collection} from '../../models/entities';
+import { Collection, Product } from '../../models/entities';
 import clsx from "clsx";
-import {Product} from '../../models/entities'
 import { useTranslation } from 'react-i18next';
 import { SortMenu } from "./SortMenu/SortMenu";
 import { useToggler } from "../../hooks/useToggler";
