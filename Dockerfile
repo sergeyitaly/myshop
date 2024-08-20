@@ -43,6 +43,7 @@ ENV PATH="/app/venv/bin:$PATH"
 # Copy the entrypoint script
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
 
 # Apply Django migrations
 RUN python manage.py makemigrations
@@ -61,6 +62,5 @@ RUN du -h --max-depth=5 | sort -rh
 EXPOSE 8000
 
 # Set the entrypoint
-ENTRYPOINT ["/app/entrypoint.sh"]
 # Define the entry point for the container
 CMD ["/app/venv/bin/gunicorn", "--config", "gunicorn_config.py", "myshop.wsgi:application"]
