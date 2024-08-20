@@ -20,21 +20,34 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    echo "Building Docker image..."
-                    withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARGS_FILE')]) {
-                        sh "cp ${ENV_ARGS_FILE} .env"
-                        // Build Docker image with tag
-                        dockerImage = docker.build("${DOCKER_IMAGE}:${TAG}", "-f Dockerfile .")
-                        echo "Docker image built: ${DOCKER_IMAGE}:${TAG}"
-                        sh "rm .env"
-                        echo ".env is removed from the image"
-                    }
+    stage('Build Docker Image') {
+        steps {
+            script {
+                echo "Building Docker image..."
+                withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARGS_FILE')]) {
+                    // Copy .env file for Docker build context
+                    sh "cp ${ENV_ARGS_FILE} .env"
+
+                    // Remove the old Docker image with the same tag if it exists
+                    sh """
+                    if docker images -q ${DOCKER_IMAGE}:${TAG}; then
+                        echo "Removing old Docker image..."
+                        docker rmi -f ${DOCKER_IMAGE}:${TAG}
+                    fi
+                    """
+
+                    // Build the new Docker image with the specified tag
+                    dockerImage = docker.build("${DOCKER_IMAGE}:${TAG}", "-f Dockerfile .")
+                    echo "Docker image built: ${DOCKER_IMAGE}:${TAG}"
+
+                    // Clean up the .env file after the build
+                    sh "rm .env"
+                    echo ".env is removed from the build context"
                 }
             }
         }
+    }
+
 
         stage('Docker Push') {
             agent any
