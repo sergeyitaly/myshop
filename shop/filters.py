@@ -24,6 +24,14 @@ class ProductFilter(django_filters.FilterSet):
     sales_count = django_filters.NumberFilter(field_name='sales_count', lookup_expr='exact')
     popularity = django_filters.NumberFilter(field_name='popularity', lookup_expr='exact')
 
+    # Filter by products with a discount
+    has_discount = django_filters.BooleanFilter(
+        field_name='discount', 
+        method='filter_has_discount', 
+        label='Has Discount'
+    )
+
+
     ordering = OrderingFilter(
         fields=(
             ('popularity', 'popularity'),
@@ -51,5 +59,13 @@ class ProductFilter(django_filters.FilterSet):
         model = Product
         fields = [
             'category_id', 'collection_id', 'name', 'name_en', 'name_uk', 
-            'price_min', 'price_max', 'sales_count', 'popularity'
+            'price_min', 'price_max', 'sales_count', 'popularity', 'has_discount'
         ]
+
+    def filter_has_discount(self, queryset, name, value):
+        """
+        Filter the queryset to include only products with a discount if value is True.
+        """
+        if value:
+            return queryset.filter(discount__gt=0)
+        return queryset
