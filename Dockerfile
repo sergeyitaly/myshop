@@ -44,8 +44,9 @@ ENV PATH="/app/venv/bin:$PATH"
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-# Apply Django migrations with a clean cache
-RUN python manage.py db_cache_clean
+# Apply Django migrations 
+RUN python manage.py makemigrations
+RUN python manage.py migrate
 
 #copy images
 RUN python manage.py process_thumbnails
