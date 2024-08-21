@@ -2,6 +2,7 @@
 FROM node:18 AS frontend-build
 
 WORKDIR /app/frontend
+ENV VITE_API_BASE_URL=http://localhost:8000
 COPY frontend/package*.json ./
 RUN npm install
 COPY frontend/ .
