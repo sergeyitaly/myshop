@@ -15,6 +15,10 @@ from django.core.cache import cache
 from rest_framework import generics, permissions
 from .models import AdditionalField
 from .serializers import AdditionalFieldSerializer
+from django.http import JsonResponse
+from django.http import HttpResponse
+
+
 
 class CustomPageNumberPagination(PageNumberPagination):
     default_page_size = 4
@@ -82,7 +86,6 @@ class ProductListFilter(generics.ListCreateAPIView):
             category_ids_list = [int(c) for c in category_ids.split(',') if c.isdigit()]
             if category_ids_list:
                 queryset = queryset.filter(collection__category__id__in=category_ids_list)
-        # Apply the has_discount filter if provided
 
         # Apply the has_discount filter if provided
         has_discount = self.request.query_params.get('has_discount', None)
@@ -92,16 +95,6 @@ class ProductListFilter(generics.ListCreateAPIView):
             elif has_discount.lower() in ['false', '0']:
                 queryset = queryset.filter(discount=0)  # Only products without a discount
 
-
-                queryset = queryset.filter(discount=0)
-        # Apply price range filter if provided
-        price_min = self.request.query_params.get('price_min', None)
-        price_max = self.request.query_params.get('price_max', None)
-        if price_min and price_min.isdigit():
-            queryset = queryset.filter(price__gte=float(price_min))
-        if price_max and price_max.isdigit():
-            queryset = queryset.filter(price__lte=float(price_max))
-
         # Annotate discounted_price
         queryset = queryset.annotate(
             discounted_price=ExpressionWrapper(
@@ -110,20 +103,64 @@ class ProductListFilter(generics.ListCreateAPIView):
             )
         )
 
-
-        # Apply additional filters from filterset_class
+        # Default behavior if no specific parameter for price_min or price_max is provided
         queryset = self.filterset_class(self.request.GET, queryset=queryset).qs
 
+        # Ordering logic with multiple fields
         ordering = self.request.query_params.get('ordering', None)
         if ordering:
-            ordering_field = ordering.split(',')[0]  # Only take the first field
-
-            # Validate the ordering field
-            if ordering_field in ['discounted_price', '-discounted_price', 'price', '-price', 'sales_count', '-sales_count', 'popularity', '-popularity']:
-                queryset = queryset.order_by(ordering_field)
+            ordering_fields = ordering.split(',')
+            valid_ordering_fields = [
+                'discounted_price', '-discounted_price', 
+                'price', '-price', 
+                'sales_count', '-sales_count', 
+                'popularity', '-popularity'
+            ]
+            # Validate each ordering field
+            valid_ordering_fields = [field for field in ordering_fields if field in valid_ordering_fields]
+            if valid_ordering_fields:
+                queryset = queryset.order_by(*valid_ordering_fields)
 
         return queryset
- 
+    
+    def list(self, request, *args, **kwargs):
+        # Get the filtered queryset
+        queryset = self.get_queryset()
+
+        # Calculate the overall price_min and price_max considering discounts
+        overall_price_min = Product.objects.annotate(
+            discounted_price=ExpressionWrapper(
+                F('price') * (1 - F('discount') / 100.0),
+                output_field=FloatField()
+            )
+        ).aggregate(Min('discounted_price'))['discounted_price__min']
+
+        overall_price_max = Product.objects.annotate(
+            discounted_price=ExpressionWrapper(
+                F('price') * (1 - F('discount') / 100.0),
+                output_field=FloatField()
+            )
+        ).aggregate(Max('discounted_price'))['discounted_price__max']
+
+        # Calculate the min and max price from the filtered queryset considering discounts
+        price_min = queryset.aggregate(Min('discounted_price'))['discounted_price__min']
+        price_max = queryset.aggregate(Max('discounted_price'))['discounted_price__max']
+
+        # Apply pagination to the queryset
+        paginated_queryset = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(paginated_queryset, many=True)
+
+        # Prepare the response data
+        response_data = {
+            'price_min': price_min if price_min is not None else overall_price_min,
+            'price_max': price_max if price_max is not None else overall_price_max,
+            'overall_price_min': overall_price_min,
+            'overall_price_max': overall_price_max,
+            'results': serializer.data
+        }
+
+        # Return the paginated response
+        return self.get_paginated_response(response_data)
 
 class CollectionItemsFilterPage(generics.ListAPIView):
     serializer_class = ProductSerializer
