@@ -49,6 +49,8 @@ ENTRYPOINT ["/app/entrypoint.sh"]
 RUN python manage.py makemigrations
 RUN python manage.py migrate
 
+#copy images
+RUN python manage.py process_thumbnails
 # Collect static files
 RUN python manage.py collectstatic --noinput --clear
 
@@ -59,7 +61,7 @@ RUN rm /app/.env
 # Display disk usage for debugging
 RUN du -h --max-depth=5 | sort -rh
 
-EXPOSE 8000
+EXPOSE 8010
 
 # Set the entrypoint
 # Define the entry point for the container

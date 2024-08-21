@@ -14,7 +14,7 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
-
+USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
 DEBUG = bool(strtobool(os.getenv('DEBUG', 'True')))
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
@@ -29,7 +29,6 @@ AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
 AWS_MEDIA_LOCATION = os.getenv('AWS_MEDIA', 'media')  # Default to 'media' if not specified
 AWS_LOCATION = 'staticfiles_build/static/'
 AWS_TEMPLATES = f'https://{AWS_S3_CUSTOM_DOMAIN}/templates/'
-USE_S3 = bool(strtobool(os.getenv('USE_S3', 'True')))
 AWS_FRONTEND_DOMAIN = f"https://{AWS_S3_CUSTOM_DOMAIN}"
 VERCEL_DOMAIN = os.getenv('VERCEL_DOMAIN')
 LOCAL_HOST = os.getenv('LOCAL_HOST')
@@ -56,7 +55,7 @@ ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app', 'localhost']
 # Application definition
 
 INSTALLED_APPS = [
-   # 'admin_interface',
+  #  'admin_interface',
     'colorfield',
     'whitenoise.runserver_nostatic',
     'django.contrib.admin',
@@ -73,7 +72,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'allauth',
     'allauth.account',
-   # 'allauth.socialaccount',
+    #'allauth.socialaccount',
     'knox',
     'cart',
     'accounts',
