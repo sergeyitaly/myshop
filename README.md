@@ -41,9 +41,9 @@ Prerequsite: .env file is required.
 3. docker run -d \
   --name django_web \
   --env-file .env \
-  -p 8000:8000 \
+  -p 8010:8010 \
   sergeyitaly/koloryt:serhii_test
-4. visit: 127.0.0.1:8000
+4. visit: 127.0.0.1:8010
 
 
 *. To stay updated with docker image you need one more container, to do manage it every 10 minutes:
