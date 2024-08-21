@@ -9,7 +9,7 @@
     
 }
 
-.container {
+.desktopContainer {
     display: flex;
     gap: 10px;
     overflow: scroll;
@@ -28,6 +28,51 @@
         border-radius: 20px;       /* округлось бегунка */
         border: 3px solid $color-gray-200;  /* отступ вокруг бегунка */
       }
+
+      @media (max-width: $screen-mobile) {
+        display: none;
+      }
+}
+
+.mobileContainer {
+  display: none;
+  align-items: center;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  @media (max-width: $screen-mobile) {
+    display: flex;
+  }
+
+  .last {
+    font-size: 18px;
+    text-align: center;
+  }
+}
+
+.mobileActiveList {
+  display: flex;
+  gap: 5px;
+  overflow: scroll;
+
+  & span:last-child {
+    display: none;
+  }
+
+  &::-webkit-scrollbar {
+    width: 0px; 
+    height: 0px;              /* ширина всей полосы прокрутки */
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: $color-background;        /* цвет зоны отслеживания */
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background-color: blue;    /* цвет бегунка */
+    border-radius: 20px;       /* округлось бегунка */
+    border: 3px solid $color-gray-200;  /* отступ вокруг бегунка */
+  }
 }
 
 .noWrap {

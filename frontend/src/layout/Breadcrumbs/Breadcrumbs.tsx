@@ -26,6 +26,8 @@ const getTranslatedProductName = (product: any, language: string): string => {
 
 // Function to get translated collection name
 const getTranslatedCollectionName = (collection: any, language: string): string => {
+    console.log(collection);
+    
     return language === 'uk' ? collection.name_uk || collection.name : collection.name_en || collection.name;
 };
 
@@ -93,12 +95,17 @@ export const Breadcrumbs = () => {
 
     const [list, setList] = useState<Breadcrumb[]>([])
 
+    const [activeList, setActiveList] = useState<Breadcrumb[]>([])
+    const [lastItem, setLastItem] = useState<Breadcrumb | undefined>(undefined)
+
 
     const getBreadcrumbs = (): Breadcrumb[] => {
 
         const {collections, home, order, products} = constantRoutes
 
         const list: Breadcrumb[] = [home]
+
+      
 
         const pages = pageDefiner(pathname)
         const {isCollection, isCollections, isProducts, isProduct, isOrder} = pages
@@ -134,11 +141,18 @@ export const Breadcrumbs = () => {
         if (isCollection && id){
             list.push(products)
             list.push(collections)
-            list.push({
-                title: getTranslatedCollectionName(collectionResponce, i18n.language),
-                link: `${ROUTE.COLLECTION}${collectionResponce?.id}`,
-                isLoading: isLoadingCollection || isFetchingCollection,
-            })
+            if(isLoadingCollection || isFetchingCollection){
+                list.push({
+                    isLoading: true
+                })
+            }
+            else {
+                list.push({
+                    title: getTranslatedCollectionName(collectionResponce, i18n.language),
+                    link: `${ROUTE.COLLECTION}${collectionResponce?.id}`,
+                    isLoading: isLoadingCollection || isFetchingCollection,
+                })
+            }
         }
 
         if(isOrder) list.push(order)
@@ -161,18 +175,22 @@ export const Breadcrumbs = () => {
         isProductLoading
     ])
 
+    useEffect(() => {
+
+        setActiveList(list.filter((_, index) => index !== list.length - 1))
+        setLastItem(list.find((_, index) => index === list.length-1 ))
+
+    }, [list])
+
     return (
         <>
             {
                 !!list.length &&
                 <section className={styles.section}>
-                    <PageContainer className={styles.container}>
+                    <PageContainer className={styles.desktopContainer}>
                         {
-                            list.map((item, index) => {
+                            activeList.map((item) => {
 
-                                const isLast = index === list.length - 1
-
-                                console.log(item.title, isLast);
                                 const {link, title, isLoading} = item
                                 
                                 return (
@@ -181,7 +199,6 @@ export const Breadcrumbs = () => {
                                         isLoading ?
                                         <span>Loading...</span>
                                         :
-                                        !isLast ?
                                         <>
                                             <Link
                                                 className={clsx(styles.noWrap, styles.link)}
@@ -191,13 +208,40 @@ export const Breadcrumbs = () => {
                                             </Link>
                                             <span>{'>'}</span>
                                         </>
-                                        : 
-                                        <span className={clsx(styles.noWrap, styles.last)}>{title}</span>
                                     }
                                     </Fragment>
                                 )
                             })
                         }
+                        <span className={clsx(styles.noWrap, styles.last)}>{lastItem?.title}</span>
+                    </PageContainer>
+                    <PageContainer className={styles.mobileContainer}>
+                        <div className={styles.mobileActiveList}>
+                            {
+                                activeList.map(({isLoading, title, link}) => {
+
+                                    return (
+                                        <Fragment key={title}>
+                                        {
+                                            isLoading ?
+                                            <span>Loading...</span>
+                                            :
+                                            <>
+                                                <Link
+                                                    className={clsx(styles.noWrap, styles.link)}
+                                                    to={link || ''}
+                                                >
+                                                    {title}
+                                                </Link>
+                                                <span>{'>'}</span>
+                                            </>
+                                        }
+                                        </Fragment>
+                                    )
+                                })
+                            }
+                        </div>
+                        <span className={styles.last}>{lastItem?.title}</span>
                     </PageContainer>
                 </section>
             }

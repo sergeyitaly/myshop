@@ -14,9 +14,10 @@ import clsx from "clsx";
 import { useTranslation } from 'react-i18next';
 import { SortMenu } from "./SortMenu/SortMenu";
 import { useToggler } from "../../hooks/useToggler";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ROUTE } from "../../constants";
+import { useSortList } from "./SortList";
 
 
 
@@ -33,7 +34,7 @@ export const FilterSection = ({
     initialCollection
 }: FilterSectionProps) => {
 
-    const LIMIT = 4;
+    const LIMIT = 100;
 
 
     const navigate = useNavigate()
@@ -81,6 +82,13 @@ export const FilterSection = ({
 
     let totalPages = 0
 
+    console.log(productsResponse);
+    
+    useEffect(() => {
+        productsResponse &&
+        changePrice([productsResponse.price_min, productsResponse.price_max])
+    }, [productsResponse])
+    
 
     if (productsResponse) {
         totalPages = Math.ceil(productsResponse.count / LIMIT);
@@ -95,29 +103,7 @@ export const FilterSection = ({
         handleCloseMenu();
     };
 
-    // Define the sort menu items using translations
-    const sortList = [
-        {
-            title: t('sort.price_descending'),
-            name: '-discounted_price'
-        },
-        {
-            title: t('sort.price_ascending'),
-            name: 'discounted_price'
-        },
-        {
-            title: t('sort.new_arrivals'),
-            name: 'sales_count'
-        },
-        {
-            title: t('sort.most_popular'),
-            name: 'popularity'
-        },
-        {
-            title: t('sort.discounts'),
-            name: 'discounted_price'
-        },
-    ];
+    const sortList = useSortList()
 
     return (
         <section className={clsx(styles.section, {
@@ -215,8 +201,8 @@ export const FilterSection = ({
                     open &&
                     <FilterMenu
                         showCollections={!initialCollection}
-                        minValue={minValue}
-                        maxValue={maxValue}
+                        minValue={productsResponse?.price_min || minValue}
+                        maxValue={productsResponse?.price_max || maxValue }
                         priceValue={tempPriceValues}
                         activeCategories={tempCategories}
                         activeCollections={tempCollections}
