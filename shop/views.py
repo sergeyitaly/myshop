@@ -82,7 +82,15 @@ class ProductListFilter(generics.ListCreateAPIView):
             category_ids_list = [int(c) for c in category_ids.split(',') if c.isdigit()]
             if category_ids_list:
                 queryset = queryset.filter(collection__category__id__in=category_ids_list)
+        # Apply the has_discount filter if provided
 
+        has_discount = self.request.query_params.get('has_discount', None)
+        if has_discount is not None:
+            if has_discount.lower() in ['true', '1']:
+                queryset = queryset.filter(discount__gt=0)
+            elif has_discount.lower() in ['false', '0']:
+                
+                queryset = queryset.filter(discount=0)
         # Apply price range filter if provided
         price_min = self.request.query_params.get('price_min', None)
         price_max = self.request.query_params.get('price_max', None)
@@ -99,27 +107,17 @@ class ProductListFilter(generics.ListCreateAPIView):
             )
         )
 
+
         # Apply additional filters from filterset_class
         queryset = self.filterset_class(self.request.GET, queryset=queryset).qs
 
-        # Handle ordering based on query parameters
         ordering = self.request.query_params.get('ordering', None)
         if ordering:
-            ordering_fields = ordering.split(',')
-            order_by_fields = []
+            ordering_field = ordering.split(',')[0]  # Only take the first field
 
-            for field in ordering_fields:
-                if field in ['discounted_price', '-discounted_price']:
-                    order_by_fields.append(field)
-                elif field == 'price':
-                    order_by_fields.append('discounted_price')
-                elif field == '-price':
-                    order_by_fields.append('-discounted_price')
-                else:
-                    order_by_fields.append(field)
-
-            if order_by_fields:
-                queryset = queryset.order_by(*order_by_fields)
+            # Validate the ordering field
+            if ordering_field in ['discounted_price', '-discounted_price', 'price', '-price', 'sales_count', '-sales_count', 'popularity', '-popularity']:
+                queryset = queryset.order_by(ordering_field)
 
         return queryset
  
