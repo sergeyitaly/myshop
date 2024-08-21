@@ -48,9 +48,11 @@ RUN chmod +x /app/entrypoint.sh
 RUN python manage.py makemigrations
 RUN python manage.py migrate
 
-#copy images
+#clone images
 RUN python manage.py process_thumbnails
-COPY media /app/media
+
+#copy images
+#COPY media /app/media
 
 # Collect static files
 RUN python manage.py collectstatic --noinput --clear
