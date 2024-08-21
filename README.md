@@ -54,3 +54,5 @@ Prerequsite: .env file is required.
   django_web \
   --interval 600 \
   --cleanup
+
+docker run -it --entrypoint /bin/bash sergeyitaly/koloryt:serhii_test

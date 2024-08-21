@@ -5,7 +5,6 @@ from .models import Product
 class NumberInFilter(django_filters.BaseInFilter, django_filters.NumberFilter):
     pass
 
-#was created to allow filtering by multiple numbers using in
 class ProductFilter(django_filters.FilterSet):
     # Filter products by category and collection
     category_id = NumberInFilter(field_name='collection__category__id', lookup_expr='in')
@@ -16,9 +15,15 @@ class ProductFilter(django_filters.FilterSet):
     name_en = django_filters.CharFilter(field_name='name_en', lookup_expr='icontains')
     name_uk = django_filters.CharFilter(field_name='name_uk', lookup_expr='icontains')
     
-    # Filter by price range
-    price_min = django_filters.NumberFilter(field_name='price', lookup_expr='gte')
-    price_max = django_filters.NumberFilter(field_name='price', lookup_expr='lte')
+    # Filter by discounted price range
+    price_min = django_filters.NumberFilter(
+        field_name='discounted_price', 
+        lookup_expr='gte'
+    )
+    price_max = django_filters.NumberFilter(
+        field_name='discounted_price', 
+        lookup_expr='lte'
+    )
     
     # Filter by sales count and popularity
     sales_count = django_filters.NumberFilter(field_name='sales_count', lookup_expr='exact')
@@ -30,7 +35,6 @@ class ProductFilter(django_filters.FilterSet):
         method='filter_has_discount', 
         label='Has Discount'
     )
-
 
     ordering = OrderingFilter(
         fields=(
