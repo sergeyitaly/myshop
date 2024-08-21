@@ -26,6 +26,8 @@ const getTranslatedProductName = (product: any, language: string): string => {
 
 // Function to get translated collection name
 const getTranslatedCollectionName = (collection: any, language: string): string => {
+    console.log(collection);
+    
     return language === 'uk' ? collection.name_uk || collection.name : collection.name_en || collection.name;
 };
 
@@ -139,11 +141,18 @@ export const Breadcrumbs = () => {
         if (isCollection && id){
             list.push(products)
             list.push(collections)
-            list.push({
-                title: getTranslatedCollectionName(collectionResponce, i18n.language),
-                link: `${ROUTE.COLLECTION}${collectionResponce?.id}`,
-                isLoading: isLoadingCollection || isFetchingCollection,
-            })
+            if(isLoadingCollection || isFetchingCollection){
+                list.push({
+                    isLoading: true
+                })
+            }
+            else {
+                list.push({
+                    title: getTranslatedCollectionName(collectionResponce, i18n.language),
+                    link: `${ROUTE.COLLECTION}${collectionResponce?.id}`,
+                    isLoading: isLoadingCollection || isFetchingCollection,
+                })
+            }
         }
 
         if(isOrder) list.push(order)
