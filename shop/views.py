@@ -84,12 +84,15 @@ class ProductListFilter(generics.ListCreateAPIView):
                 queryset = queryset.filter(collection__category__id__in=category_ids_list)
         # Apply the has_discount filter if provided
 
+        # Apply the has_discount filter if provided
         has_discount = self.request.query_params.get('has_discount', None)
         if has_discount is not None:
             if has_discount.lower() in ['true', '1']:
-                queryset = queryset.filter(discount__gt=0)
+                queryset = queryset.filter(discount__gt=0)  # Only products with a discount
             elif has_discount.lower() in ['false', '0']:
-                
+                queryset = queryset.filter(discount=0)  # Only products without a discount
+
+
                 queryset = queryset.filter(discount=0)
         # Apply price range filter if provided
         price_min = self.request.query_params.get('price_min', None)
