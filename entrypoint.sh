@@ -45,8 +45,7 @@ echo "SESSION_KEY: $SESSION_KEY"
 
 # Clear the Django cache before making migrations
 echo "Clearing cache..."
-python manage.py shell -c "from django.core.cache import cache; cache.clear()"
-
+python manage.py db_cache_clean
 
 exec /app/venv/bin/gunicorn --config gunicorn_config.py myshop.wsgi:application
 
