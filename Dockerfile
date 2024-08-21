@@ -50,6 +50,8 @@ RUN python manage.py migrate
 
 #copy images
 RUN python manage.py process_thumbnails
+COPY media /app/media
+
 # Collect static files
 RUN python manage.py collectstatic --noinput --clear
 
