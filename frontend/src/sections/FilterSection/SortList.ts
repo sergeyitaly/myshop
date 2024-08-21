@@ -25,9 +25,5 @@ export const useSortList = (): SortMenuItem[] => {
       title: t('sort.most_popular'),
       name: 'popularity'
     },
-    {
-      title: t('sort.discounts'),
-      name: '-discounted_price'
-    },
   ];
 };
