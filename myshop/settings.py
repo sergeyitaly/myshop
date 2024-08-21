@@ -50,7 +50,12 @@ CORS_ALLOWED_ORIGINS = [
 SECURE_SSL_REDIRECT = False
 SECURE_HSTS_SECONDS=0
 INTERNAL_IPS = ["127.0.0.1", "localhost", '::1']
-ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app', 'localhost']
+
+allowed_hosts = os.getenv('ALLOWED_HOSTS', '')
+
+# Split the string into a list and strip whitespace
+ALLOWED_HOSTS = [host.strip() for host in allowed_hosts.split(',') if host.strip()]
+#ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app', 'localhost']
 
 # Application definition
 
