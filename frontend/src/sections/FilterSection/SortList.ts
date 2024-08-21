@@ -11,11 +11,11 @@ export const useSortList = (): SortMenuItem[] => {
   return [
     {
       title: t('sort.price_descending'),
-      name: 'price'
+      name: 'discounted_price'
     },
     {
       title: t('sort.price_ascending'),
-      name: '-price'
+      name: '-discounted_price'
     },
     {
       title: t('sort.new_arrivals'),
