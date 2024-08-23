@@ -1,10 +1,27 @@
+import {useNavigate} from "react-router-dom";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import style from './style.module.scss'
-import {mockDataProducts} from "../carouselMock";
+import {NamedSection} from "../../NamedSection/NamedSection";
+import {PreviewCard} from "../../Cards/PreviewCard/PreviewCard";
+import {useGetAllProductsFromCollectionQuery} from "../../../api/collectionSlice";
+import {ROUTE} from "../../../constants";
+import {PreviewLoadingCard} from "../../Cards/PreviewCard/PreviewLoagingCard";
 
 function CarouselCeramic () {
+
+    const collectionId = 3;
+    const navigate = useNavigate()
+
+    const { data, isLoading } = useGetAllProductsFromCollectionQuery(collectionId);
+
+    const products = data?.results || [];
+
+    const handleClickProduct = (productId: number) => {
+        navigate(`${ROUTE.PRODUCT}${productId}`)
+    }
+
     const settings = {
         dots: true,
         infinite: true,
@@ -26,21 +43,35 @@ function CarouselCeramic () {
             }
         ]
     };
+
     return (
         <div className={style.sliderContainer}>
-            <p className={style.title}>Керамічний фольклор</p>
-            <Slider {...settings}>
-                {mockDataProducts.map((product, index) => (
-                    <div key={index} className={style.card}>
-                        <div className={style.cardImage}>
-                            <img src={product.imageUrl} alt={product.name} className={style.image}/>
-                            <p className={style.name} >{product.name}</p>
-                            <p className={style.price}>{product.price}</p>
-                        </div>
-                    </div>
-                ))}
-            </Slider>
+            <NamedSection title="Кераміка" >
+                <Slider {...settings}>
+                    {isLoading
+                        ? Array.from({ length: 3 }).map((_, index) => (
+                            <div key={index} className={style.container}>
+                                <PreviewLoadingCard />
+                            </div>
+                        ))
+                        : products.map((product) => (
+                            <div key={product.id} className={style.container}>
+                                <PreviewCard
+                                    key={product.id}
+                                    photoSrc={product.photo_url}
+                                    // discount = {product.discount}
+                                    title={product.name}
+                                    price={product.price}
+                                    currency={product.currency}
+                                    previewSrc={product.photo_thumbnail_url}
+                                    onClick={() => handleClickProduct(product.id)}
+                                />
+                            </div>
+                        ))}
+                </Slider>
+            </NamedSection>
         </div>
+
     );
 }
 
