@@ -9,38 +9,27 @@ import { AnimatePresence } from "framer-motion";
 import { useFilters } from "../../hooks/useFilters";
 import { Tag } from "./Tag/Tag";
 import { Pagination } from "../../components/UI/Pagination/Pagination";
-import { Collection, Product } from '../../models/entities';
+import { Collection, Product, Category } from '../../models/entities';
 import clsx from "clsx";
 import { useTranslation } from 'react-i18next';
 import { SortMenu } from "./SortMenu/SortMenu";
 import { useToggler } from "../../hooks/useToggler";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ROUTE } from "../../constants";
 import { useSortList } from "./SortList";
-
-
 
 interface FilterSectionProps {
     initialCollection?: Collection;
 }
 
-// Function to get translated product name
-const getTranslatedProductName = (product: Product, language: string): string => {
-    return language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
-};
-
 export const FilterSection = ({
     initialCollection
 }: FilterSectionProps) => {
-
     const LIMIT = 100;
 
-
-    const navigate = useNavigate()
-
+    const navigate = useNavigate();
     const [currentPage, setCurrentPage] = useState<number>(1);
-
     const { t, i18n } = useTranslation();
 
     const {
@@ -80,16 +69,13 @@ export const FilterSection = ({
         isError: isErrorWhenFetchingProducts
     } = useGetProductsByMainFilterQuery({...filter, page: currentPage, page_size: LIMIT});
 
-    let totalPages = 0
-
-    console.log(productsResponse);
+    let totalPages = 0;
     
     useEffect(() => {
         productsResponse &&
-        changePrice([productsResponse.price_min, productsResponse.price_max])
-    }, [productsResponse])
+        changePrice([productsResponse.price_min, productsResponse.price_max]);
+    }, [productsResponse]);
     
-
     if (productsResponse) {
         totalPages = Math.ceil(productsResponse.count / LIMIT);
     }
@@ -103,7 +89,26 @@ export const FilterSection = ({
         handleCloseMenu();
     };
 
-    const sortList = useSortList()
+    const sortList = useSortList();
+
+    // Function to get translated collection name
+    const getTranslatedCollectionName = useCallback((collection?: Collection): string => {
+        if (!collection) return '';
+        return i18n.language === 'uk' ? collection.name_uk || collection.name : collection.name_en || collection.name;
+    }, [i18n.language]);
+
+    // Function to get translated category name
+    const getTranslatedCategoryName = useCallback((category?: Category): string => {
+        if (!category) return '';
+        return i18n.language === 'uk'
+            ? category?.name_uk || category?.name || ''
+            : category?.name_en || category?.name || '';
+    }, [i18n.language]);
+
+    // Function to get translated product name
+    const getTranslatedProductName = (product: Product): string => {
+        return i18n.language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
+    };
 
     return (
         <section className={clsx(styles.section, {
@@ -173,15 +178,18 @@ export const FilterSection = ({
                             return (
                                 <PreviewCard
                                     key={id}
-                                    subTitle={product.collection?.category?.name}
+                                    subTitle={`${getTranslatedCollectionName(product.collection)}${
+                                        product.collection?.category ? ' / ' : ''
+                                    }${getTranslatedCategoryName(product.collection?.category)}`}
                                     photoSrc={photo_url}
                                     previewSrc={photo_thumbnail_url}
-                                    title={getTranslatedProductName(product, i18n.language)}
+                                    title={getTranslatedProductName(product)}
                                     discount={discount}
                                     currency={currency}
                                     price={price}
                                     onClick={() => navigate(`${ROUTE.PRODUCT}${id}`)}
                                 />
+
                             );
                         })
                     }
@@ -202,7 +210,7 @@ export const FilterSection = ({
                     <FilterMenu
                         showCollections={!initialCollection}
                         minValue={productsResponse?.price_min || minValue}
-                        maxValue={productsResponse?.price_max || maxValue }
+                        maxValue={productsResponse?.price_max || maxValue}
                         priceValue={tempPriceValues}
                         activeCategories={tempCategories}
                         activeCollections={tempCollections}
