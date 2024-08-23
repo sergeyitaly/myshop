@@ -1,10 +1,33 @@
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import style from './style.module.scss'
 import {mockDataCategories} from "../carouselMock";
+import {useGetAllCollectionsQuery} from "../../../api/collectionSlice";
+import {Collection} from "../../../models/entities";
+import {ROUTE} from "../../../constants";
+import {PreviewCard} from "../../Cards/PreviewCard/PreviewCard";
+import {NamedSection} from "../../NamedSection/NamedSection";
+import style from "../CarouselNewProduct/style.module.scss";
+import {PreviewLoadingCard} from "../../Cards/PreviewCard/PreviewLoagingCard";
+import {useNavigate} from "react-router-dom";
+
 
 function CarouselNewProduct () {
+    const navigate = useNavigate()
+
+    const {data, isLoading} = useGetAllCollectionsQuery()
+
+    const collections: Collection[] = data?.results || []
+
+    const handleClickCollectionCard = (id: number) => {
+        navigate(ROUTE.COLLECTION + id)
+    }
+
+    const shuffleArray = (array: any[]) => {
+        return array.sort(() => Math.random() - 0.5);
+    };
+
+    const shuffledCollections = shuffleArray([...collections]);
 
     const totalCards = mockDataCategories.length;
     let dotsValue = true;
@@ -35,18 +58,31 @@ function CarouselNewProduct () {
     };
     return (
         <div className={style.sliderContainer}>
-            <p className={style.title}> Нові надходження </p>
-            <Slider {...settings}>
-                {mockDataCategories.map((product, index) => (
-                    <div key={index} className={style.card}>
-                        <div className={style.cardImage}>
-                            <img src={product.imageUrl} alt={product.name} style={{maxWidth:'100%'}}/>
-                            <p className={style.name}>{product.name}</p>
-                        </div>
-                    </div>
-                ))}
-            </Slider>
+            <NamedSection title="Нові надходження" >
+                <Slider {...settings}>
+                    {isLoading
+                        ? Array.from({ length: 3 }).map((_, index) => (
+                            <div key={index} className={style.card}>
+                                <PreviewLoadingCard />
+                            </div>
+                        ))
+                        : shuffledCollections.map((product) => (
+                                <PreviewCard
+                                    className={style.card}
+                                    key={product.id}
+                                    title={product.name}
+                                    discount = {product.discount}
+                                    price={product.price}
+                                    currency={product.currency}
+                                    photoSrc={product.photo_url}
+                                    previewSrc={product.photo_thumbnail_url}
+                                    onClick={() => handleClickCollectionCard(product.id)}
+                                />
+                        ))}
+                </Slider>
+            </NamedSection>
         </div>
+
     );
 }
 
