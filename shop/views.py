@@ -75,21 +75,15 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
     pagination_class = CustomPageNumberPagination  # Use custom pagination for products
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     search_fields = ['name_en', 'name_uk']
-    ordering_fields = ['name_en', 'name_uk','price', 'sales_count', 'popularity']
+   # ordering_fields = ['name_en', 'name_uk']
 
     def get_queryset(self):
         cache_key = f"product_list_{self.request.GET.urlencode()}"
-        queryset = Product.objects.all()
+        queryset = Product.objects.only('name_en', 'name_uk', 'photo')  # Optimize data fetching
 
-        # Apply search filter
         search_query = self.request.query_params.get('search', None)
         if search_query:
-            # Decode the search query from URL encoding
-            search_query = urllib.parse.unquote(search_query)
-
-            # Optional: Convert the query to ASCII if needed
-            # search_query = search_query.encode('ascii', 'ignore').decode('ascii')
-
+            search_query = unquote(search_query)
             queryset = queryset.filter(
                 Q(name_en__icontains=search_query) |
                 Q(name_uk__icontains=search_query)
@@ -263,8 +257,8 @@ class CollectionList(generics.ListCreateAPIView, CachedQueryMixin):
     ordering_fields = ['name_en', 'name_uk']
 
     def get_queryset(self):
-        cache_key = "collection_list"
-        queryset = Collection.objects.all()
+        cache_key = f"collection_list_{self.request.GET.urlencode()}"
+        queryset = Collection.objects.only('name_en', 'name_uk', 'photo')  # Optimize data fetching
         search_query = self.request.query_params.get('search', None)
         if search_query:
             search_query = unquote(search_query)
@@ -272,7 +266,7 @@ class CollectionList(generics.ListCreateAPIView, CachedQueryMixin):
                 Q(name_en__icontains=search_query) |
                 Q(name_uk__icontains=search_query)
             )
-        return self.get_cached_queryset(cache_key, queryset)
+        return self.get_cached_queryset(cache_key, queryset)        
     
     def perform_create(self, serializer):
         instance = serializer.save()
