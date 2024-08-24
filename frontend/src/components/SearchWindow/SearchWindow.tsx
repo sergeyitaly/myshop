@@ -11,6 +11,8 @@ import { MotionItem } from '../MotionComponents/MotionItem';
 import { MotionSearch } from '../MotionComponents/MotionSearch';
 import { useTranslation } from 'react-i18next';
 import { useCallback } from 'react';
+import { useDebounce } from '../../hooks/useDebounce';
+
 
 interface SearchWindowProps {
     value: string;
@@ -28,13 +30,14 @@ export const SearchWindow = ({
     onClickProduct
 }: SearchWindowProps) => {
     const { t, i18n } = useTranslation();
+    const debouncedQuery = useDebounce(queryText, 300); // 300ms debounce
 
     const {
         data: products,
         isSuccess,
         isLoading,
         isFetching
-    } = useGetManyProductsByFilterQuery(queryText ? { search: queryText } : skipToken);
+    } = useGetManyProductsByFilterQuery(debouncedQuery ? { search: debouncedQuery } : skipToken);
 
     const handleClickClose = () => {
         onClickClose && onClickClose();
