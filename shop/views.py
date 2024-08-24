@@ -25,6 +25,8 @@ import os
 from django.utils import timezone
 from datetime import timedelta
 from django.utils.cache import add_never_cache_headers
+import urllib.parse
+import base64
 
 class CustomPageNumberPagination(PageNumberPagination):
     default_page_size = 4
@@ -67,7 +69,7 @@ class CachedQueryMixin:
         return cached_data
     
 class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
-    queryset = Product.objects.all()
+#    queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
     pagination_class = CustomPageNumberPagination  # Use custom pagination for products
@@ -78,11 +80,16 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
     def get_queryset(self):
         cache_key = f"product_list_{self.request.GET.urlencode()}"
         queryset = Product.objects.all()
+
         # Apply search filter
         search_query = self.request.query_params.get('search', None)
         if search_query:
             # Decode the search query from URL encoding
-            search_query = unquote(search_query)
+            search_query = urllib.parse.unquote(search_query)
+
+            # Optional: Convert the query to ASCII if needed
+            # search_query = search_query.encode('ascii', 'ignore').decode('ascii')
+
             queryset = queryset.filter(
                 Q(name_en__icontains=search_query) |
                 Q(name_uk__icontains=search_query)
