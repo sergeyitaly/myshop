@@ -1,4 +1,4 @@
-import { ChangeEvent, useState, useEffect } from 'react';
+import { ChangeEvent } from 'react';
 import { useGetManyProductsByFilterQuery } from '../../api/productSlice';
 import { ResultCard } from './ResultCard/ResultCard';
 import { SearchInput } from './SearchInput/SearchInput';
@@ -10,26 +10,7 @@ import styles from './SearchWindow.module.scss';
 import { MotionItem } from '../MotionComponents/MotionItem';
 import { MotionSearch } from '../MotionComponents/MotionSearch';
 import { useTranslation } from 'react-i18next';
-
-// Normalize text to improve search functionality
-const normalizeText = (text: string): string => {
-    return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-};
-
-// Filter products by query, using normalized text for comparison
-const filterProductsByQuery = (products: Product[], query: string) => {
-    const normalizedQuery = normalizeText(query);
-    return products.filter(product => {
-        const nameEnMatch = product.name_en && normalizeText(product.name_en).includes(normalizedQuery);
-        const nameUkMatch = product.name_uk && normalizeText(product.name_uk).includes(normalizedQuery);
-        return nameEnMatch || nameUkMatch;
-    });
-};
-
-// Get the most relevant product name or a fallback
-const getTranslatedProductName = (product: Product): string => {
-    return product.name_en || product.name_uk || product.name;
-};
+import { useCallback } from 'react';
 
 interface SearchWindowProps {
     value: string;
@@ -46,28 +27,14 @@ export const SearchWindow = ({
     onClickClose,
     onClickProduct
 }: SearchWindowProps) => {
-    const { t } = useTranslation();
-    const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+    const { t, i18n } = useTranslation();
 
-    // Encode the queryText for the API request
-    const encodedQueryText = encodeURIComponent(queryText);
-
-    // Use the hook and destructure correctly
     const {
         data: products,
         isSuccess,
         isLoading,
         isFetching
-    } = useGetManyProductsByFilterQuery(encodedQueryText ? { search: encodedQueryText } : skipToken);
-
-    useEffect(() => {
-        if (products && isSuccess) {
-            console.log('Products:', products.results); // Debug log
-            const results = filterProductsByQuery(products.results, queryText);
-            console.log('Filtered Results:', results); // Debug log
-            setFilteredProducts(results);
-        }
-    }, [products, queryText, isSuccess]);
+    } = useGetManyProductsByFilterQuery(queryText ? { search: queryText } : skipToken);
 
     const handleClickClose = () => {
         onClickClose && onClickClose();
@@ -77,49 +44,57 @@ export const SearchWindow = ({
         onClickProduct && onClickProduct(product);
     };
 
+    const handleSearch = (query: string) => {
+        // Handle the search query here if needed
+        console.log('Search query:', query);
+    };
+        
+      const getTranslatedProductName = useCallback((product: Product | undefined): string => {
+        return i18n.language === 'uk'
+          ? product?.name_uk || product?.name || ''
+          : product?.name_en || product?.name || '';
+      }, [i18n.language]);
+
     return (
         <MotionSearch className={styles.container}>
             <SearchInput
                 id='search'
                 value={value}
-                onChange={(e) => {
-                    onChange(e);
-                }}
+                onChange={onChange}
                 onClickClose={handleClickClose}
-                onSearch={() => {}}
+                onSearch={handleSearch}  // Add the onSearch prop here
             />
             {
-                isLoading ?
-                    <div className={styles.resultContainer}>
-                        <MapComponent
-                            component={<ResultCardSkeleton />}
-                            qty={4}
-                        />
-                    </div>
-                    :
-                    filteredProducts.length > 0 &&
-                    <div className={styles.resultContainer}>
-                        {
-                            filteredProducts.map((product, i) => (
-                                <MotionItem
-                                    key={product.id}
-                                    index={i}
-                                    offset={50}
-                                >
-                                    <ResultCard
-                                        key={product.id}
-                                        src={product.photo}
-                                        title={getTranslatedProductName(product)}
-                                        loading={isFetching}
-                                        onClick={() => handleClickProduct(product)}
-                                    />
-                                </MotionItem>
-                            ))
-                        }
-                    </div>
+                isLoading ? 
+                <div className={styles.resultContainer}>
+                    <MapComponent
+                        component={<ResultCardSkeleton />}
+                        qty={4}
+                    />
+                </div>
+                :
+                products && products.results.length > 0 &&
+                <div className={styles.resultContainer}>
+                    {
+                        products.results.map((product, i) => (
+                            <MotionItem
+                                key={product.id}
+                                index={i}
+                                offset={50}
+                            >
+                                <ResultCard
+                                    src={product.photo}
+                                    title={getTranslatedProductName(product)}
+                                    loading={isFetching}
+                                    onClick={() => handleClickProduct(product)}
+                                />
+                            </MotionItem>
+                        ))
+                    }
+                </div>
             }
             {
-                isSuccess && filteredProducts.length === 0 &&
+                isSuccess && products && products.results.length === 0 &&
                 <>
                 {isFetching ? (
                     <p className={styles.noResults}>{t('searching')}</p>
