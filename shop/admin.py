@@ -30,15 +30,15 @@ class AdditionalFieldInline(admin.TabularInline):
 @admin.register(Product)
 class ProductAdmin(TranslationAdmin):
     form = ProductForm
-    list_display = ('id_link', 'name_en', 'name_uk','collection', 'main_product_image', 'price', 'currency', 'discount', 'stock', 'available', 'sales_count', 'popularity')
+    list_display = ('id_link', 'name','collection', 'main_product_image', 'price', 'currency', 'discount', 'stock', 'available', 'sales_count', 'popularity')
     search_fields = ['name_en', 'name_uk']
     readonly_fields = ('id', 'slug', 'main_product_image_display', 'display_gallery')
     fields = (
-        'id', 'name_en', 'name_uk', 'collection', 'description_en','description_uk', 'price', 'currency', 'discount', 'stock', 'available', 'sales_count',
+        'id', 'name', 'collection', 'description_en','description_uk', 'price', 'currency', 'discount', 'stock', 'available', 'sales_count',
         'popularity', 'color_name_en','color_name_uk', 'color_value', 'size', 'slug', 'photo',
         'main_product_image_display', 'display_gallery'
     )
-    list_display_links = ['name_en', 'name_uk']
+    list_display_links = ['name']
     sortable_by = ['category','collection', 'price', 'sales_count', 'popularity']
     show_full_result_count = False
     inlines = [ProductImageInline, AdditionalFieldInline]
@@ -76,7 +76,7 @@ class CollectionInline(admin.TabularInline):
     extra = 1
     verbose_name = _('Collection')
     verbose_name_plural = _('Collections')
-    fields = ('name_en', 'name_uk', 'category', 'photo', 'image_tag')
+    fields = ('name', 'category', 'photo', 'image_tag')
     readonly_fields = ('id', 'image_tag')
 
     def image_tag(self, obj):
@@ -90,7 +90,7 @@ class CollectionInline(admin.TabularInline):
 
 @admin.register(Category)
 class CategoryAdmin(TranslationAdmin):
-    list_display = ('id', 'name_en','name_uk', 'collections_with_products')
+    list_display = ('id', 'name', 'collections_with_products')
     search_fields = ['name_en', 'name_uk']
     inlines = [CollectionInline]
 
@@ -147,7 +147,7 @@ class ProductInline(admin.TabularInline):
 @admin.register(Collection)
 class CollectionAdmin(TranslationAdmin):
     form = CollectionForm
-    list_display = ('id', 'name_en','name_uk', 'category', 'image_tag', 'products_list')
+    list_display = ('id', 'name', 'category', 'image_tag', 'products_list')
     search_fields = ['name_en','name_uk']
     readonly_fields = ('id', 'image_tag')
     inlines = [ProductInline]
