@@ -1,26 +1,33 @@
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import style from './style.module.scss'
-import {NamedSection} from "../../NamedSection/NamedSection";
-import {PreviewCard} from "../../Cards/PreviewCard/PreviewCard";
-import {useGetAllProductsFromCollectionQuery} from "../../../api/collectionSlice";
-import {ROUTE} from "../../../constants";
-import {PreviewLoadingCard} from "../../Cards/PreviewCard/PreviewLoagingCard";
+import style from './style.module.scss';
+import { NamedSection } from "../../NamedSection/NamedSection";
+import { PreviewCard } from "../../Cards/PreviewCard/PreviewCard";
+import { useGetAllProductsFromCollectionQuery } from "../../../api/collectionSlice";
+import { ROUTE } from "../../../constants";
+import { PreviewLoadingCard } from "../../Cards/PreviewCard/PreviewLoagingCard";
+import { useTranslation } from 'react-i18next';
+import { useCallback } from 'react';
+import { Product } from "../../../models/entities"; // Import the Product type
 
-function CarouselCeramic () {
-
+function CarouselCeramic() {
     const collectionId = 3;
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
 
     const { data, isLoading } = useGetAllProductsFromCollectionQuery(collectionId);
-
     const products = data?.results || [];
 
+    // Use the imported Product type
+    const getTranslatedProductName = useCallback((product: Product): string => {
+        return i18n.language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
+    }, [i18n.language]);
+
     const handleClickProduct = (productId: number) => {
-        navigate(`${ROUTE.PRODUCT}${productId}`)
-    }
+        navigate(`${ROUTE.PRODUCT}${productId}`);
+    };
 
     const settings = {
         dots: true,
@@ -46,7 +53,7 @@ function CarouselCeramic () {
 
     return (
         <div className={style.sliderContainer}>
-            <NamedSection title="Кераміка" >
+            <NamedSection title={t('Ceramics')}>
                 <Slider {...settings}>
                     {isLoading
                         ? Array.from({ length: 3 }).map((_, index) => (
@@ -59,8 +66,7 @@ function CarouselCeramic () {
                                 <PreviewCard
                                     key={product.id}
                                     photoSrc={product.photo_url}
-                                    // discount = {product.discount}
-                                    title={product.name}
+                                    title={getTranslatedProductName(product)}
                                     price={product.price}
                                     currency={product.currency}
                                     previewSrc={product.photo_thumbnail_url}
@@ -71,9 +77,7 @@ function CarouselCeramic () {
                 </Slider>
             </NamedSection>
         </div>
-
     );
 }
 
-
-export default CarouselCeramic ;
+export default CarouselCeramic;

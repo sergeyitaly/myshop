@@ -23,15 +23,12 @@ class CollectionSerializer(serializers.ModelSerializer):
     description_en = serializers.CharField(required=False)
     description_uk = serializers.CharField(required=False)
 
+    # Use a single method for URL fetching
     def get_photo_url(self, obj):
-        if obj.photo:
-            return obj.photo.url
-        return None
+        return obj.photo.url if obj.photo else None
 
     def get_photo_thumbnail_url(self, obj):
-        if obj.photo_thumbnail:
-            return obj.photo_thumbnail.url
-        return None
+        return obj.photo_thumbnail.url if obj.photo_thumbnail else None
     
     class Meta:
         model = Collection
@@ -79,15 +76,12 @@ class ProductSerializer(serializers.ModelSerializer):
     additional_fields = AdditionalFieldSerializer(many=True, read_only=True)
 
 
+    # Use a single method for URL fetching
     def get_photo_url(self, obj):
-        if obj.photo:
-            return obj.photo.url
-        return None
+        return obj.photo.url if obj.photo else None
 
     def get_photo_thumbnail_url(self, obj):
-        if obj.photo_thumbnail:
-            return obj.photo_thumbnail.url
-        return None
+        return obj.photo_thumbnail.url if obj.photo_thumbnail else None
 
     class Meta:
         model = Product

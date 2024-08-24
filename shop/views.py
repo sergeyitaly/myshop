@@ -17,8 +17,14 @@ from .models import AdditionalField
 from .serializers import AdditionalFieldSerializer
 from django.http import JsonResponse
 from django.http import HttpResponse
-
-
+from rest_framework.filters import SearchFilter
+from urllib.parse import unquote
+from django.http import FileResponse, Http404
+from django.conf import settings
+import os
+from django.utils import timezone
+from datetime import timedelta
+from django.utils.cache import add_never_cache_headers
 
 class CustomPageNumberPagination(PageNumberPagination):
     default_page_size = 4
@@ -52,14 +58,36 @@ class CollectionPageNumberPagination(PageNumberPagination):
             'page_size': self.page.paginator.per_page,
         })
     
-class ProductList(generics.ListCreateAPIView):
+class CachedQueryMixin:
+    def get_cached_queryset(self, cache_key, queryset, timeout=60 * 15):
+        cached_data = cache.get(cache_key)
+        if not cached_data:
+            cached_data = queryset
+            cache.set(cache_key, cached_data, timeout)
+        return cached_data
+    
+class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
     pagination_class = CustomPageNumberPagination  # Use custom pagination for products
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    search_fields = ['name', 'description']
-    ordering_fields = ['name', 'price', 'sales_count', 'popularity']
+    search_fields = ['name_en', 'name_uk']
+    ordering_fields = ['name_en', 'name_uk','price', 'sales_count', 'popularity']
+
+    def get_queryset(self):
+        cache_key = f"product_list_{self.request.GET.urlencode()}"
+        queryset = Product.objects.all()
+        # Apply search filter
+        search_query = self.request.query_params.get('search', None)
+        if search_query:
+            # Decode the search query from URL encoding
+            search_query = unquote(search_query)
+            queryset = queryset.filter(
+                Q(name_en__icontains=search_query) |
+                Q(name_uk__icontains=search_query)
+            )
+        return self.get_cached_queryset(cache_key, queryset)
 
 
 class ProductListFilter(generics.ListCreateAPIView):
@@ -68,11 +96,31 @@ class ProductListFilter(generics.ListCreateAPIView):
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     filterset_class = ProductFilter
-    search_fields = ['name', 'description']
+    search_fields = ['name_en', 'name_uk']
 
+    def get_cached_queryset(self, cache_key, queryset):
+        """
+        Retrieve the cached queryset if available, otherwise set the cache.
+        """
+        cached_queryset = cache.get(cache_key)
+        if not cached_queryset:
+            cache.set(cache_key, queryset, timeout=300)  # Cache timeout set to 300 seconds (5 minutes)
+            cached_queryset = queryset
+        return cached_queryset
+    
     def get_queryset(self):
         queryset = Product.objects.all()
+        # Apply search filter
+        cache_key = f"filtered_product_list_{self.request.GET.urlencode()}"
 
+        search_query = self.request.query_params.get('search', None)
+        if search_query:
+            search_query = unquote(search_query)
+            queryset = queryset.filter(
+                Q(name_en__icontains=search_query) |
+                Q(name_uk__icontains=search_query)
+            )
+        
         # Explicitly filter by collections if provided
         collection_ids = self.request.query_params.get('collection', None)
         if collection_ids:
@@ -121,7 +169,7 @@ class ProductListFilter(generics.ListCreateAPIView):
             if valid_ordering_fields:
                 queryset = queryset.order_by(*valid_ordering_fields)
 
-        return queryset
+        return self.get_cached_queryset(cache_key, queryset)
     
     def list(self, request, *args, **kwargs):
         # Get the filtered queryset
@@ -191,29 +239,33 @@ class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
 
-class CollectionList(generics.ListCreateAPIView):
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        # Invalidate the cache when a collection is updated
+        cache.delete('product_detail')
+        return instance
+
+class CollectionList(generics.ListCreateAPIView, CachedQueryMixin):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
     permission_classes = [AllowAny]
     pagination_class = CollectionPageNumberPagination  # Use custom pagination for collections
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['category']
-    search_fields = ['name']
-    ordering_fields = ['name']
+    search_fields = ['name_en', 'name_uk']
+    ordering_fields = ['name_en', 'name_uk']
 
-    
     def get_queryset(self):
-        # Cache key for the queryset
-        cache_key = 'collection_list'
-        # Check if the queryset is already cached
-        queryset = cache.get(cache_key)
-        
-        if not queryset:
-            # If not cached, fetch the data and cache it
-            queryset = Collection.objects.select_related('category').all()
-            cache.set(cache_key, queryset, timeout=60 * 15)  # Cache timeout of 15 minutes
-        
-        return queryset
+        cache_key = "collection_list"
+        queryset = Collection.objects.all()
+        search_query = self.request.query_params.get('search', None)
+        if search_query:
+            search_query = unquote(search_query)
+            queryset = queryset.filter(
+                Q(name_en__icontains=search_query) |
+                Q(name_uk__icontains=search_query)
+            )
+        return self.get_cached_queryset(cache_key, queryset)
     
     def perform_create(self, serializer):
         instance = serializer.save()
@@ -232,8 +284,8 @@ class CollectionItemsPage(generics.ListAPIView):
     serializer_class = ProductSerializer
     pagination_class = CustomPageNumberPagination  # Use custom pagination for products
     filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['name', 'description']
-    ordering_fields = ['name', 'price']
+    search_fields = ['name_en', 'name_uk']
+    ordering_fields = ['name_en', 'name_uk','price']
     permission_classes = [AllowAny]
 
     def get_queryset(self):
@@ -260,14 +312,25 @@ class CollectionDetail(generics.RetrieveUpdateDestroyAPIView):
         cache.delete('collection_list')
         return instance
 
-class CategoryList(generics.ListCreateAPIView):
-    queryset = Category.objects.all()
+class CategoryList(generics.ListCreateAPIView, CachedQueryMixin):
     serializer_class = CategorySerializer
     permission_classes = [AllowAny]
-    pagination_class = CustomPageNumberPagination  # Use custom pagination for categories
+    pagination_class = CustomPageNumberPagination
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    filterset_fields = ['name']
-    search_fields = ['name']
+    search_fields = ['name_en', 'name_uk']
+
+    def get_queryset(self):
+        cache_key = "category_list"
+        queryset = Category.objects.all()
+        search_query = self.request.query_params.get('search', None)
+        if search_query:
+            search_query = unquote(search_query)
+            queryset = queryset.filter(
+                Q(name_en__icontains=search_query) |
+                Q(name_uk__icontains=search_query)
+            )
+        return self.get_cached_queryset(cache_key, queryset)
+
 
 class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
@@ -275,39 +338,13 @@ class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [AllowAny]
 
 class ProductView(APIView):
-    permission_classes = [AllowAny]
-
-    def get_object(self, pk):
-        try:
-            return Product.objects.get(pk=pk)
-        except Product.DoesNotExist:
-            raise Http404
-
     def get(self, request, pk, format=None):
         product = self.get_object(pk)
         serializer = ProductSerializer(product)
-        return Response(serializer.data)
-
-    def post(self, request):
-        serializer = ProductSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def put(self, request, pk):
-        product = self.get_object(pk)
-        serializer = ProductSerializer(product, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk):
-        product = self.get_object(pk)
-        product.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
+        response = Response(serializer.data)
+        add_never_cache_headers(response)
+        return response
+    
 class AdditionalFieldListCreateView(generics.ListCreateAPIView):
     queryset = AdditionalField.objects.all()
     serializer_class = AdditionalFieldSerializer
@@ -321,3 +358,24 @@ class AdditionalFieldDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = AdditionalField.objects.all()
     serializer_class = AdditionalFieldSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        # Invalidate the cache for this specific additional field detail
+        cache_key = f"additional_field_detail_{instance.id}"
+        cache.delete(cache_key)
+        return instance
+
+def serve_image(request, path):
+    file_path = os.path.join(settings.MEDIA_ROOT, path)
+    if not os.path.exists(file_path):
+        raise Http404("Image not found")
+    
+    response = FileResponse(open(file_path, 'rb'), content_type='image/jpeg')
+    
+    # Set cache headers with timezone-aware datetime
+    response['Cache-Control'] = 'public, max-age=86400'  # Cache for 1 day
+    expires_at = timezone.now() + timedelta(days=1)
+    response['Expires'] = expires_at.strftime('%a, %d %b %Y %H:%M:%S GMT')
+    
+    return response
