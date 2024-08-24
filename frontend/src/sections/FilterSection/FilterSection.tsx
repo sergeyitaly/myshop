@@ -90,19 +90,18 @@ export const FilterSection = ({
     };
 
     const sortList = useSortList();
-
-    // Function to get translated collection name
-    const getTranslatedCollectionName = useCallback((collection?: Collection): string => {
-        if (!collection) return '';
-        return i18n.language === 'uk' ? collection.name_uk || collection.name : collection.name_en || collection.name;
-    }, [i18n.language]);
-
     // Function to get translated category name
     const getTranslatedCategoryName = useCallback((category?: Category): string => {
         if (!category) return '';
         return i18n.language === 'uk'
             ? category?.name_uk || category?.name || ''
             : category?.name_en || category?.name || '';
+    }, [i18n.language]);
+    
+    // Function to get translated collection name
+    const getTranslatedCollectionName = useCallback((collection?: Collection): string => {
+        if (!collection) return '';
+        return i18n.language === 'uk' ? collection.name_uk || collection.name : collection.name_en || collection.name;
     }, [i18n.language]);
 
     // Function to get translated product name
