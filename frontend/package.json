@@ -3,11 +3,15 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "resolutions": {
+    "eslint": "8.57.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
+    "postinstall": "npx npm-force-resolutions",
     "vercel-postbuild": "cp -r ../dist/* .vercel_build_output",
     "vercel-build": "npm install typescript --save-dev && tsc && vite build && npm run vercel-postbuild"
   },
@@ -52,11 +56,12 @@
     "@types/react-slick": "^0.23.13",
     "@typescript-eslint/eslint-plugin": "^8.2.0",
     "@typescript-eslint/parser": "^8.2.0",
+    "@unicode/unicode-9.0.0": "^1.5.2",
     "@vitejs/plugin-react": "^4.3.1",
     "cld3-asm": "^4.0.0",
-    "eslint": "^9.9.0",
+    "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.35.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.5",
     "framer-motion": "^11.3.2",
     "franc": "^6.2.0",
