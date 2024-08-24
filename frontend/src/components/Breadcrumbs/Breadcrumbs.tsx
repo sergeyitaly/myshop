@@ -3,18 +3,19 @@ import { useLocation, Link as RouterLink } from 'react-router-dom';
 import { Breadcrumbs, Link, Stack, CircularProgress, Typography } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { useTranslation } from 'react-i18next';
-import { getProductNameById, getCollectionNameById } from '../../api/api'; // Adjust the path as needed
-import styles from './Breadcrumbs.module.css'; // Import CSS module
+import { getProductNameById, getCollectionNameById } from '../../api/api';
+import styles from './Breadcrumbs.module.css';
 
 const BreadcrumbsComponent = () => {
     const location = useLocation();
     const { t, i18n } = useTranslation();
     const [breadcrumbs, setBreadcrumbs] = useState<JSX.Element[]>([]);
-    const [productData, setProductData] = useState<{ name_uk?: string; name_en?: string } | null>(null);
-    const [collectionData, setCollectionData] = useState<{ name_uk?: string; name_en?: string } | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [productData, setProductData] = useState<{ name_uk?: string; name_en?: string } | null>(null);
+    const [collectionData, setCollectionData] = useState<{ name_uk?: string; name_en?: string } | null>(null);
 
+    // Extract path segments
     const paths = useMemo(() => location.pathname.split('/').filter(Boolean), [location.pathname]);
     const isProductPage = paths.includes('product');
     const isCollectionPage = paths.includes('collection');
@@ -32,14 +33,14 @@ const BreadcrumbsComponent = () => {
                     const product = await getProductNameById(productId);
                     setProductData(product);
                 } else {
-                    setProductData(null); // Clear product data if not on a product page
+                    setProductData(null);
                 }
 
                 if (isCollectionPage && collectionId) {
                     const collection = await getCollectionNameById(Number(collectionId));
                     setCollectionData(collection);
                 } else {
-                    setCollectionData(null); // Clear collection data if not on a collection page
+                    setCollectionData(null);
                 }
             } catch (err) {
                 setError('Error loading data');
@@ -49,11 +50,7 @@ const BreadcrumbsComponent = () => {
         };
 
         fetchData();
-    }, [productId, collectionId, isProductPage, isCollectionPage]);
-
-    const getTranslatedName = (nameUk?: string, nameEn?: string): string => {
-        return i18n.language === 'uk' ? nameUk || '' : nameEn || '';
-    };
+    }, [productId, collectionId, isProductPage, isCollectionPage, i18n.language]);
 
     useEffect(() => {
         const generateBreadcrumbs = () => {
@@ -79,7 +76,6 @@ const BreadcrumbsComponent = () => {
                 </Link>
             ];
 
-            // Add static breadcrumb titles
             paths.forEach((_, index) => {
                 const currentPath = `/${paths.slice(0, index + 1).join('/')}`;
 
@@ -98,11 +94,10 @@ const BreadcrumbsComponent = () => {
                 }
             });
 
-            // Handle collection and product names conditionally
             if (isCollectionPage && collectionData) {
                 breadcrumbItems.push(
                     <span key="collectionName" style={{ marginLeft: '10px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}>
-                        {getTranslatedName(collectionData.name_uk, collectionData.name_en)}
+                        {i18n.language === 'uk' ? collectionData.name_uk : collectionData.name_en}
                     </span>
                 );
             }
@@ -110,7 +105,7 @@ const BreadcrumbsComponent = () => {
             if (isProductPage && productData) {
                 breadcrumbItems.push(
                     <span key="productName" style={{ marginLeft: '10px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}>
-                        {getTranslatedName(productData.name_uk, productData.name_en)}
+                        {i18n.language === 'uk' ? productData.name_uk : productData.name_en}
                     </span>
                 );
             }

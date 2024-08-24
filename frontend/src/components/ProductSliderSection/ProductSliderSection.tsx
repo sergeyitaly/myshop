@@ -8,12 +8,8 @@ import { ROUTE } from "../../constants";
 import styles from './ProductSliderSection.module.scss'
 import { SwiperSlide } from "swiper/react";
 import { PreviewLoadingCard } from "../Cards/PreviewCard/PreviewLoagingCard";
+import {useCallback } from 'react';
 
-
-// Function to get translated product name
-const getTranslatedProductName = (product: Product, language: string): string => {
-    return language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
-  };
 
 interface ProductSliderSectionProps {
     translateField: string
@@ -36,7 +32,10 @@ export const ProductSliderSection = ({
     const handleClickSlide = (productItem: Product) => {
         navigate(`${ROUTE.PRODUCT}${productItem.id}`);
     }
-
+    const getTranslatedProductName = useCallback((product: Product): string => {
+        return i18n.language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
+      }, [i18n.language]);
+    
     return (
         <NamedSection
             title={t(translateField)}
@@ -50,7 +49,7 @@ export const ProductSliderSection = ({
                         >
                             <PreviewCard
                                 className={styles.card}
-                                title={getTranslatedProductName(product, i18n.language) || t('no_name')}  // Use translated name or fallback
+                                title={getTranslatedProductName(product)}  // Use translated name or fallback
                                 discount={product.discount}
                                 price={product.price}
                                 currency={product.currency}
