@@ -39,7 +39,7 @@ AWS_S3_OBJECT_PARAMETERS = {
 }
 
 
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
@@ -54,8 +54,8 @@ INTERNAL_IPS = ["127.0.0.1", "localhost", '::1']
 allowed_hosts = os.getenv('ALLOWED_HOSTS', '')
 
 # Split the string into a list and strip whitespace
-#ALLOWED_HOSTS = [host.strip() for host in allowed_hosts.split(',') if host.strip()]
-ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app', 'localhost']
+ALLOWED_HOSTS = [host.strip() for host in allowed_hosts.split(',') if host.strip()]
+#ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app', 'localhost']
 
 # Application definition
 
