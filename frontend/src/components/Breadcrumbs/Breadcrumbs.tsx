@@ -1,74 +1,87 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useLocation, Link as RouterLink } from 'react-router-dom';
 import { Breadcrumbs, Link, Stack, CircularProgress, Typography } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { useTranslation } from 'react-i18next';
-import useFetch from '../../hooks/useFetch'; // Adjust the path as needed
 import { getProductNameById, getCollectionNameById } from '../../api/api'; // Adjust the path as needed
 import styles from './Breadcrumbs.module.css'; // Import CSS module
-
-const isHiddenIfLocationContainPath = (path: string, substring: string): boolean => path.includes(substring);
-
-type BreadcrumbTitles = {
-    [key: string]: string;
-};
-
-const getTranslatedProductName = (product: any, language: string): string => {
-    return language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
-};
-
-const getTranslatedCollectionName = (collection: any, language: string): string => {
-    return language === 'uk' ? collection.name_uk || collection.name : collection.name_en || collection.name;
-};
 
 const BreadcrumbsComponent = () => {
     const location = useLocation();
     const { t, i18n } = useTranslation();
     const [breadcrumbs, setBreadcrumbs] = useState<JSX.Element[]>([]);
+    const [productData, setProductData] = useState<{ name_uk?: string; name_en?: string } | null>(null);
+    const [collectionData, setCollectionData] = useState<{ name_uk?: string; name_en?: string } | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const paths = location.pathname.split('/').filter(Boolean);
+    const paths = useMemo(() => location.pathname.split('/').filter(Boolean), [location.pathname]);
     const isProductPage = paths.includes('product');
     const isCollectionPage = paths.includes('collection');
 
     const productId = isProductPage ? paths[paths.indexOf('product') + 1] : '';
     const collectionId = isCollectionPage ? paths[paths.indexOf('collection') + 1] : '';
-    const collectionIdNumber = Number(collectionId);
 
-    const [productData, productLoading, productError] = useFetch(() => getProductNameById(productId), [productId, i18n.language]);
-    const [collectionData, collectionLoading, collectionError] = useFetch(() => getCollectionNameById(collectionIdNumber), [collectionId, i18n.language]);
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            setError(null);
 
+            try {
+                if (isProductPage && productId) {
+                    const product = await getProductNameById(productId);
+                    setProductData(product);
+                } else {
+                    setProductData(null); // Clear product data if not on a product page
+                }
+
+                if (isCollectionPage && collectionId) {
+                    const collection = await getCollectionNameById(Number(collectionId));
+                    setCollectionData(collection);
+                } else {
+                    setCollectionData(null); // Clear collection data if not on a collection page
+                }
+            } catch (err) {
+                setError('Error loading data');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [productId, collectionId, isProductPage, isCollectionPage]);
+
+    const getTranslatedName = (nameUk?: string, nameEn?: string): string => {
+        return i18n.language === 'uk' ? nameUk || '' : nameEn || '';
+    };
 
     useEffect(() => {
         const generateBreadcrumbs = () => {
-            if (productLoading || collectionLoading) {
+            if (loading) {
                 setBreadcrumbs([<CircularProgress key="loading" />]);
                 return;
             }
 
-            if (productError || collectionError) {
-                setBreadcrumbs([<Typography key="error" color="error">Error loading data</Typography>]);
+            if (error) {
+                setBreadcrumbs([<Typography key="error" color="error">{error}</Typography>]);
                 return;
             }
 
-            const paths = location.pathname.split('/').filter(Boolean);
-            const breadcrumbItems: JSX.Element[] = [];
+            const breadcrumbItems: JSX.Element[] = [
+                <Link
+                    key="/"
+                    component={RouterLink}
+                    underline="hover"
+                    to="/"
+                    sx={{ marginLeft: '30px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}
+                >
+                    {t('home')}
+                </Link>
+            ];
 
-            if (location.pathname !== '/') {
-                breadcrumbItems.push(
-                    <Link
-                        key="/"
-                        component={RouterLink}
-                        underline="hover"
-                        to="/"
-                        sx={{ marginLeft: '30px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}
-                    >
-                        {t('home')}
-                    </Link>
-                );
-            }
-
-            paths.forEach((path, index) => {
-                const currentPath = `/${path}`;
+            // Add static breadcrumb titles
+            paths.forEach((_, index) => {
+                const currentPath = `/${paths.slice(0, index + 1).join('/')}`;
 
                 if (breadcrumbTitles[currentPath]) {
                     breadcrumbItems.push(
@@ -82,87 +95,47 @@ const BreadcrumbsComponent = () => {
                             {breadcrumbTitles[currentPath]}
                         </Link>
                     );
-                } else {
-                    if (index === paths.length - 1 && productData && collectionData) {
-                        breadcrumbItems.push(
-                            <Link
-                                key="collections"
-                                component={RouterLink}
-                                underline="hover"
-                                to="/collections"
-                                sx={{ marginLeft: '10px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}
-                            >
-                                {t('collections')}
-                            </Link>,
-                            <Link
-                                key="collection"
-                                component={RouterLink}
-                                underline="hover"
-                                to={`/collections/${collectionId}`}
-                                sx={{ marginLeft: '10px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}
-                            >
-                                {getTranslatedCollectionName(collectionData, i18n.language)}
-                            </Link>,
-                            <span key="productName" style={{ fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}>
-                                {getTranslatedProductName(productData, i18n.language)}
-                            </span>
-                        );
-                    } else if (index === paths.length - 1 && productData) {
-                        breadcrumbItems.push(
-                            <Link
-                                key="collections"
-                                component={RouterLink}
-                                underline="hover"
-                                to="/collections"
-                                sx={{ marginLeft: '10px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}
-                            >
-                                {t('collections')}
-                            </Link>,
-                            <span key="productName" style={{ marginLeft: '10px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}>
-                                {getTranslatedProductName(productData, i18n.language)}
-                            </span>
-                        );
-                    } else if (index === paths.length - 1 && collectionData) {
-                        breadcrumbItems.push(
-                            <Link
-                                key="collections"
-                                component={RouterLink}
-                                underline="hover"
-                                to="/collections"
-                                sx={{ marginLeft: '10px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}
-                            >
-                                {t('collections')}
-                            </Link>,
-                            <span key="collectionName" style={{ marginLeft: '10px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}>
-                                {getTranslatedCollectionName(collectionData, i18n.language)}
-                            </span>
-                        );
-                    }
                 }
             });
+
+            // Handle collection and product names conditionally
+            if (isCollectionPage && collectionData) {
+                breadcrumbItems.push(
+                    <span key="collectionName" style={{ marginLeft: '10px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}>
+                        {getTranslatedName(collectionData.name_uk, collectionData.name_en)}
+                    </span>
+                );
+            }
+
+            if (isProductPage && productData) {
+                breadcrumbItems.push(
+                    <span key="productName" style={{ marginLeft: '10px', fontSize: '20px', fontFamily: 'Inter', color: '#000000' }}>
+                        {getTranslatedName(productData.name_uk, productData.name_en)}
+                    </span>
+                );
+            }
 
             setBreadcrumbs(breadcrumbItems);
         };
 
         generateBreadcrumbs();
-    }, [productData, collectionData, productLoading, collectionLoading, productError, collectionError, i18n.language, location.pathname]);
+    }, [productData, collectionData, loading, error, i18n.language, paths]);
 
-    const breadcrumbTitles: BreadcrumbTitles = {
+    const breadcrumbTitles: Record<string, string> = useMemo(() => ({
         '/': t('home'),
         '/collections': t('collections'),
         '/about': t('about_us'),
         '/contact': t('contact'),
-    };
+    }), [t]);
 
     return (
         <div className={styles.container} style={{ backgroundColor: '#E3E3E26E' }}>
             <Stack spacing={2}>
-                {
-                    !isHiddenIfLocationContainPath(location.pathname, 'thank') &&
+                {!location.pathname.includes('thank') && (
                     <Breadcrumbs separator={<NavigateNextIcon />} aria-label="breadcrumb">
                         {breadcrumbs}
                     </Breadcrumbs>
-                }
+                )}
             </Stack>
         </div>
     );

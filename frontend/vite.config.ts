@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
 import path from 'path';
 import { PreRenderedAsset } from "rollup";
-import commonjs from '@rollup/plugin-commonjs'; // Corrected import
+import commonjs from 'vite-plugin-commonjs';
 import dotenv from 'dotenv';
 import { resolve } from 'path';
 
