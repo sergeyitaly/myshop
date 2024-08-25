@@ -17,10 +17,5 @@
       "src": "/(.*)",
       "dest": "/myshop/wsgi.py"
     }
-  ],
-"functions": {
-"api/*.py": {
-"maxDuration": 15
-}
-}
+  ]
 }
