@@ -26,8 +26,7 @@ interface FilterSectionProps {
 export const FilterSection = ({
     initialCollection
 }: FilterSectionProps) => {
-    const LIMIT = 100;
-
+    const LIMIT = 8;
     const navigate = useNavigate();
     const [currentPage, setCurrentPage] = useState<number>(1);
     const { t, i18n } = useTranslation();

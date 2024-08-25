@@ -7,7 +7,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.http import Http404
 from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer
 from .models import Product, Collection, Category
-from .filters import ProductFilter
+from .filters import ProductFilter, ProductsFilter
 from django.db.models import F, FloatField, ExpressionWrapper, Min, Max, Q
 from django.core.cache import cache
 from rest_framework import generics, permissions
@@ -23,7 +23,7 @@ from django.utils.cache import add_never_cache_headers
 import urllib.parse
 
 class CustomPageNumberPagination(PageNumberPagination):
-    default_page_size = 4
+    default_page_size = 8
     page_size_query_param = 'page_size'
     max_page_size = 100
 
@@ -66,6 +66,7 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
 #    queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
+    filterset_class = ProductsFilter
     pagination_class = CustomPageNumberPagination  # Use custom pagination for products
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     search_fields = ['name_en', 'name_uk']

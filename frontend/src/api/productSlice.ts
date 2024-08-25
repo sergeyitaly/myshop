@@ -11,7 +11,7 @@ export const productApiSlice = apiSlice.injectEndpoints({
     endpoints: builder => ({
 
         getAllProducts: builder.query<ServerResponce<Product[]>, void>({
-            query: () => `${apiBaseUrl}/api/${ENDPOINTS.PRODUCTS}/`
+            query: () => `${ENDPOINTS.PRODUCTS}/`
           }),
 
         getManyProductsByIdList: builder.query<Product[], number[]>({
@@ -28,18 +28,18 @@ export const productApiSlice = apiSlice.injectEndpoints({
         getManyProductsByFilter: builder.query<ServerResponce<Product[]>, ProductFilter>({
             query: (queryBuilder) => {
                 const qs = queryString(queryBuilder)
-                return `${apiBaseUrl}/api/${ENDPOINTS.PRODUCTS}/?${qs}`;
+                return `${ENDPOINTS.PRODUCTS}/?${qs}`
             }
         }),
 
         getOneProductById: builder.query<Product, number>({
-            query: (productId) => `${apiBaseUrl}/api/${ENDPOINTS.PRODUCT}/${productId}/`
+            query: (productId) => `${ENDPOINTS.PRODUCT}/${productId}/`
         }),
 
         getProductsByMainFilter: builder.query<ShortServerResponce<Product[]>, MainFilter>({
             query: (queryBuilder) => {
                 const qs = queryString(queryBuilder)
-                return `${apiBaseUrl}/api/${ENDPOINTS.FILTER}/?${qs}`
+                return `${ENDPOINTS.FILTER}/?${qs}`
             }
         })
     })
