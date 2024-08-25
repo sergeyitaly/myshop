@@ -3,6 +3,15 @@ from django_filters.rest_framework import OrderingFilter
 from .models import Product
 from django.db.models import Q
 
+class ProductsFilter(django_filters.FilterSet):
+    sales_count = django_filters.NumberFilter(field_name='sales_count', lookup_expr='exact')
+    popularity = django_filters.NumberFilter(field_name='popularity', lookup_expr='gte')
+    price = django_filters.NumberFilter(field_name='price', lookup_expr='gte')
+
+    class Meta:
+        model = Product
+        fields = ['popularity', 'price', 'sales_count']
+
 class NumberInFilter(django_filters.BaseInFilter, django_filters.NumberFilter):
     pass
 

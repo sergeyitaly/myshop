@@ -41,11 +41,11 @@ export const FilterMenu = ({
     const { i18n, t } = useTranslation(); // Initialize translation hook
 
     const { data: categories, isSuccess: isSuccessCategories } = useGetCategoriesByFilterQuery({
-        page_size: 100,
+        page_size: 8,
     });
     const { data: collections, isSuccess: isSuccessCollections } =
         useGetCollectionsByFilterQuery({
-            page_size: 100,
+            page_size: 8,
         });
 
     // Function to get translated category name
