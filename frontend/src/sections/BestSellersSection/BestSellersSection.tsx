@@ -6,11 +6,7 @@ export const BestSellersSection = () => {
 
     const {data, isLoading, isSuccess} = useGetProductsByMainFilterQuery({
         page_size: 100
-      })
-
-      console.log(data?.results);
-      
-
+      })      
     return (
         <ProductSliderSection
             isSuccess = {isSuccess}

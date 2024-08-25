@@ -8,9 +8,7 @@ import i18next from 'i18next';
 export const AboutUsSection = () => {
     const { t } = useTranslation();
     const [width, setWidth] = useState(window.innerWidth);
-
     useEffect(() => {
-        console.log('Current language:', i18next.language); // Debugging language
     }, [i18next.language]);
 
     useEffect(() => {

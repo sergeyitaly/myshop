@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next"; // Import useTranslation hook
 import { Currency } from "../models/entities"; // Import Currency type
 
 interface Tag {
-    type: 'category' | 'collection' | 'price';
+    type: 'category' | 'collection' | 'price' | 'discount';
     value: string;
 }
 
@@ -18,11 +18,12 @@ export const useFilters = (initialCollection?: Collection) => {
     const [tempCategories, setTempCategories] = useState<Category[]>([]);
     const [tempCollections, setTempCollections] = useState<Collection[]>([]);
     const [tempPriceValues, setTempPriceValues] = useState<[number, number]>([0, 0]);
+    const [hasDiscount, setHasDiscount] = useState<boolean | null>(null); // New state for has_discount
 
     const [activeCategories, setActiveCategories] = useState<Category[]>([]);
     const [activeCollections, setActiveCollections] = useState<Collection[]>([]);
     const [activePriceValues, setActivePriceValues] = useState<[number, number]>([minValue, maxValue]);
-
+    
     const [filter, setFilter] = useState<MainFilter>({});
     const [tagList, setTagList] = useState<Tag[]>([]);
 
@@ -30,7 +31,6 @@ export const useFilters = (initialCollection?: Collection) => {
 
     const { i18n } = useTranslation(); // Use the useTranslation hook
 
-    // Function to get category name based on the current language
     const getCategoryName = (category: Category): string => {
         switch (i18n.language) {
             case 'uk':
@@ -42,7 +42,6 @@ export const useFilters = (initialCollection?: Collection) => {
         }
     };
 
-    // Function to get collection name based on the current language
     const getCollectionName = (collection: Collection): string => {
         switch (i18n.language) {
             case 'uk':
@@ -54,7 +53,6 @@ export const useFilters = (initialCollection?: Collection) => {
         }
     };
 
-    // Function to get currency format based on the current language
     const getCurrencyFormat = (): Currency => {
         switch (i18n.language) {
             case 'uk':
@@ -68,8 +66,7 @@ export const useFilters = (initialCollection?: Collection) => {
         }
     };
 
-    // Create tags with translated names and currency
-    const createTags = (categories: Category[] = [], collections: Collection[] = [], price: [number, number]) => {
+    const createTags = (categories: Category[] = [], collections: Collection[] = [], price: [number, number], discount: boolean | null) => {
         let list: Tag[] = [];
         let categoryTags: Tag[] = categories.map((category) => ({
             type: 'category',
@@ -90,40 +87,44 @@ export const useFilters = (initialCollection?: Collection) => {
             });
         }
 
+        if (discount !== null) {
+            list.push({
+                type: 'discount',
+                value: discount ? 'Discounted' : 'No Discount'
+            });
+        }
+
         return list;
     };
 
-    // Update filters and tags when language changes
     useEffect(() => {
-        setTagList(createTags(activeCategories, activeCollections, activePriceValues));
-    }, [i18n.language, activeCategories, activeCollections, activePriceValues]);
+        setTagList(createTags(activeCategories, activeCollections, activePriceValues, hasDiscount));
+    }, [i18n.language, activeCategories, activeCollections, activePriceValues, hasDiscount]);
 
-    // Update active collections when initialCollection changes
     useEffect(() => {
         if (initialCollection) {
             setActiveCollections([initialCollection]);
         }
     }, [initialCollection]);
 
-    // Update filter and tag list based on active categories, collections, and other settings
     useEffect(() => {
-        setTagList(createTags(activeCategories, activeCollections, activePriceValues));
-
+        setTagList(createTags(activeCategories, activeCollections, activePriceValues, hasDiscount));
         setTempCategories(activeCategories);
         setTempPriceValues(activePriceValues);
         setTempCollections(activeCollections);
-
+    
         setFilter((state) => ({
             ...state, 
             category: activeCategories.map(({id}) => id).join(','),
             collection: activeCollections.map(({id}) => id).join(','),
             price_min: activePriceValues[0],
             price_max: activePriceValues[1],
-            ordering: sortBy
+            ordering: sortBy,
+            has_discount: state.has_discount // Ensure `has_discount` remains as a boolean or undefined
         }));
     }, [activeCategories, activePriceValues, activeCollections, sortBy]);
+    
 
-    // Handle category change
     const changeCategory = (category: Category) => {
         const alreadyExist = tempCategories.some(({ id }) => id === category.id);
         if (alreadyExist) {
@@ -133,7 +134,6 @@ export const useFilters = (initialCollection?: Collection) => {
         }
     };
 
-    // Handle collection change
     const changeCollection = (collection: Collection) => {
         const alreadyExist = tempCollections.some(({ id }) => id === collection.id);
         if (alreadyExist) {
@@ -143,26 +143,28 @@ export const useFilters = (initialCollection?: Collection) => {
         }
     };
 
-    // Handle price change
     const changePrice = (price: [number, number]) => {
         setTempPriceValues(price);
     };
 
-    // Clear all filters
+    // New function to handle discount filter change
+    const changeDiscount = (discount: boolean | null) => {
+        setHasDiscount(discount);
+    };
+
     const clearAllFilters = () => {
         setActiveCategories([]);
         setActivePriceValues([minValue, maxValue]);
         setActiveCollections([]);
+        setHasDiscount(null); // Reset has_discount filter
     };
 
-    // Apply changes to filters
     const applyChanges = () => {
         setActiveCategories(tempCategories);
         setActivePriceValues(tempPriceValues);
         setActiveCollections(tempCollections);
     };
 
-    // Delete tag
     const deleteTag = (tag: Tag) => {
         if (tag.type === 'price') {
             setActivePriceValues([minValue, maxValue]);
@@ -173,9 +175,11 @@ export const useFilters = (initialCollection?: Collection) => {
         if (tag.type === 'collection') {
             setActiveCollections(activeCollections.filter((collection) => getCollectionName(collection) !== tag.value));
         }
+        if (tag.type === 'discount') {
+            setHasDiscount(null);
+        }
     };
 
-    // Change ordering
     const changeOrdering = (ordering: string) => {
         setSortBy(ordering);
     };
@@ -197,6 +201,7 @@ export const useFilters = (initialCollection?: Collection) => {
         changePrice,
         clearAllFilters,
         applyChanges,
-        deleteTag
+        deleteTag,
+        changeDiscount, // Include changeDiscount in the return object
     };
 };
