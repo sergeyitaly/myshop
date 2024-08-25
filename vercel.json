@@ -1,5 +1,9 @@
 {
   "version": 2,
+  "functions": {
+    "api/**/*.ts": {
+      "timeout": 20
+    }},
   "builds": [
     { "src": "myshop/wsgi.py", "use": "@vercel/python", "config": { "maxLambdaSize": "100mb", "runtime": "python3.9" } },
     { "src": "build_files.sh", "use": "@vercel/static-build" }
