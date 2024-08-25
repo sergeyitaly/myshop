@@ -1,4 +1,3 @@
-from rest_framework import generics, status
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -6,7 +5,6 @@ from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import Http404
-from django_filters import FilterSet, NumberFilter
 from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer
 from .models import Product, Collection, Category
 from .filters import ProductFilter
@@ -15,10 +13,7 @@ from django.core.cache import cache
 from rest_framework import generics, permissions
 from .models import AdditionalField
 from .serializers import AdditionalFieldSerializer
-from django.http import JsonResponse
-from django.http import HttpResponse
 from rest_framework.filters import SearchFilter
-from urllib.parse import unquote
 from django.http import FileResponse, Http404
 from django.conf import settings
 import os
@@ -26,7 +21,6 @@ from django.utils import timezone
 from datetime import timedelta
 from django.utils.cache import add_never_cache_headers
 import urllib.parse
-import base64
 
 class CustomPageNumberPagination(PageNumberPagination):
     default_page_size = 4
@@ -75,7 +69,7 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
     pagination_class = CustomPageNumberPagination  # Use custom pagination for products
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     search_fields = ['name_en', 'name_uk']
-   # ordering_fields = ['name_en', 'name_uk']
+    ordering_fields = ['name_en', 'name_uk']
 
     def get_queryset(self):
         cache_key = f"product_list_{self.request.GET.urlencode()}"
@@ -83,7 +77,7 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
 
         search_query = self.request.query_params.get('search', None)
         if search_query:
-            search_query = unquote(search_query)
+            search_query = urllib.parse.unquote(search_query)
             queryset = queryset.filter(
                 Q(name_en__icontains=search_query) |
                 Q(name_uk__icontains=search_query)
@@ -116,7 +110,7 @@ class ProductListFilter(generics.ListCreateAPIView):
 
         search_query = self.request.query_params.get('search', None)
         if search_query:
-            search_query = unquote(search_query)
+            search_query = urllib.parse.unquote(search_query)
             queryset = queryset.filter(
                 Q(name_en__icontains=search_query) |
                 Q(name_uk__icontains=search_query)
@@ -261,7 +255,7 @@ class CollectionList(generics.ListCreateAPIView, CachedQueryMixin):
         queryset = Collection.objects.only('name_en', 'name_uk', 'photo')  # Optimize data fetching
         search_query = self.request.query_params.get('search', None)
         if search_query:
-            search_query = unquote(search_query)
+            search_query = urllib.parse.unquote(search_query)
             queryset = queryset.filter(
                 Q(name_en__icontains=search_query) |
                 Q(name_uk__icontains=search_query)
@@ -325,7 +319,7 @@ class CategoryList(generics.ListCreateAPIView, CachedQueryMixin):
         queryset = Category.objects.all()
         search_query = self.request.query_params.get('search', None)
         if search_query:
-            search_query = unquote(search_query)
+            search_query = urllib.parse.unquote(search_query)
             queryset = queryset.filter(
                 Q(name_en__icontains=search_query) |
                 Q(name_uk__icontains=search_query)
