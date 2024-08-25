@@ -85,7 +85,6 @@ export function Popular() {
     // State to hold products
     const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
 
-    // Log error if exists
     useEffect(() => {
         if (error) {
             console.error('Error fetching products:', error);
@@ -94,22 +93,18 @@ export function Popular() {
 
     useEffect(() => {
         if (isSuccessProductFetching && productResponse?.results) {
-            // Assume productResponse.results contains the products
             setFilteredProducts(productResponse.results);
         }
     }, [isSuccessProductFetching, productResponse]);
 
-    // Function to get translated product name based on language
     const getTranslatedProductName = useCallback((product: Product): string => {
         return i18n.language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
     }, [i18n.language]);
 
-    // Handle product click event
     const handleClickProduct = (productId: number) => {
-        navigate(`/product/${productId}`); // Update route if needed
+        navigate(`/product/${productId}`);
     };
 
-    // Slider settings
     const settings = {
         infinite: true,
         slidesToShow: 2,
@@ -151,7 +146,6 @@ export function Popular() {
         </div>
     );
 }
-
 interface DiscountFilter {
     has_discount: boolean;
 }

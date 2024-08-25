@@ -22,6 +22,11 @@ from datetime import timedelta
 from django.utils.cache import add_never_cache_headers
 import urllib.parse
 
+class ProductsPageNumberPagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
 class CustomPageNumberPagination(PageNumberPagination):
     default_page_size = 8
     page_size_query_param = 'page_size'
@@ -67,14 +72,14 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
     filterset_class = ProductsFilter
-   # pagination_class = CustomPageNumberPagination  # Use custom pagination for products
+    pagination_class = ProductsPageNumberPagination  # Use custom pagination for products
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     search_fields = ['name_en', 'name_uk']
     ordering_fields = ['name_en', 'name_uk']
 
     def get_queryset(self):
         cache_key = f"product_list_{self.request.GET.urlencode()}"
-        queryset = Product.objects.only('name_en', 'name_uk')  # Optimize data fetching
+        queryset = Product.objects.all()
 
         search_query = self.request.query_params.get('search', None)
         if search_query:
@@ -83,7 +88,15 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
                 Q(name_en__icontains=search_query) |
                 Q(name_uk__icontains=search_query)
             )
-        return self.get_cached_queryset(cache_key, queryset)
+
+        # Apply filters and ordering
+        queryset = self.filter_queryset(queryset)
+        
+        # Cache the queryset
+        cache.set(cache_key, queryset, timeout=60*15)  # Cache for 15 minutes
+        
+        return queryset
+
 
 
 class ProductListFilter(generics.ListCreateAPIView):
