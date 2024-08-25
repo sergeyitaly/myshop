@@ -30,7 +30,7 @@ export const SearchWindow = ({
     onClickProduct
 }: SearchWindowProps) => {
     const { t, i18n } = useTranslation();
-    const debouncedQuery = useDebounce(queryText, 300); // 300ms debounce
+    const debouncedQuery = useDebounce(queryText, 50); // 300ms debounce
 
     const {
         data: products,
@@ -81,7 +81,9 @@ export const SearchWindow = ({
                     {
                         products.results.map((product, i) => (
                             <MotionItem
-                                key={product.id}
+//                                key={product.id}
+                                key={`${product.id}_${i}`}  // Ensure uniqueness
+
                                 index={i}
                                 offset={50}
                             >

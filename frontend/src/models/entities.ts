@@ -10,6 +10,7 @@ export interface Product {
     collection?: Collection; 
     images: ProductImage[],
     photo: string | null,
+    photo_tumbnail: string | null,
     photo_url: string | null,
     photo_thumbnail_url: string | null
     brandimage: string | null,
