@@ -66,27 +66,51 @@ export function AllCollection() {
     );
 }
 
+
+const popularityFilter = {
+    popularity: '3', // Adjust this to the correct format as required by your API
+};
+
 export function Popular() {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
 
-    // Fetch products with the filter
+    // Fetch products with the filter applied
     const {
         data: productResponse,
         isSuccess: isSuccessProductFetching,
         isLoading: isLoadingProducts,
         error
-    } = useGetManyProductsByFilterQuery({}); // Fetch all products without specific filters
+    } = useGetManyProductsByFilterQuery(popularityFilter);
+
+    // State to hold products with popularity data
+    const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
 
     // Log error if exists
     if (error) {
         console.error('Error fetching products:', error);
     }
 
-    // Filter products with popularity greater than 6
-    const products: Product[] = isSuccessProductFetching 
-        ? productResponse.results.filter(product => product.popularity > 3) 
-        : [];
+    useEffect(() => {
+        if (isSuccessProductFetching) {
+            const filterProducts = async () => {
+                // Assume productResponse.results contains the products
+                const allProducts: Product[] = productResponse.results;
+
+                // Filter products with popularity greater than 3
+                const filtered = allProducts.filter(product => {
+                    // Replace with actual popularity fetching logic if needed
+                    // For now, assuming popularity is part of product data
+                    const popularity = product.popularity; // Adjust based on actual data
+                    return popularity && popularity > 3;
+                });
+
+                setFilteredProducts(filtered);
+            };
+
+            filterProducts();
+        }
+    }, [isSuccessProductFetching, productResponse]);
 
     // Function to get translated product name based on language
     const getTranslatedProductName = (product: Product): string => {
@@ -95,7 +119,7 @@ export function Popular() {
 
     // Handle product click event
     const handleClickProduct = (productId: number) => {
-        navigate(`${ROUTE.PRODUCT}${productId}`);
+        navigate(`/product/${productId}`); // Update route if needed
     };
 
     // Slider settings
@@ -118,12 +142,12 @@ export function Popular() {
                             <PreviewLoadingCard />
                         </div>
                     ))
-                    : products.length === 0
+                    : filteredProducts.length === 0
                         ? <div>{t('no_popular_products')}</div>
-                        : products.map((product) => (
+                        : filteredProducts.map((product) => (
                             <div key={product.id} className={style.container}>
                                 <PreviewCard
-                                    photoSrc={product.photo || ''}
+                                    photoSrc={product.photo}
                                     title={getTranslatedProductName(product)}
                                     discount={product.discount}
                                     price={product.price}
@@ -138,6 +162,7 @@ export function Popular() {
         </div>
     );
 }
+
 
 interface DiscountFilter {
     has_discount: boolean;
