@@ -66,7 +66,6 @@ export function AllCollection() {
     );
 }
 
-
 const popularityFilter = {
     popularity: '3', // Adjust this to the correct format as required by your API
 };
@@ -83,39 +82,27 @@ export function Popular() {
         error
     } = useGetManyProductsByFilterQuery(popularityFilter);
 
-    // State to hold products with popularity data
+    // State to hold products
     const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
 
     // Log error if exists
-    if (error) {
-        console.error('Error fetching products:', error);
-    }
+    useEffect(() => {
+        if (error) {
+            console.error('Error fetching products:', error);
+        }
+    }, [error]);
 
     useEffect(() => {
-        if (isSuccessProductFetching) {
-            const filterProducts = async () => {
-                // Assume productResponse.results contains the products
-                const allProducts: Product[] = productResponse.results;
-
-                // Filter products with popularity greater than 3
-                const filtered = allProducts.filter(product => {
-                    // Replace with actual popularity fetching logic if needed
-                    // For now, assuming popularity is part of product data
-                    const popularity = product.popularity; // Adjust based on actual data
-                    return popularity && popularity > 3;
-                });
-
-                setFilteredProducts(filtered);
-            };
-
-            filterProducts();
+        if (isSuccessProductFetching && productResponse?.results) {
+            // Assume productResponse.results contains the products
+            setFilteredProducts(productResponse.results);
         }
     }, [isSuccessProductFetching, productResponse]);
 
     // Function to get translated product name based on language
-    const getTranslatedProductName = (product: Product): string => {
+    const getTranslatedProductName = useCallback((product: Product): string => {
         return i18n.language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
-    };
+    }, [i18n.language]);
 
     // Handle product click event
     const handleClickProduct = (productId: number) => {
@@ -135,34 +122,35 @@ export function Popular() {
     return (
         <div className={style.sliderContainer}>
             <p className={style.title}>{t('popularProducts')}</p>
-            <Slider {...settings}>
-                {isLoadingProducts
-                    ? Array.from({ length: 3 }).map((_, index) => (
-                        <div key={index} className={style.container}>
-                            <PreviewLoadingCard />
-                        </div>
-                    ))
-                    : filteredProducts.length === 0
-                        ? <div>{t('no_popular_products')}</div>
-                        : filteredProducts.map((product) => (
-                            <div key={product.id} className={style.container}>
-                                <PreviewCard
-                                    photoSrc={product.photo}
-                                    title={getTranslatedProductName(product)}
-                                    discount={product.discount}
-                                    price={product.price}
-                                    currency={product.currency}
-                                    previewSrc={product.photo_thumbnail_url}
-                                    onClick={() => handleClickProduct(product.id)}
-                                />
-                            </div>
-                        ))
-                }
-            </Slider>
+            {isLoadingProducts
+                ? Array.from({ length: 3 }).map((_, index) => (
+                    <div key={index} className={style.container}>
+                        <PreviewLoadingCard />
+                    </div>
+                ))
+                : filteredProducts.length === 0
+                    ? <div>{t('no_popular_products')}</div>
+                    : (
+                        <Slider {...settings}>
+                            {filteredProducts.map((product) => (
+                                <div key={product.id} className={style.container}>
+                                    <PreviewCard
+                                        photoSrc={product.photo}
+                                        title={getTranslatedProductName(product)}
+                                        discount={product.discount}
+                                        price={product.price}
+                                        currency={product.currency}
+                                        previewSrc={product.photo_thumbnail_url}
+                                        onClick={() => handleClickProduct(product.id)}
+                                    />
+                                </div>
+                            ))}
+                        </Slider>
+                    )
+            }
         </div>
     );
 }
-
 
 interface DiscountFilter {
     has_discount: boolean;
