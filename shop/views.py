@@ -26,18 +26,7 @@ class LargePageNumberPagination(PageNumberPagination):
     page_size = 30
     page_size_query_param = 'page_size'
     max_page_size = 100
-    
-    def get_paginated_response(self, data):
-        return Response({
-            'next': self.get_next_link(),
-            'previous': self.get_previous_link(),
-            'count': self.page.paginator.count,
-            'results': data,
-            'next_page_number': self.page.number + 1 if self.page.has_next() else None,
-            'previous_page_number': self.page.number - 1 if self.page.has_previous() else None,
-            'page_size': self.page.paginator.per_page,
-        })
-    
+
 class CustomPageNumberPagination(PageNumberPagination):
     default_page_size = 8
     page_size_query_param = 'page_size'
@@ -90,7 +79,7 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
 
     def get_queryset(self):
         cache_key = f"product_list_{self.request.GET.urlencode()}"
-        queryset = Product.objects.all()
+        queryset = Product.objects.only('name_en', 'name_uk')
 
         search_query = self.request.query_params.get('search', None)
         if search_query:
@@ -102,13 +91,9 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
 
         # Apply filters and ordering
         queryset = self.filter_queryset(queryset)
-        
         # Cache the queryset
         cache.set(cache_key, queryset, timeout=60*15)  # Cache for 15 minutes
-        
         return queryset
-
-
 
 class ProductListFilter(generics.ListCreateAPIView):
     permission_classes = [AllowAny]
@@ -117,7 +102,7 @@ class ProductListFilter(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     filterset_class = ProductFilter
     search_fields = ['name_en', 'name_uk']
-    pagination_class = LargePageNumberPagination 
+    pagination_class = CustomPageNumberPagination 
 
     def get_cached_queryset(self, cache_key, queryset):
         """
@@ -130,7 +115,7 @@ class ProductListFilter(generics.ListCreateAPIView):
         return cached_queryset
     
     def get_queryset(self):
-        queryset = Product.objects.all()
+        queryset = Product.objects.only('name_en', 'name_uk')
         # Apply search filter
         cache_key = f"filtered_product_list_{self.request.GET.urlencode()}"
 
@@ -314,7 +299,7 @@ class CollectionItemsPage(generics.ListAPIView):
             collection_id = self.kwargs.get('pk')
             if collection_id is not None:
                 collection = Collection.objects.get(pk=collection_id)
-                queryset = collection.product_set.all()
+                queryset = collection.product_set.only('name_en', 'name_uk')
             else:
                 queryset = Product.objects.none()
         except Collection.DoesNotExist:
