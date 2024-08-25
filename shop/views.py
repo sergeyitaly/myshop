@@ -22,6 +22,9 @@ from datetime import timedelta
 from django.utils.cache import add_never_cache_headers
 import urllib.parse
 from rest_framework.throttling import ScopedRateThrottle
+from rest_framework.throttling import UserRateThrottle
+
+
 
 class LargePageNumberPagination(PageNumberPagination):
     page_size = 12
@@ -78,8 +81,8 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
     search_fields = ['name_en', 'name_uk']
     ordering_fields = ['name_en', 'name_uk']
     throttle_classes = [ScopedRateThrottle]
-    throttle_scope = 'search'
-    
+    throttle_scope = 'search'  # Use the defined throttle scope
+
     def get_queryset(self):
         cache_key = f"product_list_{self.request.GET.urlencode()}"
         queryset = Product.objects.only('name_en', 'name_uk')
@@ -106,6 +109,8 @@ class ProductListFilter(generics.ListCreateAPIView):
     filterset_class = ProductFilter
     search_fields = ['name_en', 'name_uk']
     pagination_class = CustomPageNumberPagination 
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'products'  # Use the defined throttle scope
 
     def get_cached_queryset(self, cache_key, queryset):
         """
@@ -263,6 +268,8 @@ class CollectionList(generics.ListCreateAPIView, CachedQueryMixin):
     filterset_fields = ['category']
     search_fields = ['name_en', 'name_uk']
     ordering_fields = ['name_en', 'name_uk']
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'collections'  # Use the defined throttle scope
 
     def get_queryset(self):
         cache_key = f"collection_list_{self.request.GET.urlencode()}"
