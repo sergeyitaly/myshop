@@ -18,9 +18,9 @@
       "dest": "/myshop/wsgi.py"
     }
   ],
-  "functions": {
-    "api/**/*.ts": {
-      "timeout": 30
-    }
-  }
+"functions": {
+"api/*.py": {
+"maxDuration": 300
+}
+}
 }
