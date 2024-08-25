@@ -21,9 +21,10 @@ from django.utils import timezone
 from datetime import timedelta
 from django.utils.cache import add_never_cache_headers
 import urllib.parse
+from rest_framework.throttling import ScopedRateThrottle
 
 class LargePageNumberPagination(PageNumberPagination):
-    page_size = 20
+    page_size = 12
     page_size_query_param = 'page_size'
     max_page_size = 100
 
@@ -76,7 +77,9 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     search_fields = ['name_en', 'name_uk']
     ordering_fields = ['name_en', 'name_uk']
-
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'search'
+    
     def get_queryset(self):
         cache_key = f"product_list_{self.request.GET.urlencode()}"
         queryset = Product.objects.only('name_en', 'name_uk')
