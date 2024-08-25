@@ -22,8 +22,8 @@ from datetime import timedelta
 from django.utils.cache import add_never_cache_headers
 import urllib.parse
 
-class ProductsPageNumberPagination(PageNumberPagination):
-    page_size = 20
+class LargePageNumberPagination(PageNumberPagination):
+    page_size = 30
     page_size_query_param = 'page_size'
     max_page_size = 100
 
@@ -72,7 +72,7 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
     filterset_class = ProductsFilter
-    pagination_class = ProductsPageNumberPagination  # Use custom pagination for products
+    pagination_class = LargePageNumberPagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     search_fields = ['name_en', 'name_uk']
     ordering_fields = ['name_en', 'name_uk']
@@ -106,6 +106,7 @@ class ProductListFilter(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     filterset_class = ProductFilter
     search_fields = ['name_en', 'name_uk']
+    pagination_class = LargePageNumberPagination 
 
     def get_cached_queryset(self, cache_key, queryset):
         """
@@ -258,7 +259,7 @@ class CollectionList(generics.ListCreateAPIView, CachedQueryMixin):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
     permission_classes = [AllowAny]
-    pagination_class = CollectionPageNumberPagination  # Use custom pagination for collections
+    pagination_class = LargePageNumberPagination 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['category']
     search_fields = ['name_en', 'name_uk']
