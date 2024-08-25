@@ -26,7 +26,18 @@ class LargePageNumberPagination(PageNumberPagination):
     page_size = 30
     page_size_query_param = 'page_size'
     max_page_size = 100
-
+    
+    def get_paginated_response(self, data):
+        return Response({
+            'next': self.get_next_link(),
+            'previous': self.get_previous_link(),
+            'count': self.page.paginator.count,
+            'results': data,
+            'next_page_number': self.page.number + 1 if self.page.has_next() else None,
+            'previous_page_number': self.page.number - 1 if self.page.has_previous() else None,
+            'page_size': self.page.paginator.per_page,
+        })
+    
 class CustomPageNumberPagination(PageNumberPagination):
     default_page_size = 8
     page_size_query_param = 'page_size'
