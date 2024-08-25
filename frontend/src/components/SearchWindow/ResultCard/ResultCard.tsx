@@ -28,7 +28,7 @@ export const ResultCard = ({
                     className={styles.image}
                     src={src || defaultFoto} 
                     alt={title} 
-                    loading="lazy"
+                  //  loading="lazy"
                 />
             </div>
             <h2 className={styles.title}>{title}</h2>
