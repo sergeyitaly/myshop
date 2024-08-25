@@ -30,7 +30,7 @@ export const SearchWindow = ({
     onClickProduct
 }: SearchWindowProps) => {
     const { t, i18n } = useTranslation();
-    const debouncedQuery = useDebounce(queryText, 50); // 300ms debounce
+    const debouncedQuery = useDebounce(queryText, 20);
 
     const {
         data: products,

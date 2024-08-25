@@ -23,7 +23,7 @@ from django.utils.cache import add_never_cache_headers
 import urllib.parse
 
 class LargePageNumberPagination(PageNumberPagination):
-    page_size = 12
+    page_size = 20
     page_size_query_param = 'page_size'
     max_page_size = 100
 
@@ -110,7 +110,7 @@ class ProductListFilter(generics.ListCreateAPIView):
         """
         cached_queryset = cache.get(cache_key)
         if not cached_queryset:
-            cache.set(cache_key, queryset, timeout=300)  # Cache timeout set to 300 seconds (5 minutes)
+            cache.set(cache_key, queryset, timeout=500)  # Cache timeout set to 300 seconds (5 minutes)
             cached_queryset = queryset
         return cached_queryset
     
