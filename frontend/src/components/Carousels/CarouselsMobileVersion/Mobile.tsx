@@ -5,11 +5,14 @@ import "slick-carousel/slick/slick-theme.css";
 import style from './style.module.scss'
 import { PreviewCard } from "../../Cards/PreviewCard/PreviewCard";
 import { useNavigate } from "react-router-dom";
-import { useGetAllCollectionsQuery, useGetDiscountProductsQuery, useGetProductsByPopularityQuery } from "../../../api/collectionSlice";
+import { useGetAllCollectionsQuery } from "../../../api/collectionSlice";
+import { useGetManyProductsByFilterQuery } from '../../../api/productSlice'; // Adjust the import path if needed
 import { Collection, Product } from "../../../models/entities";
 import { ROUTE } from "../../../constants";
 import { PreviewLoadingCard } from "../../Cards/PreviewCard/PreviewLoagingCard";
 import { useTranslation } from 'react-i18next';
+import { useGetFilterDataQuery } from '../../../api/filterApiSlice';
+import { useEffect, useState } from 'react';
 
 export function AllCollection() {
     const { t, i18n } = useTranslation();
@@ -67,25 +70,35 @@ export function Popular() {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
 
+    // Fetch products with the filter
     const {
         data: productResponse,
         isSuccess: isSuccessProductFetching,
         isLoading: isLoadingProducts,
         error
-    } = useGetProductsByPopularityQuery({ popularity: '6' });
+    } = useGetManyProductsByFilterQuery({}); // Fetch all products without specific filters
 
-    console.log(error);
+    // Log error if exists
+    if (error) {
+        console.error('Error fetching products:', error);
+    }
 
-    const products = isSuccessProductFetching ? productResponse.results : [];
+    // Filter products with popularity greater than 6
+    const products: Product[] = isSuccessProductFetching 
+        ? productResponse.results.filter(product => product.popularity > 3) 
+        : [];
 
+    // Function to get translated product name based on language
     const getTranslatedProductName = (product: Product): string => {
         return i18n.language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
     };
 
+    // Handle product click event
     const handleClickProduct = (productId: number) => {
         navigate(`${ROUTE.PRODUCT}${productId}`);
     };
 
+    // Slider settings
     const settings = {
         infinite: true,
         slidesToShow: 2,
@@ -105,34 +118,52 @@ export function Popular() {
                             <PreviewLoadingCard />
                         </div>
                     ))
-                    : products.map((product) => (
-                        <div key={product.id} className={style.container}>
-                            <PreviewCard
-                                key={product.id}
-                                photoSrc={product.photo || ''}
-                                title={getTranslatedProductName(product)}
-                                discount={product.discount}
-                                price={product.price}
-                                currency={product.currency}
-                                previewSrc={product.photo_thumbnail_url}
-                                onClick={() => handleClickProduct(product.id)}
-                            />
-                        </div>
-                    ))}
+                    : products.length === 0
+                        ? <div>{t('no_popular_products')}</div>
+                        : products.map((product) => (
+                            <div key={product.id} className={style.container}>
+                                <PreviewCard
+                                    photoSrc={product.photo || ''}
+                                    title={getTranslatedProductName(product)}
+                                    discount={product.discount}
+                                    price={product.price}
+                                    currency={product.currency}
+                                    previewSrc={product.photo_thumbnail_url}
+                                    onClick={() => handleClickProduct(product.id)}
+                                />
+                            </div>
+                        ))
+                }
             </Slider>
         </div>
     );
 }
 
+interface DiscountFilter {
+    has_discount: boolean;
+}
+
 export function Discount() {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
+    const [filterStatus, setFilterStatus] = useState<'loading' | 'failed' | 'success'>('loading');
+    const [filterError, setFilterError] = useState<string | null>(null);
 
-    const { data: discountProductsData, isLoading: isLoadingDiscountProducts } = useGetDiscountProductsQuery();
-    const discountProducts = discountProductsData?.results.filter(product => parseFloat(product.discount) > 0) || [];
+    // Use the filter query to fetch discount products
+    const { data, error, isLoading } = useGetFilterDataQuery({ has_discount: true } as DiscountFilter);
 
-    console.log('Discount products:', discountProducts);
-
+    useEffect(() => {
+        if (isLoading) {
+            setFilterStatus('loading');
+        } else if (error) {
+            setFilterStatus('failed');
+            setFilterError('An error occurred while fetching discount products.');
+            console.error('Fetch error:', error);
+        } else {
+            setFilterStatus('success');
+        }
+    }, [isLoading, error]);
+    const discountProducts: Product[] = data?.results || []; // Default to an empty array if undefined
     const getTranslatedProductName = (product: Product): string => {
         return i18n.language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
     };
@@ -156,31 +187,32 @@ export function Discount() {
     return (
         <div className={style.sliderContainer}>
             <p className={style.title}>{t('discounts')}</p>
-            {discountProducts.length === 1 ? (
-                <div></div>
+            {filterStatus === 'loading' ? (
+                Array.from({ length: 3 }).map((_, index) => (
+                    <div key={index} className={style.container}>
+                        <PreviewLoadingCard />
+                    </div>
+                ))
+            ) : filterStatus === 'failed' ? (
+                <div>{filterError}</div>
+            ) : discountProducts.length === 0 ? (
+                <div>{t('no_discount_products')}</div>
             ) : (
                 <Slider {...settings}>
-                    {isLoadingDiscountProducts
-                        ? Array.from({ length: 3 }).map((_, index) => (
-                            <div key={index} className={style.container}>
-                                <PreviewLoadingCard />
-                            </div>
-                        ))
-                        : discountProducts.map((product) => (
-                            <div key={product.id} className={style.container}>
-                                <PreviewCard
-                                    className={style.card}
-                                    key={product.id}
-                                    title={getTranslatedProductName(product)}
-                                    discount={product.discount}
-                                    price={product.price}
-                                    currency={product.currency}
-                                    photoSrc={product.photo_url}
-                                    previewSrc={product.photo_thumbnail_url}
-                                    onClick={() => handleClickProduct(product.id)}
-                                />
-                            </div>
-                        ))}
+                    {discountProducts.map((product) => (
+                        <div key={product.id} className={style.container}>
+                            <PreviewCard
+                                className={style.card}
+                                title={getTranslatedProductName(product)}
+                                discount={product.discount}
+                                price={product.price}
+                                currency={product.currency}
+                                photoSrc={product.photo_url}
+                                previewSrc={product.photo_thumbnail_url}
+                                onClick={() => handleClickProduct(product.id)}
+                            />
+                        </div>
+                    ))}
                 </Slider>
             )}
         </div>
