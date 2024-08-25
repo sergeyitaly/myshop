@@ -67,14 +67,14 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
     filterset_class = ProductsFilter
-    pagination_class = CustomPageNumberPagination  # Use custom pagination for products
+   # pagination_class = CustomPageNumberPagination  # Use custom pagination for products
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     search_fields = ['name_en', 'name_uk']
     ordering_fields = ['name_en', 'name_uk']
 
     def get_queryset(self):
         cache_key = f"product_list_{self.request.GET.urlencode()}"
-        queryset = Product.objects.only('name_en', 'name_uk', 'photo')  # Optimize data fetching
+        queryset = Product.objects.only('name_en', 'name_uk')  # Optimize data fetching
 
         search_query = self.request.query_params.get('search', None)
         if search_query:
@@ -253,7 +253,7 @@ class CollectionList(generics.ListCreateAPIView, CachedQueryMixin):
 
     def get_queryset(self):
         cache_key = f"collection_list_{self.request.GET.urlencode()}"
-        queryset = Collection.objects.only('name_en', 'name_uk', 'photo')  # Optimize data fetching
+        queryset = Collection.objects.only('name_en', 'name_uk')  # Optimize data fetching
         search_query = self.request.query_params.get('search', None)
         if search_query:
             search_query = urllib.parse.unquote(search_query)
