@@ -24,17 +24,15 @@ import urllib.parse
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.throttling import UserRateThrottle
 
-
-
-class LargePageNumberPagination(PageNumberPagination):
-    page_size = 12
+class ListPageNumberPagination(PageNumberPagination):
+    page_size = 8
     page_size_query_param = 'page_size'
-    max_page_size = 100
+    max_page_size = 1000
 
 class CustomPageNumberPagination(PageNumberPagination):
     default_page_size = 8
     page_size_query_param = 'page_size'
-    max_page_size = 100
+    max_page_size = 1000
 
     def get_paginated_response(self, data):
         return Response({
@@ -50,7 +48,7 @@ class CustomPageNumberPagination(PageNumberPagination):
 class CollectionPageNumberPagination(PageNumberPagination):
     page_size = 8
     page_size_query_param = 'page_size'
-    max_page_size = 100
+    max_page_size = 1000
 
     def get_paginated_response(self, data):
         return Response({
@@ -76,15 +74,15 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
     filterset_class = ProductsFilter
-    pagination_class = LargePageNumberPagination
+    pagination_class = ListPageNumberPagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    search_fields = ['name']
+    search_fields = ['name_en', 'name_uk']
    # ordering_fields = ['name_en', 'name_uk']
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'search'  # Use the defined throttle scope
 
     def get_queryset(self):
-        queryset = Product.objects.only('name')
+        queryset = Product.objects.only('name_en', 'name_uk')
         search_query = self.request.query_params.get('search', None)
         if search_query:
             search_query = urllib.parse.unquote(search_query)
@@ -110,9 +108,15 @@ class ProductListFilter(generics.ListCreateAPIView, CachedQueryMixin):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'products'  # Use the defined throttle scope
 
+    def paginate_queryset(self, queryset):
+        # Remove the page_size parameter from the query params
+        self.request.query_params._mutable = True
+        self.request.query_params.pop('page_size', None)
+        self.request.query_params._mutable = False
+        return super().paginate_queryset(queryset)
+
     def get_queryset(self):
         # Apply search filter
-
         queryset = Product.objects.only('name', 'price', 'discount', 'collection')
 #        search_query = self.request.query_params.get('search', None)
 #        if search_query:
@@ -258,16 +262,16 @@ class CollectionList(generics.ListCreateAPIView, CachedQueryMixin):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'collections'  # Use the defined throttle scope
 
-    def get_queryset(self):
-        queryset = Collection.objects.only('name')  # Optimize data fetching
-        search_query = self.request.query_params.get('search', None)
-        if search_query:
-            search_query = urllib.parse.unquote(search_query)
-            queryset = queryset.filter(
-                Q(name_en__icontains=search_query) |
-                Q(name_uk__icontains=search_query)
-            )
-        return queryset       
+#    def get_queryset(self):
+#        queryset = Collection.objects.only('name')  # Optimize data fetching
+#        search_query = self.request.query_params.get('search', None)
+#        if search_query:
+#            search_query = urllib.parse.unquote(search_query)
+#            queryset = queryset.filter(
+#                Q(name_en__icontains=search_query) |
+#                Q(name_uk__icontains=search_query)
+#            )
+#        return queryset       
     
     def perform_create(self, serializer):
         instance = serializer.save()
