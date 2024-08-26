@@ -43,7 +43,7 @@ def validate_svg(value):
         raise ValidationError('Unsupported file extension.')
 
 class Category(models.Model):
-    name = models.CharField(max_length=255, verbose_name=_('Category'))
+    name = models.CharField(max_length=255, verbose_name=_('Category'), db_index=True)
 
     def __str__(self):
         return self.name
@@ -66,7 +66,7 @@ class Collection(models.Model):
         options={'quality': 60}
     )
 
-    name = models.CharField(max_length=255, verbose_name=_('Collection'))
+    name = models.CharField(max_length=255, verbose_name=_('Collection'), db_index=True)
     category = models.ForeignKey(Category,null=True, blank=True, on_delete=models.CASCADE, verbose_name=_('Category'))
     created = models.DateTimeField(auto_now_add=True, verbose_name=_('created'))
     updated = models.DateTimeField(auto_now=True, verbose_name=_('updated'))
@@ -127,7 +127,7 @@ class Product(models.Model):
     )
 
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_('Collection'))
-    name = models.CharField(max_length=255, verbose_name=_('Name'))
+    name = models.CharField(max_length=255, verbose_name=_('Name'), db_index=True)
     description = models.TextField(null=True, blank=True, verbose_name=_('Description'))
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_('Price'))
     stock = models.IntegerField(default=0, verbose_name=_('Stock'))

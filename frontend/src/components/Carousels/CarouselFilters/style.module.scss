@@ -17,6 +17,10 @@
     position: relative;
 }
 
+.cardNew {
+    max-width: 257px;
+}
+
 .cardImage {
     /*width: 100%;*/
     position: relative;
@@ -149,15 +153,6 @@
         font-size: 16px;
     }
 
-    .price {
-        font-size: 16px;
-    }
-
-    .newPrice {
-        font-size: 16px;
-
-    }
-
     .filters {
         margin-right: 10px;
         justify-content: space-between;
@@ -172,18 +167,5 @@
     .card{
         text-align: center;
     }
-
-    .priceContainer {
-        display: inherit;
-        margin-top: 5px;
-    }
-
-    .price {
-        margin-right: 0px;
-        font-size: 14px;
-    }
-
-    .newPrice {
-        font-size: 14px;
-    }
 }
+

@@ -21,6 +21,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from django.contrib import admin
 from dotenv import load_dotenv
 from drf_spectacular.views import SpectacularRedocView
+from django.views.decorators.cache import cache_page
 
 load_dotenv()
 schema_view = get_schema_view(
@@ -55,8 +56,9 @@ urlpatterns = [
 
     path('admin/', admin.site.urls),
     path('rosetta/', include('rosetta.urls')), 
+    path("", cache_page(60 * 15)(views.index), name="index"),  # Cache for 15 minutes
 
-    path("", views.index, name="index"),
+#    path("", views.index, name="index"),
     path('i18n/', include('django.conf.urls.i18n')),
 ]
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Collection, Category } from '../../models/entities';
 import { PreviewCard } from '../../components/Cards/PreviewCard/PreviewCard';
@@ -10,7 +11,6 @@ import { Pagination } from '../../components/UI/Pagination/Pagination';
 import styles from './style.module.scss';
 import { MotionItem } from '../../components/MotionComponents/MotionItem';
 import { useMediaQuery } from '@mui/material';
-import { useTranslation } from 'react-i18next';
 
 const CollectionsPage: React.FC = () => {
   const { t, i18n } = useTranslation();
