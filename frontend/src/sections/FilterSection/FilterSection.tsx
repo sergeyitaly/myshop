@@ -18,6 +18,9 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ROUTE } from "../../constants";
 import { useSortList } from "./SortList";
+import { skipToken } from "@reduxjs/toolkit/query";
+
+
 
 interface FilterSectionProps {
     initialCollection?: Collection;
@@ -26,8 +29,12 @@ interface FilterSectionProps {
 export const FilterSection = ({
     initialCollection
 }: FilterSectionProps) => {
+
     const LIMIT = 8;
-    const navigate = useNavigate();
+
+
+    const navigate = useNavigate()
+
     const [currentPage, setCurrentPage] = useState<number>(1);
     const { t, i18n } = useTranslation();
 
@@ -60,13 +67,15 @@ export const FilterSection = ({
         changeOrdering,
     } = useFilters(initialCollection);
 
+    const isFilterEmpty = !Object.keys(filter).length
+
     const {
         data: productsResponse,
         isSuccess: isSuccessGettingProducts,
         isLoading: isLoadingProducts,
         isFetching: isFetchingProducts,
         isError: isErrorWhenFetchingProducts
-    } = useGetProductsByMainFilterQuery({...filter, page: currentPage, page_size: LIMIT});
+    } = useGetProductsByMainFilterQuery(isFilterEmpty ? skipToken : {...filter, page: currentPage, page_size: LIMIT});
 
     let totalPages = 0;
     
@@ -207,8 +216,8 @@ export const FilterSection = ({
                     open &&
                     <FilterMenu
                         showCollections={!initialCollection}
-                        minValue={productsResponse?.price_min || minValue}
-                        maxValue={productsResponse?.price_max || maxValue}
+                        minValue={productsResponse?.overall_price_min || minValue}
+                        maxValue={productsResponse?.overall_price_max || maxValue }
                         priceValue={tempPriceValues}
                         activeCategories={tempCategories}
                         activeCollections={tempCollections}
