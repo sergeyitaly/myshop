@@ -29,7 +29,9 @@ export const ThankPage = () => {
                             <span className={styles.email}> {t('emailKOLORYT')}</span>
                         </p>
                         <div className={styles.telegramContainer}>
-                            <FaTelegramPlane size={24} className={styles.telegramIcon} />
+                            <FaTelegramPlane size={24}
+                                             // className={styles.telegramIcon}
+                            />
                             <p>
                                 <a href={telegramLink} target="_blank" rel="noopener noreferrer">
                                     <span className={styles.KOLORYT_notifications_bot}>{t('telegram_bot')}</span>

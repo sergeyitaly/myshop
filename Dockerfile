@@ -2,6 +2,7 @@
 FROM node:18 AS frontend-build
 
 WORKDIR /app/frontend
+ENV VITE_API_BASE_URL=http://localhost:8010
 COPY frontend/package*.json ./
 RUN npm install
 COPY frontend/ .
@@ -48,8 +49,12 @@ RUN chmod +x /app/entrypoint.sh
 RUN python manage.py makemigrations
 RUN python manage.py migrate
 
-#copy images
+#clone images
 RUN python manage.py process_thumbnails
+
+#copy images
+#COPY media /app/media
+
 # Collect static files
 RUN python manage.py collectstatic --noinput --clear
 

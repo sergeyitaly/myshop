@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react';
 import styles from './AboutUsSection.module.scss';
 import { Link } from 'react-router-dom';
-import vase from './vase.jpg';
+import vase from './vase.png';
 import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
 
 export const AboutUsSection = () => {
     const { t } = useTranslation();
     const [width, setWidth] = useState(window.innerWidth);
-
     useEffect(() => {
-        console.log('Current language:', i18next.language); // Debugging language
     }, [i18next.language]);
 
     useEffect(() => {

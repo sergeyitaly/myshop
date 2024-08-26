@@ -10,6 +10,7 @@ import os
 from celery.schedules import crontab
 from django.utils.translation import gettext_lazy as _
 
+
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,7 +40,7 @@ AWS_S3_OBJECT_PARAMETERS = {
 }
 
 
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
@@ -50,7 +51,12 @@ CORS_ALLOWED_ORIGINS = [
 SECURE_SSL_REDIRECT = False
 SECURE_HSTS_SECONDS=0
 INTERNAL_IPS = ["127.0.0.1", "localhost", '::1']
-ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app', 'localhost']
+
+allowed_hosts = os.getenv('ALLOWED_HOSTS', '')
+
+# Split the string into a list and strip whitespace
+ALLOWED_HOSTS = [host.strip() for host in allowed_hosts.split(',') if host.strip()]
+#ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app', 'localhost']
 
 # Application definition
 
@@ -210,9 +216,28 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 6
+
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '3/s',
+        'user': '10/minute',
+        'search': '3/s',  
+        'products': '5/s',  
+        'collections': '5/s',  
+    },
+    #    'DEFAULT_PAGINATION_CLASS': 'myshop.shop.views.CustomPageNumberPagination',
+         'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+   #     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+
+
+   
+    'PAGE_SIZE': 12
 }
+
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Your API',
@@ -302,7 +327,6 @@ LANGUAGES = [
     ('en', _('English')),
     ('uk', _('Ukrainian')),
 ]
-
 
 MODELTRANSLATION_DEFAULT_LANGUAGE = 'uk'
 MODELTRANSLATION_LANGUAGES = ('en', 'uk')
