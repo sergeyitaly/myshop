@@ -27,12 +27,22 @@ from rest_framework.throttling import UserRateThrottle
 class ListPageNumberPagination(PageNumberPagination):
     page_size = 8
     page_size_query_param = 'page_size'
-    max_page_size = 1000
-
+    max_page_size = 100
+    def get_paginated_response(self, data):
+        return Response({
+            'next': self.get_next_link(),
+            'previous': self.get_previous_link(),
+            'count': self.page.paginator.count,
+            'results': data,
+            'next_page_number': self.page.number + 1 if self.page.has_next() else None,
+            'previous_page_number': self.page.number - 1 if self.page.has_previous() else None,
+            'page_size': self.page.paginator.per_page,
+        })
+    
 class CustomPageNumberPagination(PageNumberPagination):
-    default_page_size = 8
+    page_size = 8
     page_size_query_param = 'page_size'
-    max_page_size = 1000
+    max_page_size = 100
 
     def get_paginated_response(self, data):
         return Response({
@@ -48,7 +58,7 @@ class CustomPageNumberPagination(PageNumberPagination):
 class CollectionPageNumberPagination(PageNumberPagination):
     page_size = 8
     page_size_query_param = 'page_size'
-    max_page_size = 1000
+    max_page_size = 100
 
     def get_paginated_response(self, data):
         return Response({
@@ -70,19 +80,19 @@ class CachedQueryMixin:
         return cached_data
     
 class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
-#    queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
     filterset_class = ProductsFilter
     pagination_class = ListPageNumberPagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     search_fields = ['name_en', 'name_uk']
-   # ordering_fields = ['name_en', 'name_uk']
     throttle_classes = [ScopedRateThrottle]
-    throttle_scope = 'search'  # Use the defined throttle scope
+    throttle_scope = 'search'
 
     def get_queryset(self):
-        queryset = Product.objects.only('name_en', 'name_uk')
+        cache_key = 'product_list'
+        queryset = self.get_cached_queryset(cache_key, Product.objects.only('name_en', 'name_uk'))
+
         search_query = self.request.query_params.get('search', None)
         if search_query:
             search_query = urllib.parse.unquote(search_query)
@@ -93,8 +103,20 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
 
         # Apply filters and ordering
         queryset = self.filter_queryset(queryset)
-        # Cache the queryset
+
         return queryset
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        # Invalidate the cache when a new product is created
+        cache.delete('product_list')
+        return instance
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        # Invalidate the cache when a product is updated
+        cache.delete('product_list')
+        return instance
 
 class ProductListFilter(generics.ListCreateAPIView, CachedQueryMixin):
     #queryset = Product.objects.all()
