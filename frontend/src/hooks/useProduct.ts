@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Product, ProductVariantsModel } from "../models/entities";
 import { useNavigate } from "react-router-dom";
 import { ROUTE } from "../constants";
-import { useGetManyProductsByFilterQuery, useGetOneProductByIdQuery, useGetProductsByMainFilterQuery } from "../api/productSlice";
+import { useGetOneProductByIdQuery, useGetProductsByMainFilterQuery } from "../api/productSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
 
 
