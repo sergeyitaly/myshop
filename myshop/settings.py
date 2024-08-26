@@ -10,6 +10,7 @@ import os
 from celery.schedules import crontab
 from django.utils.translation import gettext_lazy as _
 
+
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -225,11 +226,16 @@ REST_FRAMEWORK = {
         'anon': '3/s',
         'user': '10/minute',
         'search': '3/s',  
-        'products': '3/s',  
-        'collections': '3/s',  
+        'products': '5/s',  
+        'collections': '5/s',  
     },
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 8
+    #    'DEFAULT_PAGINATION_CLASS': 'myshop.shop.views.CustomPageNumberPagination',
+         'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+   #     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+
+
+   
+    'PAGE_SIZE': 12
 }
 
 
