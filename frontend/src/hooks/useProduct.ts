@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Product, ProductVariantsModel } from "../models/entities";
 import { useNavigate } from "react-router-dom";
 import { ROUTE } from "../constants";
-import { useGetManyProductsByFilterQuery, useGetOneProductByIdQuery } from "../api/productSlice";
+import { useGetManyProductsByFilterQuery, useGetOneProductByIdQuery, useGetProductsByMainFilterQuery } from "../api/productSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
 
 
@@ -26,7 +26,7 @@ export const useProduct = (productId: number) => {
       data: productsResponce, 
       isLoading: isLoadingProducts,
       isFetching: isFetchingProducts
-    } = useGetManyProductsByFilterQuery(product ? {name: product.name} : skipToken)
+    } = useGetProductsByMainFilterQuery(product ? {name: product.name} : skipToken)
 
     const products = productsResponce?.results
 
