@@ -222,18 +222,12 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.ScopedRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '10/minute',
+        'anon': '3/s',
         'user': '10/minute',
         'search': '3/s',  
-        'products': '1/s',  
-        'collections': '1/s',  
-
-
+        'products': '3/s',  
+        'collections': '3/s',  
     },
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
-    ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 8
 }

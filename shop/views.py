@@ -78,15 +78,13 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
     filterset_class = ProductsFilter
     pagination_class = LargePageNumberPagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    search_fields = ['name_en', 'name_uk']
-    ordering_fields = ['name_en', 'name_uk']
+    search_fields = ['name']
+   # ordering_fields = ['name_en', 'name_uk']
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'search'  # Use the defined throttle scope
 
     def get_queryset(self):
-        cache_key = f"product_list_{self.request.GET.urlencode()}"
-        queryset = Product.objects.only('name_en', 'name_uk')
-
+        queryset = Product.objects.only('name')
         search_query = self.request.query_params.get('search', None)
         if search_query:
             search_query = urllib.parse.unquote(search_query)
@@ -98,42 +96,31 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
         # Apply filters and ordering
         queryset = self.filter_queryset(queryset)
         # Cache the queryset
-        cache.set(cache_key, queryset, timeout=60*15)  # Cache for 15 minutes
         return queryset
 
-class ProductListFilter(generics.ListCreateAPIView):
+class ProductListFilter(generics.ListCreateAPIView, CachedQueryMixin):
+    #queryset = Product.objects.all()
     permission_classes = [AllowAny]
     pagination_class = CustomPageNumberPagination
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     filterset_class = ProductFilter
-    search_fields = ['name_en', 'name_uk']
+    search_fields = ['name', 'price', 'discount', 'collection']
     pagination_class = CustomPageNumberPagination 
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'products'  # Use the defined throttle scope
 
-    def get_cached_queryset(self, cache_key, queryset):
-        """
-        Retrieve the cached queryset if available, otherwise set the cache.
-        """
-        cached_queryset = cache.get(cache_key)
-        if not cached_queryset:
-            cache.set(cache_key, queryset, timeout=500)  # Cache timeout set to 300 seconds (5 minutes)
-            cached_queryset = queryset
-        return cached_queryset
-    
     def get_queryset(self):
-        queryset = Product.objects.only('name_en', 'name_uk')
         # Apply search filter
-        cache_key = f"filtered_product_list_{self.request.GET.urlencode()}"
 
-        search_query = self.request.query_params.get('search', None)
-        if search_query:
-            search_query = urllib.parse.unquote(search_query)
-            queryset = queryset.filter(
-                Q(name_en__icontains=search_query) |
-                Q(name_uk__icontains=search_query)
-            )
+        queryset = Product.objects.only('name', 'price', 'discount', 'collection')
+#        search_query = self.request.query_params.get('search', None)
+#        if search_query:
+#            search_query = urllib.parse.unquote(search_query)
+#            queryset = queryset.filter(
+#                Q(name_en__icontains=search_query) |
+#                Q(name_uk__icontains=search_query)
+#            )
         
         # Explicitly filter by collections if provided
         collection_ids = self.request.query_params.get('collection', None)
@@ -183,7 +170,7 @@ class ProductListFilter(generics.ListCreateAPIView):
             if valid_ordering_fields:
                 queryset = queryset.order_by(*valid_ordering_fields)
 
-        return self.get_cached_queryset(cache_key, queryset)
+        return queryset
     
     def list(self, request, *args, **kwargs):
         # Get the filtered queryset
@@ -263,17 +250,16 @@ class CollectionList(generics.ListCreateAPIView, CachedQueryMixin):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
     permission_classes = [AllowAny]
-    pagination_class = LargePageNumberPagination 
+    pagination_class = CollectionPageNumberPagination 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['category']
-    search_fields = ['name_en', 'name_uk']
-    ordering_fields = ['name_en', 'name_uk']
+    search_fields = ['name']
+#    ordering_fields = ['name_en', 'name_uk']
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'collections'  # Use the defined throttle scope
 
     def get_queryset(self):
-        cache_key = f"collection_list_{self.request.GET.urlencode()}"
-        queryset = Collection.objects.only('name_en', 'name_uk')  # Optimize data fetching
+        queryset = Collection.objects.only('name')  # Optimize data fetching
         search_query = self.request.query_params.get('search', None)
         if search_query:
             search_query = urllib.parse.unquote(search_query)
@@ -281,7 +267,7 @@ class CollectionList(generics.ListCreateAPIView, CachedQueryMixin):
                 Q(name_en__icontains=search_query) |
                 Q(name_uk__icontains=search_query)
             )
-        return self.get_cached_queryset(cache_key, queryset)        
+        return queryset       
     
     def perform_create(self, serializer):
         instance = serializer.save()
@@ -333,11 +319,10 @@ class CategoryList(generics.ListCreateAPIView, CachedQueryMixin):
     permission_classes = [AllowAny]
     pagination_class = CustomPageNumberPagination
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    search_fields = ['name_en', 'name_uk']
+    search_fields = ['name']
 
     def get_queryset(self):
-        cache_key = "category_list"
-        queryset = Category.objects.all()
+        queryset = Category.objects.only('name')
         search_query = self.request.query_params.get('search', None)
         if search_query:
             search_query = urllib.parse.unquote(search_query)
@@ -345,7 +330,7 @@ class CategoryList(generics.ListCreateAPIView, CachedQueryMixin):
                 Q(name_en__icontains=search_query) |
                 Q(name_uk__icontains=search_query)
             )
-        return self.get_cached_queryset(cache_key, queryset)
+        return queryset
 
 
 class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
