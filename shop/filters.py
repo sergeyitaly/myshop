@@ -7,10 +7,22 @@ class ProductsFilter(django_filters.FilterSet):
     sales_count = django_filters.NumberFilter(field_name='sales_count', lookup_expr='exact')
     popularity = django_filters.NumberFilter(field_name='popularity', lookup_expr='gte')
     price = django_filters.NumberFilter(field_name='price', lookup_expr='gte')
+    name = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
+    search = django_filters.CharFilter(method='filter_search')
 
     class Meta:
         model = Product
         fields = ['popularity', 'price', 'sales_count']
+
+    def filter_search(self, queryset, name, value):
+        if value:
+            search_term = value.lower()
+            return queryset.filter(
+                Q(name_en__icontains=search_term) | 
+                Q(name_uk__icontains=search_term)
+            )
+        return queryset
+    
 
 class NumberInFilter(django_filters.BaseInFilter, django_filters.NumberFilter):
     pass
@@ -77,9 +89,6 @@ class ProductFilter(django_filters.FilterSet):
         ]
 
     def filter_search(self, queryset, name, value):
-        """
-        Filter the queryset based on a search term that matches any of the name fields.
-        """
         if value:
             search_term = value.lower()
             return queryset.filter(
@@ -88,11 +97,5 @@ class ProductFilter(django_filters.FilterSet):
             )
         return queryset
 
-
     def filter_has_discount(self, queryset, name, value):
-        """
-        Filter the queryset to include only products with a discount if value is True.
-        """
-        if value:
-            return queryset.filter(discount__gt=0)
-        return queryset
+        return queryset.filter(discount__gt=0) if value else queryset.filter(discount=0)
