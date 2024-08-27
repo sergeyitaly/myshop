@@ -128,7 +128,7 @@ export function Popular() {
                             {filteredProducts.map((product) => (
                                 <div key={product.id} className={style.container}>
                                     <PreviewCard
-                                        photoSrc={product.photo}
+                                        photoSrc={product.photo_url}
                                         title={getTranslatedProductName(product)}
                                         discount={product.discount}
                                         price={product.price}
