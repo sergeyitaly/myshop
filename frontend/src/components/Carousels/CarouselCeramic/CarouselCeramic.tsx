@@ -1,4 +1,3 @@
-import { useState, useCallback } from 'react';
 import { useNavigate } from "react-router-dom";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -10,21 +9,18 @@ import { useGetAllProductsFromCollectionQuery } from "../../../api/collectionSli
 import { ROUTE } from "../../../constants";
 import { PreviewLoadingCard } from "../../Cards/PreviewCard/PreviewLoagingCard";
 import { useTranslation } from 'react-i18next';
-import { Product } from "../../../models/entities";
+import { useCallback } from 'react';
+import { Product } from "../../../models/entities"; // Import the Product type
 
 function CarouselCeramic() {
     const collectionId = 3;
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
 
-    // State to manage pagination
-    const [page, setPage] = useState(1);
-    const limit = 6;  // Number of items per page
-
-    // Fetch paginated products
     const { data, isLoading } = useGetAllProductsFromCollectionQuery(collectionId);
     const products = data?.results || [];
 
+    // Use the imported Product type
     const getTranslatedProductName = useCallback((product: Product): string => {
         return i18n.language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
     }, [i18n.language]);
@@ -33,21 +29,9 @@ function CarouselCeramic() {
         navigate(`${ROUTE.PRODUCT}${productId}`);
     };
 
-    const handleNextPage = () => {
-        if (data?.next) {
-            setPage(page + 1);
-        }
-    };
-
-    const handlePreviousPage = () => {
-        if (page > 1) {
-            setPage(page - 1);
-        }
-    };
-
     const settings = {
         dots: true,
-        infinite: false,  // Turn off infinite scroll for pagination
+        infinite: true,
         speed: 500,
         slidesToShow: 3,
         slidesToScroll: 3,
@@ -91,12 +75,6 @@ function CarouselCeramic() {
                             </div>
                         ))}
                 </Slider>
-
-                {/* Pagination Controls */}
-                <div className={style.paginationControls}>
-                    <button onClick={handlePreviousPage} disabled={page === 1}>Previous</button>
-                    <button onClick={handleNextPage} disabled={!data?.next}>Next</button>
-                </div>
             </NamedSection>
         </div>
     );
