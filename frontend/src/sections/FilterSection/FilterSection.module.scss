@@ -1,7 +1,9 @@
 @import '../../variables';
 
 .section {
-    // position: relative;
+  @media (max-width: $screen-mobile) {
+      position: relative;
+    }
 }
 
 .control {
