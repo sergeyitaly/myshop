@@ -225,9 +225,9 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '3/s',
         'user': '10/minute',
-        'search': '3/s',  
-        'products': '3/s',  
-        'collections': '3/s',  
+        'search': '6/m',  
+        'products': '6/m',  
+        'collections': '6/m',  
     },
     #    'DEFAULT_PAGINATION_CLASS': 'myshop.shop.views.CustomPageNumberPagination',
          'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',

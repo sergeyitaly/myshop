@@ -52,7 +52,7 @@ export const productApiSlice = apiSlice.injectEndpoints({
     getManyProductsByFilter: builder.query<FilterProductsResponse, ProductFilter>({
       query: (queryBuilder) => {
         const qs = queryString(queryBuilder);
-        return `${ENDPOINTS.FILTER}/?${qs}`;
+        return `${ENDPOINTS.PRODUCTS}/?${qs}`;
       }
     }),
 

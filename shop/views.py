@@ -23,6 +23,7 @@ from django.utils.cache import add_never_cache_headers
 import urllib.parse
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.throttling import UserRateThrottle
+from django.utils.encoding import uri_to_iri
 
 class ListPageNumberPagination(PageNumberPagination):
     page_size = 8
@@ -88,33 +89,28 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
     search_fields = ['name_en', 'name_uk']
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'search'
-
+    
     def get_queryset(self):
         cache_key = 'product_list'
-        queryset = self.get_cached_queryset(cache_key, Product.objects.only('name_en', 'name_uk'))
+        queryset = self.get_cached_queryset(cache_key, Product.objects.all())
 
-        search_query = self.request.query_params.get('search', None)
+        search_query = self.request.query_params.get('search')
         if search_query:
-            search_query = urllib.parse.unquote(search_query)
+            search_query = uri_to_iri(search_query)  # Decode URL-encoded search query
             queryset = queryset.filter(
                 Q(name_en__icontains=search_query) |
                 Q(name_uk__icontains=search_query)
             )
 
-        # Apply filters and ordering
-        queryset = self.filter_queryset(queryset)
-
-        return queryset
+        return self.filter_queryset(queryset)
 
     def perform_create(self, serializer):
         instance = serializer.save()
-        # Invalidate the cache when a new product is created
         cache.delete('product_list')
         return instance
 
     def perform_update(self, serializer):
         instance = serializer.save()
-        # Invalidate the cache when a product is updated
         cache.delete('product_list')
         return instance
 
@@ -125,29 +121,19 @@ class ProductListFilter(generics.ListCreateAPIView, CachedQueryMixin):
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     filterset_class = ProductFilter
-    search_fields = ['name', 'price', 'discount', 'collection']
+    search_fields = ['name_en', 'name_uk']
+   # filterset_fields = ['collection']
     pagination_class = CustomPageNumberPagination 
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'products'  # Use the defined throttle scope
 
-    def paginate_queryset(self, queryset):
-        # Remove the page_size parameter from the query params
-        self.request.query_params._mutable = True
-        self.request.query_params.pop('page_size', None)
-        self.request.query_params._mutable = False
-        return super().paginate_queryset(queryset)
-
     def get_queryset(self):
-        # Apply search filter
-        queryset = Product.objects.only('name', 'price', 'discount', 'collection')
-#        search_query = self.request.query_params.get('search', None)
-#        if search_query:
-#            search_query = urllib.parse.unquote(search_query)
-#            queryset = queryset.filter(
-#                Q(name_en__icontains=search_query) |
-#                Q(name_uk__icontains=search_query)
-#            )
-        
+        queryset = Product.objects.all().annotate(
+            discounted_price=ExpressionWrapper(
+                F('price') * (1 - F('discount') / 100.0),
+                output_field=FloatField()
+            )
+        )        
         # Explicitly filter by collections if provided
         collection_ids = self.request.query_params.get('collection', None)
         if collection_ids:
@@ -169,19 +155,19 @@ class ProductListFilter(generics.ListCreateAPIView, CachedQueryMixin):
                 queryset = queryset.filter(discount__gt=0)  # Only products with a discount
             elif has_discount.lower() in ['false', '0']:
                 queryset = queryset.filter(discount=0)  # Only products without a discount
-
-        # Annotate discounted_price
-        queryset = queryset.annotate(
-            discounted_price=ExpressionWrapper(
-                F('price') * (1 - F('discount') / 100.0),
-                output_field=FloatField()
-            )
-        )
+                
+        price_min = self.request.query_params.get('price_min')
+        price_max = self.request.query_params.get('price_max')
+        if price_min and price_max:
+            queryset = queryset.filter(discounted_price__gte=price_min, discounted_price__lte=price_max)
 
         # Default behavior if no specific parameter for price_min or price_max is provided
-        queryset = self.filterset_class(self.request.GET, queryset=queryset).qs
+#        queryset = self.filterset_class(self.request.GET, queryset=queryset).qs
 
         # Ordering logic with multiple fields
+#        ordering = self.request.query_params.get('ordering', None)
+
+        queryset = self.filter_queryset(queryset)
         ordering = self.request.query_params.get('ordering', None)
         if ordering:
             ordering_fields = ordering.split(',')

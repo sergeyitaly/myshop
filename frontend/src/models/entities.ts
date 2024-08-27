@@ -95,3 +95,8 @@ export interface Order {
     receiver_comments: string | null
     submitted_at: Date
 }
+
+export interface PriceRange {
+    min: number;
+    max: number;
+}
