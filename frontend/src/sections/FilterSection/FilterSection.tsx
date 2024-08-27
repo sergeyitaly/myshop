@@ -30,7 +30,7 @@ export const FilterSection = ({
     initialCollection
 }: FilterSectionProps) => {
 
-    const LIMIT = 8;
+    const LIMIT = 4;
 
 
     const navigate = useNavigate()
