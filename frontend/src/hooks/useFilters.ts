@@ -15,9 +15,12 @@ interface PriceRange {
     max: number;
 }
 
-export const useFilters = (initialCollection?: Collection) => {
+
+export const useFilters = (initialCollection?: Collection ) => {
     const maxValue = 1000000;
     const minValue = 0;
+
+    const [minMaxPrice, setMinMaxPrice] = useState<[number, number]>([minValue, maxValue])
 
     const [tempCategories, setTempCategories] = useState<Category[]>([]);
     const [tempCollections, setTempCollections] = useState<Collection[]>([]);
@@ -28,6 +31,8 @@ export const useFilters = (initialCollection?: Collection) => {
     const [activeCollections, setActiveCollections] = useState<Collection[]>([]);
     const [activePriceValues, setActivePriceValues] = useState<PriceRange>({ min: minValue, max: maxValue });
 
+
+    
     const [filter, setFilter] = useState<MainFilter>({});
     const [tagList, setTagList] = useState<Tag[]>([]);
     const [sortBy, setSortBy] = useState<string>('');
@@ -70,6 +75,8 @@ export const useFilters = (initialCollection?: Collection) => {
     };
 
     const createTags = (categories: Category[] = [], collections: Collection[] = [], price: PriceRange, discount: boolean | null) => {
+        console.log(tempPriceValues);
+        
         let list: Tag[] = [];
         let categoryTags: Tag[] = categories.map((category) => ({
             type: 'category',
@@ -83,7 +90,7 @@ export const useFilters = (initialCollection?: Collection) => {
         list = [...categoryTags, ...collectionTags];
 
         const currencyFormat = getCurrencyFormat();
-        if (price.min !== minValue || price.max !== maxValue) {
+        if (price.min !== minMaxPrice[0] || price.max !== minMaxPrice[1]) {
             list.push({
                 type: 'price',
                 value: `${formatNumber(price.min)} - ${formatNumber(price.max)} ${formatCurrency(currencyFormat)}`
@@ -155,6 +162,8 @@ export const useFilters = (initialCollection?: Collection) => {
         setActiveCategories([]);
         setActivePriceValues({ min: minValue, max: maxValue });
         setActiveCollections([]);
+        setTempCategories([]);
+        setTempCollections([]);
         setHasDiscount(null);
     };
 
@@ -184,6 +193,8 @@ export const useFilters = (initialCollection?: Collection) => {
     };
 
     return {
+        minPrice: minMaxPrice[0],
+        maxPrice: minMaxPrice[1],
         tempCategories,
         tempPriceValues,
         tempCollections,
@@ -202,5 +213,6 @@ export const useFilters = (initialCollection?: Collection) => {
         applyChanges,
         deleteTag,
         changeDiscount,
+        setMinMaxPrice
     };
 };
