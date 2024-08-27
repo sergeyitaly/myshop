@@ -10,6 +10,7 @@ import styles from "./FilterMenu.module.scss";
 import "react-range-slider-input/dist/style.css";
 import { AppRangeSlider } from "../RangeSlider/RangeSlider";
 import { MainButton } from "../../../components/UI/MainButton/MainButton";
+import { useEffect } from "react";
 
 interface FilterMenuProps {
     showCollections?: boolean;
@@ -47,6 +48,14 @@ export const FilterMenu = ({
         useGetCollectionsByFilterQuery({
             page_size: 8,
         });
+
+    useEffect(() => {
+        window.document.body.style.overflow = 'hidden'
+
+        return () => {
+            window.document.body.style.overflow = 'visible'
+        }
+    }, [])
 
     // Function to get translated category name
     const getCategoryName = (category: Category): string => {
