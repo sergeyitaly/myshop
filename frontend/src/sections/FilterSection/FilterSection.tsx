@@ -49,8 +49,8 @@ export const FilterSection = ({
         tempPriceValues,
         tempCollections,
         filter,
-        minValue,
-        maxValue,
+        minPrice,
+        maxPrice,
         deleteTag,
         applyChanges,
         changeCategory,
@@ -58,6 +58,7 @@ export const FilterSection = ({
         changePrice,
         clearAllFilters,
         changeOrdering,
+        setMinMaxPrice,
     } = useFilters(initialCollection);
 
     const {
@@ -77,6 +78,7 @@ export const FilterSection = ({
                 max: productsResponse.price_max
             };
             changePrice(priceRange);
+            setMinMaxPrice([productsResponse.overall_price_min, productsResponse.overall_price_max])
         }
     }, [productsResponse]);
 
@@ -209,8 +211,8 @@ export const FilterSection = ({
                     open &&
                     <FilterMenu
                         showCollections={!initialCollection}
-                        minValue={productsResponse?.price_min || minValue}
-                        maxValue={productsResponse?.price_max || maxValue}
+                        minValue={minPrice}
+                        maxValue={maxPrice}
                         priceValue={[tempPriceValues.min, tempPriceValues.max]} // Convert to tuple
                         activeCategories={tempCategories}
                         activeCollections={tempCollections}

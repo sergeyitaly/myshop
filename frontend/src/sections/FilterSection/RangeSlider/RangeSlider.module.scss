@@ -31,12 +31,14 @@
     display: flex;
     justify-content: space-between;
     margin-top: 20px;
+    gap: 10px;
     input {
         border: 1px solid $color-gray-250;
         border-radius: 5px;
-        padding: 10px;
+        padding: 5px;
         font-size: clamp(1rem, 0.426vw + 0.867rem, 1.25rem);
         max-width: 217px;
+        width: 100%;
         text-align: center;
     }
 }

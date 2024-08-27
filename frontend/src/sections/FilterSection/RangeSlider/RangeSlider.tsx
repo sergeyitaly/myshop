@@ -51,7 +51,7 @@ export const AppRangeSlider = ({
             transformedValue = 0
         }
         
-        if(!isNaN(+transformedValue)){
+        if(!isNaN(+transformedValue) && transformedValue <= maxValue){
             changePrice([transformedValue, value[1]])
         }
     }
@@ -61,7 +61,7 @@ export const AppRangeSlider = ({
         if(!e.target.value){
             transformedValue = 0
         }
-        if(!isNaN(+transformedValue)){
+        if(!isNaN(+transformedValue) && transformedValue <= maxValue){
             changePrice([value[0], transformedValue])
         }
     }
