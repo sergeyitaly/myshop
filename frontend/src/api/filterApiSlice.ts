@@ -8,6 +8,11 @@ interface FilterResponse {
     price_min: number;
     price_max: number;
     has_discount: boolean;
+    overall_price_min: number;
+    overall_price_max: number;
+    next: string | null;
+    previous: string | null;
+    count: number;
     results: Product[];
 }
 

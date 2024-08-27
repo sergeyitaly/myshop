@@ -14,10 +14,10 @@ import { useTranslation } from 'react-i18next';
 import { useGetFilterDataQuery } from '../../../api/filterApiSlice';
 import { useEffect, useState } from 'react';
 
+
 export function AllCollection() {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
-
     const { data, isLoading } = useGetAllCollectionsQuery();
     const collections: Collection[] = data?.results || [];
 
@@ -27,7 +27,7 @@ export function AllCollection() {
     }, [i18n.language]);
 
     const handleClickCollectionCard = (id: number) => {
-        navigate(ROUTE.COLLECTION + id);
+        navigate(`${ROUTE.COLLECTION}${id}`);
     };
 
     const settings = {
@@ -36,7 +36,6 @@ export function AllCollection() {
         speed: 500,
         slidesToShow: 1,
         slidesToScroll: 1,
-        initialSlide: 0,
         arrows: false,
     };
 
@@ -66,6 +65,7 @@ export function AllCollection() {
     );
 }
 
+
 const popularityFilter = {
     popularity: '3', // Adjust this to the correct format as required by your API
 };
@@ -74,7 +74,6 @@ export function Popular() {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
 
-    // Fetch products with the filter applied
     const {
         data: productResponse,
         isSuccess: isSuccessProductFetching,
@@ -82,7 +81,6 @@ export function Popular() {
         error
     } = useGetManyProductsByFilterQuery(popularityFilter);
 
-    // State to hold products
     const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
 
     useEffect(() => {
@@ -130,7 +128,7 @@ export function Popular() {
                             {filteredProducts.map((product) => (
                                 <div key={product.id} className={style.container}>
                                     <PreviewCard
-                                        photoSrc={product.photo}
+                                        photoSrc={product.photo_url}
                                         title={getTranslatedProductName(product)}
                                         discount={product.discount}
                                         price={product.price}
@@ -146,6 +144,7 @@ export function Popular() {
         </div>
     );
 }
+
 interface DiscountFilter {
     has_discount: boolean;
 }
@@ -156,7 +155,6 @@ export function Discount() {
     const [filterStatus, setFilterStatus] = useState<'loading' | 'failed' | 'success'>('loading');
     const [filterError, setFilterError] = useState<string | null>(null);
 
-    // Use the filter query to fetch discount products
     const { data, error, isLoading } = useGetFilterDataQuery({ has_discount: true } as DiscountFilter);
 
     useEffect(() => {
@@ -170,7 +168,9 @@ export function Discount() {
             setFilterStatus('success');
         }
     }, [isLoading, error]);
-    const discountProducts: Product[] = data?.results || []; // Default to an empty array if undefined
+
+    const discountProducts: Product[] = data?.results || [];
+
     const getTranslatedProductName = (product: Product): string => {
         return i18n.language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
     };

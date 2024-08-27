@@ -225,17 +225,14 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '3/s',
         'user': '10/minute',
-        'search': '3/s',  
-        'products': '5/s',  
-        'collections': '5/s',  
+        'search': '6/m',  
+        'products': '30/m',  
+        'collections': '30/m',  
     },
     #    'DEFAULT_PAGINATION_CLASS': 'myshop.shop.views.CustomPageNumberPagination',
          'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-   #     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-
-
-   
-    'PAGE_SIZE': 12
+   #     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',  
+    'PAGE_SIZE': 8
 }
 
 
