@@ -878,7 +878,7 @@ async function sendChatIdAndPhoneToVercel(phoneNumber: string, chatId: string): 
     throw error;
   }
 }
-
+// Define interfaces
 interface OrderItem {
   size: string | null;
   quantity: number;
@@ -890,7 +890,6 @@ interface OrderItem {
   collection_name: string;
 }
 
-
 interface Order {
   order_id: number;
   phone?: string;
@@ -901,10 +900,11 @@ interface Order {
   canceled_at?: string;
   submitted_at?: string;
   order_items: OrderItem[];
-  TelegramUser?: any[];  // Adjust as needed
+  TelegramUser?: TelegramUser[];
   email?: string;
-  order_summary?: any;  // Adjust as needed
+  order_summary?: OrderSummary;
 }
+
 interface OrderSummary {
   order_id: number;
   order_items: OrderItem[];
@@ -922,7 +922,7 @@ interface TelegramUser {
 
 interface OrderSummaryResponse {
   chat_id: string;
-  orders: (Order | OrderSummary)[]; // Allow both Order and OrderSummary types
+  orders: (Order | OrderSummary)[];
 }
 
 interface OrderResponse {
@@ -931,8 +931,6 @@ interface OrderResponse {
   previous: string | null;
   results: OrderSummaryResponse[];
 }
-
-
 
 interface OrderDetails {
   id: number;
@@ -943,32 +941,21 @@ interface OrderDetails {
 interface SummaryResponse {
   orders: Order[];
 }
-// Define type guard functions to ensure the structure of the data
+
+
+// Type guard functions
 function isOrderItem(obj: any): obj is OrderItem {
   return obj &&
-    (obj.size === null || typeof obj.size === 'string') &&
+    typeof obj.size === 'string' &&
     typeof obj.quantity === 'number' &&
     typeof obj.total_sum === 'number' &&
-    (obj.color_name === null || typeof obj.color_name === 'string') &&
     typeof obj.item_price === 'string' &&
     typeof obj.color_value === 'string' &&
     typeof obj.product_name === 'string' &&
     typeof obj.collection_name === 'string';
 }
 
-// Type guard for OrderResponse
-function isOrderResponse(data: any): data is OrderResponse {
-  return data &&
-    typeof data.count === 'number' &&
-    Array.isArray(data.results) &&
-    data.results.every((result: any) =>
-      typeof result.chat_id === 'string' &&
-      Array.isArray(result.orders) &&
-      result.orders.every((order: any) => isOrder(order) || isOrderSummary(order))
-    );
-}
 
-// Type guard for OrderSummary
 function isOrderSummary(obj: any): obj is OrderSummary {
   return obj &&
     typeof obj.order_id === 'number' &&
@@ -981,71 +968,38 @@ function isOrderSummary(obj: any): obj is OrderSummary {
     (obj.canceled_at === undefined || typeof obj.canceled_at === 'string');
 }
 
-function isOrderSummaryResponse(obj: any): obj is OrderSummaryResponse {
-  return obj &&
-    typeof obj.chat_id === 'string' &&
-    Array.isArray(obj.orders) && obj.orders.every(isOrderSummary);
-}
-
-
-// Example of a function using the type guard to validate API response
-async function fetchOrderSummary(): Promise<void> {
-  const response = await fetch('/api/order-summary');
-  const data: unknown = await response.json();
-
-  if (isOrderResponse(data)) {
-    console.log('Valid OrderResponse:', data);
-    // Process the data here
-  } else {
-    console.error('Invalid OrderResponse structure:', data);
-  }
-}
-
 function isSummaryResponse(obj: any): obj is SummaryResponse {
-  return obj && Array.isArray(obj.orders) && obj.orders.every((order: any) =>
-    typeof order.order_id === 'number' &&
-    Array.isArray(order.order_items) &&
-    order.order_items.every((item: any) =>
-      typeof item.product_name === 'string' &&
-      typeof item.item_price === 'string' &&
-      typeof item.quantity === 'number'
-    )
-  );
+  return obj &&
+    Array.isArray(obj.orders) &&
+    obj.orders.every(isOrderSummary);
 }
 
-function isOrderArray(data: unknown): data is Order[] {
-  return Array.isArray(data) && data.every(item => 
-    typeof item.order_id === 'number' &&
-    Array.isArray(item.order_items) &&
-    typeof item.order_summary === 'object'
-  );
+function isOrderResponse(data: any): data is OrderResponse {
+  return data &&
+    typeof data.count === 'number' &&
+    Array.isArray(data.results) &&
+    data.results.every((result: any) =>
+      typeof result.chat_id === 'string' &&
+      Array.isArray(result.orders) &&
+      result.orders.every((order: any) => isOrderSummary(order))
+    );
 }
 
 
-
+// Helper function to format date
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-
-  const absHours = Math.abs(diffHours);
-  const absMinutes = Math.abs(diffMinutes);
-
-  const formattedDiff = `${absHours}h ${absMinutes}m ago`;
+  const formattedDiff = `${Math.abs(diffHours)}h ${Math.abs(diffMinutes)}m ago`;
   const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-
   return `on ${formattedDate}`;
 }
 
-
-
-
-async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<void> {
-  const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
-  const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/?chat_id=${encodeURIComponent(chatId)}`;
-
+// Helper function to extract latest order status
+function getLatestStatusEntry(statusDates: Record<string, string | null>): string | undefined {
   const statusEmojis: Record<string, string> = {
     'submitted': '📝',
     'created': '🆕',
@@ -1053,6 +1007,22 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
     'complete': '✅',
     'canceled': '❌'
   };
+
+  return Object.entries(statusDates)
+    .filter(([_, date]) => date !== null)
+    .sort(([_, dateA], [__, dateB]) => new Date(dateB!).getTime() - new Date(dateA!).getTime())
+    .map(([status, date]) => `${statusEmojis[status] || '🔍'} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`)
+    .shift();
+}
+async function sendOrderDetails(phoneNumber: string, chatId: string | null): Promise<void> {
+  if (!chatId) {
+    console.error('Chat ID is missing.');
+    if (phoneNumber) await sendMessage(phoneNumber, 'Chat ID is missing. Please try again later.');
+    return;
+  }
+
+  const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+  const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/?chat_id=${encodeURIComponent(chatId)}`;
 
   try {
     if (!accessToken) {
@@ -1070,13 +1040,15 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Failed to retrieve order summary. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
+      console.error(`Failed to retrieve order summary. Status: ${response.status}`);
       await sendMessage(chatId, 'Failed to retrieve order summary. Please try again later.');
       return;
     }
 
     const responseBody: unknown = await response.json();
+
+    // Log the response for debugging
+    console.log('Response Body:', responseBody);
 
     if (!isOrderResponse(responseBody)) {
       console.error('Invalid response format:', responseBody);
@@ -1084,8 +1056,8 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
       return;
     }
 
-    const data: OrderResponse = responseBody;
-    const summary = data.results.find(result => result.chat_id === chatId);
+    // Assuming `responseBody.results` is an array of orders summaries
+    const summary = responseBody.results.find(result => result.chat_id === chatId);
 
     if (!summary || summary.orders.length === 0) {
       console.log('No orders found for this chat ID.');
@@ -1093,7 +1065,6 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
       return;
     }
 
-    // Extracting the latest order based on the timestamp
     const latestOrder = summary.orders.reduce((latest, order) => {
       const orderDate = new Date(order.submitted_at || order.processed_at || '');
       const latestDate = new Date(latest.submitted_at || latest.processed_at || '');
@@ -1112,13 +1083,7 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
       'canceled': latestOrder.canceled_at ?? null
     };
 
-    const latestStatusEntry = Object.entries(statusDates)
-      .filter(([_, date]) => date !== null)
-      .sort(([_, dateA], [__, dateB]) => new Date(dateB!).getTime() - new Date(dateA!).getTime())
-      .map(([status, date]) => {
-        const statusEmoji = statusEmojis[status] || '🔍';
-        return `${statusEmoji} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
-      })[0];
+    const latestStatusEntry = getLatestStatusEntry(statusDates);
 
     const orderDetailsMessage = `
       Order ID: ${latestOrder.order_id}
@@ -1134,14 +1099,11 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
   }
 }
 
-async function sendAllOrdersDetails(chatId: string): Promise<void> {
-  const statusEmojis: { [key: string]: string } = {
-    'submitted': '📝',
-    'created': '🆕',
-    'processed': '🔄',
-    'complete': '✅',
-    'canceled': '❌'
-  };
+async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
+  if (!chatId) {
+    console.error('Chat ID is missing.');
+    return;
+  }
 
   try {
     if (!accessToken) {
@@ -1162,13 +1124,12 @@ async function sendAllOrdersDetails(chatId: string): Promise<void> {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Failed to retrieve order summary. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
+      console.error(`Failed to retrieve order summary. Status: ${response.status}`);
       await sendMessage(chatId, 'Failed to retrieve order summary. Please try again later.');
       return;
     }
 
-    const jsonResponse = await response.json();
+    const jsonResponse: unknown = await response.json();
 
     if (!isSummaryResponse(jsonResponse)) {
       console.error('Invalid response format');
@@ -1179,11 +1140,9 @@ async function sendAllOrdersDetails(chatId: string): Promise<void> {
     const summaryResponse: SummaryResponse = jsonResponse;
     console.log(`Order summary retrieved: ${JSON.stringify(summaryResponse)}`);
 
-    const orders: Order[] = summaryResponse.orders;
-
-    if (Array.isArray(orders) && orders.length > 0) {
-      const ordersSummary = orders.map(order => {
-        const statusDates: { [key: string]: string | null } = {
+    if (summaryResponse.orders.length > 0) {
+      const ordersSummary = summaryResponse.orders.map(order => {
+        const statusDates = {
           'submitted': order.submitted_at ?? null,
           'created': order.created_at ?? null,
           'processed': order.processed_at ?? null,
@@ -1191,37 +1150,28 @@ async function sendAllOrdersDetails(chatId: string): Promise<void> {
           'canceled': order.canceled_at ?? null
         };
 
-        const latestStatusEntry = Object.entries(statusDates)
-          .filter(([_, date]) => date !== null)
-          .sort(([_, dateA], [__, dateB]) => new Date(dateB!).getTime() - new Date(dateA!).getTime())
-          .map(([status, date]) => {
-            const statusEmoji = statusEmojis[status] || '🔍';
-            return `${statusEmoji} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
-          })[0];
-
-        const orderItemsSummary = (order.order_items || []).map(item =>
-          `- ${item.product_name || 'Unknown'}, ${item.collection_name || 'Unknown'}, Size: ${item.size || 'N/A'}, Color: ${item.color_name || 'N/A'}, Quantity: ${item.quantity || 0}, Price: ${parseFloat(item.item_price || '0.00').toFixed(2)}`
+        const latestStatusEntry = getLatestStatusEntry(statusDates);
+        const orderItemsSummary = order.order_items.map((item: OrderItem) =>
+          `- ${item.product_name}, ${item.collection_name}, Size: ${item.size || 'N/A'}, Color: ${item.color_name || 'N/A'}, ${item.quantity} pcs, ${parseFloat(item.item_price).toFixed(2)}`
         ).join('\n');
 
         return `
-          Order ID: ${order.order_id || 'Unknown'}
-          ${orderItemsSummary ? `Order Items:\n${orderItemsSummary}` : 'No items in this order'}
-          ${latestStatusEntry ? `Status: ${latestStatusEntry}` : 'Status: Unknown'}
+          Order ID: ${order.order_id}
+          Order Items:
+          ${orderItemsSummary}
+          ${latestStatusEntry ? `   ${latestStatusEntry}` : ''}
         `;
       }).join('\n\n');
 
-      const messageText = `Here are your orders:\n${ordersSummary}`;
-      await sendMessage(chatId, messageText);
+      await sendMessage(chatId, `Here are all your orders details:\n${ordersSummary}`);
     } else {
-      await sendMessage(chatId, 'You do not have any orders.');
-    }  
+      await sendMessage(chatId, 'No orders found for this chat ID.');
+    }
   } catch (error) {
-    console.error('Error:', error);
-    await sendMessage(chatId, 'An error occurred while retrieving your orders. Please try again later.');
+    console.error(`Error retrieving order details: ${error}`);
+    await sendMessage(chatId, 'An error occurred while retrieving order details. Please try again later.');
   }
 }
-
-
 
 // Helper function to update order status
 async function updateOrderStatus(orderId: number, newStatus: string, timestampField: string): Promise<void> {
@@ -1282,84 +1232,6 @@ async function updateOrderStatusWithNotification(orderId: number, status: string
 }
 
 
-async function updateSubmittedToCreated(): Promise<void> {
-  await fetchAndProcessOrders('submitted', async (order: Order) => {
-    const { submitted_at, created_at } = order.order_summary;
-    const latestTimestamp = new Date(submitted_at || created_at || 0);
-    const now = new Date();
-    const diffMinutes = (now.getTime() - latestTimestamp.getTime()) / (1000 * 60);
-
-    if (submitted_at && diffMinutes >= 10 && order.status === 'submitted') {
-      console.log(`Updating Order ID ${order.order_id} from 'submitted' to 'created'.`);
-      const chatId = await getChatIdForOrder(order.order_id);
-      if (chatId) {
-        await updateOrderStatusWithNotification(order.order_id, 'created', 'created_at', chatId);
-        await updateOrderForChatId(chatId, order.order_summary);
-      }
-    }
-  });
-}
-
-async function updateCreatedToProcessed(): Promise<void> {
-  await fetchAndProcessOrders('created', async (order: Order) => {
-    const { created_at, processed_at } = order.order_summary;
-    const latestTimestamp = new Date(created_at || processed_at || 0);
-    const now = new Date();
-    const diffMinutes = (now.getTime() - latestTimestamp.getTime()) / (1000 * 60);
-
-    if (created_at && diffMinutes >= 20 && order.status === 'created') {
-      console.log(`Updating Order ID ${order.order_id} from 'created' to 'processed'.`);
-      const chatId = await getChatIdForOrder(order.order_id);
-      if (chatId) {
-        await updateOrderStatusWithNotification(order.order_id, 'processed', 'processed_at', chatId);
-        await updateOrderForChatId(chatId, order.order_summary);
-      }
-    }
-  });
-}
-
-async function updateProcessedToComplete(): Promise<void> {
-  await fetchAndProcessOrders('processed', async (order: Order) => {
-    const { processed_at, complete_at } = order.order_summary;
-    const latestTimestamp = new Date(processed_at || complete_at || 0);
-    const now = new Date();
-    const diffHours = (now.getTime() - latestTimestamp.getTime()) / (1000 * 60 * 60);
-
-    if (processed_at && diffHours >= 24 && order.status === 'processed') {
-      console.log(`Updating Order ID ${order.order_id} from 'processed' to 'complete'.`);
-      const chatId = await getChatIdForOrder(order.order_id);
-      if (chatId) {
-        await updateOrderStatusWithNotification(order.order_id, 'complete', 'complete_at', chatId);
-        await updateOrderForChatId(chatId, order.order_summary);
-      }
-    }
-  });
-}
-
-async function updateOrderSummary(chatId: string, order: Order, newStatus: string): Promise<void> {
-  const fetchUrl = `${VERCEL_DOMAIN}/api/telegram_users/${chatId}/order_summary`;
-
-  try {
-    const response = await fetch(fetchUrl, {
-      method: 'PATCH',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        orders: order.order_summary, // Adjust as needed to update the order summary
-        status: newStatus,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Failed to update order summary for chat ID ${chatId}. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
-    }
-  } catch (error) {
-    console.error(`Error updating order summary for chat ID ${chatId}. Error: ${error}`);
-  }
-}
 
 
 async function getChatIdForOrder(orderId: number): Promise<string> {
