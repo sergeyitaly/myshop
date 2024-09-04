@@ -976,7 +976,7 @@ const fetchOrderSummary = async (chatId: string): Promise<OrderResponse> => {
   if (!accessToken) throw new Error('No access token available.');
 
   // Construct the URL with the chatId
-  const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/${chatId}/`;
+  const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/?chatId=${chatId}`;
 
   const response = await fetch(summaryUrl, {
     method: 'GET',
