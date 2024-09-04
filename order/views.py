@@ -373,6 +373,17 @@ def update_order(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
+
+@api_view(['GET'])
+def get_order_summary_by_chat_id(request, chat_id):
+    user = get_object_or_404(TelegramUser, chat_id=chat_id)
+    orders = Order.objects.filter(user=user)
+    
+    # Use get_order_summary to format each order
+    summaries = [get_order_summary(order) for order in orders]
+    
+    return Response(summaries)
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_order_summary(request):
