@@ -1,0 +1,15 @@
+@import '../../../variables';
+
+.bar {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+}
+
+.sortMenu {
+    position: absolute;
+    z-index: 3;
+    box-shadow: $shadow-main;
+    top: 100%;
+    right: 0;
+  }

@@ -22,16 +22,16 @@ export const useFilters = (initialCollection?: Collection ) => {
 
     const [minMaxPrice, setMinMaxPrice] = useState<[number, number]>([minValue, maxValue])
 
+
     const [tempCategories, setTempCategories] = useState<Category[]>([]);
     const [tempCollections, setTempCollections] = useState<Collection[]>([]);
     const [tempPriceValues, setTempPriceValues] = useState<PriceRange>({ min: minValue, max: maxValue });
-    const [hasDiscount, setHasDiscount] = useState<boolean | null>(null);
-
+    const [tempHasDiscount, setTempHasDiscount] = useState<boolean>(false)
+    
     const [activeCategories, setActiveCategories] = useState<Category[]>([]);
     const [activeCollections, setActiveCollections] = useState<Collection[]>([]);
     const [activePriceValues, setActivePriceValues] = useState<PriceRange>({ min: minValue, max: maxValue });
-
-
+    const [activeHasDiscount, setActiveHasDiscount] = useState<boolean>(false);
     
     const [filter, setFilter] = useState<MainFilter>({});
     const [tagList, setTagList] = useState<Tag[]>([]);
@@ -97,19 +97,18 @@ export const useFilters = (initialCollection?: Collection ) => {
             });
         }
 
-        if (discount !== null) {
+        if (discount) {
             list.push({
                 type: 'discount',
-                value: discount ? 'Discounted' : 'No Discount'
+                value: 'Discounted' 
             });
         }
-
         return list;
     };
 
     useEffect(() => {
-        setTagList(createTags(activeCategories, activeCollections, activePriceValues, hasDiscount));
-    }, [i18n.language, activeCategories, activeCollections, activePriceValues, hasDiscount]);
+        setTagList(createTags(activeCategories, activeCollections, activePriceValues, activeHasDiscount));
+    }, [i18n.language, activeCategories, activeCollections, activePriceValues, activeHasDiscount]);
 
     useEffect(() => {
         if (initialCollection) {
@@ -118,19 +117,32 @@ export const useFilters = (initialCollection?: Collection ) => {
     }, [initialCollection]);
 
     useEffect(() => {
-        setTagList(createTags(activeCategories, activeCollections, activePriceValues, hasDiscount));
+        // setTagList(createTags(activeCategories, activeCollections, activePriceValues, activeHasDiscount));
 
         // Set filters based on active states, excluding default values
-        setFilter((state) => ({
-            ...state,
+        const newFilter: MainFilter = {
+            ...filter,
             category: activeCategories.map(({ id }) => id).join(','),
             collection: activeCollections.map(({ id }) => id).join(','),
             price_min: activePriceValues.min !== minValue ? activePriceValues.min : undefined,
             price_max: activePriceValues.max !== maxValue ? activePriceValues.max : undefined,
             ordering: sortBy,
-            has_discount: hasDiscount !== null ? hasDiscount : undefined
-        }));
-    }, [activeCategories, activePriceValues, activeCollections, sortBy, hasDiscount]);
+            has_discount: activeHasDiscount 
+        }
+
+        if(!activeHasDiscount) delete newFilter.has_discount
+
+        setFilter(newFilter);
+    }, [activeCategories, activePriceValues, activeCollections, sortBy, activeHasDiscount]);
+
+    useEffect(() => {
+
+        setTempCategories(activeCategories)
+        setTempCollections(activeCollections)
+        setTempPriceValues(activePriceValues)
+        setTempHasDiscount(activeHasDiscount)
+
+    }, [activeCategories, activePriceValues, activeCollections, activeHasDiscount])
 
     const changeCategory = (category: Category) => {
         const alreadyExist = tempCategories.some(({ id }) => id === category.id);
@@ -154,28 +166,30 @@ export const useFilters = (initialCollection?: Collection ) => {
         setTempPriceValues(price);
     };
 
-    const changeDiscount = (discount: boolean | null) => {
-        setHasDiscount(discount);
+    const changeDiscount = (discount: boolean) => {
+        setTempHasDiscount(discount);
     };
 
     const clearAllFilters = () => {
         setActiveCategories([]);
-        setActivePriceValues({ min: minValue, max: maxValue });
+        setActivePriceValues({ min: minMaxPrice[0], max: minMaxPrice[1] });
         setActiveCollections([]);
         setTempCategories([]);
         setTempCollections([]);
-        setHasDiscount(null);
+        setTempHasDiscount(false);
+        setActiveHasDiscount(false)
     };
 
     const applyChanges = () => {
         setActiveCategories(tempCategories);
         setActivePriceValues(tempPriceValues);
         setActiveCollections(tempCollections);
+        setActiveHasDiscount(tempHasDiscount)
     };
 
     const deleteTag = (tag: Tag) => {
         if (tag.type === 'price') {
-            setActivePriceValues({ min: minValue, max: maxValue });
+            setActivePriceValues({ min: minMaxPrice[0], max: minMaxPrice[1] });
         }
         if (tag.type === 'category') {
             setActiveCategories(activeCategories.filter((category) => getCategoryName(category) !== tag.value));
@@ -184,7 +198,7 @@ export const useFilters = (initialCollection?: Collection ) => {
             setActiveCollections(activeCollections.filter((collection) => getCollectionName(collection) !== tag.value));
         }
         if (tag.type === 'discount') {
-            setHasDiscount(null);
+            setActiveHasDiscount(false);
         }
     };
 
@@ -205,6 +219,7 @@ export const useFilters = (initialCollection?: Collection ) => {
         maxValue,
         filter,
         tagList,
+        tempHasDiscount,
         changeOrdering,
         changeCategory,
         changeCollection,

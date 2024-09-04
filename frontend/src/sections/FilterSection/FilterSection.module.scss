@@ -1,10 +1,5 @@
 @import '../../variables';
 
-.section {
-  @media (max-width: $screen-mobile) {
-      position: relative;
-    }
-}
 
 .control {
     position: relative;
@@ -68,7 +63,6 @@
   .item {
     margin-left: 10px;
   }
-
 
 
 
