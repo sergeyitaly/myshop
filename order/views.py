@@ -373,6 +373,7 @@ def update_order(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_order_summary_by_chat_id(request):
@@ -387,41 +388,39 @@ def get_order_summary_by_chat_id(request):
         if not summaries.exists():
             return Response({'error': 'No summaries found for this chat ID.'}, status=404)
 
-        summary_data = [
-            {
-                'chat_id': summary.chat_id,
-                'orders': [
-                    {
-                        'order_id': order.order_id,
-                        'order_items': [
-                            {
-                                'product_name': item.product_name,
-                                'collection_name': item.collection_name,
-                                'size': item.size,
-                                'color_name': item.color_name,
-                                'quantity': item.quantity,
-                                'item_price': item.item_price,
-                                'color_value': item.color_value
-                            }
-                            for item in order.order_items.all()
-                        ],
-                        'submitted_at': order.submitted_at,
-                        'created_at': order.created_at,
-                        'processed_at': order.processed_at,
-                        'complete_at': order.complete_at,
-                        'canceled_at': order.canceled_at
-                    }
-                    for order in summary.orders.all()
-                ]
-            }
-            for summary in summaries
-        ]
+        summary_data = []
+        for summary in summaries:
+            orders = summary.orders.all()
+            for order in orders:
+                order_data = {
+                    'order_id': order.order_id,
+                    'created_at': order.created_at.strftime('%Y-%m-%d %H:%M'),
+                    'submitted_at': order.submitted_at.strftime('%Y-%m-%d %H:%M') if order.submitted_at else None,
+                    'processed_at': order.processed_at.strftime('%Y-%m-%d %H:%M') if order.processed_at else None,
+                    'complete_at': order.complete_at.strftime('%Y-%m-%d %H:%M') if order.complete_at else None,
+                    'canceled_at': order.canceled_at.strftime('%Y-%m-%d %H:%M') if order.canceled_at else None,
+                    'order_items': [
+                        {
+                            'product_name': item.product_name,
+                            'collection_name': item.collection_name,
+                            'size': item.size,
+                            'color_name': item.color_name,
+                            'quantity': item.quantity,
+                            'total_sum': float(item.total_sum),  # Convert total_sum to float
+                            'item_price': str(item.item_price),
+                            'color_value': item.color_value
+                        }
+                        for item in order.order_items.all()
+                    ]
+                }
+                summary_data.append(order_data)
 
         return Response({'results': summary_data})
 
     except Exception as e:
         return Response({'error': str(e)}, status=500)
-
+    
+    
 #@api_view(['POST'])
 #@permission_classes([AllowAny])
 #def update_order_summary(request):
