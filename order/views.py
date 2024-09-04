@@ -34,6 +34,54 @@ def health_check(request):
 class OrderSummaryViewSet(viewsets.ModelViewSet):
     queryset = OrderSummary.objects.all()
     serializer_class = OrderSummarySerializer
+    
+    @action(detail=False, methods=['get'])
+    def by_chat_id(self, request):
+        """
+        Retrieve order summaries for a specific chat_id.
+        """
+        chat_id = request.query_params.get('chat_id')
+        if not chat_id:
+            return Response({'error': 'chat_id parameter is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            summaries = OrderSummary.objects.filter(chat_id=chat_id)
+            if not summaries.exists():
+                return Response({'error': 'No summaries found for this chat ID.'}, status=status.HTTP_404_NOT_FOUND)
+
+            summary_data = [
+                {
+                    'chat_id': summary.chat_id,
+                    'orders': [
+                        {
+                            'order_id': order.order_id,
+                            'order_items': [
+                                {
+                                    'product_name': item.product_name,
+                                    'collection_name': item.collection_name,
+                                    'size': item.size,
+                                    'color_name': item.color_name,
+                                    'quantity': item.quantity,
+                                    'item_price': item.item_price,
+                                    'color_value': item.color_value
+                                }
+                                for item in order.order_items.all()
+                            ],
+                            'submitted_at': order.submitted_at,
+                            'created_at': order.created_at,
+                            'processed_at': order.processed_at,
+                            'complete_at': order.complete_at,
+                            'canceled_at': order.canceled_at
+                        }
+                        for order in summary.orders.all()
+                    ]
+                }
+                for summary in summaries
+            ]
+
+            return Response({'results': summary_data})
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create(self, request, *args, **kwargs):
         logger.debug("Received data: %s", request.data)
@@ -416,23 +464,6 @@ def get_order_summary_by_chat_id(request, chat_id):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-    
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_order_summary(request):
-    chat_id = request.query_params.get('chat_id')
-    
-    if not chat_id:
-        return Response({'error': 'Chat ID is required.'}, status=400)
-
-    try:
-        summary = OrderSummary.objects.get(chat_id=chat_id)
-        serializer = OrderSummarySerializer(summary)
-        return Response(serializer.data)
-    except OrderSummary.DoesNotExist:
-        return Response({'error': 'No orders found for this chat ID.'}, status=404)
-    except Exception as e:
-        return Response({'error': str(e)}, status=500)
     
 
 #@api_view(['POST'])
