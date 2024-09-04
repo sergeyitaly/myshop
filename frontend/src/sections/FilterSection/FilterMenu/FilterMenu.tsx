@@ -11,8 +11,11 @@ import "react-range-slider-input/dist/style.css";
 import { AppRangeSlider } from "../RangeSlider/RangeSlider";
 import { MainButton } from "../../../components/UI/MainButton/MainButton";
 import { useEffect } from "react";
+import { FormControlLabel, Switch } from "@mui/material";
 
 interface FilterMenuProps {
+    hasDiscount: boolean;
+    initialTopPosition: number
     showCollections?: boolean;
     activeCategories?: Category[];
     activeCollections?: Collection[];
@@ -24,9 +27,12 @@ interface FilterMenuProps {
     onClickCategory: (category: Category) => void;
     onClickCollection: (collection: Collection) => void;
     onApply: () => void;
+    onChangeSale: (value: boolean) => void
 }
 
 export const FilterMenu = ({
+    hasDiscount,
+    initialTopPosition,
     showCollections,
     activeCategories = [],
     activeCollections = [],
@@ -38,6 +44,7 @@ export const FilterMenu = ({
     onClickCollection,
     onClickCategory,
     onApply,
+    onChangeSale,
 }: FilterMenuProps) => {
     const { i18n, t } = useTranslation(); // Initialize translation hook
 
@@ -81,6 +88,10 @@ export const FilterMenu = ({
         }
     };
 
+    const handleChangeSale = (_: React.ChangeEvent<HTMLInputElement>, value: boolean) => {
+        onChangeSale(value)
+    }
+
     return (
         <motion.div
             className={styles.wrapper}
@@ -88,6 +99,7 @@ export const FilterMenu = ({
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ ease: "linear" }}
+            style={{top: initialTopPosition}}
         >
             <header className={styles.header}>
                 <TextButton
@@ -145,6 +157,12 @@ export const FilterMenu = ({
                             })}
                     </div>
                 </FilterDropDown>
+                <FormControlLabel
+                    control={
+                        <Switch checked={hasDiscount} onChange={handleChangeSale} name="gilad" />
+                    }
+                    label="Товари зі знижкою"
+                    />
                 <FilterDropDown
                     title={t("price")} // Localized text
                 >
