@@ -24,7 +24,7 @@ import os
 from django.http import JsonResponse
 from rest_framework.decorators import action
 from .signals import update_order_status_with_notification
-from django.shortcuts import get_object_or_404
+from django.http import JsonResponse, Http404
 
 
 logger = logging.getLogger(__name__)
@@ -375,17 +375,48 @@ def update_order(request):
     
 
 @api_view(['GET'])
-def get_order_summary_by_chat_id(request, chat_id: str):
-    # Implement your logic to get the order summary by chat_id
-    # Example:
+def get_order_summary_by_chat_id(request, chat_id):
     try:
-        summary = OrderSummary.objects.filter(chat_id=chat_id)
-        # Convert to JSON or another appropriate format
-        data = {"results": list(summary.values())}  # Adjust according to your data
-        return JsonResponse(data)
-    except OrderSummary.DoesNotExist:
-        return JsonResponse({"error": "Not found"}, status=404)
+        # Retrieve summaries by chat_id
+        summaries = OrderSummary.objects.filter(chat_id=chat_id)
+        if not summaries.exists():
+            raise Http404('No summaries found for this chat ID.')
 
+        summary_data = [
+            {
+                'chat_id': summary.chat_id,
+                'orders': [
+                    {
+                        'order_id': order.order_id,
+                        'order_items': [
+                            {
+                                'product_name': item.product_name,
+                                'collection_name': item.collection_name,
+                                'size': item.size,
+                                'color_name': item.color_name,
+                                'quantity': item.quantity,
+                                'item_price': item.item_price,
+                                'color_value': item.color_value
+                            }
+                            for item in order.order_items.all()
+                        ],
+                        'submitted_at': order.submitted_at,
+                        'created_at': order.created_at,
+                        'processed_at': order.processed_at,
+                        'complete_at': order.complete_at,
+                        'canceled_at': order.canceled_at
+                    }
+                    for order in summary.orders.all()
+                ]
+            }
+            for summary in summaries
+        ]
+
+        return JsonResponse({'results': summary_data})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+    
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_order_summary(request):
