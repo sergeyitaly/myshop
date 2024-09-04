@@ -375,14 +375,16 @@ def update_order(request):
     
 
 @api_view(['GET'])
-def get_order_summary_by_chat_id(request, chat_id):
+def get_order_summary_by_chat_id(request, chat_id: str):
+    # Implement your logic to get the order summary by chat_id
+    # Example:
     try:
-        # Filter order summaries by chat_id, including null values
-        order_summaries = OrderSummary.objects.filter(chat_id=chat_id)
-        serializer = OrderSummarySerializer(order_summaries, many=True)
-        return Response(serializer.data)
+        summary = OrderSummary.objects.filter(chat_id=chat_id)
+        # Convert to JSON or another appropriate format
+        data = {"results": list(summary.values())}  # Adjust according to your data
+        return JsonResponse(data)
     except OrderSummary.DoesNotExist:
-        return Response({'error': 'Order summaries not found'}, status=404)
+        return JsonResponse({"error": "Not found"}, status=404)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

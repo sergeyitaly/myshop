@@ -972,7 +972,7 @@ const getLatestStatusEntry = (statusDates: Record<string, string | null>): strin
     .shift();
 };
 
-const fetchOrderSummary = async (chatId: number): Promise<OrderResponse> => {
+const fetchOrderSummary = async (chatId: string): Promise<OrderResponse> => {
   if (!accessToken) throw new Error('No access token available.');
 
   // Construct the URL with the chatId
@@ -1007,15 +1007,9 @@ async function sendOrderDetails(phoneNumber: string, chatId: string | null): Pro
   }
 
   try {
-    const chatIdNumber = parseInt(chatId, 10); // Convert chatId to number
-    if (isNaN(chatIdNumber)) throw new Error('Invalid chat ID.');
+    const responseBody = await fetchOrderSummary(chatId);
 
-    const responseBody = await fetchOrderSummary(chatIdNumber);
-
-    const summary = responseBody.results.find(result => {
-      const resultChatId = parseInt(result.chat_id || '', 10); // Convert result.chat_id to number
-      return resultChatId === chatIdNumber;
-    });
+    const summary = responseBody.results.find(result => result.chat_id === chatId);
 
     if (!summary || summary.orders.length === 0) {
       console.log('No orders found for this chat ID.');
@@ -1060,6 +1054,7 @@ async function sendOrderDetails(phoneNumber: string, chatId: string | null): Pro
     await sendMessage(chatId, 'An error occurred while retrieving order details. Please try again later.');
   }
 }
+
 async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
   if (!chatId) {
     console.error('Chat ID is missing.');
@@ -1067,10 +1062,7 @@ async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
   }
 
   try {
-    const chatIdNumber = parseInt(chatId, 10); // Convert chatId to number
-    if (isNaN(chatIdNumber)) throw new Error('Invalid chat ID.');
-
-    const responseBody = await fetchOrderSummary(chatIdNumber);
+    const responseBody = await fetchOrderSummary(chatId);
 
     const allOrders = responseBody.results.flatMap(result => result.orders);
 
