@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import { PageContainer } from '../../components/containers/PageContainer'
 import styles from './Breadcrumbs.module.scss'
 import { ROUTE } from '../../constants'
@@ -78,6 +78,7 @@ export const Breadcrumbs = () => {
         }
     }
 
+    
  
 
     const {
@@ -172,8 +173,10 @@ export const Breadcrumbs = () => {
         collectionResponce, 
         productResponce, 
         isProductFetching, 
-        isProductLoading
+        isProductLoading, 
+        t
     ])
+
 
     useEffect(() => {
 

@@ -1,6 +1,5 @@
 import { PageContainer } from "../../components/containers/PageContainer";
 import styles from './FilterSection.module.scss';
-import { TextButton } from "../../components/UI/TextButton/TextButton";
 import { useGetProductsByMainFilterQuery } from "../../api/productSlice";
 import { PreviewCard } from "../../components/Cards/PreviewCard/PreviewCard";
 import { PreviewItemsContainer } from "../../components/containers/PreviewItemsContainer/PreviewItemsContainer";
@@ -12,12 +11,11 @@ import { Pagination } from "../../components/UI/Pagination/Pagination";
 import { Collection, Product, Category, PriceRange } from '../../models/entities';
 import clsx from "clsx";
 import { useTranslation } from 'react-i18next';
-import { SortMenu } from "./SortMenu/SortMenu";
 import { useToggler } from "../../hooks/useToggler";
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ROUTE } from "../../constants";
-import { useSortList } from "./SortList";
+import { FilterControlBar } from "./FilterControlBar/FilterControlBar";
 
 interface FilterSectionProps {
     initialCollection?: Collection;
@@ -30,6 +28,7 @@ export const FilterSection = ({
     const navigate = useNavigate();
     const [currentPage, setCurrentPage] = useState<number>(1);
     const { t, i18n } = useTranslation();
+    const [topPosition, setTopPosition] = useState<number>(0)
 
     const {
         openStatus: open,
@@ -37,11 +36,6 @@ export const FilterSection = ({
         handleClose: handleCloseMenu
     } = useToggler();
 
-    const {
-        openStatus: openSort,
-        handleClose: handleClickOutsideSort,   
-        handleOpen: handleClickSort
-    } = useToggler();
 
     const {
         tagList,
@@ -51,6 +45,7 @@ export const FilterSection = ({
         filter,
         minPrice,
         maxPrice,
+        tempHasDiscount,
         deleteTag,
         applyChanges,
         changeCategory,
@@ -58,6 +53,7 @@ export const FilterSection = ({
         changePrice,
         clearAllFilters,
         changeOrdering,
+        changeDiscount,
         setMinMaxPrice,
     } = useFilters(initialCollection);
 
@@ -66,7 +62,7 @@ export const FilterSection = ({
         isSuccess: isSuccessGettingProducts,
         isLoading: isLoadingProducts,
         isFetching: isFetchingProducts,
-        isError: isErrorWhenFetchingProducts
+        isError: isErrorWhenFetchingProducts,
     } = useGetProductsByMainFilterQuery({...filter, page: currentPage, page_size: LIMIT});
 
     let totalPages = 0;
@@ -90,12 +86,19 @@ export const FilterSection = ({
         setCurrentPage(page);
     };
 
+ 
+
     const handleApply = () => {
         applyChanges();
         handleCloseMenu();
     };
 
-    const sortList = useSortList();
+    const handleInitRect = (rect?: DOMRect) => {
+        if(rect){
+            setTopPosition(rect.top)
+        }
+    }
+
 
     const getTranslatedCategoryName = useCallback((category?: Category): string => {
         if (!category) return '';
@@ -113,35 +116,21 @@ export const FilterSection = ({
         return i18n.language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
     };
 
+    console.log(filter);
+    
+
+
     return (
         <section className={clsx(styles.section, {
             [styles.blur]: isFetchingProducts
         })}>
             <PageContainer>
-                <div className={styles.control}>
-                    {
-                        open ?
-                            <span />
-                            :
-                            <TextButton
-                                title={open ? t('filters.hide') : t('filters.show')}
-                                onClick={handleOpenMenu}
-                            />
-                    }
-                    <TextButton
-                        title={t('sort.title')}
-                        onClick={handleClickSort}
-                    />
-                    {
-                        openSort &&
-                        <SortMenu
-                            className={styles.sortMenu}
-                            menuList={sortList}
-                            onClickOutside={handleClickOutsideSort}
-                            onClickMenu={(item) => changeOrdering(item.name)}
-                        />
-                    }
-                </div>
+                <FilterControlBar
+                    isOpenFilterMenu = {open}
+                    changeOrdering={changeOrdering}
+                    onClickOpenFilterMenu={handleOpenMenu}
+                    onInitRect={handleInitRect}
+                />
                 <div className={styles.tagContainer}>
                     {
                         tagList.map((tag, i) => {
@@ -210,6 +199,8 @@ export const FilterSection = ({
                 {
                     open &&
                     <FilterMenu
+                        hasDiscount = {tempHasDiscount}
+                        initialTopPosition={topPosition}
                         showCollections={!initialCollection}
                         minValue={minPrice}
                         maxValue={maxPrice}
@@ -221,6 +212,7 @@ export const FilterSection = ({
                         onClickCategory={changeCategory}
                         onClickCollection={changeCollection}
                         onApply={handleApply}
+                        onChangeSale={changeDiscount}
                     />
                 }
             </AnimatePresence>
