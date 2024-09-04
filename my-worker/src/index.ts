@@ -976,7 +976,7 @@ const getLatestStatusEntry = (statusDates: Record<string, string | null>): strin
 const fetchOrderSummary = async (chatId: string): Promise<OrderResponse> => {
   if (!accessToken) throw new Error('No access token available.');
 
-  const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/by_chat_id/?chat_id=${encodeURIComponent(chatId)}`;
+  const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/by_chat_id/${encodeURIComponent(chatId)}/`;
 
   try {
     const response = await fetch(summaryUrl, {
