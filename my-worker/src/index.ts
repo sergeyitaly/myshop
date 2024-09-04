@@ -880,16 +880,15 @@ async function sendChatIdAndPhoneToVercel(phoneNumber: string, chatId: string): 
 }
 
 interface OrderItem {
-  size: string | null;
+  size?: string;
   quantity: number;
   total_sum: number;
-  color_name: string | null;
+  color_name?: string;
   item_price: string;
   color_value: string;
   product_name: string;
   collection_name: string;
 }
-
 
 interface Order {
   order_id: number;
@@ -900,19 +899,21 @@ interface Order {
   complete_at?: string;
   canceled_at?: string;
   submitted_at?: string;
-  order_items: OrderItem[];
-  TelegramUser?: any[];  // Adjust as needed
+  order_items?: OrderItem[];
+  TelegramUser?: TelegramUser[];
   email?: string;
-  order_summary?: any;  // Adjust as needed
 }
-interface OrderSummary {
-  order_id: number;
-  order_items: OrderItem[];
-  submitted_at?: string;
-  processed_at?: string;
-  created_at?: string;
-  complete_at?: string;
-  canceled_at?: string;
+
+interface OrderSummaryResponse {
+  chat_id?: string;
+  orders: Order[];
+}
+
+interface OrderResponse {
+  count: number;
+  next?: string | null;
+  previous?: string | null;
+  results: OrderSummaryResponse[];
 }
 
 interface TelegramUser {
@@ -920,147 +921,64 @@ interface TelegramUser {
   chat_id: string;
 }
 
-interface OrderSummaryResponse {
-  chat_id: string;
-  orders: (Order | OrderSummary)[]; // Allow both Order and OrderSummary types
-}
+const isOrderItem = (obj: any): obj is OrderItem =>
+  obj && typeof obj.quantity === 'number' && typeof obj.total_sum === 'number' &&
+  typeof obj.item_price === 'string' && typeof obj.color_value === 'string' &&
+  typeof obj.product_name === 'string' && typeof obj.collection_name === 'string';
 
-interface OrderResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: OrderSummaryResponse[];
-}
-
-
-
-interface OrderDetails {
-  id: number;
-  email: string;
-  order_items: OrderItem[];
-}
-
-interface SummaryResponse {
-  orders: Order[];
-}
-// Define type guard functions to ensure the structure of the data
-function isOrderItem(obj: any): obj is OrderItem {
-  return obj &&
-    (obj.size === null || typeof obj.size === 'string') &&
-    typeof obj.quantity === 'number' &&
-    typeof obj.total_sum === 'number' &&
-    (obj.color_name === null || typeof obj.color_name === 'string') &&
-    typeof obj.item_price === 'string' &&
-    typeof obj.color_value === 'string' &&
-    typeof obj.product_name === 'string' &&
-    typeof obj.collection_name === 'string';
-}
-
-// Type guard for OrderResponse
-function isOrderResponse(data: any): data is OrderResponse {
-  return data &&
-    typeof data.count === 'number' &&
-    Array.isArray(data.results) &&
-    data.results.every((result: any) =>
-      typeof result.chat_id === 'string' &&
-      Array.isArray(result.orders) &&
-      result.orders.every((order: any) => isOrder(order) || isOrderSummary(order))
-    );
-}
-
-// Type guard for OrderSummary
-function isOrderSummary(obj: any): obj is OrderSummary {
-  return obj &&
-    typeof obj.order_id === 'number' &&
-    Array.isArray(obj.order_items) &&
-    obj.order_items.every(isOrderItem) &&
-    (obj.submitted_at === undefined || typeof obj.submitted_at === 'string') &&
-    (obj.processed_at === undefined || typeof obj.processed_at === 'string') &&
+  const isOrder = (obj: any): obj is Order =>
+    obj && typeof obj.order_id === 'number' &&
+    (obj.order_items === undefined || Array.isArray(obj.order_items) && obj.order_items.every(isOrderItem)) &&
+    (obj.phone === undefined || typeof obj.phone === 'string') &&
+    (obj.status === undefined || typeof obj.status === 'string') &&
     (obj.created_at === undefined || typeof obj.created_at === 'string') &&
+    (obj.processed_at === undefined || typeof obj.processed_at === 'string') &&
     (obj.complete_at === undefined || typeof obj.complete_at === 'string') &&
-    (obj.canceled_at === undefined || typeof obj.canceled_at === 'string');
-}
+    (obj.canceled_at === undefined || typeof obj.canceled_at === 'string') &&
+    (obj.submitted_at === undefined || typeof obj.submitted_at === 'string') &&
+    (obj.TelegramUser === undefined || 
+      Array.isArray(obj.TelegramUser) &&
+      obj.TelegramUser.every((u: any): u is TelegramUser => typeof u.phone_number === 'string' && typeof u.chat_id === 'string')) &&
+    (obj.email === undefined || typeof obj.email === 'string');
 
-function isOrderSummaryResponse(obj: any): obj is OrderSummaryResponse {
-  return obj &&
-    typeof obj.chat_id === 'string' &&
-    Array.isArray(obj.orders) && obj.orders.every(isOrderSummary);
-}
+const isOrderSummaryResponse = (obj: any): obj is OrderSummaryResponse =>
+  obj && (obj.chat_id === undefined || typeof obj.chat_id === 'string') &&
+  Array.isArray(obj.orders) && obj.orders.every(isOrder);
 
-
-// Example of a function using the type guard to validate API response
-async function fetchOrderSummary(): Promise<void> {
-  const response = await fetch('/api/order-summary');
-  const data: unknown = await response.json();
-
-  if (isOrderResponse(data)) {
-    console.log('Valid OrderResponse:', data);
-    // Process the data here
-  } else {
-    console.error('Invalid OrderResponse structure:', data);
-  }
-}
-
-function isSummaryResponse(obj: any): obj is SummaryResponse {
-  return obj && Array.isArray(obj.orders) && obj.orders.every((order: any) =>
-    typeof order.order_id === 'number' &&
-    Array.isArray(order.order_items) &&
-    order.order_items.every((item: any) =>
-      typeof item.product_name === 'string' &&
-      typeof item.item_price === 'string' &&
-      typeof item.quantity === 'number'
-    )
-  );
-}
-
-function isOrderArray(data: unknown): data is Order[] {
-  return Array.isArray(data) && data.every(item => 
-    typeof item.order_id === 'number' &&
-    Array.isArray(item.order_items) &&
-    typeof item.order_summary === 'object'
-  );
-}
+const isOrderResponse = (data: any): data is OrderResponse =>
+  data && typeof data.count === 'number' &&
+  (data.next === undefined || typeof data.next === 'string' || data.next === null) &&
+  (data.previous === undefined || typeof data.previous === 'string' || data.previous === null) &&
+  Array.isArray(data.results) && data.results.every(isOrderSummaryResponse);
 
 
-
-function formatDate(dateString: string): string {
+const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+  return isNaN(date.getTime()) ? dateString : date.toISOString().split('T')[0];
+};
 
-  const absHours = Math.abs(diffHours);
-  const absMinutes = Math.abs(diffMinutes);
-
-  const formattedDiff = `${absHours}h ${absMinutes}m ago`;
-  const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-
-  return `on ${formattedDate}`;
-}
-
-
-
-
-async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<void> {
-  const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
-  const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/?chat_id=${encodeURIComponent(chatId)}`;
-
+const getLatestStatusEntry = (statusDates: Record<string, string | null>): string | undefined => {
   const statusEmojis: Record<string, string> = {
     'submitted': '📝',
     'created': '🆕',
     'processed': '🔄',
     'complete': '✅',
-    'canceled': '❌'
+    'canceled': '❌',
   };
 
-  try {
-    if (!accessToken) {
-      console.error('No access token available.');
-      await sendMessage(chatId, 'Authorization error. Please try again later.');
-      return;
-    }
+  return Object.entries(statusDates)
+    .filter(([_, date]) => date)
+    .sort(([_, dateA], [__, dateB]) => new Date(dateB!).getTime() - new Date(dateA!).getTime())
+    .map(([status, date]) => `${statusEmojis[status]} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`)
+    .shift();
+};
 
+const fetchOrderSummary = async (chatId: string): Promise<OrderResponse> => {
+  if (!accessToken) throw new Error('No access token available.');
+
+  const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/?chat_id=${encodeURIComponent(chatId)}`;
+
+  try {
     const response = await fetch(summaryUrl, {
       method: 'GET',
       headers: {
@@ -1069,38 +987,61 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
       },
     });
 
+    const responseBody = await response.json();
+
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Failed to retrieve order summary. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
-      await sendMessage(chatId, 'Failed to retrieve order summary. Please try again later.');
-      return;
+      const errorText = JSON.stringify(responseBody); // Capture error details
+      console.log('Response:', responseBody); // Log the response body
+
+      console.error(`Failed to retrieve order summary. Status: ${response.status}, Error: ${errorText}`);
+      throw new Error(`Failed to retrieve order summary. Status: ${response.status}`);
     }
 
-    const responseBody: unknown = await response.json();
+    console.log('Response Body:', responseBody); // Log the response body
 
     if (!isOrderResponse(responseBody)) {
       console.error('Invalid response format:', responseBody);
-      await sendMessage(chatId, 'Invalid response format. Please try again later.');
-      return;
+      throw new Error('Invalid response format.');
     }
 
-    const data: OrderResponse = responseBody;
-    const summary = data.results.find(result => result.chat_id === chatId);
+    return responseBody;
 
-    if (!summary || summary.orders.length === 0) {
+  } catch (error) {
+    console.error(`Error during fetch operation: ${error}`);
+    throw error;
+  }
+};
+
+async function sendOrderDetails(phoneNumber: string, chatId: string | null): Promise<void> {
+  if (!chatId) {
+    console.error('Chat ID is missing.');
+    if (phoneNumber) await sendMessage(phoneNumber, 'Chat ID is missing. Please try again later.');
+    return;
+  }
+
+  try {
+    const responseBody = await fetchOrderSummary(chatId);
+    console.log('Response Body:', responseBody); // Log the raw response
+
+    const summary = responseBody.results.find(result => result.chat_id === chatId);
+
+    if (!summary || !summary.orders || summary.orders.length === 0) {
       console.log('No orders found for this chat ID.');
-      await sendMessage(chatId, 'No orders found for this phone number and chat ID.');
+      await sendMessage(chatId, 'No orders found for this chat ID.');
       return;
     }
 
-    // Extracting the latest order based on the timestamp
-    const latestOrder = summary.orders.reduce((latest, order) => {
-      const orderDate = new Date(order.submitted_at || order.processed_at || '');
-      const latestDate = new Date(latest.submitted_at || latest.processed_at || '');
-      return orderDate > latestDate ? order : latest;
-    }, summary.orders[0]);
+    const latestOrder = summary.orders.reduce((latest, order) =>
+      new Date(order.submitted_at || order.processed_at || '') >
+      new Date(latest.submitted_at || latest.processed_at || '') ? order : latest, summary.orders[0]);
 
-    const orderItemsSummary = latestOrder.order_items.map((item: OrderItem) =>
+    if (!latestOrder.order_items) {
+      console.log('No order items found for this order.');
+      await sendMessage(chatId, 'No order items found for this order.');
+      return;
+    }
+
+    const orderItemsSummary = latestOrder.order_items.map(item =>
       `- ${item.product_name}, ${item.collection_name}, Size: ${item.size || 'N/A'}, Color: ${item.color_name || 'N/A'}, ${item.quantity} pcs, ${parseFloat(item.item_price).toFixed(2)}`
     ).join('\n');
 
@@ -1112,19 +1053,13 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
       'canceled': latestOrder.canceled_at ?? null
     };
 
-    const latestStatusEntry = Object.entries(statusDates)
-      .filter(([_, date]) => date !== null)
-      .sort(([_, dateA], [__, dateB]) => new Date(dateB!).getTime() - new Date(dateA!).getTime())
-      .map(([status, date]) => {
-        const statusEmoji = statusEmojis[status] || '🔍';
-        return `${statusEmoji} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
-      })[0];
+    const latestStatusEntry = getLatestStatusEntry(statusDates);
 
-    const orderDetailsMessage = `
-      Order ID: ${latestOrder.order_id}
+    const orderDetailsMessage =
+      `Order ID: ${latestOrder.order_id}
       Order Items:
       ${orderItemsSummary}
-      ${latestStatusEntry ? `   ${latestStatusEntry}` : ''}
+      ${latestStatusEntry ? latestStatusEntry : ''}
     `;
 
     await sendMessage(chatId, `Thank you! Here are your order details:\n${orderDetailsMessage}`);
@@ -1134,349 +1069,66 @@ async function sendOrderDetails(phoneNumber: string, chatId: string): Promise<vo
   }
 }
 
-async function sendAllOrdersDetails(chatId: string): Promise<void> {
-  const statusEmojis: { [key: string]: string } = {
-    'submitted': '📝',
-    'created': '🆕',
-    'processed': '🔄',
-    'complete': '✅',
-    'canceled': '❌'
-  };
+async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
+  if (!chatId) {
+    console.error('Chat ID is missing.');
+    return;
+  }
 
   try {
-    if (!accessToken) {
-      console.error('No access token available.');
-      await sendMessage(chatId, 'Authorization error. Please try again later.');
+    const responseBody = await fetchOrderSummary(chatId);
+    console.log('Response Body:', responseBody); // Log the raw response
+
+    // Filter out results with null chat_id
+    const validSummaries = responseBody.results.filter(result => result.chat_id !== null);
+
+    // Find the summary for the given chat ID
+    const summary = validSummaries.find(result => result.chat_id === chatId);
+
+    if (!summary) {
+      console.log('No summary found for this chat ID.');
+      await sendMessage(chatId, 'No orders found for this chat ID.');
       return;
     }
 
-    const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/?chat_id=${encodeURIComponent(chatId)}`;
+    const allOrders = summary.orders;
 
-    console.log(`Fetching order summary from: ${summaryUrl}`);
-    const response = await fetch(summaryUrl, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Failed to retrieve order summary. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
-      await sendMessage(chatId, 'Failed to retrieve order summary. Please try again later.');
+    if (allOrders.length === 0) {
+      console.log('No orders found for this chat ID.');
+      await sendMessage(chatId, 'No orders found for this chat ID.');
       return;
     }
 
-    const jsonResponse = await response.json();
-
-    if (!isSummaryResponse(jsonResponse)) {
-      console.error('Invalid response format');
-      await sendMessage(chatId, 'Failed to retrieve order summary. The response format is invalid.');
-      return;
-    }
-
-    const summaryResponse: SummaryResponse = jsonResponse;
-    console.log(`Order summary retrieved: ${JSON.stringify(summaryResponse)}`);
-
-    const orders: Order[] = summaryResponse.orders;
-
-    if (Array.isArray(orders) && orders.length > 0) {
-      const ordersSummary = orders.map(order => {
-        const statusDates: { [key: string]: string | null } = {
-          'submitted': order.submitted_at ?? null,
-          'created': order.created_at ?? null,
-          'processed': order.processed_at ?? null,
-          'complete': order.complete_at ?? null,
-          'canceled': order.canceled_at ?? null
-        };
-
-        const latestStatusEntry = Object.entries(statusDates)
-          .filter(([_, date]) => date !== null)
-          .sort(([_, dateA], [__, dateB]) => new Date(dateB!).getTime() - new Date(dateA!).getTime())
-          .map(([status, date]) => {
-            const statusEmoji = statusEmojis[status] || '🔍';
-            return `${statusEmoji} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`;
-          })[0];
-
-        const orderItemsSummary = (order.order_items || []).map(item =>
-          `- ${item.product_name || 'Unknown'}, ${item.collection_name || 'Unknown'}, Size: ${item.size || 'N/A'}, Color: ${item.color_name || 'N/A'}, Quantity: ${item.quantity || 0}, Price: ${parseFloat(item.item_price || '0.00').toFixed(2)}`
-        ).join('\n');
-
-        return `
-          Order ID: ${order.order_id || 'Unknown'}
-          ${orderItemsSummary ? `Order Items:\n${orderItemsSummary}` : 'No items in this order'}
-          ${latestStatusEntry ? `Status: ${latestStatusEntry}` : 'Status: Unknown'}
-        `;
-      }).join('\n\n');
-
-      const messageText = `Here are your orders:\n${ordersSummary}`;
-      await sendMessage(chatId, messageText);
-    } else {
-      await sendMessage(chatId, 'You do not have any orders.');
-    }  
-  } catch (error) {
-    console.error('Error:', error);
-    await sendMessage(chatId, 'An error occurred while retrieving your orders. Please try again later.');
-  }
-}
-
-
-
-// Helper function to update order status
-async function updateOrderStatus(orderId: number, newStatus: string, timestampField: string): Promise<void> {
-  const updateUrl = `${VERCEL_DOMAIN}/api/orders/${orderId}/`;
-
-  try {
-    const response = await fetch(updateUrl, {
-      method: 'PATCH',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        status: newStatus,
-        [timestampField]: new Date().toISOString(),
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Failed to update order status. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
-    } else {
-      console.log(`Order ID ${orderId} updated to ${newStatus}`);
-    }
-  } catch (error) {
-    console.error(`Error updating order status: ${error}`);
-  }
-}
-
-// Function to send order status change notifications
-async function sendOrderStatusNotification(chatId: string, orderId: number, status: string, dateTime: string): Promise<void> {
-  const statusEmojis: { [key: string]: string } = {
-    'submitted': '📝',
-    'created': '🆕',
-    'processed': '🔄',
-    'complete': '✅',
-    'canceled': '❌'
-  };
-
-  const statusEmoji = statusEmojis[status] || '🔍';
-  const formattedStatus = status.charAt(0).toUpperCase() + status.slice(1);
-  const message = `Order #${orderId} status is changed to ${statusEmoji} ${formattedStatus} at ${dateTime}`;
-
-  const isRegistered = await isChatIdRegistered(chatId);
-  if (isRegistered) {
-    await sendMessage(chatId, message);
-  } else {
-    console.log(`Chat ID ${chatId} is not registered.`);
-  }
-}
-
-// Function to update order status and send notification
-async function updateOrderStatusWithNotification(orderId: number, status: string, dateTimeField: string, chatId: string): Promise<void> {
-  await updateOrderStatus(orderId, status, dateTimeField);
-
-  const now = new Date().toISOString();
-  await sendOrderStatusNotification(chatId, orderId, status, now);
-}
-
-
-async function updateSubmittedToCreated(): Promise<void> {
-  await fetchAndProcessOrders('submitted', async (order: Order) => {
-    const { submitted_at, created_at } = order.order_summary;
-    const latestTimestamp = new Date(submitted_at || created_at || 0);
-    const now = new Date();
-    const diffMinutes = (now.getTime() - latestTimestamp.getTime()) / (1000 * 60);
-
-    if (submitted_at && diffMinutes >= 10 && order.status === 'submitted') {
-      console.log(`Updating Order ID ${order.order_id} from 'submitted' to 'created'.`);
-      const chatId = await getChatIdForOrder(order.order_id);
-      if (chatId) {
-        await updateOrderStatusWithNotification(order.order_id, 'created', 'created_at', chatId);
-        await updateOrderForChatId(chatId, order.order_summary);
+    const ordersMessage = allOrders.map((order: Order) => {
+      if (!order.order_items) {
+        return `Order ID: ${order.order_id}
+        No order items found for this order.`;
       }
-    }
-  });
-}
 
-async function updateCreatedToProcessed(): Promise<void> {
-  await fetchAndProcessOrders('created', async (order: Order) => {
-    const { created_at, processed_at } = order.order_summary;
-    const latestTimestamp = new Date(created_at || processed_at || 0);
-    const now = new Date();
-    const diffMinutes = (now.getTime() - latestTimestamp.getTime()) / (1000 * 60);
+      const orderItemsSummary = order.order_items.map((item: OrderItem) =>
+        `- ${item.product_name}, ${item.collection_name}, Size: ${item.size || 'N/A'}, Color: ${item.color_name || 'N/A'}, ${item.quantity} pcs, ${parseFloat(item.item_price).toFixed(2)}`
+      ).join('\n');
 
-    if (created_at && diffMinutes >= 20 && order.status === 'created') {
-      console.log(`Updating Order ID ${order.order_id} from 'created' to 'processed'.`);
-      const chatId = await getChatIdForOrder(order.order_id);
-      if (chatId) {
-        await updateOrderStatusWithNotification(order.order_id, 'processed', 'processed_at', chatId);
-        await updateOrderForChatId(chatId, order.order_summary);
-      }
-    }
-  });
-}
+      const statusDates = {
+        'submitted': order.submitted_at ?? null,
+        'created': order.created_at ?? null,
+        'processed': order.processed_at ?? null,
+        'complete': order.complete_at ?? null,
+        'canceled': order.canceled_at ?? null
+      };
 
-async function updateProcessedToComplete(): Promise<void> {
-  await fetchAndProcessOrders('processed', async (order: Order) => {
-    const { processed_at, complete_at } = order.order_summary;
-    const latestTimestamp = new Date(processed_at || complete_at || 0);
-    const now = new Date();
-    const diffHours = (now.getTime() - latestTimestamp.getTime()) / (1000 * 60 * 60);
+      const latestStatusEntry = getLatestStatusEntry(statusDates);
 
-    if (processed_at && diffHours >= 24 && order.status === 'processed') {
-      console.log(`Updating Order ID ${order.order_id} from 'processed' to 'complete'.`);
-      const chatId = await getChatIdForOrder(order.order_id);
-      if (chatId) {
-        await updateOrderStatusWithNotification(order.order_id, 'complete', 'complete_at', chatId);
-        await updateOrderForChatId(chatId, order.order_summary);
-      }
-    }
-  });
-}
+      return `Order ID: ${order.order_id}
+      Order Items:
+      ${orderItemsSummary}
+      ${latestStatusEntry ? latestStatusEntry : ''}
+      `;
+    }).join('\n\n');
 
-async function updateOrderSummary(chatId: string, order: Order, newStatus: string): Promise<void> {
-  const fetchUrl = `${VERCEL_DOMAIN}/api/telegram_users/${chatId}/order_summary`;
-
-  try {
-    const response = await fetch(fetchUrl, {
-      method: 'PATCH',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        orders: order.order_summary, // Adjust as needed to update the order summary
-        status: newStatus,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Failed to update order summary for chat ID ${chatId}. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
-    }
+    await sendMessage(chatId, `Here are all your order details:\n${ordersMessage}`);
   } catch (error) {
-    console.error(`Error updating order summary for chat ID ${chatId}. Error: ${error}`);
-  }
-}
-
-
-async function getChatIdForOrder(orderId: number): Promise<string> {
-  const url = `${VERCEL_DOMAIN}/api/orders/${orderId}`;
-  
-  try {
-    const response = await fetch(url);
-    
-    // Assert the type of response.json() to OrderResponse
-    const data = await response.json() as OrderResponse;
-    
-    if (isOrderResponse(data)) {
-      for (const result of data.results) {
-        const order = result.orders.find(order => order.order_id === orderId);
-        if (order) {
-          return result.chat_id;
-        }
-      }
-    }
-  } catch (error) {
-    console.error(`Error fetching chat ID for order ${orderId}:`, error);
-  }
-  
-  return '';
-}
-
-
-async function fetchAndProcessOrders(
-  status: string,
-  processOrder: (order: Order) => Promise<void>
-) {
-  const ordersUrl = `${VERCEL_DOMAIN}/api/orders?status=${status}`;
-
-  try {
-    const response = await fetch(ordersUrl);
-    const data: unknown = await response.json();
-
-    if (isOrderResponse(data)) {
-      for (const result of data.results) {
-        for (const order of result.orders) {
-          if (isOrder(order)) {
-            await processOrder(order);
-          } else {
-            console.warn(`Skipping invalid order data: ${JSON.stringify(order)}`);
-          }
-        }
-      }
-    } else {
-      console.error('Invalid response format:', data);
-    }
-  } catch (error) {
-    console.error(`Error fetching orders with status ${status}:`, error);
-  }
-}
-
-// Type guard for Order
-function isOrder(obj: any): obj is Order {
-  return obj &&
-    typeof obj.order_id === 'number' &&
-    Array.isArray(obj.order_items) &&
-    obj.order_items.every(isOrderItem) &&
-    (obj.TelegramUser === undefined || Array.isArray(obj.TelegramUser)) &&
-    (obj.order_summary === undefined || typeof obj.order_summary === 'object');
-}
-
-async function processOrder(order: Order): Promise<void> {
-  try {
-    if (order.TelegramUser && order.TelegramUser.length > 0) {
-      // Update the order for each chat_id in TelegramUser array
-      for (const user of order.TelegramUser) {
-        await updateOrderForChatId(user.chat_id, order.order_summary);
-      }
-    } else {
-      // Update the order for all chat_ids when chat_id is not available
-      for (const chatId of chatIds) {
-        await updateOrderForChatId(chatId, order.order_summary);
-      }
-    }
-  } catch (error) {
-    console.error(`Failed to process order with ID: ${order.order_id}. Error: ${error}`);
-  }
-}
-
-// Helper function to fetch an Order by ID if needed
-async function fetchOrderById(orderId: number): Promise<Order> {
-  const response = await fetch(`${VERCEL_DOMAIN}/api/orders/${orderId}`);
-  const data: unknown = await response.json();
-
-  if (isOrder(data)) {
-    return data;
-  } else {
-    throw new Error(`Order with ID ${orderId} is not valid`);
-  }
-}
-
-
-async function updateOrderForChatId(chatId: string, orderSummary: any): Promise<void> {
-  const updateUrl = `${VERCEL_DOMAIN}/api/update_order`;
-  
-  try {
-    const response = await fetch(updateUrl, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        chat_id: chatId,
-        orders: orderSummary, // Update to match the `OrderSummary` model field name
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Failed to update order for chat_id: ${chatId}. Status: ${response.status} ${response.statusText}. Response body: ${errorText}`);
-    }
-  } catch (error) {
-    console.error(`Error updating order for chat_id: ${chatId}. Error: ${error}`);
+    console.error(`Error retrieving all orders details: ${error}`);
+    await sendMessage(chatId, 'An error occurred while retrieving all order details. Please try again later.');
   }
 }

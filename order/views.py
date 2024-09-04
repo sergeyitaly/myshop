@@ -24,7 +24,7 @@ import os
 from django.http import JsonResponse
 from rest_framework.decorators import action
 from .signals import update_order_status_with_notification
-
+from django.http import JsonResponse, Http404
 
 
 logger = logging.getLogger(__name__)
@@ -373,24 +373,54 @@ def update_order(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
-#@api_view(['GET'])
-#@permission_classes([IsAuthenticated])
-#def get_order_summary(request):
-#    chat_id = request.query_params.get('chat_id')
-    
-#    if not chat_id:
-#        return Response({'error': 'Chat ID is required.'}, status=400)
 
-#    try:
-#        summary = OrderSummary.objects.get(chat_id=chat_id)
-#        serializer = OrderSummarySerializer(summary)
-#        return Response(serializer.data)
-#   except OrderSummary.DoesNotExist:
-#        return Response({'error': 'No orders found for this chat ID.'}, status=404)
-#    except Exception as e:
-#        return Response({'error': str(e)}, status=500)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_order_summary_by_chat_id(request):
+    chat_id = request.query_params.get('chat_id')
     
+    if not chat_id:
+        return Response({'error': 'Chat ID is required.'}, status=400)
 
+    try:
+        # Retrieve summaries by chat_id
+        summaries = OrderSummary.objects.filter(chat_id=chat_id)
+        if not summaries.exists():
+            return Response({'error': 'No summaries found for this chat ID.'}, status=404)
+
+        summary_data = []
+        for summary in summaries:
+            orders = summary.orders.all()
+            for order in orders:
+                order_data = {
+                    'order_id': order.order_id,
+                    'created_at': order.created_at.strftime('%Y-%m-%d %H:%M'),
+                    'submitted_at': order.submitted_at.strftime('%Y-%m-%d %H:%M') if order.submitted_at else None,
+                    'processed_at': order.processed_at.strftime('%Y-%m-%d %H:%M') if order.processed_at else None,
+                    'complete_at': order.complete_at.strftime('%Y-%m-%d %H:%M') if order.complete_at else None,
+                    'canceled_at': order.canceled_at.strftime('%Y-%m-%d %H:%M') if order.canceled_at else None,
+                    'order_items': [
+                        {
+                            'product_name': item.product_name,
+                            'collection_name': item.collection_name,
+                            'size': item.size,
+                            'color_name': item.color_name,
+                            'quantity': item.quantity,
+                            'total_sum': float(item.total_sum),  # Convert total_sum to float
+                            'item_price': str(item.item_price),
+                            'color_value': item.color_value
+                        }
+                        for item in order.order_items.all()
+                    ]
+                }
+                summary_data.append(order_data)
+
+        return Response({'results': summary_data})
+
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+    
+    
 #@api_view(['POST'])
 #@permission_classes([AllowAny])
 #def update_order_summary(request):
