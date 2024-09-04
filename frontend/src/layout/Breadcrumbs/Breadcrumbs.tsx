@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { PageContainer } from '../../components/containers/PageContainer'
 import styles from './Breadcrumbs.module.scss'
 import { ROUTE } from '../../constants'
