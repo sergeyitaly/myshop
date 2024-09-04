@@ -78,6 +78,7 @@ export const Breadcrumbs = () => {
         }
     }
 
+    
  
 
     const {
@@ -172,8 +173,10 @@ export const Breadcrumbs = () => {
         collectionResponce, 
         productResponce, 
         isProductFetching, 
-        isProductLoading
+        isProductLoading, 
+        t
     ])
+
 
     useEffect(() => {
 
