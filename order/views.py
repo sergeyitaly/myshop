@@ -376,12 +376,7 @@ def update_order(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_order_summary_by_chat_id(request):
-    chat_id = request.query_params.get('chat_id')
-    
-    if not chat_id:
-        return Response({'error': 'Chat ID is required.'}, status=400)
-
+def get_order_summary_by_chat_id(request, chat_id):
     try:
         # Retrieve summaries by chat_id
         summaries = OrderSummary.objects.filter(chat_id=chat_id)
@@ -420,7 +415,7 @@ def get_order_summary_by_chat_id(request):
     except Exception as e:
         return Response({'error': str(e)}, status=500)
     
-    
+
 #@api_view(['POST'])
 #@permission_classes([AllowAny])
 #def update_order_summary(request):

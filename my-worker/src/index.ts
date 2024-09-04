@@ -972,11 +972,10 @@ const getLatestStatusEntry = (statusDates: Record<string, string | null>): strin
     .map(([status, date]) => `${statusEmojis[status]} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`)
     .shift();
 };
-
 const fetchOrderSummary = async (chatId: string): Promise<OrderResponse> => {
   if (!accessToken) throw new Error('No access token available.');
 
-  const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/by_chat_id/${encodeURIComponent(chatId)}/`;
+  const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/by_chat_id/${chatId}/`;
 
   try {
     const response = await fetch(summaryUrl, {
@@ -986,6 +985,15 @@ const fetchOrderSummary = async (chatId: string): Promise<OrderResponse> => {
         'Content-Type': 'application/json',
       },
     });
+
+    // Check Content-Type
+    const contentType = response.headers.get('Content-Type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const errorText = await response.text();
+      console.error(`Unexpected Content-Type: ${contentType}`);
+      console.error(`Response Body: ${errorText}`);
+      throw new Error('Unexpected Content-Type. Expected application/json.');
+    }
 
     const responseBody = await response.json();
 
