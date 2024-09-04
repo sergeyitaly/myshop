@@ -976,7 +976,7 @@ const fetchOrderSummary = async (chatId: string): Promise<OrderResponse> => {
   if (!accessToken) throw new Error('No access token available.');
 
   // Construct the URL with the chatId
-  const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/?chatId=${chatId}`;
+  const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/by_chat_id/?chat_id=${encodeURIComponent(chatId)}`;
 
   const response = await fetch(summaryUrl, {
     method: 'GET',
@@ -986,8 +986,11 @@ const fetchOrderSummary = async (chatId: string): Promise<OrderResponse> => {
     },
   });
 
-  if (!response.ok) throw new Error(`Failed to retrieve order summary. Status: ${response.status}`);
-
+  if (!response.ok) {
+    const errorText = await response.text(); // Capture error details
+    console.error(`Failed to retrieve order summary. Status: ${response.status}, Error: ${errorText}`);
+    throw new Error(`Failed to retrieve order summary. Status: ${response.status}`);
+  }
   const responseBody = await response.json();
   console.log('Response Body:', responseBody); // Log the raw response
 
