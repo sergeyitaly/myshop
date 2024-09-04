@@ -878,6 +878,7 @@ async function sendChatIdAndPhoneToVercel(phoneNumber: string, chatId: string): 
     throw error;
   }
 }
+
 interface OrderItem {
   size?: string;
   quantity: number;
@@ -975,31 +976,40 @@ const getLatestStatusEntry = (statusDates: Record<string, string | null>): strin
 const fetchOrderSummary = async (chatId: string): Promise<OrderResponse> => {
   if (!accessToken) throw new Error('No access token available.');
 
-  // Construct the URL with the chatId
-  const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/by_chat_id/?chat_id=${encodeURIComponent(chatId)}`;
+  const summaryUrl = `${VERCEL_DOMAIN}/api/order_summary/?chat_id=${encodeURIComponent(chatId)}`;
 
-  const response = await fetch(summaryUrl, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-  });
+  try {
+    const response = await fetch(summaryUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
 
-  if (!response.ok) {
-    const errorText = await response.text(); // Capture error details
-    console.error(`Failed to retrieve order summary. Status: ${response.status}, Error: ${errorText}`);
-    throw new Error(`Failed to retrieve order summary. Status: ${response.status}`);
+    const responseBody = await response.json();
+
+    if (!response.ok) {
+      const errorText = JSON.stringify(responseBody); // Capture error details
+      console.log('Response:', responseBody); // Log the response body
+
+      console.error(`Failed to retrieve order summary. Status: ${response.status}, Error: ${errorText}`);
+      throw new Error(`Failed to retrieve order summary. Status: ${response.status}`);
+    }
+
+    console.log('Response Body:', responseBody); // Log the response body
+
+    if (!isOrderResponse(responseBody)) {
+      console.error('Invalid response format:', responseBody);
+      throw new Error('Invalid response format.');
+    }
+
+    return responseBody;
+
+  } catch (error) {
+    console.error(`Error during fetch operation: ${error}`);
+    throw error;
   }
-  const responseBody = await response.json();
-  console.log('Response Body:', responseBody); // Log the raw response
-
-  if (!isOrderResponse(responseBody)) {
-    console.error('Invalid response format:', responseBody);
-    throw new Error('Invalid response format.');
-  }
-
-  return responseBody;
 };
 
 async function sendOrderDetails(phoneNumber: string, chatId: string | null): Promise<void> {
@@ -1011,12 +1021,13 @@ async function sendOrderDetails(phoneNumber: string, chatId: string | null): Pro
 
   try {
     const responseBody = await fetchOrderSummary(chatId);
+    console.log('Response Body:', responseBody); // Log the raw response
 
     const summary = responseBody.results.find(result => result.chat_id === chatId);
 
-    if (!summary || summary.orders.length === 0) {
+    if (!summary || !summary.orders || summary.orders.length === 0) {
       console.log('No orders found for this chat ID.');
-      await sendMessage(chatId, 'No orders found for this phone number and chat ID.');
+      await sendMessage(chatId, 'No orders found for this chat ID.');
       return;
     }
 
@@ -1066,8 +1077,21 @@ async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
 
   try {
     const responseBody = await fetchOrderSummary(chatId);
+    console.log('Response Body:', responseBody); // Log the raw response
 
-    const allOrders = responseBody.results.flatMap(result => result.orders);
+    // Filter out results with null chat_id
+    const validSummaries = responseBody.results.filter(result => result.chat_id !== null);
+
+    // Find the summary for the given chat ID
+    const summary = validSummaries.find(result => result.chat_id === chatId);
+
+    if (!summary) {
+      console.log('No summary found for this chat ID.');
+      await sendMessage(chatId, 'No orders found for this chat ID.');
+      return;
+    }
+
+    const allOrders = summary.orders;
 
     if (allOrders.length === 0) {
       console.log('No orders found for this chat ID.');
@@ -1104,7 +1128,7 @@ async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
 
     await sendMessage(chatId, `Here are all your order details:\n${ordersMessage}`);
   } catch (error) {
-    console.error(`Error retrieving order details: ${error}`);
-    await sendMessage(chatId, 'An error occurred while retrieving order details. Please try again later.');
+    console.error(`Error retrieving all orders details: ${error}`);
+    await sendMessage(chatId, 'An error occurred while retrieving all order details. Please try again later.');
   }
 }
