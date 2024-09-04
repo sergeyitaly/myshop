@@ -376,13 +376,13 @@ def update_order(request):
 
 @api_view(['GET'])
 def get_order_summary_by_chat_id(request, chat_id):
-    user = get_object_or_404(TelegramUser, chat_id=chat_id)
-    orders = Order.objects.filter(user=user)
-    
-    # Use get_order_summary to format each order
-    summaries = [get_order_summary(order) for order in orders]
-    
-    return Response(summaries)
+    try:
+        # Filter order summaries by chat_id, including null values
+        order_summaries = OrderSummary.objects.filter(chat_id=chat_id)
+        serializer = OrderSummarySerializer(order_summaries, many=True)
+        return Response(serializer.data)
+    except OrderSummary.DoesNotExist:
+        return Response({'error': 'Order summaries not found'}, status=404)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
