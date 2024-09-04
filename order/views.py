@@ -373,10 +373,13 @@ def update_order(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
-
+    
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_order_summary_by_chat_id(request, chat_id):
+    if not chat_id:
+        return Response({'error': 'Chat ID is required.'}, status=400)
+
     try:
         # Retrieve summaries by chat_id
         summaries = OrderSummary.objects.filter(chat_id=chat_id)
@@ -385,27 +388,28 @@ def get_order_summary_by_chat_id(request, chat_id):
 
         summary_data = []
         for summary in summaries:
-            orders = summary.orders.all()
+            orders = summary.orders  # This is a list, not a queryset
             for order in orders:
+                # Assuming each order is a dict with necessary details
                 order_data = {
-                    'order_id': order.order_id,
-                    'created_at': order.created_at.strftime('%Y-%m-%d %H:%M'),
-                    'submitted_at': order.submitted_at.strftime('%Y-%m-%d %H:%M') if order.submitted_at else None,
-                    'processed_at': order.processed_at.strftime('%Y-%m-%d %H:%M') if order.processed_at else None,
-                    'complete_at': order.complete_at.strftime('%Y-%m-%d %H:%M') if order.complete_at else None,
-                    'canceled_at': order.canceled_at.strftime('%Y-%m-%d %H:%M') if order.canceled_at else None,
+                    'order_id': order.get('order_id'),
+                    'created_at': order.get('created_at'),
+                    'submitted_at': order.get('submitted_at'),
+                    'processed_at': order.get('processed_at'),
+                    'complete_at': order.get('complete_at'),
+                    'canceled_at': order.get('canceled_at'),
                     'order_items': [
                         {
-                            'product_name': item.product_name,
-                            'collection_name': item.collection_name,
-                            'size': item.size,
-                            'color_name': item.color_name,
-                            'quantity': item.quantity,
-                            'total_sum': float(item.total_sum),  # Convert total_sum to float
-                            'item_price': str(item.item_price),
-                            'color_value': item.color_value
+                            'product_name': item.get('product_name'),
+                            'collection_name': item.get('collection_name'),
+                            'size': item.get('size'),
+                            'color_name': item.get('color_name'),
+                            'quantity': item.get('quantity'),
+                            'total_sum': float(item.get('total_sum', 0)),  # Convert total_sum to float, default to 0 if not present
+                            'item_price': str(item.get('item_price', '0')),  # Default to '0' if not present
+                            'color_value': item.get('color_value')
                         }
-                        for item in order.order_items.all()
+                        for item in order.get('order_items', [])
                     ]
                 }
                 summary_data.append(order_data)
@@ -414,7 +418,6 @@ def get_order_summary_by_chat_id(request, chat_id):
 
     except Exception as e:
         return Response({'error': str(e)}, status=500)
-    
 
 #@api_view(['POST'])
 #@permission_classes([AllowAny])
