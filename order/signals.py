@@ -88,18 +88,12 @@ def get_chat_id_from_phone(phone_number):
         logger.error(f"Request to /api/telegram_user failed: {e}")
         return None
 
-@receiver(post_save, sender=OrderItem)
-def update_order_summary_on_order_item_change(sender, instance, **kwargs):
-    order = instance.order
-    phone_number = order.phone
-    if phone_number:
-        chat_id = get_chat_id_from_phone(phone_number)
-        if chat_id:
-            update_order_summary_for_chat_id(chat_id, order)
-            logger.debug(f"OrderItem change detected for Order ID: {order.id}, updating summary for chat_id: {chat_id}")
-        else:
-            logger.warning(f"No chat_id found for phone number: {phone_number}")
-
+def update_order_summary_for_phone(phone_number):
+    chat_id = get_chat_id_from_phone(phone_number)
+    if chat_id:
+        update_order_summary_for_chat_id(chat_id)
+    else:
+        logger.error(f"Failed to update order summary for phone number: {phone_number}")
 
 
 #def get_random_saying(file_path):
@@ -145,8 +139,6 @@ def update_order_summary_on_order_item_change(sender, instance, **kwargs):
         if chat_id:
             update_order_summary_for_chat_id(chat_id)
             logger.debug(f"OrderItem change detected for Order ID: {order.id}, updating summary for chat_id: {chat_id}")
-        else:
-            logger.warning(f"No chat_id found for phone number: {phone_number}")
 
 @receiver(post_delete, sender=Order)
 def remove_order_from_summary(sender, instance, **kwargs):
@@ -174,8 +166,10 @@ def remove_order_from_summary(sender, instance, **kwargs):
                 cache.delete(cache_key)
 
             except OrderSummary.DoesNotExist:
+                # Log the exception if needed
                 logger.warning(f"OrderSummary with chat_id {chat_id} does not exist")
             except Exception as e:
+                # Log any other exceptions
                 logger.error(f"Error while removing Order ID: {instance.id} from summary: {str(e)}")
 
 @receiver(post_delete, sender=OrderItem)
