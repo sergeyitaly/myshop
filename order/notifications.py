@@ -82,6 +82,7 @@ def update_order_status_with_notification(order_id, order_items, new_status, sta
     except Exception as e:
         logger.error(f"Error updating order status or sending notification: {e}")
 
+
 def update_order_summary_for_chat_id(order_id, chat_id):
     try:
         # Fetch the order summary for the specified chat_id
@@ -132,13 +133,17 @@ def update_order_summary_for_chat_id(order_id, chat_id):
             latest_status_field: datetime_to_str(latest_status_timestamp)
         }
 
-        # Update the order within the existing summary
+        # Update or replace the order within the existing summary
         existing_orders = summary.orders or []
-        for existing_order in existing_orders:
+        order_found = False
+        for i, existing_order in enumerate(existing_orders):
             if existing_order['order_id'] == order_id:
-                existing_order.update(updated_order_summary)
+                # Replace the existing order summary
+                existing_orders[i] = updated_order_summary
+                order_found = True
                 break
-        else:
+
+        if not order_found:
             # If the order is not in the summary, add it
             existing_orders.append(updated_order_summary)
 
