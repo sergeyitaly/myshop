@@ -81,7 +81,6 @@ def update_order_status_with_notification(order_id, order_items, new_status, sta
     except Exception as e:
         logger.error(f"Error updating order status or sending notification: {e}")
 
-
 def update_order_summary_for_chat_id(chat_id):
     if not chat_id:
         logger.error("Chat ID is missing. Cannot update order summary.")
@@ -147,7 +146,10 @@ def update_order_summary_for_chat_id(chat_id):
             }
 
             # Update the existing order in the dictionary or add a new one
-            grouped_orders[order.id] = summary
+            if order.id in grouped_orders:
+                grouped_orders[order.id].update(summary)  # Update the existing order summary
+            else:
+                grouped_orders[order.id] = summary  # Add new order to the summary
 
         # Convert the dictionary back to a list and update the order summary
         order_summary.orders = list(grouped_orders.values())
