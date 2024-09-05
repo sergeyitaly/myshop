@@ -126,7 +126,7 @@ def update_order_summary_for_chat_id(order_id, chat_id):
 
         # Create the updated summary for this order
         updated_order_summary = {
-            'order_id': order.id,
+            'order_id': order_id,
             'order_items': order_data['order_items'],
             'submitted_at': datetime_to_str(submitted_at),
             latest_status_field: datetime_to_str(latest_status_timestamp)
@@ -135,7 +135,7 @@ def update_order_summary_for_chat_id(order_id, chat_id):
         # Update the order within the existing summary
         existing_orders = summary.orders or []
         for existing_order in existing_orders:
-            if existing_order['order_id'] == order.id:
+            if existing_order['order_id'] == order_id:
                 existing_order.update(updated_order_summary)
                 break
         else:
