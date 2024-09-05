@@ -20,7 +20,7 @@ urlpatterns = [
     path('order/', create_order, name='create_order'),
     path('order/<int:order_id>/', get_order, name='get_order'),
     path('orders/', get_orders, name='get_orders'),
-    path('order_summary/<int:chat_id>/', get_order_summary_by_chat_id, name='get_order_summary_by_chat_id'),
+    path('order_summary/by_chat_id/<int:chat_id>/', get_order_summary_by_chat_id, name='get_order_summary_by_chat_id'),
 
    # path('order_summary/', get_order_summary, name='get_order_summary'),
  #   path('update_order_summary/', update_order, name='update_order_summary'),  # Add this line for update_order_summary
