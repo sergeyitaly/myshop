@@ -1008,7 +1008,7 @@ const formatDate = (date: string): string => {
 
 const fetchOrderSummary = async (chatId: string): Promise<OrderSummaryResponse> => {
   try {
-    const response = await fetch(`${VERCEL_DOMAIN}/api/order_summary/${chatId}/`, {
+    const response = await fetch(`${VERCEL_DOMAIN}/api/order_summary/by_chat_id/${chatId}/`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
