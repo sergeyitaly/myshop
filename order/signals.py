@@ -88,12 +88,12 @@ def get_chat_id_from_phone(phone_number):
         logger.error(f"Request to /api/telegram_user failed: {e}")
         return None
 
-def update_order_summary_for_phone(phone_number):
-    chat_id = get_chat_id_from_phone(phone_number)
-    if chat_id:
-        update_order_summary_for_chat_id(chat_id)
-    else:
-        logger.error(f"Failed to update order summary for phone number: {phone_number}")
+#def update_order_summary_for_phone(phone_number):
+#    chat_id = get_chat_id_from_phone(phone_number)
+#    if chat_id:
+#        update_order_summary_for_chat_id(chat_id)
+#    else:
+#        logger.error(f"Failed to update order summary for phone number: {phone_number}")
 
 
 #def get_random_saying(file_path):
@@ -114,21 +114,21 @@ def update_order_summary_for_phone(phone_number):
 #        logger.error(f"Error reading sayings file: {e}")
 #        return "No sayings available."
 
-@receiver(post_save, sender=Order)
-def update_order_summary(sender, instance, **kwargs):
-    # Only update the summary if the order is created or updated
-    if kwargs.get('created', False) or kwargs.get('update_fields'):
-        phone_number = instance.phone
-        if phone_number:
-            chat_id = get_chat_id_from_phone(phone_number)
-            if chat_id:
-                update_order_summary_for_chat_id(chat_id)
-            else:
-                # Handle case where chat_id is not found for the phone number
-                logger.error(f"No chat_id found for phone number: {phone_number}")
-        else:
-            # Handle orders with no phone number
-            logger.error(f"No phone number found for order ID: {instance.id}")
+#@receiver(post_save, sender=Order)
+#def update_order_summary(sender, instance, **kwargs):
+#    # Only update the summary if the order is created or updated
+#    if kwargs.get('created', False) or kwargs.get('update_fields'):
+#        phone_number = instance.phone
+#        if phone_number:
+#            chat_id = get_chat_id_from_phone(phone_number)
+#            if chat_id:
+#                update_order_summary_for_chat_id(chat_id)
+#            else:
+#                # Handle case where chat_id is not found for the phone number
+#                logger.error(f"No chat_id found for phone number: {phone_number}")
+#        else:
+#            # Handle orders with no phone number
+#            logger.error(f"No phone number found for order ID: {instance.id}")
 
 @receiver(post_save, sender=OrderItem)
 def update_order_summary_on_order_item_change(sender, instance, **kwargs):
