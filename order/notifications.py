@@ -95,9 +95,11 @@ def datetime_to_str(dt):
     """Convert datetime to string format."""
     return dt.strftime('%Y-%m-%d %H:%M') if dt else None
 
+
 @receiver(post_save, sender=Order)
-def update_order_summary_for_chat_id(order):
+def update_order_summary_for_chat_id(sender, instance, **kwargs):
     try:
+        order = instance
         chat_id = order.telegram_user.chat_id if order.telegram_user else None
         if not chat_id:
             logger.warning(f'Order {order.id} has no associated chat ID.')
