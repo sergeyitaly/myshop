@@ -7,7 +7,7 @@ import logging
 import requests
 from django.core.cache import cache
 from .models import Order, OrderSummary
-from .serializers import OrderSerializer
+from .serializers import OrderItemSerializer
 from datetime import datetime
 from .shared_utils import get_random_saying
 from django.utils.timezone import is_aware, make_naive
@@ -78,7 +78,7 @@ def update_order_status_with_notification(order_id, order_items, new_status, sta
             )
 
         send_telegram_message(chat_id, message)
-        update_order_summary_for_chat_id(chat_id)
+        update_order_summary_for_chat_id(chat_id, order)
     except Order.DoesNotExist:
         logger.error(f"Order with id {order_id} does not exist.")
     except Exception as e:
@@ -96,57 +96,32 @@ def datetime_to_str(dt):
     return dt.strftime('%Y-%m-%d %H:%M') if dt else None
 
 
-@receiver(post_save, sender=Order)
-def update_order_summary_for_chat_id(sender, instance, **kwargs):
+def update_order_summary_for_chat_id(chat_id, order):
     try:
-        order = instance
-        chat_id = order.telegram_user.chat_id if order.telegram_user else None
-        if not chat_id:
-            logger.warning(f'Order {order.id} has no associated chat ID.')
-            return
+        # Filter orders based on the chat_id
+        orders = Order.objects.filter(phone=order.phone)
 
-        # Extract and format status fields
-        statuses = {
-            'submitted_at': safe_make_naive(order.submitted_at),
-            'created_at': safe_make_naive(order.created_at),
-            'processed_at': safe_make_naive(order.processed_at),
-            'complete_at': safe_make_naive(order.complete_at),
-            'canceled_at': safe_make_naive(order.canceled_at),
-        }
-        latest_status_field = max(statuses, key=lambda s: statuses[s] or datetime.min)
-        latest_status_timestamp = statuses[latest_status_field]
+        # Create a list of order summaries
+        summary = []
+        for order in orders:
+            serializer = OrderItemSerializer(order.order_items.all(), many=True)
+            order_data = serializer.data
+            summary.append({
+                'order_id': order.id,
+                'order_items': order_data,
+                'submitted_at': order.submitted_at.strftime('%Y-%m-%d %H:%M') if order.submitted_at else None,
+                'created_at': order.created_at.strftime('%Y-%m-%d %H:%M') if order.created_at else None,
+                'processed_at': order.processed_at.strftime('%Y-%m-%d %H:%M') if order.processed_at else None,
+                'complete_at': order.complete_at.strftime('%Y-%m-%d %H:%M') if order.complete_at else None,
+                'canceled_at': order.canceled_at.strftime('%Y-%m-%d %H:%M') if order.canceled_at else None,
+            })
 
-        # Serialize order data
-        order_data = OrderSerializer(order).data
-
-        # Prepare order summary data
-        summary = {
-            'order_id': order.id,
-            'order_items': order_data['order_items'],
-            'submitted_at': datetime_to_str(statuses['submitted_at']),
-            latest_status_field: datetime_to_str(latest_status_timestamp)
-        }
-
-        # Get or create OrderSummary for the chat_id
-        order_summary, _ = OrderSummary.objects.get_or_create(chat_id=chat_id)
-
-        # Update existing order summaries or add a new one
-        existing_orders = order_summary.orders or []
-        updated = False
-
-        for i, existing_order in enumerate(existing_orders):
-            if existing_order['order_id'] == order.id:
-                existing_orders[i] = summary  # Update existing order summary
-                updated = True
-                break
-
-        if not updated:
-            existing_orders.append(summary)  # Add new order summary
-
-        # Save updated order summary
-        order_summary.orders = existing_orders
-        order_summary.save()
-        logger.info(f'Order summary for chat ID {chat_id} updated.')
-
+        # Update or create the OrderSummary instance
+        OrderSummary.objects.update_or_create(
+            chat_id=chat_id,
+            defaults={'orders': summary}
+        )
+        logger.info(f'Order summary updated for chat ID {chat_id}')
+    
     except Exception as e:
-        logger.error(f"Error updating order summary for chat_id {chat_id}: {e}")
+        logger.error(f'Error updating order summary for chat ID {chat_id}: {e}')
