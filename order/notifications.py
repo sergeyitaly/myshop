@@ -81,24 +81,27 @@ def update_order_status_with_notification(order_id, order_items, new_status, sta
         logger.error(f"Order with id {order_id} does not exist.")
     except Exception as e:
         logger.error(f"Error updating order status or sending notification: {e}")
-
 def update_order_summary_for_chat_id(chat_id):
     try:
-        # Fetch all orders with related order items and products
-        orders = Order.objects.prefetch_related('order_items__product').all()
-        # Group orders by chat_id
-        grouped_orders = {}
+        # Fetch orders related to the specified chat_id
+        orders = Order.objects.prefetch_related('order_items__product').filter(telegram_user__chat_id=chat_id)
+        
+        # Function to safely convert datetime to naive
+        def safe_make_naive(dt):
+            if dt is None:
+                return None
+            return make_naive(dt) if is_aware(dt) else dt
+
+        # Function to convert datetime to string
+        def datetime_to_str(dt):
+            if dt:
+                return dt.strftime('%Y-%m-%d %H:%M')
+            return None
+
+        # Initialize a list to store summaries
+        grouped_orders = []
+
         for order in orders:
-            chat_id = order.telegram_user.chat_id if order.telegram_user else None
-            if chat_id not in grouped_orders:
-                grouped_orders[chat_id] = []
-
-            # Function to safely convert datetime to naive
-            def safe_make_naive(dt):
-                if dt is None:
-                    return None
-                return make_naive(dt) if is_aware(dt) else dt
-
             # Extract and format datetime fields
             submitted_at = safe_make_naive(order.submitted_at)
             created_at = safe_make_naive(order.created_at)
@@ -121,15 +124,10 @@ def update_order_summary_for_chat_id(chat_id):
             )
             latest_status_timestamp = statuses[latest_status_field]
 
-            # Convert datetime to string for summary
-            def datetime_to_str(dt):
-                if dt:
-                    return dt.strftime('%Y-%m-%d %H:%M')
-                return None
-
             # Use the serializer to format the order and items
             serializer = OrderSerializer(order)
             order_data = serializer.data
+            
             # Create order summary with only the required statuses
             summary = {
                 'order_id': order.id,
@@ -137,15 +135,13 @@ def update_order_summary_for_chat_id(chat_id):
                 'submitted_at': datetime_to_str(submitted_at),
                 latest_status_field: datetime_to_str(latest_status_timestamp)
             }
-            grouped_orders[chat_id].append(summary)
+            grouped_orders.append(summary)
 
-        # Update OrderSummary
-        all_chat_ids = grouped_orders.keys()
-        for chat_id in all_chat_ids:
-            orders_summary = grouped_orders.get(chat_id, [])
-            OrderSummary.objects.update_or_create(
-                chat_id=chat_id,
-                defaults={'orders': orders_summary}
-            )
+        # Update or create OrderSummary for the specified chat_id
+        OrderSummary.objects.update_or_create(
+            chat_id=chat_id,
+            defaults={'orders': grouped_orders}
+        )
+        
     except Exception as e:
-        logger.error(f'Error while generating order summaries: {e}')
+        logger.error(f'Error while generating order summaries for chat_id {chat_id}: {e}')
