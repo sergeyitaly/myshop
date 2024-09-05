@@ -47,7 +47,7 @@ def send_telegram_message(chat_id, message):
         logger.error(f"Request to Telegram API failed: {e}")
         raise
 
-    
+
 def update_order_status_with_notification(order_id, order_items, new_status, status_field, chat_id):
     try:
         order = Order.objects.get(id=order_id)
@@ -96,7 +96,6 @@ def datetime_to_str(dt):
     """Convert datetime to string format 'YYYY-MM-DD HH:MM'."""
     return dt.strftime('%Y-%m-%d %H:%M') if dt else None
 
-
 def update_order_summary_for_chat_id(chat_id, order):
     try:
         # Retrieve all orders by the phone associated with this order
@@ -109,9 +108,10 @@ def update_order_summary_for_chat_id(chat_id, order):
             order_items = [{
                 'product_name': item.product.name,
                 'collection_name': item.product.collection.name,
-                'size': item.size,
-                'color_name': item.color.name,
-                'color_value': item.color.value,
+                # If size is not a field, replace it with an appropriate one or omit
+                'size': getattr(item, 'size', 'N/A'),  # Change 'size' if it doesn't exist, or set a default
+                'color_name': getattr(item.color, 'name', 'N/A') if hasattr(item, 'color') else 'N/A',
+                'color_value': getattr(item.color, 'value', '#FFFFFF') if hasattr(item, 'color') else '#FFFFFF',
                 'quantity': item.quantity,
                 'total_sum': item.quantity * item.price,
                 'item_price': f'{item.price:.2f}'
