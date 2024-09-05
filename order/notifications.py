@@ -2,7 +2,7 @@
 from django.utils import timezone
 from django.conf import settings
 from .models import Order
-from .shared_utils import safe_make_naive, datetime_to_str, get_random_saying
+from .shared_utils import get_random_saying
 import logging
 import requests
 from django.core.cache import cache
@@ -10,6 +10,7 @@ from .models import Order, OrderSummary
 from .serializers import OrderSerializer
 from datetime import datetime
 from .shared_utils import get_random_saying
+from django.utils.timezone import is_aware, make_naive
 
 logger = logging.getLogger(__name__)
 
@@ -82,40 +83,30 @@ def update_order_status_with_notification(order_id, order_items, new_status, sta
         logger.error(f"Error updating order status or sending notification: {e}")
 
 def update_order_summary_for_chat_id(chat_id):
-    if not chat_id:
-        logger.error("Chat ID is missing. Cannot update order summary.")
-        return
-
-    logger.debug(f"Updating order summary for chat_id: {chat_id}")
-
     try:
-        # Fetch or create the OrderSummary for this chat ID
-        order_summary, created = OrderSummary.objects.get_or_create(chat_id=chat_id)
-        logger.debug(f"OrderSummary created: {created}")
-
-        # Fetch all orders for the given Telegram user
-        orders = Order.objects.filter(telegram_user__chat_id=chat_id).prefetch_related('order_items__product')
-
-        if not orders.exists():
-            logger.error(f"No orders found for chat_id: {chat_id}")
-            return
-
-        # Create a dictionary to track orders by order_id
-        grouped_orders = {order['order_id']: order for order in order_summary.orders} if order_summary.orders else {}
-
+        # Fetch all orders with related order items and products
+        orders = Order.objects.prefetch_related('order_items__product').all()
+        # Group orders by chat_id
+        grouped_orders = {}
         for order in orders:
-            if not order.telegram_user:
-                logger.error(f"TelegramUser for Order ID {order.id} not found. Skipping.")
-                continue
+            chat_id = order.telegram_user.chat_id if order.telegram_user else None
+            if chat_id not in grouped_orders:
+                grouped_orders[chat_id] = []
 
-            # Prepare timestamp values
+            # Function to safely convert datetime to naive
+            def safe_make_naive(dt):
+                if dt is None:
+                    return None
+                return make_naive(dt) if is_aware(dt) else dt
+
+            # Extract and format datetime fields
             submitted_at = safe_make_naive(order.submitted_at)
             created_at = safe_make_naive(order.created_at)
             processed_at = safe_make_naive(order.processed_at)
             complete_at = safe_make_naive(order.complete_at)
             canceled_at = safe_make_naive(order.canceled_at)
 
-            # Dictionary of statuses to find the most recent one
+            # Determine the latest timestamp directly using datetime
             statuses = {
                 'submitted_at': submitted_at,
                 'created_at': created_at,
@@ -123,37 +114,38 @@ def update_order_summary_for_chat_id(chat_id):
                 'complete_at': complete_at,
                 'canceled_at': canceled_at
             }
-
-            # Find the latest status and timestamp
+            
             latest_status_field = max(
                 statuses,
                 key=lambda s: statuses[s] or datetime.min
             )
             latest_status_timestamp = statuses[latest_status_field]
 
-            # Serialize the order data
+            # Convert datetime to string for summary
+            def datetime_to_str(dt):
+                if dt:
+                    return dt.strftime('%Y-%m-%d %H:%M')
+                return None
+
+            # Use the serializer to format the order and items
             serializer = OrderSerializer(order)
             order_data = serializer.data
-
-            logger.info(f'Order {order.id} has {len(order_data["order_items"])} items.')
-
-            # Prepare the summary for this order
+            # Create order summary with only the required statuses
             summary = {
                 'order_id': order.id,
                 'order_items': order_data['order_items'],
-                latest_status_field: datetime_to_str(latest_status_timestamp),
-                'submitted_at': datetime_to_str(submitted_at)
+                'submitted_at': datetime_to_str(submitted_at),
+                latest_status_field: datetime_to_str(latest_status_timestamp)
             }
+            grouped_orders[chat_id].append(summary)
 
-            # Update the existing order in the dictionary or add a new one
-            if order.id in grouped_orders:
-                grouped_orders[order.id].update(summary)  # Update the existing order summary
-            else:
-                grouped_orders[order.id] = summary  # Add new order to the summary
-
-        # Convert the dictionary back to a list and update the order summary
-        order_summary.orders = list(grouped_orders.values())
-        order_summary.save()
-
+        # Update OrderSummary
+        all_chat_ids = grouped_orders.keys()
+        for chat_id in all_chat_ids:
+            orders_summary = grouped_orders.get(chat_id, [])
+            OrderSummary.objects.update_or_create(
+                chat_id=chat_id,
+                defaults={'orders': orders_summary}
+            )
     except Exception as e:
-        logger.error(f"Error updating OrderSummary for chat_id {chat_id}: {e}")
+        logger.error(f'Error while generating order summaries: {e}')
