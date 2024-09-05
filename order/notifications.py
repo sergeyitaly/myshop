@@ -76,16 +76,17 @@ def update_order_status_with_notification(order_id, order_items, new_status, sta
             )
 
         send_telegram_message(chat_id, message)
-        update_order_summary_for_chat_id(chat_id)
+        update_order_summary_for_chat_id(order_id, chat_id)
     except Order.DoesNotExist:
         logger.error(f"Order with id {order_id} does not exist.")
     except Exception as e:
         logger.error(f"Error updating order status or sending notification: {e}")
-def update_order_summary_for_chat_id(chat_id):
+
+def update_order_summary_for_chat_id(order_id, chat_id):
     try:
-        # Fetch orders related to the specified chat_id
-        orders = Order.objects.prefetch_related('order_items__product').filter(telegram_user__chat_id=chat_id)
-        
+        # Fetch the order summary for the specified chat_id
+        summary, created = OrderSummary.objects.get_or_create(chat_id=chat_id)
+
         # Function to safely convert datetime to naive
         def safe_make_naive(dt):
             if dt is None:
@@ -98,50 +99,54 @@ def update_order_summary_for_chat_id(chat_id):
                 return dt.strftime('%Y-%m-%d %H:%M')
             return None
 
-        # Initialize a list to store summaries
-        grouped_orders = []
+        # Fetch the updated order
+        order = Order.objects.prefetch_related('order_items__product').get(id=order_id)
 
-        for order in orders:
-            # Extract and format datetime fields
-            submitted_at = safe_make_naive(order.submitted_at)
-            created_at = safe_make_naive(order.created_at)
-            processed_at = safe_make_naive(order.processed_at)
-            complete_at = safe_make_naive(order.complete_at)
-            canceled_at = safe_make_naive(order.canceled_at)
+        # Extract and format datetime fields
+        submitted_at = safe_make_naive(order.submitted_at)
+        created_at = safe_make_naive(order.created_at)
+        processed_at = safe_make_naive(order.processed_at)
+        complete_at = safe_make_naive(order.complete_at)
+        canceled_at = safe_make_naive(order.canceled_at)
 
-            # Determine the latest timestamp directly using datetime
-            statuses = {
-                'submitted_at': submitted_at,
-                'created_at': created_at,
-                'processed_at': processed_at,
-                'complete_at': complete_at,
-                'canceled_at': canceled_at
-            }
-            
-            latest_status_field = max(
-                statuses,
-                key=lambda s: statuses[s] or datetime.min
-            )
-            latest_status_timestamp = statuses[latest_status_field]
+        # Determine the latest status and its timestamp
+        statuses = {
+            'submitted_at': submitted_at,
+            'created_at': created_at,
+            'processed_at': processed_at,
+            'complete_at': complete_at,
+            'canceled_at': canceled_at
+        }
+        latest_status_field = max(statuses, key=lambda s: statuses[s] or datetime.min)
+        latest_status_timestamp = statuses[latest_status_field]
 
-            # Use the serializer to format the order and items
-            serializer = OrderSerializer(order)
-            order_data = serializer.data
-            
-            # Create order summary with only the required statuses
-            summary = {
-                'order_id': order.id,
-                'order_items': order_data['order_items'],
-                'submitted_at': datetime_to_str(submitted_at),
-                latest_status_field: datetime_to_str(latest_status_timestamp)
-            }
-            grouped_orders.append(summary)
+        # Serialize the order and format the order items
+        serializer = OrderSerializer(order)
+        order_data = serializer.data
 
-        # Update or create OrderSummary for the specified chat_id
-        OrderSummary.objects.update_or_create(
-            chat_id=chat_id,
-            defaults={'orders': grouped_orders}
-        )
-        
+        # Create the updated summary for this order
+        updated_order_summary = {
+            'order_id': order.id,
+            'order_items': order_data['order_items'],
+            'submitted_at': datetime_to_str(submitted_at),
+            latest_status_field: datetime_to_str(latest_status_timestamp)
+        }
+
+        # Update the order within the existing summary
+        existing_orders = summary.orders or []
+        for existing_order in existing_orders:
+            if existing_order['order_id'] == order.id:
+                existing_order.update(updated_order_summary)
+                break
+        else:
+            # If the order is not in the summary, add it
+            existing_orders.append(updated_order_summary)
+
+        # Save the updated summary back to the OrderSummary model
+        summary.orders = existing_orders
+        summary.save()
+
+    except Order.DoesNotExist:
+        logger.error(f"Order with id {order_id} does not exist.")
     except Exception as e:
         logger.error(f'Error while generating order summaries for chat_id {chat_id}: {e}')
