@@ -25,7 +25,7 @@ function App() {
 				<Route path="/product/:id" element={<ProductPage />} />
 				<Route path="/order" element={<OrderPage />} />
 				<Route path="/products" element={<FilterPage />} />
-				<Route path={ROUTE.ABOUT} element={<About />} />
+				<Route path="/about" element={<About />} />
 				<Route path="/test" element={<TestPage />} />
 				<Route path={ROUTE.THANK} element={<ThankPage />} />
 				<Route path="*" element={<NotFound />} />
