@@ -2,18 +2,14 @@
 from django.utils import timezone
 from django.conf import settings
 from .models import Order
-from .shared_utils import get_random_saying
+from .shared_utils import safe_make_naive, datetime_to_str, get_random_saying
 import logging
 import requests
 from django.core.cache import cache
 from .models import Order, OrderSummary
-from .serializers import OrderItemSerializer
+from .serializers import OrderSerializer
 from datetime import datetime
 from .shared_utils import get_random_saying
-from django.utils.timezone import is_aware, make_naive
-from django.dispatch import receiver
-from django.db.models.signals import post_save
-from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
@@ -48,105 +44,107 @@ def send_telegram_message(chat_id, message):
         logger.error(f"Request to Telegram API failed: {e}")
         raise
 
-
 def update_order_status_with_notification(order_id, order_items, new_status, status_field, chat_id):
     try:
         order = Order.objects.get(id=order_id)
-        setattr(order, status_field, timezone.now())  # Update status timestamp
+        setattr(order, status_field, timezone.now())
         order.status = new_status
         order.save()
 
         status = new_status.capitalize()
         emoji = STATUS_EMOJIS.get(new_status, '')
 
-        # Prepare order items details
         order_items_details = "\n".join([
             f"{item.product.name} - {item.quantity} x {item.product.price} {item.product.currency}" 
             for item in order_items
         ])
 
-        # Create the message based on the status change
-        if new_status == 'submitted':
+        if new_status == 'submitted':       
             message = (
                 f"\n"
-                f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. You have a new order #{order_id}. Status of order: {emoji} {status}. \n"
+                f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. You have a new order #{order_id}. Status of order:  {emoji} {status}. \n"
                 f"Order Details:\n{order_items_details}\n\n"
-                f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i>\n"
+                f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i> \n"
             )
         else:
             message = (
                 f"\n"
                 f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. Status of order #{order_id} has been changed to {emoji} {status}. \n"
                 f"Order Details:\n{order_items_details}\n\n"
-                f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i>\n"
+                f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i> \n"
             )
 
-        # Send the message via Telegram
         send_telegram_message(chat_id, message)
-
-        # Update the order summary with the desired structure
-        update_order_summary_for_chat_id(order)
-
+        update_order_summary_for_chat_id(chat_id)
     except Order.DoesNotExist:
         logger.error(f"Order with id {order_id} does not exist.")
     except Exception as e:
         logger.error(f"Error updating order status or sending notification: {e}")
 
+def update_order_summary_for_chat_id(chat_id):
+    if not chat_id:
+        logger.error("Chat ID is missing. Cannot update order summary.")
+        return
 
-def datetime_to_str(dt):
-    """Convert datetime to string format 'YYYY-MM-DD HH:MM'."""
-    return dt.strftime('%Y-%m-%d %H:%M') if dt else None
+    logger.debug(f"Updating order summary for chat_id: {chat_id}")
 
-
-def update_order_summary_for_chat_id(order):
     try:
-        # Retrieve all orders by the phone associated with this order
-        orders = Order.objects.filter(phone=order.phone)
+        order_summary, created = OrderSummary.objects.get_or_create(chat_id=chat_id)
+        logger.debug(f"OrderSummary created: {created}")
 
-        # Use a dictionary to ensure unique orders by order_id
-        summary_dict = defaultdict(dict)
+        orders = Order.objects.filter(telegram_user__chat_id=chat_id).prefetch_related('order_items__product')
 
+        if not orders.exists():
+            logger.error(f"No orders found for chat_id: {chat_id}")
+            return
+
+        grouped_orders = []
         for order in orders:
-            # Serialize order items with detailed fields
-            order_items = []
-            for item in order.order_items.all():
-                # Check if the price is available on the OrderItem or related Product model
-                price = getattr(item, 'price', getattr(item.product, 'price', None))  # Default to product price if not in item
-                if price is None:
-                    logger.error(f"Price not found for order item {item.id}")
-                    continue
+            if not order.telegram_user:
+                logger.error(f"TelegramUser for Order ID {order.id} not found. Skipping.")
+                continue
 
-                # Append the serialized order item
-                order_items.append({
-                    'product_name': item.product.name,
-                    'collection_name': item.product.collection.name,
-                    'size': getattr(item, 'size', 'N/A'),
-                    'color_name': getattr(item.color, 'name', 'N/A') if hasattr(item, 'color') else 'N/A',
-                    'color_value': getattr(item.color, 'value', '#FFFFFF') if hasattr(item, 'color') else '#FFFFFF',
-                    'quantity': item.quantity,
-                    'total_sum': item.quantity * price,
-                    'item_price': f'{price:.2f}'
-                })
+            submitted_at = safe_make_naive(order.submitted_at)
+            created_at = safe_make_naive(order.created_at)
+            processed_at = safe_make_naive(order.processed_at)
+            complete_at = safe_make_naive(order.complete_at)
+            canceled_at = safe_make_naive(order.canceled_at)
 
-            # Update or create the entry in the summary dictionary
-            summary_dict[order.id].update({
+            statuses = {
+                'submitted_at': submitted_at,
+                'created_at': created_at,
+                'processed_at': processed_at,
+                'complete_at': complete_at,
+                'canceled_at': canceled_at
+            }
+
+            latest_status_field = max(
+                statuses,
+                key=lambda s: statuses[s] or datetime.min
+            )
+            latest_status_timestamp = statuses[latest_status_field]
+
+            serializer = OrderSerializer(order)
+            order_data = serializer.data
+
+            logger.info(f'Order {order.id} has {len(order_data["order_items"])} items.')
+
+            summary = {
                 'order_id': order.id,
-                'created_at': datetime_to_str(order.created_at),
-                'submitted_at': datetime_to_str(order.submitted_at),
-                'processed_at': datetime_to_str(order.processed_at),
-                'complete_at': datetime_to_str(order.complete_at),
-                'canceled_at': datetime_to_str(order.canceled_at),
-                'order_items': order_items
-            })
+                'order_items': order_data['order_items'],
+                latest_status_field: datetime_to_str(latest_status_timestamp),
+                'submitted_at': datetime_to_str(submitted_at)
+            }
 
-        # Convert the dictionary back to a list
-        summary = list(summary_dict.values())
+            grouped_orders.append(summary)
 
-        # Update or create an OrderSummary for the given chat_id
-        OrderSummary.objects.update_or_create(
-            orders=orders,
-            defaults={'orders': summary}
-        )
+        # Update OrderSummary
+        order_summary.orders = grouped_orders
+        order_summary.save()
+
+        cache_key = f'order_summary_{chat_id}'
+        cache.set(cache_key, order_summary, timeout=60 * 15)
+        logger.debug(f"OrderSummary saved and cached: {order_summary}")
 
     except Exception as e:
-        logger.error(f'Error updating order summary for orders {orders}: {e}')
+        logger.error(f"Error updating OrderSummary for chat_id {chat_id}: {e}")
