@@ -108,16 +108,25 @@ def update_order_summary_for_chat_id(order):
 
         for order in orders:
             # Serialize order items with detailed fields
-            order_items = [{
-                'product_name': item.product.name,
-                'collection_name': item.product.collection.name,
-                'size': getattr(item, 'size', 'N/A'),
-                'color_name': getattr(item.color, 'name', 'N/A') if hasattr(item, 'color') else 'N/A',
-                'color_value': getattr(item.color, 'value', '#FFFFFF') if hasattr(item, 'color') else '#FFFFFF',
-                'quantity': item.quantity,
-                'total_sum': item.quantity * item.price,
-                'item_price': f'{item.price:.2f}'
-            } for item in order.order_items.all()]
+            order_items = []
+            for item in order.order_items.all():
+                # Check if the price is available on the OrderItem or related Product model
+                price = getattr(item, 'price', getattr(item.product, 'price', None))  # Default to product price if not in item
+                if price is None:
+                    logger.error(f"Price not found for order item {item.id}")
+                    continue
+
+                # Append the serialized order item
+                order_items.append({
+                    'product_name': item.product.name,
+                    'collection_name': item.product.collection.name,
+                    'size': getattr(item, 'size', 'N/A'),
+                    'color_name': getattr(item.color, 'name', 'N/A') if hasattr(item, 'color') else 'N/A',
+                    'color_value': getattr(item.color, 'value', '#FFFFFF') if hasattr(item, 'color') else '#FFFFFF',
+                    'quantity': item.quantity,
+                    'total_sum': item.quantity * price,
+                    'item_price': f'{price:.2f}'
+                })
 
             # Update or create the entry in the summary dictionary
             summary_dict[order.id].update({
