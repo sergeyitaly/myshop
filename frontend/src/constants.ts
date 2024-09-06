@@ -20,7 +20,8 @@ export enum ROUTE {
     COLLECTION = '/collection/',
     COLLECTIONS = '/collections/',
     ORDER = '/order',
-    THANK = '/thank'
+    THANK = '/thank',
+    ABOUT = '/about'
 }
 
 export enum ENDPOINTS {
