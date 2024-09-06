@@ -13,6 +13,7 @@ from .shared_utils import get_random_saying
 from django.utils.timezone import is_aware, make_naive
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
@@ -96,20 +97,21 @@ def datetime_to_str(dt):
     """Convert datetime to string format 'YYYY-MM-DD HH:MM'."""
     return dt.strftime('%Y-%m-%d %H:%M') if dt else None
 
+
 def update_order_summary_for_chat_id(order):
     try:
         # Retrieve all orders by the phone associated with this order
         orders = Order.objects.filter(phone=order.phone)
 
-        # Construct order summary with the expected format
-        summary = []
+        # Use a dictionary to ensure unique orders by order_id
+        summary_dict = defaultdict(dict)
+
         for order in orders:
             # Serialize order items with detailed fields
             order_items = [{
                 'product_name': item.product.name,
                 'collection_name': item.product.collection.name,
-                # If size is not a field, replace it with an appropriate one or omit
-                'size': getattr(item, 'size', 'N/A'),  # Change 'size' if it doesn't exist, or set a default
+                'size': getattr(item, 'size', 'N/A'),
                 'color_name': getattr(item.color, 'name', 'N/A') if hasattr(item, 'color') else 'N/A',
                 'color_value': getattr(item.color, 'value', '#FFFFFF') if hasattr(item, 'color') else '#FFFFFF',
                 'quantity': item.quantity,
@@ -117,8 +119,8 @@ def update_order_summary_for_chat_id(order):
                 'item_price': f'{item.price:.2f}'
             } for item in order.order_items.all()]
 
-            # Add order data to summary
-            summary.append({
+            # Update or create the entry in the summary dictionary
+            summary_dict[order.id].update({
                 'order_id': order.id,
                 'created_at': datetime_to_str(order.created_at),
                 'submitted_at': datetime_to_str(order.submitted_at),
@@ -128,11 +130,14 @@ def update_order_summary_for_chat_id(order):
                 'order_items': order_items
             })
 
+        # Convert the dictionary back to a list
+        summary = list(summary_dict.values())
+
         # Update or create an OrderSummary for the given chat_id
         OrderSummary.objects.update_or_create(
             orders=orders,
             defaults={'orders': summary}
         )
-    
+
     except Exception as e:
         logger.error(f'Error updating order summary for orders {orders}: {e}')
