@@ -84,7 +84,7 @@ def update_order_status_with_notification(order_id, order_items, new_status, sta
         send_telegram_message(chat_id, message)
 
         # Update the order summary with the desired structure
-        update_order_summary_for_chat_id(chat_id, order)
+        update_order_summary_for_chat_id(order)
 
     except Order.DoesNotExist:
         logger.error(f"Order with id {order_id} does not exist.")
@@ -96,7 +96,7 @@ def datetime_to_str(dt):
     """Convert datetime to string format 'YYYY-MM-DD HH:MM'."""
     return dt.strftime('%Y-%m-%d %H:%M') if dt else None
 
-def update_order_summary_for_chat_id(chat_id, order):
+def update_order_summary_for_chat_id(order):
     try:
         # Retrieve all orders by the phone associated with this order
         orders = Order.objects.filter(phone=order.phone)
@@ -130,10 +130,9 @@ def update_order_summary_for_chat_id(chat_id, order):
 
         # Update or create an OrderSummary for the given chat_id
         OrderSummary.objects.update_or_create(
-            chat_id=chat_id,
+            orders=orders,
             defaults={'orders': summary}
         )
-        logger.info(f'Order summary updated for chat ID {chat_id}')
     
     except Exception as e:
-        logger.error(f'Error updating order summary for chat ID {chat_id}: {e}')
+        logger.error(f'Error updating order summary for orders {orders}: {e}')
