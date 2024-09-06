@@ -56,7 +56,6 @@ def get_order_summary(order):
     # Format the summary dictionary to match the required JSON structure
     summary = {
         'order_id': order.id,
-        'created_at': datetime_to_str(order.created_at),
         'order_items': [
             {
                 'size': item['size'],
@@ -73,7 +72,6 @@ def get_order_summary(order):
         'last_status_time': datetime_to_str(last_status_time),
         'submitted_at': datetime_to_str(submitted_at)
     }
-
     return summary
 
 

@@ -142,9 +142,5 @@ def update_order_summary_for_chat_id(chat_id):
         order_summary.orders = grouped_orders
         order_summary.save()
 
-        cache_key = f'order_summary_{chat_id}'
-        cache.set(cache_key, order_summary, timeout=60 * 15)
-        logger.debug(f"OrderSummary saved and cached: {order_summary}")
-
     except Exception as e:
         logger.error(f"Error updating OrderSummary for chat_id {chat_id}: {e}")
