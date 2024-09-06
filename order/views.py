@@ -31,40 +31,40 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
     queryset = OrderSummary.objects.all()
     serializer_class = OrderSummarySerializer
 
-#   def create(self, request, *args, **kwargs):
-#        logger.debug("Received data: %s", request.data)
-#        serializer = self.get_serializer(data=request.data)
-#        serializer.is_valid(raise_exception=True)
+    def create(self, request, *args, **kwargs):
+        logger.debug("Received data: %s", request.data)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         
-#        chat_id = serializer.validated_data.get('chat_id')
-#        if not chat_id:
-#            logger.error("chat_id is missing in the request data.")
-#            return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+        chat_id = serializer.validated_data.get('chat_id')
+        if not chat_id:
+            logger.error("chat_id is missing in the request data.")
+            return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
         
-#        self.perform_create(serializer)
-#        headers = self.get_success_headers(serializer.data)
-#        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-#    def update(self, request, *args, **kwargs):
-#        partial = kwargs.pop('partial', False)
-#        instance = self.get_object()
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
         
         # Ensure the chat_id is provided in the request data
-#        chat_id = request.data.get('chat_id')
-#        if not chat_id:
-#            logger.error("chat_id is missing in the request data.")
-#            return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+        chat_id = request.data.get('chat_id')
+        if not chat_id:
+            logger.error("chat_id is missing in the request data.")
+            return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
         
         # Validate and update the instance
-#        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-#        serializer.is_valid(raise_exception=True)        
-#        self.perform_update(serializer)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)        
+        self.perform_update(serializer)
         
         # Handle potential prefetched objects cache
-#        if getattr(instance, '_prefetched_objects_cache', None):
-#            instance._prefetched_objects_cache = {}
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
         
-#        return Response(serializer.data)
+        return Response(serializer.data)
     
 
 

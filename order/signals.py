@@ -85,12 +85,6 @@ def update_order_summary_for_chat_id():
             if chat_id not in grouped_orders:
                 grouped_orders[chat_id] = []
 
-            # Function to safely convert datetime to naive
-            def safe_make_naive(dt):
-                if dt is None:
-                    return None
-                return make_naive(dt) if is_aware(dt) else dt
-
             # Extract and format datetime fields
             submitted_at = safe_make_naive(order.submitted_at)
             created_at = safe_make_naive(order.created_at)
@@ -119,15 +113,11 @@ def update_order_summary_for_chat_id():
                     return dt.strftime('%Y-%m-%d %H:%M')
                 return None
 
-            # Use the serializer to format the order and items
+            # Serialize the order
             serializer = OrderSerializer(order)
             order_data = serializer.data
 
-            # Log the order items for debugging
-            logger.info(f'Order {order.id} has {len(order_data["order_items"])} items.')
-            logger.info(f'Serialized Order Data: {order_data}')
-
-            # Create order summary with only the required statuses
+            # Create the summary for the order
             summary = {
                 'order_id': order.id,
                 'order_items': order_data['order_items'],
@@ -135,6 +125,13 @@ def update_order_summary_for_chat_id():
                 latest_status_field: datetime_to_str(latest_status_timestamp)
             }
 
+            # Check if this order already exists in the summary for the chat_id
+            existing_summary = next((o for o in grouped_orders[chat_id] if o['order_id'] == order.id), None)
+            if existing_summary:
+                # If the order already exists, update the existing summary
+                grouped_orders[chat_id].remove(existing_summary)
+            
+            # Append the updated summary to the grouped orders
             grouped_orders[chat_id].append(summary)
 
         # Log grouped orders for debugging
