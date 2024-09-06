@@ -137,7 +137,7 @@ def update_order_summary_on_order_item_change(sender, instance, **kwargs):
     if phone_number:
         chat_id = get_chat_id_from_phone(phone_number)
         if chat_id:
-            update_order_summary_for_chat_id(chat_id, order)
+            update_order_summary_for_chat_id(order)
             logger.debug(f"OrderItem change detected for Order ID: {order.id}, updating summary for chat_id: {chat_id}")
 
 @receiver(post_delete, sender=Order)
@@ -179,7 +179,7 @@ def update_order_summary_on_order_item_delete(sender, instance, **kwargs):
     if phone_number:
         chat_id = get_chat_id_from_phone(phone_number)
         if chat_id:
-            update_order_summary_for_chat_id(chat_id, order)
+            update_order_summary_for_chat_id(order)
             logger.debug(f"OrderItem deleted for Order ID: {order.id}, updating summary for chat_id: {chat_id}")
 
 #def update_order_summary_for_chat_id(chat_id):
