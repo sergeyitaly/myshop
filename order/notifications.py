@@ -10,6 +10,7 @@ from .models import Order, OrderSummary
 from .serializers import OrderSerializer
 from datetime import datetime
 from .shared_utils import get_random_saying
+from django.utils.timezone import is_aware, make_naive
 
 logger = logging.getLogger(__name__)
 
@@ -75,72 +76,7 @@ def update_order_status_with_notification(order_id, order_items, new_status, sta
             )
 
         send_telegram_message(chat_id, message)
-        update_order_summary_for_chat_id(chat_id)
     except Order.DoesNotExist:
         logger.error(f"Order with id {order_id} does not exist.")
     except Exception as e:
         logger.error(f"Error updating order status or sending notification: {e}")
-
-def update_order_summary_for_chat_id(chat_id):
-    if not chat_id:
-        logger.error("Chat ID is missing. Cannot update order summary.")
-        return
-
-    logger.debug(f"Updating order summary for chat_id: {chat_id}")
-
-    try:
-        order_summary, created = OrderSummary.objects.get_or_create(chat_id=chat_id)
-        logger.debug(f"OrderSummary created: {created}")
-
-        orders = Order.objects.filter(telegram_user__chat_id=chat_id).prefetch_related('order_items__product')
-
-        if not orders.exists():
-            logger.error(f"No orders found for chat_id: {chat_id}")
-            return
-
-        grouped_orders = []
-        for order in orders:
-            if not order.telegram_user:
-                logger.error(f"TelegramUser for Order ID {order.id} not found. Skipping.")
-                continue
-
-            submitted_at = safe_make_naive(order.submitted_at)
-            created_at = safe_make_naive(order.created_at)
-            processed_at = safe_make_naive(order.processed_at)
-            complete_at = safe_make_naive(order.complete_at)
-            canceled_at = safe_make_naive(order.canceled_at)
-
-            statuses = {
-                'submitted_at': submitted_at,
-                'created_at': created_at,
-                'processed_at': processed_at,
-                'complete_at': complete_at,
-                'canceled_at': canceled_at
-            }
-
-            latest_status_field = max(
-                statuses,
-                key=lambda s: statuses[s] or datetime.min
-            )
-            latest_status_timestamp = statuses[latest_status_field]
-
-            serializer = OrderSerializer(order)
-            order_data = serializer.data
-
-            logger.info(f'Order {order.id} has {len(order_data["order_items"])} items.')
-
-            summary = {
-                'order_id': order.id,
-                'order_items': order_data['order_items'],
-                latest_status_field: datetime_to_str(latest_status_timestamp),
-                'submitted_at': datetime_to_str(submitted_at)
-            }
-
-            grouped_orders.append(summary)
-
-        # Update OrderSummary
-        order_summary.orders = grouped_orders
-        order_summary.save()
-
-    except Exception as e:
-        logger.error(f"Error updating OrderSummary for chat_id {chat_id}: {e}")
