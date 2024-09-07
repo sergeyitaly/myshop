@@ -46,3 +46,4 @@ my-worker/wrangler.toml
 db_backup.dump
 dump.rdb
 *.csv
+.git/

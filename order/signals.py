@@ -124,7 +124,6 @@ def update_order_summary_for_chat_id():
                 'submitted_at': datetime_to_str(submitted_at),
                 latest_status_field: datetime_to_str(latest_status_timestamp)
             }
-
             # Check if this order already exists in the summary for the chat_id
             existing_summary = next((o for o in grouped_orders[chat_id] if o['order_id'] == order.id), None)
             if existing_summary:
