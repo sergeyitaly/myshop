@@ -160,17 +160,13 @@ DATABASES = {
 
 if USE_S3:
     # LoadImagesToS3().copy_local_media_to_s3(os.path.join(BASE_DIR, 'media'))
-    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}'
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_MEDIA_LOCATION}/'
 
     IMAGEKIT_DEFAULT_CACHEFILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     IMAGEKIT_CACHEFILE_DIR = 'CACHE/images'
-    STATICFILES_DIRS = [
-    os.path.join(STATIC_URL),  # Directory containing main.js and main.css
-    os.path.join(STATIC_URL, 'assets'),  # Directory containing other assets (images, etc.)
-    ]
 
 else:
     # Local static file settings
@@ -184,10 +180,10 @@ else:
     IMAGEKIT_DEFAULT_CACHEFILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
     IMAGEKIT_CACHEFILE_DIR = 'images'  # Update this as per your requirement
 #    WHITENOISE_ROOT = STATIC_ROOT
-    STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'dist'),  # Directory containing main.js and main.css
-        os.path.join(BASE_DIR, 'dist', 'assets'),  # Directory containing other assets (images, etc.)
-    ]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'dist'),  # Directory containing main.js and main.css
+    os.path.join(BASE_DIR, 'dist', 'assets'),  # Directory containing other assets (images, etc.)
+]
 
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
