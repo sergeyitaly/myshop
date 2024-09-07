@@ -12,6 +12,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "postinstall": "npx npm-force-resolutions",
+    "vercel-postbuild": "rm -rf dist",
     "vercel-build": "npm install typescript --save-dev && tsc && vite build && npm run vercel-postbuild"
   },
   "dependencies": {

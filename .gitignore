@@ -48,3 +48,5 @@ db_backup.dump
 dump.rdb
 *.csv
 .git/
+package-lock.json
+package.json
