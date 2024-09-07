@@ -11,5 +11,6 @@ python3 manage.py compilemessages
 pip install awscli
 aws s3 mv media s3://kolorytmedia/media --recursive
 python3 manage.py collectstatic --noinput --clear
+rm -rf dist
 rm -rf frontend
 du -h --max-depth=5 | sort -rh

@@ -11,4 +11,3 @@ frontend/node_modules/
 *.log
 env/
 .git/
-./dist
