@@ -1,9 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import img1 from "./about_img1.png";
-import img2 from "./about_img2.png";
-import img3 from "./about_img3.png";
+import { TeamCarousel } from "./TeamCarousel/TeamCarousel";
+import { TechnologiesCarousel } from "./TechnologiesCarousel/TechnologiesCarousel";
+import { Brands } from "./Brands/Brands";
+import img1 from "./img/about_img1.png";
+import img2 from "./img/about_img2.png";
+import img3 from "./img/about_img3.png";
 import styles from "../About/About.module.scss";
 
 export const About: React.FC = () => {
@@ -35,6 +38,10 @@ export const About: React.FC = () => {
 				<img src={img2} alt="About" className={styles.img} />
 			</div>
 
+			<TeamCarousel />
+
+			<TechnologiesCarousel />
+
 			<div className={`${styles.container} ${styles.content3}`}>
 				<img src={img3} alt="About" className={styles.img} />
 				<div className={styles.text}>
@@ -45,6 +52,8 @@ export const About: React.FC = () => {
 					{t("about_us_culture_part_3")}
 				</div>
 			</div>
+
+			<Brands />
 		</section>
 	);
 };
