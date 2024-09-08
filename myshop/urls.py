@@ -71,5 +71,5 @@ if settings.DEBUG:
 
 # Catch-all URL pattern for handling unmatched URLs
 urlpatterns += [
-    re_path(r'^.*$', RedirectView.as_view(url='/')),
+  #  re_path(r'^.*$', RedirectView.as_view(url='/')),
 ]
