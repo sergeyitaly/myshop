@@ -35,7 +35,7 @@ export const AboutUsSection = () => {
                 <span className={styles.blue}>KOLORYT</span>
                 {content}
             </div>
-            <Link to="/about" className={styles.link}>
+            <Link to="/about/" className={styles.link}>
                 {t('more_about_us')}
             </Link>
         </section>
