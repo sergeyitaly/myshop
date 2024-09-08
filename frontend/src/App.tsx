@@ -28,7 +28,7 @@ function App() {
 				<Route path="/about" element={<About />} />
 				<Route path="/test" element={<TestPage />} />
 				<Route path={ROUTE.THANK} element={<ThankPage />} />
-				<Route path="*" element={<NotFound />} />
+				<Route path="/notfound" element={<NotFound />} />
 			</Route>
 		</Routes>
 	);
