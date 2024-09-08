@@ -57,6 +57,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('rosetta/', include('rosetta.urls')), 
     path("", cache_page(60 * 15)(views.index), name="index"),  # Cache for 15 minutes
+    path('api/', include('team.urls')),
 
 #    path("", views.index, name="index"),
     path('i18n/', include('django.conf.urls.i18n')),
