@@ -9,7 +9,7 @@ export const useLinks = () => {
       name: t('collections'),
     },
     {
-      href: '/about/',
+      href: '/about',
       name: t('about_us'),
     },
     {
