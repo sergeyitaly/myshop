@@ -95,7 +95,7 @@ INSTALLED_APPS = [
     'rosetta',
     'modeltranslation',
     'drf_spectacular',
-
+    'team',
       # "debug_toolbar",
 
 ]
