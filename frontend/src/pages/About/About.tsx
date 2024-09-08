@@ -16,7 +16,7 @@ export const About: React.FC = () => {
 	return (
 		<section className={styles.wrapper}>
 			<div className={styles.linkContainer}>
-				<Link to="/about" className={styles.link}>
+				<Link to="/about/" className={styles.link}>
 					{t("about_us")}
 				</Link>
 			</div>
