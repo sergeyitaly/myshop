@@ -96,7 +96,7 @@ INSTALLED_APPS = [
     'modeltranslation',
     'drf_spectacular',
     'team',
-    'brands',
+    'brand',
       # "debug_toolbar",
 
 ]
