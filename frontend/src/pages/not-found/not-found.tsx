@@ -14,7 +14,7 @@ export const NotFound = () => {
                 alt="404"
             />
             <h2 className={styles.message}>{t('not_found_message')}</h2>
-            <RouterLink to="/notfound" className={styles.link}>
+            <RouterLink to="/" className={styles.link}>
                 {t('return_to_home')}
             </RouterLink>
         </main>

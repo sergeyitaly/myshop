@@ -24,11 +24,10 @@ function App() {
 				/>
 				<Route path="/product/:id" element={<ProductPage />} />
 				<Route path="/order" element={<OrderPage />} />
-				<Route path="/products" element={<FilterPage />} />
-				<Route path="/about" element={<About />} />
+				<Route path="/products" element={<FilterPage />} />				
 				<Route path="/test" element={<TestPage />} />
 				<Route path={ROUTE.THANK} element={<ThankPage />} />
-				<Route path="/notfound" element={<NotFound />} />
+				<Route path="/*" element={<NotFound />} />
 			</Route>
 		</Routes>
 	);
