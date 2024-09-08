@@ -7,7 +7,7 @@ from django.utils.html import format_html
 
 
 @admin.register(Brand)
-class TeamMemberAdmin(TranslationAdmin):
+class BrandAdmin(TranslationAdmin):
     list_display = ('id','name_uk', 'name_en', 'link')
     search_fields = ('name_uk', 'name_en', 'link')
     readonly_fields = ('id', 'image_tag')
