@@ -1,0 +1,48 @@
+
+@import '../../../variables';
+
+.menuContainer {
+    position: relative;
+    max-width: 170px;
+
+}
+
+.menuList {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-radius: 5px;
+    bottom: 100%;
+    background: $color-background;
+    padding: 5px;
+    box-shadow: $shadow-main;
+}
+
+.flag {
+    width: 15px;
+    height: 15px;
+}
+
+.button {
+    padding-left: 0;
+    &:hover {
+        background: inherit;
+    }
+
+}
+
+.dropDownButton {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.arrow {
+    transform: rotate(90deg);
+    height: 15px;
+    transition: .2s;
+    &.active {
+        transform: rotate(-90deg);
+    }
+}
