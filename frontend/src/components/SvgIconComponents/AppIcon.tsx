@@ -7,6 +7,7 @@ import { AppIconNames } from "../../constants";
 import { SearchIcon } from "./SearchIcon";
 import { LeftArrowIcon } from "./LeftArrowIcon";
 import { RightArrowIcon } from "./RightArrowIcon";
+import { ForwardArrowIcon } from "./ForwardArrow";
 
 interface AppIconProps extends SVGProps<SVGSVGElement> {
     iconName: AppIconNames
@@ -22,6 +23,7 @@ export const AppIcon = ({iconName, ...props}: AppIconProps) => {
         case 'search': return <SearchIcon {...props}/>
         case 'leftArrow': return <LeftArrowIcon {...props}/>
         case 'rigrtArrow': return <RightArrowIcon {...props}/>
+        case 'forwardArrow': return <ForwardArrowIcon {...props}/>
         default: return <CartIcon {...props}/>
     }
 }
