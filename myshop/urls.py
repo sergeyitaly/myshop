@@ -59,6 +59,8 @@ urlpatterns = [
     path("", cache_page(60 * 15)(views.index), name="index"),  # Cache for 15 minutes
     path('api/', include('team.urls')),
     path('api/', include('brand.urls')),
+    path('api/', include('comments.urls')),
+
 
 
 #    path("", views.index, name="index"),

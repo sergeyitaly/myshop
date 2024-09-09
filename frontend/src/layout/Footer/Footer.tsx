@@ -18,7 +18,7 @@ export const Footer = () => {
                     <p className={styles.title}>{t('contact_us')}</p> {/* Localized text */}
                     <Link
                         className={styles.link}
-                        to="/"
+                        to="/contacts"
                     >
                         {t('contacts')}
                     </Link>
