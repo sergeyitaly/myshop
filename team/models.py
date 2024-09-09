@@ -81,13 +81,12 @@ class TeamMember(models.Model):
             self.photo.delete(save=False)
         super().delete(*args, **kwargs)
 
+    class Meta:
+        ordering = ('name',)
+        verbose_name = _('TeamMember')
+        verbose_name_plural = _('TeamMembers')
 # Move the signal outside the class to avoid the NameError
 @receiver(post_save, sender=TeamMember)
 def generate_teammember_thumbnails(sender, instance, **kwargs):
     if instance.photo:
         instance.photo_thumbnail.generate()
-
-class Meta:
-    ordering = ('name',)
-    verbose_name = _('TeamMember')
-    verbose_name_plural = _('TeamMembers')
