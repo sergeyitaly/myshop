@@ -18,4 +18,4 @@ class TeamMemberListView(generics.ListAPIView):
 class TeamMemberDetailAPIView(generics.RetrieveAPIView):
     queryset = TeamMember.objects.all()
     serializer_class = TeamMemberSerializer
-    permission_classes = [AllowAny] 
+    permission_classes = [AllowAny]
