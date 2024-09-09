@@ -97,6 +97,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'team',
     'brand',
+    'comments',
       # "debug_toolbar",
 
 ]
