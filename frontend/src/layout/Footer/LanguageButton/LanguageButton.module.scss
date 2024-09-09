@@ -1,0 +1,18 @@
+@import '../../../variables';
+
+.button {
+    display: flex;
+    gap: 10px;
+    font-size: 16px;
+    padding: 5px 15px;
+    border-radius: 5px;
+    transition: .2s;
+    &:hover {
+        background: $color-gray-100;
+    }
+}
+
+.flag {
+    width: 15px;
+    height: 15px;
+}

@@ -8,9 +8,6 @@ export const BestSellersSection = () => {
         page_size: 10
       })
 
-      console.log(data?.results);
-      
-
     return (
         <ProductSliderSection
             isSuccess = {isSuccess}
