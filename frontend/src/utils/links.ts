@@ -13,7 +13,7 @@ export const useLinks = () => {
       name: t('about_us'),
     },
     {
-      href: '/*',
+      href: '/contacts',
       name: t('contacts'),
     }
   ];

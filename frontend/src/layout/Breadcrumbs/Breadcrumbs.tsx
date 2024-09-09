@@ -15,7 +15,7 @@ interface Breadcrumb {
     isLoading?: boolean
 }
 
-type Pages = 'collections' | 'products' | 'order' | 'home'
+type Pages = 'collections' | 'products' | 'order' | 'home' | 'contacts'
 
 type ConstantRoutes = {[K in Pages]: Breadcrumb}
 
@@ -40,7 +40,8 @@ const pageDefiner = (path: string) => {
         isCollection: false,
         isProducts: false,
         isProduct: false,
-        isOrder: false
+        isOrder: false,
+        isContacts: false
     }
 
     if(route === 'collections') pages = {...pages, isCollections: true }
@@ -48,6 +49,7 @@ const pageDefiner = (path: string) => {
     if(route === 'products')    pages = {...pages, isProducts: true }
     if(route === 'product')     pages = {...pages, isProduct: true}
     if(route === 'order')       pages = {...pages, isOrder: true}
+    if(route === 'contacts')    pages = {...pages, isContacts: true}
 
     return pages
 }
@@ -75,6 +77,10 @@ export const Breadcrumbs = () => {
         order: {
             title: t('order'),
             link: ROUTE.ORDER
+        },
+        contacts: {
+            title: t('contacts'),
+            link: ROUTE.CONTACTS
         }
     }
 
@@ -102,14 +108,14 @@ export const Breadcrumbs = () => {
 
     const getBreadcrumbs = (): Breadcrumb[] => {
 
-        const {collections, home, order, products} = constantRoutes
+        const {collections, home, order, products, contacts} = constantRoutes
 
         const list: Breadcrumb[] = [home]
 
       
 
         const pages = pageDefiner(pathname)
-        const {isCollection, isCollections, isProducts, isProduct, isOrder} = pages
+        const {isCollection, isCollections, isProducts, isProduct, isOrder, isContacts} = pages
 
         
 
@@ -120,6 +126,10 @@ export const Breadcrumbs = () => {
 
         if(isProducts){
             list.push(products)
+        }
+
+        if(isContacts){
+            list.push(contacts)
         }
 
         if(isProduct){
