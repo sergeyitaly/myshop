@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Category, Collection, Currency } from "../models/entities";
+import { Category, Collection } from "../models/entities";
 import { MainFilter } from "../models/filters";
 import { formatNumber } from "../functions/formatNumber";
 import { formatCurrency } from "../functions/formatCurrency";
-import { useTranslation } from "react-i18next";
+import { useAppTranslator } from "./useAppTranslator";
 
 interface Tag {
     type: 'category' | 'collection' | 'price' | 'discount';
@@ -37,45 +37,14 @@ export const useFilters = (initialCollection?: Collection ) => {
     const [tagList, setTagList] = useState<Tag[]>([]);
     const [sortBy, setSortBy] = useState<string>('');
 
-    const { i18n } = useTranslation();
-
-    const getCategoryName = (category: Category): string => {
-        switch (i18n.language) {
-            case 'uk':
-                return category.name_uk || category.name || '';
-            case 'en':
-                return category.name_en || category.name || '';
-            default:
-                return category.name_en || category.name || '';
-        }
-    };
-
-    const getCollectionName = (collection: Collection): string => {
-        switch (i18n.language) {
-            case 'uk':
-                return collection.name_uk || collection.name || '';
-            case 'en':
-                return collection.name_en || collection.name || '';
-            default:
-                return collection.name_en || collection.name || '';
-        }
-    };
-
-    const getCurrencyFormat = (): Currency => {
-        switch (i18n.language) {
-            case 'uk':
-                return 'UAH';
-            case 'en':
-                return 'USD';
-            case 'fr':
-                return 'EUR';
-            default:
-                return 'USD';
-        }
-    };
+    const {
+        i18n,
+        getCategoryName,
+        getCollectionName,
+        getCurrencyFormat
+    } = useAppTranslator()
 
     const createTags = (categories: Category[] = [], collections: Collection[] = [], price: PriceRange, discount: boolean | null) => {
-        console.log(tempPriceValues);
         
         let list: Tag[] = [];
         let categoryTags: Tag[] = categories.map((category) => ({
@@ -117,8 +86,6 @@ export const useFilters = (initialCollection?: Collection ) => {
     }, [initialCollection]);
 
     useEffect(() => {
-        // setTagList(createTags(activeCategories, activeCollections, activePriceValues, activeHasDiscount));
-
         // Set filters based on active states, excluding default values
         const newFilter: MainFilter = {
             ...filter,

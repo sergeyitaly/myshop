@@ -47,9 +47,9 @@ export const FilterControlBar = ({
     }
 
     
-    
-    console.log(ref.current?.getBoundingClientRect());
 
+    
+    
     return (
         <div ref = {ref} className={styles.bar} >
             {
