@@ -42,7 +42,7 @@ export const ProductInfo = ({
     onChangeColor,
     onChangeSize
 }: ProductInfoProps) => {
-    const { i18n } = useTranslation();
+    const { i18n, t } = useTranslation();
     const language = i18n.language;
 
     // Get translated values
@@ -73,7 +73,7 @@ export const ProductInfo = ({
 
                 />
                 <div className={styles.description}>
-                    <h3>{i18n.t('description_label')}</h3> {/* Ensure this is translated */}
+                    <h3>{t('description')}</h3> {/* Ensure this is translated */}
                     <p>{translatedDescription || i18n.t('description_missing')}</p> {/* Ensure this is translated */}
                 </div>
             </div>
