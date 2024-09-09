@@ -9,11 +9,11 @@ export const useLinks = () => {
       name: t('collections'),
     },
     {
-      href: '/*',
+      href: '/about',
       name: t('about_us'),
     },
     {
-      href: '/*',
+      href: '/contacts',
       name: t('contacts'),
     }
   ];
