@@ -14,3 +14,8 @@ class TeamMemberListView(generics.ListAPIView):
     serializer_class = TeamMemberSerializer
     pagination_class = TeamMemberPagination
     permission_classes = [AllowAny]
+
+class TeamMemberDetailAPIView(generics.RetrieveAPIView):
+    queryset = TeamMember.objects.all()
+    serializer_class = TeamMemberSerializer
+    permission_classes = [AllowAny]

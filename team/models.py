@@ -9,7 +9,9 @@ from storages.backends.s3boto3 import S3Boto3Storage
 from django.core.exceptions import ValidationError
 from django.core.files.images import get_image_dimensions
 from django.utils.html import format_html
-from django.utils.text import slugify
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 # Load environment variables
 load_dotenv()
 
@@ -40,7 +42,6 @@ def validate_svg(value):
     if ext != '.svg':
         raise ValidationError('Unsupported file extension.')
 
-    
 class TeamMember(models.Model):
     name = models.CharField(max_length=100,  verbose_name=_('Name'))
     surname = models.CharField(max_length=100, verbose_name=_('Surname'))
@@ -60,14 +61,20 @@ class TeamMember(models.Model):
     )
 
     def image_tag(self):
-        if self.photo:
-            url = self.photo_thumbnail.url
-            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(url))
+        if self.photo and hasattr(self.photo, 'url'):
+            try:
+                url = self.photo_thumbnail.url
+                return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(url))
+            except Exception:
+                return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format('default_photo.jpg'))
         else:
             return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format('default_photo.jpg'))
 
     def __str__(self):
-        return self.name
+        return f'{self.name} {self.surname}'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         if self.photo:
@@ -78,3 +85,8 @@ class TeamMember(models.Model):
         ordering = ('name',)
         verbose_name = _('TeamMember')
         verbose_name_plural = _('TeamMembers')
+# Move the signal outside the class to avoid the NameError
+@receiver(post_save, sender=TeamMember)
+def generate_teammember_thumbnails(sender, instance, **kwargs):
+    if instance.photo:
+        instance.photo_thumbnail.generate()
