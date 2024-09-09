@@ -14,3 +14,8 @@ class BrandListView(generics.ListAPIView):
     serializer_class = BrandSerializer
     pagination_class = BrandPagination
     permission_classes = [AllowAny]
+
+class BrandDetailAPIView(generics.RetrieveAPIView):
+    queryset = Brand.objects.all()
+    serializer_class = BrandSerializer
+    permission_classes = [AllowAny]
