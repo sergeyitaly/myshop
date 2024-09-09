@@ -59,4 +59,4 @@ export const color = {
     darkOrange: '#BB4430'
 }
 
-export type AppIconNames = 'cart' | 'cross' | 'vase' | 'delete' | 'search' | 'leftArrow' | 'rigrtArrow'
+export type AppIconNames = 'cart' | 'cross' | 'vase' | 'delete' | 'search' | 'leftArrow' | 'rigrtArrow' | 'forwardArrow' | 'flagUkraine' | 'flagUK'

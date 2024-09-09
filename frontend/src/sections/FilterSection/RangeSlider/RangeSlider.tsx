@@ -1,8 +1,9 @@
 import { Slider } from '@mui/material';
-import { ChangeEvent } from 'react';
+import { ChangeEvent, useEffect } from 'react';
 import styles from './RangeSlider.module.scss'
 import { formatPrice } from '../../../functions/formatPrice';
 import { formatNumber } from '../../../functions/formatNumber';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 
 interface AppRangeSliderPeops {
@@ -21,6 +22,23 @@ export const AppRangeSlider = ({
 
     const minDistance = 1000;
 
+    console.log(value);
+
+    const value1 = useDebounce(value[0].toString(), 500)
+    const value2 = useDebounce(value[1].toString(), 500)
+    
+    useEffect(() => {
+        if(+value1 > value[1]){
+            changePrice([value[1], value[1]])
+        }
+    }, [value1])
+   
+    useEffect(() => {
+        if(+value2 < value[0]){
+            changePrice([value[0], value[0]])
+        }
+    }, [value2])
+    
 
     const handleChange2 = (
       _: Event,

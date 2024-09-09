@@ -11,7 +11,7 @@ import "react-range-slider-input/dist/style.css";
 import { AppRangeSlider } from "../RangeSlider/RangeSlider";
 import { MainButton } from "../../../components/UI/MainButton/MainButton";
 import { useEffect } from "react";
-import { FormControlLabel, Switch } from "@mui/material";
+import { TopLevelFilter } from "../TopLevelFilter/TopLevelFilter";
 
 interface FilterMenuProps {
     hasDiscount: boolean;
@@ -88,16 +88,16 @@ export const FilterMenu = ({
         }
     };
 
-    const handleChangeSale = (_: React.ChangeEvent<HTMLInputElement>, value: boolean) => {
-        onChangeSale(value)
+    const handleChangeSale = () => {
+        onChangeSale(!hasDiscount)
     }
 
     return (
         <motion.div
             className={styles.wrapper}
-            initial={{ x: "-100%" }}
+            initial={{ x: "-100%"}}
             animate={{ x: 0 }}
-            exit={{ x: "-100%" }}
+            exit={{ x: "-100%"}}
             transition={{ ease: "linear" }}
             style={{top: initialTopPosition}}
         >
@@ -157,12 +157,7 @@ export const FilterMenu = ({
                             })}
                     </div>
                 </FilterDropDown>
-                <FormControlLabel
-                    control={
-                        <Switch checked={hasDiscount} onChange={handleChangeSale} name="gilad" />
-                    }
-                    label="Товари зі знижкою"
-                    />
+              
                 <FilterDropDown
                     title={t("price")} // Localized text
                 >
@@ -173,6 +168,11 @@ export const FilterMenu = ({
                         changePrice={changePrice}
                     />
                 </FilterDropDown>
+                <TopLevelFilter
+                    isActive = {hasDiscount}
+                    title="Знижка"
+                    onClick={ handleChangeSale }
+                />
                 <MainButton 
                     className={styles.saveButton}
                     title={t("save")}
