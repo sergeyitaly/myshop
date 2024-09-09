@@ -8,6 +8,7 @@ import { useGetOneCollectionByIdQuery } from '../../api/collectionSlice'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { useGetOneProductByIdQuery } from '../../api/productSlice'
 import clsx from 'clsx'
+import { AppIcon } from '../../components/SvgIconComponents/AppIcon'
 
 interface Breadcrumb {
     title?: string
@@ -209,7 +210,7 @@ export const Breadcrumbs = () => {
                                             >
                                                 {title}
                                             </Link>
-                                            <span>{'>'}</span>
+                                            <AppIcon iconName='forwardArrow'/>
                                         </>
                                     }
                                     </Fragment>
@@ -236,7 +237,7 @@ export const Breadcrumbs = () => {
                                                 >
                                                     {title}
                                                 </Link>
-                                                <span>{'>'}</span>
+                                                <AppIcon iconName='forwardArrow'/>
                                             </>
                                         }
                                         </Fragment>
