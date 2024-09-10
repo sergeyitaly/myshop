@@ -1,0 +1,12 @@
+@import '../../../variables';
+
+
+.button {
+    padding: 20px 0;
+    font-size: clamp(1.25rem, 1.277vw + 0.851rem, 2rem);
+    border-bottom: 3px solid transparent;
+}
+
+.active {
+    border-bottom: 3px solid $color-blue;
+}
