@@ -8,7 +8,7 @@ from django.utils.html import format_html
 
 @admin.register(Brand)
 class BrandAdmin(TranslationAdmin):
-    list_display = ('id','image_tag', 'name_uk', 'name_en', 'photo')
+    list_display = ('id','image_tag', 'name_uk', 'name_en')
     search_fields = ('name_uk', 'name_en', 'link')
     readonly_fields = ('id', 'image_tag')
 
