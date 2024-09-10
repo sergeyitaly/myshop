@@ -20,6 +20,7 @@ export enum ROUTE {
     COLLECTION = '/collection/',
     COLLECTIONS = '/collections/',
     ORDER = '/order',
+    ABOUT = '/about',
     THANK = '/thank',
     CONTACTS='/contacts',
     SENDCONTACTS='/sendcontacts'
@@ -33,7 +34,9 @@ export enum ENDPOINTS {
     ORDER = 'order',
     PRODUCT = 'product',
     PRODUCTS = 'products',
-    FILTER = 'products/filter'
+    FILTER = 'products/filter',
+    TEAM_MEMBERS = 'team',
+    BRANDS = 'brand' 
    
 }
 
