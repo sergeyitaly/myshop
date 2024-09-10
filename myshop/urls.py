@@ -53,17 +53,14 @@ urlpatterns = [
     path('api/', include('accounts.urls')), 
     path('api/', include('shop.urls')), 
     path('api/', include('order.urls')),
-
-    path('admin/', admin.site.urls),
-    path('rosetta/', include('rosetta.urls')), 
-    path("", cache_page(60 * 15)(views.index), name="index"),  # Cache for 15 minutes
     path('api/', include('team.urls')),
     path('api/', include('brand.urls')),
     path('api/', include('comments.urls')),
-
-
-
-#    path("", views.index, name="index"),
+    path('admin/', admin.site.urls),
+    path('rosetta/', include('rosetta.urls')), 
+#    path("", cache_page(60 * 15)(views.index), name="index"),  
+    path("", views.index, name="index"),  
+    re_path(r'^(?:.*)/?$', views.index),  # Catch all other routes and serve the same view
     path('i18n/', include('django.conf.urls.i18n')),
 ]
 
