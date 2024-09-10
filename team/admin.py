@@ -8,7 +8,7 @@ from django.contrib import admin
 
 @admin.register(TeamMember)
 class TeamMemberAdmin(TranslationAdmin):
-    list_display = ('id', 'name_en', 'name_uk', 'surname_en', 'surname_uk', 'description_en', 'description_uk','mobile', 'email','link_to_telegram', 'linkedin')
+    list_display = ('id', 'image_tag','name_en', 'name_uk', 'surname_en', 'surname_uk', 'mobile', 'email',)
     search_fields = ('name_en', 'name_uk', 'surname_en', 'surname_uk', 'mobile', 'linkedin')
     readonly_fields = ('id', 'image_tag')
 
