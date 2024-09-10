@@ -110,6 +110,8 @@ export interface TeamMember {
 	linkedin?: string;
 	photo?: string;
 	photo_thumbnail?: string;
+	photo_url: string;
+	photo_thumbnail_url: string;
 }
 
 export interface Brand {
@@ -120,4 +122,6 @@ export interface Brand {
 	link?: string;
 	photo?: string;
 	photo_thumbnail?: string;
+	photo_url: string;
+	photo_thumbnail_url: string;
 }
