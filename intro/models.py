@@ -11,6 +11,7 @@ from django.core.files.images import get_image_dimensions
 from django.utils.html import format_html
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
 # Load environment variables
 load_dotenv()
 
@@ -41,15 +42,16 @@ def validate_svg(value):
     if ext != '.svg':
         raise ValidationError('Unsupported file extension.')
 
-    
-class Brand(models.Model):
+class Intro(models.Model):
     name = models.CharField(max_length=100,  verbose_name=_('Name'))
     link = models.URLField(blank=True, null=True)
-    
+    description = models.TextField(null=True, blank=True, verbose_name=_('Description'))
+
     if USE_S3:
-        photo = models.ImageField(upload_to="photos/brand", storage=MediaStorage(), null=True, blank=True, validators=[validate_file_extension], verbose_name=_('photo'))
+        photo = models.ImageField(upload_to="photos/intro", storage=MediaStorage(), null=True, blank=True, validators=[validate_file_extension], verbose_name=_('photo'))
     else:
-        photo = models.ImageField(upload_to="photos/brand", null=True, blank=True, validators=[validate_file_extension], verbose_name=_('photo'))
+        photo = models.ImageField(upload_to="photos/intro", null=True, blank=True, validators=[validate_file_extension], verbose_name=_('photo'))
+
     photo_thumbnail = ImageSpecField(
         source='photo',
         processors=[ResizeToFill(50, 50)],
@@ -80,11 +82,10 @@ class Brand(models.Model):
 
     class Meta:
         ordering = ('name',)
-        verbose_name = _('Brand')
-        verbose_name_plural = _('Brands')
-
+        verbose_name = _('Intro')
+        verbose_name_plural = _('Intros')
 # Move the signal outside the class to avoid the NameError
-@receiver(post_save, sender=Brand)
-def generate_brand_thumbnails(sender, instance, **kwargs):
+@receiver(post_save, sender=Intro)
+def generate_intro_thumbnails(sender, instance, **kwargs):
     if instance.photo:
         instance.photo_thumbnail.generate()
