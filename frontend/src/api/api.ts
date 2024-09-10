@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Collection, Product } from '../models/entities';
+import { Collection, Product, TeamMember, Brand } from '../models/entities';
 import { ServerResponce, ShortServerResponce } from '../models/server-responce';
 import { queryString } from 'object-query-string'
 import { CollectionFilter, CollectionProductFilter, ProductFilter } from '../models/filters';
@@ -85,5 +85,25 @@ export async function getCollections(page: number = 1): Promise<{ results: Colle
     return response.data;
   } catch (error) {
     throw new Error('Error fetching collections: ' + error);
+  }
+}
+
+// Function to fetch TeamMembers
+export async function getTeamMembers(): Promise<TeamMember[]> {
+  try {
+    const response = await axios.get<TeamMember[]>(`${apiBaseUrl}/api/team/`);
+    return response.data;
+  } catch (error) {
+    throw new Error('Error fetching team members: ' + error);
+  }
+}
+
+// Function to fetch Brands
+export async function getBrands(): Promise<Brand[]> {
+  try {
+    const response = await axios.get<Brand[]>(`${apiBaseUrl}/api/brand/`);
+    return response.data;
+  } catch (error) {
+    throw new Error('Error fetching brands: ' + error);
   }
 }
