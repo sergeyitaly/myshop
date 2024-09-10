@@ -1,0 +1,22 @@
+@import '../../variables';
+
+
+
+.slider {
+
+    &.disabled :global(.slick-slide) {
+        pointer-events: none;
+    }
+
+    & :global(.slick-slide) {
+        padding: 0 10px;
+    };
+
+    & div:global(.slick-track) {
+        display: flex;
+    };
+    
+    & :global(.slick-list) {
+        margin: 0 -10px;
+    }
+}
