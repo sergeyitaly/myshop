@@ -56,6 +56,8 @@ urlpatterns = [
     path('api/', include('team.urls')),
     path('api/', include('brand.urls')),
     path('api/', include('comments.urls')),
+    path('api/', include('intro.urls')),
+
     path('admin/', admin.site.urls),
     path('rosetta/', include('rosetta.urls')), 
 #    path("", cache_page(60 * 15)(views.index), name="index"),  

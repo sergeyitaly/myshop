@@ -98,6 +98,7 @@ INSTALLED_APPS = [
     'team',
     'brand',
     'comments',
+    'intro',
       # "debug_toolbar",
 
 ]
