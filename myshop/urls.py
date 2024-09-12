@@ -57,6 +57,8 @@ urlpatterns = [
     path('api/', include('brand.urls')),
     path('api/', include('comments.urls')),
     path('api/', include('intro.urls')),
+    path('api/', include('technologies.urls')),
+
 
     path('admin/', admin.site.urls),
     path('rosetta/', include('rosetta.urls')), 
