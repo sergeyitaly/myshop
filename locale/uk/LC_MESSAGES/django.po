@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-10 22:16+0300\n"
+"POT-Creation-Date: 2024-09-12 21:57+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,18 +23,20 @@ msgstr ""
 
 #: brand/admin.py:20 intro/admin.py:20 shop/admin.py:87 shop/admin.py:160
 #: shop/models.py:95 shop/models.py:190 team/admin.py:20
+#: technologies/admin.py:20
 #: venv/lib/python3.9/site-packages/django/db/models/fields/files.py:393
 msgid "Image"
 msgstr "Картинка"
 
 #: brand/models.py:46 comments/models.py:10 intro/models.py:46
-#: shop/models.py:130 team/models.py:46
+#: shop/models.py:130 team/models.py:46 technologies/models.py:46
 msgid "Name"
 msgstr "Ім'я"
 
 #: brand/models.py:50 brand/models.py:52 intro/models.py:51 intro/models.py:53
 #: shop/models.py:58 shop/models.py:60 shop/models.py:109 shop/models.py:110
-#: shop/models.py:112 shop/models.py:113 team/models.py:53 team/models.py:55
+#: shop/models.py:112 shop/models.py:113 team/models.py:55 team/models.py:57
+#: technologies/models.py:51 technologies/models.py:53
 msgid "photo"
 msgstr "фото"
 
@@ -59,6 +61,7 @@ msgid "Comments"
 msgstr "Коментарі"
 
 #: intro/models.py:48 shop/models.py:131 team/models.py:50
+#: technologies/models.py:48
 msgid "Description"
 msgstr "Опис"
 
@@ -70,11 +73,11 @@ msgstr ""
 msgid "Intros"
 msgstr ""
 
-#: myshop/settings.py:327
+#: myshop/settings.py:328
 msgid "English"
 msgstr ""
 
-#: myshop/settings.py:328
+#: myshop/settings.py:329
 msgid "Ukrainian"
 msgstr ""
 
@@ -409,13 +412,25 @@ msgstr "картинкі"
 msgid "Surname"
 msgstr "Пріізвищє"
 
-#: team/models.py:87
+#: team/models.py:52
+msgid "Link to the Telegram"
+msgstr ""
+
+#: team/models.py:89
 msgid "TeamMember"
 msgstr "Член команди"
 
-#: team/models.py:88
+#: team/models.py:90
 msgid "TeamMembers"
 msgstr "Члени команди"
+
+#: technologies/models.py:85
+msgid "Technology"
+msgstr ""
+
+#: technologies/models.py:86
+msgid "Technologies"
+msgstr ""
 
 #: templates/admin/base_site.html:5
 msgid "Django site admin"
