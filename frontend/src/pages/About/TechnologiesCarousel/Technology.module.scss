@@ -1,0 +1,40 @@
+@import "../../../variables";
+
+.container {
+	display: flex;
+	flex-direction: column;
+	gap: 128px;
+	padding-bottom: clamp(60px, 8vw, 128px);
+
+	@media (max-width: $screen-mobile) {
+		gap: 40px;
+	}
+}
+
+.title {
+	font-size: clamp(20px, 5vw, 64px);
+	line-height: clamp(20px, 10vw, 105px);
+	text-align: center;
+	margin-top: clamp(50px, 7vw, 100px);
+}
+
+.content {
+	width: 335px;
+	height: 191px;
+	margin-bottom: 64px;
+
+	@media (max-width: $screen-laptop) {
+		width: 235px;
+		height: 91px;
+	}
+
+	@media (max-width: $screen-tablet) {
+		width: 135px;
+		height: 61px;
+	}
+
+	@media (max-width: $screen-mobile) {
+		width: 74px;
+		height: 47px;
+	}
+}
