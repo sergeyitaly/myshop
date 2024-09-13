@@ -1,7 +1,6 @@
 import { ENDPOINTS } from "../constants";
 import { OrderDTO } from "../models/dto";
 import { apiSlice } from "./mainApiSlice";
-import {createApi, fetchBaseQuery} from "@reduxjs/toolkit/query/react";
 
 export interface CreateOrderErrorResponce {
     status: number
