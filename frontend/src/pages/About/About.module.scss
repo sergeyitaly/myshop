@@ -3,37 +3,19 @@
 .wrapper {
 	display: flex;
 	flex-direction: column;
+	justify-content: center;
 }
 
-.linkContainer {
-	padding-top: clamp(24px, 4vw, 56px);
-	padding-left: clamp(19px, 2vw, 21px);
+.title {
+	padding-top: clamp(8px, 3vw, 20px);
 	padding-bottom: clamp(24px, 3vw, 40px);
-}
-
-.link {
-	display: block;
-	text-decoration: none;
 	font-size: clamp(16px, 2vw + 8px, 36px);
-	color: $color-black;
-	white-space: nowrap;
-	width: 142px;
-
-	&:hover {
-		text-decoration: underline;
-		text-decoration-color: blue;
-	}
-
-	@media (max-width: $screen-mobile) {
-		width: 70px;
-	}
 }
 
 .container {
 	display: flex;
-	justify-content: center;
 	align-items: center;
-	margin-bottom: clamp(40px, 5vw, 64px);
+	margin-bottom: clamp(40px, 5vw + 10px, 80px);
 	border-top: 1px solid $color-black;
 	border-bottom: 1px solid $color-black;
 }
@@ -63,6 +45,7 @@
 .content3 {
 	padding: 90px 60px 90px 32px;
 	gap: 52px;
+	margin-bottom: clamp(60px, 10vw + 30px, 164px);
 
 	@media (max-width: $screen-mobile) {
 		flex-direction: column-reverse;
@@ -88,6 +71,6 @@
 	}
 }
 
-.blueText {
+.blue {
 	color: $color-blue;
 }
