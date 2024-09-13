@@ -82,7 +82,7 @@ export const Breadcrumbs = () => {
             link: ROUTE.ORDER
         },
         about: {
-            title: t('about'),
+            title: t('about_us'),
             link: ROUTE.ABOUT
         },
         contacts: {

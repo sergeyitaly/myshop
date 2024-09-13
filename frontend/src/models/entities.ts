@@ -106,8 +106,28 @@ export interface TeamMember {
 	surname: string;
 	surname_en?: string;
 	surname_uk?: string;
+	description?: string;
+	description_en?: string;
+	description_uk?: string;
 	mobile?: string;
 	linkedin?: string;
+	link_to_telegram?: string;
+	email: string;
+	photo?: string;
+	photo_thumbnail?: string;
+	photo_url: string;
+	photo_thumbnail_url: string;
+}
+
+export interface Technology {
+	id: number;
+	name: string;
+	name_en?: string;
+	name_uk?: string;
+	description?: string;
+	description_en?: string;
+	description_uk?: string;
+	link?: string;
 	photo?: string;
 	photo_thumbnail?: string;
 	photo_url: string;

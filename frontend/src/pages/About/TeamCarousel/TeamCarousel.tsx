@@ -1,57 +1,81 @@
 import React from "react";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import { useGetTeamMembersQuery } from "../../../api/aboutSlice";
-import { TeamMember } from "../../../models/entities";
+import { TeamItem } from "./TeamItem";
 import { useTranslation } from "react-i18next";
+import styles from "./TeamCarousel.module.scss";
+import { PreviewLoadingCard } from "../../../components/Cards/PreviewCard/PreviewLoagingCard";
 
 export const TeamCarousel: React.FC = () => {
-	const { data, error, isLoading } = useGetTeamMembersQuery();
-	const { t, i18n } = useTranslation();
-	const language = i18n.language;
+	const { data, isError, isLoading } = useGetTeamMembersQuery();
+	const { t } = useTranslation();
+
+	const settings = {
+		dots: true,
+		infinite: true,
+		speed: 500,
+		slidesToShow: 3,
+		slidesToScroll: 2,
+		arrows: false,
+		responsive: [
+			{
+				breakpoint: 740,
+				settings: {
+					slidesToShow: 2,
+					slidesToScroll: 2,
+					centerMode: true,
+					centerPadding: "15px",
+				},
+			},
+			{
+				breakpoint: 600,
+				settings: {
+					slidesToShow: 2,
+					slidesToScroll: 1,
+					centerMode: true,
+					centerPadding: "10px",
+				},
+			},
+			{
+				breakpoint: 375,
+				settings: {
+					slidesToShow: 2,
+					slidesToScroll: 1,
+					centerMode: false,
+					centerPadding: "5px",
+				},
+			},
+		],
+	};
 
 	const teamData = data?.results || [];
 
-	const getTranslatedName = (member: TeamMember): string => {
-		return language === "uk"
-			? member.name_uk || member.name
-			: member.name_en || member.name;
-	};
-
-	console.log("Data:", data);
-	// console.log("Error:", error);
-	// console.log("Is loading:", isLoading);
-
-	if (isLoading) return <p>Loading...</p>;
-	if (error) return <p>Error loading team members</p>;
-
 	return (
-		<div>
-			<h2>{t("our_team")}</h2>
-			<div>
-				{teamData.length > 0 ? (
-					teamData.map((member, index) => (
-						<div key={member.id || index}>
-							<img
-								src={member.photo_thumbnail_url}
-								alt={getTranslatedName(member)}
-							/>
-							<p>{getTranslatedName(member)}</p>
-							{member.surname && <p>{member.surname}</p>}
-							{member.mobile && <p>{member.mobile}</p>}
-							{member.linkedin && (
-								<a
-									href={member.linkedin}
-									target="_blank"
-									rel="noopener noreferrer"
-								>
-									LinkedIn
-								</a>
-							)}
-						</div>
-					))
-				) : (
-					<p>No team members</p>
-				)}
-			</div>
+		<div className={styles.container}>
+			<div className={styles.title}>{t("our_team")}</div>
+			{isError ? (
+				<p>{t("products.error")}</p>
+			) : (
+				<Slider {...settings}>
+					{isLoading
+						? Array.from({ length: 3 }).map((_, index) => (
+								<div key={index} className={styles.sliderItem}>
+									<PreviewLoadingCard />
+								</div>
+							))
+						: teamData.length > 0
+						? teamData.map((member, index) => (
+								<div key={index} className={styles.sliderItem}>
+									<TeamItem member={member} />
+								</div>
+							))
+						: (
+							<p>{t("empty_team")}</p>
+						)}
+				</Slider>
+			)}
 		</div>
 	);
 };
