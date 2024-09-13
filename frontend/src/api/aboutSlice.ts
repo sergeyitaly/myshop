@@ -1,12 +1,19 @@
 import { apiSlice } from "./mainApiSlice";
 import { ENDPOINTS } from "../constants";
-import { TeamMember, Brand } from "../models/entities";
+import { TeamMember, Technology, Brand } from "../models/entities";
 
 export interface TeamApiResponse {
 	count: number;
 	next: string | null;
 	previous: string | null;
 	results: TeamMember[];
+}
+
+export interface TechnologyApiResponse {
+	count: number;
+	next: string | null;
+	previous: string | null;
+	results: Technology[];
 }
 
 export interface BrandsApiResponse {
@@ -21,10 +28,17 @@ export const aboutSlice = apiSlice.injectEndpoints({
 		getTeamMembers: builder.query<TeamApiResponse, void>({
 			query: () => `${ENDPOINTS.TEAM_MEMBERS}/`,
 		}),
+		getTechnologies: builder.query<TechnologyApiResponse, void>({
+			query: () => `${ENDPOINTS.TECHNOLOGIES}/`,
+		}),
 		getBrands: builder.query<BrandsApiResponse, void>({
 			query: () => `${ENDPOINTS.BRANDS}/`,
 		}),
 	}),
 });
 
-export const { useGetTeamMembersQuery, useGetBrandsQuery } = aboutSlice;
+export const {
+	useGetTeamMembersQuery,
+	useGetTechnologiesQuery,
+	useGetBrandsQuery,
+} = aboutSlice;

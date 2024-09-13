@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Collection, Product, TeamMember, Brand } from '../models/entities';
+import { Collection, Product, TeamMember, Technology, Brand } from '../models/entities';
 import { ServerResponce, ShortServerResponce } from '../models/server-responce';
 import { queryString } from 'object-query-string'
 import { CollectionFilter, CollectionProductFilter, ProductFilter } from '../models/filters';
@@ -95,6 +95,16 @@ export async function getTeamMembers(): Promise<TeamMember[]> {
     return response.data;
   } catch (error) {
     throw new Error('Error fetching team members: ' + error);
+  }
+}
+
+// Function to fetch Technology
+export async function getTechnologies(): Promise<Technology[]> {
+  try {
+    const response = await axios.get<Technology[]>(`${apiBaseUrl}/api/technology/`);
+    return response.data;
+  } catch (error) {
+    throw new Error('Error fetching technologies: ' + error);
   }
 }
 

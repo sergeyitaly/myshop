@@ -36,6 +36,7 @@ export enum ENDPOINTS {
     PRODUCTS = 'products',
     FILTER = 'products/filter',
     TEAM_MEMBERS = 'team',
+    TECHNOLOGIES = 'technology',
     BRANDS = 'brand' 
    
 }
