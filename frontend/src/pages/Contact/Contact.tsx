@@ -4,7 +4,6 @@ import { PageContainer } from "../../components/containers/PageContainer"
 import {useNavigate} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {useState} from "react";
-import {useSendContactFormMutation} from "../../api/orderSlice";
 
 
 const textFieldStyles = {
@@ -26,7 +25,6 @@ export const Contact = () => {
     const [error3, setError3] = useState(false);
     const [message, setMessage] = useState('');
     const [error4, setError4] = useState(false);
-    const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 
     const data = {
         name,
@@ -63,7 +61,7 @@ export const Contact = () => {
     };
 
 
-    const handleNameChange = (e) => {
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
 
         if (/\d/.test(value)) {
@@ -76,7 +74,7 @@ export const Contact = () => {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    const handleEmailChange = (e) => {
+    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setEmail(value);
 
@@ -89,7 +87,7 @@ export const Contact = () => {
 
     const phoneRegex = /^\+?\d{10,15}$/;
 
-    const handlePhoneChange = (e) => {
+    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setPhone(value);
 
@@ -100,7 +98,7 @@ export const Contact = () => {
         }
     };
 
-    const handleMessageChange = (e) => {
+    const handleMessageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setMessage(value);
         setError4(value.trim() === '');
