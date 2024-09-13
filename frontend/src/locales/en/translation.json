@@ -97,6 +97,17 @@
     "hide": "Hide Filters",
     "clear": "Clear Filters"
   },
-  "save" :"Save"
+  "save" :"Save",
+  "name" : "Name",
+  "message" : "Your message",
+    "send" : "Send",
+    "hello_part_1" : "You are welcomed",
+    "hello_part_2" : "we hope that you will enjoy our products as much as we do!",
+    "for_cooperation": "For cooperation",
+    "support" : "Support",
+    "have_question" : "Have a question? Contact us...",
+  "thank_you_text_part1" : "Your request has been successfully sent and we will contact you shortly.",
+  "thank_you_text_part2" : " We usually respond within 24 hours. Thank you for choosing us!",
+  "thank_you_text_part3" : "We are always happy to help!"
 }
   

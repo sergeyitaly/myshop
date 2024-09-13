@@ -20,7 +20,7 @@ export const BurgerMenu = () => {
         { name: t('all_collections'), href: '/all-collections' },
         { name: t('discounts'), href: '/discounts' },
         { name: t('about_us'), href: '/about' },
-        { name: t('contacts'), href: '/contact' },
+        { name: t('contacts'), href: '/contacts' },
         { name: t('order'), href: '/order' },
     ];
 
