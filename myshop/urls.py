@@ -63,8 +63,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('rosetta/', include('rosetta.urls')), 
 #    path("", cache_page(60 * 15)(views.index), name="index"),  
-    path("", views.index, name="index"),  
-    re_path(r'^(?:.*)/?$', views.index),  # Catch all other routes and serve the same view
+#    path("", views.index, name="index"),  
+    path("", cache_page(60 * 15)(views.index), name="index"),
+
+#    re_path(r'^(?:.*)/?$', views.index),  # Catch all other routes and serve the same view
     path('i18n/', include('django.conf.urls.i18n')),
 ]
 
@@ -77,4 +79,5 @@ if settings.DEBUG:
 # Catch-all URL pattern fnor handling unmatched URLs
 urlpatterns += [
 #    re_path(r'^.*$', RedirectView.as_view(url='/')),
+re_path(r'^(?:.*)/?$', views.index)
 ]
