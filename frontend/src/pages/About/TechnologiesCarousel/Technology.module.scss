@@ -18,23 +18,24 @@
 	margin-top: clamp(50px, 7vw, 100px);
 }
 
-.content {
+.imageSize {
 	width: 335px;
 	height: 191px;
-	margin-bottom: 64px;
-
-	@media (max-width: $screen-laptop) {
-		width: 235px;
-		height: 91px;
-	}
+	padding-top: 50%;
 
 	@media (max-width: $screen-tablet) {
-		width: 135px;
-		height: 61px;
+		width: 196px;
+		height: 117px;
+		padding-top: 27%;
 	}
 
 	@media (max-width: $screen-mobile) {
 		width: 74px;
 		height: 47px;
+		padding-top: 0;
 	}
+}
+
+.imageWrapper {
+	padding-bottom: clamp(32px, 5vw, 64px);
 }

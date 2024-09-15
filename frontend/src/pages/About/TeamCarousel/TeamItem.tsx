@@ -1,9 +1,9 @@
 import React, { useCallback } from "react";
 import { TeamMember } from "../../../models/entities";
+import { AppImage } from "../../../components/AppImage/AppImage";
 import { useTranslation } from "react-i18next";
 import { LinkedIn, Telegram, Email } from "@mui/icons-material";
 import styles from "../TeamCarousel/TeamCarousel.module.scss";
-import default_photo from "../../../assets/default.png";
 
 interface TeamMemberProps {
 	member: TeamMember;
@@ -23,7 +23,7 @@ export const TeamItem: React.FC<TeamMemberProps> = ({ member }) => {
 		description,
 		description_uk,
 		description_en,
-		photo_thumbnail_url,
+		photo_url,
 		linkedin,
 		link_to_telegram,
 		email,
@@ -51,10 +51,10 @@ export const TeamItem: React.FC<TeamMemberProps> = ({ member }) => {
 
 	return (
 		<div className={styles.teamItem}>
-			<img
-				src={photo_thumbnail_url || default_photo}
+			<AppImage
+				src={photo_url}
 				alt={translatedName}
-				className={styles.imgContainer}
+				className={styles.imageSize}
 			/>
 
 			<p className={styles.name}>
