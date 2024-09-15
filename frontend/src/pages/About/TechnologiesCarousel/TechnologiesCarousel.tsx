@@ -19,35 +19,6 @@ export const TechnologiesCarousel: React.FC = () => {
 		slidesToShow: 4,
 		slidesToScroll: 3,
 		arrows: false,
-		responsive: [
-			{
-				breakpoint: 740,
-				settings: {
-					slidesToShow: 3,
-					slidesToScroll: 2,
-					centerMode: true,
-					centerPadding: "20px",
-				},
-			},
-			{
-				breakpoint: 600,
-				settings: {
-					slidesToShow: 4,
-					slidesToScroll: 2,
-					centerMode: true,
-					centerPadding: "10px",
-				},
-			},
-			{
-				breakpoint: 375,
-				settings: {
-					slidesToShow: 4,
-					slidesToScroll: 2,
-					centerMode: true,
-					centerPadding: "5px",
-				},
-			},
-		],
 	};
 
 	const technologyData = data?.results || [];

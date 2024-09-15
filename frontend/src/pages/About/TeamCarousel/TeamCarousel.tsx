@@ -21,12 +21,17 @@ export const TeamCarousel: React.FC = () => {
 		arrows: false,
 		responsive: [
 			{
-				breakpoint: 740,
+				breakpoint: 1366,
 				settings: {
 					slidesToShow: 2,
-					slidesToScroll: 2,
-					centerMode: true,
-					centerPadding: "15px",
+					slidesToScroll: 1,
+				},
+			},
+			{
+				breakpoint: 1280,
+				settings: {
+					slidesToShow: 2,
+					slidesToScroll: 1,
 				},
 			},
 			{
@@ -34,19 +39,8 @@ export const TeamCarousel: React.FC = () => {
 				settings: {
 					slidesToShow: 2,
 					slidesToScroll: 1,
-					centerMode: true,
-					centerPadding: "10px",
 				},
-			},
-			{
-				breakpoint: 375,
-				settings: {
-					slidesToShow: 2,
-					slidesToScroll: 1,
-					centerMode: false,
-					centerPadding: "5px",
-				},
-			},
+			}
 		],
 	};
 
@@ -59,21 +53,21 @@ export const TeamCarousel: React.FC = () => {
 				<p>{t("products.error")}</p>
 			) : (
 				<Slider {...settings}>
-					{isLoading
-						? Array.from({ length: 3 }).map((_, index) => (
-								<div key={index} className={styles.sliderItem}>
-									<PreviewLoadingCard />
-								</div>
-							))
-						: teamData.length > 0
-						? teamData.map((member, index) => (
-								<div key={index} className={styles.sliderItem}>
-									<TeamItem member={member} />
-								</div>
-							))
-						: (
-							<p>{t("empty_team")}</p>
-						)}
+					{isLoading ? (
+						Array.from({ length: 3 }).map((_, index) => (
+							<div key={index} className={styles.sliderItem}>
+								<PreviewLoadingCard />
+							</div>
+						))
+					) : teamData.length > 0 ? (
+						teamData.map((member, index) => (
+							<div key={index} className={styles.sliderItem}>
+								<TeamItem member={member} />
+							</div>
+						))
+					) : (
+						<p>{t("empty_team")}</p>
+					)}
 				</Slider>
 			)}
 		</div>

@@ -11,7 +11,7 @@
 	font-size: clamp(16px, 5vw + 2px, 64px);
 	line-height: clamp(22px, 5vw, 105px);
 	text-align: center;
-	margin-bottom: clamp(20px, 5vw, 60px);
+	margin-bottom: clamp(24px, 5vw, 60px);
 
 	@media (max-width: $screen-mobile) {
 		font-size: 16px;
@@ -20,30 +20,22 @@
 
 .content {
 	display: flex;
-	gap: 20px;
+	gap: 16px;
 	flex-wrap: wrap;
 	margin-bottom: clamp(20px, 5vw, 60px);
-
-	@media (max-width: $screen-mobile) {
-		gap: 16px;
-	}
 }
 
-.img {
-	width: 335px;
-	height: 200px;
-
-	@media (max-width: $screen-mobile) {
-		width: 74px;
-		height: 69px;
-	}
+.imageSize {
+	width: clamp(74px, 25vw, 330px);
+	height: clamp(69px, 15vw, 200px);
+	padding-top: clamp(0%, 15%, 50%);
 }
 
 .skeletonWrapper {
-	width: 324px;
-	height: 200px;
+	width: clamp(74px, 25vw, 330px);
+	height: clamp(69px, 15vw, 200px);
 	display: flex;
-	gap: 20px;
+	gap: 16px;
 	align-items: center;
 	justify-content: center;
 	overflow: hidden;
