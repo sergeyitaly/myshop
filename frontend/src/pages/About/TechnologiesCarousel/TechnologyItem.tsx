@@ -1,8 +1,8 @@
 import React, { useCallback } from "react";
 import { Technology } from "../../../models/entities";
 import { useTranslation } from "react-i18next";
+import { AppImage } from "../../../components/AppImage/AppImage";
 import styles from "./Technology.module.scss";
-import default_photo from "../../../assets/default.png";
 
 interface TechnologyProps {
 	technology: Technology;
@@ -12,7 +12,7 @@ export const TechnologyItem: React.FC<TechnologyProps> = ({ technology }) => {
 	const { i18n } = useTranslation();
 	const language = i18n.language;
 
-	const { name, name_uk, name_en, link, photo_thumbnail_url } = technology;
+	const { name, name_uk, name_en, link, photo_url } = technology;
 
 	const getTranslatedName = useCallback(() => {
 		return language === "uk" ? name_uk || name : name_en || name;
@@ -21,12 +21,12 @@ export const TechnologyItem: React.FC<TechnologyProps> = ({ technology }) => {
 	const translatedName = getTranslatedName();
 
 	return (
-		<div>
+		<div className={styles.imageWrapper}>
 			<a href={link || "#"} target="_blank" rel="noopener noreferrer">
-				<img
-					src={photo_thumbnail_url || default_photo}
+				<AppImage
+					src={photo_url}
 					alt={translatedName}
-					className={styles.content}
+					className={styles.imageSize}
 				/>
 			</a>
 		</div>
