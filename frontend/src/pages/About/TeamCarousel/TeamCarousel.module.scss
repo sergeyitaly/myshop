@@ -15,45 +15,30 @@
 .teamItem {
 	display: flex;
 	flex-direction: column;
-	justify-content: space-between;
 	align-items: center;
 	text-align: center;
 	margin-bottom: clamp(40px, 5vw, 138px);
 
-	.imgContainer {
+	.imageSize {
 		width: 453px;
 		height: 492px;
-		margin-bottom: 24px;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		overflow: hidden;
-
-		@media (max-width: $screen-laptop) {
-			width: 353px;
-			height: 392px;
-		}
+		padding-top: 50%;
 
 		@media (max-width: $screen-tablet) {
 			width: 253px;
-			height: 292px;
+			height: 300px;
 		}
-
 		@media (max-width: $screen-mobile) {
 			width: 164px;
 			height: 164px;
-			margin-bottom: 8px;
+			padding-top: 0;
 		}
 	}
 
 	.name {
 		font-size: clamp(16px, 4vw, 32px);
-		margin-bottom: 16px;
+		margin-bottom: 10px;
 		text-wrap: nowrap;
-
-		@media (max-width: $screen-mobile) {
-			margin-bottom: 8px;
-		}
 	}
 
 	.description {
@@ -63,6 +48,7 @@
 		margin-bottom: clamp(10px, 3vw, 63px);
 		text-align: center;
 		height: 300px;
+		padding: 6px;
 
 		@media (max-width: $screen-mobile) {
 			font-size: 14px;
