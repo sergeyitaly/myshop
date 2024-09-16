@@ -32,28 +32,6 @@ export const Contact = () => {
         phone,
         message
     };
-    //
-    // const handleButtonClick = async () => {
-    //     try {
-    //         const response = await fetch('http://localhost:8000/api/comments/comments', {  // Замените на ваш URL
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify(data),
-    //         });
-    //
-    //         if (response.ok) {
-    //             setSubmitSuccess('Форма успешно отправлена');
-    //             navigate('/success'); // Переход на страницу успеха
-    //         } else {
-    //             setSubmitSuccess('Ошибка при отправке формы');
-    //         }
-    //     } catch (error) {
-    //         console.error('Ошибка:', error);
-    //         setSubmitSuccess('Ошибка при отправке формы');
-    //     }
-    // };
 
     const handleButtonClick = () => {
         navigate('/sendcontacts');
@@ -109,7 +87,7 @@ export const Contact = () => {
             <div className={style.titleContainer}>
                 <p className={style.description}>
                     {t('hello_part_1')}
-                    <span className={style.name}> KOLORYT ,</span> <br/>
+                    <span className={style.name}> KOLORYT,</span> <br/>
                     {t('hello_part_2')}
                 </p>
             </div>
