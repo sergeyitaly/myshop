@@ -15,8 +15,10 @@ export const ThankYouPage = () => {
                     <div className={styles.container}>
                         <h1 className={styles.title}>{t('thank_you')}</h1>
                         <p className={styles.p}>
-                            {t('thank_you_text_part1')}<br/>
-                            {t('thank_you_text_part2')}
+                            <div>{t('thank_you_text_part1')}<br/></div>
+                            <div>{t('thank_you_text_part2')}<br/></div>
+                            <div>{t('thank_you_text_part2.1')}</div>
+
                         </p>
                         <img className={styles.image} src={img} alt={t('thank_you_image_alt')} />
                         <p className={styles.p}>
