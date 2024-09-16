@@ -113,7 +113,8 @@
     "support" : "Support",
     "have_question" : "Have a question? Contact us...",
   "thank_you_text_part1" : "Your request has been successfully sent and we will contact you shortly.",
-  "thank_you_text_part2" : " We usually respond within 24 hours. Thank you for choosing us!",
+  "thank_you_text_part2" : " We usually respond within 24 hours.",
+  "thank_you_text_part2.1" : "Thank you for choosing us!",
   "thank_you_text_part3" : "We are always happy to help!"
 }
   

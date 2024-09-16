@@ -1,7 +1,12 @@
 @import '../../variables';
 
 .titleContainer {
-  padding: 100px;
+  padding: 100px 140px;
+  font-weight: 400;
+
+  @media (max-width: $screen-mobile) {
+    padding: 70px;
+  }
 }
 
 .name {
@@ -9,11 +14,13 @@
 }
 
 .description {
+  display: block;
   font-size: 36px;
   text-align: center;
 
   @media (max-width: $screen-mobile) {
-    font-size: 28px;
+    font-size: 22px;
+    line-height: 1.5;
   }
 }
 
@@ -26,18 +33,18 @@
 }
 
 .contactScontainer {
-
   font-weight: 400;
   flex: 0 0 30%;
 
   h3 {
     color: $color-blue;
     font-size: 36px;
+    margin-bottom: 10px;
     font-weight: 400;
-    margin-bottom: 20px;
 
     @media (max-width: $screen-mobile) {
-      font-size: 28px;
+      font-size: 20px;
+      font-weight: 600;
     }
   }
 
@@ -46,12 +53,18 @@
     line-height: 2.2;
 
     @media (max-width: $screen-mobile) {
-      font-size: 22px;
+      font-size: 20px;
+      line-height: 1.8;
     }
   }
 
   .subTitle {
     color: #080599;
+
+    @media (max-width: $screen-mobile) {
+      font-size: 20px;
+      margin-top: 15px;
+    }
   }
 }
 
@@ -66,7 +79,7 @@
     margin-bottom: 30px;
 
     @media (max-width: $screen-mobile) {
-      font-size: 28px;
+      font-size: 24px;
     }
   }
 
@@ -85,6 +98,7 @@
 
   @media (max-width: $screen-mobile) {
     padding: 30px 50px 30px 50px;
+    font-size: 22px;
   }
 }
 
