@@ -8,14 +8,12 @@
 }
 
 .title {
-	font-size: clamp(16px, 5vw + 2px, 64px);
-	line-height: clamp(22px, 5vw, 105px);
+	font-size: clamp(16px, 5vw, 60px);
+	line-height: clamp(22px, 5vw + 5px, 105px);
 	text-align: center;
 	margin-bottom: clamp(24px, 5vw, 60px);
-
-	@media (max-width: $screen-mobile) {
-		font-size: 16px;
-	}
+	padding-left: clamp(20px, 5vw, 80px);
+	padding-right: clamp(20px, 5vw, 80px);	
 }
 
 .content {
@@ -23,12 +21,14 @@
 	gap: 16px;
 	flex-wrap: wrap;
 	margin-bottom: clamp(20px, 5vw, 60px);
+	padding: 0 clamp(16px, 2vw, 20px);
 }
 
 .imageSize {
 	width: clamp(74px, 25vw, 330px);
 	height: clamp(69px, 15vw, 200px);
 	padding-top: clamp(0%, 15%, 50%);
+	border: 1px solid $color-gray-500;
 }
 
 .skeletonWrapper {
