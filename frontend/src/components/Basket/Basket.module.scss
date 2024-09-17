@@ -20,13 +20,9 @@
     right: 0;
     width: 473px;
     max-width: 90vw;
-    height: 90vh;
+    height: 100%;
     background-color: $color-background;
     border-radius: 0 0 0 10px;
-    @media (max-width: $screen-mobile) {
-        top: 10%;
-        height: 80vh;
-    }
 }
 
 .header {

@@ -17,20 +17,18 @@ interface PriceRange {
 
 
 export const useFilters = (initialCollection?: Collection ) => {
-    const maxValue = 1000000;
-    const minValue = 0;
 
-    const [minMaxPrice, setMinMaxPrice] = useState<[number, number]>([minValue, maxValue])
+    const [fullRangeOfPrice, setFullRangeOfPrice] = useState<[number, number]>([0, 0])
 
 
     const [tempCategories, setTempCategories] = useState<Category[]>([]);
     const [tempCollections, setTempCollections] = useState<Collection[]>([]);
-    const [tempPriceValues, setTempPriceValues] = useState<PriceRange>({ min: minValue, max: maxValue });
+    const [tempPriceValues, setTempPriceValues] = useState<PriceRange>({ min: fullRangeOfPrice[0], max: fullRangeOfPrice[1]});
     const [tempHasDiscount, setTempHasDiscount] = useState<boolean>(false)
     
     const [activeCategories, setActiveCategories] = useState<Category[]>([]);
     const [activeCollections, setActiveCollections] = useState<Collection[]>([]);
-    const [activePriceValues, setActivePriceValues] = useState<PriceRange>({ min: minValue, max: maxValue });
+    const [activePriceValues, setActivePriceValues] = useState<PriceRange>({ min: fullRangeOfPrice[0], max: fullRangeOfPrice[1] });
     const [activeHasDiscount, setActiveHasDiscount] = useState<boolean>(false);
     
     const [filter, setFilter] = useState<MainFilter>({});
@@ -43,6 +41,7 @@ export const useFilters = (initialCollection?: Collection ) => {
         getCollectionName,
         getCurrencyFormat
     } = useAppTranslator()
+
 
     const createTags = (categories: Category[] = [], collections: Collection[] = [], price: PriceRange, discount: boolean | null) => {
         
@@ -59,7 +58,7 @@ export const useFilters = (initialCollection?: Collection ) => {
         list = [...categoryTags, ...collectionTags];
 
         const currencyFormat = getCurrencyFormat();
-        if (price.min !== minMaxPrice[0] || price.max !== minMaxPrice[1]) {
+        if (price.min !== fullRangeOfPrice[0] || price.max !== fullRangeOfPrice[1]) {
             list.push({
                 type: 'price',
                 value: `${formatNumber(price.min)} - ${formatNumber(price.max)} ${formatCurrency(currencyFormat)}`
@@ -74,6 +73,11 @@ export const useFilters = (initialCollection?: Collection ) => {
         }
         return list;
     };
+
+    useEffect(() => {
+        setTempPriceValues({min: fullRangeOfPrice[0], max: fullRangeOfPrice[1]})
+        setActivePriceValues({min: fullRangeOfPrice[0], max: fullRangeOfPrice[1]})
+    }, [fullRangeOfPrice[0], fullRangeOfPrice[1]])
 
     useEffect(() => {
         setTagList(createTags(activeCategories, activeCollections, activePriceValues, activeHasDiscount));
@@ -91,13 +95,15 @@ export const useFilters = (initialCollection?: Collection ) => {
             ...filter,
             category: activeCategories.map(({ id }) => id).join(','),
             collection: activeCollections.map(({ id }) => id).join(','),
-            price_min: activePriceValues.min !== minValue ? activePriceValues.min : undefined,
-            price_max: activePriceValues.max !== maxValue ? activePriceValues.max : undefined,
+            price_min: activePriceValues.min,
+            price_max: activePriceValues.max,
             ordering: sortBy,
             has_discount: activeHasDiscount 
         }
 
         if(!activeHasDiscount) delete newFilter.has_discount
+        if(!fullRangeOfPrice[0]) delete newFilter.price_min
+        if(!fullRangeOfPrice[1]) delete newFilter.price_max
 
         setFilter(newFilter);
     }, [activeCategories, activePriceValues, activeCollections, sortBy, activeHasDiscount]);
@@ -139,7 +145,7 @@ export const useFilters = (initialCollection?: Collection ) => {
 
     const clearAllFilters = () => {
         setActiveCategories([]);
-        setActivePriceValues({ min: minMaxPrice[0], max: minMaxPrice[1] });
+        setActivePriceValues({ min: fullRangeOfPrice[0], max: fullRangeOfPrice[1] });
         setActiveCollections([]);
         setTempCategories([]);
         setTempCollections([]);
@@ -156,7 +162,7 @@ export const useFilters = (initialCollection?: Collection ) => {
 
     const deleteTag = (tag: Tag) => {
         if (tag.type === 'price') {
-            setActivePriceValues({ min: minMaxPrice[0], max: minMaxPrice[1] });
+            setActivePriceValues({ min: fullRangeOfPrice[0], max: fullRangeOfPrice[1] });
         }
         if (tag.type === 'category') {
             setActiveCategories(activeCategories.filter((category) => getCategoryName(category) !== tag.value));
@@ -174,16 +180,13 @@ export const useFilters = (initialCollection?: Collection ) => {
     };
 
     return {
-        minPrice: minMaxPrice[0],
-        maxPrice: minMaxPrice[1],
+        fullRangeOfPrice,
         tempCategories,
         tempPriceValues,
         tempCollections,
         activeCollections,
         activeCategories,
         price: activePriceValues,
-        minValue,
-        maxValue,
         filter,
         tagList,
         tempHasDiscount,
@@ -195,6 +198,6 @@ export const useFilters = (initialCollection?: Collection ) => {
         applyChanges,
         deleteTag,
         changeDiscount,
-        setMinMaxPrice
+        setFullRangeOfPrice
     };
 };

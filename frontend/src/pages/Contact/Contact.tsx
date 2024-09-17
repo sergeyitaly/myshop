@@ -26,12 +26,12 @@ export const Contact = () => {
     const [message, setMessage] = useState('');
     const [error4, setError4] = useState(false);
 
-    const data = {
-        name,
-        email,
-        phone,
-        message
-    };
+    // const data = {
+    //     name,
+    //     email,
+    //     phone,
+    //     message
+    // };
     //
     // const handleButtonClick = async () => {
     //     try {
@@ -57,7 +57,6 @@ export const Contact = () => {
 
     const handleButtonClick = () => {
         navigate('/sendcontacts');
-        console.log(data)
     };
 
 

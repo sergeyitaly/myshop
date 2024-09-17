@@ -1,13 +1,17 @@
 import { Swiper, SwiperSlide } from "swiper/react"
-import { SwiperOptions } from "swiper/types";
+import { Swiper as SwiperRef, SwiperOptions } from "swiper/types";
+
 
 import 'swiper/css/bundle';
 import 'swiper/css/grid';
 import 'swiper/css/pagination';
+import 'swiper/css/navigation';
 
 import style from './AppSlider.module.scss'
 import { defaultAppSliderOptions } from "./defaultSwiperSettings";
 import { PreviewLoadingCard } from "../Cards/PreviewCard/PreviewLoagingCard";
+import { useEffect, useRef, useState } from "react";
+import { IconButton } from "../UI/IconButton/IconButton";
 
 
 
@@ -25,13 +29,57 @@ export const AppSlider = ({
     sliderSettings = defaultAppSliderOptions 
 }: ProductSliderProps) => {
 
-    console.log(children);
+
+    const [paginationEl, setPaginationEl] = useState<HTMLElement | null>(null)
+    const [totalBullets, setTotalBullets] = useState<number>(0)
+
+    const controlContainer = useRef<HTMLDivElement>(null)
+    const prevButton = useRef<HTMLButtonElement>(null)
     
     const preloaderArray =  Array.from({length: qtyOfPreloaderCards}, (_, i) => i); 
+
+    const [swiperRef, setSwiperRef] = useState<SwiperRef | null>(null);
+
+
+    useEffect(() => {
+
+        if(swiperRef?.pagination){
+            setTotalBullets(swiperRef.pagination.bullets.length)
+        }
+        
+        if(paginationEl){
+            controlContainer.current?.append(paginationEl)
+        }
+        
+    }, [paginationEl, swiperRef, prevButton])
+    
+
+    useEffect(() => {
+        if(swiperRef?.pagination){
+            setTotalBullets(swiperRef.pagination.bullets.length);
+        }
+        
+    }, [children.length])
+   
+
+
+const handlePrev = () => {
+    swiperRef?.slidePrev()
+}
+
+const handleNext = () => {
+    swiperRef?.slideNext()
+}
+
+   
 
     return (
         <Swiper 
             className={style.slider}
+            onSwiper={setSwiperRef}
+            onPaginationRender={(_, paginationEl) => setPaginationEl(paginationEl)}
+            onSlideChange={(a) => console.log(a)
+            }
             {...sliderSettings}
         >
            
@@ -53,6 +101,27 @@ export const AppSlider = ({
                     </SwiperSlide>
                 ))
             }
+            <div 
+                ref = {controlContainer}
+                className={style.control}
+            
+            >
+                {
+                    (totalBullets > 1) &&
+                    <>
+                        <IconButton
+                            iconName="leftArrow"
+                            onClick={handlePrev}
+                        />
+                        <IconButton
+                            className={style.next}
+                            iconName="rigrtArrow"
+                            onClick={handleNext}
+                        />
+                    </>
+                
+                }
+            </div>
         </Swiper>
     )
 }
