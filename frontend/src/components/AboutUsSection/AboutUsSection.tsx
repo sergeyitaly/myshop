@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import styles from './AboutUsSection.module.scss';
 import { Link } from 'react-router-dom';
-import vase from './vase.png';
+import vase from './vase.svg';
 import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
 

@@ -5,7 +5,7 @@ import clsx from "clsx"
 import { Skeleton } from "../Skeleton/Skeleton"
 
 interface NamedSectionProps extends DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> {
-    title: string
+    title: string 
     isLoading?: boolean
 }
 
@@ -25,6 +25,7 @@ export const NamedSection = ({
                         <Skeleton className={clsx(styles.title, styles.skeleton)}/>
                         :
                         <h1 className={styles.title}>{title}</h1>
+                
                 }
                 {children}
             </PageContainer>

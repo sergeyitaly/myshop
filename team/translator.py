@@ -2,6 +2,6 @@ from modeltranslation.translator import TranslationOptions,translator, Translati
 from .models import TeamMember
 
 class TeamMemberTranslationOptions(TranslationOptions):
-    fields = ('name','surname',)
+    fields = ('name','surname','description')
 
 translator.register(TeamMember, TeamMemberTranslationOptions)

@@ -85,6 +85,6 @@ class Brand(models.Model):
 
 # Move the signal outside the class to avoid the NameError
 @receiver(post_save, sender=Brand)
-def generate_teammember_thumbnails(sender, instance, **kwargs):
+def generate_brand_thumbnails(sender, instance, **kwargs):
     if instance.photo:
         instance.photo_thumbnail.generate()

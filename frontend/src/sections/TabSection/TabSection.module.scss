@@ -1,0 +1,19 @@
+
+.tabContainer {
+    display: grid;
+    grid-template-columns: repeat(3, clamp(16.25rem, 41.429vw - 2.911rem, 34.375rem));
+    justify-items: start;
+    justify-content: space-between;
+    gap: 30px;
+    margin-bottom: 20px;
+}
+
+.item {
+    text-align: start;
+}
+
+.lightCard {
+    & > div:first-child {
+        padding-top: 82%;
+    }
+}

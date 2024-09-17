@@ -34,7 +34,8 @@ export const BasketItem = ({
 }: BasketItemProps) => {
     const { t, i18n } = useTranslation(); // Initialize useTranslation
 
-    const { photo, photo_thumbnail_url, available, price, currency } = product;
+    const { photo, photo_thumbnail_url, available, price, currency, discount } = product;
+
 
     const handleClickDelete = () => {
         onClickDelete && onClickDelete(product);
@@ -52,7 +53,7 @@ export const BasketItem = ({
         onChangeCounter && onChangeCounter(product, value);
     };
 
-    const discountPrice = product ? countDiscountPrice(product.price, product.discount) : null;
+    const discountPrice = product ? countDiscountPrice(price, discount) : null;
 
     // Function to get translated product name
     const getTranslatedProductName = (product: Product): string => {
@@ -70,9 +71,12 @@ export const BasketItem = ({
                     previewSrc={photo_thumbnail_url}
                     alt={getTranslatedProductName(product)} // Use translated name for alt text
                 />
-                <Plug
-                    className={styles.plug}
-                />
+                {  
+                    discountPrice &&
+                    <Plug
+                        className={styles.plug}
+                    />
+                }
             </button>
             <div className={styles.info}>
                 <div className={styles.header}>
