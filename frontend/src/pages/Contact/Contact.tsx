@@ -108,7 +108,7 @@ export const Contact = () => {
             <div className={style.titleContainer}>
                 <p className={style.description}>
                     {t('hello_part_1')}
-                    <span className={style.name}> KOLORYT ,</span> <br/>
+                    <span className={style.name}> KOLORYT,</span> <br/>
                     {t('hello_part_2')}
                 </p>
             </div>
