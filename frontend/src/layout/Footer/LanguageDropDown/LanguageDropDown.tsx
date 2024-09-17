@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useToggler } from "../../../hooks/useToggler";
-import { AppIconNames } from "../../../constants";
+import { AppIconNames, STORAGE } from "../../../constants";
 import { LanguageButton } from "../LanguageButton/LanguageButton";
 import useClickOutside from "../../../hooks/useClickOutside";
 import styles from './LanguageDropDown.module.scss'
@@ -40,6 +40,7 @@ export const LanguageDropDown = () => {
 
 
     const handleLanguageChange = (lang: string) => {
+        localStorage.setItem(STORAGE.LANGUAGE, lang)
         i18n.changeLanguage(lang); // Change the language
         handleClose()
     };

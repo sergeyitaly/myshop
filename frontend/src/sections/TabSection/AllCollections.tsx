@@ -1,11 +1,15 @@
 import { PreviewCard } from "../../components/Cards/PreviewCard/PreviewCard"
 import { useGetAllCollectionsQuery } from "../../api/collectionSlice"
 import { AppSlider } from "../../components/AppSlider/AppSlider"
+import { allCollectionSettings } from "./sliderSettings/AllCollectionSetting"
+import { useNavigate } from "react-router-dom"
+import { ROUTE } from "../../constants"
 
 
 export const AllCollections = () => {
 
 
+    const navigate = useNavigate()
     
     const {data, isLoading} = useGetAllCollectionsQuery()
 
@@ -16,6 +20,7 @@ export const AllCollections = () => {
     return (
         <AppSlider 
             isLoading = {isLoading}
+            sliderSettings={allCollectionSettings}
         >
             {
                 collections.map((collection) => {
@@ -29,6 +34,7 @@ export const AllCollections = () => {
                             previewSrc={photo_thumbnail_url}
                             subTitle={category?.name}
                             title={name}
+                            onClick={() => navigate(`${ROUTE.COLLECTION}${id}`)}
                         />
                     )
                 })

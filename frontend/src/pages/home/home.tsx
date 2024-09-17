@@ -1,7 +1,5 @@
 import { AboutUsSection } from "../../components/AboutUsSection/AboutUsSection";
 import styles from "./home.module.scss";
-import CarouselCeramic from "../../components/Carousels/CarouselCeramic/CarouselCeramic";
-import CarouselNewProduct from "../../components/Carousels/CarouselNewProduct/CarouselNewProduct";
 import { HeroSection } from '../../components/HeroSection/HeroSection';
 import { TabSection } from "../../sections/TabSection/TabSection";
 import { PopularProducts } from "../../sections/TabSection/PopularProducts";
@@ -10,31 +8,44 @@ import { ProductsWithDiscount } from "../../sections/TabSection/ProductsWithDisc
 import { screens } from "../../constants";
 import { useMediaQuery } from "@mui/material";
 import { AllCollections } from "../../sections/TabSection/AllCollections";
+import { LightSection } from "../../sections/TabSection/LightSection";
+import { NewProducts } from "../../sections/TabSection/NewProducts";
+import { useTranslation } from "react-i18next";
 
 export const Home = () => {
 
       const isMobile = useMediaQuery(screens.maxMobile)
 
+      const {t} = useTranslation()
+
     return (
         <main className={styles.main}>
             <HeroSection />
-            <CarouselCeramic />
-            <CarouselNewProduct />
+            <NamedSection
+                title={t('light')}
+            >
+                <LightSection />
+            </NamedSection>
+            <NamedSection
+                title={t('new_arrivals')}
+            >
+                <NewProducts/>
+            </NamedSection>
             {
                 isMobile ? 
                 <>
                     <NamedSection
-                        title={"Найпопулярніші товари"}
+                        title={t('popularProducts')}
                     >
                         <PopularProducts/>
                     </NamedSection>
                     <NamedSection
-                        title={"Знижки"}
+                        title={t('discounts')}
                     >
                         <ProductsWithDiscount/>
                     </NamedSection>
                     <NamedSection
-                        title={"Всі колекції"}
+                        title={t('all_collections')}
                     >
                         <AllCollections/>
                     </NamedSection>
