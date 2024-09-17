@@ -79,7 +79,7 @@
     "allCollections":"All collections",
     "popularProducts":"Most popular",
     "no_popular_products": "No popular products at the moment",
-    "about_us_content": " — is a unique project created by a team of six people who united their passion for Ukrainian culture and their desire to promote it through home decor. The store specializes in Ukrainian-themed products, offering a wide range of home goods, including ceramics, glassware, and various accessories.",
+    "about_us_content": " — is a unique project created by a team of eight people who united their passion for Ukrainian culture and their desire to promote it through home decor. The store specializes in Ukrainian-themed products, offering a wide range of home goods, including ceramics, glassware, and various accessories.",
     "about_us_idea_part_1": "The idea ",
     "about_us_idea_part_2": " of arose from the desire to create a place where everyone can find something special for their home that reflects Ukrainian culture and traditions. The team behind this project strives not only to sell goods, but also to instill in buyers respect and love for Ukrainian art, crafts and design.",
     "about_us_culture_part_1": "Each product in the ",
@@ -114,7 +114,8 @@
     "support" : "Support",
     "have_question" : "Have a question? Contact us...",
   "thank_you_text_part1" : "Your request has been successfully sent and we will contact you shortly.",
-  "thank_you_text_part2" : " We usually respond within 24 hours. Thank you for choosing us!",
+  "thank_you_text_part2" : " We usually respond within 24 hours.",
+  "thank_you_text_part2.1" : "Thank you for choosing us!",
   "thank_you_text_part3" : "We are always happy to help!"
 }
   
