@@ -17,7 +17,7 @@ export const TeamCarousel: React.FC = () => {
 		infinite: true,
 		speed: 500,
 		slidesToShow: 3,
-		slidesToScroll: 2,
+		slidesToScroll: 3,
 		arrows: false,
 		responsive: [
 			{
@@ -38,7 +38,7 @@ export const TeamCarousel: React.FC = () => {
 				breakpoint: 600,
 				settings: {
 					slidesToShow: 2,
-					slidesToScroll: 1,
+					slidesToScroll: 2,
 				},
 			}
 		],
@@ -55,13 +55,13 @@ export const TeamCarousel: React.FC = () => {
 				<Slider {...settings}>
 					{isLoading ? (
 						Array.from({ length: 3 }).map((_, index) => (
-							<div key={index} className={styles.sliderItem}>
+							<div key={index}>
 								<PreviewLoadingCard />
 							</div>
 						))
 					) : teamData.length > 0 ? (
 						teamData.map((member, index) => (
-							<div key={index} className={styles.sliderItem}>
+							<div key={index}>
 								<TeamItem member={member} />
 							</div>
 						))
