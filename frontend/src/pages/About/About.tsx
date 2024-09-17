@@ -3,10 +3,9 @@ import { useTranslation } from "react-i18next";
 import { TeamCarousel } from "./TeamCarousel/TeamCarousel";
 import { TechnologiesCarousel } from "./TechnologiesCarousel/TechnologiesCarousel";
 import { Brands } from "./Brands/Brands";
-import { PageContainer } from "../../components/containers/PageContainer";
-import img1 from "../../assets/about/about_img1.png";
-import img2 from "../../assets/about/about_img2.png";
-import img3 from "../../assets/about/about_img3.png";
+import img1 from "../../assets/about/about_img1.svg";
+import img2 from "../../assets/about/about_img2.svg";
+import img3 from "../../assets/about/about_img3.svg";
 import styles from "../About/About.module.scss";
 
 export const About: React.FC = () => {
@@ -15,7 +14,7 @@ export const About: React.FC = () => {
 
 	return (
 		<section>
-			<PageContainer className={styles.wrapper}>
+			<div className={styles.wrapper}>
 				<div className={styles.title}>{t("about_us")}</div>
 
 				<div className={`${styles.container} ${styles.content1}`}>
@@ -51,7 +50,7 @@ export const About: React.FC = () => {
 				</div>
 
 				<Brands />
-			</PageContainer>
+			</div>
 		</section>
 	);
 };
