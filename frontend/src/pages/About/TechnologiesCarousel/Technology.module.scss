@@ -3,25 +3,37 @@
 .container {
 	display: flex;
 	flex-direction: column;
-	gap: 128px;
+	gap: clamp(40px, 5vw + 10px, 128px);
+	padding: 0 clamp(16px, 2vw, 20px);
 	padding-bottom: clamp(60px, 8vw, 128px);
-
-	@media (max-width: $screen-mobile) {
-		gap: 40px;
-	}
 }
 
 .title {
-	font-size: clamp(20px, 5vw, 64px);
-	line-height: clamp(20px, 10vw, 105px);
+	font-size: clamp(20px, 5vw, 60px);
+	line-height: clamp(20px, 5vw + 5px, 105px);
 	text-align: center;
 	margin-top: clamp(50px, 7vw, 100px);
+	padding: 0 clamp(20px, 5vw + 10px, 80px);
+}
+
+.imageWrapper {
+	padding-bottom: clamp(32px, 5vw, 64px);
+	position: relative;
+	overflow: hidden;
+
+	@media (min-width: $screen-mobile) {
+		&:hover .imageSize {
+			filter: grayscale(0%);
+		}
+	}
 }
 
 .imageSize {
 	width: 335px;
 	height: 191px;
 	padding-top: 50%;
+	transition: filter 0.3s ease-in-out;
+	filter: grayscale(100%);
 
 	@media (max-width: $screen-tablet) {
 		width: 196px;
@@ -33,9 +45,6 @@
 		width: 74px;
 		height: 47px;
 		padding-top: 0;
+		filter: grayscale(100%);
 	}
-}
-
-.imageWrapper {
-	padding-bottom: clamp(32px, 5vw, 64px);
 }
