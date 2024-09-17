@@ -8,6 +8,7 @@ import { LanguageDropDown } from './LanguageDropDown/LanguageDropDown';
 export const Footer = () => {
     const { t } = useTranslation(); // Initialize translation hook
 
+
     return (
         <footer className={styles.footer}>
             <Logo 

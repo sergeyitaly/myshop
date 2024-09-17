@@ -42,7 +42,8 @@ export enum ENDPOINTS {
 }
 
 export enum STORAGE {
-    BASKET='basket'
+    BASKET='basket',
+    LANGUAGE='lang'
 }
 
 export const color = {
