@@ -4,6 +4,8 @@ import { PageContainer } from "../../components/containers/PageContainer"
 import {useNavigate} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {useState} from "react";
+import axios from "axios";
+import {apiBaseUrl} from "../../api/api";
 
 
 const textFieldStyles = {
@@ -21,44 +23,17 @@ export const Contact = () => {
     const [error, setError] = useState(false);
     const [email, setEmail] = useState('');
     const [error2, setError2] = useState(false);
-    const [phone, setPhone] = useState('');
+    const [phone_number, setPhone] = useState('');
     const [error3, setError3] = useState(false);
-    const [message, setMessage] = useState('');
+    const [comment, setMessage] = useState('');
     const [error4, setError4] = useState(false);
 
-    // const data = {
-    //     name,
-    //     email,
-    //     phone,
-    //     message
-    // };
-    //
-    // const handleButtonClick = async () => {
-    //     try {
-    //         const response = await fetch('http://localhost:8000/api/comments/comments', {  // Замените на ваш URL
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify(data),
-    //         });
-    //
-    //         if (response.ok) {
-    //             setSubmitSuccess('Форма успешно отправлена');
-    //             navigate('/success'); // Переход на страницу успеха
-    //         } else {
-    //             setSubmitSuccess('Ошибка при отправке формы');
-    //         }
-    //     } catch (error) {
-    //         console.error('Ошибка:', error);
-    //         setSubmitSuccess('Ошибка при отправке формы');
-    //     }
-    // };
-
-    const handleButtonClick = () => {
-        navigate('/sendcontacts');
+    const data = {
+        name,
+        email,
+        phone_number,
+        comment
     };
-
 
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -103,6 +78,22 @@ export const Contact = () => {
         setError4(value.trim() === '');
     };
 
+    const postComment = async (userData: typeof data) => {
+        try {
+            const response = await axios.post(`${apiBaseUrl}/api/comments/comments/`, userData);
+            console.log('Response:', response.data);
+            navigate('/sendcontacts'); // Перенаправление на страницу после успешной отправки
+        } catch (error) {
+            console.error('Error posting comment:', error);
+        }
+    };
+
+    const handleButtonClick = () => {
+        // Выполняется только если нет ошибок и введен валидный email
+        if (!error && !error2 && !error3 && !error4) {
+            postComment(data);
+        }
+    };
     return (
         <PageContainer>
             <div className={style.titleContainer}>
@@ -154,7 +145,7 @@ export const Contact = () => {
                             variant="standard"
                             sx={textFieldStyles}
                             onChange={handlePhoneChange}
-                            value={phone}
+                            value={phone_number}
                             error={error3}
                             helperText={error2 ? 'Введіть валідний телефон' : ''}
                         />
@@ -162,7 +153,7 @@ export const Contact = () => {
                             label={t('message')}
                             variant="standard"
                             sx={textFieldStyles}
-                            value={message}
+                            value={comment}
                             onChange={handleMessageChange}
                             error={error4}
                         />
