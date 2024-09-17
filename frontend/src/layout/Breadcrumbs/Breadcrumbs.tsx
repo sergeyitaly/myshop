@@ -16,7 +16,7 @@ interface Breadcrumb {
     isLoading?: boolean
 }
 
-type Pages = 'collections' | 'products' | 'order' | 'home' | 'contacts'
+type Pages = 'collections' | 'products' | 'order' | 'home' | 'contacts' | 'about';
 
 type ConstantRoutes = {[K in Pages]: Breadcrumb}
 
@@ -42,6 +42,7 @@ const pageDefiner = (path: string) => {
         isProducts: false,
         isProduct: false,
         isOrder: false,
+        isAbout: false,
         isContacts: false
     }
 
@@ -50,6 +51,7 @@ const pageDefiner = (path: string) => {
     if(route === 'products')    pages = {...pages, isProducts: true }
     if(route === 'product')     pages = {...pages, isProduct: true}
     if(route === 'order')       pages = {...pages, isOrder: true}
+    if(route === 'about')       pages = {...pages, isAbout: true }
     if(route === 'contacts')    pages = {...pages, isContacts: true}
 
     return pages
@@ -79,14 +81,15 @@ export const Breadcrumbs = () => {
             title: t('order'),
             link: ROUTE.ORDER
         },
+        about: {
+            title: t('about_us'),
+            link: ROUTE.ABOUT
+        },
         contacts: {
             title: t('contacts'),
             link: ROUTE.CONTACTS
         }
     }
-
-    
- 
 
     const {
         data: collectionResponce,
@@ -109,14 +112,14 @@ export const Breadcrumbs = () => {
 
     const getBreadcrumbs = (): Breadcrumb[] => {
 
-        const {collections, home, order, products, contacts} = constantRoutes
+        const {collections, home, order, products, about, contacts} = constantRoutes
 
         const list: Breadcrumb[] = [home]
 
       
 
         const pages = pageDefiner(pathname)
-        const {isCollection, isCollections, isProducts, isProduct, isOrder, isContacts} = pages
+        const {isCollection, isCollections, isProducts, isProduct, isOrder, isAbout, isContacts} = pages
 
         
 
@@ -127,6 +130,10 @@ export const Breadcrumbs = () => {
 
         if(isProducts){
             list.push(products)
+        }
+
+        if(isAbout){
+            list.push(about)
         }
 
         if(isContacts){

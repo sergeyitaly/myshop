@@ -8,7 +8,7 @@ import { AnimatePresence } from "framer-motion";
 import { useFilters } from "../../hooks/useFilters";
 import { Tag } from "./Tag/Tag";
 import { Pagination } from "../../components/UI/Pagination/Pagination";
-import { Collection, Product, Category, PriceRange } from '../../models/entities';
+import { Collection, Product, Category } from '../../models/entities';
 import clsx from "clsx";
 import { useTranslation } from 'react-i18next';
 import { useToggler } from "../../hooks/useToggler";
@@ -43,8 +43,7 @@ export const FilterSection = ({
         tempPriceValues,
         tempCollections,
         filter,
-        minPrice,
-        maxPrice,
+        fullRangeOfPrice,
         tempHasDiscount,
         deleteTag,
         applyChanges,
@@ -54,7 +53,7 @@ export const FilterSection = ({
         clearAllFilters,
         changeOrdering,
         changeDiscount,
-        setMinMaxPrice,
+        setFullRangeOfPrice,
     } = useFilters(initialCollection);
 
     const {
@@ -66,15 +65,10 @@ export const FilterSection = ({
     } = useGetProductsByMainFilterQuery({...filter, page: currentPage, page_size: LIMIT});
 
     let totalPages = 0;
-    
+
     useEffect(() => {
         if (productsResponse) {
-            const priceRange: PriceRange = {
-                min: productsResponse.price_min,
-                max: productsResponse.price_max
-            };
-            changePrice(priceRange);
-            setMinMaxPrice([productsResponse.overall_price_min, productsResponse.overall_price_max])
+            setFullRangeOfPrice([productsResponse.overall_price_min, productsResponse.overall_price_max])
         }
     }, [productsResponse]);
 
@@ -117,9 +111,6 @@ export const FilterSection = ({
     };
 
     
-console.log(topPosition);
-
-
     return (
         <section className={clsx(styles.section, {
             [styles.blur]: isFetchingProducts
@@ -202,8 +193,8 @@ console.log(topPosition);
                         hasDiscount = {tempHasDiscount}
                         initialTopPosition={topPosition}
                         showCollections={!initialCollection}
-                        minValue={minPrice}
-                        maxValue={maxPrice}
+                        minValue={fullRangeOfPrice[0]}
+                        maxValue={fullRangeOfPrice[1]}
                         priceValue={[tempPriceValues.min, tempPriceValues.max]} // Convert to tuple
                         activeCategories={tempCategories}
                         activeCollections={tempCollections}

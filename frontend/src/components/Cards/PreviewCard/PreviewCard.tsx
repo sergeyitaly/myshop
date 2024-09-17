@@ -39,7 +39,7 @@ export const PreviewCard = ({
     }
 
    const discountPrice = countDiscountPrice(price, discount)
-    
+
     return (
         <div 
             className={clsx(style.card, className, {

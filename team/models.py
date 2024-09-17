@@ -47,7 +47,10 @@ class TeamMember(models.Model):
     surname = models.CharField(max_length=100, verbose_name=_('Surname'))
     mobile = models.CharField(max_length=15, blank=True, null=True)
     linkedin = models.URLField(blank=True, null=True)
-    
+    description = models.TextField(null=True, blank=True, verbose_name=_('Description'))
+    email = models.EmailField(default='example@example.com')
+    link_to_telegram = models.URLField(null=True, blank=True,verbose_name=_('Link to the Telegram'))
+
     if USE_S3:
         photo = models.ImageField(upload_to="photos/team", storage=MediaStorage(), null=True, blank=True, validators=[validate_file_extension], verbose_name=_('photo'))
     else:

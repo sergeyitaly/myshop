@@ -16,7 +16,7 @@ $topSpace: -125px;
     position: relative;
     padding-top: 63px;
     border-top: 1px solid #CDCDCD;
-
+    font-weight: 400;
     padding-bottom: clamp(14px,3vw,64px);
     &::before {
         @include halfLine;

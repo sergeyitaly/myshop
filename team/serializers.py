@@ -7,7 +7,7 @@ class TeamMemberSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TeamMember
-        fields = ['name', 'name_en', 'name_uk', 'surname', 'surname_en', 'surname_uk', 'mobile', 'linkedin', 'photo_url', 'photo_thumbnail_url']
+        fields = ['name', 'name_en', 'name_uk', 'surname', 'surname_en', 'surname_uk', 'description', 'description_en', 'description_uk','mobile', 'email','link_to_telegram','linkedin', 'photo_url', 'photo_thumbnail_url']
 
     def get_photo_url(self, obj):
         if obj.photo and hasattr(obj.photo, 'url'):
