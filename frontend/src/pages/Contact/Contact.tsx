@@ -26,16 +26,37 @@ export const Contact = () => {
     const [message, setMessage] = useState('');
     const [error4, setError4] = useState(false);
 
-    const data = {
-        name,
-        email,
-        phone,
-        message
-    };
+    // const data = {
+    //     name,
+    //     email,
+    //     phone,
+    //     message
+    // };
+    //
+    // const handleButtonClick = async () => {
+    //     try {
+    //         const response = await fetch('http://localhost:8000/api/comments/comments', {  // Замените на ваш URL
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify(data),
+    //         });
+    //
+    //         if (response.ok) {
+    //             setSubmitSuccess('Форма успешно отправлена');
+    //             navigate('/success'); // Переход на страницу успеха
+    //         } else {
+    //             setSubmitSuccess('Ошибка при отправке формы');
+    //         }
+    //     } catch (error) {
+    //         console.error('Ошибка:', error);
+    //         setSubmitSuccess('Ошибка при отправке формы');
+    //     }
+    // };
 
     const handleButtonClick = () => {
         navigate('/sendcontacts');
-        console.log(data)
     };
 
 

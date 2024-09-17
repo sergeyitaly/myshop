@@ -1,5 +1,5 @@
 import { Slider } from '@mui/material';
-import { ChangeEvent, useEffect } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import styles from './RangeSlider.module.scss'
 import { formatPrice } from '../../../functions/formatPrice';
 import { formatNumber } from '../../../functions/formatNumber';
@@ -22,15 +22,24 @@ export const AppRangeSlider = ({
 
     const minDistance = 1000;
 
-    console.log(value);
+    const [startValue1FromScratch, setStartValue1FromScratch] = useState<boolean>(true) 
 
-    const value1 = useDebounce(value[0].toString(), 500)
-    const value2 = useDebounce(value[1].toString(), 500)
+    const value1 = useDebounce(value[0].toString(), 1000)
+    const value2 = useDebounce(value[1].toString(), 1000)
+
+    console.log(startValue1FromScratch);
+    
     
     useEffect(() => {
+
+        if(+value1 < minValue){
+            changePrice([minValue, value[1]])
+        }
+
         if(+value1 > value[1]){
             changePrice([value[1], value[1]])
         }
+        setStartValue1FromScratch(true)
     }, [value1])
    
     useEffect(() => {
@@ -64,14 +73,34 @@ export const AppRangeSlider = ({
     };
 
     const handleChangeInp1 = (e: ChangeEvent<HTMLInputElement>) => {
+
+        
         let transformedValue = parseFloat(e.target.value.replace(/\s/g, '').replace(/,/g, '.'))
+        console.log(transformedValue);
+
+        if(startValue1FromScratch){
+            console.log('fromScratch');
+            
+            const lastIndex = transformedValue.toString().length
+            console.log(lastIndex);
+            
+            transformedValue = +transformedValue.toString()[lastIndex - 1]
+        }
+        
         if(!e.target.value){
             transformedValue = 0
         }
         
+       
+
         if(!isNaN(+transformedValue) && transformedValue <= maxValue){
             changePrice([transformedValue, value[1]])
         }
+
+        setStartValue1FromScratch(false)
+
+
+
     }
 
     const handleChangeInp2 = (e: ChangeEvent<HTMLInputElement>) => {
