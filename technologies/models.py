@@ -48,9 +48,9 @@ class Technology(models.Model):
     description = models.TextField(null=True, blank=True, verbose_name=_('Description'))
 
     if USE_S3:
-        photo = models.ImageField(upload_to="photos/intro", storage=MediaStorage(), null=True, blank=True, validators=[validate_file_extension], verbose_name=_('photo'))
+        photo = models.ImageField(upload_to="photos/technology", storage=MediaStorage(), null=True, blank=True, validators=[validate_file_extension], verbose_name=_('photo'))
     else:
-        photo = models.ImageField(upload_to="photos/intro", null=True, blank=True, validators=[validate_file_extension], verbose_name=_('photo'))
+        photo = models.ImageField(upload_to="photos/technology", null=True, blank=True, validators=[validate_file_extension], verbose_name=_('photo'))
 
     photo_thumbnail = ImageSpecField(
         source='photo',

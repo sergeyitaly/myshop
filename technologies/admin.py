@@ -8,7 +8,7 @@ from django.contrib import admin
 
 @admin.register(Technology)
 class IntroAdmin(TranslationAdmin):
-    list_display = ('id', 'name_en', 'name_uk',  'description_en', 'description_uk', 'link')
+    list_display = ('id', 'name_en', 'name_uk', 'link')
     search_fields = ('name_en', 'name_uk', 'link')
     readonly_fields = ('id', 'image_tag')
 

@@ -45,8 +45,14 @@ def validate_svg(value):
 class TeamMember(models.Model):
     name = models.CharField(max_length=100,  verbose_name=_('Name'))
     surname = models.CharField(max_length=100, verbose_name=_('Surname'))
+    role = models.CharField(max_length=100,default='developer', verbose_name=_('Role'))
+    experience = models.TextField(null=True, blank=True, verbose_name=_('Experience'))
+
     mobile = models.CharField(max_length=15, blank=True, null=True)
     linkedin = models.URLField(blank=True, null=True)
+    github = models.URLField(blank=True, null=True)
+    behance = models.URLField(blank=True, null=True)
+
     description = models.TextField(null=True, blank=True, verbose_name=_('Description'))
     email = models.EmailField(default='example@example.com')
     link_to_telegram = models.URLField(null=True, blank=True,verbose_name=_('Link to the Telegram'))
