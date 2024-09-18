@@ -9,9 +9,17 @@ import {apiBaseUrl} from "../../api/api";
 
 
 const textFieldStyles = {
-    '& .MuiInputLabel-root': { fontSize: '24px' },
-    '& .MuiInputBase-root': { height: '50px' },
-    '& .MuiInputBase-input': { padding: '16px 0' },
+    '& .MuiInputLabel-root': {
+        fontSize: '24px',
+        '@media (max-width:740px)': {
+            fontSize: '18px',
+        },
+    },
+    '& .MuiInputBase-root': { height: '50px',
+        '@media (max-width:740px)': {
+            height: '40px',
+        },},
+    '& .MuiInputBase-input': { padding: '10px 0' },
 };
 
 export const Contact = () => {
