@@ -22,9 +22,13 @@ $gap: clamp(0.625rem, 1.277vw + 0.226rem, 1.375rem);
 }
 
 .title {
-    font-size: clamp(1.5rem, 1.277vw + 1.101rem, 2.25rem);
+    font-size: 32px;
     font-weight: 400;
     margin-bottom: $gap;
+
+    @media (max-width: $screen-mobile) {
+        font-size: 20px;
+    }
 }
 
 .p {
