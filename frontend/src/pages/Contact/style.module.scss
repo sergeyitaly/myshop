@@ -15,11 +15,11 @@
 
 .description {
   display: block;
-  font-size: 36px;
+  font-size: 32px;
   text-align: center;
 
   @media (max-width: $screen-mobile) {
-    font-size: 22px;
+    font-size: 20px;
     line-height: 1.5;
   }
 }
@@ -38,7 +38,7 @@
 
   h3 {
     color: $color-blue;
-    font-size: 36px;
+    font-size: 32px;
     margin-bottom: 10px;
     font-weight: 400;
 
@@ -53,7 +53,7 @@
     line-height: 2.2;
 
     @media (max-width: $screen-mobile) {
-      font-size: 20px;
+      font-size: 18px;
       line-height: 1.8;
     }
   }
@@ -62,7 +62,7 @@
     color: #080599;
 
     @media (max-width: $screen-mobile) {
-      font-size: 20px;
+      font-size: 18px;
       margin-top: 15px;
     }
   }
@@ -72,14 +72,18 @@
   flex: 1;
   margin-left: 20px;
 
+  @media (max-width: $screen-mobile) {
+    margin-left: 0;
+  }
+
   h2 {
-    font-size: 36px;
+    font-size: 32px;
     font-weight: 400;
     text-align: center;
     margin-bottom: 30px;
 
     @media (max-width: $screen-mobile) {
-      font-size: 24px;
+      font-size: 20px;
     }
   }
 
