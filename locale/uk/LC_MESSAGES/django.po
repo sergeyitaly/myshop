@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-12 21:57+0300\n"
+"POT-Creation-Date: 2024-09-18 20:45+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,7 +35,7 @@ msgstr "Ім'я"
 
 #: brand/models.py:50 brand/models.py:52 intro/models.py:51 intro/models.py:53
 #: shop/models.py:58 shop/models.py:60 shop/models.py:109 shop/models.py:110
-#: shop/models.py:112 shop/models.py:113 team/models.py:55 team/models.py:57
+#: shop/models.py:112 shop/models.py:113 team/models.py:61 team/models.py:63
 #: technologies/models.py:51 technologies/models.py:53
 msgid "photo"
 msgstr "фото"
@@ -60,7 +60,7 @@ msgstr "Коментар"
 msgid "Comments"
 msgstr "Коментарі"
 
-#: intro/models.py:48 shop/models.py:131 team/models.py:50
+#: intro/models.py:48 shop/models.py:131 team/models.py:56
 #: technologies/models.py:48
 msgid "Description"
 msgstr "Опис"
@@ -412,15 +412,23 @@ msgstr "картинкі"
 msgid "Surname"
 msgstr "Пріізвищє"
 
-#: team/models.py:52
+#: team/models.py:48
+msgid "Role"
+msgstr ""
+
+#: team/models.py:49
+msgid "Experience"
+msgstr ""
+
+#: team/models.py:58
 msgid "Link to the Telegram"
 msgstr ""
 
-#: team/models.py:89
+#: team/models.py:95
 msgid "TeamMember"
 msgstr "Член команди"
 
-#: team/models.py:90
+#: team/models.py:96
 msgid "TeamMembers"
 msgstr "Члени команди"
 
