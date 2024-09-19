@@ -5,35 +5,40 @@
 	flex-direction: column;
 	justify-content: center;
 	margin-bottom: clamp(20px, 5vw, 60px);
+	padding: 0px 100px 90px 100px;
+
+	@media (max-width: $screen-mobile) {
+		padding: 0px 20px 12px 20px;
+	}
 }
 
 .title {
-	font-size: clamp(16px, 5vw, 60px);
+	font-size: clamp(16px, 5vw, 38px);
 	line-height: clamp(22px, 5vw + 5px, 105px);
 	text-align: center;
+	max-width: 90%;
+	margin: auto;
 	margin-bottom: clamp(24px, 5vw, 60px);
-	padding-left: clamp(20px, 5vw, 80px);
-	padding-right: clamp(20px, 5vw, 80px);	
 }
 
 .content {
 	display: flex;
-	gap: 16px;
+	gap: 10px;
 	flex-wrap: wrap;
 	margin-bottom: clamp(20px, 5vw, 60px);
-	padding: 0 clamp(16px, 2vw, 20px);
+	padding: 0 clamp(16px, 2vw, 40px);
 }
 
 .imageSize {
-	width: clamp(74px, 25vw, 330px);
-	height: clamp(69px, 15vw, 200px);
+	width: clamp(74px, 25vw, 320px);
+	height: clamp(69px, 15vw, 190px);
 	padding-top: clamp(0%, 15%, 50%);
-	border: 1px solid $color-gray-500;
+	border: 1px solid $color-gray-100;
 }
 
 .skeletonWrapper {
-	width: clamp(74px, 25vw, 330px);
-	height: clamp(69px, 15vw, 200px);
+	width: clamp(74px, 25vw, 285px);
+	height: clamp(69px, 15vw, 170px);
 	display: flex;
 	gap: 16px;
 	align-items: center;

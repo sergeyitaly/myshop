@@ -1,7 +1,7 @@
-import React, { useCallback } from "react";
 import { Technology } from "../../../models/entities";
 import { useTranslation } from "react-i18next";
 import { AppImage } from "../../../components/AppImage/AppImage";
+import { getTranslatedText } from "../translation";
 import styles from "./Technology.module.scss";
 
 interface TechnologyProps {
@@ -14,11 +14,7 @@ export const TechnologyItem: React.FC<TechnologyProps> = ({ technology }) => {
 
 	const { name, name_uk, name_en, link, photo_url } = technology;
 
-	const getTranslatedName = useCallback(() => {
-		return language === "uk" ? name_uk || name : name_en || name;
-	}, [language, name, name_uk, name_en]);
-
-	const translatedName = getTranslatedName();
+	const translatedName = getTranslatedText(name, name_uk, name_en, language);
 
 	return (
 		<div className={styles.imageWrapper}>
