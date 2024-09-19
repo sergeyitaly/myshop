@@ -4,16 +4,17 @@
 	display: flex;
 	flex-direction: column;
 	gap: clamp(40px, 5vw + 10px, 128px);
-	padding: 0 clamp(16px, 2vw, 20px);
+	padding: 0 clamp(16px, 2vw, 50px);
 	padding-bottom: clamp(60px, 8vw, 128px);
 }
 
 .title {
-	font-size: clamp(20px, 5vw, 60px);
+	font-size: clamp(20px, 5vw, 38px);
 	line-height: clamp(20px, 5vw + 5px, 105px);
 	text-align: center;
 	margin-top: clamp(50px, 7vw, 100px);
-	padding: 0 clamp(20px, 5vw + 10px, 80px);
+	max-width: 70%;
+	margin: auto;
 }
 
 .imageWrapper {
@@ -47,4 +48,8 @@
 		padding-top: 0;
 		filter: grayscale(100%);
 	}
+}
+
+.sliderContainer {
+	width: 100%;
 }

@@ -1,8 +1,9 @@
-import React, { useCallback } from "react";
 import { TeamMember } from "../../../models/entities";
 import { AppImage } from "../../../components/AppImage/AppImage";
 import { useTranslation } from "react-i18next";
-import { LinkedIn, Telegram, Email } from "@mui/icons-material";
+import { LinkedIn, Telegram, GitHub, Email } from "@mui/icons-material";
+import { FaBehance } from "react-icons/fa";
+import { getTranslatedText } from "../translation";
 import styles from "../TeamCarousel/TeamCarousel.module.scss";
 
 interface TeamMemberProps {
@@ -20,34 +21,44 @@ export const TeamItem: React.FC<TeamMemberProps> = ({ member }) => {
 		surname,
 		surname_uk,
 		surname_en,
+		role,
+		role_en,
+		role_uk,
+		experience,
+		experience_en,
+		experience_uk,
 		description,
 		description_uk,
 		description_en,
 		photo_url,
 		linkedin,
 		link_to_telegram,
+		github,
+		behance,
 		email,
 	} = member;
 
-	const getTranslatedName = useCallback(() => {
-		return language === "uk" ? name_uk || name : name_en || name;
-	}, [language, name, name_uk, name_en]);
+	const translatedName = getTranslatedText(name, name_uk, name_en, language);
+	const translatedSurname = getTranslatedText(
+		surname,
+		surname_uk,
+		surname_en,
+		language
+	);
 
-	const getTranslatedSurname = useCallback(() => {
-		return language === "uk"
-			? surname_uk || surname
-			: surname_en || surname;
-	}, [language, surname, surname_uk, surname_en]);
-
-	const getTranslatedDescription = useCallback(() => {
-		return language === "uk"
-			? description_uk || description || ""
-			: description_en || description || "";
-	}, [language, description, description_uk, description_en]);
-
-	const translatedName = getTranslatedName();
-	const translatedSurname = getTranslatedSurname();
-	const translatedDescription = getTranslatedDescription();
+	const translatedRole = getTranslatedText(role, role_uk, role_en, language);
+	const translatedExperience = getTranslatedText(
+		experience,
+		experience_uk,
+		experience_en,
+		language
+	);
+	const translatedDescription = getTranslatedText(
+		description,
+		description_uk,
+		description_en,
+		language
+	);
 
 	return (
 		<div className={styles.teamItem}>
@@ -61,6 +72,10 @@ export const TeamItem: React.FC<TeamMemberProps> = ({ member }) => {
 				{translatedName} {translatedSurname}
 			</p>
 
+			<p className={styles.role}>{translatedRole}</p>
+
+			<p className={styles.experience}>{translatedExperience}</p>
+
 			<p className={styles.description}>{translatedDescription}</p>
 
 			<div className={styles.links}>
@@ -71,6 +86,24 @@ export const TeamItem: React.FC<TeamMemberProps> = ({ member }) => {
 						rel="noopener noreferrer"
 					>
 						<LinkedIn />
+					</a>
+				)}
+				{github && (
+					<a
+						href={github}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						<GitHub />
+					</a>
+				)}
+				{behance && (
+					<a
+						href={behance}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						<FaBehance />
 					</a>
 				)}
 				{link_to_telegram && (
