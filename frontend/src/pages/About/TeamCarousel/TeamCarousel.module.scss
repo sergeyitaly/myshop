@@ -5,7 +5,11 @@
 	flex-direction: column;
 	gap: clamp(40px, 10vw, 115px);
 	margin-bottom: 60px;
-	
+	padding-left: 15px;
+
+	@media (max-width: $screen-mobile) {
+		padding-left: 0px;
+	}
 }
 
 .title {
@@ -62,6 +66,7 @@
 	.experience {
 		font-size: 14px;
 		margin-bottom: 10px;
+		height: 10px;
 	}
 
 	.description {
@@ -69,9 +74,13 @@
 		font-weight: 400;
 		color: $color-gray-200;
 		text-align: center;
-		height: clamp(180px, 5vw, 140px);
+		height: 160px;
 		margin-bottom: 5px;
 		padding: 10px;
+
+		@media (max-width: $screen-tablet) {
+			font-size: 12px;
+		}
 
 		@media (max-width: $screen-mobile) {
 			font-size: 10px;
