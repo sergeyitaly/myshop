@@ -100,7 +100,7 @@ export const ProductControl = ({
                     {sizes.map((size) => (
                         <ValueBox 
                             key={size}
-                            isActive={size === size}
+                            isActive={size === product.size}
                             value={size}
                             title={size}
                             onClick={onChangeSize}

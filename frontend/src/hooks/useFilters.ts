@@ -39,7 +39,6 @@ export const useFilters = (initialCollection?: Collection ) => {
         i18n,
         getCategoryName,
         getCollectionName,
-        getCurrencyFormat
     } = useAppTranslator()
 
 
@@ -57,11 +56,10 @@ export const useFilters = (initialCollection?: Collection ) => {
 
         list = [...categoryTags, ...collectionTags];
 
-        const currencyFormat = getCurrencyFormat();
         if (price.min !== fullRangeOfPrice[0] || price.max !== fullRangeOfPrice[1]) {
             list.push({
                 type: 'price',
-                value: `${formatNumber(price.min)} - ${formatNumber(price.max)} ${formatCurrency(currencyFormat)}`
+                value: `${formatNumber(price.min)} - ${formatNumber(price.max)} ${formatCurrency('UAH')}`
             });
         }
 
