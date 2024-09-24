@@ -8,6 +8,10 @@ import { useEffect } from 'react';
 import { Breadcrumbs } from '../Breadcrumbs/Breadcrumbs';
 import { useTranslation } from 'react-i18next';
 import { STORAGE } from '../../constants';
+import { InfoButton } from '../../components/InfoButton/InfoButton';
+import styles from './Layout.module.scss'
+import { useToggler } from '../../hooks/useToggler';
+import { InfoModal } from '../InfoModal/InfoModal';
 // import { useHistory } from 'react-router-dom';
 
 export const Layout = ({
@@ -19,6 +23,7 @@ export const Layout = ({
 }) => {
 
     const {isLoadingBasket} = useBootstrap()
+    const {openStatus, handleOpen, handleClose} = useToggler()
 
     const location = useLocation()
 
@@ -29,6 +34,9 @@ export const Layout = ({
        savedLanguage && i18n.changeLanguage(savedLanguage)
     }, [])
     
+    useEffect(() => {
+        handleOpen()
+    }, [])
 
 
     useEffect(() => {
@@ -43,9 +51,16 @@ export const Layout = ({
             <Outlet />
             {withFooter && <Footer />}
             {
-
+                openStatus &&
+                <InfoModal
+                    onClose={handleClose}
+                />
             }
             <Basket />
+            <InfoButton
+                className={styles.infoButton}
+                onClick={handleOpen}
+            />
             <AppSnackbar/>
         </>
     );
