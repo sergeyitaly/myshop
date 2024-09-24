@@ -1,9 +1,10 @@
 import { useTranslation } from "react-i18next";
-import { Category, Collection, Currency } from "../models/entities";
+import { Category, Collection, Currency, Product } from "../models/entities";
+import { useCallback } from "react";
 
 export const useAppTranslator = () => {
 
-    const { i18n } = useTranslation();
+    const { i18n, t } = useTranslation();
 
     const getCategoryName = (category: Category): string => {
         switch (i18n.language) {
@@ -40,10 +41,16 @@ export const useAppTranslator = () => {
         }
     };
 
+    const getTranslatedProductName = useCallback((product: Product): string => {
+        return i18n.language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
+      }, [i18n.language]);
+
     return {
+        t,
         i18n,
         getCurrencyFormat,
         getCategoryName,
-        getCollectionName
+        getCollectionName,
+        getTranslatedProductName
     }
 }

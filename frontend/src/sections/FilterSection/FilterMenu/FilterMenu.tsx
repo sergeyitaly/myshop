@@ -170,7 +170,7 @@ export const FilterMenu = ({
                 </FilterDropDown>
                 <TopLevelFilter
                     isActive = {hasDiscount}
-                    title="Знижка"
+                    title={t('discounts')}
                     onClick={ handleChangeSale }
                 />
                 <MainButton 
