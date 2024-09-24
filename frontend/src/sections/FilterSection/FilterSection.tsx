@@ -82,6 +82,8 @@ export const FilterSection = ({
 
  
 
+ 
+
     const handleApply = () => {
         applyChanges();
         handleCloseMenu();

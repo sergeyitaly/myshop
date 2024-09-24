@@ -1,23 +1,52 @@
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useGetAllProductsFromCollectionQuery } from "../../api/collectionSlice";
-import { ProductSliderSection } from "../../components/ProductSliderSection/ProductSliderSection";
-import { useTranslation } from 'react-i18next'; // Import the hook
+import { NamedSection } from "../../components/NamedSection/NamedSection";
+import { useAppTranslator } from "../../hooks/useAppTranslator";
+import { AppSlider } from "../../components/AppSlider/AppSlider";
+import { PreviewCard } from "../../components/Cards/PreviewCard/PreviewCard";
+import { Product } from "../../models/entities";
+import { ROUTE } from "../../constants";
+import { useNavigate } from "react-router-dom";
 
   interface FromThisCollectionProps {
     collectionId?: number
   }
 
-export const FromThisCollectionSection = ({collectionId}: FromThisCollectionProps) => {
-    const { t } = useTranslation(); // Use the translation hook
 
-    
-    const { data, isSuccess } = useGetAllProductsFromCollectionQuery(collectionId ?? skipToken);
+export const FromThisCollectionSection = ({collectionId}: FromThisCollectionProps) => {
+
+    const navigate = useNavigate()
+
+    const { data, isLoading } = useGetAllProductsFromCollectionQuery(collectionId ?? skipToken);
+
+    const {t, getTranslatedProductName} = useAppTranslator()
+
+    const handleClickSlide = (productItem: Product) => {
+      navigate(`${ROUTE.PRODUCT}${productItem.id}`);
+  }
+
+  const products = data?.results || []
 
     return (
-       <ProductSliderSection
-            isSuccess = {isSuccess}
-            translateField={t("also_from_this_collection")} 
-            products={data?.results}
-       />
+      <NamedSection
+      title={t('also_from_this_collection')}
+  > 
+          <AppSlider
+              isLoading = {isLoading}
+          >
+              {products.map((product) => (
+                      <PreviewCard
+                          key={product.id}
+                          title={getTranslatedProductName(product)}  // Use translated name or fallback
+                          discount={product.discount}
+                          price={product.price}
+                          currency={product.currency}
+                          photoSrc={product.photo_url || ''}
+                          previewSrc={product.photo_thumbnail_url || ''}
+                          onClick={() => handleClickSlide(product)}
+                      />
+              ))}
+          </AppSlider>
+  </NamedSection>
     )
 }
