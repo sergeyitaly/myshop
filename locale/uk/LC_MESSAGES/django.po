@@ -67,15 +67,15 @@ msgstr "Опис"
 
 #: intro/models.py:85
 msgid "Intro"
-msgstr ""
+msgstr "Вступ"
 
 #: intro/models.py:86
 msgid "Intros"
-msgstr ""
+msgstr "Вступи"
 
 #: myshop/settings.py:328
 msgid "English"
-msgstr ""
+msgstr "Англійська"
 
 #: myshop/settings.py:329
 msgid "Ukrainian"
@@ -340,7 +340,7 @@ msgstr ""
 
 #: shop/models.py:100
 msgid "value"
-msgstr ""
+msgstr "значення"
 
 #: shop/models.py:132
 msgid "Price"
@@ -414,15 +414,15 @@ msgstr "Пріізвищє"
 
 #: team/models.py:48
 msgid "Role"
-msgstr ""
+msgstr "Роль"
 
 #: team/models.py:49
 msgid "Experience"
-msgstr ""
+msgstr "Досвід"
 
 #: team/models.py:58
 msgid "Link to the Telegram"
-msgstr ""
+msgstr "Посилання на Телеграм"
 
 #: team/models.py:95
 msgid "TeamMember"
@@ -434,11 +434,11 @@ msgstr "Члени команди"
 
 #: technologies/models.py:85
 msgid "Technology"
-msgstr ""
+msgstr "Технологія"
 
 #: technologies/models.py:86
 msgid "Technologies"
-msgstr ""
+msgstr "Технології"
 
 #: templates/admin/base_site.html:5
 msgid "Django site admin"
@@ -446,7 +446,7 @@ msgstr "Сайт адмін Джаного"
 
 #: templates/admin/base_site.html:10
 msgid "Logo"
-msgstr ""
+msgstr "Лого"
 
 #: templates/admin/base_site.html:12
 msgid "Django administration"

@@ -361,23 +361,13 @@ class ProductView(APIView):
 class AdditionalFieldListCreateView(generics.ListCreateAPIView):
     queryset = AdditionalField.objects.all()
     serializer_class = AdditionalFieldSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
-    def perform_create(self, serializer):
-        serializer.save()
+    permission_classes = [AllowAny]
 
 
 class AdditionalFieldDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = AdditionalField.objects.all()
     serializer_class = AdditionalFieldSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
-    def perform_update(self, serializer):
-        instance = serializer.save()
-        # Invalidate the cache for this specific additional field detail
-        cache_key = f"additional_field_detail_{instance.id}"
-        cache.delete(cache_key)
-        return instance
+    permission_classes = [AllowAny]
 
 def serve_image(request, path):
     file_path = os.path.join(settings.MEDIA_ROOT, path)
