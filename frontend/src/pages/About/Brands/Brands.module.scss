@@ -1,32 +1,24 @@
 @import "../../../variables";
 
-.container {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	margin-bottom: clamp(20px, 5vw, 60px);
-	padding: 0px 100px 90px 100px;
-
-	@media (max-width: $screen-mobile) {
-		padding: 0px 20px 12px 20px;
-	}
-}
-
 .title {
-	font-size: clamp(16px, 5vw, 38px);
-	line-height: clamp(22px, 5vw + 5px, 105px);
+	font-size: clamp(16px,4vw, 60px);
+	
 	text-align: center;
-	max-width: 90%;
 	margin: auto;
 	margin-bottom: clamp(24px, 5vw, 60px);
+	width: 60%;
+	@media (max-width: $screen-mobile) {
+		line-height: 22px;
+		width: 80%;
+	}
 }
 
 .content {
 	display: flex;
-	gap: 10px;
+	justify-content: flex-start;
+	gap: 20px;
 	flex-wrap: wrap;
 	margin-bottom: clamp(20px, 5vw, 60px);
-	padding: 0 clamp(16px, 2vw, 40px);
 }
 
 .imageSize {

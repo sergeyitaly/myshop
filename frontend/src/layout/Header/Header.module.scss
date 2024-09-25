@@ -20,7 +20,7 @@
 
 .control {
     display: flex;
-    gap: 30px;
+    gap: clamp(26px, 5vw, 89px);
 }
 
 @media (max-width: $screen-mobile) {
