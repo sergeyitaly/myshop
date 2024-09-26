@@ -90,18 +90,18 @@ export const Contact = () => {
         try {
             const response = await axios.post(`${apiBaseUrl}/api/comments/comments/`, userData);
             console.log('Response:', response.data);
-            navigate('/sendcontacts'); // Перенаправление на страницу после успешной отправки
+            navigate('/sendcontacts');
         } catch (error) {
             console.error('Error posting comment:', error);
         }
     };
 
     const handleButtonClick = () => {
-        // Выполняется только если нет ошибок и введен валидный email
         if (!error && !error2 && !error3 && !error4) {
             postComment(data);
         }
     };
+
     return (
         <PageContainer>
             <div className={style.titleContainer}>
@@ -136,7 +136,7 @@ export const Contact = () => {
                             value={name}
                             onChange={handleNameChange}
                             error={error}
-                            helperText={error ? 'Ім`я не повинно містити цифри' : ''}
+                            helperText={error ? t('error_name') : ''}
                         />
                         <TextField
                             label={t('email')}
@@ -145,7 +145,7 @@ export const Contact = () => {
                             value={email}
                             onChange={handleEmailChange}
                             error={error2}
-                            helperText={error2 ? 'Введіть валідний email' : ''}
+                            helperText={error2 ? t('error_email') : ''}
                             required
                         />
                         <TextField
@@ -155,7 +155,7 @@ export const Contact = () => {
                             onChange={handlePhoneChange}
                             value={phone_number}
                             error={error3}
-                            helperText={error2 ? 'Введіть валідний телефон' : ''}
+                            helperText={error3 ? t('error_phone') : ''}
                         />
                         <TextField
                             label={t('message')}

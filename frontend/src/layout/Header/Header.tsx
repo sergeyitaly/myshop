@@ -7,7 +7,7 @@ import { PageContainer } from '../../components/containers/PageContainer';
 import styles from './Header.module.scss';
 import { SearchWindow } from '../../components/SearchWindow/SearchWindow';
 import { useSearch } from '../../hooks/useSearch';
-import { useNavigate } from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 import { ROUTE } from '../../constants';
 import { Product } from '../../models/entities';
 import { AnimatePresence } from 'framer-motion';
@@ -22,6 +22,9 @@ export const Header = ({
     const { openBasket, productQty } = useBasket();
     const { open, value, debounceValue, toggleSearchBar, handleChange, closeSearchBar } = useSearch();
     const navigate = useNavigate();
+    const location = useLocation(); // Используйте хук useLocation
+    const headerClassName = location.pathname === '/sendcontacts' ? `${styles.header} ${styles.noBorder}` : styles.header;
+
 
     const handleClickProduct = (product: Product) => {
         navigate(`${ROUTE.PRODUCT}${product.id}`);
@@ -29,7 +32,7 @@ export const Header = ({
     };
 
     return (
-        <header className={styles.header}>
+        <header className={headerClassName}>
             <PageContainer className={styles.container}>
                 <BurgerMenu />
                 <Logo className={styles.logo} />
