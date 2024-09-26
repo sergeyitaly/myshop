@@ -5,6 +5,10 @@
     border-bottom: 1px solid $color-button;
 }
 
+.noBorder {
+    border-bottom: none;
+}
+
 .container {
     display: flex;
     justify-content: space-between;
