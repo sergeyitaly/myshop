@@ -118,3 +118,31 @@
   width: 150px;
   margin-top: 25px;
 }
+
+.phoneInput {
+  .PhoneInputInput {
+    height: 300px;
+    width: 100%;
+    font-size: 16px;
+    border: none;
+    border-bottom: 1px solid #a8a8a8;
+    padding: 10px 0;
+    outline: none;
+  }
+
+  .PhoneInputCountry {
+    margin-right: 10px;
+  }
+
+  @media (max-width: 740px) {
+    .PhoneInputInput {
+      height: 40px;
+    }
+  }
+
+  .errorText {
+    color: red;
+    font-size: 12px;
+    margin-top: 5px;
+  }
+}
