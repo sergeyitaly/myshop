@@ -120,6 +120,10 @@
    "pay_attantion": "Pay attantion!",
    "training_project": "This site is a training project.",
    "left_rewiew": "Please write your review",
-   "here": "here"
+   "here": "here",
+  "error_name": "Invalid name format. Please enter a correct format.",
+  "error_email": "Please enter a valid email address.",
+  "error_phone": "Invalid phone number format. Please enter a valid phone number.",
+  "order_place" : "Place an order"
 }
   
