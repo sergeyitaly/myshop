@@ -95,14 +95,6 @@ class Collection(models.Model):
     image_tag.short_description =_("Image")
     image_tag.allow_tags = True
 
-class AdditionalField(models.Model):
-    name = models.CharField(max_length=255, verbose_name=_('name'), null=True, blank=True,db_index=True)
-    value = models.TextField(verbose_name=_('value'),null=True, blank=True)
-    product = models.ForeignKey('Product', on_delete=models.CASCADE, null=True, blank=True, verbose_name=_('Product'))
-
-
-    def __str__(self):
-        return self.name
 
 class Product(models.Model):
     if USE_S3:
@@ -219,6 +211,16 @@ class ProductImage(models.Model):
             self.images.delete(save=False)
         super().delete(*args, **kwargs)
 
+class AdditionalField(models.Model):
+    name = models.CharField(max_length=255, verbose_name=_('name'), null=True, blank=True,db_index=True)
+    value = models.TextField(verbose_name=_('value'),null=True, blank=True)
+ #   product = models.ForeignKey('Product', on_delete=models.CASCADE, null=True, blank=True, verbose_name=_('Product'))
+    product = models.ForeignKey(Product, default=None, on_delete=models.CASCADE, verbose_name=_('Product'))
+
+
+    def __str__(self):
+        return self.name
+    
 @receiver(post_save, sender=Collection)
 def generate_collection_thumbnails(sender, instance, **kwargs):
     if instance.photo:
