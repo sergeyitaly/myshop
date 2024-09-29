@@ -34,17 +34,32 @@ def datetime_to_str(dt):
             dt = make_naive(dt)
         return dt.strftime('%Y-%m-%d %H:%M')
     return None
-
 def get_order_summary(order):
     """Generates a summary of an order."""
     submitted_at = ensure_datetime(order.submitted_at)
-    
-    # Determine the latest status time
-    last_status_time = ensure_datetime(
-        order.canceled_at or order.complete_at or order.processed_at or order.created_at
+    created_at = ensure_datetime(order.created_at)
+    processed_at = ensure_datetime(order.processed_at)
+    complete_at = ensure_datetime(order.complete_at)
+    canceled_at = ensure_datetime(order.canceled_at)
+
+    # Prepare a dictionary of status fields
+    status_fields = {
+        'submitted_at': submitted_at,
+        'created_at': created_at,
+        'processed_at': processed_at,
+        'complete_at': complete_at,
+        'canceled_at': canceled_at,
+    }
+
+    # Determine the latest status timestamp
+    latest_status_key = max(
+        status_fields,
+        key=lambda k: status_fields[k] or datetime.min
     )
+    latest_status_time = status_fields[latest_status_key]
 
     order_items_data = OrderItemSerializer(order.order_items.all(), many=True).data
+
     summary = {
         'order_id': order.id,
         'order_items': [
@@ -59,9 +74,11 @@ def get_order_summary(order):
                 'collection_name': item['collection_name'],
             } for item in order_items_data
         ],
-        'latest_status_time': datetime_to_str(last_status_time),  # Change here
+        # Use the determined latest status time from the appropriate field
+        latest_status_key: datetime_to_str(latest_status_time),  # This field will reflect the latest timestamp
         'submitted_at': datetime_to_str(submitted_at),
     }
+
     return summary
 
 def update_order_summary():
