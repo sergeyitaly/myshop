@@ -8,7 +8,7 @@ from .notifications import update_order_status_with_notification
 from django.contrib.admin import SimpleListFilter
 from django.db.models import Sum, F
 from django.utils.translation import gettext_lazy as _
-from .signals import update_order_summary_for_chat
+from modeltranslation.admin import TranslationAdmin
 
 class OrderSummaryAdmin(admin.ModelAdmin):
     list_display = ('chat_id',)
@@ -176,8 +176,7 @@ class OrderAdmin(admin.ModelAdmin):
                     f'{obj.status}_at',
                     obj.telegram_user.chat_id
                 )
-                update_order_summary_for_chat(obj.telegram_user.chat_id)
-
+        
         super().save_model(request, obj, form, change)
 
 
