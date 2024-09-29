@@ -10,7 +10,7 @@ export const teamSettings: SwiperOptions = {
 	pagination: {
 		clickable: true,
 	},
-	spaceBetween: 25,
+	spaceBetween: 20,
 	modules: [Grid, Pagination],
 
 	breakpoints: {
@@ -18,7 +18,10 @@ export const teamSettings: SwiperOptions = {
 			slidesPerView: 3,
 		},
 		740: {
-			slidesPerView: 2,
+			slidesPerView: 3,
+		},
+		500: {
+			slidesPerView: 3,
 		},
 		0: {
 			slidesPerView: 2,

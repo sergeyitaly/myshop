@@ -54,6 +54,7 @@
 .img {
 	width: 514px;
 	height: auto;
+	transition: width 0.3s ease-in-out;
 
 	@media (max-width: $screen-laptop) {
 		width: 467px;
