@@ -50,14 +50,15 @@ def prepare_order_summary(order, new_status):
         for item in order.order_items.all()
     ]
     
-    # Dynamically set the status field (processed_at, submitted_at, etc.)
+    # Dynamically set the status field (e.g., processed_at, submitted_at)
     status_timestamp_field = f'{new_status}_at'
     status_timestamp = getattr(order, status_timestamp_field)
     
-    # Prepare the order summary in the desired format
+    # Prepare the order summary including both submitted_at and current status timestamp
     order_summary = {
         "order_id": order.id,
         "order_items": order_items_data,
+        "submitted_at": date_format(order.submitted_at, 'Y-m-d H:i') if order.submitted_at else None,
         status_timestamp_field: date_format(status_timestamp, 'Y-m-d H:i') if status_timestamp else None,
     }
     
