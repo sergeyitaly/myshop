@@ -109,6 +109,32 @@
       "p_s_title": "P.S.", 
       "p_s_content": "This website was created exclusively for educational purposes and to gain practical skills. The site has no commercial basis, and none of the products are for sale."
   },
+  "privacy_and_policy": {
+      "title": "Privacy and Policy",
+      "privacy_title": "Your privacy is important to us.", 
+      "privacy_content": {
+        "first_paragraph": "This section outlines how we collect, use, process, and protect your personal data.",
+        "second_paragraph": "This Privacy Policy applies to the use of our website, applications, and services, so please take a moment to read it."
+      },
+      "personal_data_title": "What personal data do we collect:", 
+      "personal_data_content": {
+        "first_paragraph": "We may collect various types of personal data that you voluntarily provide when interacting with our website, registering an account, placing an order, or filling out forms.",
+        "second_paragraph": "This may include your name, email address, phone number, address, order information, and more."
+      },
+      "use_data_title": "How we use your personal data:",
+      "use_data_content": "We use the collected personal data to provide services, manage your account, process orders, provide you with information about our products and services, and to communicate with you regarding inquiries and updates.",
+      "protection_title": "Protection of personal data:", 
+      "protection_content": "We take every effort to protect your information and use modern technologies to prevent unauthorized access, loss, or disclosure of your personal information.",
+      "disclosure_title": "Disclosure to third parties:", 
+      "disclosure_content": "We do not disclose your personal data to third parties without your consent, except when required by law or to provide the services you requested.",
+      "changes_title": "Changes to the Privacy Policy:", 
+      "changes_content": {
+        "first_paragraph": "We may periodically update this Privacy Policy.",
+        "second_paragraph": "Please refer to this page to stay informed about any changes."
+      },
+      "contact_title": "Contact information:", 
+      "contact_content": "If you have any questions or concerns regarding this Privacy Policy or your information, please contact us using the contact details provided on our website."
+    },
   "products": {
     "error": "An error occurred :(",
     "empty": "No products found for this query"
