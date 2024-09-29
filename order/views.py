@@ -381,24 +381,20 @@ def get_order_summary_by_chat_id(request, chat_id):
         return Response({'error': 'Chat ID is required.'}, status=400)
 
     try:
-        # Retrieve summaries by chat_id
         summaries = OrderSummary.objects.filter(chat_id=chat_id)
         if not summaries.exists():
             return Response({'error': 'No summaries found for this chat ID.'}, status=404)
-
         summary_data = []
         for summary in summaries:
-            orders = summary.orders  # This should be a list of order dicts
+            orders = summary.orders 
             for order in orders:
-                # Extract order details
                 order_data = {
                     'order_id': order.get('order_id'),
                     'created_at': order.get('created_at'),
-                    'processed_at': order.get('processed_at'),
                     'submitted_at': order.get('submitted_at'),
+                    'processed_at': order.get('processed_at'),
                     'complete_at': order.get('complete_at'),
                     'canceled_at': order.get('canceled_at'),
-                    'status': order.get('status'),  # Ensure status is included here
                     'order_items': [
                         {
                             'product_name': item.get('product_name'),
@@ -406,40 +402,37 @@ def get_order_summary_by_chat_id(request, chat_id):
                             'size': item.get('size'),
                             'color_name': item.get('color_name'),
                             'quantity': item.get('quantity'),
-                            'total_sum': float(item.get('total_sum', 0)),  # Convert total_sum to float
-                            'item_price': str(item.get('item_price', '0')),  # Default to '0' if not present
+                            'total_sum': float(item.get('total_sum', 0)),  
+                            'item_price': str(item.get('item_price', '0')),  
                             'color_value': item.get('color_value')
                         }
                         for item in order.get('order_items', [])
                     ]
                 }
                 summary_data.append(order_data)
-
         return Response({'results': summary_data})
-
     except Exception as e:
         return Response({'error': str(e)}, status=500)
 
-#@api_view(['POST'])
-#@permission_classes([AllowAny])
-#def update_order_summary(request):
-#    chat_id = request.data.get('chat_id')
-#    orders = request.data.get('orders', {})  # Ensure orders defaults to an empty dict
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def update_order_summary(request):
+    chat_id = request.data.get('chat_id')
+    orders = request.data.get('orders', {})  # Ensure orders defaults to an empty dict
+    
+    if not chat_id:
+        return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not isinstance(orders, dict):  # Validate orders structure
+        return Response({"detail": "Invalid orders format."}, status=status.HTTP_400_BAD_REQUEST)
 
-#    if not chat_id:
-#        return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-    # Log the incoming data
-#    logger.info(f"Updating OrderSummary: chat_id={chat_id}, orders={orders}")
-
-#    try:
-#        order_summary, created = OrderSummary.objects.get_or_create(chat_id=chat_id)
-#        order_summary.orders = orders
-#        order_summary.save()
-
-#        return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
-#    except Exception as e:
-#        logger.error(f"Error updating OrderSummary: {e}")
-#        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        order_summary, created = OrderSummary.objects.get_or_create(chat_id=chat_id)
+        order_summary.orders = orders  # You may want to serialize this properly
+        order_summary.save()
+        return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
+    except Exception as e:
+        logger.error(f"Error updating OrderSummary: {e}")
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 

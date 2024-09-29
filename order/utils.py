@@ -6,8 +6,6 @@ from .notifications import update_order_status_with_notification
 
 def update_order_statuses():
     now = timezone.now()
-
-    # Update statuses
     update_submitted_to_created(now)
     update_created_to_processed(now)
     update_processed_to_complete(now)
@@ -36,8 +34,6 @@ def update_processed_to_complete(now):
     for order in orders:
         processed_at = order.processed_at
         if processed_at and (now - processed_at).total_seconds() / 3600 >= 24:
-            print(f"Processing order {order.id}")
-            print(f"Telegram User: {order.telegram_user}")
             chat_id = order.telegram_user.chat_id if order.telegram_user else None
             if chat_id:
                 update_order_status_with_notification(order.id, order.order_items, 'complete', 'complete_at', chat_id)
