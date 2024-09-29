@@ -4,6 +4,7 @@ import VisaImg from './visa.svg';
 import { Logo } from '../../components/Logo/Logo';
 import { useTranslation } from 'react-i18next'; // Import the useTranslation hook
 import { LanguageDropDown } from './LanguageDropDown/LanguageDropDown';
+import { PageContainer } from '../../components/containers/PageContainer';
 
 export const Footer = () => {
     const { t } = useTranslation(); // Initialize translation hook
@@ -11,6 +12,7 @@ export const Footer = () => {
 
     return (
         <footer className={styles.footer}>
+            <PageContainer>
             <Logo 
                 className={styles.logo}    
                 type='short'
@@ -78,6 +80,8 @@ export const Footer = () => {
                     <LanguageDropDown/>
                 </nav>
             </div>
+            </PageContainer>
+
         </footer>
     );
 };

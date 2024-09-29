@@ -3,6 +3,12 @@
 .header {
     position: relative;
     border-bottom: 1px solid $color-button;
+
+   
+}
+
+.noLine {
+    border-bottom: 1px solid transparent;
 }
 
 .container {
