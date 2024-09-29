@@ -388,16 +388,17 @@ def get_order_summary_by_chat_id(request, chat_id):
 
         summary_data = []
         for summary in summaries:
-            orders = summary.orders  # This is a list, not a queryset
+            orders = summary.orders  # This should be a list of order dicts
             for order in orders:
-                # Assuming each order is a dict with necessary details
+                # Extract order details
                 order_data = {
                     'order_id': order.get('order_id'),
                     'created_at': order.get('created_at'),
-                    'submitted_at': order.get('submitted_at'),
                     'processed_at': order.get('processed_at'),
+                    'submitted_at': order.get('submitted_at'),
                     'complete_at': order.get('complete_at'),
                     'canceled_at': order.get('canceled_at'),
+                    'status': order.get('status'),  # Ensure status is included here
                     'order_items': [
                         {
                             'product_name': item.get('product_name'),
@@ -405,7 +406,7 @@ def get_order_summary_by_chat_id(request, chat_id):
                             'size': item.get('size'),
                             'color_name': item.get('color_name'),
                             'quantity': item.get('quantity'),
-                            'total_sum': float(item.get('total_sum', 0)),  # Convert total_sum to float, default to 0 if not present
+                            'total_sum': float(item.get('total_sum', 0)),  # Convert total_sum to float
                             'item_price': str(item.get('item_price', '0')),  # Default to '0' if not present
                             'color_value': item.get('color_value')
                         }
