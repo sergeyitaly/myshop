@@ -34,6 +34,8 @@ def datetime_to_str(dt):
             dt = make_naive(dt)
         return dt.strftime('%Y-%m-%d %H:%M')
     return None
+
+
 def get_order_summary(order):
     """Generates a summary of an order."""
     submitted_at = ensure_datetime(order.submitted_at)

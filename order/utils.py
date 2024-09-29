@@ -50,7 +50,7 @@ def prepare_order_summary(order):
         for item in order.order_items.all()
     ]
 
-    # Determine the latest status timestamp
+    # Gather status timestamps
     status_fields = {
         'submitted_at': order.submitted_at,
         'created_at': order.created_at,
@@ -59,7 +59,7 @@ def prepare_order_summary(order):
         'canceled_at': order.canceled_at,
     }
 
-    # Find the latest status field and its timestamp
+    # Find the latest status timestamp
     latest_status_field = max(
         status_fields,
         key=lambda k: status_fields[k] or timezone.datetime.min
