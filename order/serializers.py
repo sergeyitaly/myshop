@@ -16,21 +16,24 @@ class OrderSummarySerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         # Ensure Decimal values are serialized properly
         representation['orders'] = self._convert_decimals(representation['orders'])
-
-        # Update orders to avoid duplicates by merging existing entries with new ones
+        
+        # Create a mapping of existing orders by order_id
         existing_orders = {order['order_id']: order for order in representation['orders']}
         
-        # Merge incoming orders with existing orders to update them
-        for new_order in self.initial_data.get('orders', []):
+        # Incoming orders from validated data
+        incoming_orders = self.initial_data.get('orders', [])
+        
+        # Process incoming orders
+        for new_order in incoming_orders:
             order_id = new_order.get('order_id')
             if order_id in existing_orders:
-                # Update existing order with new data
+                # Update the existing order's fields
                 existing_orders[order_id].update(new_order)
             else:
-                # If not existing, add new order
+                # Add new order if it does not exist
                 existing_orders[order_id] = new_order
         
-        # Convert back to a list
+        # Convert the dictionary back to a list for output
         representation['orders'] = list(existing_orders.values())
         return representation
 
