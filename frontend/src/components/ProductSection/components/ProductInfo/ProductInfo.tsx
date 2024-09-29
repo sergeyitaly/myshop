@@ -45,6 +45,10 @@ export const ProductInfo = ({
     const { i18n, t } = useTranslation();
     const language = i18n.language;
 
+    console.log(product);
+    
+    
+
     // Get translated values
     const translatedName = getTranslatedProductName(product, language);
     const translatedDescription = getTranslatedProductDescription(product, language);

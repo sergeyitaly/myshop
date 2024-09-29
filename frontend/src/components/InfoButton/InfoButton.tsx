@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import styles from './InfoButton.module.scss'
+import { useAppTranslator } from '../../hooks/useAppTranslator'
 
 interface InfoButtonProps {
     className?: string
@@ -11,6 +12,7 @@ export const InfoButton = ({
     onClick
 }: InfoButtonProps) => {
 
+    const {t} =useAppTranslator()
 
 
     return (
@@ -18,7 +20,7 @@ export const InfoButton = ({
             className={clsx(styles.button, className)}
             onClick={onClick}
         >
-            Оцінити сайт
+            {t('rate_us')}
         </button>
     )
 }
