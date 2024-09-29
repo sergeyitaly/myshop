@@ -1,15 +1,17 @@
 @import "../../../variables";
 
 .title {
-	font-size: clamp(16px,4vw, 60px);
-	
+	font-size: clamp(16px, 4vw, 58px);
+	line-height: clamp(20px, 5vw + 5px, 105px);
 	text-align: center;
 	margin: auto;
 	margin-bottom: clamp(24px, 5vw, 60px);
-	width: 60%;
+	width: clamp(80%, 10vw, 50%);
+	max-width: $screen-tablet;
+	transition: width 0.3s ease-in-out;
+	
 	@media (max-width: $screen-mobile) {
-		line-height: 22px;
-		width: 80%;
+		line-height: 20px;
 	}
 }
 

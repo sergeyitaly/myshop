@@ -17,7 +17,7 @@ export const TechnologyItem: React.FC<TechnologyProps> = ({ technology }) => {
 	const translatedName = getTranslatedText(name, name_uk, name_en, language);
 
 	return (
-		<div className={styles.imageWrapper}>
+		<div className={styles.container}>
 			<a href={link || "#"} target="_blank" rel="noopener noreferrer">
 				<AppImage
 					src={photo_url}
