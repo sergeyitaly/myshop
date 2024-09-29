@@ -64,7 +64,7 @@ export const Footer = () => {
                     </p>
                     <Link
                         className={styles.link}
-                        to="/"
+                        to="/privacy_policy"
                     >
                         {t('privacy_policy')}
                     </Link>
