@@ -51,22 +51,30 @@ def prepare_order_summary(order):
     ]
 
     # Determine the latest status timestamp
-    latest_status_timestamp = None
-    if order.status == 'submitted':
-        latest_status_timestamp = order.submitted_at
-    elif order.status == 'created':
-        latest_status_timestamp = order.created_at
-    elif order.status == 'processed':
-        latest_status_timestamp = order.processed_at
-    elif order.status == 'complete':
-        latest_status_timestamp = order.complete_at
+    status_fields = {
+        'submitted_at': order.submitted_at,
+        'created_at': order.created_at,
+        'processed_at': order.processed_at,
+        'complete_at': order.complete_at,
+        'canceled_at': order.canceled_at,
+    }
 
-    # Prepare the order summary with the latest status timestamp
+    # Find the latest status field and its timestamp
+    latest_status_field = max(
+        status_fields,
+        key=lambda k: status_fields[k] or timezone.datetime.min
+    )
+    latest_status_timestamp = status_fields[latest_status_field]
+
+    # Prepare the order summary
     order_summary = {
         "order_id": order.id,
         "order_items": order_items_data,
         "submitted_at": date_format(order.submitted_at, 'Y-m-d H:i') if order.submitted_at else None,
-        "latest_status_timestamp": date_format(latest_status_timestamp, 'Y-m-d H:i') if latest_status_timestamp else None
     }
+
+    # Add the latest status timestamp to the summary
+    if latest_status_timestamp:
+        order_summary[latest_status_field] = date_format(latest_status_timestamp, 'Y-m-d H:i')
 
     return order_summary
