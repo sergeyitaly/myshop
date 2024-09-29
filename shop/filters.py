@@ -1,6 +1,28 @@
 import django_filters
 from django_filters.rest_framework import OrderingFilter
 from .models import Product
+from django.db.models import Q
+
+class ProductsFilter(django_filters.FilterSet):
+    sales_count = django_filters.NumberFilter(field_name='sales_count', lookup_expr='exact')
+    popularity = django_filters.NumberFilter(field_name='popularity', lookup_expr='gte')
+    price = django_filters.NumberFilter(field_name='price', lookup_expr='gte')
+    name = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
+    search = django_filters.CharFilter(method='filter_search')
+
+    class Meta:
+        model = Product
+        fields = ['popularity', 'price', 'sales_count']
+
+    def filter_search(self, queryset, name, value):
+        if value:
+            search_term = value.lower()
+            return queryset.filter(
+                Q(name_en__icontains=search_term) | 
+                Q(name_uk__icontains=search_term)
+            )
+        return queryset
+    
 
 class NumberInFilter(django_filters.BaseInFilter, django_filters.NumberFilter):
     pass
@@ -12,8 +34,8 @@ class ProductFilter(django_filters.FilterSet):
 
     # Filter by translated name fields
     name = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
-    name_en = django_filters.CharFilter(field_name='name_en', lookup_expr='icontains')
-    name_uk = django_filters.CharFilter(field_name='name_uk', lookup_expr='icontains')
+    search = django_filters.CharFilter(method='filter_search')
+
     
     # Filter by discounted price range
     price_min = django_filters.NumberFilter(
@@ -62,14 +84,18 @@ class ProductFilter(django_filters.FilterSet):
     class Meta:
         model = Product
         fields = [
-            'category_id', 'collection_id', 'name', 'name_en', 'name_uk', 
-            'price_min', 'price_max', 'sales_count', 'popularity', 'has_discount'
+            'category_id', 'collection_id', 'search', 'price_min', 'price_max', 
+            'sales_count', 'popularity', 'has_discount'
         ]
 
-    def filter_has_discount(self, queryset, name, value):
-        """
-        Filter the queryset to include only products with a discount if value is True.
-        """
+    def filter_search(self, queryset, name, value):
         if value:
-            return queryset.filter(discount__gt=0)
+            search_term = value.lower()
+            return queryset.filter(
+                Q(name_en__icontains=search_term) | 
+                Q(name_uk__icontains=search_term)
+            )
         return queryset
+
+    def filter_has_discount(self, queryset, name, value):
+        return queryset.filter(discount__gt=0) if value else queryset.filter(discount=0)

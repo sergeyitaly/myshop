@@ -6,14 +6,21 @@
     padding: clamp(0.438rem, 0.532vw + 0.271rem, 0.75rem) 0;
     background: $color-gray-350;
     font-size: clamp(0.875rem, 0.638vw + 0.676rem, 1.25rem);
-    
+    color: $color-gray-300;
+    font-weight: 400;
+
+    svg {
+      fill: $color-gray-300;
+      height: clamp(0.875rem, 0.638vw + 0.676rem, 1.25rem);
+      flex-shrink: 0;
+    }
 }
 
 .desktopContainer {
     display: flex;
-    gap: 10px;
-    overflow: scroll;
-
+    gap: 32px;
+    overflow-x: scroll;
+    align-items: center;
     &::-webkit-scrollbar {
         width: 5px; 
         height: 0px;              /* ширина всей полосы прокрутки */
@@ -39,21 +46,23 @@
   align-items: center;
   flex-direction: column;
   gap: 5px;
-  font-size: 12px;
+  font-size: 11px;
   @media (max-width: $screen-mobile) {
     display: flex;
   }
 
   .last {
-    font-size: 18px;
+    font-size: 13px;
     text-align: center;
   }
 }
 
 .mobileActiveList {
   display: flex;
+  align-items: center;
   gap: 5px;
   overflow: scroll;
+
 
   & span:last-child {
     display: none;
@@ -82,7 +91,7 @@
 
 .link {
     text-decoration: none;
-    color: $color-black;
+    color: $color-gray-300;
 }
 
 .last {

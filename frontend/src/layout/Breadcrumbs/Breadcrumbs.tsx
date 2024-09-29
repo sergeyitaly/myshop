@@ -8,6 +8,7 @@ import { useGetOneCollectionByIdQuery } from '../../api/collectionSlice'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { useGetOneProductByIdQuery } from '../../api/productSlice'
 import clsx from 'clsx'
+import { AppIcon } from '../../components/SvgIconComponents/AppIcon'
 
 interface Breadcrumb {
     title?: string
@@ -15,7 +16,7 @@ interface Breadcrumb {
     isLoading?: boolean
 }
 
-type Pages = 'collections' | 'products' | 'order' | 'home' | 'payment_delivery' 
+type Pages = 'collections' | 'products' | 'order' | 'home' | 'contacts' | 'about' | 'payment_delivery';
 
 type ConstantRoutes = {[K in Pages]: Breadcrumb}
 
@@ -41,14 +42,18 @@ const pageDefiner = (path: string) => {
         isProducts: false,
         isProduct: false,
         isOrder: false,
-        isPaymentDelivery: false,
+        isAbout: false,
+        isContacts: false,
+        isPaymentDelivery: false
     }
 
     if(route === 'collections') pages = {...pages, isCollections: true }
     if(route === 'collection')  pages = {...pages, isCollection: true }
     if(route === 'products')    pages = {...pages, isProducts: true }
-    if (route === 'product') pages = { ...pages, isProduct: true }
-    if (route === 'order') pages = { ...pages, isOrder: true }
+    if(route === 'product')     pages = {...pages, isProduct: true}
+    if(route === 'order')       pages = {...pages, isOrder: true}
+    if(route === 'about')       pages = {...pages, isAbout: true }
+    if (route === 'contacts') pages = { ...pages, isContacts: true }
     if(route === 'payment_delivery') pages = {...pages, isPaymentDelivery: true }
 
     return pages
@@ -81,10 +86,16 @@ export const Breadcrumbs = () => {
         order: {
             title: t('order'),
             link: ROUTE.ORDER
+        },
+        about: {
+            title: t('about_us'),
+            link: ROUTE.ABOUT
+        },
+        contacts: {
+            title: t('contacts'),
+            link: ROUTE.CONTACTS
         }
     }
-
-
 
     const {
         data: collectionResponce,
@@ -107,14 +118,15 @@ export const Breadcrumbs = () => {
 
     const getBreadcrumbs = (): Breadcrumb[] => {
 
-        const {collections, home, order, products, payment_delivery} = constantRoutes
+        const {collections, home, order, products, about, contacts, payment_delivery} = constantRoutes
 
         const list: Breadcrumb[] = [home]
 
-      
+
 
         const pages = pageDefiner(pathname)
-        const {isCollection, isCollections, isProducts, isProduct, isOrder, isPaymentDelivery} = pages
+
+        const {isCollection, isCollections, isProducts, isProduct, isOrder, isAbout, isContacts, isPaymentDelivery} = pages
 
         
 
@@ -125,6 +137,14 @@ export const Breadcrumbs = () => {
 
         if(isProducts){
             list.push(products)
+        }
+
+        if(isAbout){
+            list.push(about)
+        }
+
+        if(isContacts){
+            list.push(contacts)
         }
 
         if(isProduct){
@@ -178,8 +198,10 @@ export const Breadcrumbs = () => {
         collectionResponce, 
         productResponce, 
         isProductFetching, 
-        isProductLoading
+        isProductLoading, 
+        t
     ])
+
 
     useEffect(() => {
 
@@ -212,7 +234,7 @@ export const Breadcrumbs = () => {
                                             >
                                                 {title}
                                             </Link>
-                                            <span>{'>'}</span>
+                                            <AppIcon iconName='forwardArrow'/>
                                         </>
                                     }
                                     </Fragment>
@@ -239,7 +261,7 @@ export const Breadcrumbs = () => {
                                                 >
                                                     {title}
                                                 </Link>
-                                                <span>{'>'}</span>
+                                                <AppIcon iconName='forwardArrow'/>
                                             </>
                                         }
                                         </Fragment>

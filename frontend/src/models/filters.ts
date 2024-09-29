@@ -4,6 +4,7 @@ export interface ProductFilter {
     category?: string
     price?: string
     sales_count?: string
+    discount?: string
     popularity?: string
     search?: string
     ordering?: string
@@ -47,6 +48,7 @@ export interface MainFilter {
     page?: number
     page_size?: number
 }
+
 
 
 

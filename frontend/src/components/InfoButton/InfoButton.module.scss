@@ -1,0 +1,10 @@
+@import '../../variables';
+
+.button {
+    background-color: $color-gray-500;
+    color: $color-background;
+    width: clamp(3.75rem, 4.255vw + 2.42rem, 6.25rem);
+    height: clamp(3.75rem, 4.255vw + 2.42rem, 6.25rem);
+    font-size: clamp(0.75rem, 0.638vw + 0.551rem, 1.125rem);
+    border-radius: 100%;
+}

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-11 18:27+0300\n"
+"POT-Creation-Date: 2024-09-18 20:44+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,59 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: myshop/settings.py:285
+#: brand/admin.py:20 intro/admin.py:20 shop/admin.py:87 shop/admin.py:160
+#: shop/models.py:95 shop/models.py:190 team/admin.py:20
+#: technologies/admin.py:20
+#: venv/lib/python3.9/site-packages/django/db/models/fields/files.py:393
+msgid "Image"
+msgstr ""
+
+#: brand/models.py:46 comments/models.py:10 intro/models.py:46
+#: shop/models.py:130 team/models.py:46 technologies/models.py:46
+msgid "Name"
+msgstr ""
+
+#: brand/models.py:50 brand/models.py:52 intro/models.py:51 intro/models.py:53
+#: shop/models.py:58 shop/models.py:60 shop/models.py:109 shop/models.py:110
+#: shop/models.py:112 shop/models.py:113 team/models.py:61 team/models.py:63
+#: technologies/models.py:51 technologies/models.py:53
+msgid "photo"
+msgstr ""
+
+#: brand/models.py:83
+msgid "Brand"
+msgstr ""
+
+#: brand/models.py:84
+msgid "Brands"
+msgstr ""
+
+#: comments/models.py:13 comments/models.py:21
+msgid "Comment"
+msgstr ""
+
+#: comments/models.py:22
+msgid "Comments"
+msgstr ""
+
+#: intro/models.py:48 shop/models.py:131 team/models.py:56
+#: technologies/models.py:48
+msgid "Description"
+msgstr ""
+
+#: intro/models.py:85
+msgid "Intro"
+msgstr ""
+
+#: intro/models.py:86
+msgid "Intros"
+msgstr ""
+
+#: myshop/settings.py:328
 msgid "English"
 msgstr ""
 
-#: myshop/settings.py:286
+#: myshop/settings.py:329
 msgid "Ukrainian"
 msgstr ""
 
@@ -38,11 +86,12 @@ msgstr ""
 msgid "Product Name"
 msgstr ""
 
-#: order/admin.py:63 shop/models.py:69 shop/models.py:92 shop/models.py:128
+#: order/admin.py:63 shop/admin.py:77 shop/models.py:69 shop/models.py:92
+#: shop/models.py:129
 msgid "Collection"
 msgstr ""
 
-#: order/admin.py:67 shop/models.py:141
+#: order/admin.py:67 shop/models.py:142
 msgid "Size"
 msgstr ""
 
@@ -98,7 +147,7 @@ msgstr ""
 msgid "Submitted"
 msgstr ""
 
-#: order/models.py:24 shop/models.py:134
+#: order/models.py:24 shop/models.py:135
 msgid "Created"
 msgstr ""
 
@@ -192,7 +241,7 @@ msgstr ""
 msgid "Order summarys"
 msgstr ""
 
-#: order/models.py:135 shop/models.py:186
+#: order/models.py:135 shop/admin.py:132 shop/models.py:187
 msgid "Product"
 msgstr ""
 
@@ -212,33 +261,40 @@ msgstr ""
 msgid "Order Items"
 msgstr ""
 
-#: shop/admin.py:16
+#: shop/admin.py:17 shop/admin.py:145
 msgid "Product Image"
 msgstr ""
 
-#: shop/admin.py:17 shop/admin.py:62
+#: shop/admin.py:18 shop/admin.py:70 shop/admin.py:169
 msgid "Product Images"
 msgstr ""
 
-#: shop/admin.py:23
+#: shop/admin.py:24
 msgid "Additional Field"
 msgstr ""
 
-#: shop/admin.py:24
+#: shop/admin.py:25
 msgid "Additional Fields"
 msgstr ""
 
-#: shop/admin.py:48
+#: shop/admin.py:56
 msgid "Main Image"
 msgstr ""
 
-#: shop/admin.py:52
+#: shop/admin.py:60
 msgid "Main Image Preview"
 msgstr ""
 
-#: shop/admin.py:84 shop/models.py:95 shop/models.py:189
-#: venv/lib/python3.9/site-packages/django/db/models/fields/files.py:393
-msgid "Image"
+#: shop/admin.py:78 shop/models.py:93
+msgid "Collections"
+msgstr ""
+
+#: shop/admin.py:125
+msgid "Collections and Products"
+msgstr ""
+
+#: shop/admin.py:133 shop/admin.py:186 shop/models.py:188
+msgid "Products"
 msgstr ""
 
 #: shop/models.py:46 shop/models.py:53 shop/models.py:70
@@ -247,11 +303,6 @@ msgstr ""
 
 #: shop/models.py:54
 msgid "Categories"
-msgstr ""
-
-#: shop/models.py:58 shop/models.py:60 shop/models.py:108 shop/models.py:109
-#: shop/models.py:111 shop/models.py:112
-msgid "photo"
 msgstr ""
 
 #: shop/models.py:71
@@ -266,10 +317,6 @@ msgstr ""
 msgid "Sales count"
 msgstr ""
 
-#: shop/models.py:93
-msgid "Collections"
-msgstr ""
-
 #: shop/models.py:99
 msgid "name"
 msgstr ""
@@ -278,80 +325,100 @@ msgstr ""
 msgid "value"
 msgstr ""
 
-#: shop/models.py:129
-msgid "Name"
-msgstr ""
-
-#: shop/models.py:130
-msgid "Description"
-msgstr ""
-
-#: shop/models.py:131
+#: shop/models.py:132
 msgid "Price"
 msgstr ""
 
-#: shop/models.py:132
+#: shop/models.py:133
 msgid "Stock"
 msgstr ""
 
-#: shop/models.py:133
+#: shop/models.py:134
 msgid "Available"
 msgstr ""
 
-#: shop/models.py:135
+#: shop/models.py:136
 msgid "Updated"
 msgstr ""
 
-#: shop/models.py:136
+#: shop/models.py:137
 msgid "Sales Count"
 msgstr ""
 
-#: shop/models.py:137
+#: shop/models.py:138
 msgid "Popularity"
 msgstr ""
 
-#: shop/models.py:138
+#: shop/models.py:139
 msgid "Slug"
 msgstr ""
 
-#: shop/models.py:139
+#: shop/models.py:140
 msgid "Enter the color name, e.g., magenta or purple"
 msgstr ""
 
-#: shop/models.py:139
+#: shop/models.py:140
 msgid "Color Name"
 msgstr ""
 
-#: shop/models.py:140
+#: shop/models.py:141
 msgid "Enter the color value in the format #RRGGBB"
 msgstr ""
 
-#: shop/models.py:140
+#: shop/models.py:141
 msgid "Color Value"
 msgstr ""
 
-#: shop/models.py:141
+#: shop/models.py:142
 msgid "Format: LxHxD (in mm or specify cm)"
 msgstr ""
 
-#: shop/models.py:142
+#: shop/models.py:143
 msgid "Discount percentage (e.g., 10.00 for 10%)"
 msgstr ""
 
-#: shop/models.py:142
+#: shop/models.py:143
 msgid "Discount"
 msgstr ""
 
-#: shop/models.py:149
+#: shop/models.py:150
 msgid "Currency"
 msgstr ""
 
-#: shop/models.py:187
-msgid "Products"
+#: shop/models.py:195 shop/models.py:197
+msgid "images"
 msgstr ""
 
-#: shop/models.py:194 shop/models.py:196
-msgid "images"
+#: team/models.py:47
+msgid "Surname"
+msgstr ""
+
+#: team/models.py:48
+msgid "Role"
+msgstr ""
+
+#: team/models.py:49
+msgid "Experience"
+msgstr ""
+
+#: team/models.py:58
+msgid "Link to the Telegram"
+msgstr ""
+
+#: team/models.py:95
+msgid "TeamMember"
+msgstr ""
+
+#: team/models.py:96
+msgid "TeamMembers"
+msgstr ""
+
+#: technologies/models.py:85
+msgid "Technology"
+msgstr ""
+
+#: technologies/models.py:86
+msgid "Technologies"
 msgstr ""
 
 #: templates/admin/base_site.html:5
@@ -1861,6 +1928,34 @@ msgstr ""
 
 #: venv/lib/python3.9/site-packages/django/views/templates/default_urlconf.html:248
 msgid "Connect, get help, or contribute"
+msgstr ""
+
+#: venv/lib/python3.9/site-packages/drf_spectacular/openapi.py:1371
+#: venv/lib/python3.9/site-packages/drf_spectacular/openapi.py:1424
+#: venv/lib/python3.9/site-packages/drf_spectacular/openapi.py:1428
+#: venv/lib/python3.9/site-packages/drf_spectacular/openapi.py:1432
+msgid "No response body"
+msgstr ""
+
+#: venv/lib/python3.9/site-packages/drf_spectacular/openapi.py:1396
+#: venv/lib/python3.9/site-packages/drf_spectacular/openapi.py:1450
+msgid "Unspecified response body"
+msgstr ""
+
+#: venv/lib/python3.9/site-packages/drf_spectacular/plumbing.py:484
+#, python-format
+msgid "Token-based authentication with required prefix \"%s\""
+msgstr ""
+
+#: venv/lib/python3.9/site-packages/drf_spectacular/views.py:45
+msgid ""
+"\n"
+"    OpenApi3 schema for this API. Format can be selected via content "
+"negotiation.\n"
+"\n"
+"    - YAML: application/vnd.oai.openapi\n"
+"    - JSON: application/vnd.oai.openapi+json\n"
+"    "
 msgstr ""
 
 #: venv/lib/python3.9/site-packages/imagekit/admin.py:10

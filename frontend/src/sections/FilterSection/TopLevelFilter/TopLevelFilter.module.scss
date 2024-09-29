@@ -1,0 +1,9 @@
+@import '../../../variables';
+@import '../FilterSection.module.scss';
+
+.button {
+   @include topLevelButton;
+   &.active {
+       color: $color-gray-200
+   }
+}

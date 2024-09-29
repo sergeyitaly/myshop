@@ -21,6 +21,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from django.contrib import admin
 from dotenv import load_dotenv
 from drf_spectacular.views import SpectacularRedocView
+from django.views.decorators.cache import cache_page
 
 load_dotenv()
 schema_view = get_schema_view(
@@ -52,11 +53,20 @@ urlpatterns = [
     path('api/', include('accounts.urls')), 
     path('api/', include('shop.urls')), 
     path('api/', include('order.urls')),
+    path('api/', include('team.urls')),
+    path('api/', include('brand.urls')),
+    path('api/', include('comments.urls')),
+    path('api/', include('intro.urls')),
+    path('api/', include('technologies.urls')),
+
 
     path('admin/', admin.site.urls),
     path('rosetta/', include('rosetta.urls')), 
+#    path("", cache_page(60 * 15)(views.index), name="index"),  
+#    path("", views.index, name="index"),  
+    path("", cache_page(60 * 15)(views.index), name="index"),
 
-    path("", views.index, name="index"),
+#    re_path(r'^(?:.*)/?$', views.index),  # Catch all other routes and serve the same view
     path('i18n/', include('django.conf.urls.i18n')),
 ]
 
@@ -66,7 +76,8 @@ if settings.DEBUG:
     if len(settings.STATICFILES_DIRS) > 1:
         urlpatterns += static('/assets/', document_root=settings.STATICFILES_DIRS[1])
 
-# Catch-all URL pattern for handling unmatched URLs
+# Catch-all URL pattern fnor handling unmatched URLs
 urlpatterns += [
-    re_path(r'^.*$', RedirectView.as_view(url='/')),
+#    re_path(r'^.*$', RedirectView.as_view(url='/')),
+re_path(r'^(?:.*)/?$', views.index)
 ]

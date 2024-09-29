@@ -10,6 +10,7 @@ import os
 from celery.schedules import crontab
 from django.utils.translation import gettext_lazy as _
 
+
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,7 +40,7 @@ AWS_S3_OBJECT_PARAMETERS = {
 }
 
 
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
@@ -94,7 +95,11 @@ INSTALLED_APPS = [
     'rosetta',
     'modeltranslation',
     'drf_spectacular',
-
+    'team',
+    'brand',
+    'comments',
+    'intro',
+    'technologies',
       # "debug_toolbar",
 
 ]
@@ -215,9 +220,25 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 6
+
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '3/s',
+        'user': '10/minute',
+        'search': '6/m',  
+        'products': '30/m',  
+        'collections': '30/m',  
+    },
+    #    'DEFAULT_PAGINATION_CLASS': 'myshop.shop.views.CustomPageNumberPagination',
+         'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+   #     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',  
+    'PAGE_SIZE': 8
 }
+
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Your API',
@@ -307,7 +328,6 @@ LANGUAGES = [
     ('en', _('English')),
     ('uk', _('Ukrainian')),
 ]
-
 
 MODELTRANSLATION_DEFAULT_LANGUAGE = 'uk'
 MODELTRANSLATION_LANGUAGES = ('en', 'uk')

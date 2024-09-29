@@ -14,7 +14,7 @@
   --screen-laptop: 1366px;
   --screen-tablet: 1280px;
   --screen-mobile: 740px;
-  overflow-x: hidden;
+  // overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -41,6 +41,7 @@ button {
   background: transparent;
   color: $color-black;
 }
+
 
 *::-webkit-scrollbar {
   width: 5px;               /* ширина всей полосы прокрутки */

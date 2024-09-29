@@ -1,0 +1,90 @@
+@import "../../../variables";
+
+.wrapper {
+	padding-bottom: clamp(72px, 5vw + 30px, 164px);
+}
+
+.title {
+	font-size: clamp(20px, 5vw, 60px);
+	text-align: center;
+	margin-bottom: clamp(40px, 5vw + 10px, 115px);
+}
+
+.teamItem {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	width: 440px;
+	margin-bottom: clamp(10px, 5vw, 40px);
+
+	@media (max-width: $screen-tablet) {
+		width: 353px;
+	}
+	@media (max-width: $screen-mobile) {
+		width: 164px;
+	}
+
+	.imageSize {
+		width: 100%;
+		padding-top: 115%;
+		filter: grayscale(100%);
+		transition: filter 0.3s ease;
+
+		@media (max-width: $screen-mobile) {
+			filter: grayscale(100%);
+		}
+
+		@media (min-width: $screen-mobile) {
+			&:hover {
+				filter: grayscale(0%);
+			}
+		}
+	}
+
+	.name {
+		font-size: clamp(15px, 4vw, 30px);
+		padding-top: 20px;
+		margin-bottom: 10px;
+		text-wrap: nowrap;
+	}
+
+	.role {
+		font-size: clamp(14px, 2vw, 20px);
+		margin-bottom: 10px;
+	}
+
+	.experience {
+		font-size: 14px;
+		margin-bottom: 10px;
+		height: 10px;
+	}
+
+	.description {
+		font-size: 16px;
+		font-weight: 400;
+		color: $color-gray-200;
+		text-align: center;
+		height: 160px;
+		margin-bottom: 5px;
+		padding: 10px;
+
+		@media (max-width: $screen-tablet) {
+			font-size: 12px;
+		}
+
+		@media (max-width: $screen-mobile) {
+			font-size: 10px;
+		}
+	}
+
+	.links {
+		display: flex;
+		gap: 16px;
+		justify-content: center;
+	}
+	.links a {
+		color: $color-gray-400;
+		text-decoration: none;
+	}
+}

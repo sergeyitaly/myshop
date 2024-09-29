@@ -1,8 +1,9 @@
 import { Slider } from '@mui/material';
-import { ChangeEvent } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import styles from './RangeSlider.module.scss'
 import { formatPrice } from '../../../functions/formatPrice';
 import { formatNumber } from '../../../functions/formatNumber';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 
 interface AppRangeSliderPeops {
@@ -21,6 +22,32 @@ export const AppRangeSlider = ({
 
     const minDistance = 1000;
 
+    const [startValue1FromScratch, setStartValue1FromScratch] = useState<boolean>(true) 
+
+    const value1 = useDebounce(value[0].toString(), 1000)
+    const value2 = useDebounce(value[1].toString(), 1000)
+
+    console.log(startValue1FromScratch);
+    
+    
+    useEffect(() => {
+
+        if(+value1 < minValue){
+            changePrice([minValue, value[1]])
+        }
+
+        if(+value1 > value[1]){
+            changePrice([value[1], value[1]])
+        }
+        setStartValue1FromScratch(true)
+    }, [value1])
+   
+    useEffect(() => {
+        if(+value2 < value[0]){
+            changePrice([value[0], value[0]])
+        }
+    }, [value2])
+    
 
     const handleChange2 = (
       _: Event,
@@ -46,14 +73,34 @@ export const AppRangeSlider = ({
     };
 
     const handleChangeInp1 = (e: ChangeEvent<HTMLInputElement>) => {
+
+        
         let transformedValue = parseFloat(e.target.value.replace(/\s/g, '').replace(/,/g, '.'))
+        console.log(transformedValue);
+
+        if(startValue1FromScratch){
+            console.log('fromScratch');
+            
+            const lastIndex = transformedValue.toString().length
+            console.log(lastIndex);
+            
+            transformedValue = +transformedValue.toString()[lastIndex - 1]
+        }
+        
         if(!e.target.value){
             transformedValue = 0
         }
         
-        if(!isNaN(+transformedValue)){
+       
+
+        if(!isNaN(+transformedValue) && transformedValue <= maxValue){
             changePrice([transformedValue, value[1]])
         }
+
+        setStartValue1FromScratch(false)
+
+
+
     }
 
     const handleChangeInp2 = (e: ChangeEvent<HTMLInputElement>) => {
@@ -61,7 +108,7 @@ export const AppRangeSlider = ({
         if(!e.target.value){
             transformedValue = 0
         }
-        if(!isNaN(+transformedValue)){
+        if(!isNaN(+transformedValue) && transformedValue <= maxValue){
             changePrice([value[0], transformedValue])
         }
     }

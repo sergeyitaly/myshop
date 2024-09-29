@@ -43,7 +43,7 @@ def validate_svg(value):
         raise ValidationError('Unsupported file extension.')
 
 class Category(models.Model):
-    name = models.CharField(max_length=255, verbose_name=_('Category'))
+    name = models.CharField(max_length=255, verbose_name=_('Category'), db_index=True)
 
     def __str__(self):
         return self.name
@@ -66,7 +66,7 @@ class Collection(models.Model):
         options={'quality': 60}
     )
 
-    name = models.CharField(max_length=255, verbose_name=_('Collection'))
+    name = models.CharField(max_length=255, verbose_name=_('Collection'), db_index=True)
     category = models.ForeignKey(Category,null=True, blank=True, on_delete=models.CASCADE, verbose_name=_('Category'))
     created = models.DateTimeField(auto_now_add=True, verbose_name=_('created'))
     updated = models.DateTimeField(auto_now=True, verbose_name=_('updated'))
@@ -95,14 +95,6 @@ class Collection(models.Model):
     image_tag.short_description =_("Image")
     image_tag.allow_tags = True
 
-class AdditionalField(models.Model):
-    name = models.CharField(max_length=255, verbose_name=_('name'))
-    value = models.TextField(verbose_name=_('value'))
-    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='additional_fields')
-
-
-    def __str__(self):
-        return f"{self.name} - {self.value}"
 
 class Product(models.Model):
     if USE_S3:
@@ -127,7 +119,7 @@ class Product(models.Model):
     )
 
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_('Collection'))
-    name = models.CharField(max_length=255, verbose_name=_('Name'))
+    name = models.CharField(max_length=255, verbose_name=_('Name'), db_index=True)
     description = models.TextField(null=True, blank=True, verbose_name=_('Description'))
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_('Price'))
     stock = models.IntegerField(default=0, verbose_name=_('Stock'))
@@ -219,6 +211,16 @@ class ProductImage(models.Model):
             self.images.delete(save=False)
         super().delete(*args, **kwargs)
 
+class AdditionalField(models.Model):
+    name = models.CharField(max_length=255, verbose_name=_('name'), null=True, blank=True,db_index=True)
+    value = models.TextField(verbose_name=_('value'),null=True, blank=True)
+ #   product = models.ForeignKey('Product', on_delete=models.CASCADE, null=True, blank=True, verbose_name=_('Product'))
+    product = models.ForeignKey(Product, default=None, on_delete=models.CASCADE, verbose_name=_('Product'))
+
+
+    def __str__(self):
+        return self.name
+    
 @receiver(post_save, sender=Collection)
 def generate_collection_thumbnails(sender, instance, **kwargs):
     if instance.photo:

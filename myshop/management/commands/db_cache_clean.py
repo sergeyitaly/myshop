@@ -20,10 +20,10 @@ class Command(BaseCommand):
         # Create new migrations
         self.stdout.write(self.style.NOTICE('Creating new migrations...'))
         apps = [
-            'shop', 'accounts', 'account', 'sites', 'admin', #'admin_interface', 
-            'auth', 'authtoken', 'contenttypes', 'knox', 'sessions',
+            'shop', 'accounts', 'account', 'sites', 'admin', 'team',#'admin_interface', 
+            'auth', 'authtoken', 'contenttypes', 'knox', 'sessions', 'brand', 'comments',
             #'socialaccount', 
-            'token_blacklist', 'order',  
+            'token_blacklist', 'order', 'intro', 'technologies'
         ]
         for app in apps:
             call_command('makemigrations', app)

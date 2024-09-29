@@ -4,3 +4,28 @@
     flex-direction: column;
     gap: 10px;
 }
+
+
+ 
+  /* Media query for mobile devices */
+  @media (max-width: 600px) {
+    .desktopOnly {
+      display: none;
+    }
+  
+    .mobileOnly {
+      display: block;
+    }
+  }
+  
+  /* Hide mobile-only components on larger screens */
+  @media (min-width: 601px) {
+    .mobileOnly {
+      display: none;
+    }
+  
+    .desktopOnly {
+      display: block;
+    }
+  }
+  

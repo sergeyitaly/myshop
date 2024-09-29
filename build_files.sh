@@ -12,4 +12,5 @@ pip install awscli
 aws s3 mv media s3://kolorytmedia/media --recursive
 python3 manage.py collectstatic --noinput --clear
 rm -rf frontend
+rm -rf dist/assets/img
 du -h --max-depth=5 | sort -rh
