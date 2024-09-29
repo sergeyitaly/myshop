@@ -38,8 +38,12 @@ def datetime_to_str(dt):
 def get_order_summary(order):
     """Generates a summary of an order."""
     submitted_at = ensure_datetime(order.submitted_at)
-    last_status_time = ensure_datetime(order.canceled_at or order.complete_at or order.processed_at or order.created_at)
     
+    # Determine the latest status time
+    last_status_time = ensure_datetime(
+        order.canceled_at or order.complete_at or order.processed_at or order.created_at
+    )
+
     order_items_data = OrderItemSerializer(order.order_items.all(), many=True).data
     summary = {
         'order_id': order.id,
@@ -55,7 +59,7 @@ def get_order_summary(order):
                 'collection_name': item['collection_name'],
             } for item in order_items_data
         ],
-        'processed_at': datetime_to_str(last_status_time),
+        'latest_status_time': datetime_to_str(last_status_time),  # Change here
         'submitted_at': datetime_to_str(submitted_at),
     }
     return summary
