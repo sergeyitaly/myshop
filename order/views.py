@@ -413,26 +413,3 @@ def get_order_summary_by_chat_id(request, chat_id):
         return Response({'results': summary_data})
     except Exception as e:
         return Response({'error': str(e)}, status=500)
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def update_order_summary(request):
-    chat_id = request.data.get('chat_id')
-    orders = request.data.get('orders', {})  # Ensure orders defaults to an empty dict
-    
-    if not chat_id:
-        return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
-    
-    if not isinstance(orders, dict):  # Validate orders structure
-        return Response({"detail": "Invalid orders format."}, status=status.HTTP_400_BAD_REQUEST)
-
-    try:
-        order_summary, created = OrderSummary.objects.get_or_create(chat_id=chat_id)
-        order_summary.orders = orders  # You may want to serialize this properly
-        order_summary.save()
-        return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
-    except Exception as e:
-        logger.error(f"Error updating OrderSummary: {e}")
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
