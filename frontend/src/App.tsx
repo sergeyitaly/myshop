@@ -7,6 +7,7 @@ import { Home } from './pages/home/home';
 import { NotFound } from './pages/not-found/not-found';
 import { OrderPage } from './pages/Order/OrderPage';
 import { ThankPage } from './pages/ThankPage/ThankPage';
+import { PaymentAndDeliveryPage } from './pages/PaymentAndDeliveryPage/PaymentAndDeliveryPage';
 import { ROUTE } from './constants';
 import { FilterPage } from './pages/FilterPage/FilterPage';
 import { TestPage } from './pages/TestPage';
@@ -31,6 +32,7 @@ function App() {
         <Route path={ROUTE.THANK} element={<ThankPage />} />
         <Route path={ROUTE.CONTACTS} element={<Contact />} />
         <Route path={ROUTE.SENDCONTACTS} element={<ThankYouPage />} />
+        <Route path={ROUTE.PAYMENT_DELIVERY} element={<PaymentAndDeliveryPage />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
