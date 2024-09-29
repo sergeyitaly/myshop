@@ -2,6 +2,9 @@ from django.utils import timezone
 from order.models import Order
 from .notifications import update_order_status_with_notification
 from django.utils.dateformat import format as date_format
+from django.db import transaction
+from order.models import OrderSummary
+
 
 def update_order_statuses():
     now = timezone.now()
@@ -19,15 +22,27 @@ def update_orders(current_status, new_status, threshold_minutes, timestamp_field
                 # Update the order status and corresponding timestamp
                 update_order_status(order, new_status, now, timestamp_field)
 
-                # Notify user with the updated order summary
+                # Prepare the order summary
                 order_summary = prepare_order_summary(order)
-                update_order_status_with_notification(
-                    order.id,
-                    order_summary["order_items"],
-                    new_status,
-                    f'{new_status}_at',
-                    chat_id
-                )
+
+                # Use a transaction to ensure atomicity
+                with transaction.atomic():
+                    # Check if the OrderSummary already exists
+                    order_summary_instance, created = OrderSummary.objects.update_or_create(
+                        chat_id=chat_id,
+                        defaults={
+                            'orders': order_summary["order_items"],
+                        }
+                    )
+
+                    # Notify user with the updated order summary
+                    update_order_status_with_notification(
+                        order.id,
+                        order_summary["order_items"],
+                        new_status,
+                        f'{new_status}_at',
+                        chat_id
+                    )
 
 def update_order_status(order, new_status, now, timestamp_field):
     order.status = new_status
