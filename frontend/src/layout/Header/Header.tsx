@@ -7,10 +7,11 @@ import { PageContainer } from '../../components/containers/PageContainer';
 import styles from './Header.module.scss';
 import { SearchWindow } from '../../components/SearchWindow/SearchWindow';
 import { useSearch } from '../../hooks/useSearch';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ROUTE } from '../../constants';
 import { Product } from '../../models/entities';
 import { AnimatePresence } from 'framer-motion';
+import clsx from 'clsx';
 
 interface HeaderProps {
     basketLoadingStatus: boolean
@@ -19,6 +20,9 @@ interface HeaderProps {
 export const Header = ({
     basketLoadingStatus
 }: HeaderProps) => {
+
+    const {pathname} = useLocation()
+
     const { openBasket, productQty } = useBasket();
     const { open, value, debounceValue, toggleSearchBar, handleChange, closeSearchBar } = useSearch();
     const navigate = useNavigate();
@@ -28,8 +32,9 @@ export const Header = ({
         closeSearchBar();
     };
 
+    
     return (
-        <header className={styles.header}>
+        <header className={clsx(styles.header, {[styles.noLine]: pathname === '/thank'  } )}>
             <PageContainer className={styles.container}>
                 <BurgerMenu />
                 <Logo className={styles.logo} />

@@ -10,9 +10,9 @@ const getTranslatedColorName = (color: any, language: string): string => {
 };
 
 // Function to get translated product name
-const getTranslatedProductName = (product: any, language: string): string => {
-    return language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
-};
+// const getTranslatedProductName = (product: any, language: string): string => {
+//     return language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
+// };
 
 // Function to get translated product description
 const getTranslatedProductDescription = (product: any, language: string): string => {
@@ -45,12 +45,11 @@ export const ProductInfo = ({
     const { i18n, t } = useTranslation();
     const language = i18n.language;
 
-    console.log(product);
     
     
 
     // Get translated values
-    const translatedName = getTranslatedProductName(product, language);
+    // const translatedName = getTranslatedProductName(product, language);
     const translatedDescription = getTranslatedProductDescription(product, language);
     const translatedAdditionalFields = product.additional_fields?.map(field => 
         getTranslatedAdditionalField(field, language)
@@ -65,8 +64,6 @@ export const ProductInfo = ({
         <div className={styles.container}>
             <div className={styles.productInfo}>
                 {/* Display translated product name */}
-                <h2 className={styles.productName}>{translatedName}</h2>
-                
                 <ProductControl 
                     discountPrice={discountPrice}
                     product={product}
