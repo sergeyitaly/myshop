@@ -1,8 +1,15 @@
 @import '../../variables';
 
-.section {
-    position: relative;
+@mixin topLevelButton{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: clamp(1rem, 1.702vw + 0.468rem, 2rem);
+  font-weight: 500;
+  width: 100%;
+  border-bottom: 1px solid $color-gray-100;
 }
+
 
 .control {
     position: relative;
@@ -66,7 +73,6 @@
   .item {
     margin-left: 10px;
   }
-
 
 
 

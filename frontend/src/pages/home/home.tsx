@@ -1,41 +1,58 @@
 import { AboutUsSection } from "../../components/AboutUsSection/AboutUsSection";
-import styles from "./home.module.scss"
-import CarouselCeramic from "../../components/Carousels/CarouselCeramic/CarouselCeramic";
-import CarouselNewProduct from "../../components/Carousels/CarouselNewProduct/CarouselNewProduct";
-import CarouselFilters from "../../components/Carousels/CarouselFilters/CarouselFilters";
+import styles from "./home.module.scss";
 import { HeroSection } from '../../components/HeroSection/HeroSection';
-import {AllCollection, Discount, Popular} from "../../components/Carousels/CarouselsMobileVersion/Mobile";
-import {useEffect, useState} from "react";
+import { TabSection } from "../../sections/TabSection/TabSection";
+import { PopularProducts } from "../../sections/TabSection/PopularProducts";
+import { NamedSection } from "../../components/NamedSection/NamedSection";
+import { ProductsWithDiscount } from "../../sections/TabSection/ProductsWithDiscount";
+import { screens } from "../../constants";
+import { useMediaQuery } from "@mui/material";
+import { AllCollections } from "../../sections/TabSection/AllCollections";
+import { LightSection } from "../../sections/TabSection/LightSection";
+import { NewProducts } from "../../sections/TabSection/NewProducts";
+import { useTranslation } from "react-i18next";
 
 export const Home = () => {
-    const [isMobile, setIsMobile] = useState(false);
 
-    useEffect(() => {
-        const handleResize = () => {
-            setIsMobile(window.innerWidth < 600);
-        };
+      const isMobile = useMediaQuery(screens.maxMobile)
 
-        handleResize();
-        window.addEventListener("resize", handleResize);
-        return () => {
-            window.removeEventListener("resize", handleResize);
-        };
-    }, []);
-    
+      const {t} = useTranslation()
+
     return (
         <main className={styles.main}>
             <HeroSection />
-            <CarouselCeramic />
-            <CarouselNewProduct />
-            {isMobile ? (
+            <NamedSection
+                title={t('light')}
+            >
+                <LightSection />
+            </NamedSection>
+            <NamedSection
+                title={t('new_arrivals')}
+            >
+                <NewProducts/>
+            </NamedSection>
+            {
+                isMobile ? 
                 <>
-                    <AllCollection />
-                    <Popular />
-                    <Discount />
+                    <NamedSection
+                        title={t('popularProducts')}
+                    >
+                        <PopularProducts/>
+                    </NamedSection>
+                    <NamedSection
+                        title={t('discounts')}
+                    >
+                        <ProductsWithDiscount/>
+                    </NamedSection>
+                    <NamedSection
+                        title={t('all_collections')}
+                    >
+                        <AllCollections/>
+                    </NamedSection>
                 </>
-            ) : (
-                <CarouselFilters />
-            )}
+                :
+                <TabSection/>
+            }
             <AboutUsSection />
         </main>
     );

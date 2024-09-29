@@ -20,8 +20,11 @@ export enum ROUTE {
     COLLECTION = '/collection/',
     COLLECTIONS = '/collections/',
     ORDER = '/order',
-    PAYMENT_DELIVERY = '/payment_delivery',
-    THANK = '/thank'
+    ABOUT = '/about',
+    THANK = '/thank',
+    CONTACTS='/contacts',
+    SENDCONTACTS = '/sendcontacts',
+    PAYMENT_DELIVERY = '/payment_delivery'
 }
 
 export enum ENDPOINTS {
@@ -32,11 +35,16 @@ export enum ENDPOINTS {
     ORDER = 'order',
     PRODUCT = 'product',
     PRODUCTS = 'products',
-    FILTER = 'products/filter'
+    FILTER = 'products/filter',
+    TEAM_MEMBERS = 'team',
+    TECHNOLOGIES = 'technology',
+    BRANDS = 'brand' 
+   
 }
 
 export enum STORAGE {
-    BASKET='basket'
+    BASKET='basket',
+    LANGUAGE='lang'
 }
 
 export const color = {
@@ -57,4 +65,4 @@ export const color = {
     darkOrange: '#BB4430'
 }
 
-export type AppIconNames = 'cart' | 'cross' | 'vase' | 'delete' | 'search' | 'leftArrow' | 'rigrtArrow'
+export type AppIconNames = 'cart' | 'cross' | 'vase' | 'delete' | 'search' | 'leftArrow' | 'rigrtArrow' | 'forwardArrow' | 'flagUkraine' | 'flagUK'

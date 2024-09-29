@@ -1,6 +1,10 @@
 from django.core.management.base import BaseCommand
 from django.core.files.storage import FileSystemStorage
 from shop.models import Product, Collection, ProductImage
+from intro.models import Intro
+from brand.models import Brand
+from team.models import TeamMember
+from technologies.models import Technology
 from PIL import Image
 from io import BytesIO
 from myshop.settings import BASE_DIR
@@ -38,7 +42,23 @@ class Command(BaseCommand):
         # Process Collection Thumbnails
         self.stdout.write(self.style.NOTICE('Processing collection thumbnails...'))
         self.process_thumbnails(Collection.objects.all(), s3_storage, local_storage, local_media_root, 'collection')
-        
+
+        # Process Team Thumbnails
+        self.stdout.write(self.style.NOTICE('Processing team thumbnails...'))
+        self.process_thumbnails(TeamMember.objects.all(), s3_storage, local_storage, local_media_root, 'team')
+
+        # Process Brand Thumbnails
+        self.stdout.write(self.style.NOTICE('Processing brand thumbnails...'))
+        self.process_thumbnails(Brand.objects.all(), s3_storage, local_storage, local_media_root, 'brand')
+
+        # Process Technology Thumbnails
+        self.stdout.write(self.style.NOTICE('Processing technology thumbnails...'))
+        self.process_thumbnails(Technology.objects.all(), s3_storage, local_storage, local_media_root, 'technology')
+
+        # Process Intro Thumbnails
+        self.stdout.write(self.style.NOTICE('Processing intro thumbnails...'))
+        self.process_thumbnails(Intro.objects.all(), s3_storage, local_storage, local_media_root, 'intro')
+
         # Process Product Images
         self.stdout.write(self.style.NOTICE('Processing product images...'))
         self.process_product_images(ProductImage.objects.all(), s3_storage, local_storage, local_media_root)

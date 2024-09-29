@@ -4,7 +4,7 @@ from django.db.models import Sum  # Import Sum
 from .models import *
 import json
 from django.utils.html import format_html
-from .signals import update_order_status_with_notification
+from .notifications import update_order_status_with_notification
 from django.contrib.admin import SimpleListFilter
 from django.db.models import Sum, F
 from django.utils.translation import gettext_lazy as _

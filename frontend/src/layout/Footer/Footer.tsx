@@ -3,9 +3,11 @@ import styles from './Footer.module.scss';
 import VisaImg from './visa.svg';
 import { Logo } from '../../components/Logo/Logo';
 import { useTranslation } from 'react-i18next'; // Import the useTranslation hook
+import { LanguageDropDown } from './LanguageDropDown/LanguageDropDown';
 
 export const Footer = () => {
     const { t } = useTranslation(); // Initialize translation hook
+
 
     return (
         <footer className={styles.footer}>
@@ -18,7 +20,7 @@ export const Footer = () => {
                     <p className={styles.title}>{t('contact_us')}</p> {/* Localized text */}
                     <Link
                         className={styles.link}
-                        to="/"
+                        to="/contacts"
                     >
                         {t('contacts')}
                     </Link>
@@ -39,7 +41,7 @@ export const Footer = () => {
                     <p className={styles.title}>{t('info')}</p> {/* Localized text */}
                     <Link
                         className={styles.link}
-                        to="/"
+                        to="/about"
                     >
                         {t('about_us')}
                     </Link>
@@ -73,6 +75,7 @@ export const Footer = () => {
                             alt="visa icon"
                         />
                     </p>
+                    <LanguageDropDown/>
                 </nav>
             </div>
         </footer>

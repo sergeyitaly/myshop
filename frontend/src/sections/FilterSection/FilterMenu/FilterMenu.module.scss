@@ -5,9 +5,9 @@
     z-index: 2;
     top: 0;
     left: 0;
+    bottom: 0;
     display: flex;
     flex-direction: column;
-    height: 100%;
     width: 90vw;
     max-width: 500px;
 }
@@ -51,8 +51,9 @@
         width: 100vw;
         top: 35px;
         height: auto;
-        .header {
-            display: none;
-        }
+    };
+
+    .header {
+    text-align: start;
     }
 }

@@ -10,8 +10,12 @@ import styles from "./FilterMenu.module.scss";
 import "react-range-slider-input/dist/style.css";
 import { AppRangeSlider } from "../RangeSlider/RangeSlider";
 import { MainButton } from "../../../components/UI/MainButton/MainButton";
+import { useEffect } from "react";
+import { TopLevelFilter } from "../TopLevelFilter/TopLevelFilter";
 
 interface FilterMenuProps {
+    hasDiscount: boolean;
+    initialTopPosition: number
     showCollections?: boolean;
     activeCategories?: Category[];
     activeCollections?: Collection[];
@@ -23,9 +27,12 @@ interface FilterMenuProps {
     onClickCategory: (category: Category) => void;
     onClickCollection: (collection: Collection) => void;
     onApply: () => void;
+    onChangeSale: (value: boolean) => void
 }
 
 export const FilterMenu = ({
+    hasDiscount,
+    initialTopPosition,
     showCollections,
     activeCategories = [],
     activeCollections = [],
@@ -37,16 +44,25 @@ export const FilterMenu = ({
     onClickCollection,
     onClickCategory,
     onApply,
+    onChangeSale,
 }: FilterMenuProps) => {
     const { i18n, t } = useTranslation(); // Initialize translation hook
 
     const { data: categories, isSuccess: isSuccessCategories } = useGetCategoriesByFilterQuery({
-        page_size: 100,
+        page_size: 8,
     });
     const { data: collections, isSuccess: isSuccessCollections } =
         useGetCollectionsByFilterQuery({
-            page_size: 100,
+            page_size: 8,
         });
+
+    useEffect(() => {
+        window.document.body.style.overflow = 'hidden'
+
+        return () => {
+            window.document.body.style.overflow = 'visible'
+        }
+    }, [])
 
     // Function to get translated category name
     const getCategoryName = (category: Category): string => {
@@ -72,13 +88,18 @@ export const FilterMenu = ({
         }
     };
 
+    const handleChangeSale = () => {
+        onChangeSale(!hasDiscount)
+    }
+
     return (
         <motion.div
             className={styles.wrapper}
-            initial={{ x: "-100%" }}
+            initial={{ x: "-100%"}}
             animate={{ x: 0 }}
-            exit={{ x: "-100%" }}
+            exit={{ x: "-100%"}}
             transition={{ ease: "linear" }}
+            style={{top: initialTopPosition}}
         >
             <header className={styles.header}>
                 <TextButton
@@ -136,6 +157,7 @@ export const FilterMenu = ({
                             })}
                     </div>
                 </FilterDropDown>
+              
                 <FilterDropDown
                     title={t("price")} // Localized text
                 >
@@ -146,6 +168,11 @@ export const FilterMenu = ({
                         changePrice={changePrice}
                     />
                 </FilterDropDown>
+                <TopLevelFilter
+                    isActive = {hasDiscount}
+                    title={t('discounts')}
+                    onClick={ handleChangeSale }
+                />
                 <MainButton 
                     className={styles.saveButton}
                     title={t("save")}

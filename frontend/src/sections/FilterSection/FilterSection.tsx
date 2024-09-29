@@ -1,6 +1,5 @@
 import { PageContainer } from "../../components/containers/PageContainer";
 import styles from './FilterSection.module.scss';
-import { TextButton } from "../../components/UI/TextButton/TextButton";
 import { useGetProductsByMainFilterQuery } from "../../api/productSlice";
 import { PreviewCard } from "../../components/Cards/PreviewCard/PreviewCard";
 import { PreviewItemsContainer } from "../../components/containers/PreviewItemsContainer/PreviewItemsContainer";
@@ -9,39 +8,27 @@ import { AnimatePresence } from "framer-motion";
 import { useFilters } from "../../hooks/useFilters";
 import { Tag } from "./Tag/Tag";
 import { Pagination } from "../../components/UI/Pagination/Pagination";
-import { Collection, Product } from '../../models/entities';
+import { Collection, Product, Category } from '../../models/entities';
 import clsx from "clsx";
 import { useTranslation } from 'react-i18next';
-import { SortMenu } from "./SortMenu/SortMenu";
 import { useToggler } from "../../hooks/useToggler";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ROUTE } from "../../constants";
-import { useSortList } from "./SortList";
-
-
+import { FilterControlBar } from "./FilterControlBar/FilterControlBar";
 
 interface FilterSectionProps {
     initialCollection?: Collection;
 }
 
-// Function to get translated product name
-const getTranslatedProductName = (product: Product, language: string): string => {
-    return language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
-};
-
 export const FilterSection = ({
     initialCollection
 }: FilterSectionProps) => {
-
-    const LIMIT = 100;
-
-
-    const navigate = useNavigate()
-
+    const LIMIT = 8;
+    const navigate = useNavigate();
     const [currentPage, setCurrentPage] = useState<number>(1);
-
     const { t, i18n } = useTranslation();
+    const [topPosition, setTopPosition] = useState<number>(0)
 
     const {
         openStatus: open,
@@ -49,11 +36,6 @@ export const FilterSection = ({
         handleClose: handleCloseMenu
     } = useToggler();
 
-    const {
-        openStatus: openSort,
-        handleClose: handleClickOutsideSort,   
-        handleOpen: handleClickSort
-    } = useToggler();
 
     const {
         tagList,
@@ -61,8 +43,8 @@ export const FilterSection = ({
         tempPriceValues,
         tempCollections,
         filter,
-        minValue,
-        maxValue,
+        fullRangeOfPrice,
+        tempHasDiscount,
         deleteTag,
         applyChanges,
         changeCategory,
@@ -70,6 +52,8 @@ export const FilterSection = ({
         changePrice,
         clearAllFilters,
         changeOrdering,
+        changeDiscount,
+        setFullRangeOfPrice,
     } = useFilters(initialCollection);
 
     const {
@@ -77,18 +61,16 @@ export const FilterSection = ({
         isSuccess: isSuccessGettingProducts,
         isLoading: isLoadingProducts,
         isFetching: isFetchingProducts,
-        isError: isErrorWhenFetchingProducts
+        isError: isErrorWhenFetchingProducts,
     } = useGetProductsByMainFilterQuery({...filter, page: currentPage, page_size: LIMIT});
 
-    let totalPages = 0
+    let totalPages = 0;
 
-    console.log(productsResponse);
-    
     useEffect(() => {
-        productsResponse &&
-        changePrice([productsResponse.price_min, productsResponse.price_max])
-    }, [productsResponse])
-    
+        if (productsResponse) {
+            setFullRangeOfPrice([productsResponse.overall_price_min, productsResponse.overall_price_max])
+        }
+    }, [productsResponse]);
 
     if (productsResponse) {
         totalPages = Math.ceil(productsResponse.count / LIMIT);
@@ -98,42 +80,50 @@ export const FilterSection = ({
         setCurrentPage(page);
     };
 
+ 
+
+ 
+
     const handleApply = () => {
         applyChanges();
         handleCloseMenu();
     };
 
-    const sortList = useSortList()
+    const handleInitRect = (rect?: DOMRect) => {
+        if(rect){
+            setTopPosition(rect.top)
+        }
+    }
 
+
+    const getTranslatedCategoryName = useCallback((category?: Category): string => {
+        if (!category) return '';
+        return i18n.language === 'uk'
+            ? category?.name_uk || category?.name || ''
+            : category?.name_en || category?.name || '';
+    }, [i18n.language]);
+    
+    const getTranslatedCollectionName = useCallback((collection?: Collection): string => {
+        if (!collection) return '';
+        return i18n.language === 'uk' ? collection.name_uk || collection.name : collection.name_en || collection.name;
+    }, [i18n.language]);
+
+    const getTranslatedProductName = (product: Product): string => {
+        return i18n.language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
+    };
+
+    
     return (
         <section className={clsx(styles.section, {
             [styles.blur]: isFetchingProducts
         })}>
             <PageContainer>
-                <div className={styles.control}>
-                    {
-                        open ?
-                            <span />
-                            :
-                            <TextButton
-                                title={open ? t('filters.hide') : t('filters.show')}
-                                onClick={handleOpenMenu}
-                            />
-                    }
-                    <TextButton
-                        title={t('sort.title')}
-                        onClick={handleClickSort}
-                    />
-                    {
-                        openSort &&
-                        <SortMenu
-                            className={styles.sortMenu}
-                            menuList={sortList}
-                            onClickOutside={handleClickOutsideSort}
-                            onClickMenu={(item) => changeOrdering(item.name)}
-                        />
-                    }
-                </div>
+                <FilterControlBar
+                    isOpenFilterMenu = {open}
+                    changeOrdering={changeOrdering}
+                    onClickOpenFilterMenu={handleOpenMenu}
+                    onInitRect={handleInitRect}
+                />
                 <div className={styles.tagContainer}>
                     {
                         tagList.map((tag, i) => {
@@ -173,10 +163,12 @@ export const FilterSection = ({
                             return (
                                 <PreviewCard
                                     key={id}
-                                    subTitle={product.collection?.category?.name}
+                                    subTitle={`${getTranslatedCollectionName(product.collection)}${
+                                        product.collection?.category ? ' / ' : ''
+                                    }${getTranslatedCategoryName(product.collection?.category)}`}
                                     photoSrc={photo_url}
                                     previewSrc={photo_thumbnail_url}
-                                    title={getTranslatedProductName(product, i18n.language)}
+                                    title={getTranslatedProductName(product)}
                                     discount={discount}
                                     currency={currency}
                                     price={price}
@@ -200,17 +192,20 @@ export const FilterSection = ({
                 {
                     open &&
                     <FilterMenu
+                        hasDiscount = {tempHasDiscount}
+                        initialTopPosition={topPosition}
                         showCollections={!initialCollection}
-                        minValue={productsResponse?.price_min || minValue}
-                        maxValue={productsResponse?.price_max || maxValue }
-                        priceValue={tempPriceValues}
+                        minValue={fullRangeOfPrice[0]}
+                        maxValue={fullRangeOfPrice[1]}
+                        priceValue={[tempPriceValues.min, tempPriceValues.max]} // Convert to tuple
                         activeCategories={tempCategories}
                         activeCollections={tempCollections}
-                        changePrice={changePrice}
+                        changePrice={(priceRange: [number, number]) => changePrice({ min: priceRange[0], max: priceRange[1] })} // Convert tuple to object
                         onClickHideFilters={handleCloseMenu}
                         onClickCategory={changeCategory}
                         onClickCollection={changeCollection}
                         onApply={handleApply}
+                        onChangeSale={changeDiscount}
                     />
                 }
             </AnimatePresence>

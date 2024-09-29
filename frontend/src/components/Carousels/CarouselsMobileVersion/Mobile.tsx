@@ -1,67 +1,180 @@
+import { useCallback } from 'react';
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import style from './style.module.scss'
-import {mockDataAllCollection, mockDataDiscount, mockDataProducts} from "../carouselMock";
+import { PreviewCard } from "../../Cards/PreviewCard/PreviewCard";
+import { useNavigate } from "react-router-dom";
+import { useGetAllCollectionsQuery } from "../../../api/collectionSlice";
+import { useGetManyProductsByFilterQuery } from '../../../api/productSlice'; // Adjust the import path if needed
+import { Collection, Product } from "../../../models/entities";
+import { ROUTE } from "../../../constants";
+import { PreviewLoadingCard } from "../../Cards/PreviewCard/PreviewLoagingCard";
+import { useTranslation } from 'react-i18next';
+import { useGetFilterDataQuery } from '../../../api/filterApiSlice';
+import { useEffect, useState } from 'react';
+
 
 export function AllCollection() {
+    const { t, i18n } = useTranslation();
+    const navigate = useNavigate();
+    const { data, isLoading } = useGetAllCollectionsQuery();
+    const collections: Collection[] = data?.results || [];
+
+    const getTranslatedCollectionName = useCallback((collection?: Collection): string => {
+        if (!collection) return '';
+        return i18n.language === 'uk' ? collection.name_uk || collection.name : collection.name_en || collection.name;
+    }, [i18n.language]);
+
+    const handleClickCollectionCard = (id: number) => {
+        navigate(`${ROUTE.COLLECTION}${id}`);
+    };
+
     const settings = {
         dots: true,
         infinite: true,
         speed: 500,
         slidesToShow: 1,
         slidesToScroll: 1,
-        initialSlide: 0,
         arrows: false,
     };
+
     return (
         <div className={style.sliderContainer}>
-            <p className={style.title}>Всі колекції</p>
+            <p className={style.title}>{t('allCollections')}</p>
             <Slider {...settings}>
-                {mockDataAllCollection.map((product, index) => (
-                    <div key={index} className={style.card}>
-                        <div className={style.cardImage}>
-                            <img src={product.imageUrl} alt={product.name} className={style.imageCollection}/>
-                            <p className={style.name}>{product.name}</p>
-                            <p className={style.category}>{product.category}</p>
+                {isLoading
+                    ? Array.from({ length: 3 }).map((_, index) => (
+                        <div key={index} className={style.container}>
+                            <PreviewLoadingCard />
                         </div>
-                    </div>
-                ))}
+                    ))
+                    : collections.map((collection) => (
+                        <div key={collection.id} className={style.container}>
+                            <PreviewCard
+                                className={style.card}
+                                photoSrc={collection.photo || ''}
+                                title={getTranslatedCollectionName(collection)}
+                                previewSrc={collection.photo_thumbnail_url}
+                                onClick={() => handleClickCollectionCard(collection.id)}
+                            />
+                        </div>
+                    ))}
             </Slider>
         </div>
     );
 }
 
 
-export function Popular () {
+const popularityFilter = {
+    popularity: '3', // Adjust this to the correct format as required by your API
+};
+
+export function Popular() {
+    const { t, i18n } = useTranslation();
+    const navigate = useNavigate();
+
+    const {
+        data: productResponse,
+        isSuccess: isSuccessProductFetching,
+        isLoading: isLoadingProducts,
+        error
+    } = useGetManyProductsByFilterQuery(popularityFilter);
+
+    const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+
+    useEffect(() => {
+        if (error) {
+            console.error('Error fetching products:', error);
+        }
+    }, [error]);
+
+    useEffect(() => {
+        if (isSuccessProductFetching && productResponse?.results) {
+            setFilteredProducts(productResponse.results);
+        }
+    }, [isSuccessProductFetching, productResponse]);
+
+    const getTranslatedProductName = useCallback((product: Product): string => {
+        return i18n.language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
+    }, [i18n.language]);
+
+    const handleClickProduct = (productId: number) => {
+        navigate(`/product/${productId}`);
+    };
+
     const settings = {
         infinite: true,
-        slidesPerRow: 2,
+        slidesToShow: 2,
         rows: 2,
         speed: 500,
         dots: true,
         arrows: false
     };
+
     return (
         <div className={style.sliderContainer}>
-            <p className={style.title}>Найпопулярніші товари</p>
-            <Slider {...settings}>
-                {mockDataProducts.map((product, index) => (
-                    <div key={index} className={style.cardRow}>
-                        <div className={style.cardImage}>
-                            <img src={product.imageUrl} alt={product.name} className={style.image}/>
-                            <p className={style.name}>{product.name}</p>
-                            <p className={style.price}>{product.price}</p>
-                        </div>
+            <p className={style.title}>{t('popularProducts')}</p>
+            {isLoadingProducts
+                ? Array.from({ length: 3 }).map((_, index) => (
+                    <div key={index} className={style.container}>
+                        <PreviewLoadingCard />
                     </div>
-                ))}
-            </Slider>
+                ))
+                : filteredProducts.length === 0
+                    ? <div>{t('no_popular_products')}</div>
+                    : (
+                        <Slider {...settings}>
+                            {filteredProducts.map((product) => (
+                                <div key={product.id} className={style.container}>
+                                    <PreviewCard
+                                        photoSrc={product.photo_url}
+                                        title={getTranslatedProductName(product)}
+                                        discount={product.discount}
+                                        price={product.price}
+                                        currency={product.currency}
+                                        previewSrc={product.photo_thumbnail_url}
+                                        onClick={() => handleClickProduct(product.id)}
+                                    />
+                                </div>
+                            ))}
+                        </Slider>
+                    )
+            }
         </div>
     );
 }
 
+interface DiscountFilter {
+    has_discount: boolean;
+}
 
-export function Discount () {
+export function Discount() {
+    const { t, i18n } = useTranslation();
+    const navigate = useNavigate();
+    const [filterStatus, setFilterStatus] = useState<'loading' | 'failed' | 'success'>('loading');
+    const [filterError, setFilterError] = useState<string | null>(null);
+
+    const { data, error, isLoading } = useGetFilterDataQuery({ has_discount: true } as DiscountFilter);
+
+    useEffect(() => {
+        if (isLoading) {
+            setFilterStatus('loading');
+        } else if (error) {
+            setFilterStatus('failed');
+            setFilterError('An error occurred while fetching discount products.');
+            console.error('Fetch error:', error);
+        } else {
+            setFilterStatus('success');
+        }
+    }, [isLoading, error]);
+
+    const discountProducts: Product[] = data?.results || [];
+
+    const getTranslatedProductName = (product: Product): string => {
+        return i18n.language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
+    };
+
     const settings = {
         dots: true,
         infinite: true,
@@ -73,29 +186,42 @@ export function Discount () {
         centerPadding: "25%",
         arrows: false,
     };
-    return (
-        <div className={style.sliderContainer} >
-            <p className={style.title}> Знижки </p>
-            <Slider {...settings}>
-                {mockDataDiscount.map((product, index) => (
-                    <div key={index} className={style.card}>
-                        <div className={style.cardImage}>
-                            {/*<img src={product.imageUrl} alt={product.name} style={{maxWidth:'100%'}}/>  */}
-                            <div className={style.imageContainer}>
-                                <p className={style.saleLabel}>Sale</p>
-                                <img src={product.imageUrl} alt={product.name} className={style.image} />
-                            </div>
-                            <p className={style.name} style={{marginTop:'15px', textAlign:'center'}}>{product.name}</p>
-                            <div className={style.priceContainer}>
-                                <p className={style.oldPrice}>{product.price}</p>
-                                <p className={style.newPrice}>{product.newPrice}</p>
-                            </div>
 
-                        </div>
+    const handleClickProduct = (productId: number) => {
+        navigate(`${ROUTE.PRODUCT}${productId}`);
+    };
+
+    return (
+        <div className={style.sliderContainer}>
+            <p className={style.title}>{t('discounts')}</p>
+            {filterStatus === 'loading' ? (
+                Array.from({ length: 3 }).map((_, index) => (
+                    <div key={index} className={style.container}>
+                        <PreviewLoadingCard />
                     </div>
-                ))}
-            </Slider>
+                ))
+            ) : filterStatus === 'failed' ? (
+                <div>{filterError}</div>
+            ) : discountProducts.length === 0 ? (
+                <div>{t('no_discount_products')}</div>
+            ) : (
+                <Slider {...settings}>
+                    {discountProducts.map((product) => (
+                        <div key={product.id} className={style.container}>
+                            <PreviewCard
+                                className={style.card}
+                                title={getTranslatedProductName(product)}
+                                discount={product.discount}
+                                price={product.price}
+                                currency={product.currency}
+                                photoSrc={product.photo_url}
+                                previewSrc={product.photo_thumbnail_url}
+                                onClick={() => handleClickProduct(product.id)}
+                            />
+                        </div>
+                    ))}
+                </Slider>
+            )}
         </div>
     );
 }
-

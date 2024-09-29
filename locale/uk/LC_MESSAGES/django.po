@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-11 18:27+0300\n"
+"POT-Creation-Date: 2024-09-18 20:45+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,11 +21,63 @@ msgstr ""
 "100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
 "(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
 
-#: myshop/settings.py:285
-msgid "English"
-msgstr ""
+#: brand/admin.py:20 intro/admin.py:20 shop/admin.py:87 shop/admin.py:160
+#: shop/models.py:95 shop/models.py:190 team/admin.py:20
+#: technologies/admin.py:20
+#: venv/lib/python3.9/site-packages/django/db/models/fields/files.py:393
+msgid "Image"
+msgstr "Картинка"
 
-#: myshop/settings.py:286
+#: brand/models.py:46 comments/models.py:10 intro/models.py:46
+#: shop/models.py:130 team/models.py:46 technologies/models.py:46
+msgid "Name"
+msgstr "Ім'я"
+
+#: brand/models.py:50 brand/models.py:52 intro/models.py:51 intro/models.py:53
+#: shop/models.py:58 shop/models.py:60 shop/models.py:109 shop/models.py:110
+#: shop/models.py:112 shop/models.py:113 team/models.py:61 team/models.py:63
+#: technologies/models.py:51 technologies/models.py:53
+msgid "photo"
+msgstr "фото"
+
+#: brand/models.py:83
+msgid "Brand"
+msgstr "Бренд"
+
+#: brand/models.py:84
+msgid "Brands"
+msgstr "Бренди"
+
+#: comments/models.py:13 comments/models.py:21
+#, fuzzy
+#| msgid "Commands"
+msgid "Comment"
+msgstr "Коментар"
+
+#: comments/models.py:22
+#, fuzzy
+#| msgid "Commands"
+msgid "Comments"
+msgstr "Коментарі"
+
+#: intro/models.py:48 shop/models.py:131 team/models.py:56
+#: technologies/models.py:48
+msgid "Description"
+msgstr "Опис"
+
+#: intro/models.py:85
+msgid "Intro"
+msgstr "Вступ"
+
+#: intro/models.py:86
+msgid "Intros"
+msgstr "Вступи"
+
+#: myshop/settings.py:328
+msgid "English"
+msgstr "Англійська"
+
+#: myshop/settings.py:329
 msgid "Ukrainian"
 msgstr ""
 
@@ -39,19 +91,16 @@ msgstr "JSON замовлення"
 msgid "Product Photo"
 msgstr "Фото продукту"
 
-#: order/admin.py:55
-msgid "Collection Photo"
-msgstr "Фото коллекції"
-
 #: order/admin.py:59
 msgid "Product Name"
 msgstr "Назва продукту"
 
-#: order/admin.py:63 shop/models.py:69 shop/models.py:92 shop/models.py:128
+#: order/admin.py:63 shop/admin.py:77 shop/models.py:69 shop/models.py:92
+#: shop/models.py:129
 msgid "Collection"
 msgstr "Коллекція"
 
-#: order/admin.py:67 shop/models.py:141
+#: order/admin.py:67 shop/models.py:142
 msgid "Size"
 msgstr "Розмір"
 
@@ -107,7 +156,7 @@ msgstr "Телеграм користувачі"
 msgid "Submitted"
 msgstr "Оформлено"
 
-#: order/models.py:24 shop/models.py:134
+#: order/models.py:24 shop/models.py:135
 msgid "Created"
 msgstr "Створено"
 
@@ -129,7 +178,7 @@ msgstr "Назва за замовчуванням"
 
 #: order/models.py:32
 msgid "Default Surname"
-msgstr "Пріізвищє"
+msgstr "Прізвищє"
 
 #: order/models.py:33
 msgid "Contact phone number"
@@ -203,7 +252,7 @@ msgstr "JSON замовлення"
 msgid "Order summarys"
 msgstr "JSON замовлень"
 
-#: order/models.py:135 shop/models.py:186
+#: order/models.py:135 shop/admin.py:132 shop/models.py:187
 msgid "Product"
 msgstr "Продукт"
 
@@ -223,34 +272,43 @@ msgstr "Елемент замовлення"
 msgid "Order Items"
 msgstr "Елементи замовлення"
 
-#: shop/admin.py:16
+#: shop/admin.py:17 shop/admin.py:145
 msgid "Product Image"
 msgstr "Фото продукту"
 
-#: shop/admin.py:17 shop/admin.py:62
+#: shop/admin.py:18 shop/admin.py:70 shop/admin.py:169
 msgid "Product Images"
 msgstr "Фото продукту"
 
-#: shop/admin.py:23
+#: shop/admin.py:24
 msgid "Additional Field"
 msgstr "Додаткове поле"
 
-#: shop/admin.py:24
+#: shop/admin.py:25
 msgid "Additional Fields"
 msgstr "Додаткові поля"
 
-#: shop/admin.py:48
+#: shop/admin.py:56
 msgid "Main Image"
 msgstr "Головне фото"
 
-#: shop/admin.py:52
+#: shop/admin.py:60
 msgid "Main Image Preview"
 msgstr "Прев'ю головного фото"
 
-#: shop/admin.py:84 shop/models.py:95 shop/models.py:189
-#: venv/lib/python3.9/site-packages/django/db/models/fields/files.py:393
-msgid "Image"
-msgstr "Картинка"
+#: shop/admin.py:78 shop/models.py:93
+msgid "Collections"
+msgstr "Колекції"
+
+#: shop/admin.py:125
+#, fuzzy
+#| msgid "Collection Photo"
+msgid "Collections and Products"
+msgstr "Фото коллекції"
+
+#: shop/admin.py:133 shop/admin.py:186 shop/models.py:188
+msgid "Products"
+msgstr "Продукти"
 
 #: shop/models.py:46 shop/models.py:53 shop/models.py:70
 msgid "Category"
@@ -259,11 +317,6 @@ msgstr "Категорія"
 #: shop/models.py:54
 msgid "Categories"
 msgstr "Категорії"
-
-#: shop/models.py:58 shop/models.py:60 shop/models.py:108 shop/models.py:109
-#: shop/models.py:111 shop/models.py:112
-msgid "photo"
-msgstr "фото"
 
 #: shop/models.py:71
 #, fuzzy
@@ -281,93 +334,111 @@ msgstr "Оновлено"
 msgid "Sales count"
 msgstr "Кількість продаж"
 
-#: shop/models.py:93
-msgid "Collections"
-msgstr "Колекції"
-
 #: shop/models.py:99
 msgid "name"
 msgstr ""
 
 #: shop/models.py:100
 msgid "value"
-msgstr ""
+msgstr "значення"
 
-#: shop/models.py:129
-msgid "Name"
-msgstr "Назва"
-
-#: shop/models.py:130
-msgid "Description"
-msgstr "Опис"
-
-#: shop/models.py:131
+#: shop/models.py:132
 msgid "Price"
 msgstr "Ціна"
 
-#: shop/models.py:132
+#: shop/models.py:133
 msgid "Stock"
 msgstr "В наявності"
 
-#: shop/models.py:133
+#: shop/models.py:134
 msgid "Available"
 msgstr "Досутпно"
 
-#: shop/models.py:135
+#: shop/models.py:136
 msgid "Updated"
 msgstr "Оновлено"
 
-#: shop/models.py:136
+#: shop/models.py:137
 msgid "Sales Count"
 msgstr "Кількість продаж"
 
-#: shop/models.py:137
+#: shop/models.py:138
 msgid "Popularity"
 msgstr "Популярність"
 
-#: shop/models.py:138
+#: shop/models.py:139
 msgid "Slug"
 msgstr "Ідентифікатор"
 
-#: shop/models.py:139
+#: shop/models.py:140
 msgid "Enter the color name, e.g., magenta or purple"
 msgstr "Введіть назву кольору, наприклад рожевий"
 
-#: shop/models.py:139
+#: shop/models.py:140
 msgid "Color Name"
 msgstr "Назва кольору"
 
-#: shop/models.py:140
+#: shop/models.py:141
 msgid "Enter the color value in the format #RRGGBB"
 msgstr "Введіть значення кольору в форматі #RRGGBB"
 
-#: shop/models.py:140
+#: shop/models.py:141
 msgid "Color Value"
 msgstr "Значення кольору"
 
-#: shop/models.py:141
+#: shop/models.py:142
 msgid "Format: LxHxD (in mm or specify cm)"
 msgstr "Формат розміру"
 
-#: shop/models.py:142
+#: shop/models.py:143
 msgid "Discount percentage (e.g., 10.00 for 10%)"
 msgstr "Знажка в %"
 
-#: shop/models.py:142
+#: shop/models.py:143
 msgid "Discount"
 msgstr "Знижка"
 
-#: shop/models.py:149
+#: shop/models.py:150
 msgid "Currency"
 msgstr "Валюта"
 
-#: shop/models.py:187
-msgid "Products"
-msgstr "Продукти"
-
-#: shop/models.py:194 shop/models.py:196
+#: shop/models.py:195 shop/models.py:197
 msgid "images"
 msgstr "картинкі"
+
+#: team/models.py:47
+#, fuzzy
+#| msgid "Default Surname"
+msgid "Surname"
+msgstr "Пріізвищє"
+
+#: team/models.py:48
+msgid "Role"
+msgstr "Роль"
+
+#: team/models.py:49
+msgid "Experience"
+msgstr "Досвід"
+
+#: team/models.py:58
+msgid "Link to the Telegram"
+msgstr "Посилання на Телеграм"
+
+#: team/models.py:95
+msgid "TeamMember"
+msgstr "Член команди"
+
+#: team/models.py:96
+msgid "TeamMembers"
+msgstr "Члени команди"
+
+#: technologies/models.py:85
+msgid "Technology"
+msgstr "Технологія"
+
+#: technologies/models.py:86
+msgid "Technologies"
+msgstr "Технології"
 
 #: templates/admin/base_site.html:5
 msgid "Django site admin"
@@ -375,7 +446,7 @@ msgstr "Сайт адмін Джаного"
 
 #: templates/admin/base_site.html:10
 msgid "Logo"
-msgstr ""
+msgstr "Лого"
 
 #: templates/admin/base_site.html:12
 msgid "Django administration"
@@ -1876,6 +1947,34 @@ msgstr ""
 
 #: venv/lib/python3.9/site-packages/django/views/templates/default_urlconf.html:248
 msgid "Connect, get help, or contribute"
+msgstr ""
+
+#: venv/lib/python3.9/site-packages/drf_spectacular/openapi.py:1371
+#: venv/lib/python3.9/site-packages/drf_spectacular/openapi.py:1424
+#: venv/lib/python3.9/site-packages/drf_spectacular/openapi.py:1428
+#: venv/lib/python3.9/site-packages/drf_spectacular/openapi.py:1432
+msgid "No response body"
+msgstr ""
+
+#: venv/lib/python3.9/site-packages/drf_spectacular/openapi.py:1396
+#: venv/lib/python3.9/site-packages/drf_spectacular/openapi.py:1450
+msgid "Unspecified response body"
+msgstr ""
+
+#: venv/lib/python3.9/site-packages/drf_spectacular/plumbing.py:484
+#, python-format
+msgid "Token-based authentication with required prefix \"%s\""
+msgstr ""
+
+#: venv/lib/python3.9/site-packages/drf_spectacular/views.py:45
+msgid ""
+"\n"
+"    OpenApi3 schema for this API. Format can be selected via content "
+"negotiation.\n"
+"\n"
+"    - YAML: application/vnd.oai.openapi\n"
+"    - JSON: application/vnd.oai.openapi+json\n"
+"    "
 msgstr ""
 
 #: venv/lib/python3.9/site-packages/imagekit/admin.py:10

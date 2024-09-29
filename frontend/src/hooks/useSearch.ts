@@ -7,7 +7,7 @@ export const useSearch = () => {
 
     const {open, value} = useAppSelector(state => state.searchBar)
     const dispatch = useAppDispatch()
-    const [debounceValue] = useDebounce(value, 500)
+    const [debounceValue] = useDebounce(value, 700)
     
 
     useEffect(() => {

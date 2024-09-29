@@ -1,0 +1,54 @@
+@import '../../variables';
+
+
+
+.slider {
+
+    &.disabled :global(.slick-slide) {
+        pointer-events: none;
+    }
+
+    & :global(.slick-slide) {
+        padding: 0 10px;
+    };
+
+    & :global(.swiper-pagination) {
+        position: static;
+        order: 1;
+        width: auto;
+    }
+
+    & :global(.swiper-pagination-bullet-active) {
+        background-color: $color-black;
+    }
+
+    & div:global(.slick-track) {
+        display: flex;
+    };
+    
+    & :global(.slick-list) {
+        margin: 0 -10px;
+    }
+
+    .control {
+        margin-top: 20px;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        svg{
+            width: 24px;
+            height: 24px;
+        }
+    }
+
+    .prev {
+        border: 1px solid black;
+        order: 0;
+    }
+    
+    .next {
+        order: 2;
+    }
+}

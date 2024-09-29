@@ -1,0 +1,46 @@
+@import "../../../variables";
+
+.title {
+	font-size: clamp(16px,4vw, 60px);
+	
+	text-align: center;
+	margin: auto;
+	margin-bottom: clamp(24px, 5vw, 60px);
+	width: 60%;
+	@media (max-width: $screen-mobile) {
+		line-height: 22px;
+		width: 80%;
+	}
+}
+
+.content {
+	display: flex;
+	justify-content: flex-start;
+	gap: 20px;
+	flex-wrap: wrap;
+	margin-bottom: clamp(20px, 5vw, 60px);
+}
+
+.imageSize {
+	width: clamp(74px, 25vw, 320px);
+	height: clamp(69px, 15vw, 190px);
+	padding-top: clamp(0%, 15%, 50%);
+	border: 1px solid $color-gray-100;
+}
+
+.skeletonWrapper {
+	width: clamp(74px, 25vw, 285px);
+	height: clamp(69px, 15vw, 170px);
+	display: flex;
+	gap: 16px;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	position: relative;
+}
+
+.imageSkeleton {
+	width: 100%;
+	height: 100%;
+	border-radius: 5px;
+}

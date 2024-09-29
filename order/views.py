@@ -16,15 +16,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
-import logging
-import requests
-import json
-import random
-import os
+import logging, requests, json
 from django.http import JsonResponse
 from rest_framework.decorators import action
-from .signals import update_order_status_with_notification
-
+from .notifications import update_order_status_with_notification
+from django.http import JsonResponse, Http404
 
 
 logger = logging.getLogger(__name__)
@@ -52,20 +48,24 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
         
-        chat_id = serializer.validated_data.get('chat_id')
+        # Ensure the chat_id is provided in the request data
+        chat_id = request.data.get('chat_id')
         if not chat_id:
             logger.error("chat_id is missing in the request data.")
             return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
         
+        # Validate and update the instance
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)        
         self.perform_update(serializer)
         
+        # Handle potential prefetched objects cache
         if getattr(instance, '_prefetched_objects_cache', None):
             instance._prefetched_objects_cache = {}
         
         return Response(serializer.data)
+    
 
 
 class TelegramUserViewSet(viewsets.ModelViewSet):
@@ -373,23 +373,51 @@ def update_order(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
-#@api_view(['GET'])
-#@permission_classes([IsAuthenticated])
-#def get_order_summary(request):
-#    chat_id = request.query_params.get('chat_id')
     
-#    if not chat_id:
-#        return Response({'error': 'Chat ID is required.'}, status=400)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_order_summary_by_chat_id(request, chat_id):
+    if not chat_id:
+        return Response({'error': 'Chat ID is required.'}, status=400)
 
-#    try:
-#        summary = OrderSummary.objects.get(chat_id=chat_id)
-#        serializer = OrderSummarySerializer(summary)
-#        return Response(serializer.data)
-#   except OrderSummary.DoesNotExist:
-#        return Response({'error': 'No orders found for this chat ID.'}, status=404)
-#    except Exception as e:
-#        return Response({'error': str(e)}, status=500)
-    
+    try:
+        # Retrieve summaries by chat_id
+        summaries = OrderSummary.objects.filter(chat_id=chat_id)
+        if not summaries.exists():
+            return Response({'error': 'No summaries found for this chat ID.'}, status=404)
+
+        summary_data = []
+        for summary in summaries:
+            orders = summary.orders  # This is a list, not a queryset
+            for order in orders:
+                # Assuming each order is a dict with necessary details
+                order_data = {
+                    'order_id': order.get('order_id'),
+                    'created_at': order.get('created_at'),
+                    'submitted_at': order.get('submitted_at'),
+                    'processed_at': order.get('processed_at'),
+                    'complete_at': order.get('complete_at'),
+                    'canceled_at': order.get('canceled_at'),
+                    'order_items': [
+                        {
+                            'product_name': item.get('product_name'),
+                            'collection_name': item.get('collection_name'),
+                            'size': item.get('size'),
+                            'color_name': item.get('color_name'),
+                            'quantity': item.get('quantity'),
+                            'total_sum': float(item.get('total_sum', 0)),  # Convert total_sum to float, default to 0 if not present
+                            'item_price': str(item.get('item_price', '0')),  # Default to '0' if not present
+                            'color_value': item.get('color_value')
+                        }
+                        for item in order.get('order_items', [])
+                    ]
+                }
+                summary_data.append(order_data)
+
+        return Response({'results': summary_data})
+
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
 
 #@api_view(['POST'])
 #@permission_classes([AllowAny])

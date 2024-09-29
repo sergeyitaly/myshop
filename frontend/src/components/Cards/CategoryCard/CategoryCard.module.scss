@@ -1,0 +1,18 @@
+
+.card {
+    position: relative;
+    cursor: pointer;
+
+    h1 {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-weight: 500;
+        font-size: clamp(1rem, 1.702vw + 0.468rem, 2rem);
+    }
+}
+
+.imageSize {
+    padding-top: 67%;
+}
