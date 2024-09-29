@@ -150,25 +150,25 @@ class OrderAdmin(admin.ModelAdmin):
         return obj.order_items.aggregate(total=Sum('quantity') * Sum('product__price'))['total'] or 0
     total_price.short_description = _('Total Price')
 
-def save_model(self, request, obj, form, change):
-    if change:
-        old_obj = self.model.objects.get(pk=obj.pk)
-        order_items = obj.order_items.all()  # Fetch order items only once
-        
-        if old_obj.status != obj.status:  # Only update if status has changed
-            if obj.status == 'submitted':
-                obj.submitted_at = timezone.now()
-            elif obj.status == 'created':
-                obj.created_at = timezone.now()
-            elif obj.status == 'processed':
-                obj.processed_at = timezone.now()
-            elif obj.status == 'complete':
-                obj.complete_at = timezone.now()
-            elif obj.status == 'canceled':
-                obj.canceled_at = timezone.now()
+    def save_model(self, request, obj, form, change):
+        if change:
+            old_obj = self.model.objects.get(pk=obj.pk)
+            if old_obj.status != obj.status or old_obj.status == obj.status:
+                if obj.status == 'submited':
+                    obj.submitted_at = timezone.now()
+                if obj.status == 'created':
+                    obj.created_at = timezone.now()
+                if obj.status == 'processed':
+                    obj.processed_at = timezone.now()
+                elif obj.status == 'complete':
+                    obj.complete_at = timezone.now()
+                elif obj.status == 'canceled':
+                    obj.canceled_at = timezone.now()
+                order_items = obj.order_items.all()
 
-            # Ensure chat_id is valid before sending notification
+            # Ensure that obj.telegram_user is not None and has chat_id attribute
             if obj.telegram_user and obj.telegram_user.chat_id:
+ # Send notification about status change
                 update_order_status_with_notification(
                     obj.id,
                     order_items,
@@ -177,7 +177,7 @@ def save_model(self, request, obj, form, change):
                     obj.telegram_user.chat_id
                 )
 
-    super().save_model(request, obj, form, change)
+        super().save_model(request, obj, form, change)
 
 
 
