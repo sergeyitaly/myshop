@@ -47,7 +47,7 @@ export const Footer = () => {
                     </Link>
                     <Link
                         className={styles.link}
-                        to="/"
+                        to="/payment_delivery"
                     >
                         {t('payment_delivery')}
                     </Link>

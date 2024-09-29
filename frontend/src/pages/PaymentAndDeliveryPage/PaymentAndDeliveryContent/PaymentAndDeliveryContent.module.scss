@@ -1,0 +1,60 @@
+@import "../../../variables";
+
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  margin-top: 12px;
+  padding: 0;
+
+  font-family: Capriola;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5em;
+  color: $color-black;
+  text-align: left;
+}
+
+.section:last-child {
+  display: none;
+}
+
+.text {
+  margin-top: 12px;
+}
+
+@media screen and (min-width: $screen-big) {
+  .container {
+    gap: 24px;
+    margin: 49px 0 0 0;
+  }
+
+  .section {
+    font-family: Capriola;
+    font-size: 32px;
+    font-weight: 400;
+    line-height: 1.43em;
+  }
+
+  .section:last-child {
+    display: flex;
+    font-family: Inter;
+    font-size: 36px;
+    font-weight: 600;
+    line-height: 1.21em;
+    text-align: left;
+    color: #787878;
+    margin-top: 62px;
+    margin-bottom: 82px;
+  }
+
+  .text {
+    margin-top: 24px;
+  }
+}
