@@ -2,10 +2,10 @@
 from django.utils import timezone
 from django.conf import settings
 from .models import Order
-from .shared_utils import get_random_saying
 import logging
 import requests
 from .shared_utils import get_random_saying
+from .signals import update_order_summary
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +71,7 @@ def update_order_status_with_notification(order_id, order_items, new_status, sta
             )
 
         send_telegram_message(chat_id, message)
+        update_order_summary()
 
     except Order.DoesNotExist:
         logger.error(f"Order with id {order_id} does not exist.")
