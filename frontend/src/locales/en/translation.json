@@ -67,9 +67,23 @@
           "most_popular": "Most Popular",
           "discounts": "Discounts",
           "title": "Sort"
-
         },
-    
+    "payment_and_delivery": {
+      "title": "Payment and delivery",
+      "payment_title": "Payment", 
+      "payment_content": "You can pay for your order using a bank card through our website. If you encounter any issues during payment, please contact us via <strong>email</strong> at <strong>koloryt@gmail.com</strong>, and we will be happy to assist you in completing your purchase.",
+      "delivery_title": "Delivery", 
+      "delivery_content": "For deliveries within Ukraine, you have the option of picking up your order from our store in Kyiv. Deliveries across Ukraine are carried out Monday to Friday via the Nova Poshta service. The delivery time ranges from <strong>1</strong> to <strong>3</strong> days. If your order exceeds <strong>3000</strong> UAH, delivery will be free. Otherwise, the customer covers the delivery cost according to the service's rates.",
+      "international_delivery_title": "International Delivery",
+      "international_delivery_content": {
+        "first_paragraph": "International orders are shipped via the Ukrposhta <strong>EMS</strong> courier service, and the delivery cost is already included in the product price on the international version of our website. Delivery times may vary from <strong>2</strong> to <strong>4</strong> weeks depending on the destination country. We do not ship orders to Russia and Belarus due to Russian military aggression. International orders may be subject to customs duties in the destination country, so we advise you to review your country's customs regulations before placing an order.",
+        "second_paragraph": "We do not ship orders to Russia and Belarus due to Russian military aggression. International orders may be subject to customs duties in the destination country, so we advise you to review your country's customs regulations before placing an order."
+      },
+      "returns_title": "Returns", 
+      "returns_content": "As for returns and exchanges, jewelry items are not eligible for exchange or return according to Ukrainian law. For other product categories, returns are accepted within <strong>14</strong> days, provided that the product has not been used and retains its original condition.",
+      "p_s_title": "P.S.", 
+      "p_s_content": "This website was created exclusively for educational purposes and to gain practical skills. The site has no commercial basis, and none of the products are for sale."
+  },
   "products": {
     "error": "An error occurred :(",
     "empty": "No products found for this query"
