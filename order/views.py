@@ -20,7 +20,11 @@ import logging, requests, json
 from django.http import JsonResponse
 from rest_framework.decorators import action
 from .notifications import update_order_status_with_notification
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from django.utils.dateformat import format as date_format
+
 
 
 logger = logging.getLogger(__name__)
@@ -30,6 +34,54 @@ def health_check(request):
 class OrderSummaryViewSet(viewsets.ModelViewSet):
     queryset = OrderSummary.objects.all()
     serializer_class = OrderSummarySerializer
+
+    def format_timestamp(self, timestamp):
+        # Format timestamp to 'Y-m-d H:i'
+        return date_format(timestamp, 'Y-m-d H:i') if timestamp else None
+
+    def prepare_order_summary(self, order_summary):
+        # Extracting order items and preparing summary
+        order_items = [
+            {
+                "size": item.size,
+                "quantity": item.quantity,
+                "total_sum": item.total_sum,
+                "color_name": item.color_name,
+                "item_price": str(item.item_price),
+                "color_value": item.color_value,
+                "product_name": item.product_name,
+                "collection_name": item.collection_name,
+            }
+            for item in order_summary.order.order_items.all()
+        ]
+
+        # Prepare summary with formatted timestamps
+        order_summary_data = {
+            "order_id": order_summary.order.id,
+            "order_items": order_items,
+            "created_at": self.format_timestamp(order_summary.order.created_at),
+            "submitted_at": self.format_timestamp(order_summary.order.submitted_at),
+            "processed_at": self.format_timestamp(order_summary.order.processed_at),
+            "complete_at": self.format_timestamp(order_summary.order.complete_at),
+            "canceled_at": self.format_timestamp(order_summary.order.canceled_at)
+        }
+
+        # Only keep the latest timestamp status
+        status_fields = ['submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at']
+        latest_status = max(
+            ((field, order_summary_data[field]) for field in status_fields if order_summary_data[field]),
+            key=lambda x: x[1],  # Sort by the timestamp value
+            default=None
+        )
+        if latest_status:
+            # Keep only the latest status in the response
+            order_summary_data = {
+                "order_id": order_summary.order.id,
+                "order_items": order_items,
+                latest_status[0]: latest_status[1],
+            }
+
+        return order_summary_data
 
     def create(self, request, *args, **kwargs):
         logger.debug("Received data: %s", request.data)
@@ -41,30 +93,39 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
             logger.error("chat_id is missing in the request data.")
             return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
         
+        # Perform creation
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+        # Prepare formatted order summary
+        order_summary_data = self.prepare_order_summary(serializer.instance)
+        
+        return Response(order_summary_data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         
-        # Ensure the chat_id is provided in the request data
         chat_id = request.data.get('chat_id')
         if not chat_id:
             logger.error("chat_id is missing in the request data.")
             return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Validate and update the instance
+        # Validate and update instance
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)        
+        serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         
         # Handle potential prefetched objects cache
         if getattr(instance, '_prefetched_objects_cache', None):
             instance._prefetched_objects_cache = {}
-        
-        return Response(serializer.data)
+
+        # Prepare updated order summary
+        order_summary_data = self.prepare_order_summary(instance)
+
+        return Response(order_summary_data)
+
+
     
 
 
