@@ -35,7 +35,6 @@ def datetime_to_str(dt):
         return dt.strftime('%Y-%m-%d %H:%M')
     return None
 
-
 def get_order_summary(order):
     """Generates a summary of an order."""
     submitted_at = ensure_datetime(order.submitted_at)
@@ -76,7 +75,6 @@ def get_order_summary(order):
                 'collection_name': item['collection_name'],
             } for item in order_items_data
         ],
-        # Use the determined latest status time from the appropriate field
         latest_status_key: datetime_to_str(latest_status_time),  # This field will reflect the latest timestamp
         'submitted_at': datetime_to_str(submitted_at),
     }

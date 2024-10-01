@@ -24,6 +24,7 @@ from django.http import JsonResponse
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django.utils.dateformat import format as date_format
+from django.utils.timezone import make_naive, is_aware
 from datetime import datetime
 
 
@@ -428,6 +429,46 @@ def get_orders(request):
     except Exception as e:
         logger.error(f"Error fetching orders: {e}")
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+def safe_make_naive(dt):
+    if dt is None:
+        return None
+    return make_naive(dt) if is_aware(dt) else dt
+
+def format_order_summary(order):
+    submitted_at = safe_make_naive(order.submitted_at)
+    processed_at = safe_make_naive(order.processed_at)
+    complete_at = safe_make_naive(order.complete_at)
+    canceled_at = safe_make_naive(order.canceled_at)
+
+    statuses = {
+        'submitted_at': submitted_at,
+        'processed_at': processed_at,
+        'complete_at': complete_at,
+        'canceled_at': canceled_at
+    }
+    
+    latest_status_field = max(
+        statuses,
+        key=lambda s: statuses[s] or datetime.min
+    )
+    latest_status_timestamp = statuses[latest_status_field]
+
+    def datetime_to_str(dt):
+        if dt:
+            return dt.strftime('%Y-%m-%d %H:%M')
+        return None
+
+    serializer = OrderSerializer(order)
+    order_data = serializer.data
+
+    return {
+        'order_id': order.id,
+        'order_items': order_data['order_items'],
+        'submitted_at': datetime_to_str(submitted_at),
+        latest_status_field: datetime_to_str(latest_status_timestamp)
+    }
+
 @api_view(['POST'])
 def update_order(request):
     chat_id = request.data.get('chat_id')
@@ -440,39 +481,27 @@ def update_order(request):
         return Response({"detail": "Orders must be a list."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        # Retrieve the existing OrderSummary for the given chat_id
-        order_summary = OrderSummary.objects.get(chat_id=chat_id)
-
-        # Prepare the order summaries
+        # Retrieve existing orders based on the incoming order data
         updated_orders = []
         for order_data in orders:
             order_id = order_data.get('order_id')
-            order_items = order_data.get('order_items', [])
-            latest_status = order_data.get('latest_status')  # Get the latest status
-            latest_status_timestamp = order_data.get('latest_status_timestamp')  # Get the corresponding timestamp
-            submitted_at = order_data.get('submitted_at')
+            if not order_id:
+                return Response({"detail": "Order ID is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Validate required fields
-            if order_id is None or not order_items or latest_status is None:
-                return Response({"detail": "Order ID, items, and latest status are required for each order."}, 
-                                status=status.HTTP_400_BAD_REQUEST)
-
-            # Format each order for the summary
-            formatted_order = {
-                "order_id": order_id,
-                "order_items": order_items,
-                "latest_status": latest_status,
-                "latest_status_timestamp": date_format(latest_status_timestamp, 'Y-m-d H:i') if latest_status_timestamp else None,
-                "submitted_at": date_format(submitted_at, 'Y-m-d H:i') if submitted_at else None,
-            }
+            order = Order.objects.get(id=order_id)  # Adjust as needed based on your logic
+            formatted_order = format_order_summary(order)
             updated_orders.append(formatted_order)
 
-        # Update the orders field in the OrderSummary
-        order_summary.orders = updated_orders
-        order_summary.save()
+        # Update or create the OrderSummary with the formatted orders
+        OrderSummary.objects.update_or_create(
+            chat_id=chat_id,
+            defaults={'orders': updated_orders}
+        )
 
         return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
 
+    except Order.DoesNotExist:
+        return Response({"error": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
     except OrderSummary.DoesNotExist:
         return Response({"error": "Order summary not found."}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
