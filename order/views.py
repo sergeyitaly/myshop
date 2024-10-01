@@ -24,6 +24,7 @@ from django.http import JsonResponse
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django.utils.dateformat import format as date_format
+from datetime import datetime
 
 
 
@@ -38,6 +39,13 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
     def format_timestamp(self, timestamp):
         # Format timestamp to 'Y-m-d H:i'
         return date_format(timestamp, 'Y-m-d H:i') if timestamp else None
+
+    def make_aware_if_naive(self, dt):
+        # Convert naive datetime to aware using Django's timezone support
+        if dt and isinstance(dt, datetime):
+            if timezone.is_naive(dt):
+                return timezone.make_aware(dt)
+        return dt
 
     def prepare_order_summary(self, order_summary):
         # Extracting order items and preparing summary
@@ -55,22 +63,29 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
             for item in order_summary.order.order_items.all()
         ]
 
+        # Convert all relevant fields to timezone-aware datetimes
+        order_created_at = self.make_aware_if_naive(order_summary.order.created_at)
+        order_submitted_at = self.make_aware_if_naive(order_summary.order.submitted_at)
+        order_processed_at = self.make_aware_if_naive(order_summary.order.processed_at)
+        order_complete_at = self.make_aware_if_naive(order_summary.order.complete_at)
+        order_canceled_at = self.make_aware_if_naive(order_summary.order.canceled_at)
+
         # Prepare summary with formatted timestamps
         order_summary_data = {
             "order_id": order_summary.order.id,
             "order_items": order_items,
-            "created_at": self.format_timestamp(order_summary.order.created_at),
-            "submitted_at": self.format_timestamp(order_summary.order.submitted_at),
-            "processed_at": self.format_timestamp(order_summary.order.processed_at),
-            "complete_at": self.format_timestamp(order_summary.order.complete_at),
-            "canceled_at": self.format_timestamp(order_summary.order.canceled_at)
+            "created_at": self.format_timestamp(order_created_at),
+            "submitted_at": self.format_timestamp(order_submitted_at),
+            "processed_at": self.format_timestamp(order_processed_at),
+            "complete_at": self.format_timestamp(order_complete_at),
+            "canceled_at": self.format_timestamp(order_canceled_at)
         }
 
         # Only keep the latest timestamp status
         status_fields = ['submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at']
         latest_status = max(
             ((field, order_summary_data[field]) for field in status_fields if order_summary_data[field]),
-            key=lambda x: x[1],  # Sort by the timestamp value
+            key=lambda x: self.make_aware_if_naive(x[1]),  # Ensure all compared fields are aware
             default=None
         )
         if latest_status:
