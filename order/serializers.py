@@ -6,7 +6,6 @@ class TelegramUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = TelegramUser
         fields = ['id', 'phone', 'chat_id']
-
 class OrderSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderSummary
@@ -34,7 +33,20 @@ class OrderSummarySerializer(serializers.ModelSerializer):
                 existing_orders[order_id] = new_order
         
         # Convert the dictionary back to a list for output
-        representation['orders'] = list(existing_orders.values())
+        updated_orders = list(existing_orders.values())
+        
+        # Filter to include only necessary fields
+        filtered_orders = []
+        for order in updated_orders:
+            filtered_order = {
+                'order_id': order['order_id'],
+                'submitted_at': order.get('submitted_at'),  # Assuming you have this in the order data
+                'latest_status': order.get('latest_status'),  # Assuming you have this in the order data
+                'latest_status_time': order.get('latest_status_time'),  # Assuming you have this in the order data
+            }
+            filtered_orders.append(filtered_order)
+
+        representation['orders'] = filtered_orders
         return representation
 
     def _convert_decimals(self, data):
@@ -45,7 +57,7 @@ class OrderSummarySerializer(serializers.ModelSerializer):
         elif isinstance(data, decimal.Decimal):
             return float(data)
         return data
-    
+
     def validate_chat_id(self, value):
         if not value:
             raise serializers.ValidationError("chat_id cannot be null.")
