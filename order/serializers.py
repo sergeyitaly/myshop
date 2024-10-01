@@ -11,12 +11,30 @@ class OrderSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderSummary
         fields = ['chat_id', 'orders']
-        
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         # Ensure Decimal values are serialized properly
         representation['orders'] = self._convert_decimals(representation['orders'])
+        
+        # Create a mapping of existing orders by order_id
+        existing_orders = {order['order_id']: order for order in representation['orders']}
+        
+        # Incoming orders from validated data
+        incoming_orders = self.initial_data.get('orders', [])
+        
+        # Process incoming orders
+        for new_order in incoming_orders:
+            order_id = new_order.get('order_id')
+            if order_id in existing_orders:
+                # Update the existing order's fields
+                existing_orders[order_id].update(new_order)
+            else:
+                # Add new order if it does not exist
+                existing_orders[order_id] = new_order
+        
+        # Convert the dictionary back to a list for output
+        representation['orders'] = list(existing_orders.values())
         return representation
 
     def _convert_decimals(self, data):

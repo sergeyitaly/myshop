@@ -23,7 +23,9 @@ export enum ROUTE {
     ABOUT = '/about',
     THANK = '/thank',
     CONTACTS='/contacts',
-    SENDCONTACTS='/sendcontacts'
+    SENDCONTACTS = '/sendcontacts',
+    PAYMENT_DELIVERY = '/payment_delivery',
+    PRIVACY_POLICY = '/privacy_policy'
 }
 
 export enum ENDPOINTS {

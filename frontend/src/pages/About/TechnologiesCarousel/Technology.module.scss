@@ -1,51 +1,48 @@
 @import "../../../variables";
 
-.container {
-	display: flex;
-	flex-direction: column;
-	gap: clamp(40px, 5vw + 10px, 128px);
-	padding: 0 clamp(16px, 2vw, 50px);
-	padding-bottom: clamp(60px, 8vw, 128px);
+.wrapper {
+	padding-bottom: clamp(32px, 3vw, 128px);
 }
 
 .title {
-	font-size: clamp(20px, 5vw, 38px);
+	font-size: clamp(20px, 5vw, 58px);
 	line-height: clamp(20px, 5vw + 5px, 105px);
 	text-align: center;
-	margin-top: clamp(50px, 7vw, 100px);
-	max-width: 70%;
+	padding-bottom: clamp(25px, 3vw + 10px, 125px);
+	width: clamp(80%, 10vw, 50%); 
+	max-width: $screen-tablet;
 	margin: auto;
 }
 
-.imageWrapper {
-	padding-bottom: clamp(32px, 5vw, 64px);
+.container {
+	margin-bottom: clamp(32px, 5vw, 64px);
 	position: relative;
-	overflow: hidden;
-
-	@media (min-width: $screen-mobile) {
-		&:hover .imageSize {
-			filter: grayscale(0%);
-		}
-	}
 }
 
 .imageSize {
-	width: 335px;
-	height: 191px;
+	width: clamp(74px, calc(100vw * 0.2), 335px);
+	height: clamp(47px, calc((100vw * 0.2) * 191 / 335), 191px);
 	padding-top: 50%;
-	transition: filter 0.3s ease-in-out;
+	transition:
+		filter 0.3s ease-in-out,
+		width 0.3s ease-in-out,
+		height 0.3s ease-in-out;
 	filter: grayscale(100%);
+	object-fit: cover;
+	border: 1px solid $color-gray-100;
 
-	@media (max-width: $screen-tablet) {
-		width: 196px;
-		height: 117px;
-		padding-top: 27%;
+	@media (min-width: 1440px) {
+		width: 335px;
+		height: 191px;
+	}
+
+	@media (min-width: $screen-mobile) {
+		&:hover {
+			filter: grayscale(0%);
+		}
 	}
 
 	@media (max-width: $screen-mobile) {
-		width: 74px;
-		height: 47px;
-		padding-top: 0;
 		filter: grayscale(100%);
 	}
 }

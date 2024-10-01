@@ -1,48 +1,30 @@
 @import "../../../variables";
 
-.container {
-	display: flex;
-	flex-direction: column;
-	gap: clamp(40px, 10vw, 115px);
-	margin-bottom: 60px;
-	padding-left: 15px;
-
-	@media (max-width: $screen-mobile) {
-		padding-left: 0px;
-	}
+.wrapper {
+	padding-bottom: clamp(72px, 5vw + 30px, 164px);
 }
 
 .title {
-	font-size: clamp(20px, 5vw, 38px);
+	font-size: clamp(20px, 5vw, 58px);
 	text-align: center;
+	margin-bottom: clamp(40px, 5vw + 10px, 115px);
 }
 
 .teamItem {
 	display: flex;
 	flex-direction: column;
-	align-items: center;
 	text-align: center;
-	width: 350px;
+	max-width: clamp(164px, calc(30vw + 10px), 440px); 
 	margin-bottom: clamp(10px, 5vw, 40px);
-	margin-left: 70px;
-
-	@media (max-width: $screen-tablet) {
-		width: 253px;
-	}
-	@media (max-width: $screen-mobile) {
-		width: 164px;
-		margin-left: 10px;
-	}
+	transition: width 0.5s ease-in-out;
 
 	.imageSize {
 		width: 100%;
 		padding-top: 115%;
 		filter: grayscale(100%);
-		transition: filter 0.3s ease;
-
-		@media (max-width: $screen-mobile) {
-			filter: grayscale(100%);
-		}
+		transition:
+			filter 0.3s ease,
+			width 0.5s ease-in-out;
 
 		@media (min-width: $screen-mobile) {
 			&:hover {
@@ -52,7 +34,7 @@
 	}
 
 	.name {
-		font-size: clamp(15px, 4vw, 30px);
+		font-size: clamp(15px, 2vw, 30px);
 		padding-top: 20px;
 		margin-bottom: 10px;
 		text-wrap: nowrap;
@@ -73,8 +55,7 @@
 		font-size: 16px;
 		font-weight: 400;
 		color: $color-gray-200;
-		text-align: center;
-		height: 160px;
+		height: 110px;
 		margin-bottom: 5px;
 		padding: 10px;
 

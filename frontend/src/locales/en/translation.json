@@ -92,9 +92,49 @@
           "most_popular": "Most Popular",
           "discounts": "Discounts",
           "title": "Sort"
-
         },
-    
+    "payment_and_delivery": {
+      "title": "Payment and delivery",
+      "payment_title": "Payment", 
+      "payment_content": "You can pay for your order using a bank card through our website. If you encounter any issues during payment, please contact us via <strong>email</strong> at <strong>koloryt@gmail.com</strong>, and we will be happy to assist you in completing your purchase.",
+      "delivery_title": "Delivery", 
+      "delivery_content": "For deliveries within Ukraine, you have the option of picking up your order from our store in Kyiv. Deliveries across Ukraine are carried out Monday to Friday via the Nova Poshta service. The delivery time ranges from <strong>1</strong> to <strong>3</strong> days. If your order exceeds <strong>3000</strong> UAH, delivery will be free. Otherwise, the customer covers the delivery cost according to the service's rates.",
+      "international_delivery_title": "International Delivery",
+      "international_delivery_content": {
+        "first_paragraph": "International orders are shipped via the Ukrposhta <strong>EMS</strong> courier service, and the delivery cost is already included in the product price on the international version of our website. Delivery times may vary from <strong>2</strong> to <strong>4</strong> weeks depending on the destination country. We do not ship orders to Russia and Belarus due to Russian military aggression. International orders may be subject to customs duties in the destination country, so we advise you to review your country's customs regulations before placing an order.",
+        "second_paragraph": "We do not ship orders to Russia and Belarus due to Russian military aggression. International orders may be subject to customs duties in the destination country, so we advise you to review your country's customs regulations before placing an order."
+      },
+      "returns_title": "Returns", 
+      "returns_content": "As for returns and exchanges, jewelry items are not eligible for exchange or return according to Ukrainian law. For other product categories, returns are accepted within <strong>14</strong> days, provided that the product has not been used and retains its original condition.",
+      "p_s_title": "P.S.", 
+      "p_s_content": "This website was created exclusively for educational purposes and to gain practical skills. The site has no commercial basis, and none of the products are for sale."
+  },
+  "privacy_and_policy": {
+      "title": "Privacy and Policy",
+      "privacy_title": "Your privacy is important to us.", 
+      "privacy_content": {
+        "first_paragraph": "This section outlines how we collect, use, process, and protect your personal data.",
+        "second_paragraph": "This Privacy Policy applies to the use of our website, applications, and services, so please take a moment to read it."
+      },
+      "personal_data_title": "What personal data do we collect:", 
+      "personal_data_content": {
+        "first_paragraph": "We may collect various types of personal data that you voluntarily provide when interacting with our website, registering an account, placing an order, or filling out forms.",
+        "second_paragraph": "This may include your name, email address, phone number, address, order information, and more."
+      },
+      "use_data_title": "How we use your personal data:",
+      "use_data_content": "We use the collected personal data to provide services, manage your account, process orders, provide you with information about our products and services, and to communicate with you regarding inquiries and updates.",
+      "protection_title": "Protection of personal data:", 
+      "protection_content": "We take every effort to protect your information and use modern technologies to prevent unauthorized access, loss, or disclosure of your personal information.",
+      "disclosure_title": "Disclosure to third parties:", 
+      "disclosure_content": "We do not disclose your personal data to third parties without your consent, except when required by law or to provide the services you requested.",
+      "changes_title": "Changes to the Privacy Policy:", 
+      "changes_content": {
+        "first_paragraph": "We may periodically update this Privacy Policy.",
+        "second_paragraph": "Please refer to this page to stay informed about any changes."
+      },
+      "contact_title": "Contact information:", 
+      "contact_content": "If you have any questions or concerns regarding this Privacy Policy or your information, please contact us using the contact details provided on our website."
+    },
   "products": {
     "error": "An error occurred :(",
     "empty": "No products found for this query"
@@ -121,6 +161,9 @@
    "training_project": "This site is a training project.",
    "left_rewiew": "Please write your review",
    "here": "here",
-   "rate_us": "Rate us"
+  "error_name": "Invalid name format. Please enter a correct format.",
+  "error_email": "Please enter a valid email address.",
+  "error_phone": "Invalid phone number format. Please enter a valid phone number.",
+  "order_place" : "Place an order"
 }
   
