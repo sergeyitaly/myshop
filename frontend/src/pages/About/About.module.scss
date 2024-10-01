@@ -6,31 +6,20 @@
 	justify-content: center;
 }
 
-.title {
-	padding: clamp(8px, 3vw, 20px) 0 clamp(18px, 3vw, 40px) 0;
-	padding-left: clamp(20px, 5vw, 75px);
-	font-size: clamp(16px, 2vw + 8px, 32px);
+.border {
+	border-top: 1px solid $color-black;
+	margin-bottom: clamp(40px, 3vw, 64px);
 }
 
 .container {
 	display: flex;
 	gap: clamp(20px, 5vw + 10px, 130px);
 	align-items: center;
-	margin-bottom: clamp(40px, 5vw + 10px, 80px);
-	border-top: 1px solid $color-black;
-	border-bottom: 1px solid $color-black;
-	padding: 90px 150px 90px 150px;
-
-	@media (max-width: $screen-laptop) {
-		padding: 80px 120px 70px 120px;
-	}
-
-	@media (max-width: $screen-tablet) {
-		padding: 60px 30px 60px 30px;
-	}
+	margin-bottom: clamp(40px, 5vw + 10px, 90px);
+	padding: 0 30px;
 
 	@media (max-width: $screen-mobile) {
-		padding: 40px 20px 12px 20px;
+		padding: 0; 
 	}
 }
 
@@ -47,7 +36,7 @@
 }
 
 .content3 {
-	margin-bottom: clamp(60px, 10vw + 30px, 140px);
+	margin-bottom: clamp(30px, 10vw + 30px, 140px);
 
 	@media (max-width: $screen-mobile) {
 		flex-direction: column-reverse;
@@ -56,19 +45,16 @@
 
 .text {
 	font-family: "Capriola", sans-serif;
-	font-size: clamp(16px, 5vw, 22px);
+	font-size: clamp(16px, 2vw, 32px);
 	line-height: clamp(26px, 3vw + 13px, 55px);
 	text-align: center;
 	font-weight: 400;
-
-	@media (max-width: $screen-mobile) {
-		font-size: 16px;
-	}
 }
 
 .img {
 	width: 514px;
 	height: auto;
+	transition: width 0.3s ease-in-out;
 
 	@media (max-width: $screen-laptop) {
 		width: 467px;

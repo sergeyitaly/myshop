@@ -45,7 +45,7 @@ def validate_svg(value):
 class TeamMember(models.Model):
     name = models.CharField(max_length=100,  verbose_name=_('Name'))
     surname = models.CharField(max_length=100, verbose_name=_('Surname'))
-    role = models.CharField(max_length=100,default='developer', verbose_name=_('Role'))
+    role = models.CharField(max_length=100, default='developer', verbose_name=_('Role'))
     experience = models.TextField(null=True, blank=True, verbose_name=_('Experience'))
 
     mobile = models.CharField(max_length=15, blank=True, null=True)

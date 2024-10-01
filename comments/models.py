@@ -7,10 +7,10 @@ class Comment(models.Model):
         ('complete', 'Complete'),
     ]
 
-    name = models.CharField(max_length=255,verbose_name=_('Name'))
+    name = models.CharField(null=True, blank=True, max_length=255,verbose_name=_('Name'))
     email = models.EmailField()
     phone_number = models.CharField(max_length=15)
-    comment = models.TextField(verbose_name=_('Comment'))
+    comment = models.TextField(null=True, blank=True, verbose_name=_('Comment'))
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='processed')
     created_at = models.DateTimeField(auto_now_add=True)
 
