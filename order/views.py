@@ -428,8 +428,6 @@ def get_orders(request):
     except Exception as e:
         logger.error(f"Error fetching orders: {e}")
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-
 @api_view(['POST'])
 def update_order(request):
     chat_id = request.data.get('chat_id')
@@ -438,17 +436,47 @@ def update_order(request):
     if not chat_id:
         return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
 
+    if not isinstance(orders, list):
+        return Response({"detail": "Orders must be a list."}, status=status.HTTP_400_BAD_REQUEST)
+
     try:
+        # Retrieve the existing OrderSummary for the given chat_id
         order_summary = OrderSummary.objects.get(chat_id=chat_id)
-        order_summary.orders = orders
+
+        # Prepare the order summaries
+        updated_orders = []
+        for order_data in orders:
+            order_id = order_data.get('order_id')
+            order_items = order_data.get('order_items', [])
+            latest_status = order_data.get('latest_status')  # Get the latest status
+            latest_status_timestamp = order_data.get('latest_status_timestamp')  # Get the corresponding timestamp
+            submitted_at = order_data.get('submitted_at')
+
+            # Validate required fields
+            if order_id is None or not order_items or latest_status is None:
+                return Response({"detail": "Order ID, items, and latest status are required for each order."}, 
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            # Format each order for the summary
+            formatted_order = {
+                "order_id": order_id,
+                "order_items": order_items,
+                "latest_status": latest_status,
+                "latest_status_timestamp": date_format(latest_status_timestamp, 'Y-m-d H:i') if latest_status_timestamp else None,
+                "submitted_at": date_format(submitted_at, 'Y-m-d H:i') if submitted_at else None,
+            }
+            updated_orders.append(formatted_order)
+
+        # Update the orders field in the OrderSummary
+        order_summary.orders = updated_orders
         order_summary.save()
-        
+
         return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
+
     except OrderSummary.DoesNotExist:
         return Response({"error": "Order summary not found."}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    
     
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
