@@ -11,6 +11,7 @@ import {useLocation, useNavigate} from 'react-router-dom';
 import { ROUTE } from '../../constants';
 import { Product } from '../../models/entities';
 import { AnimatePresence } from 'framer-motion';
+import clsx from 'clsx';
 
 interface HeaderProps {
     basketLoadingStatus: boolean
@@ -20,6 +21,7 @@ export const Header = ({
     basketLoadingStatus
 }: HeaderProps) => {
     const { openBasket, productQty } = useBasket();
+
     const { open, value, debounceValue, toggleSearchBar, handleChange, closeSearchBar } = useSearch();
     const navigate = useNavigate();
     const location = useLocation(); // Используйте хук useLocation
@@ -31,8 +33,9 @@ export const Header = ({
         closeSearchBar();
     };
 
+    
     return (
-        <header className={headerClassName}>
+        <header className={clsx(headerClassName, {[styles.noLine]: location.pathname === '/thank'})}>
             <PageContainer className={styles.container}>
                 <BurgerMenu />
                 <Logo className={styles.logo} />

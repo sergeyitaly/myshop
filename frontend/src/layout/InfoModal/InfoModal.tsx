@@ -37,8 +37,10 @@ export const InfoModal = ({
                 />
                 <div className={styles.content}>
                     <header>{t('pay_attantion')}</header>
-                    <p>{t('training_project')}</p>
-                    <p>{t('left_rewiew')} <Link to={'https://docs.google.com/forms/d/e/1FAIpQLScXzBZeNqUsbB9iQYWlyCrdgrmUB0ZPOlVe_AhKwL9u1Nft0w/viewform'}>{t('here')}</Link></p> 
+                    <div className={styles.info}>
+                        <p>{t('training_project')}</p>
+                        <p>{t('left_rewiew')} <Link to={'https://docs.google.com/forms/d/e/1FAIpQLScXzBZeNqUsbB9iQYWlyCrdgrmUB0ZPOlVe_AhKwL9u1Nft0w/viewform'}>{t('here')}</Link></p> 
+                    </div>
                     <Logo className={styles.logo}/>
                 </div>
             </div>
