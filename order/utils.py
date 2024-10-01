@@ -88,6 +88,13 @@ def prepare_order_summary(order):
         "submitted_at": date_format(order.submitted_at, 'Y-m-d H:i') if order.submitted_at else None,
     }
 
+    # Format timestamps to include only hours and minutes
+    for field in ['created_at', 'processed_at', 'complete_at', 'canceled_at']:
+        if status_fields[field]:
+            order_summary[field] = date_format(status_fields[field], 'Y-m-d H:i')
+        else:
+            order_summary[field] = None
+
     # Add the latest status timestamp to the summary
     if latest_status_timestamp:
         order_summary[latest_status_field] = date_format(latest_status_timestamp, 'Y-m-d H:i')
