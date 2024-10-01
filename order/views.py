@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 def health_check(request):
     return JsonResponse({'status': 'ok'})
 
+
 class OrderSummaryViewSet(viewsets.ModelViewSet):
     queryset = OrderSummary.objects.all()
     serializer_class = OrderSummarySerializer
@@ -48,56 +49,67 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
                 return timezone.make_aware(dt)
         return dt
 
-    def prepare_order_summary(self, order_summary):
-        # Extracting order items and preparing summary
-        order_items = [
-            {
-                "size": item.size,
-                "quantity": item.quantity,
-                "total_sum": item.total_sum,
-                "color_name": item.color_name,
-                "item_price": str(item.item_price),
-                "color_value": item.color_value,
-                "product_name": item.product_name,
-                "collection_name": item.collection_name,
-            }
-            for item in order_summary.order.order_items.all()
-        ]
+    def ensure_datetime(self, value):
+        """Converts a value to a datetime object if it's not None."""
+        if value is None:
+            return None
+        if isinstance(value, datetime):
+            return value
+        return datetime.fromisoformat(value)
 
-        # Convert all relevant fields to timezone-aware datetimes
-        order_created_at = self.make_aware_if_naive(order_summary.order.created_at)
-        order_submitted_at = self.make_aware_if_naive(order_summary.order.submitted_at)
-        order_processed_at = self.make_aware_if_naive(order_summary.order.processed_at)
-        order_complete_at = self.make_aware_if_naive(order_summary.order.complete_at)
-        order_canceled_at = self.make_aware_if_naive(order_summary.order.canceled_at)
+    def datetime_to_str(self, value):
+        """Converts a datetime object to a string."""
+        if value is None:
+            return None
+        return value.strftime("%Y-%m-%d %H:%M")  # Adjust the format as needed
 
-        # Prepare summary with formatted timestamps
-        order_summary_data = {
-            "order_id": order_summary.order.id,
-            "order_items": order_items,
-            "created_at": self.format_timestamp(order_created_at),
-            "submitted_at": self.format_timestamp(order_submitted_at),
-            "processed_at": self.format_timestamp(order_processed_at),
-            "complete_at": self.format_timestamp(order_complete_at),
-            "canceled_at": self.format_timestamp(order_canceled_at)
+    def prepare_order_summary(self, order):
+        """Generates a unified summary of an order with correct status naming."""
+        submitted_at = self.ensure_datetime(order.submitted_at)
+        created_at = self.ensure_datetime(order.created_at)
+        processed_at = self.ensure_datetime(order.processed_at)
+        complete_at = self.ensure_datetime(order.complete_at)
+        canceled_at = self.ensure_datetime(order.canceled_at)
+
+        # Prepare a dictionary of status fields
+        status_fields = {
+            'submitted_at': submitted_at,
+            'created_at': created_at,
+            'processed_at': processed_at,
+            'complete_at': complete_at,
+            'canceled_at': canceled_at,
         }
 
-        # Only keep the latest timestamp status
-        status_fields = ['submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at']
-        latest_status = max(
-            ((field, order_summary_data[field]) for field in status_fields if order_summary_data[field]),
-            key=lambda x: self.make_aware_if_naive(x[1]),  # Ensure all compared fields are aware
-            default=None
+        # Determine the latest status and its corresponding timestamp
+        latest_status_key = max(
+            status_fields,
+            key=lambda k: status_fields[k] or datetime.min
         )
-        if latest_status:
-            # Keep only the latest status in the response
-            order_summary_data = {
-                "order_id": order_summary.order.id,
-                "order_items": order_items,
-                latest_status[0]: latest_status[1],
-            }
 
-        return order_summary_data
+        latest_status_name = latest_status_key  # Get the latest status key directly
+        latest_status_time = status_fields[latest_status_key]  # Get the corresponding timestamp
+
+        order_items_data = OrderItemSerializer(order.order_items.all(), many=True).data
+
+        summary = {
+            'order_id': order.id,
+            'order_items': [
+                {
+                    'size': item['size'],
+                    'quantity': item['quantity'],
+                    'total_sum': item['total_sum'],
+                    'color_name': item['color_name'],
+                    'item_price': item['item_price'],
+                    'color_value': item['color_value'],
+                    'product_name': item['product_name'],
+                    'collection_name': item['collection_name'],
+                } for item in order_items_data
+            ],
+            latest_status_name: self.datetime_to_str(latest_status_time),  # Reflect latest status with its timestamp
+            'submitted_at': self.datetime_to_str(submitted_at),
+        }
+
+        return summary
 
     def create(self, request, *args, **kwargs):
         logger.debug("Received data: %s", request.data)
@@ -140,9 +152,6 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
         order_summary_data = self.prepare_order_summary(instance)
 
         return Response(order_summary_data)
-
-
-    
 
 
 class TelegramUserViewSet(viewsets.ModelViewSet):
