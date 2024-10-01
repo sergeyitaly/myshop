@@ -6,6 +6,7 @@ class TelegramUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = TelegramUser
         fields = ['id', 'phone', 'chat_id']
+
 class OrderSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderSummary
@@ -35,14 +36,27 @@ class OrderSummarySerializer(serializers.ModelSerializer):
         # Convert the dictionary back to a list for output
         updated_orders = list(existing_orders.values())
         
-        # Filter to include only necessary fields
+        # Filter to include only necessary fields: 'submitted_at' and 'latest_status_time'
         filtered_orders = []
         for order in updated_orders:
+            # Determine latest status and corresponding timestamp
+            latest_status_time = None
+            latest_status = None
+            
+            # Check each possible status and its timestamp
+            for status in ['submitted', 'created', 'processed', 'complete', 'canceled']:
+                status_time = order.get(f"{status}_at")  # Assumes you have timestamp fields like submitted_at, created_at, etc.
+                
+                if status_time is not None:
+                    if latest_status_time is None or status_time > latest_status_time:
+                        latest_status_time = status_time
+                        latest_status = status
+            
             filtered_order = {
                 'order_id': order['order_id'],
-                'submitted_at': order.get('submitted_at'),  # Assuming you have this in the order data
-                'latest_status': order.get('latest_status'),  # Assuming you have this in the order data
-                'latest_status_time': order.get('latest_status_time'),  # Assuming you have this in the order data
+                'submitted_at': order.get('submitted_at'),  # Make sure this field exists in your order data
+                'latest_status_time': latest_status_time,
+                'latest_status': latest_status  # The status name (like 'processed', etc.)
             }
             filtered_orders.append(filtered_order)
 
