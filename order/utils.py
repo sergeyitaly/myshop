@@ -1,9 +1,8 @@
 from django.utils import timezone
-from order.models import Order
+from order.models import Order, OrderSummary
 from .notifications import update_order_status_with_notification
 from django.utils.dateformat import format as date_format
 from django.db import transaction
-from order.models import OrderSummary
 
 
 def update_order_statuses():
@@ -11,6 +10,7 @@ def update_order_statuses():
     update_orders('submitted', 'created', 1, 'submitted_at', now)
     update_orders('created', 'processed', 20, 'created_at', now)
     update_orders('processed', 'complete', 24 * 60, 'processed_at', now)
+
 
 def update_orders(current_status, new_status, threshold_minutes, timestamp_field, now):
     orders = Order.objects.filter(status=current_status)
@@ -31,7 +31,8 @@ def update_orders(current_status, new_status, threshold_minutes, timestamp_field
                     order_summary_instance, created = OrderSummary.objects.update_or_create(
                         chat_id=chat_id,
                         defaults={
-                            'orders': order_summary["order_items"],
+                            'orders': order_summary["order_items"],  # Ensure this matches your OrderSummary model
+                            'latest_status': order_summary["latest_status"],  # Optionally store latest status
                         }
                     )
 
@@ -44,10 +45,12 @@ def update_orders(current_status, new_status, threshold_minutes, timestamp_field
                         chat_id
                     )
 
+
 def update_order_status(order, new_status, now, timestamp_field):
     order.status = new_status
     setattr(order, f'{new_status}_at', now)  # Dynamically set the timestamp for the new status
     order.save()
+
 
 def prepare_order_summary(order):
     # Prepare order items data
@@ -65,38 +68,31 @@ def prepare_order_summary(order):
         for item in order.order_items.all()
     ]
 
-    # Gather status timestamps
-    status_fields = {
-        'submitted_at': order.submitted_at,
-        'created_at': order.created_at,
-        'processed_at': order.processed_at,
-        'complete_at': order.complete_at,
-        'canceled_at': order.canceled_at,
+    # Collect the latest status and its corresponding timestamp
+    status_mapping = {
+        'created': (order.created_at, 'Created'),
+        'processed': (order.processed_at, 'Processed'),
+        'completed': (order.complete_at, 'Completed'),
+        'canceled': (order.canceled_at, 'Canceled'),
     }
 
-    # Find the latest status timestamp
-    latest_status_field = max(
-        status_fields,
-        key=lambda k: status_fields[k] or timezone.datetime.min
-    )
-    latest_status_timestamp = status_fields[latest_status_field]
+    # Initialize variables to find the latest status
+    latest_status = None
+    latest_status_timestamp = None
 
-    # Prepare the order summary
+    for status, (timestamp, status_name) in status_mapping.items():
+        if timestamp:
+            # Check if this is the most recent status
+            if latest_status_timestamp is None or timestamp > latest_status_timestamp:
+                latest_status_timestamp = timestamp
+                latest_status = status_name
+
+    # Prepare the order summary with the latest status and its timestamp
     order_summary = {
         "order_id": order.id,
-        "order_items": order_items_data,
-        "submitted_at": date_format(order.submitted_at, 'Y-m-d H:i') if order.submitted_at else None,
+        "latest_status": latest_status,  # Latest status from the order
+        "submitted_at": date_format(order.submitted_at, 'Y-m-d H:i') if order.submitted_at else None,  # Constant submitted_at value
+        "order_items": order_items_data
     }
-
-    # Format timestamps to include only hours and minutes
-    for field in ['created_at', 'processed_at', 'complete_at', 'canceled_at']:
-        if status_fields[field]:
-            order_summary[field] = date_format(status_fields[field], 'Y-m-d H:i')
-        else:
-            order_summary[field] = None
-
-    # Add the latest status timestamp to the summary
-    if latest_status_timestamp:
-        order_summary[latest_status_field] = date_format(latest_status_timestamp, 'Y-m-d H:i')
 
     return order_summary
