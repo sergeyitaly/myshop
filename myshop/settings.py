@@ -361,13 +361,13 @@ CACHES = {
 CELERY_BROKER_URL = os.getenv('REDIS_BROKER_URL', 'redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 
-CELERY_IMPORTS = ('order.tasks',)
-CELERY_BEAT_SCHEDULE = {
-    'update-order-statuses-every-minute': {
-        'task': 'order.tasks.update_order_statuses_task',
-        'schedule': crontab(minute='*/1'),  # Run every minute
-    },
-}
+#CELERY_IMPORTS = ('order.tasks',)
+#CELERY_BEAT_SCHEDULE = {
+#    'update-order-statuses-every-minute': {
+#        'task': 'order.tasks.update_order_statuses_task',
+#        'schedule': crontab(minute='*/1'),  # Run every minute
+#    },
+#}
 
 
 #CELERY_WORKER_CANCEL_LONG_RUNNING_TASKS_ON_CONNECTION_LOSS = True
