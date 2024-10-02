@@ -156,6 +156,7 @@ export const Contact = () => {
                             value={phone_number}
                             error={error3}
                             helperText={error3 ? t('error_phone') : ''}
+                            required
                         />
                         <TextField
                             label={t('message')}
