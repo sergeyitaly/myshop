@@ -26,6 +26,7 @@ export const FromThisCollectionSection = ({collectionId}: FromThisCollectionProp
   }
 
   const products = data?.results || []
+  console.log(products);
 
     return (
       <NamedSection
