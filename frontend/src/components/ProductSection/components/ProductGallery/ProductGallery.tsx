@@ -1,4 +1,4 @@
-import { Modal, useMediaQuery } from '@mui/material'
+import { useMediaQuery } from '@mui/material'
 import { screens } from '../../../../constants'
 import { ProductImageSlider } from '../ProductImageSlider/ProductImageSlider'
 import styles from './ProductGallery.module.scss'
@@ -8,6 +8,9 @@ import { AppImage } from '../../../AppImage/AppImage'
 import ZoomIn from '@mui/icons-material/ZoomIn'
 import { Plug } from '../../../Plug/Plug'
 import { transformURL } from '../../../../functions/transformURL'
+import {TransformWrapper, TransformComponent} from 'react-zoom-pan-pinch'
+import { AppModal } from '../../../AppModal/AppModal'
+
 
 interface ProductGalleryProps {
     smallImg?: string | null
@@ -45,6 +48,7 @@ export const ProductGallery = ({
         setCurrentImage(src)
         setOpen(true)
     }
+
 
     return (
       <div className={styles.container}>
@@ -95,20 +99,23 @@ export const ProductGallery = ({
                     </div>
                 </div>
             }
-            <Modal
+            <AppModal
                 open={open}
-                onClose={handleClose}
+                onClickOutside={handleClose}
             >
                 {
                     currentImage ?
-                    <img 
-                        className={styles.modalContent}
-                        src={transformURL(currentImage)}
-                    />
+                    <TransformWrapper>
+                        <TransformComponent>
+                            <img 
+                                src={transformURL(currentImage)}
+                            />
+                        </TransformComponent>
+                    </TransformWrapper>
                     :
                     <p>No image</p>
                 }
-            </Modal>
+            </AppModal>
       </div>  
     )
 }
