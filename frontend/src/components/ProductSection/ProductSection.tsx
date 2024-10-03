@@ -1,10 +1,10 @@
+import { useParams } from "react-router-dom";
 import { PageContainer } from "../containers/PageContainer";
-import style from "./ProducSection.module.scss";
 import { ProductGallery } from "./components/ProductGallery/ProductGallery";
 import { ProductInfo } from "./components/ProductInfo/ProductInfo";
-import { useParams } from "react-router-dom";
 import { useProduct } from "../../hooks/useProduct";
 import { countDiscountPrice } from "../../functions/countDiscountPrice";
+import style from "./ProducSection.module.scss";
 
 export const ProductSection = () => {
 	const { id } = useParams<{ id: string }>();
