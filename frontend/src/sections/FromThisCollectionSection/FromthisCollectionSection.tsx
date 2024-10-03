@@ -58,10 +58,11 @@ import { useGetProductsFromCollectionByProductFilterQuery } from "../../api/coll
 import { NamedSection } from "../../components/NamedSection/NamedSection";
 import { Pagination } from "../../components/UI/Pagination/Pagination";
 import { useAppTranslator } from "../../hooks/useAppTranslator";
-import { AppSlider } from "../../components/AppSlider/AppSlider";
 import { PreviewCard } from "../../components/Cards/PreviewCard/PreviewCard";
+import { Skeleton } from "../../components/Skeleton/Skeleton";
 import { Product } from "../../models/entities";
 import { ROUTE } from "../../constants";
+import styles from "./FromthisCollectionSection.module.scss";
 
 interface FromThisCollectionProps {
 	collectionId?: number;
@@ -106,20 +107,26 @@ export const FromThisCollectionSection = ({
 
 	return (
 		<NamedSection title={t("also_from_this_collection")}>
-			<AppSlider isLoading={isLoading}>
-				{products.map((product) => (
-					<PreviewCard
-						key={product.id}
-						title={getTranslatedProductName(product)}
-						discount={product.discount}
-						price={product.price}
-						currency={product.currency}
-						photoSrc={product.photo_url || ""}
-						previewSrc={product.photo_thumbnail_url || ""}
-						onClick={() => handleClickSlide(product)}
-					/>
-				))}
-			</AppSlider>
+			<div className={styles.wrapper}>
+				{isLoading
+					? Array.from({ length: LIMIT }).map((_, index) => (
+							<div key={index} className={styles.skeletonWrapper}>
+								<Skeleton className={styles.imageSkeleton} />
+							</div>
+						))
+					: products.map((product) => (
+							<PreviewCard
+								key={product.id}
+								title={getTranslatedProductName(product)}
+								discount={product.discount}
+								price={product.price}
+								currency={product.currency}
+								photoSrc={product.photo_url || ""}
+								previewSrc={product.photo_thumbnail_url || ""}
+								onClick={() => handleClickSlide(product)}
+							/>
+						))}
+			</div>
 
 			{data?.count && totalPages > 1 && (
 				<Pagination
