@@ -1,21 +1,9 @@
 import { Product, ProductVariantsModel } from "../../../../models/entities";
 import { DropDown } from "../DropDown/DropDown";
 import { ProductControl } from "../ProductControl/ProductControl";
-import styles from "./ProductInfo.module.scss";
 import { useTranslation } from "react-i18next";
+import styles from "./ProductInfo.module.scss";
 
-const getTranslatedColorName = (color: any, language: string): string => {
-	return language === "uk"
-		? color.name_uk || color.name
-		: color.name_en || color.name;
-};
-
-// Function to get translated product name
-// const getTranslatedProductName = (product: any, language: string): string => {
-//     return language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
-// };
-
-// Function to get translated product description
 const getTranslatedProductDescription = (
 	product: any,
 	language: string
@@ -25,7 +13,6 @@ const getTranslatedProductDescription = (
 		: product.description_en || product.description;
 };
 
-// Function to get translated additional field name and value
 const getTranslatedAdditionalField = (
 	field: any,
 	language: string
@@ -60,8 +47,6 @@ export const ProductInfo = ({
 	const { i18n, t } = useTranslation();
 	const language = i18n.language;
 
-	// Get translated values
-	// const translatedName = getTranslatedProductName(product, language);
 	const translatedDescription = getTranslatedProductDescription(
 		product,
 		language
@@ -70,30 +55,21 @@ export const ProductInfo = ({
 		getTranslatedAdditionalField(field, language)
 	);
 
-	const translatedColors =
-		productVariants.colors?.map((color) =>
-			getTranslatedColorName(color, language)
-		) || [];
-
 	return (
 		<div className={styles.container}>
 			<div className={styles.productInfo}>
-				{/* Display translated product name */}
 				<ProductControl
 					discountPrice={discountPrice}
 					product={product}
 					variants={productVariants}
 					onChangeColor={onChangeColor}
 					onChangeSize={onChangeSize}
-					colors={translatedColors} // Ensure ProductControl can handle this
 				/>
 				<div className={styles.description}>
-					<h3>{t("description")}</h3>{" "}
-					{/* Ensure this is translated */}
+					<h3>{t("description")}</h3>
 					<p>
 						{translatedDescription || i18n.t("description_missing")}
-					</p>{" "}
-					{/* Ensure this is translated */}
+					</p>
 				</div>
 			</div>
 

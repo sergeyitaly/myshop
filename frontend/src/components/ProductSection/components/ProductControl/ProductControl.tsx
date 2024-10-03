@@ -1,17 +1,17 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Product, ProductVariantsModel } from "../../../../models/entities";
 import { AvailableLable } from "../../../AvailableLabel/AvailableLabel";
 import { Counter } from "../../../Counter/Counter";
 import { MainButton } from "../../../UI/MainButton/MainButton";
 import { ValueBox } from "../../../ProductVariants/ValueBox/ValueBox";
-import style from "./ProductControl.module.scss";
 import { ProductVariants } from "../../../ProductVariants/ProductVariants";
 import { useBasket } from "../../../../hooks/useBasket";
 import { useCounter } from "../../../../hooks/useCounter";
 import { formatPrice } from "../../../../functions/formatPrice";
-import { useNavigate } from "react-router-dom";
 import { ROUTE } from "../../../../constants";
 import { useTranslation } from "react-i18next";
+import style from "./ProductControl.module.scss";
 
 const getTranslatedProductName = (product: any, language: string): string => {
 	return language === "uk"
@@ -19,10 +19,10 @@ const getTranslatedProductName = (product: any, language: string): string => {
 		: product.name_en || product.name;
 };
 
-const getTranslatedColorName = (color: any, language: string): string => {
+const getTranslatedColorName = (product: any, language: string): string => {
 	return language === "uk"
-		? color.name_uk || color.name
-		: color.name_en || color.name;
+		? product.color_name_uk || product.color_name || ""
+		: product.color_name_en || product.color_name || "";
 };
 
 interface ProductControlProps {
@@ -44,8 +44,9 @@ export const ProductControl = ({
 	const { t, i18n } = useTranslation();
 	const language = i18n.language;
 
-	const { available, price, currency, color_name, color_value } = product;
+	const { available, price, currency, color_value } = product;
 	const { colors, sizes } = variants;
+	console.log("colors");
 
 	const { qty, setCounter } = useCounter(1);
 
@@ -70,8 +71,7 @@ export const ProductControl = ({
 		<div className={style.container}>
 			<h2 className={style.title}>
 				{getTranslatedProductName(product, language)}
-			</h2>{" "}
-			{/* Translated product name */}
+			</h2>
 			<div className={style.price}>
 				{formatPrice(discountPrice ? discountPrice : price, currency)}
 				{discountPrice && (
@@ -87,19 +87,14 @@ export const ProductControl = ({
 			<ProductVariants
 				className={style.color}
 				title={t("color")}
-				value={
-					getTranslatedColorName({ name: color_name }, language) || ""
-				}
+				value={getTranslatedColorName(product, language)}
 			>
 				{colors.map(({ color }) => (
 					<ValueBox
 						key={color}
 						value={color}
 						isActive={color === color_value}
-						color={getTranslatedColorName(
-							{ name: color },
-							language
-						)}
+						color={color}
 						onClick={onChangeColor}
 					/>
 				))}
