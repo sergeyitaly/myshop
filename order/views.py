@@ -10,17 +10,14 @@ from rest_framework import status, viewsets, permissions
 from .models import *
 from .serializers import *
 from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 import logging, requests, json
-from django.http import JsonResponse
 from rest_framework.decorators import action
 from .notifications import update_order_status_with_notification
-from django.http import JsonResponse
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django.utils.dateformat import format as date_format
@@ -39,11 +36,11 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSummarySerializer
 
     def format_timestamp(self, timestamp):
-        # Format timestamp to 'Y-m-d H:i'
+        """Format timestamp to 'Y-m-d H:i'."""
         return date_format(timestamp, 'Y-m-d H:i') if timestamp else None
 
     def make_aware_if_naive(self, dt):
-        # Convert naive datetime to aware using Django's timezone support
+        """Convert naive datetime to aware using Django's timezone support."""
         if dt and isinstance(dt, datetime):
             if timezone.is_naive(dt):
                 return timezone.make_aware(dt)
@@ -66,31 +63,30 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
     def prepare_order_summary(self, order):
         """Generates a unified summary of an order with correct status naming."""
         submitted_at = self.ensure_datetime(order.submitted_at)
-        created_at = self.ensure_datetime(order.created_at)
         processed_at = self.ensure_datetime(order.processed_at)
         complete_at = self.ensure_datetime(order.complete_at)
         canceled_at = self.ensure_datetime(order.canceled_at)
 
-        # Prepare a dictionary of status fields
+        # Prepare a dictionary of relevant status fields
         status_fields = {
             'submitted_at': submitted_at,
-            'created_at': created_at,
             'processed_at': processed_at,
             'complete_at': complete_at,
             'canceled_at': canceled_at,
         }
 
-        # Determine the latest status and its corresponding timestamp
+        # Determine the latest status key based on the timestamp values
         latest_status_key = max(
             status_fields,
             key=lambda k: status_fields[k] or datetime.min
         )
 
-        latest_status_name = latest_status_key  # Get the latest status key directly
         latest_status_time = status_fields[latest_status_key]  # Get the corresponding timestamp
 
+        # Serialize order items
         order_items_data = OrderItemSerializer(order.order_items.all(), many=True).data
 
+        # Prepare the summary with only the two required statuses
         summary = {
             'order_id': order.id,
             'order_items': [
@@ -105,7 +101,8 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
                     'collection_name': item['collection_name'],
                 } for item in order_items_data
             ],
-            latest_status_name: self.datetime_to_str(latest_status_time),  # Reflect latest status with its timestamp
+            'latest_status': latest_status_key,  # Reflect latest status key
+            'latest_status_time': self.datetime_to_str(latest_status_time),  # Reflect latest status timestamp
             'submitted_at': self.datetime_to_str(submitted_at),
         }
 
@@ -515,7 +512,7 @@ def update_order(request):
         return Response({"error": "Order summary not found."}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_order_summary_by_chat_id(request, chat_id):
@@ -526,10 +523,15 @@ def get_order_summary_by_chat_id(request, chat_id):
         summaries = OrderSummary.objects.filter(chat_id=chat_id)
         if not summaries.exists():
             return Response({'error': 'No summaries found for this chat ID.'}, status=404)
+
+        # Initialize a new list to hold the summary data for the response
         summary_data = []
+
+        # Iterate over each summary for the specified chat ID
         for summary in summaries:
-            orders = summary.orders 
+            orders = summary.orders  # Assuming this is a list of order dictionaries
             for order in orders:
+                # Construct a dictionary for each order
                 order_data = {
                     'order_id': order.get('order_id'),
                     'created_at': order.get('created_at'),
@@ -551,7 +553,11 @@ def get_order_summary_by_chat_id(request, chat_id):
                         for item in order.get('order_items', [])
                     ]
                 }
+                # Append the constructed order_data to the summary_data list
                 summary_data.append(order_data)
-        return Response({'results': summary_data})
+
+        # Return the constructed summary_data as the response
+        return Response({'results': summary_data}, status=200)
+
     except Exception as e:
         return Response({'error': str(e)}, status=500)
