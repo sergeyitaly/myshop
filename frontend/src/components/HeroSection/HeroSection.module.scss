@@ -1,34 +1,43 @@
 
 .container {
     position: relative;
-
-    background-size: cover;
+    background-size: contain;
     background-repeat: no-repeat;
     background-position: right;
-    padding: clamp(44px, 10%, 181px) 0 75px;
+    // padding: clamp(44px, 10%, 181px) 0 75px;
+    padding-bottom: clamp(3.25rem, 2.128vw + 2.585rem, 4.5rem);
+    padding-top: clamp(4.063rem, 12.66vw + 0.106rem, 11.5rem);
     padding-left: 3%;
 }
 
 .background {
     position: absolute;
+    display: block;
+    // border: 1px solid red;
     top: 0;
     left: 0;
-    right: clamp(0.75rem, 2.087vw + 0.098rem, 2.063rem);
+    // right: clamp(0.75rem, 2.087vw + 0.098rem, 2.063rem);
+    right: 0;
     bottom: 0;
-    background-size: cover;
+    width: calc(100% - clamp(0.75rem, 2.087vw + 0.098rem, 2.063rem));
+    height: 100%;
+    object-fit: cover;
+    background-size: contain;
     background-position: center;
+    background-repeat: no-repeat;
 }
 
 .content {
     position: relative;
     z-index: 1;
-    display: flex;
-    flex-direction: column;
+    // display: flex;
+    // flex-direction: column;
     gap: 16px;
 }
 
 .title {
     font-size: clamp(20px, 5vw, 30px);
+    margin-bottom: clamp(1.75rem, 1.809vw + 1.185rem, 2.813rem);
     font-weight: 500;
     font-family: "Capriola", sans-serif;
     text-transform: uppercase;
@@ -38,10 +47,24 @@
 .description {
     font-size: clamp(12px, 3vw, 18px);
     max-width: 450px;
-    margin-bottom: clamp(48px, 3vw, 60px);
+    // margin-bottom: clamp(48px, 3vw, 60px);
+    margin-bottom: clamp(4.938rem, 2.021vw + 4.306rem, 6.125rem);
     color: var(--gray-500);
     //font-style: italic;
     line-height: 1.5;
+}
+
+.imageContainer {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    right: 0;
+    bottom: 0;
+    img {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+    }
 }
 
 .link {
