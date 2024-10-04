@@ -46,7 +46,6 @@ export const ProductControl = ({
 
 	const { available, price, currency, color_value } = product;
 	const { colors, sizes } = variants;
-	console.log("colors");
 
 	const { qty, setCounter } = useCounter(1);
 
