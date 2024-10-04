@@ -9,6 +9,7 @@ import { transformURL } from "../../../../functions/transformURL";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { AppModal } from "../../../AppModal/AppModal";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination } from "swiper/modules";
 import styles from "./ProductGallery.module.scss";
 
 interface ProductGalleryProps {
@@ -50,6 +51,7 @@ export const ProductGallery = ({
 			clickable: true,
 		},
 		loop: true,
+		modules: [Pagination],
 	};
 
 	const handleClickZoomOnSlider = (src: string) => {
@@ -60,7 +62,7 @@ export const ProductGallery = ({
 	return (
 		<div className={styles.container}>
 			{isMobile ? (
-				<Swiper {...swiperSettings}>
+				<Swiper {...swiperSettings} className={styles.slider}>
 					{images.map((image) => (
 						<SwiperSlide
 							key={image.id}
