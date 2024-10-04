@@ -17,7 +17,7 @@ export const AppModal = ({
     useEffect(() => {
         open ? 
             window.document.body.style.overflow = 'hidden' :
-            window.document.body.style.overflow = 'static'
+            window.document.body.style.overflow = 'visible'
     }, [open])
 
     const div = useRef(null)
