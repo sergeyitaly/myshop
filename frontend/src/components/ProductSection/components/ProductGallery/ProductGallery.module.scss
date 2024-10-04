@@ -1,119 +1,104 @@
-@import '../../../../variables';
-
+@import "../../../../variables";
 
 .container {
-    flex-grow: 1;
-    width: 100%;
-    container-type: inline-size;
+	flex-grow: 1;
+	width: 100%;
+	container-type: inline-size;
 }
 
 .descktopMode {
-    display: flex;
-    gap: 20px;
+	display: flex;
+	gap: 20px;
 }
 
 .imageListContainer {
-    position: relative;
-    flex-basis: 100px;
-    overflow: auto;
+	position: relative;
+	flex-basis: 100px;
+	overflow: auto;
 
-    &::-webkit-scrollbar {
-        width: 0px; 
-        height: 0px              
-    }
+	&::-webkit-scrollbar {
+		width: 0px;
+		height: 0px;
+	}
 }
 
-.imageList{
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    top: 0;
-    left: 0;
-  }
+.imageList {
+	position: absolute;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	top: 0;
+	left: 0;
+}
 
-.previevBox{
-    width: 100px;
+.previevBox {
+	width: 100px;
 }
 
 .currentImageContainer {
-    position: relative;
+	position: relative;
 }
 
 .zoomButton {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    svg {
-        fill: $color-button;
-    }
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	svg {
+		fill: $color-button;
+	}
 }
 
 .modalContent {
-    display: block;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    max-height: 90%;
-    max-width: 90%;
+	display: block;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	max-height: 90%;
+	max-width: 90%;
 }
 
 .plug {
-    position: absolute;
-    right: 10px;
-    top: 10px;
+	position: absolute;
+	right: 10px;
+	top: 10px;
 }
 
-@container (max-width: 510px){
-    .imageListContainer {
-        flex-basis: 90px;
-    }
+@container (max-width: 510px) {
+	.imageListContainer {
+		flex-basis: 90px;
+	}
 
-    .previevBox {
-        width: 90px;
-    }
+	.previevBox {
+		width: 90px;
+	}
 }
 
-@container (max-width: 490px){
-    .imageListContainer {
-        flex-basis: 80px;
-    }
+@container (max-width: 490px) {
+	.imageListContainer {
+		flex-basis: 80px;
+	}
 
-    .previevBox {
-        width: 80px;
-    }
+	.previevBox {
+		width: 80px;
+	}
 }
 
-@container (max-width: 450px){
-    .descktopMode {
-        flex-direction: column;
-    }
+@container (max-width: 450px) {
+	.descktopMode {
+		flex-direction: column;
+	}
 
-    .imageListContainer {
-        order: 1;
-    }
+	.imageListContainer {
+		order: 1;
+	}
 
-    .imageList {
-        flex-direction: row;
-    }
+	.imageList {
+		flex-direction: row;
+	}
 }
 
 .currentImageContainer {
-    flex-grow: 1;
+	flex-grow: 1;
 }
 
-
-
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-  
