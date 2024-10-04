@@ -102,3 +102,8 @@
 	flex-grow: 1;
 }
 
+.slider {
+	& :global(.swiper-pagination-bullet-active) {
+		background-color: $color-gray-400;
+	}
+}
