@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { screens } from "../../../../constants";
 import { useMediaQuery } from "@mui/material";
 import ZoomIn from "@mui/icons-material/ZoomIn";
-// import { ProductImageSlider } from "../ProductImageSlider/ProductImageSlider";
 import { ProductImage } from "../../../../models/entities";
 import { AppImage } from "../../../AppImage/AppImage";
 import { Plug } from "../../../Plug/Plug";
 import { transformURL } from "../../../../functions/transformURL";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { AppModal } from "../../../AppModal/AppModal";
+import { Swiper, SwiperSlide } from "swiper/react";
 import styles from "./ProductGallery.module.scss";
 
 interface ProductGalleryProps {
@@ -43,25 +43,50 @@ export const ProductGallery = ({
 		setOpen(false);
 	};
 
-	// const handleClickZoomOnSlider = (src: string) => {
-	// 	setCurrentImage(src);
-	// 	setOpen(true);
-	// };
+	const swiperSettings = {
+		spaceBetween: 10,
+		slidesPerView: 1,
+		pagination: {
+			clickable: true,
+		},
+		loop: true,
+	};
+
+	const handleClickZoomOnSlider = (src: string) => {
+		setCurrentImage(src);
+		setOpen(true);
+	};
 
 	return (
 		<div className={styles.container}>
 			{isMobile ? (
-				<div>
+				<Swiper {...swiperSettings}>
 					{images.map((image) => (
-						<div key={image.id} className={styles.mobileImage}>
-							<AppImage
-								src={image.images}
-								previewSrc={smallImg}
-								alt="product"
-							/>
-						</div>
+						<SwiperSlide
+							key={image.id}
+							className={styles.mobileImage}
+						>
+							<div className={styles.imageWrapper}>
+								<AppImage
+									src={image.images}
+									previewSrc={smallImg}
+									alt="product"
+									onClick={() =>
+										handleClickZoomOnSlider(image.images)
+									}
+								/>
+								<button
+									className={styles.zoomButton}
+									onClick={() =>
+										handleClickZoomOnSlider(image.images)
+									}
+								>
+									<ZoomIn />
+								</button>
+							</div>
+						</SwiperSlide>
 					))}
-				</div>
+				</Swiper>
 			) : (
 				<div className={styles.descktopMode}>
 					<div className={styles.imageListContainer}>

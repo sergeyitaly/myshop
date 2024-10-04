@@ -7,6 +7,8 @@ import { useGetCollectionByNameQuery } from "../../api/collectionSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useTranslation } from "react-i18next";
 import { FromThisCollectionSection } from "../../sections/FromThisCollectionSection/FromthisCollectionSection";
+import { PageContainer } from "../../components/containers/PageContainer";
+
 
 const ProductPage: React.FC = () => {
 	const { id } = useParams<{ id: string }>();
@@ -19,19 +21,20 @@ const ProductPage: React.FC = () => {
 
 	const { data: collection } = useGetCollectionByNameQuery(collectionName);
 
-	if (isLoading) {
-		return <div>{t("loading")}</div>;
-	}
-
-	if (!product) {
-		return <div>{t("product_not_found")}</div>;
-	}
-
 	return (
-		<MainContainer isLoading={isFetching}>
-			<ProductSection />
-			<FromThisCollectionSection collectionId={collection?.id} />
-		</MainContainer>
+		<>
+			<PageContainer>
+				{isLoading ? (
+					<div>{t("loading")}</div>
+				) : !product ? (
+					<div>{t("product_not_found")}</div>
+				) : null}
+			</PageContainer>
+			<MainContainer isLoading={isFetching}>
+				<ProductSection />
+				<FromThisCollectionSection collectionId={collection?.id} />
+			</MainContainer>
+		</>
 	);
 };
 
