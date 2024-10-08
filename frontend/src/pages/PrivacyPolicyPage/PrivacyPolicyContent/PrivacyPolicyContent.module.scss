@@ -13,12 +13,12 @@
   margin-top: 12px;
   padding: 0;
 
-  font-family: Capriola;
-  font-size: 16px;
+  font-family: "Capriola", sans-serif;
+  font-size: 14px;
   font-weight: 400;
-  line-height: 1.5em;
-  color: $color-black;
+  line-height: 1.28em;
   text-align: left;
+  color: $color-black;
 }
 
 @media screen and (min-width: $screen-big) {
@@ -28,10 +28,8 @@
   }
 
   .section {
-    font-family: Capriola;
-    font-size: 32px;
-    font-weight: 400;
-    line-height: 1.43em;
+    font-size: 24px;
+    line-height: 1.33em;
   }
 
   .section:last-child {
