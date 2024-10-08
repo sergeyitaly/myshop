@@ -11,7 +11,7 @@ import styles from "../About/About.module.scss";
 
 export const About: React.FC = () => {
 	const { t } = useTranslation();
-	const projectName = <span className={styles.blue}>KOLORYT</span>;
+	const projectName = <span className={styles.projectName}>KOLORYT</span>;
 
 	return (
 		<section>
