@@ -40,8 +40,10 @@ $topSpace: -125px;
 }
 
 .content {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(clamp(150px, 10vw, 300px), 1fr));
+    // display: grid;
+    // grid-template-columns: repeat(auto-fit, minmax(clamp(150px, 10vw, 300px), 1fr));
+    display: flex;
+    justify-content: space-between;
     align-items: start;
     row-gap: 50px;
     padding: 0 clamp(10px, 1vw, 20px);
