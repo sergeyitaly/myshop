@@ -120,6 +120,7 @@ class Product(models.Model):
 
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_('Collection'))
     name = models.CharField(max_length=255, verbose_name=_('Name'), db_index=True)
+    id_name = models.CharField(max_length=255, verbose_name=_('ID Name'), db_index=True, null=True, blank=True)
     description = models.TextField(null=True, blank=True, verbose_name=_('Description'))
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_('Price'))
     stock = models.IntegerField(default=0, verbose_name=_('Stock'))
@@ -154,7 +155,15 @@ class Product(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = self.generate_unique_slug()
+
+        if not self.id_name:
+            name_with_underscores = self.name.replace(' ', '_')
+            self.id_name = f"{self.id}_{name_with_underscores}"
+        
         super().save(*args, **kwargs)
+        if not self.id_name:
+            self.id_name = f"{self.id}_{name_with_underscores}"
+            self.save(update_fields=['id_name'])
 
     def generate_unique_slug(self):
         base_slug = slugify(self.name)
