@@ -80,7 +80,6 @@ def get_order_summary(order):
     }
 
     return summary
-
 def update_order_summary():
     """Updates the summary of orders grouped by Telegram chat ID."""
     try:
@@ -98,11 +97,16 @@ def update_order_summary():
 
             summary = get_order_summary(order)
             existing_summary = next((o for o in grouped_orders[order_chat_id] if o['order_id'] == order.id), None)
+            
             if existing_summary:
-                grouped_orders[order_chat_id].remove(existing_summary)
-            grouped_orders[order_chat_id].append(summary)
+                # Update the existing summary with new order details
+                existing_summary.update(summary)
+            else:
+                # Append the new summary if it doesn't exist
+                grouped_orders[order_chat_id].append(summary)
 
         for chat_id, orders_summary in grouped_orders.items():
+            # Use update_or_create to ensure the summary is updated or created
             OrderSummary.objects.update_or_create(
                 chat_id=chat_id,
                 defaults={'orders': orders_summary}
