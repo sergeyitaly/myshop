@@ -34,7 +34,7 @@ class ProductAdmin(TranslationAdmin):
     search_fields = ['name_en', 'name_uk']
     readonly_fields = ('id', 'slug', 'main_product_image_display', 'display_gallery')
     fields = (
-        'id', 'name', 'collection', 'description_en','description_uk', 'price', 'currency', 'discount', 'stock', 'available', 'sales_count',
+        'id', 'name', 'id_name', 'collection', 'description_en','description_uk', 'price', 'currency', 'discount', 'stock', 'available', 'sales_count',
         'popularity', 'color_name_en','color_name_uk', 'color_value', 'size', 'slug', 'photo',
         'main_product_image_display', 'display_gallery'
     )
@@ -69,6 +69,17 @@ class ProductAdmin(TranslationAdmin):
         return format_html(images_html)
     display_gallery.short_description = _("Product Images")
 
+    def save_model(self, request, obj, form, change):
+        # Call the parent class's save_model method to ensure normal behavior
+        super().save_model(request, obj, form, change)
+
+        # Generate id_name only if the product has an ID and name
+        if obj.id and obj.name:
+            # Replace spaces with underscores in the name
+            name_with_underscores = obj.name.replace(' ', '_')
+            obj.id_name = f"{obj.id}_{name_with_underscores}"
+            # Save the product instance again to update id_name
+            obj.save(update_fields=['id_name'])
 
 class CollectionInline(admin.TabularInline):
     model = Collection
