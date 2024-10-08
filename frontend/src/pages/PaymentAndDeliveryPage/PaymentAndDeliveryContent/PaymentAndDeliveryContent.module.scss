@@ -13,12 +13,12 @@
   margin-top: 12px;
   padding: 0;
 
-  font-family: Capriola;
-  font-size: 16px;
+  font-family: "Capriola", sans-serif;
+  font-size: 14px;
   font-weight: 400;
-  line-height: 1.5em;
-  color: $color-black;
+  line-height: 1.28em;
   text-align: left;
+  color: $color-black;
 }
 
 .section:last-child {
@@ -36,19 +36,12 @@
   }
 
   .section {
-    font-family: Capriola;
-    font-size: 32px;
-    font-weight: 400;
-    line-height: 1.43em;
+    font-size: 24px;
+    line-height: 1.5em;
   }
 
   .section:last-child {
     display: flex;
-    font-family: Inter;
-    font-size: 36px;
-    font-weight: 600;
-    line-height: 1.21em;
-    text-align: left;
     color: #787878;
     margin-top: 62px;
     margin-bottom: 82px;
