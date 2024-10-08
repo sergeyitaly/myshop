@@ -21,6 +21,9 @@ const ProductPage: React.FC = () => {
 
 	const { data: collection } = useGetCollectionByNameQuery(collectionName);
 
+	console.log(product);
+	
+
 	return (
 		<>
 			<PageContainer>
