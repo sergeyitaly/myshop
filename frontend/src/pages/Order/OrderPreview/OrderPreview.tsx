@@ -9,9 +9,8 @@ import { useNavigate } from 'react-router-dom'
 import {useTranslation} from "react-i18next";
 
 interface OrderPreviewProps {
-    className?: string
+	className?: string;
 }
-
 
 
 export const OrderPreview = ({
