@@ -12,12 +12,14 @@
   flex-direction: column;
   margin-top: 12px;
   padding: 0;
-
-  font-family: "Capriola", sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.28em;
   text-align: left;
+
+  font-family: Inter;
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 43.57px;
+  text-align: left;
+
   color: $color-black;
 }
 
@@ -27,6 +29,36 @@
 
 .text {
   margin-top: 12px;
+}
+
+.customTitle {
+  h1 {
+    font-family: Inter;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 24.2px;
+    text-align: left;
+
+    color: #0b0599;
+  }
+
+  span {
+    font-family: Inter;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 26px;
+    margin-bottom: 24px;
+    margin-top: 12px;
+    text-align: left;
+  }
+
+  p {
+    font-family: Inter;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 26px;
+    text-align: left;
+  }
 }
 
 @media screen and (min-width: $screen-big) {
@@ -49,5 +81,23 @@
 
   .text {
     margin-top: 24px;
+  }
+
+  .customTitle {
+    h1 {
+      font-size: 32px;
+      font-weight: 500;
+      line-height: 43.57px;
+    }
+
+    span {
+      font-size: 24px;
+      line-height: 26px;
+      margin-bottom: 24px;
+    }
+
+    p {
+      line-height: 26px;
+    }
   }
 }

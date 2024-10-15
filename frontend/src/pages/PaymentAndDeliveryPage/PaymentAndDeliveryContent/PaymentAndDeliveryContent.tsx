@@ -21,11 +21,11 @@ export const PaymentAndDeliveryContent: React.FC<PaymentAndDeliveryTextProps> = 
     }
 
     return (
-        <NamedSection title={t(`payment_and_delivery.title`)} id="payment_and_delivery">
+        <NamedSection title={t(`payment_and_delivery.title`)} id="payment_and_delivery" className={style.customTitle}>
             <div className={style.container}>
                 {sections.map((section, index) => (
                     <div key={index} className={style.section}>
-                        <h2 >{t(`payment_and_delivery.${section.titleKey}`)}</h2>
+                        <span>{t(`payment_and_delivery.${section.titleKey}`)}</span>
                         {typeof section.contentKey === 'string' ? (
                             <p dangerouslySetInnerHTML={{ __html: t(`payment_and_delivery.${section.contentKey}`) }} className={style.text}/>
                         ) : (
