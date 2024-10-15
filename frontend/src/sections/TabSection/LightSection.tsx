@@ -18,7 +18,6 @@ export const LightSection = () => {
 
     const {getTranslatedProductName} = useAppTranslator()
 
-    console.log(products);
     
     
 
