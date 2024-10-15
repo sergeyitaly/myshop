@@ -3,9 +3,9 @@ import { PreviewCard } from "../../components/Cards/PreviewCard/PreviewCard"
 import { AppSlider } from "../../components/AppSlider/AppSlider"
 import { lightSettings } from "./sliderSettings/LightSettings"
 import styles from './TabSection.module.scss'
-import { useGetAllCategoriesQuery } from "../../api/categorySlice"
 import { useNavigate } from "react-router-dom"
 import { ROUTE } from "../../constants"
+import { useAppTranslator } from "../../hooks/useAppTranslator"
 
 
 export const LightSection = () => {
@@ -16,9 +16,10 @@ export const LightSection = () => {
 
     const products = data?.results || []
 
-    const {data: a} = useGetAllCategoriesQuery()    
+    const {getTranslatedProductName} = useAppTranslator()
 
-    console.log(a);
+    console.log(products);
+    
     
 
     return (
@@ -29,7 +30,7 @@ export const LightSection = () => {
             {
                 products.map((product) => {
 
-                    const {id, photo, name, discount, photo_tumbnail} = product
+                    const {id, photo, id_name, discount, photo_tumbnail} = product
 
                     return (
                             <PreviewCard
@@ -37,11 +38,11 @@ export const LightSection = () => {
                                 className={styles.lightCard}
                                 photoSrc={photo}
                                 previewSrc={photo_tumbnail}
-                                title={name}
+                                title={getTranslatedProductName(product)}
                                 discount={discount}
                                 price={product.price}
                                 currency={product.currency}
-                                onClick={() => navigate(`${ROUTE.PRODUCT}${id}`)}
+                                onClick={() => navigate(`${ROUTE.PRODUCT}${id_name}`)}
                             />
                     )
                 })

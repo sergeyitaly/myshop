@@ -130,7 +130,9 @@ export const ProductGallery = ({
 				{currentImage ? (
 					<TransformWrapper>
 						<TransformComponent>
-							<img src={transformURL(currentImage)} />
+							<div className={styles.imgWrapper}>
+								<img src={transformURL(currentImage)} />
+							</div>
 						</TransformComponent>
 					</TransformWrapper>
 				) : (

@@ -4,6 +4,7 @@ import { AppSlider } from "../../components/AppSlider/AppSlider"
 import { allCollectionSettings } from "./sliderSettings/AllCollectionSetting"
 import { useNavigate } from "react-router-dom"
 import { ROUTE } from "../../constants"
+import { useAppTranslator } from "../../hooks/useAppTranslator"
 
 
 export const AllCollections = () => {
@@ -15,7 +16,7 @@ export const AllCollections = () => {
 
     const collections = data?.results || []
 
-    
+    const {getCollectionName} = useAppTranslator()
 
     return (
         <AppSlider 
@@ -25,7 +26,7 @@ export const AllCollections = () => {
             {
                 collections.map((collection) => {
 
-                    const {id, photo, name, photo_thumbnail_url, category} = collection
+                    const {id, photo, photo_thumbnail_url, category} = collection
 
                     return (
                         <PreviewCard
@@ -33,7 +34,7 @@ export const AllCollections = () => {
                             photoSrc={photo}
                             previewSrc={photo_thumbnail_url}
                             subTitle={category?.name}
-                            title={name}
+                            title={getCollectionName(collection)}
                             onClick={() => navigate(`${ROUTE.COLLECTION}${id}`)}
                         />
                     )

@@ -1,9 +1,10 @@
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Logo } from '../../components/Logo/Logo'
 import { IconButton } from '../../components/UI/IconButton/IconButton'
 import { useAppTranslator } from '../../hooks/useAppTranslator'
 import styles from './InfoModal.module.scss'
 import { useEffect } from 'react'
+import { ROUTE } from '../../constants'
 
 interface InfoModalProps {
     onClose: () => void
@@ -15,6 +16,8 @@ export const InfoModal = ({
 
     const {t} = useAppTranslator()
 
+    const navigate = useNavigate()
+
     useEffect(() => {
 
         window.document.body.style.overflow = 'hidden'
@@ -24,6 +27,11 @@ export const InfoModal = ({
         }
 
     }, [])
+
+    const move = () => {
+        navigate(ROUTE.FEEDBACK)
+        onClose()
+    }
 
     return (
         <div 
@@ -39,7 +47,7 @@ export const InfoModal = ({
                     <header>{t('pay_attantion')}</header>
                     <div className={styles.info}>
                         <p>{t('training_project')}</p>
-                        <p>{t('left_rewiew')} <Link to={'https://docs.google.com/forms/d/e/1FAIpQLScXzBZeNqUsbB9iQYWlyCrdgrmUB0ZPOlVe_AhKwL9u1Nft0w/viewform'}>{t('here')}</Link></p> 
+                        <p>{t('left_rewiew')} <button onClick={move}>{t('here')}</button></p> 
                     </div>
                     <Logo className={styles.logo}/>
                 </div>

@@ -7,6 +7,7 @@ export interface AdditionalField {
 
 export interface Product {
 	id: number;
+	id_name: string;
 	collection?: Collection;
 	images: ProductImage[];
 	photo: string | null;

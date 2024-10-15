@@ -46,13 +46,7 @@
     
    
     
-    a {
-        text-decoration: none;
-        color: $color-blue;
-        &:hover {
-            text-decoration: underline;
-        }
-    }
+  
 }
 
 .logo {
@@ -66,6 +60,14 @@
         text-align: center;
         &:first-child {
             margin-bottom: clamp(1.563rem, 2.872vw + 0.665rem, 3.25rem);
+        }
+    }
+
+    button {
+        font-size: inherit;
+        color: $color-blue;
+        &:hover {
+            text-decoration: underline;
         }
     }
 

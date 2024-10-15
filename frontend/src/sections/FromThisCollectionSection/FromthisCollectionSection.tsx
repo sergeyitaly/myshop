@@ -45,7 +45,7 @@ export const FromThisCollectionSection = ({
 	}, [data]);
 
 	const handleClickSlide = (productItem: Product) => {
-		navigate(`${ROUTE.PRODUCT}${productItem.id}`);
+		navigate(`${ROUTE.PRODUCT}${productItem.id_name}`);
 	};
 
 	const handlePageChange = (page: number) => {

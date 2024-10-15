@@ -17,8 +17,6 @@ export const NewProducts = () => {
 
     const {getCollectionName} = useAppTranslator()
 
-    
-
     return (
         <AppSlider
             isLoading = {isLoading}

@@ -23,6 +23,7 @@ export enum ROUTE {
     ABOUT = '/about',
     THANK = '/thank',
     CONTACTS='/contacts',
+    FEEDBACK='/feedback',
     SENDCONTACTS = '/sendcontacts',
     PAYMENT_DELIVERY = '/payment_delivery',
     PRIVACY_POLICY = '/privacy_policy'
@@ -66,4 +67,4 @@ export const color = {
     darkOrange: '#BB4430'
 }
 
-export type AppIconNames = 'cart' | 'cross' | 'vase' | 'delete' | 'search' | 'leftArrow' | 'rigrtArrow' | 'forwardArrow' | 'flagUkraine' | 'flagUK'
+export type AppIconNames = 'face1' | 'face2' | 'face3' | 'face4' | 'cart' | 'cross' | 'vase' | 'delete' | 'search' | 'leftArrow' | 'rigrtArrow' | 'forwardArrow' | 'flagUkraine' | 'flagUK'

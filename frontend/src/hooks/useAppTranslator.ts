@@ -45,6 +45,10 @@ export const useAppTranslator = () => {
         return i18n.language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
       }, [i18n.language]);
 
+
+    
+ 
+
     return {
         t,
         i18n,
