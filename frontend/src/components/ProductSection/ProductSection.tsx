@@ -9,7 +9,7 @@ import style from "./ProducSection.module.scss";
 export const ProductSection = () => {
 	const { id } = useParams<{ id: string }>();
 
-	const { product, variants, changeColor, changeSize } = useProduct(+id!);
+	const { product, variants, changeColor, changeSize } = useProduct(id!);
 
 	const discountPrice = product
 		? countDiscountPrice(product.price, product.discount)

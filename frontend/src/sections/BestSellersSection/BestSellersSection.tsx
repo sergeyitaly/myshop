@@ -22,7 +22,7 @@ export const BestSellersSection = () => {
     const products = data?.results || []
 
     const handleClickSlide = (productItem: Product) => {
-        navigate(`${ROUTE.PRODUCT}${productItem.id}`);
+        navigate(`${ROUTE.PRODUCT}${productItem.id_name}`);
     }
 
     return (

@@ -13,15 +13,16 @@ import { PageContainer } from "../../components/containers/PageContainer";
 const ProductPage: React.FC = () => {
 	const { id } = useParams<{ id: string }>();
 
+	
+
 	const { t } = useTranslation();
 
-	const { product, isLoading, isFetching } = useProduct(+id!);
+	const { product, isLoading, isFetching } = useProduct(id!);
 
 	const collectionName = product?.collection?.name ?? skipToken;
 
 	const { data: collection } = useGetCollectionByNameQuery(collectionName);
 
-	console.log(product);
 	
 
 	return (
