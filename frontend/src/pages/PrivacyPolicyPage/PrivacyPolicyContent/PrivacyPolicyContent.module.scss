@@ -12,28 +12,51 @@
   flex-direction: column;
   margin-top: 12px;
   padding: 0;
-
-  font-family: "Capriola", sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.28em;
   text-align: left;
+
+  font-family: Inter;
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 43.57px;
+  text-align: left;
+
   color: $color-black;
+}
+
+.customTitle {
+  h1 {
+    font-family: Inter;
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 43.57px;
+    text-align: left;
+
+    color: #0b0599;
+  }
+
+  span {
+    font-family: Inter;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 26px;
+    margin-bottom: 24px;
+    margin-top: 12px;
+    text-align: left;
+  }
+
+  p {
+    font-family: Inter;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 26px;
+    text-align: left;
+  }
 }
 
 @media screen and (min-width: $screen-big) {
   .container {
     gap: 24px;
     margin: 49px 0 0 0;
-  }
-
-  .section {
-    font-size: 24px;
-    line-height: 1.33em;
-  }
-
-  .section:last-child {
-    margin-bottom: 82px;
   }
 
   .text {
