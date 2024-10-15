@@ -20,11 +20,11 @@ export const PrivacyPolicyContent: React.FC<PrivacyPolicyTextProps> = ({ section
     }
 
     return (
-        <NamedSection title={t(`privacy_and_policy.title`)} id="privacy_and_policy">
+        <NamedSection title={t(`privacy_and_policy.title`)} id="privacy_and_policy" className={style.customTitle}>
             <div className={style.container}>
                 {sections.map((section, index) => (
                     <div key={index} className={style.section}>
-                        <h2 >{t(`privacy_and_policy.${section.titleKey}`)}</h2>
+                        <span>{t(`privacy_and_policy.${section.titleKey}`)}</span>
                         {typeof section.contentKey === 'string' ? (
                             <p dangerouslySetInnerHTML={{ __html: t(`privacy_and_policy.${section.contentKey}`) }} className={style.text}/>
                         ) : (
