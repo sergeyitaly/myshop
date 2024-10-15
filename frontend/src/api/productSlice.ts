@@ -60,6 +60,10 @@ export const productApiSlice = apiSlice.injectEndpoints({
     getOneProductById: builder.query<Product, number>({
       query: (productId) => `${ENDPOINTS.PRODUCT}/${productId}/`
     }),
+   
+    getOneProductByIdName: builder.query<Product, string>({
+      query: (idName) => `${ENDPOINTS.PRODUCT}/${idName}/`
+    }),
 
     // Endpoint to fetch products by main filter with pagination
     getProductsByMainFilter: builder.query<FilterProductsResponse, MainFilter>({
@@ -76,5 +80,6 @@ export const {
   useGetManyProductsByFilterQuery,
   useGetOneProductByIdQuery,
   useGetManyProductsByIdListQuery,
-  useGetProductsByMainFilterQuery
+  useGetProductsByMainFilterQuery,
+  useGetOneProductByIdNameQuery
 } = productApiSlice;

@@ -15,13 +15,14 @@ import { TestPage } from './pages/TestPage';
 import {Contact} from "./pages/Contact/Contact";
 import {ThankYouPage} from "./pages/Contact/ThankYouPage/ThankYouPage";
 import { About } from './pages/About/About';
+import { FeedbackPage } from './pages/Feedback/Feedback';
 
 function App() {
 
 
   return (
     <Routes>
-      <Route element={<Layout withFooter withHeader />}>
+      <Route element={<Layout/>}>
         <Route index element={<Home />} />
         <Route path="/collections" element={<CollectionsPage/>}/>
         <Route path="/collection/:id" element={<CollectionItemsPage/>}/>
@@ -29,6 +30,7 @@ function App() {
         <Route path="/order" element={<OrderPage />} />
         <Route path="/products" element={<FilterPage />} />
         <Route path="/test" element={<TestPage />} />
+        <Route path={ROUTE.FEEDBACK} element={<FeedbackPage/>}/>
         <Route path={ROUTE.ABOUT} element={<About />} />
         <Route path={ROUTE.THANK} element={<ThankPage />} />
         <Route path={ROUTE.CONTACTS} element={<Contact />} />

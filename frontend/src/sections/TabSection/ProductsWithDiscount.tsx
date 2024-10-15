@@ -4,6 +4,7 @@ import { AppSlider } from "../../components/AppSlider/AppSlider"
 import { discountSettings } from "./sliderSettings/DiscountSetting"
 import { useNavigate } from "react-router-dom"
 import { ROUTE } from "../../constants"
+import { useAppTranslator } from "../../hooks/useAppTranslator"
 
 
 export const ProductsWithDiscount = () => {
@@ -14,6 +15,8 @@ export const ProductsWithDiscount = () => {
 
     const products = data?.results || []
 
+    const {getTranslatedProductName} = useAppTranslator()
+
     return (
         <AppSlider
             isLoading = {isLoading}
@@ -22,7 +25,7 @@ export const ProductsWithDiscount = () => {
             {
                 products.map((product) => {
 
-                    const {id, photo, name, discount, photo_tumbnail, currency, price} = product
+                    const {id, id_name, photo, discount, photo_tumbnail, currency, price} = product
 
                     return (
                        
@@ -30,11 +33,11 @@ export const ProductsWithDiscount = () => {
                                 key={id}
                                 photoSrc={photo}
                                 previewSrc={photo_tumbnail}
-                                title={name}
+                                title={getTranslatedProductName(product)}
                                 discount={discount}
                                 price={price}
                                 currency={currency}
-                                onClick = {() => navigate(`${ROUTE.PRODUCT}${id}`)}
+                                onClick = {() => navigate(`${ROUTE.PRODUCT}${id_name}`)}
                             />
                     )
                 })

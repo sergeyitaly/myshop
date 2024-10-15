@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Product, ProductVariantsModel } from "../models/entities";
 import { useNavigate } from "react-router-dom";
 import { ROUTE } from "../constants";
-import { useGetOneProductByIdQuery, useGetProductsByMainFilterQuery } from "../api/productSlice";
+import { useGetOneProductByIdNameQuery, useGetProductsByMainFilterQuery } from "../api/productSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
 
 
@@ -11,7 +11,7 @@ const initialVariants: ProductVariantsModel = {
     sizes: []
 }
 
-export const useProduct = (productId: number) => {
+export const useProduct = (idName: string) => {
 
     const [variants, setVariants] = useState<ProductVariantsModel>(initialVariants)
     // const [counter, setCounter] = useState<number>(1)
@@ -20,7 +20,7 @@ export const useProduct = (productId: number) => {
       data: product, 
       isLoading: isLoadingProduct, 
       isFetching
-    } = useGetOneProductByIdQuery(productId)
+    } = useGetOneProductByIdNameQuery(idName)
 
     const {
       data: productsResponce, 
@@ -54,11 +54,11 @@ export const useProduct = (productId: number) => {
         if(product && products){
           const matchProduct = products.find(item => ((item.size === product.size) && (item.color_value === value)))
           if(matchProduct) {
-            navigate(`${ROUTE.PRODUCT}${matchProduct.id}`)
+            navigate(`${ROUTE.PRODUCT}${matchProduct.id_name}`)
             return
           }
           const matchColor = products.find(item => item.color_value === value) 
-          if(matchColor) navigate(`${ROUTE.PRODUCT}${matchColor.id}`)
+          if(matchColor) navigate(`${ROUTE.PRODUCT}${matchColor.id_name}`)
         }
       }
       
@@ -66,11 +66,11 @@ export const useProduct = (productId: number) => {
         if(product && products){
           const matchProduct = products.find(item => ((item.color_value === product.color_value) && (item.size === value)))
           if(matchProduct) {
-            navigate(`${ROUTE.PRODUCT}${matchProduct.id}`)
+            navigate(`${ROUTE.PRODUCT}${matchProduct.id_name}`)
             return
           }
           const matchColor = products.find(item => item.size === value) 
-          if(matchColor) navigate(`${ROUTE.PRODUCT}${matchColor.id}`)
+          if(matchColor) navigate(`${ROUTE.PRODUCT}${matchColor.id_name}`)
         }
       }
 
