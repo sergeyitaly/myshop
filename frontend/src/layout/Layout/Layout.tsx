@@ -7,20 +7,14 @@ import { useBootstrap } from '../../hooks/useBootstrap';
 import { useEffect } from 'react';
 import { Breadcrumbs } from '../Breadcrumbs/Breadcrumbs';
 import { useTranslation } from 'react-i18next';
-import { STORAGE } from '../../constants';
+import { ROUTE, STORAGE } from '../../constants';
 import { InfoButton } from '../../components/InfoButton/InfoButton';
 import styles from './Layout.module.scss'
 import { useToggler } from '../../hooks/useToggler';
 import { InfoModal } from '../InfoModal/InfoModal';
 // import { useHistory } from 'react-router-dom';
 
-export const Layout = ({
-    withHeader,
-    withFooter,
-}: {
-    withHeader: boolean;
-    withFooter: boolean;
-}) => {
+export const Layout = () => {
 
     const {isLoadingBasket} = useBootstrap()
     const {openStatus, handleOpen, handleClose} = useToggler()
@@ -43,6 +37,8 @@ export const Layout = ({
         window.scrollTo({top: 0, left: 0, behavior: 'smooth'})
     }, [location.pathname]) 
    
+    const withHeader = location.pathname !== ROUTE.FEEDBACK 
+    const withFooter = location.pathname !== ROUTE.FEEDBACK
 
     return (
         <>

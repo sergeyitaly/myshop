@@ -24,7 +24,7 @@ export const OrderPreview = ({
     const { basketItems, totalPrice, deleteFromBasket, changeCounter} = useBasket()
 
     const handleClickCard = (product: Product) => {
-        navigate(ROUTE.PRODUCT+product.id)
+        navigate(ROUTE.PRODUCT+product.id_name)
     }
 
 

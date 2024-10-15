@@ -1,62 +1,51 @@
-import { useNavigate } from "react-router-dom";
-import { useGetProductsByMainFilterQuery } from "../../api/productSlice";
-import { PreviewCard } from "../../components/Cards/PreviewCard/PreviewCard";
-import { AppSlider } from "../../components/AppSlider/AppSlider";
-import { lightSettings } from "./sliderSettings/LightSettings";
-import { useGetAllCategoriesQuery } from "../../api/categorySlice";
-import { ROUTE } from "../../constants";
-import { useTranslation } from "react-i18next";
-import styles from "./TabSection.module.scss";
+import { useGetProductsByMainFilterQuery } from "../../api/productSlice"
+import { PreviewCard } from "../../components/Cards/PreviewCard/PreviewCard"
+import { AppSlider } from "../../components/AppSlider/AppSlider"
+import { lightSettings } from "./sliderSettings/LightSettings"
+import styles from './TabSection.module.scss'
+import { useNavigate } from "react-router-dom"
+import { ROUTE } from "../../constants"
+import { useAppTranslator } from "../../hooks/useAppTranslator"
+
 
 export const LightSection = () => {
-	const navigate = useNavigate();
 
-	const { i18n } = useTranslation();
-	const language = i18n.language;
+    const navigate = useNavigate()
 
-	const { data, isLoading } = useGetProductsByMainFilterQuery({
-		category: "5",
-	});
+    const {data, isLoading} = useGetProductsByMainFilterQuery({category: '5'})
 
-	const products = data?.results || [];
+    const products = data?.results || []
 
-	const { data: categories } = useGetAllCategoriesQuery();
+    const {getTranslatedProductName} = useAppTranslator()
 
-	console.log(categories);
+    
+    
 
-	const getTranslatedProductName = (
-		product: any,
-		language: string
-	): string => {
-		return language === "uk"
-			? product.name_uk || product.name
-			: product.name_en || product.name;
-	};
+    return (
+        <AppSlider
+            isLoading = {isLoading}
+            sliderSettings={lightSettings}
+        >
+            {
+                products.map((product) => {
 
-	return (
-		<AppSlider isLoading={isLoading} sliderSettings={lightSettings}>
-			{products.map((product) => {
-				const { id, photo, discount, photo_tumbnail } = product;
+                    const {id, photo, id_name, discount, photo_tumbnail} = product
 
-				const translatedName = getTranslatedProductName(
-					product,
-					language
-				);
-
-				return (
-					<PreviewCard
-						key={id}
-						className={styles.lightCard}
-						photoSrc={photo}
-						previewSrc={photo_tumbnail}
-						title={translatedName}
-						discount={discount}
-						price={product.price}
-						currency={product.currency}
-						onClick={() => navigate(`${ROUTE.PRODUCT}${id}`)}
-					/>
-				);
-			})}
-		</AppSlider>
-	);
-};
+                    return (
+                            <PreviewCard
+                                key={id}
+                                className={styles.lightCard}
+                                photoSrc={photo}
+                                previewSrc={photo_tumbnail}
+                                title={getTranslatedProductName(product)}
+                                discount={discount}
+                                price={product.price}
+                                currency={product.currency}
+                                onClick={() => navigate(`${ROUTE.PRODUCT}${id_name}`)}
+                            />
+                    )
+                })
+            }
+        </AppSlider>
+    )
+}
