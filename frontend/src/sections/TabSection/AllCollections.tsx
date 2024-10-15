@@ -25,13 +25,26 @@ export const AllCollections = () => {
 			: collection.name_en || collection.name;
 	};
 
+	const getTranslatedCategoryName = (
+		category: any,
+		language: string
+	): string => {
+		return language === "uk"
+			? category?.name_uk || category?.name
+			: category?.name_en || category?.name;
+	};
+
 	return (
 		<AppSlider isLoading={isLoading} sliderSettings={allCollectionSettings}>
 			{collections.map((collection) => {
-				const { id, photo, photo_thumbnail_url, category } =
-					collection;
+				const { id, photo, photo_thumbnail_url, category } = collection;
 				const translatedName = getTranslatedCollectionName(
 					collection,
+					language
+				);
+
+				const translatedCategory = getTranslatedCategoryName(
+					category,
 					language
 				);
 
@@ -40,7 +53,7 @@ export const AllCollections = () => {
 						key={id}
 						photoSrc={photo}
 						previewSrc={photo_thumbnail_url}
-						subTitle={category?.name}
+						subTitle={translatedCategory}
 						title={translatedName}
 						onClick={() => navigate(`${ROUTE.COLLECTION}${id}`)}
 					/>
