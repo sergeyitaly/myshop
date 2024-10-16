@@ -81,18 +81,6 @@ class ProductAdmin(TranslationAdmin):
             # Save the product instance again to update id_name
             obj.save(update_fields=['id_name'])
 
-    def save_model(self, request, obj, form, change):
-        # Call the parent class's save_model method to ensure normal behavior
-        super().save_model(request, obj, form, change)
-
-        # Generate id_name only if the product has an ID and name
-        if obj.id and obj.name:
-            # Replace spaces with underscores in the name
-            name_with_underscores = obj.name.replace(' ', '_')
-            obj.id_name = f"{obj.id}_{name_with_underscores}"
-            # Save the product instance again to update id_name
-            obj.save(update_fields=['id_name'])
-
 class CollectionInline(admin.TabularInline):
     model = Collection
     form = CollectionForm
