@@ -52,3 +52,4 @@ package-lock.json
 package.json
 data_quality_report_*
 graphviz*
+erd_graph.png

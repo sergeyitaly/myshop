@@ -5,6 +5,7 @@ from django.apps import apps
 import os
 from datetime import datetime
 import pydot
+from django.utils import timezone
 
 
 class Command(BaseCommand):
@@ -83,7 +84,7 @@ class Command(BaseCommand):
         report_output = "\n".join(report)
 
         # Save the report to a .txt file with a timestamp
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = timezone.now().strftime("%Y%m%d_%H%M%S")  # Use timezone-aware now
         file_path = os.path.join(os.getcwd(), f'data_quality_report_{timestamp}.txt')
         with open(file_path, 'w') as file:
             file.write(report_output)
@@ -193,13 +194,14 @@ class Command(BaseCommand):
     def check_date_validity(self, model, issue_counts):
         """Check date fields for future dates"""
         issues = []
+        current_time = timezone.now()  # Use timezone-aware now
         for field in model._meta.fields:
             if isinstance(field, models.DateTimeField):
-                future_count = model.objects.filter(**{f"{field.name}__gt": datetime.now()}).count()
+                future_count = model.objects.filter(**{f"{field.name}__gt": current_time}).count()
                 if future_count > 0:
                     issues.append(f"Field '{field.name}' has {future_count} entries with future dates.")
                     issue_counts['future_dates'] += future_count
-        
+
         if issues:
             return " | ".join(issues)
 
