@@ -71,13 +71,14 @@ class Collection(models.Model):
     created = models.DateTimeField(auto_now_add=True, verbose_name=_('created'))
     updated = models.DateTimeField(auto_now=True, verbose_name=_('updated'))
     sales_count = models.PositiveIntegerField(default=0, verbose_name=_('Sales count'))
+    products = models.ManyToManyField('Product', related_name='collections', blank=True)
 
     def image_tag(self):
         if self.photo:
             url = self.photo_thumbnail.url
             return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(url))
         else:
-            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format('default_collection.jpg'))
+            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format('collection.jpg'))
 
     def __str__(self):
         return self.name
@@ -117,8 +118,7 @@ class Product(models.Model):
         format='JPEG',
         options={'quality': 60}
     )
-
-    collection = models.ForeignKey(Collection, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_('Collection'))
+    collection = models.ForeignKey(Collection, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('Collection'))
     name = models.CharField(max_length=255, verbose_name=_('Name'), db_index=True)
     id_name = models.CharField(max_length=255, verbose_name=_('ID Name'), db_index=True, null=True, blank=True)
     description = models.TextField(null=True, blank=True, verbose_name=_('Description'))
@@ -147,7 +147,7 @@ class Product(models.Model):
             url = self.photo_thumbnail.url
             return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(url))
         else:
-            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format('default_product.png'))
+            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format('product.png'))
 
     def __str__(self):
         return self.name

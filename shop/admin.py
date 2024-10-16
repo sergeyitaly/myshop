@@ -13,14 +13,14 @@ from django.urls import reverse
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
     form = ProductImageForm
-    extra = 1
+    extra = 0
     verbose_name = _('Product Image')
     verbose_name_plural = _('Product Images')
 
 class AdditionalFieldInline(admin.TabularInline):
     model = AdditionalField
     form = AdditionalFieldForm
-    extra = 1
+    extra = 0
     verbose_name = _('Additional Field')
     verbose_name_plural = _('Additional Fields')
     fields = ('name_en', 'name_uk','value_en', 'value_uk')
@@ -84,7 +84,7 @@ class ProductAdmin(TranslationAdmin):
 class CollectionInline(admin.TabularInline):
     model = Collection
     form = CollectionForm
-    extra = 1
+    extra = 0
     verbose_name = _('Collection')
     verbose_name_plural = _('Collections')
     fields = ('name', 'category', 'photo', 'image_tag')
@@ -134,12 +134,13 @@ class CategoryAdmin(TranslationAdmin):
     
     
     collections_with_products.short_description = _('Collections and Products')
-
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
 
 class ProductInline(admin.TabularInline):
     model = Product
     form = ProductForm
-    extra = 1
+    extra = 0
     verbose_name = _('Product')
     verbose_name_plural = _('Products')
     fields = (
@@ -147,7 +148,8 @@ class ProductInline(admin.TabularInline):
         'sales_count', 'popularity', 'color_name_en', 'color_name_uk', 'color_value', 'size', 'photo', 'product_image'
     )
     readonly_fields = ('product_image',)
-
+    def has_add_permission(self, request, obj=None):
+        return not (obj and obj.products.exists())
     def product_image(self, obj):
         if obj.photo:
             return format_html('<img src="{}" style="max-height:50px; max-width:50px;" />', obj.photo.url)
@@ -195,6 +197,8 @@ class CollectionAdmin(TranslationAdmin):
         return format_html(products_html)
 
     products_list.short_description = _('Products')
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
 
 # Register admin classes for translated models, handling potential errors
 def register_translation_admin(model, admin_class):
