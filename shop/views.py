@@ -22,10 +22,8 @@ from datetime import timedelta
 from django.utils.cache import add_never_cache_headers
 import urllib.parse
 from rest_framework.throttling import ScopedRateThrottle
+from rest_framework.throttling import UserRateThrottle
 from django.utils.encoding import uri_to_iri
-from django.shortcuts import get_object_or_404
-from rest_framework.generics import RetrieveAPIView
-
 
 class ListPageNumberPagination(PageNumberPagination):
     page_size = 8
@@ -248,32 +246,35 @@ class CollectionItemsFilterPage(generics.ListAPIView):
         collection_id = self.kwargs.get('pk')
         queryset = Product.objects.filter(collection__id=collection_id)
         return queryset
-    
-class ProductDetailView(RetrieveAPIView):
-    serializer_class = ProductSerializer
+
+class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
+    serializer_class = ProductSerializer
     permission_classes = [AllowAny]
-
+    
     def get_object(self):
-        # Determine if we should filter by id or id_name
-        id = self.kwargs.get('id', None)
-        id_name = self.kwargs.get('id_name', None)
+        id = self.kwargs.get('id')
+        id_name = self.kwargs.get('id_name')
 
-        if id:
-            return get_object_or_404(Product, id=id)
-        elif id_name:
-            return get_object_or_404(Product, id_name=id_name)
+        # Attempt to retrieve by ID first
+        if id is not None:
+            product = Product.objects.filter(id=id).first()
+            if product:
+                return product
 
-    def get(self, request, *args, **kwargs):
-        product = self.get_object()
-        serializer = self.get_serializer(product)
-        return Response(serializer.data)
+        # Then attempt to retrieve by ID name
+        if id_name:
+            product = Product.objects.filter(id_name=id_name).first()
+            if product:
+                return product
 
+        raise Http404("Product not found")
     def perform_update(self, serializer):
         instance = serializer.save()
+        # Invalidate the cache when a collection is updated
         cache.delete('product_detail')
         return instance
-    
+
 class CollectionList(generics.ListCreateAPIView, CachedQueryMixin):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer

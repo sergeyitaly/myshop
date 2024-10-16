@@ -65,7 +65,6 @@ class ProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(required=False, allow_null=True)
     images = ProductImageSerializer(source='productimage_set', many=True, read_only=True)
     name = serializers.CharField()
-    id_name = serializers.CharField()
     name_en = serializers.CharField(required=False)
     name_uk = serializers.CharField(required=False)
     description = serializers.CharField(required=False)
