@@ -123,7 +123,7 @@ class Product(models.Model):
     id_name = models.CharField(max_length=255, verbose_name=_('ID Name'), db_index=True, null=True, blank=True)
     description = models.TextField(null=True, blank=True, verbose_name=_('Description'))
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_('Price'))
-    stock = models.IntegerField(default=0, verbose_name=_('Stock'))
+    stock = models.PositiveIntegerField(default=0, verbose_name=_('Stock'))
     available = models.BooleanField(default=True, verbose_name=_('Available'))
     created = models.DateTimeField(auto_now_add=True, verbose_name=_('Created'))
     updated = models.DateTimeField(auto_now=True, verbose_name=_('Updated'))

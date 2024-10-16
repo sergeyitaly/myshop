@@ -5,7 +5,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feedback
         fields = [
-            'name', 'comment',
+            'name', 'email','comment',
             'question1', 'answer1', 'question2', 'answer2',
             'rating_1', 'rating_2', 'rating_3', 'rating_4', 'rating_5',
             'rating_6', 'rating_7', 'rating_8', 'rating_9', 'rating_10'

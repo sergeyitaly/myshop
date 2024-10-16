@@ -5,7 +5,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Feedback(models.Model):
     # String fields for feedback details
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
     email = models.EmailField(null=True, blank=True)
 
