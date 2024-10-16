@@ -30,7 +30,7 @@ class AdditionalFieldInline(admin.TabularInline):
 @admin.register(Product)
 class ProductAdmin(TranslationAdmin):
     form = ProductForm
-    list_display = ('id_link', 'name','collection', 'main_product_image', 'price', 'currency', 'discount', 'stock', 'available', 'sales_count', 'popularity')
+    list_display = ('id_link', 'name','id_name','collection', 'main_product_image', 'price', 'currency', 'discount', 'stock', 'available', 'sales_count', 'popularity')
     search_fields = ['name_en', 'name_uk']
     readonly_fields = ('id', 'slug', 'main_product_image_display', 'display_gallery')
     fields = (
