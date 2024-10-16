@@ -102,6 +102,7 @@ INSTALLED_APPS = [
     'technologies',
     'django_extensions',
       # "debug_toolbar",
+    'feedback',
 
 ]
 

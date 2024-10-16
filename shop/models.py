@@ -134,6 +134,7 @@ class Product(models.Model):
     color_value = ColorField(default='#RRGGBB', null=True, blank=True, help_text=_("Enter the color value in the format #RRGGBB"), verbose_name=_('Color Value'))
     size = models.CharField(max_length=50, null=True, blank=True, help_text=_("Format: LxHxD (in mm or specify cm)"), verbose_name=_('Size'))
     discount = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, null=True, blank=True, help_text=_("Discount percentage (e.g., 10.00 for 10%)"), verbose_name=_('Discount'))
+    id_name = models.CharField(max_length=255, verbose_name=_('ID Name'), db_index=True, null=True, blank=True)  # Allow null and blank
 
     CURRENCY_CHOICES = (
         ('UAH', 'UAH (грн)'),
