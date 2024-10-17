@@ -4,7 +4,18 @@ from .models import Feedback
 class FeedbackForm(forms.ModelForm):
     class Meta:
         model = Feedback
-        fields = ['name', 'email','comment', 'rating_1', 'rating_2', 'rating_3', 'rating_4', 'rating_5', 'rating_6', 'rating_7', 'rating_8', 'rating_9', 'rating_10']
+        fields =['name', 'email', 'comment',
+             'question1', 'answer1', 'rating_1', 
+             'question2', 'answer2', 'rating_2',
+             'question3', 'answer3', 'rating_3', 
+             'question4', 'answer4', 'rating_4',
+             'question5', 'answer5', 'rating_5', 
+             'question6', 'answer6', 'rating_6',
+             'question7', 'answer7', 'rating_7', 
+             'question8', 'answer8', 'rating_8',
+             'question9', 'answer9', 'rating_9', 
+             'question10', 'answer10', 'rating_10']
+
         widgets = {
             'rating_1': forms.NumberInput(attrs={'min': 1, 'max': 10}),
             'rating_2': forms.NumberInput(attrs={'min': 1, 'max': 10}),

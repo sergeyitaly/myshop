@@ -2,12 +2,17 @@ from django.contrib import admin
 from django.db.models import Avg
 from .models import Feedback, OverallAverageRating
 from django.utils.safestring import mark_safe
+from .translator import * 
+from django.utils.translation import gettext_lazy as _  
+from modeltranslation.admin import TranslationAdmin
 
 @admin.register(Feedback)
-class FeedbackAdmin(admin.ModelAdmin):
-    list_display = ['name', 'comment', 'rating_1', 'rating_2', 'rating_3', 'rating_4', 'rating_5', 
-                    'rating_6', 'rating_7', 'rating_8', 'rating_9', 'rating_10']
-    readonly_fields = ['question1', 'answer1', 'question2', 'answer2']
+class FeedbackAdmin(TranslationAdmin):
+    list_display = ['name', 'email', 'comment', 'status', 'created_at']
+    list_filter = ['status']
+    readonly_fields = ['name', 'email', 'comment',
+                       'answer1', 'answer2','answer3', 'answer4','answer5', 'answer6','answer7', 'answer8','answer9', 'answer10',                       
+                       ]
 
     def save_model(self, request, obj, form, change):
         """Override to recalculate the overall average rating after saving a feedback."""
@@ -107,3 +112,13 @@ class OverallAverageRatingAdmin(admin.ModelAdmin):
         return mark_safe(table_html)
 
     ratings_table.short_description = "Average Ratings Table"
+
+
+# Helper function to register translated models
+def register_translation_admin(model, admin_class):
+    try:
+        admin.site.register(model, admin_class)
+    except admin.sites.NotRegistered:
+        admin.site.register(model, admin.ModelAdmin)
+    
+
