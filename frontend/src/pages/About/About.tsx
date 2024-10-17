@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { TeamCarousel } from "./TeamCarousel/TeamCarousel";
 import { TechnologiesCarousel } from "./TechnologiesCarousel/TechnologiesCarousel";
-import { Brands } from "./Brands/Brands";
+import { BrandsCarousel } from "./Brands/BrandsCarousel";
 import { NamedSection } from "../../components/NamedSection/NamedSection";
 import img1 from "../../assets/about/about_img1.svg";
 import img2 from "../../assets/about/about_img2.svg";
@@ -68,7 +68,7 @@ export const About: React.FC = () => {
 
 				<div className={styles.border} />
 
-				<Brands />
+				<BrandsCarousel />
 			</div>
 		</section>
 	);
