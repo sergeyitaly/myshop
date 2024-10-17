@@ -7,7 +7,7 @@ import { useBootstrap } from '../../hooks/useBootstrap';
 import { useEffect } from 'react';
 import { Breadcrumbs } from '../Breadcrumbs/Breadcrumbs';
 import { useTranslation } from 'react-i18next';
-import { ROUTE, STORAGE } from '../../constants';
+import { STORAGE } from '../../constants';
 import { InfoButton } from '../../components/InfoButton/InfoButton';
 import styles from './Layout.module.scss'
 import { useToggler } from '../../hooks/useToggler';
@@ -37,8 +37,8 @@ export const Layout = () => {
         window.scrollTo({top: 0, left: 0, behavior: 'smooth'})
     }, [location.pathname]) 
    
-    const withHeader = location.pathname !== ROUTE.FEEDBACK 
-    const withFooter = location.pathname !== ROUTE.FEEDBACK
+    const withHeader = true
+    const withFooter = true
 
     return (
         <>

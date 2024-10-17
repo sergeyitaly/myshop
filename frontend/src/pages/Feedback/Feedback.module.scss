@@ -1,14 +1,9 @@
 @import '../../variables';
 
-.logo {
-	flex-shrink: 2;
-	max-width: clamp(8.125rem, 7.447vw + 5.798rem, 12.5rem);
-}
-
 .cardContainer {
     display: flex;
     flex-direction: column;
-    gap: 40px;
+    gap: clamp(1rem, 1.277vw + 0.601rem, 1.75rem);
 }
 
 .imageWrapper {
@@ -25,11 +20,11 @@
 }
 
 .intro {
-    font-size: 40px;
-    margin-bottom: 50px;
-    margin-top: 100px;
+    font-size: clamp(0.875rem, 1.064vw + 0.543rem, 1.5rem);
+    margin-bottom: clamp(1.25rem, 3.191vw + 0.253rem, 3.125rem);
+    margin-top: clamp(1.25rem, 3.191vw + 0.253rem, 3.125rem);
     p:first-child, p:nth-child(2) {
-        margin-bottom: 50px;
+        margin-bottom: clamp(0.75rem, 1.277vw + 0.351rem, 1.5rem);
     }
     span {
         color: $color-blue;
@@ -39,13 +34,14 @@
 }
 
 .actions {
-    margin-top: 50px;
+    margin-top: clamp(1.75rem, 1.277vw + 1.351rem, 2.5rem);
     margin-bottom: 100px;
     display: flex;
     justify-content: space-between;
     align-items: start;
     color: $color-gray-500;
-    & button:hover {
+    gap: 15px;
+    & .button:hover {
         text-decoration: underline;
     }
 }
