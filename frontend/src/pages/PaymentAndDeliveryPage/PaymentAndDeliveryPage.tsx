@@ -2,7 +2,6 @@ import React from 'react';
 import { PaymentAndDeliveryContent } from './PaymentAndDeliveryContent/PaymentAndDeliveryContent';
 import { PageContainer } from "../../components/containers/PageContainer";
 
-
 const paymentAndDeliveryOptions = [
     {
         titleKey: 'payment_title',
