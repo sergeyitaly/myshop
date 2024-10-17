@@ -1,0 +1,99 @@
+@import "../../../variables";
+
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+
+  font-family: Inter;
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 43.57px;
+  text-align: left;
+
+  color: $color-black;
+}
+
+.customTitle {
+  div {
+    margin: 0;
+    padding: 0;
+  }
+
+  h1 {
+    font-family: Inter;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 24.2px;
+    text-align: left;
+
+    color: #0b0599;
+  }
+
+  span {
+    font-family: Inter;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 26px;
+    margin-bottom: 24px;
+    margin-top: 12px;
+    text-align: left;
+  }
+
+  p {
+    font-family: Inter;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 26px;
+    text-align: left;
+  }
+
+  li {
+    font-family: Inter;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 26px;
+    text-align: left;
+  }
+}
+
+@media screen and (min-width: $screen-big) {
+  .container {
+    gap: 24px;
+    margin: 49px 0 82px 0;
+  }
+
+  .text {
+    margin-top: 24px;
+  }
+
+  .customTitle {
+    h1 {
+      font-size: 32px;
+      font-weight: 500;
+      line-height: 43.57px;
+    }
+
+    span {
+      font-size: 24px;
+      line-height: 26px;
+      margin-bottom: 24px;
+    }
+
+    p {
+      line-height: 26px;
+    }
+
+    li {
+      line-height: 26px;
+      margin-top: 24px;
+    }
+  }
+}
