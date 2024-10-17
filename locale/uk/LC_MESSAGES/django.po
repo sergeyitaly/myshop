@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-18 20:45+0300\n"
+"POT-Creation-Date: 2024-10-17 22:44+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,21 +21,21 @@ msgstr ""
 "100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
 "(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
 
-#: brand/admin.py:20 intro/admin.py:20 shop/admin.py:87 shop/admin.py:160
-#: shop/models.py:95 shop/models.py:190 team/admin.py:20
+#: brand/admin.py:20 intro/admin.py:20 shop/admin.py:98 shop/admin.py:173
+#: shop/models.py:96 shop/models.py:191 team/admin.py:20
 #: technologies/admin.py:20
 #: venv/lib/python3.9/site-packages/django/db/models/fields/files.py:393
 msgid "Image"
 msgstr "Картинка"
 
 #: brand/models.py:46 comments/models.py:10 intro/models.py:46
-#: shop/models.py:130 team/models.py:46 technologies/models.py:46
+#: shop/models.py:122 team/models.py:46 technologies/models.py:46
 msgid "Name"
 msgstr "Ім'я"
 
 #: brand/models.py:50 brand/models.py:52 intro/models.py:51 intro/models.py:53
-#: shop/models.py:58 shop/models.py:60 shop/models.py:109 shop/models.py:110
-#: shop/models.py:112 shop/models.py:113 team/models.py:61 team/models.py:63
+#: shop/models.py:58 shop/models.py:60 shop/models.py:102 shop/models.py:103
+#: shop/models.py:105 shop/models.py:106 team/models.py:61 team/models.py:63
 #: technologies/models.py:51 technologies/models.py:53
 msgid "photo"
 msgstr "фото"
@@ -60,7 +60,19 @@ msgstr "Коментар"
 msgid "Comments"
 msgstr "Коментарі"
 
-#: intro/models.py:48 shop/models.py:131 team/models.py:56
+#: feedback/admin.py:52
+msgid "Average Rating"
+msgstr ""
+
+#: feedback/models.py:43
+msgid "Feedback"
+msgstr ""
+
+#: feedback/models.py:44
+msgid "Feedbacks"
+msgstr ""
+
+#: intro/models.py:48 shop/models.py:124 team/models.py:56
 #: technologies/models.py:48
 msgid "Description"
 msgstr "Опис"
@@ -73,11 +85,11 @@ msgstr "Вступ"
 msgid "Intros"
 msgstr "Вступи"
 
-#: myshop/settings.py:328
+#: myshop/settings.py:331
 msgid "English"
 msgstr "Англійська"
 
-#: myshop/settings.py:329
+#: myshop/settings.py:332
 msgid "Ukrainian"
 msgstr ""
 
@@ -95,12 +107,12 @@ msgstr "Фото продукту"
 msgid "Product Name"
 msgstr "Назва продукту"
 
-#: order/admin.py:63 shop/admin.py:77 shop/models.py:69 shop/models.py:92
-#: shop/models.py:129
+#: order/admin.py:63 shop/admin.py:88 shop/models.py:69 shop/models.py:93
+#: shop/models.py:121
 msgid "Collection"
 msgstr "Коллекція"
 
-#: order/admin.py:67 shop/models.py:142
+#: order/admin.py:67 shop/models.py:135
 msgid "Size"
 msgstr "Розмір"
 
@@ -156,7 +168,7 @@ msgstr "Телеграм користувачі"
 msgid "Submitted"
 msgstr "Оформлено"
 
-#: order/models.py:24 shop/models.py:135
+#: order/models.py:24 shop/models.py:128
 msgid "Created"
 msgstr "Створено"
 
@@ -252,7 +264,7 @@ msgstr "JSON замовлення"
 msgid "Order summarys"
 msgstr "JSON замовлень"
 
-#: order/models.py:135 shop/admin.py:132 shop/models.py:187
+#: order/models.py:135 shop/admin.py:144 shop/models.py:188 shop/models.py:227
 msgid "Product"
 msgstr "Продукт"
 
@@ -272,11 +284,11 @@ msgstr "Елемент замовлення"
 msgid "Order Items"
 msgstr "Елементи замовлення"
 
-#: shop/admin.py:17 shop/admin.py:145
+#: shop/admin.py:17 shop/admin.py:158
 msgid "Product Image"
 msgstr "Фото продукту"
 
-#: shop/admin.py:18 shop/admin.py:70 shop/admin.py:169
+#: shop/admin.py:18 shop/admin.py:70 shop/admin.py:182
 msgid "Product Images"
 msgstr "Фото продукту"
 
@@ -296,17 +308,17 @@ msgstr "Головне фото"
 msgid "Main Image Preview"
 msgstr "Прев'ю головного фото"
 
-#: shop/admin.py:78 shop/models.py:93
+#: shop/admin.py:89 shop/models.py:94
 msgid "Collections"
 msgstr "Колекції"
 
-#: shop/admin.py:125
+#: shop/admin.py:136
 #, fuzzy
 #| msgid "Collection Photo"
 msgid "Collections and Products"
 msgstr "Фото коллекції"
 
-#: shop/admin.py:133 shop/admin.py:186 shop/models.py:188
+#: shop/admin.py:145 shop/admin.py:199 shop/models.py:189
 msgid "Products"
 msgstr "Продукти"
 
@@ -334,77 +346,83 @@ msgstr "Оновлено"
 msgid "Sales count"
 msgstr "Кількість продаж"
 
-#: shop/models.py:99
-msgid "name"
-msgstr ""
+#: shop/models.py:123
+#, fuzzy
+#| msgid "Name"
+msgid "ID Name"
+msgstr "Ім'я"
 
-#: shop/models.py:100
-msgid "value"
-msgstr "значення"
-
-#: shop/models.py:132
+#: shop/models.py:125
 msgid "Price"
 msgstr "Ціна"
 
-#: shop/models.py:133
+#: shop/models.py:126
 msgid "Stock"
 msgstr "В наявності"
 
-#: shop/models.py:134
+#: shop/models.py:127
 msgid "Available"
 msgstr "Досутпно"
 
-#: shop/models.py:136
+#: shop/models.py:129
 msgid "Updated"
 msgstr "Оновлено"
 
-#: shop/models.py:137
+#: shop/models.py:130
 msgid "Sales Count"
 msgstr "Кількість продаж"
 
-#: shop/models.py:138
+#: shop/models.py:131
 msgid "Popularity"
 msgstr "Популярність"
 
-#: shop/models.py:139
+#: shop/models.py:132
 msgid "Slug"
 msgstr "Ідентифікатор"
 
-#: shop/models.py:140
+#: shop/models.py:133
 msgid "Enter the color name, e.g., magenta or purple"
 msgstr "Введіть назву кольору, наприклад рожевий"
 
-#: shop/models.py:140
+#: shop/models.py:133
 msgid "Color Name"
 msgstr "Назва кольору"
 
-#: shop/models.py:141
+#: shop/models.py:134
 msgid "Enter the color value in the format #RRGGBB"
 msgstr "Введіть значення кольору в форматі #RRGGBB"
 
-#: shop/models.py:141
+#: shop/models.py:134
 msgid "Color Value"
 msgstr "Значення кольору"
 
-#: shop/models.py:142
+#: shop/models.py:135
 msgid "Format: LxHxD (in mm or specify cm)"
 msgstr "Формат розміру"
 
-#: shop/models.py:143
+#: shop/models.py:136
 msgid "Discount percentage (e.g., 10.00 for 10%)"
 msgstr "Знажка в %"
 
-#: shop/models.py:143
+#: shop/models.py:136
 msgid "Discount"
 msgstr "Знижка"
 
-#: shop/models.py:150
+#: shop/models.py:143
 msgid "Currency"
 msgstr "Валюта"
 
-#: shop/models.py:195 shop/models.py:197
+#: shop/models.py:196 shop/models.py:198
 msgid "images"
 msgstr "картинкі"
+
+#: shop/models.py:224
+msgid "name"
+msgstr ""
+
+#: shop/models.py:225
+msgid "value"
+msgstr "значення"
 
 #: team/models.py:47
 #, fuzzy

@@ -1,31 +1,68 @@
 from rest_framework import serializers
-from .models import Feedback, OverallAverageRating
+from .models import RatingQuestion, Feedback, RatingAnswer, OverallAverageRating
 
+
+# Serializer for RatingQuestion
+class RatingQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RatingQuestion
+        fields = ['id', 'question_en','question_uk', 'aspect_name_en', 'aspect_name_uk']
+
+
+# Serializer for RatingAnswer
+class RatingAnswerSerializer(serializers.ModelSerializer):
+    question = RatingQuestionSerializer(read_only=True)
+    question_id = serializers.PrimaryKeyRelatedField(queryset=RatingQuestion.objects.all(), write_only=True, source='question')
+
+    class Meta:
+        model = RatingAnswer
+        fields = ['id', 'question', 'question_id', 'answer', 'rating']
+
+
+# Serializer for Feedback
 class FeedbackSerializer(serializers.ModelSerializer):
+    ratings = RatingAnswerSerializer(many=True, write_only=True)
+
     class Meta:
         model = Feedback
-        fields = [
-            'name', 'email','comment',
-            'question1', 'answer1', 
-            'question2', 'answer2',
-            'question3', 'answer3', 
-            'question4', 'answer4',
-            'question5', 'answer5', 
-            'question6', 'answer6',
-            'question7', 'answer7', 
-            'question8', 'answer8',
-            'question9', 'answer9', 
-            'question10', 'answer10',
-            'rating_1', 'rating_2', 'rating_3', 'rating_4', 'rating_5',
-            'rating_6', 'rating_7', 'rating_8', 'rating_9', 'rating_10',
-             'status', 'created_at'
-        ]
+        fields = ['id', 'name', 'comment', 'email', 'created_at', 'status', 'ratings']
+
+    def create(self, validated_data):
+        # Handle nested RatingAnswer creation
+        ratings_data = validated_data.pop('ratings')
+        feedback = Feedback.objects.create(**validated_data)
+
+        for rating_data in ratings_data:
+            RatingAnswer.objects.create(feedback=feedback, **rating_data)
+
+        return feedback
+
+    def update(self, instance, validated_data):
+        ratings_data = validated_data.pop('ratings', None)
+        instance.name = validated_data.get('name', instance.name)
+        instance.comment = validated_data.get('comment', instance.comment)
+        instance.email = validated_data.get('email', instance.email)
+        instance.status = validated_data.get('status', instance.status)
+        instance.save()
+
+        if ratings_data:
+            for rating_data in ratings_data:
+                question_id = rating_data.get('question_id')
+                rating_answer = RatingAnswer.objects.filter(feedback=instance, question=question_id).first()
+                if rating_answer:
+                    rating_answer.rating = rating_data.get('rating', rating_answer.rating)
+                    rating_answer.answer = rating_data.get('answer', rating_answer.answer)
+                    rating_answer.save()
+                else:
+                    RatingAnswer.objects.create(feedback=instance, **rating_data)
+
+        return instance
 
 
+# Serializer for OverallAverageRating
 class OverallAverageRatingSerializer(serializers.ModelSerializer):
+    question = RatingQuestionSerializer(read_only=True)
+
     class Meta:
         model = OverallAverageRating
-        fields = [
-            'avg_rating_1', 'avg_rating_2', 'avg_rating_3', 'avg_rating_4', 'avg_rating_5',
-            'avg_rating_6', 'avg_rating_7', 'avg_rating_8', 'avg_rating_9', 'avg_rating_10'
-        ]
+        fields = ['question', 'average_rating']
