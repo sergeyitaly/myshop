@@ -11,6 +11,7 @@ export const teamSettings: SwiperOptions = {
 		clickable: true,
 	},
 	spaceBetween: 20,
+	loop: true,
 	modules: [Grid, Pagination],
 
 	breakpoints: {

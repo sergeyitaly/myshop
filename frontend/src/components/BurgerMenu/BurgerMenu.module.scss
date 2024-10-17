@@ -91,7 +91,7 @@
 	transition: 0.3s color;
 
 	&:active {
-		color: #a8a8a8;
+		color: $color-border;
 	}
 
 	&::after {
