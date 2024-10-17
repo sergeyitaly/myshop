@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { NamedSection } from '../../../components/NamedSection/NamedSection';
 import style from './PaymentAndDeliveryContent.module.scss';
 
-
 interface PaymentAndDeliveryText {
     titleKey: string;
     contentKey: string | { first_paragraph: string; second_paragraph: string };
