@@ -1,0 +1,52 @@
+@import '../../../variables';
+
+.card {
+    background: $color-gray-450;
+    padding: 10px;
+}
+
+.buttons {
+    margin-bottom: clamp(0.875rem, 1.064vw + 0.543rem, 1.5rem);
+    display: flex;
+    gap: 20px;
+}
+
+.textarea {
+    font-size: clamp(0.75rem, 0.426vw + 0.617rem, 1rem);
+    max-width: 690px;
+    width: 100%;
+    height: clamp(5rem, 2.128vw + 4.335rem, 6.25rem);
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    resize: none;
+    background-color: $color-gray-550;
+    outline: none;
+    transition: .5s;
+    margin-bottom: clamp(0.5rem, 0.851vw + 0.234rem, 1rem);
+    &:focus {
+        background: $color-background;
+    }
+}
+
+.button {
+    background: $color-gray-100;
+    padding: 8px;
+    border-radius: 5px;
+    svg {
+        width: clamp(1.25rem, 0.851vw + 0.984rem, 1.75rem);
+        height: clamp(1.25rem, 0.851vw + 0.984rem, 1.75rem);
+    }
+}
+
+.firstQuestion {
+    font-size: clamp(1rem, 0.851vw + 0.734rem, 1.5rem);
+    font-weight: 500;
+    margin-bottom: clamp(0.875rem, 1.064vw + 0.543rem, 1.5rem);
+}
+
+.secondQusetion {
+    font-size: clamp(0.875rem, 0.638vw + 0.676rem, 1.25rem);
+    font-weight: 500;
+    margin-bottom: 10px;
+}

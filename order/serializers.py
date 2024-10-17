@@ -11,12 +11,56 @@ class OrderSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderSummary
         fields = ['chat_id', 'orders']
-        
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         # Ensure Decimal values are serialized properly
         representation['orders'] = self._convert_decimals(representation['orders'])
+        
+        # Create a mapping of existing orders by order_id
+        existing_orders = {order['order_id']: order for order in representation['orders']}
+        
+        # Incoming orders from validated data
+        incoming_orders = self.initial_data.get('orders', [])
+        
+        # Process incoming orders
+        for new_order in incoming_orders:
+            order_id = new_order.get('order_id')
+            if order_id in existing_orders:
+                # Update the existing order's fields
+                existing_orders[order_id].update(new_order)
+            else:
+                # Add new order if it does not exist
+                existing_orders[order_id] = new_order
+        
+        # Convert the dictionary back to a list for output
+        updated_orders = list(existing_orders.values())
+        
+        # Filter to include only necessary fields: 'submitted_at' and 'latest_status_time'
+        filtered_orders = []
+        for order in updated_orders:
+            # Determine latest status and corresponding timestamp
+            latest_status_time = None
+            latest_status = None
+            
+            # Check each possible status and its timestamp
+            for status in ['submitted', 'created', 'processed', 'complete', 'canceled']:
+                status_time = order.get(f"{status}_at")  # Assumes you have timestamp fields like submitted_at, created_at, etc.
+                
+                if status_time is not None:
+                    if latest_status_time is None or status_time > latest_status_time:
+                        latest_status_time = status_time
+                        latest_status = status
+            
+            filtered_order = {
+                'order_id': order['order_id'],
+                'submitted_at': order.get('submitted_at'),  # Make sure this field exists in your order data
+                'latest_status_time': latest_status_time,
+                'latest_status': latest_status  # The status name (like 'processed', etc.)
+            }
+            filtered_orders.append(filtered_order)
+
+        representation['orders'] = filtered_orders
         return representation
 
     def _convert_decimals(self, data):
@@ -27,7 +71,7 @@ class OrderSummarySerializer(serializers.ModelSerializer):
         elif isinstance(data, decimal.Decimal):
             return float(data)
         return data
-    
+
     def validate_chat_id(self, value):
         if not value:
             raise serializers.ValidationError("chat_id cannot be null.")

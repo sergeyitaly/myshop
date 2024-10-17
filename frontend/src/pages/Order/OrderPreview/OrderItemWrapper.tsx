@@ -17,7 +17,7 @@ export const OrderItemWrapper = ({
 
     const { productId, qty } = basketItem
 
-    const {product} = useProduct(productId)
+    const {product} = useProduct(productId.toString())
 
     const handleClickDeleteItem = () => {
         onClickDelete && product && onClickDelete(product)

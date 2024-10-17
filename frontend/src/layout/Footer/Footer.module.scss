@@ -1,92 +1,94 @@
-@import '../../variables';
+@import "../../variables";
 
 $topSpace: -125px;
 
 @mixin halfLine {
-    position: absolute;
-    content: "";
-    background-color: var(--blue);
-    height: 2px;
-    width: clamp(30%, 58.511vw - 8.91rem, 40%);
-    top: $topSpace;
+	position: absolute;
+	content: "";
+	background-color: var(--blue);
+	height: 2px;
+	width: clamp(30%, 58.511vw - 8.91rem, 40%);
+	top: $topSpace;
 }
 
 .footer {
-    margin-top: 250px;
-    position: relative;
-    padding-top: 63px;
-    border-top: 1px solid #CDCDCD;
-    font-weight: 400;
-    padding-bottom: clamp(14px,3vw,64px);
-    &::before {
-        @include halfLine;
-        left: 0;
-    }
+	margin-top: 250px;
+	position: relative;
+	padding-top: 63px;
+	border-top: 1px solid $color-gray-100;
+	font-weight: 400;
+	padding-bottom: clamp(14px, 3vw, 64px);
+	&::before {
+		@include halfLine;
+		left: 0;
+	}
 
-    &::after {
-        @include halfLine;
-        right: 0;
-    }
+	&::after {
+		@include halfLine;
+		right: 0;
+	}
 
-    .logo {
-        position: absolute;
-        top: $topSpace;
-        left: 50%;
-        translate: -50% -45%;
-        img{
-            height: clamp(5rem, 8.511vw + 2.34rem, 10rem);
-        }
-    }
+	.logo {
+		position: absolute;
+		top: $topSpace;
+		left: 50%;
+		translate: -50% -45%;
+		img {
+			height: clamp(5rem, 8.511vw + 2.34rem, 10rem);
+		}
+	}
 }
 
 .content {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(clamp(150px, 10vw, 300px), 1fr));
-    align-items: start;
-    row-gap: 50px;
-    padding: 0 clamp(10px, 1vw, 20px);
+	// display: grid;
+	// grid-template-columns: repeat(auto-fit, minmax(clamp(150px, 10vw, 300px), 1fr));
+	display: flex;
+	justify-content: space-between;
+	align-items: start;
+	row-gap: 50px;
+	padding: 0 clamp(10px, 1vw, 20px);
 }
 
 .nav {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: clamp(4px, 3vw, 24px);
-    font-size: clamp(12px, 2vw, 20px);
-    order: 1;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: clamp(4px, 3vw, 24px);
+	font-size: clamp(12px, 2vw, 20px);
+	order: 1;
 }
 
 @media screen and (max-width: 468px) {
-    .nav:nth-of-type(2) {
-        order: 2;
-    }
+	.nav:nth-of-type(2) {
+		order: 2;
+	}
 }
 
 .title {
-    color: rgba(0, 0, 0, .4);
+	color: rgba(0, 0, 0, 0.4);
 }
 
 .link {
-    text-decoration: none;
-    color: var(--gray-500);
+	text-decoration: none;
+	color: var(--gray-500);
 
-    transition: color .3s;
+	transition: color 0.3s;
 
-    &:hover {
-        color: #A8A8A8;
-    }
+	&:hover {
+		color: $color-border;
+	}
 
-    &:active {
-        color: #A8A8A8;
-    }
+	&:active {
+		color: $color-border;
+	}
 }
 
 .koloryt {
-    font-family: "Capriola", sans-serif;
-    text-transform: uppercase;
+	font-family: "Capriola", sans-serif;
+	text-transform: uppercase;
 }
 
 .payment {
-    display: flex;
-    gap: 20px;
+	display: flex;
+	gap: 20px;
 }

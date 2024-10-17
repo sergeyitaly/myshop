@@ -6,7 +6,7 @@ import { Link, useParams, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useGetOneCollectionByIdQuery } from '../../api/collectionSlice'
 import { skipToken } from '@reduxjs/toolkit/query'
-import { useGetOneProductByIdQuery } from '../../api/productSlice'
+import { useGetOneProductByIdNameQuery } from '../../api/productSlice'
 import clsx from 'clsx'
 import { AppIcon } from '../../components/SvgIconComponents/AppIcon'
 
@@ -27,8 +27,6 @@ const getTranslatedProductName = (product: any, language: string): string => {
 
 // Function to get translated collection name
 const getTranslatedCollectionName = (collection: any, language: string): string => {
-    console.log(collection);
-    
     return language === 'uk' ? collection.name_uk || collection.name : collection.name_en || collection.name;
 };
 
@@ -114,7 +112,7 @@ export const Breadcrumbs = () => {
         data: productResponce,
         isLoading: isProductLoading,
         isFetching: isProductFetching
-    } = useGetOneProductByIdQuery((pageDefiner(pathname).isProduct && id) ? +id : skipToken) 
+    } = useGetOneProductByIdNameQuery((pageDefiner(pathname).isProduct && id) ? id : skipToken) 
 
     const [list, setList] = useState<Breadcrumb[]>([])
 
@@ -160,6 +158,7 @@ export const Breadcrumbs = () => {
             if(isProductLoading || isProductFetching)
                 list.push({isLoading: true})
             else{
+                
                 list.push({
                     title: getTranslatedCollectionName(productResponce?.collection, i18n.language),
                     link: `${ROUTE.COLLECTION}${productResponce?.collection?.id}` 

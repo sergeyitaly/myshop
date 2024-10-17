@@ -4,6 +4,7 @@ import { AppSlider } from "../../components/AppSlider/AppSlider"
 import { popularSettings } from "./sliderSettings/PopularProductSetting"
 import { useNavigate } from "react-router-dom"
 import { ROUTE } from "../../constants"
+import { useAppTranslator } from "../../hooks/useAppTranslator"
 
 
 export const PopularProducts = () => {
@@ -14,6 +15,8 @@ export const PopularProducts = () => {
 
     const products = data?.results || []
 
+    const {getTranslatedProductName} = useAppTranslator()
+
     return (
         <AppSlider
             isLoading = {isLoading}
@@ -22,18 +25,18 @@ export const PopularProducts = () => {
             {
                 products.map((product) => {
 
-                    const {id, photo, name, discount, photo_tumbnail} = product
+                    const {id, id_name, photo, discount, photo_tumbnail} = product
 
                     return (
                             <PreviewCard
                                 key={id}
                                 photoSrc={photo}
                                 previewSrc={photo_tumbnail}
-                                title={name}
+                                title={getTranslatedProductName(product)}
                                 discount={discount}
                                 price={product.price}
                                 currency={product.currency}
-                                onClick={() => navigate(`${ROUTE.PRODUCT}${id}`)}
+                                onClick={() => navigate(`${ROUTE.PRODUCT}${id_name}`)}
                             />
                     )
                 })

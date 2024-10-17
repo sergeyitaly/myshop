@@ -8,6 +8,9 @@
         pointer-events: none;
     }
 
+    &:global(.swiper) {
+        padding-bottom: 5px
+    };
     & :global(.slick-slide) {
         padding: 0 10px;
     };
@@ -16,10 +19,19 @@
         position: static;
         order: 1;
         width: auto;
+        display: flex;
+        gap: clamp(0.938rem, 2.128vw + 0.273rem, 2.188rem);
+    }
+
+    & :global(.swiper-pagination-bullet):global(.swiper-pagination-bullet) {
+        background-color: $color-gray-500;
+        width: clamp(0.313rem, 1.064vw - 0.02rem, 0.938rem);
+        height: clamp(0.313rem, 1.064vw - 0.02rem, 0.938rem);
+        margin: 0;
     }
 
     & :global(.swiper-pagination-bullet-active) {
-        background-color: $color-black;
+        background-color: $color-gray-500;
     }
 
     & div:global(.slick-track) {
@@ -31,16 +43,11 @@
     }
 
     .control {
-        margin-top: 20px;
-        margin-bottom: 5px;
+        margin-top: clamp(1.25rem, 3.191vw + 0.253rem, 3.125rem);
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 20px;
-        svg{
-            width: 24px;
-            height: 24px;
-        }
+        gap: clamp(0.938rem, 2.128vw + 0.273rem, 2.188rem);
     }
 
     .prev {
@@ -50,5 +57,12 @@
     
     .next {
         order: 2;
+    }
+
+    .button {
+        svg{
+            width: clamp(1.25rem, 2.128vw + 0.585rem, 2.5rem);
+            height: clamp(1.25rem, 2.128vw + 0.585rem, 2.5rem);
+        }
     }
 }

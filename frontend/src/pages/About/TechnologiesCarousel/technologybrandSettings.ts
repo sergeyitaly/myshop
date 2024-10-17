@@ -1,7 +1,7 @@
 import { Grid, Pagination } from "swiper/modules";
 import { SwiperOptions } from "swiper/types";
 
-export const technologySettings: SwiperOptions = {
+export const technologybrandSettings: SwiperOptions = {
 	grid: {
 		rows: 1,
 		fill: "row",
@@ -11,6 +11,7 @@ export const technologySettings: SwiperOptions = {
 		clickable: true,
 	},
 	spaceBetween: 20,
+	loop: true,
 	modules: [Grid, Pagination],
 	breakpoints: {
 		740: {

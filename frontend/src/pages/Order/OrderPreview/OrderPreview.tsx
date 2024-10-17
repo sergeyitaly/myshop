@@ -6,30 +6,32 @@ import { OrderItemCard } from '../../../components/Cards/OrderItemCard/OrderItem
 import { ROUTE } from '../../../constants'
 import { Product } from '../../../models/entities'
 import { useNavigate } from 'react-router-dom'
+import {useTranslation} from "react-i18next";
 
 interface OrderPreviewProps {
-    className?: string
+	className?: string;
 }
-
 
 
 export const OrderPreview = ({
     className
 }: OrderPreviewProps) => {
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const { t } = useTranslation(); // Initialize useTranslation
+
 
     const { basketItems, totalPrice, deleteFromBasket, changeCounter} = useBasket()
 
     const handleClickCard = (product: Product) => {
-        navigate(ROUTE.PRODUCT+product.id)
+        navigate(ROUTE.PRODUCT+product.id_name)
     }
 
 
     return (
         <div className={clsx(className, styles.container )}>
             <div className={styles.spaceBetween}>
-                <h2 className={styles.text}>Замовлення</h2>
+                <h2 className={styles.text}>{t('order_preview')}</h2>
             </div>
             <div className={styles.content}>
             {
@@ -49,7 +51,7 @@ export const OrderPreview = ({
 
             </div>
             <div className={styles.spaceBetween}>
-                <p className={styles.text}>Загальна сума</p>
+                <p className={styles.text}>{t('total_sum')}</p>
                 <p className={styles.text}>{formatPrice(totalPrice, 'UAH')}</p>
             </div>
         </div>

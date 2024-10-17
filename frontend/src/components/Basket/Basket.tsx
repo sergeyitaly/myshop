@@ -49,7 +49,7 @@ export const Basket = (): JSX.Element => {
     };
 
     const handleClickName = (product: Product) => {
-        navigate(`${ROUTE.PRODUCT}${product.id}`);
+        navigate(`${ROUTE.PRODUCT}${product.id_name}`);
         closeBasket();
     };
 

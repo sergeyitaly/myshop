@@ -1,0 +1,29 @@
+@import "../../variables";
+
+.wrapper {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 20px;
+	margin-bottom: 50px;
+
+	@media (max-width: $screen-mobile) {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+.skeletonWrapper {
+	width: clamp(165px, 25vw, 329px);
+	height: clamp(150px, 25vw, 368px);
+	display: flex;
+	gap: 16px;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	position: relative;
+}
+
+.imageSkeleton {
+	width: 100%;
+	height: 100%;
+	border-radius: 5px;
+}

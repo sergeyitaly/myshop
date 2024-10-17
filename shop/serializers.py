@@ -74,6 +74,8 @@ class ProductSerializer(serializers.ModelSerializer):
     color_name_en = serializers.CharField(required=False)
     color_name_uk = serializers.CharField(required=False)
     additional_fields = AdditionalFieldSerializer(source='additionalfield_set',many=True, read_only=True)
+    id_name = serializers.CharField(read_only=True)
+    id = serializers.IntegerField(read_only=True)
 
 
     # Use a single method for URL fetching

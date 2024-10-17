@@ -251,7 +251,24 @@ class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
+    
+    def get_object(self):
+        id = self.kwargs.get('id')
+        id_name = self.kwargs.get('id_name')
 
+        # Attempt to retrieve by ID first
+        if id is not None:
+            product = Product.objects.filter(id=id).first()
+            if product:
+                return product
+
+        # Then attempt to retrieve by ID name
+        if id_name:
+            product = Product.objects.filter(id_name=id_name).first()
+            if product:
+                return product
+
+        raise Http404("Product not found")
     def perform_update(self, serializer):
         instance = serializer.save()
         # Invalidate the cache when a collection is updated

@@ -71,13 +71,14 @@ class Collection(models.Model):
     created = models.DateTimeField(auto_now_add=True, verbose_name=_('created'))
     updated = models.DateTimeField(auto_now=True, verbose_name=_('updated'))
     sales_count = models.PositiveIntegerField(default=0, verbose_name=_('Sales count'))
+    products = models.ManyToManyField('Product', related_name='collections', blank=True)
 
     def image_tag(self):
         if self.photo:
             url = self.photo_thumbnail.url
             return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(url))
         else:
-            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format('default_collection.jpg'))
+            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format('collection.jpg'))
 
     def __str__(self):
         return self.name
@@ -117,12 +118,12 @@ class Product(models.Model):
         format='JPEG',
         options={'quality': 60}
     )
-
-    collection = models.ForeignKey(Collection, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_('Collection'))
+    collection = models.ForeignKey(Collection, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('Collection'))
     name = models.CharField(max_length=255, verbose_name=_('Name'), db_index=True)
+    id_name = models.CharField(max_length=255, verbose_name=_('ID Name'), db_index=True, null=True, blank=True)
     description = models.TextField(null=True, blank=True, verbose_name=_('Description'))
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_('Price'))
-    stock = models.IntegerField(default=0, verbose_name=_('Stock'))
+    stock = models.PositiveIntegerField(default=0, verbose_name=_('Stock'))
     available = models.BooleanField(default=True, verbose_name=_('Available'))
     created = models.DateTimeField(auto_now_add=True, verbose_name=_('Created'))
     updated = models.DateTimeField(auto_now=True, verbose_name=_('Updated'))
@@ -146,7 +147,7 @@ class Product(models.Model):
             url = self.photo_thumbnail.url
             return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format(url))
         else:
-            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format('default_product.png'))
+            return format_html('<img src="{}" style="max-height: 150px; max-width: 150px;" />'.format('product.png'))
 
     def __str__(self):
         return self.name
@@ -154,7 +155,15 @@ class Product(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = self.generate_unique_slug()
+
+        if not self.id_name:
+            name_with_underscores = self.name.replace(' ', '_')
+            self.id_name = f"{self.id}_{name_with_underscores}"
+        
         super().save(*args, **kwargs)
+        if not self.id_name:
+            self.id_name = f"{self.id}_{name_with_underscores}"
+            self.save(update_fields=['id_name'])
 
     def generate_unique_slug(self):
         base_slug = slugify(self.name)

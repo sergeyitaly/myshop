@@ -1,46 +1,83 @@
 @import "../../../variables";
 
+.wrapper {
+	padding-bottom: clamp(32px, 3vw, 128px);
+}
+
 .title {
-	font-size: clamp(16px,4vw, 60px);
-	
+	font-size: clamp(20px, 4vw, 32px);
+	line-height: clamp(20px, 5vw + 5px, 105px);
 	text-align: center;
 	margin: auto;
 	margin-bottom: clamp(24px, 5vw, 60px);
-	width: 60%;
+	padding: 0 40px;
+	transition: width 0.3s ease-in-out;
+
 	@media (max-width: $screen-mobile) {
-		line-height: 22px;
-		width: 80%;
+		line-height: 20px;
 	}
 }
 
 .content {
 	display: flex;
-	justify-content: flex-start;
+	justify-content: space-between;
 	gap: 20px;
 	flex-wrap: wrap;
 	margin-bottom: clamp(20px, 5vw, 60px);
 }
 
+// .imageSize {
+// 	width: clamp(74px, 25vw, 320px);
+// 	height: clamp(69px, 15vw, 190px);
+// 	padding-top: clamp(0%, 15%, 50%);
+// 	border: 1px solid $color-gray-100;
+// }
+
 .imageSize {
-	width: clamp(74px, 25vw, 320px);
-	height: clamp(69px, 15vw, 190px);
-	padding-top: clamp(0%, 15%, 50%);
+	width: clamp(74px, calc(100vw * 0.2), 335px);
+	height: clamp(47px, calc((100vw * 0.2) * 191 / 335), 191px);
+	padding-top: 50%;
+	transition:
+		filter 0.3s ease-in-out,
+		width 0.3s ease-in-out,
+		height 0.3s ease-in-out;
+	filter: grayscale(100%);
+	object-fit: cover;
 	border: 1px solid $color-gray-100;
+
+	@media (min-width: 1440px) {
+		width: 335px;
+		height: 191px;
+	}
+
+	@media (min-width: $screen-mobile) {
+		&:hover {
+			filter: grayscale(0%);
+		}
+	}
+
+	@media (max-width: $screen-mobile) {
+		filter: grayscale(100%);
+	}
 }
 
-.skeletonWrapper {
-	width: clamp(74px, 25vw, 285px);
-	height: clamp(69px, 15vw, 170px);
-	display: flex;
-	gap: 16px;
-	align-items: center;
-	justify-content: center;
-	overflow: hidden;
-	position: relative;
-}
+// .skeletonWrapper {
+// 	width: clamp(74px, 25vw, 285px);
+// 	height: clamp(69px, 15vw, 170px);
+// 	display: flex;
+// 	gap: 16px;
+// 	align-items: center;
+// 	justify-content: center;
+// 	overflow: hidden;
+// 	position: relative;
+// }
 
-.imageSkeleton {
+// .imageSkeleton {
+// 	width: 100%;
+// 	height: 100%;
+// 	border-radius: 5px;
+// }
+
+.sliderContainer {
 	width: 100%;
-	height: 100%;
-	border-radius: 5px;
 }

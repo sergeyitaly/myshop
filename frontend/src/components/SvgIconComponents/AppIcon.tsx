@@ -10,6 +10,10 @@ import { RightArrowIcon } from "./RightArrowIcon";
 import { ForwardArrowIcon } from "./ForwardArrow";
 import { UkraineFlagIcon } from "./UkraineFlag";
 import { UKFlagIcon } from "./UKFlagIcon";
+import { Face1 } from "./Face1";
+import { Face2 } from "./Face2";
+import { Face3 } from "./Face3";
+import { Face4 } from "./Face4";
 
 interface AppIconProps extends SVGProps<SVGSVGElement> {
     iconName: AppIconNames
@@ -28,6 +32,10 @@ export const AppIcon = ({iconName, ...props}: AppIconProps) => {
         case 'forwardArrow': return <ForwardArrowIcon {...props}/>
         case 'flagUkraine' : return <UkraineFlagIcon {...props}/>
         case 'flagUK' : return <UKFlagIcon {...props}/>
+        case 'face1' : return <Face1 {...props}/>
+        case 'face2' : return <Face2 {...props}/>
+        case 'face3' : return <Face3 {...props}/>
+        case 'face4' : return <Face4 {...props}/>
         default: return <CartIcon {...props}/>
     }
 }
