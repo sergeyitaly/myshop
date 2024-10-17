@@ -26,7 +26,8 @@ export enum ROUTE {
     FEEDBACK='/feedback',
     SENDCONTACTS = '/sendcontacts',
     PAYMENT_DELIVERY = '/payment_delivery',
-    PRIVACY_POLICY = '/privacy_policy'
+    PRIVACY_POLICY = '/privacy_policy',
+    RETURNS_REFUNDS = '/returns_refunds'
 }
 
 export enum ENDPOINTS {

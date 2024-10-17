@@ -9,6 +9,7 @@ import { OrderPage } from './pages/Order/OrderPage';
 import { ThankPage } from './pages/ThankPage/ThankPage';
 import { PaymentAndDeliveryPage } from './pages/PaymentAndDeliveryPage/PaymentAndDeliveryPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage/PrivacyPolicyPage';
+import { ReturnsRefundsPage } from './pages/ReturnsRefundsPage/ReturnsRefundsPage';
 import { ROUTE } from './constants';
 import { FilterPage } from './pages/FilterPage/FilterPage';
 import { TestPage } from './pages/TestPage';
@@ -37,6 +38,7 @@ function App() {
         <Route path={ROUTE.SENDCONTACTS} element={<ThankYouPage />} />
         <Route path={ROUTE.PAYMENT_DELIVERY} element={<PaymentAndDeliveryPage />} />
         <Route path={ROUTE.PRIVACY_POLICY} element={<PrivacyPolicyPage />} />
+        <Route path={ROUTE.RETURNS_REFUNDS} element={<ReturnsRefundsPage />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
