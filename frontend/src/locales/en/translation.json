@@ -167,6 +167,7 @@
    "here": "here",
    "rate_us": "Rate us",
   "error_name": "Invalid name format. Please enter a correct format.",
+  "error_surname": "Invalid surname format. Please enter a correct format.",
   "error_email": "Please enter a valid email address.",
   "error_phone": "Invalid phone number format. Please enter a valid phone number.",
   "order_place" : "Place an order",
