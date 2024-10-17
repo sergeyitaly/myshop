@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import Avg
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils import timezone
 
 
 class Feedback(models.Model):
@@ -9,24 +10,54 @@ class Feedback(models.Model):
     comment = models.TextField(null=True, blank=True)
     email = models.EmailField(null=True, blank=True)
 
-    # Two questions and answers
-    question1 = models.TextField(verbose_name="Question 1")
-    answer1 = models.TextField(verbose_name="Answer 1")
-
-    question2 = models.TextField(verbose_name="Question 2")
-    answer2 = models.TextField(verbose_name="Answer 2")
-
     # Integer fields for star ratings (1 to 10)
-    rating_1 = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Rating for aspect 1")
-    rating_2 = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Rating for aspect 2")
-    rating_3 = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Rating for aspect 3")
-    rating_4 = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Rating for aspect 4")
-    rating_5 = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Rating for aspect 5")
-    rating_6 = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Rating for aspect 6")
-    rating_7 = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Rating for aspect 7")
-    rating_8 = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Rating for aspect 8")
-    rating_9 = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Rating for aspect 9")
-    rating_10 = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Rating for aspect 10")
+    rating_1 = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Rating for aspect 1", blank=True)
+    question1 = models.TextField(verbose_name="Question 1", null=True, blank=True)
+    answer1 = models.TextField(verbose_name="Answer 1",null=True, blank=True)
+
+    rating_2 = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Rating for aspect 2", blank=True)
+    question2 = models.TextField(verbose_name="Question 2", null=True, blank=True)
+    answer2 = models.TextField(verbose_name="Answer 2",null=True, blank=True )
+
+    rating_3 = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Rating for aspect 3", blank=True)
+    question3 = models.TextField(verbose_name="Question 3", null=True, blank=True)
+    answer3 = models.TextField(verbose_name="Answer 2",null=True, blank=True )
+
+    rating_4 = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Rating for aspect 4", blank=True)
+    question4 = models.TextField(verbose_name="Question 4", null=True, blank=True)
+    answer4 = models.TextField(verbose_name="Answer 4",null=True, blank=True )
+
+    rating_5 = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Rating for aspect 5", blank=True)
+    question5 = models.TextField(verbose_name="Question 5", null=True, blank=True)
+    answer5 = models.TextField(verbose_name="Answer 5",null=True, blank=True )
+
+    rating_6 = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Rating for aspect 6", blank=True)
+    question6 = models.TextField(verbose_name="Question 6", null=True, blank=True)
+    answer6 = models.TextField(verbose_name="Answer 6",null=True, blank=True )
+
+    rating_7 = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Rating for aspect 7", blank=True)
+    question7 = models.TextField(verbose_name="Question 7", null=True, blank=True)
+    answer7 = models.TextField(verbose_name="Answer 7",null=True, blank=True )
+
+    rating_8 = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Rating for aspect 8", blank=True)
+    question8 = models.TextField(verbose_name="Question 8", null=True, blank=True)
+    answer8 = models.TextField(verbose_name="Answer 8",null=True, blank=True )
+
+    rating_9 = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Rating for aspect 9", blank=True)
+    question9 = models.TextField(verbose_name="Question 9", null=True, blank=True)
+    answer9 = models.TextField(verbose_name="Answer 9",null=True, blank=True )
+
+    rating_10 = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], verbose_name="Rating for aspect 10", blank=True)
+    question10 = models.TextField(verbose_name="Question 10", null=True, blank=True)
+    answer10 = models.TextField(verbose_name="Answer 10",null=True, blank=True )
+ 
+    STATUS_CHOICES = [
+        ('processed', 'Processed'),
+        ('complete', 'Complete'),
+    ]
+
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='processed')
+    created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"Feedback from {self.name}"

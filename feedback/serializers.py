@@ -6,9 +6,19 @@ class FeedbackSerializer(serializers.ModelSerializer):
         model = Feedback
         fields = [
             'name', 'email','comment',
-            'question1', 'answer1', 'question2', 'answer2',
+            'question1', 'answer1', 
+            'question2', 'answer2',
+            'question3', 'answer3', 
+            'question4', 'answer4',
+            'question5', 'answer5', 
+            'question6', 'answer6',
+            'question7', 'answer7', 
+            'question8', 'answer8',
+            'question9', 'answer9', 
+            'question10', 'answer10',
             'rating_1', 'rating_2', 'rating_3', 'rating_4', 'rating_5',
-            'rating_6', 'rating_7', 'rating_8', 'rating_9', 'rating_10'
+            'rating_6', 'rating_7', 'rating_8', 'rating_9', 'rating_10',
+             'status', 'created_at'
         ]
 
 
