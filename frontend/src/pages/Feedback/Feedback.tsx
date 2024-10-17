@@ -1,6 +1,5 @@
 import { FeedbackCard } from "../../components/Cards/FeedbackCard/FeedbackCard"
 import { PageContainer } from "../../components/containers/PageContainer"
-import { Logo } from "../../components/Logo/Logo"
 import { MainButton } from "../../components/UI/MainButton/MainButton"
 import styles from './Feedback.module.scss'
 import image from './image.png'
@@ -16,7 +15,6 @@ export const FeedbackPage = () => {
 
     return (
         <PageContainer>
-            <Logo className={styles.logo} />
             <div className={styles.imageWrapper}>
                 <img 
                     src={image}
@@ -45,7 +43,7 @@ export const FeedbackPage = () => {
                     color="blue"
                     title="Надіслати"
                 />
-                <button onClick={() => navigate(ROUTE.HOME)}>Закрити і повернутися на головний екран</button>
+                <button className={styles.button} onClick={() => navigate(ROUTE.HOME)}>Закрити і повернутися на головний екран</button>
             </div>
         </PageContainer>
     )

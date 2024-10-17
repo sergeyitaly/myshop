@@ -66,6 +66,9 @@ export const FilterSection = ({
 
     let totalPages = 0;
 
+    console.log(productsResponse?.results);
+    
+
     useEffect(() => {
         if (productsResponse) {
             setFullRangeOfPrice([productsResponse.overall_price_min, productsResponse.overall_price_max])
