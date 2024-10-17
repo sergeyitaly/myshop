@@ -16,7 +16,7 @@ interface Breadcrumb {
     isLoading?: boolean
 }
 
-type Pages = 'collections' | 'products' | 'order' | 'home' | 'contacts' | 'about' | 'payment_delivery' | 'privacy_policy';
+type Pages = 'collections' | 'products' | 'order' | 'home' | 'contacts' | 'about' | 'payment_delivery' | 'privacy_policy' | 'returns_refunds';
 
 type ConstantRoutes = {[K in Pages]: Breadcrumb}
 
@@ -44,6 +44,7 @@ const pageDefiner = (path: string) => {
         isContacts: false,
         isPaymentDelivery: false,
         isPrivacyPolicy: false,
+        isReturnsRefunds: false
     }
 
     if(route === 'collections') pages = {...pages, isCollections: true }
@@ -54,7 +55,8 @@ const pageDefiner = (path: string) => {
     if(route === 'about')       pages = {...pages, isAbout: true }
     if(route === 'contacts') pages = { ...pages, isContacts: true }
     if(route === 'payment_delivery') pages = { ...pages, isPaymentDelivery: true }
-    if(route === 'privacy_policy') pages = {...pages, isPrivacyPolicy: true}
+    if (route === 'privacy_policy') pages = { ...pages, isPrivacyPolicy: true }
+    if(route === 'returns_refunds') pages = { ...pages, isReturnsRefunds: true }
 
     return pages
 }
@@ -98,6 +100,10 @@ export const Breadcrumbs = () => {
         privacy_policy: {
             title: t('privacy_policy'),
             link: ROUTE.PRIVACY_POLICY
+        },
+        returns_refunds: {
+            title: t('returns_refunds'),
+            link: ROUTE.RETURNS_REFUNDS
         }
     }
 
@@ -122,7 +128,7 @@ export const Breadcrumbs = () => {
 
     const getBreadcrumbs = (): Breadcrumb[] => {
 
-        const {collections, home, order, products, about, contacts, payment_delivery, privacy_policy} = constantRoutes
+        const {collections, home, order, products, about, contacts, payment_delivery, privacy_policy, returns_refunds} = constantRoutes
 
         const list: Breadcrumb[] = [home]
 
@@ -130,7 +136,7 @@ export const Breadcrumbs = () => {
 
         const pages = pageDefiner(pathname)
 
-        const {isCollection, isCollections, isProducts, isProduct, isOrder, isAbout, isContacts, isPaymentDelivery, isPrivacyPolicy} = pages
+        const {isCollection, isCollections, isProducts, isProduct, isOrder, isAbout, isContacts, isPaymentDelivery, isPrivacyPolicy, isReturnsRefunds} = pages
 
         
 
@@ -191,6 +197,8 @@ export const Breadcrumbs = () => {
         if (isPaymentDelivery) list.push(payment_delivery)
         
         if (isPrivacyPolicy) list.push(privacy_policy)
+        
+        if (isReturnsRefunds) list.push(returns_refunds)
 
         return Object.values(pages).some(item => item) ? list: []
     }
