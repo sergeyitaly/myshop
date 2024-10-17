@@ -13,14 +13,9 @@
 
 .container {
 	display: flex;
-	gap: clamp(20px, 5vw + 10px, 130px);
+	gap: clamp(20px, 5vw, 150px);
 	align-items: center;
 	margin-bottom: clamp(40px, 5vw + 10px, 90px);
-	padding: 0 30px;
-
-	@media (max-width: $screen-mobile) {
-		padding: 0; 
-	}
 }
 
 .content1 {
@@ -44,16 +39,18 @@
 }
 
 .text {
-	font-family: "Capriola", sans-serif;
-	font-size: clamp(16px, 2vw, 32px);
-	line-height: clamp(26px, 3vw + 13px, 55px);
-	text-align: center;
-	font-weight: 400;
+	font-size: clamp(12px, 2vw, 18px);
+	line-height: 1.5;
+	text-align: start;
+
+	@media (max-width: $screen-mobile) {
+		text-align: center;
+	}
 }
 
 .img {
-	width: 514px;
-	height: auto;
+	max-width: 514px;
+	transition: width 0.3s ease-in-out;
 
 	@media (max-width: $screen-laptop) {
 		width: 467px;
@@ -68,6 +65,9 @@
 	}
 }
 
-.blue {
+.projectName {
 	color: $color-blue;
+	font-size: clamp(20px, 5vw, 30px);
+	font-weight: 500;
+	font-family: "Capriola", sans-serif;
 }

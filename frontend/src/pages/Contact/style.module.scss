@@ -1,148 +1,159 @@
-@import '../../variables';
+@import "../../variables";
 
 .titleContainer {
-  padding: 100px 140px;
-  font-weight: 400;
+	padding: 100px 140px;
+	font-weight: 400;
 
-  @media (max-width: $screen-mobile) {
-    padding: 70px;
-  }
+	@media (max-width: $screen-mobile) {
+		padding: 70px;
+	}
 }
 
 .name {
-  color: $color-blue;
+	color: $color-blue;
 }
 
 .description {
-  display: block;
-  font-size: 32px;
-  text-align: center;
+	display: block;
+	font-size: 32px;
+	text-align: center;
 
-  @media (max-width: $screen-mobile) {
-    font-size: 20px;
-    line-height: 1.5;
-  }
+	@media (max-width: $screen-mobile) {
+		font-size: 20px;
+		line-height: 1.5;
+	}
 }
 
 .generalContainer {
-  display: flex;
+	display: flex;
 
-  @media (max-width: $screen-mobile) {
-    display: inline;
-  }
+	@media (max-width: $screen-mobile) {
+		display: inline;
+	}
 }
 
 .contactScontainer {
-  font-weight: 400;
-  flex: 0 0 30%;
+	font-weight: 400;
+	flex: 0 0 30%;
 
-  h3 {
-    color: $color-blue;
-    font-size: 32px;
-    margin-bottom: 10px;
-    font-weight: 400;
+	h3 {
+		color: $color-blue;
+		font-size: 32px;
+		margin-bottom: 10px;
+		font-weight: 400;
 
-    @media (max-width: $screen-mobile) {
-      font-size: 20px;
-      font-weight: 600;
-    }
-  }
+		@media (max-width: $screen-mobile) {
+			font-size: 20px;
+			font-weight: 600;
+		}
+	}
 
-  p {
-    font-size: 24px;
-    line-height: 2.2;
+	p {
+		font-size: 24px;
+		line-height: 2.2;
 
-    @media (max-width: $screen-mobile) {
-      font-size: 18px;
-      line-height: 1.8;
-    }
-  }
+		@media (max-width: $screen-mobile) {
+			font-size: 18px;
+			line-height: 1.8;
+		}
+	}
 
-  .subTitle {
-    color: #080599;
+	.subTitle {
+		color: $color-button;
 
-    @media (max-width: $screen-mobile) {
-      font-size: 18px;
-      margin-top: 15px;
-    }
-  }
+		@media (max-width: $screen-mobile) {
+			font-size: 18px;
+			margin-top: 15px;
+		}
+	}
 }
 
 .formContainer {
-  flex: 1;
-  margin-left: 20px;
+	flex: 1;
+	margin-left: 20px;
 
-  @media (max-width: $screen-mobile) {
-    margin-left: 0;
-  }
+	@media (max-width: $screen-mobile) {
+		margin-left: 0;
+	}
 
-  h2 {
-    font-size: 32px;
-    font-weight: 400;
-    text-align: center;
-    margin-bottom: 30px;
+	h2 {
+		font-size: 32px;
+		font-weight: 400;
+		text-align: center;
+		margin-bottom: 30px;
 
-    @media (max-width: $screen-mobile) {
-      font-size: 20px;
-    }
-  }
+		@media (max-width: $screen-mobile) {
+			font-size: 20px;
+		}
+	}
 
-  @media (max-width: $screen-mobile) {
-    margin-top: 30px;
-  }
+	@media (max-width: $screen-mobile) {
+		margin-top: 30px;
+	}
 }
 
 .frame {
-  padding: 35px 60px;
-  border: 2px solid #A8A8A8;
-  border-radius: 3;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+	padding: 35px 60px;
+	border: 2px solid $color-border;
+	border-radius: 3;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
 
-  @media (max-width: $screen-mobile) {
-    padding: 30px 50px 30px 50px;
-    font-size: 22px;
-  }
+	@media (max-width: $screen-mobile) {
+		padding: 30px 50px 30px 50px;
+		font-size: 22px;
+	}
 }
 
 .sendButton {
-  background-color: #000;
-  color: #fff;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 4px;
-  font-size: 20px;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
-  width: 150px;
-  margin-top: 25px;
+	background-color: $color-black;
+	color: $color-background;
+	padding: 12px 24px;
+	border: none;
+	border-radius: 4px;
+	font-size: 20px;
+	cursor: pointer;
+	transition:
+		background-color 0.3s,
+		transform 0.2s;
+	width: 150px;
+	margin-top: 25px;
 }
 
 .phoneInput {
-  .PhoneInputInput {
-    height: 300px;
-    width: 100%;
-    font-size: 16px;
-    border: none;
-    border-bottom: 1px solid #a8a8a8;
-    padding: 10px 0;
-    outline: none;
-  }
+	.PhoneInputInput {
+		height: 300px;
+		width: 100%;
+		font-size: 16px;
+		border: none;
+		border-bottom: 1px solid $color-border;
+		padding: 10px 0;
+		outline: none;
+	}
 
-  .PhoneInputCountry {
-    margin-right: 10px;
-  }
+	.PhoneInputCountry {
+		margin-right: 10px;
+	}
 
-  @media (max-width: 740px) {
-    .PhoneInputInput {
-      height: 40px;
-    }
-  }
+	@media (max-width: 740px) {
+		.PhoneInputInput {
+			height: 40px;
+		}
+	}
 
-  .errorText {
-    color: red;
-    font-size: 12px;
-    margin-top: 5px;
-  }
+	.errorText {
+		color: $color-error;
+		font-size: 12px;
+		margin-top: 5px;
+	}
+}
+
+a {
+	text-decoration: none;
+	color: inherit;
+
+	&:hover {
+		color: $color-button;
+	}
 }

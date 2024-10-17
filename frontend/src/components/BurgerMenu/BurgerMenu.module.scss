@@ -1,121 +1,127 @@
+@import "../../variables";
+
 .burger_container {
-    display: none;
+	display: none;
 }
 
 .burger {
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
+	background-color: transparent;
+	border: none;
+	cursor: pointer;
 
-    &:hover {
-
-        .bar1,
-        .bar2,
-        .bar3 {
-            background-color: var(--blue);
-            width: 25px;
-        }
-    }
+	&:hover {
+		.bar1,
+		.bar2,
+		.bar3 {
+			background-color: $color-button;
+			width: 25px;
+		}
+	}
 }
 
 .bar1,
 .bar2,
 .bar3 {
-    width: 25px;
-    height: 3px;
-    background-color: var(--blue);
-    margin: 8px 0;
-    transition: 0.4s;
-    border-radius: 15px;
-    transition: opacity .2s, transform .4s, width .2s;
+	width: 25px;
+	height: 2.5px;
+	background-color: $color-button;
+	margin: 8px 0;
+	transition: 0.4s;
+	border-radius: 15px;
+	transition:
+		opacity 0.2s,
+		transform 0.4s,
+		width 0.2s;
 }
 
 .menu {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    min-height: 100vh;
-    width: 80%;
-    padding-left: 10px;
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	min-height: 100vh;
+	width: 80%;
+	padding-left: 10px;
 
-    display: flex;
-    flex-direction: column;
-    justify-content: start;
-    gap: 35px;
+	display: flex;
+	flex-direction: column;
+	justify-content: start;
+	gap: 35px;
 
-    background-color: white;
-    border-left: none;
-    opacity: 0;
-    translate: -100vw 0;
-    box-shadow: 4px 4px 25px 1px rgba(0, 0, 0, .4);
-    transition: translate .3s, opacity .3s;
-    z-index: 100;
+	background-color: $color-background;
+	border-left: none;
+	opacity: 0;
+	translate: -100vw 0;
+	box-shadow: 4px 4px 25px 1px rgba(0, 0, 0, 0.4);
+	transition:
+		translate 0.3s,
+		opacity 0.3s;
+	z-index: 100;
 
-    &>* {
-        padding: 10px 15px;
-    }
+	& > * {
+		padding: 10px 15px;
+	}
 }
 
 .menu_open {
-    translate: 0;
-    opacity: 1;
+	translate: 0;
+	opacity: 1;
 }
 
 .logo_container {
-    display: flex;
-    justify-content: end;
-    align-items: center;
-    padding-right: 5%;
+	display: flex;
+	justify-content: end;
+	align-items: center;
+	padding-right: 5%;
 }
 
 .title {
-    width: fit-content;
+	width: fit-content;
 }
 
 .link {
-    text-decoration: none;
-    color: var(--gray-500);
-    font-size: 20px;
-    border-bottom: 1px solid var(--gray);
-    width: 95%;
-    min-width: fit-content;
-    position: relative;
+	text-decoration: none;
+	color: $color-gray-500;
+	font-size: 20px;
+	border-bottom: 1px solid var(--gray);
+	width: 95%;
+	min-width: fit-content;
+	position: relative;
 
-    transition: .3s color;
+	transition: 0.3s color;
 
-    &:active {
-        color: #A8A8A8;
-    }
+	&:active {
+		color: $color-border;
+	}
 
-    &::after {
-        content: url('./arrow.svg');
-        position: absolute;
-        width: 16px;
-        height: 16px;
-        display: block;
-        right: 0;
-        top: 30%;
-    }
+	&::after {
+		content: url("./arrow.svg");
+		position: absolute;
+		width: 16px;
+		height: 16px;
+		display: block;
+		right: 0;
+		top: 30%;
+	}
 }
 
 .button_open {
-    .bar1 {
-        transform: rotate(-45deg) translate(-7px, 8px);
-    }
+	.bar1 {
+		transform: rotate(-45deg) translate(-7px, 8px);
+	}
 
-    .bar2 {
-        opacity: 0;
-    }
+	.bar2 {
+		opacity: 0;
+	}
 
-    .bar3 {
-        transform: rotate(45deg) translate(-7px, -8px);
-        width: 25px;
-    }
+	.bar3 {
+		transform: rotate(45deg) translate(-7px, -8px);
+		width: 25px;
+	}
 }
 
 @media (max-width: 1000px) {
-    .burger_container {
-        display: block;
-    }
+	.burger_container {
+		display: block;
+	}
 }

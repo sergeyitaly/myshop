@@ -10,26 +10,103 @@ from rest_framework import status, viewsets, permissions
 from .models import *
 from .serializers import *
 from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 import logging, requests, json
-from django.http import JsonResponse
 from rest_framework.decorators import action
 from .notifications import update_order_status_with_notification
-from django.http import JsonResponse, Http404
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from django.utils.dateformat import format as date_format
+from django.utils.timezone import make_naive, is_aware
+from datetime import datetime
+
 
 
 logger = logging.getLogger(__name__)
 def health_check(request):
     return JsonResponse({'status': 'ok'})
 
+
 class OrderSummaryViewSet(viewsets.ModelViewSet):
     queryset = OrderSummary.objects.all()
     serializer_class = OrderSummarySerializer
+
+    def format_timestamp(self, timestamp):
+        """Format timestamp to 'Y-m-d H:i'."""
+        return date_format(timestamp, 'Y-m-d H:i') if timestamp else None
+
+    def make_aware_if_naive(self, dt):
+        """Convert naive datetime to aware using Django's timezone support."""
+        if dt and isinstance(dt, datetime):
+            if timezone.is_naive(dt):
+                return timezone.make_aware(dt)
+        return dt
+
+    def ensure_datetime(self, value):
+        """Converts a value to a datetime object if it's not None."""
+        if value is None:
+            return None
+        if isinstance(value, datetime):
+            return value
+        return datetime.fromisoformat(value)
+
+    def datetime_to_str(self, value):
+        """Converts a datetime object to a string."""
+        if value is None:
+            return None
+        return value.strftime("%Y-%m-%d %H:%M")  # Adjust the format as needed
+
+    def prepare_order_summary(self, order):
+        """Generates a unified summary of an order with correct status naming."""
+        submitted_at = self.ensure_datetime(order.submitted_at)
+        processed_at = self.ensure_datetime(order.processed_at)
+        complete_at = self.ensure_datetime(order.complete_at)
+        canceled_at = self.ensure_datetime(order.canceled_at)
+
+        # Prepare a dictionary of relevant status fields
+        status_fields = {
+            'submitted_at': submitted_at,
+            'processed_at': processed_at,
+            'complete_at': complete_at,
+            'canceled_at': canceled_at,
+        }
+
+        # Determine the latest status key based on the timestamp values
+        latest_status_key = max(
+            status_fields,
+            key=lambda k: status_fields[k] or datetime.min
+        )
+
+        latest_status_time = status_fields[latest_status_key]  # Get the corresponding timestamp
+
+        # Serialize order items
+        order_items_data = OrderItemSerializer(order.order_items.all(), many=True).data
+
+        # Prepare the summary with only the two required statuses
+        summary = {
+            'order_id': order.id,
+            'order_items': [
+                {
+                    'size': item['size'],
+                    'quantity': item['quantity'],
+                    'total_sum': item['total_sum'],
+                    'color_name': item['color_name'],
+                    'item_price': item['item_price'],
+                    'color_value': item['color_value'],
+                    'product_name': item['product_name'],
+                    'collection_name': item['collection_name'],
+                } for item in order_items_data
+            ],
+            'latest_status': latest_status_key,  # Reflect latest status key
+            'latest_status_time': self.datetime_to_str(latest_status_time),  # Reflect latest status timestamp
+            'submitted_at': self.datetime_to_str(submitted_at),
+        }
+
+        return summary
 
     def create(self, request, *args, **kwargs):
         logger.debug("Received data: %s", request.data)
@@ -41,31 +118,37 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
             logger.error("chat_id is missing in the request data.")
             return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
         
+        # Perform creation
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+        # Prepare formatted order summary
+        order_summary_data = self.prepare_order_summary(serializer.instance)
+        
+        return Response(order_summary_data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         
-        # Ensure the chat_id is provided in the request data
         chat_id = request.data.get('chat_id')
         if not chat_id:
             logger.error("chat_id is missing in the request data.")
             return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Validate and update the instance
+        # Validate and update instance
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)        
+        serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         
         # Handle potential prefetched objects cache
         if getattr(instance, '_prefetched_objects_cache', None):
             instance._prefetched_objects_cache = {}
-        
-        return Response(serializer.data)
-    
+
+        # Prepare updated order summary
+        order_summary_data = self.prepare_order_summary(instance)
+
+        return Response(order_summary_data)
 
 
 class TelegramUserViewSet(viewsets.ModelViewSet):
@@ -353,6 +436,44 @@ def get_orders(request):
         logger.error(f"Error fetching orders: {e}")
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+def safe_make_naive(dt):
+    if dt is None:
+        return None
+    return make_naive(dt) if is_aware(dt) else dt
+
+def format_order_summary(order):
+    submitted_at = safe_make_naive(order.submitted_at)
+    processed_at = safe_make_naive(order.processed_at)
+    complete_at = safe_make_naive(order.complete_at)
+    canceled_at = safe_make_naive(order.canceled_at)
+
+    statuses = {
+        'submitted_at': submitted_at,
+        'processed_at': processed_at,
+        'complete_at': complete_at,
+        'canceled_at': canceled_at
+    }
+    
+    latest_status_field = max(
+        statuses,
+        key=lambda s: statuses[s] or datetime.min
+    )
+    latest_status_timestamp = statuses[latest_status_field]
+
+    def datetime_to_str(dt):
+        if dt:
+            return dt.strftime('%Y-%m-%d %H:%M')
+        return None
+
+    serializer = OrderSerializer(order)
+    order_data = serializer.data
+
+    return {
+        'order_id': order.id,
+        'order_items': order_data['order_items'],
+        'submitted_at': datetime_to_str(submitted_at),
+        latest_status_field: datetime_to_str(latest_status_timestamp)
+    }
 
 @api_view(['POST'])
 def update_order(request):
@@ -362,18 +483,36 @@ def update_order(request):
     if not chat_id:
         return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
 
+    if not isinstance(orders, list):
+        return Response({"detail": "Orders must be a list."}, status=status.HTTP_400_BAD_REQUEST)
+
     try:
-        order_summary = OrderSummary.objects.get(chat_id=chat_id)
-        order_summary.orders = orders
-        order_summary.save()
-        
+        # Retrieve existing orders based on the incoming order data
+        updated_orders = []
+        for order_data in orders:
+            order_id = order_data.get('order_id')
+            if not order_id:
+                return Response({"detail": "Order ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            order = Order.objects.get(id=order_id)  # Adjust as needed based on your logic
+            formatted_order = format_order_summary(order)
+            updated_orders.append(formatted_order)
+
+        # Update or create the OrderSummary with the formatted orders
+        OrderSummary.objects.update_or_create(
+            chat_id=chat_id,
+            defaults={'orders': updated_orders}
+        )
+
         return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
+
+    except Order.DoesNotExist:
+        return Response({"error": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
     except OrderSummary.DoesNotExist:
         return Response({"error": "Order summary not found."}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    
-    
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_order_summary_by_chat_id(request, chat_id):
@@ -381,16 +520,18 @@ def get_order_summary_by_chat_id(request, chat_id):
         return Response({'error': 'Chat ID is required.'}, status=400)
 
     try:
-        # Retrieve summaries by chat_id
         summaries = OrderSummary.objects.filter(chat_id=chat_id)
         if not summaries.exists():
             return Response({'error': 'No summaries found for this chat ID.'}, status=404)
 
+        # Initialize a new list to hold the summary data for the response
         summary_data = []
+
+        # Iterate over each summary for the specified chat ID
         for summary in summaries:
-            orders = summary.orders  # This is a list, not a queryset
+            orders = summary.orders  # Assuming this is a list of order dictionaries
             for order in orders:
-                # Assuming each order is a dict with necessary details
+                # Construct a dictionary for each order
                 order_data = {
                     'order_id': order.get('order_id'),
                     'created_at': order.get('created_at'),
@@ -405,40 +546,18 @@ def get_order_summary_by_chat_id(request, chat_id):
                             'size': item.get('size'),
                             'color_name': item.get('color_name'),
                             'quantity': item.get('quantity'),
-                            'total_sum': float(item.get('total_sum', 0)),  # Convert total_sum to float, default to 0 if not present
-                            'item_price': str(item.get('item_price', '0')),  # Default to '0' if not present
+                            'total_sum': float(item.get('total_sum', 0)),  
+                            'item_price': str(item.get('item_price', '0')),  
                             'color_value': item.get('color_value')
                         }
                         for item in order.get('order_items', [])
                     ]
                 }
+                # Append the constructed order_data to the summary_data list
                 summary_data.append(order_data)
 
-        return Response({'results': summary_data})
+        # Return the constructed summary_data as the response
+        return Response({'results': summary_data}, status=200)
 
     except Exception as e:
         return Response({'error': str(e)}, status=500)
-
-#@api_view(['POST'])
-#@permission_classes([AllowAny])
-#def update_order_summary(request):
-#    chat_id = request.data.get('chat_id')
-#    orders = request.data.get('orders', {})  # Ensure orders defaults to an empty dict
-
-#    if not chat_id:
-#        return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-    # Log the incoming data
-#    logger.info(f"Updating OrderSummary: chat_id={chat_id}, orders={orders}")
-
-#    try:
-#        order_summary, created = OrderSummary.objects.get_or_create(chat_id=chat_id)
-#        order_summary.orders = orders
-#        order_summary.save()
-
-#        return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
-#    except Exception as e:
-#        logger.error(f"Error updating OrderSummary: {e}")
-#        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-

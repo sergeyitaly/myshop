@@ -12,6 +12,7 @@ import { defaultAppSliderOptions } from "./defaultSwiperSettings";
 import { PreviewLoadingCard } from "../Cards/PreviewCard/PreviewLoagingCard";
 import { useEffect, useRef, useState } from "react";
 import { IconButton } from "../UI/IconButton/IconButton";
+import clsx from "clsx";
 
 
 
@@ -110,11 +111,12 @@ const handleNext = () => {
                     (totalBullets > 1) &&
                     <>
                         <IconButton
+                            className={style.button}
                             iconName="leftArrow"
                             onClick={handlePrev}
                         />
                         <IconButton
-                            className={style.next}
+                            className={clsx(style.button, style.next)}
                             iconName="rigrtArrow"
                             onClick={handleNext}
                         />
@@ -122,6 +124,7 @@ const handleNext = () => {
                 
                 }
             </div>
+
         </Swiper>
     )
 }

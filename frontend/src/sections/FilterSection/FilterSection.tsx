@@ -66,6 +66,9 @@ export const FilterSection = ({
 
     let totalPages = 0;
 
+    console.log(productsResponse?.results);
+    
+
     useEffect(() => {
         if (productsResponse) {
             setFullRangeOfPrice([productsResponse.overall_price_min, productsResponse.overall_price_max])
@@ -158,7 +161,7 @@ export const FilterSection = ({
                     {
                         isSuccessGettingProducts &&
                         productsResponse.results.map((product) => {
-                            const { id, discount, currency, price, photo_url, photo_thumbnail_url } = product;
+                            const { id, id_name, discount, currency, price, photo_url, photo_thumbnail_url } = product;
 
                             return (
                                 <PreviewCard
@@ -172,7 +175,7 @@ export const FilterSection = ({
                                     discount={discount}
                                     currency={currency}
                                     price={price}
-                                    onClick={() => navigate(`${ROUTE.PRODUCT}${id}`)}
+                                    onClick={() => navigate(`${ROUTE.PRODUCT}${id_name}`)}
                                 />
                             );
                         })

@@ -1,7 +1,6 @@
 import { Technology } from "../../../models/entities";
-import { useTranslation } from "react-i18next";
 import { AppImage } from "../../../components/AppImage/AppImage";
-import { getTranslatedText } from "../translation";
+import { useAppTranslator } from "../../../hooks/useAppTranslator";
 import styles from "./Technology.module.scss";
 
 interface TechnologyProps {
@@ -9,19 +8,16 @@ interface TechnologyProps {
 }
 
 export const TechnologyItem: React.FC<TechnologyProps> = ({ technology }) => {
-	const { i18n } = useTranslation();
-	const language = i18n.language;
+	const { getTranslatedTechnologyName } = useAppTranslator();
 
-	const { name, name_uk, name_en, link, photo_url } = technology;
-
-	const translatedName = getTranslatedText(name, name_uk, name_en, language);
+	const { link, photo_url } = technology;
 
 	return (
-		<div className={styles.imageWrapper}>
+		<div className={styles.container}>
 			<a href={link || "#"} target="_blank" rel="noopener noreferrer">
 				<AppImage
 					src={photo_url}
-					alt={translatedName}
+					alt={getTranslatedTechnologyName(technology)}
 					className={styles.imageSize}
 				/>
 			</a>

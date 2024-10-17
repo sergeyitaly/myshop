@@ -15,12 +15,12 @@
     padding: clamp(0.938rem, 0.532vw + 0.771rem, 1.25rem);
     position: absolute;
     display: flex;
-    gap: 10px;
+    gap: 8px;
     flex-direction: column;
     right: 0;
     width: 473px;
     max-width: 90vw;
-    height: 100%;
+    height: 92%;
     background-color: $color-background;
     border-radius: 0 0 0 10px;
 }

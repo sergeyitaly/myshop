@@ -4,7 +4,7 @@ import { useGetTechnologiesQuery } from "../../../api/aboutSlice";
 import { AppSlider } from "../../../components/AppSlider/AppSlider";
 import { NamedSection } from "../../../components/NamedSection/NamedSection";
 import { TechnologyItem } from "./TechnologyItem";
-import { technologySettings } from "./technologySettings";
+import { technologybrandSettings } from "./technologybrandSettings";
 import styles from "./Technology.module.scss";
 
 export const TechnologiesCarousel: React.FC = () => {
@@ -24,7 +24,7 @@ export const TechnologiesCarousel: React.FC = () => {
 					<div className={styles.sliderContainer}>
 						<AppSlider
 							isLoading={isLoading}
-							sliderSettings={technologySettings}
+							sliderSettings={technologybrandSettings}
 						>
 							{technologyData.map((technology, index) => (
 								<TechnologyItem

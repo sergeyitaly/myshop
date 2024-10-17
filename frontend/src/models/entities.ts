@@ -7,6 +7,7 @@ export interface AdditionalField {
 
 export interface Product {
 	id: number;
+	id_name: string;
 	collection?: Collection;
 	images: ProductImage[];
 	photo: string | null;
@@ -28,6 +29,8 @@ export interface Product {
 	popularity: number;
 	slug: string;
 	color_name: string | null;
+	color_name_en?: string | null;
+	color_name_uk?: string | null;
 	color_value: string | null;
 	size: string | null;
 	currency: Currency;

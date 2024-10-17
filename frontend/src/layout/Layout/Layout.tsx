@@ -14,13 +14,7 @@ import { useToggler } from '../../hooks/useToggler';
 import { InfoModal } from '../InfoModal/InfoModal';
 // import { useHistory } from 'react-router-dom';
 
-export const Layout = ({
-    withHeader,
-    withFooter,
-}: {
-    withHeader: boolean;
-    withFooter: boolean;
-}) => {
+export const Layout = () => {
 
     const {isLoadingBasket} = useBootstrap()
     const {openStatus, handleOpen, handleClose} = useToggler()
@@ -43,6 +37,8 @@ export const Layout = ({
         window.scrollTo({top: 0, left: 0, behavior: 'smooth'})
     }, [location.pathname]) 
    
+    const withHeader = true
+    const withFooter = true
 
     return (
         <>
