@@ -6,7 +6,7 @@ from .models import RatingQuestion, Feedback, RatingAnswer, OverallAverageRating
 class RatingQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = RatingQuestion
-        fields = ['id', 'question_en','question_uk', 'aspect_name_en', 'aspect_name_uk']
+        fields = ['id', 'question','aspect_name']
 
 
 # Serializer for RatingAnswer
@@ -61,6 +61,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
 
 # Serializer for OverallAverageRating
 class OverallAverageRatingSerializer(serializers.ModelSerializer):
+    model = OverallAverageRating
     question = RatingQuestionSerializer(read_only=True)
 
     class Meta:
