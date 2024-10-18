@@ -12,7 +12,7 @@ class FeedbackViewSet(viewsets.ModelViewSet):
     queryset = Feedback.objects.all()
     serializer_class = FeedbackSerializer
     permission_classes = [AllowAny] 
-    
+
     def create(self, request, *args, **kwargs):
         feedback_data = request.data
         serializer = self.get_serializer(data=feedback_data)
@@ -49,7 +49,7 @@ class OverallAverageRatingView(APIView):
         serializer = OverallAverageRatingSerializer(averages, many=True)
         return Response(serializer.data)
 
-# View for listing all rating questions
 class RatingQuestionViewSet(viewsets.ModelViewSet):
     queryset = RatingQuestion.objects.all()
     serializer_class = RatingQuestionSerializer
+    permission_classes = [AllowAny] 
