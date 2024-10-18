@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-17 22:44+0300\n"
+"POT-Creation-Date: 2024-10-18 19:42+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -64,11 +64,11 @@ msgstr "Коментарі"
 msgid "Average Rating"
 msgstr ""
 
-#: feedback/models.py:43
+#: feedback/models.py:39
 msgid "Feedback"
 msgstr ""
 
-#: feedback/models.py:44
+#: feedback/models.py:40
 msgid "Feedbacks"
 msgstr ""
 
@@ -85,11 +85,11 @@ msgstr "Вступ"
 msgid "Intros"
 msgstr "Вступи"
 
-#: myshop/settings.py:331
+#: myshop/settings.py:328
 msgid "English"
 msgstr "Англійська"
 
-#: myshop/settings.py:332
+#: myshop/settings.py:329
 msgid "Ukrainian"
 msgstr ""
 
@@ -473,12 +473,12 @@ msgstr "Адмін панель Джанго"
 #: venv/lib/python3.9/site-packages/click/_termui_impl.py:518
 #, python-brace-format
 msgid "{editor}: Editing failed"
-msgstr "Поля для редагування"
+msgstr "{editor}: Поля для редагування"  # Added the {editor} placeholder
 
 #: venv/lib/python3.9/site-packages/click/_termui_impl.py:522
 #, python-brace-format
 msgid "{editor}: Editing failed: {e}"
-msgstr "Поле що редагується"
+msgstr "{editor}: Поле що редагується: {e}"  # Added the {editor} and {e} placeholders
 
 #: venv/lib/python3.9/site-packages/click/core.py:1120
 msgid "Aborted!"

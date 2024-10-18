@@ -6,11 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 # 1. Model for questions and rating names (aspects)
 class RatingQuestion(models.Model):
-    question = models.CharField(
-        max_length=255, 
-        default='Question is ...',
-        verbose_name="Rating Question"
-    )
+    question = models.CharField(max_length=255, default='Question is ...',verbose_name="Rating Question")
     aspect_name = models.CharField(max_length=255, verbose_name="Aspect Name")
 
     def __str__(self):

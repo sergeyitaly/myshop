@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from .models import Feedback, OverallAverageRating, RatingQuestion, RatingAnswer
 from modeltranslation.admin import TranslationAdmin
-from .translator import * 
+from .translator import RatingQuestion
 
 @admin.register(RatingQuestion)
 class RatingQuestionAdmin(TranslationAdmin):
@@ -10,12 +10,33 @@ class RatingQuestionAdmin(TranslationAdmin):
     search_fields = ['question_en', 'question_uk','aspect_name_uk','aspect_name_en']
 
 
+
+
+class RatingAnswerInline(admin.TabularInline):
+    model = RatingAnswer
+    extra = 0  # Number of empty forms to display
+
+    # Ensure the question field is a dropdown of RatingQuestion instances
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "question":
+            kwargs["queryset"] = RatingQuestion.objects.all()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
+@admin.register(RatingAnswer)
+class RatingAnswerAdmin(admin.ModelAdmin):
+    list_display = ['feedback', 'question', 'rating', 'answer']
+    list_filter = ['question']
+    search_fields = ['feedback__name', 'question__aspect_name']
+    raw_id_fields = ['feedback', 'question']
+
 @admin.register(Feedback)
 class FeedbackAdmin(admin.ModelAdmin):
     list_display = ['name', 'email', 'comment', 'status', 'created_at']
     list_filter = ['status']
     readonly_fields = ['name', 'email', 'comment']
-
+    inlines = [RatingAnswerInline]
+    
     def save_model(self, request, obj, form, change):
         """Override to recalculate the overall average rating after saving a feedback."""
         super().save_model(request, obj, form, change)
@@ -24,14 +45,7 @@ class FeedbackAdmin(admin.ModelAdmin):
     def update_overall_average_ratings(self):
         """Calculate the overall average ratings and update the OverallAverageRating model."""
         OverallAverageRating.calculate_overall_averages()
-
-@admin.register(RatingAnswer)
-class RatingAnswerAdmin(admin.ModelAdmin):
-    list_display = ['feedback', 'question', 'rating', 'answer']
-    list_filter = ['question']
-    search_fields = ['feedback__name', 'question__aspect_name']
-    raw_id_fields = ['feedback', 'question']  # Use raw_id fields for better performance with large datasets
-
+        
 @admin.register(OverallAverageRating)
 class OverallAverageRatingAdmin(admin.ModelAdmin):
     list_display = ['question', 'average_rating']
