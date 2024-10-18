@@ -140,27 +140,31 @@
       "contact_content": "If you have any questions or concerns regarding this Privacy Policy or your information, please contact us using the contact details provided on our website."
     },
   "returns_and_refunds": {
-    "title": "Return Policy",
+    "title": "Return Conditions",
+    "conditions": "If for any reason you decide to return the purchased product, you can do so in accordance with the ",
+    "law": "Law of Ukraine on Consumer Protection.",
     "returns_title": "Return of Goods of Proper Quality:",
+    "designation": "*Goods of improper quality refer to products that cannot perform their functional qualities due to significant defects (with the presence of defects/faults).",
+    "refunds_subtitle": "A customer who has purchased goods of improper quality, unless otherwise stated by the seller, has the right to claim any of the following options at their discretion:",
     "returns_content": {
-        "first_paragraph": "The customer has the right to refuse the ordered Goods at any time before receiving them, and after receiving the Goods - within 14 days, excluding the day of purchase.",
-        "second_paragraph": "The return of Goods of proper quality is possible if their marketable appearance and consumer properties are preserved.",
-        "third_paragraph": "The customer does not have the right to refuse the Goods that have individually defined properties.",
-        "fourth_paragraph": "In the event of the Customer's refusal of the Goods of proper quality, the Seller is obliged to return the amount paid by the customer, excluding delivery costs, no later than 10 days from the date the customer presents the relevant request."
+      "first_paragraph": "The customer has the right to refuse the ordered goods at any time before receiving them, and after receiving the goods - within 14 days, excluding the day of purchase.",
+      "second_paragraph": "The return of goods of proper quality is possible if their marketable appearance and consumer properties are preserved.",
+      "third_paragraph": "The customer does not have the right to refuse goods that have individually specified characteristics.",
+      "fourth_paragraph": "If the customer refuses goods of proper quality, the seller is obliged to refund the amount paid by the customer, excluding delivery costs, no later than 10 days from the date the customer submits the relevant claim."
     },
-    "refunds_title": "Return of Goods of Improper Quality:",
+    "refunds_title": "Return of Goods of Improper Quality*:",
     "refunds_content": {
-        "first_option": "Replacement with a product of the same brand (model, article) or with a similar product of a different brand (model, article) with the corresponding recalculation of the purchase price.",
-        "second_option": "Proportional reduction of the price.",
-        "third_option": "Free elimination of product defects or reimbursement of costs for their correction by the customer or a third party.",
-        "fourth_option": "The customer has the right to refuse the goods and demand a refund of the amount paid for the goods."
+      "first_option": "Replacement with goods of a similar brand (model, article) or with the same goods of another brand (model, article) with the appropriate price adjustment.",
+      "second_option": "Proportional price reduction.",
+      "third_option": "Free defect correction or reimbursement of the cost of defect correction by the buyer or a third party.",
+      "fourth_option": "The right to refuse the goods and request a refund for the amount paid."
     },
-    "terms_title": "Time Limits for Claims:",
+    "terms_title": "Claim Submission Deadlines:",
     "terms_content": {
-        "first_term": "For goods with a warranty period - throughout the entire warranty period.",
-        "second_term": "For goods without a warranty period - within 14 days."
+      "first_term": "For goods with a warranty period - throughout the entire warranty period.",
+      "second_term": "For goods without a warranty period - within 14 days."
     }
-},
+  },
   "products": {
     "error": "An error occurred :(",
     "empty": "No products found for this query"

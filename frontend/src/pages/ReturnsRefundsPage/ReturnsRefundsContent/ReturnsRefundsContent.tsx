@@ -17,39 +17,49 @@ interface ReturnsRefundsTextProps {
 export const ReturnsRefundsContent: React.FC<ReturnsRefundsTextProps> = ({ sections }) => {
     const { t } = useTranslation();
 
+    if (!sections) {
+        return null;
+    }
+
     return (
-        <div className={style.container}>
-        {sections.map((section, index) => (
-            <NamedSection
-            key={index}
-            title={t(`returns_and_refunds.${section.titleKey}`)}
-            id={`section_${index}`}
-            className={style.customTitle}
-            >
-            <div className={style.customTitle}>
-                {typeof section.contentKey === 'object' ? (
-                Object.entries(section.contentKey).map(([key, content], idx) => {
-                    if (key.includes('paragraph')) {
-                    return (
-                        <p key={idx} className={style.text}>
-                        {idx + 1}. {t(`returns_and_refunds.${content}`)}
-                        </p>
-                    );
-                    } else {
-                    return (
-                        <li key={idx} className={style.cu}>
-                        {t(`returns_and_refunds.${content}`)}
-                        </li>
-                    );
-                    }
-                })
-                ) : (
-                <p>{t(`returns_and_refunds.${section.contentKey}`)}</p>
-                )}
+        <NamedSection title={t(`returns_refunds`)} id="returns_and_refunds" className={style.customTitle}>
+            <div className={style.container}>
+                <h2>{t(`returns_and_refunds.title`)}</h2>
+                <div className={style.conditions}> 
+                    <span>{t(`returns_and_refunds.conditions`)}</span>
+                    <a href='http://zakon.rada.gov.ua/cgi-bin/laws/main.cgi?nreg=1023-12' target='_blank'>{t(`returns_and_refunds.law`)}</a>
+                </div>
+                {sections.map((section, index) => (
+                    <div key={index} id={`section_${index}`} className={style.customTitle}>
+                        <h2>{t(`returns_and_refunds.${section.titleKey}`)}</h2>
+                        <div>
+                            {typeof section.contentKey === 'object' ? (
+                                Object.entries(section.contentKey).map(([key, content], idx) => {
+                                    if (key.includes('paragraph')) {
+                                        return (
+                                            <p key={idx} className={style.text}>
+                                                {idx + 1}. {t(`returns_and_refunds.${content}`)}
+                                            </p>
+                                        );
+                                    } else {
+                                        return (
+                                            <ul>
+                                                <li key={idx}>
+                                                    {t(`returns_and_refunds.${content}`)}
+                                                </li>
+                                            </ul>
+                                        );
+                                    }
+                                })
+                            ) : (
+                                <p className='designation'>{t(`returns_and_refunds.${section.contentKey}`)}</p>
+                            )}
+                        </div>
+                    </div> 
+                ))}
+                <p className='customParagraph'>{t(`returns_and_refunds.designation`)}</p>
             </div>
-            </NamedSection>
-        ))}
-        </div>
+        </NamedSection>
     );
 };
 
