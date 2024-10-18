@@ -34,7 +34,7 @@ class RatingAnswerAdmin(admin.ModelAdmin):
 class FeedbackAdmin(admin.ModelAdmin):
     list_display = ['name', 'email', 'comment', 'status', 'created_at']
     list_filter = ['status']
-    readonly_fields = ['name', 'email', 'comment']
+ #   readonly_fields = ['name', 'email', 'comment']
     inlines = [RatingAnswerInline]
     
     def save_model(self, request, obj, form, change):
