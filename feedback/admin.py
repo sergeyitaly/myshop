@@ -1,13 +1,20 @@
 from django.contrib import admin
-from django.db.models import Avg
-from .models import Feedback, OverallAverageRating
-from django.utils.safestring import mark_safe
+from django.utils.translation import gettext_lazy as _
+from .models import Feedback, OverallAverageRating, RatingQuestion, RatingAnswer
+from modeltranslation.admin import TranslationAdmin
+from .translator import * 
+
+@admin.register(RatingQuestion)
+class RatingQuestionAdmin(TranslationAdmin):
+    list_display = ['question_en', 'question_uk','aspect_name_uk','aspect_name_en']
+    search_fields = ['question_en', 'question_uk','aspect_name_uk','aspect_name_en']
+
 
 @admin.register(Feedback)
 class FeedbackAdmin(admin.ModelAdmin):
-    list_display = ['name', 'comment', 'rating_1', 'rating_2', 'rating_3', 'rating_4', 'rating_5', 
-                    'rating_6', 'rating_7', 'rating_8', 'rating_9', 'rating_10']
-    readonly_fields = ['question1', 'answer1', 'question2', 'answer2']
+    list_display = ['name', 'email', 'comment', 'status', 'created_at']
+    list_filter = ['status']
+    readonly_fields = ['name', 'email', 'comment']
 
     def save_model(self, request, obj, form, change):
         """Override to recalculate the overall average rating after saving a feedback."""
@@ -16,35 +23,19 @@ class FeedbackAdmin(admin.ModelAdmin):
 
     def update_overall_average_ratings(self):
         """Calculate the overall average ratings and update the OverallAverageRating model."""
-        feedbacks = Feedback.objects.all()
-        avg_rating_1 = feedbacks.aggregate(Avg('rating_1'))['rating_1__avg'] or 0
-        avg_rating_2 = feedbacks.aggregate(Avg('rating_2'))['rating_2__avg'] or 0
-        avg_rating_3 = feedbacks.aggregate(Avg('rating_3'))['rating_3__avg'] or 0
-        avg_rating_4 = feedbacks.aggregate(Avg('rating_4'))['rating_4__avg'] or 0
-        avg_rating_5 = feedbacks.aggregate(Avg('rating_5'))['rating_5__avg'] or 0
-        avg_rating_6 = feedbacks.aggregate(Avg('rating_6'))['rating_6__avg'] or 0
-        avg_rating_7 = feedbacks.aggregate(Avg('rating_7'))['rating_7__avg'] or 0
-        avg_rating_8 = feedbacks.aggregate(Avg('rating_8'))['rating_8__avg'] or 0
-        avg_rating_9 = feedbacks.aggregate(Avg('rating_9'))['rating_9__avg'] or 0
-        avg_rating_10 = feedbacks.aggregate(Avg('rating_10'))['rating_10__avg'] or 0
+        OverallAverageRating.calculate_overall_averages()
 
-        overall_avg, created = OverallAverageRating.objects.get_or_create(id=1)
-        overall_avg.avg_rating_1 = avg_rating_1
-        overall_avg.avg_rating_2 = avg_rating_2
-        overall_avg.avg_rating_3 = avg_rating_3
-        overall_avg.avg_rating_4 = avg_rating_4
-        overall_avg.avg_rating_5 = avg_rating_5
-        overall_avg.avg_rating_6 = avg_rating_6
-        overall_avg.avg_rating_7 = avg_rating_7
-        overall_avg.avg_rating_8 = avg_rating_8
-        overall_avg.avg_rating_9 = avg_rating_9
-        overall_avg.avg_rating_10 = avg_rating_10
-        overall_avg.save()
+@admin.register(RatingAnswer)
+class RatingAnswerAdmin(admin.ModelAdmin):
+    list_display = ['feedback', 'question', 'rating', 'answer']
+    list_filter = ['question']
+    search_fields = ['feedback__name', 'question__aspect_name']
+    raw_id_fields = ['feedback', 'question']  # Use raw_id fields for better performance with large datasets
 
 @admin.register(OverallAverageRating)
 class OverallAverageRatingAdmin(admin.ModelAdmin):
-    list_display = ['ratings_table']
-    readonly_fields = ['ratings_table']
+    list_display = ['question', 'average_rating']
+    readonly_fields = ['average_rating']
 
     def has_add_permission(self, request):
         """Prevent creating new OverallAverageRating instances through the admin."""
@@ -54,56 +45,15 @@ class OverallAverageRatingAdmin(admin.ModelAdmin):
         """Prevent deletion of the OverallAverageRating instance."""
         return False
 
-    def ratings_table(self, obj):
-        """Return a table displaying the average ratings for each aspect."""
-        table_html = f'''
-        <table style="border-collapse: collapse; width: 50%;">
-            <tr>
-                <th style="border: 1px solid black; padding: 8px;">Aspect</th>
-                <th style="border: 1px solid black; padding: 8px;">Average Rating</th>
-            </tr>
-            <tr>
-                <td style="border: 1px solid black; padding: 8px;">Aspect 1</td>
-                <td style="border: 1px solid black; padding: 8px;">{obj.avg_rating_1}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid black; padding: 8px;">Aspect 2</td>
-                <td style="border: 1px solid black; padding: 8px;">{obj.avg_rating_2}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid black; padding: 8px;">Aspect 3</td>
-                <td style="border: 1px solid black; padding: 8px;">{obj.avg_rating_3}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid black; padding: 8px;">Aspect 4</td>
-                <td style="border: 1px solid black; padding: 8px;">{obj.avg_rating_4}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid black; padding: 8px;">Aspect 5</td>
-                <td style="border: 1px solid black; padding: 8px;">{obj.avg_rating_5}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid black; padding: 8px;">Aspect 6</td>
-                <td style="border: 1px solid black; padding: 8px;">{obj.avg_rating_6}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid black; padding: 8px;">Aspect 7</td>
-                <td style="border: 1px solid black; padding: 8px;">{obj.avg_rating_7}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid black; padding: 8px;">Aspect 8</td>
-                <td style="border: 1px solid black; padding: 8px;">{obj.avg_rating_8}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid black; padding: 8px;">Aspect 9</td>
-                <td style="border: 1px solid black; padding: 8px;">{obj.avg_rating_9}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid black; padding: 8px;">Aspect 10</td>
-                <td style="border: 1px solid black; padding: 8px;">{obj.avg_rating_10}</td>
-            </tr>
-        </table>
-        '''
-        return mark_safe(table_html)
+    def average_rating(self, obj):
+        """Display the average rating."""
+        return obj.average_rating
 
-    ratings_table.short_description = "Average Ratings Table"
+    average_rating.short_description = _("Average Rating")
+
+def register_translation_admin(model, admin_class):
+    try:
+        admin.site.register(model, admin_class)
+    except admin.sites.NotRegistered:
+        admin.site.register(model, admin.ModelAdmin)
+    
