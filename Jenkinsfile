@@ -1,6 +1,5 @@
 pipeline {
     agent any
-
     environment {
        // GITHUB_CREDENTIALS = credentials('github-credentials-id') 
         DOCKER_IMAGE = 'sergeyitaly/koloryt' 
@@ -27,24 +26,16 @@ pipeline {
                     withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARGS_FILE')]) {
                         // Copy .env file for Docker build context
                         sh "cp ${ENV_ARGS_FILE} .env"
-
                         // Build the new Docker image with the specified tag
                         dockerImage = docker.build("${DOCKER_IMAGE}:${TAG}", "-f Dockerfile .")
                         echo "Docker image built: ${DOCKER_IMAGE}:${TAG}"
-
                         // Clean up the .env file after the build
-                        sh """
-                        if [ -f .env ]; then
-                            rm .env
-                        fi
-                        """
+                        sh "rm .env"
                         echo ".env is removed from the build context"
                     }
                 }
             }
         }
-
-
 
         stage('Docker Push') {
             agent any
