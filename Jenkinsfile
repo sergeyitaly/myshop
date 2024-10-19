@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        GITHUB_CREDENTIALS = credentials('github-credentials-id') 
+       // GITHUB_CREDENTIALS = credentials('github-credentials-id') 
         DOCKER_IMAGE = 'sergeyitaly/koloryt' 
         TAG = 'serhii_test' 
     }
@@ -14,12 +14,12 @@ pipeline {
                     deleteDir()
                     echo "Workspace is deleted..."
                     echo "Checking out the repository..."
-                    git branch: 'main', credentialsId: GITHUB_CREDENTIALS, url: 'https://github.com/sergeyitaly/myshop.git'
+                    git branch: 'main', credentialsId: 'github-credentials-id', url: 'https://github.com/sergeyitaly/myshop.git'
                     sh "ls -lat"
                 }
             }
         }
-
+    
         stage('Build Docker Image') {
             steps {
                 script {
