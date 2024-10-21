@@ -7,11 +7,12 @@ export const technologybrandSettings: SwiperOptions = {
 		fill: "row",
 	},
 	slidesPerView: 4,
+	slidesPerGroup: 4,
 	pagination: {
 		clickable: true,
 	},
 	spaceBetween: 20,
-	loop: true,
+	speed: 1200,
 	modules: [Grid, Pagination],
 	breakpoints: {
 		740: {
@@ -19,6 +20,7 @@ export const technologybrandSettings: SwiperOptions = {
 				rows: 1,
 			},
 			slidesPerView: 4,
+			slidesPerGroup: 4,
 		},
 	},
 };
