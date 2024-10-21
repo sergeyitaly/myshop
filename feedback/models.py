@@ -66,10 +66,9 @@ class OverallAverageRating(models.Model):
 
     @classmethod
     def calculate_overall_averages(cls):
-        """Calculate the average ratings for each question."""
-        questions = RatingQuestion.objects.all()
-        for question in questions:
-            avg_rating = RatingAnswer.objects.filter(question=question).aggregate(Avg('rating'))['rating__avg'] or 0
+        """Calculate average ratings for all RatingQuestions."""
+        for question in RatingQuestion.objects.all():
+            avg_rating = RatingAnswer.objects.filter(question=question).aggregate(average=Avg('rating'))['average'] or 0
             overall_avg, created = cls.objects.get_or_create(question=question)
             overall_avg.average_rating = avg_rating
             overall_avg.save()
