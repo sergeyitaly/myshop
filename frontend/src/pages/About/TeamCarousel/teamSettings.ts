@@ -7,11 +7,12 @@ export const teamSettings: SwiperOptions = {
 		fill: "row",
 	},
 	slidesPerView: 3,
+	slidesPerGroup: 3,
 	pagination: {
 		clickable: true,
 	},
 	spaceBetween: 20,
-	loop: true,
+	speed: 1000,
 	modules: [Grid, Pagination],
 
 	breakpoints: {
