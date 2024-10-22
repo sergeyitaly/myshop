@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-18 19:42+0300\n"
+"POT-Creation-Date: 2024-10-22 20:48+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,8 +28,9 @@ msgstr ""
 msgid "Image"
 msgstr "Картинка"
 
-#: brand/models.py:46 comments/models.py:10 intro/models.py:46
-#: shop/models.py:122 team/models.py:46 technologies/models.py:46
+#: brand/models.py:46 comments/models.py:10 feedback/models.py:19
+#: intro/models.py:46 shop/models.py:122 team/models.py:46
+#: technologies/models.py:46
 msgid "Name"
 msgstr "Ім'я"
 
@@ -48,7 +49,7 @@ msgstr "Бренд"
 msgid "Brands"
 msgstr "Бренди"
 
-#: comments/models.py:13 comments/models.py:21
+#: comments/models.py:13 comments/models.py:21 feedback/models.py:20
 #, fuzzy
 #| msgid "Commands"
 msgid "Comment"
@@ -60,16 +61,60 @@ msgstr "Коментар"
 msgid "Comments"
 msgstr "Коментарі"
 
-#: feedback/admin.py:52
-msgid "Average Rating"
+#: feedback/models.py:9
+msgid "Rating Question"
 msgstr ""
 
-#: feedback/models.py:39
+#: feedback/models.py:10
+#, fuzzy
+#| msgid "Product Name"
+msgid "Aspect Name"
+msgstr "Назва продукту"
+
+#: feedback/models.py:11
+msgid "Is Rating Required"
+msgstr ""
+
+#: feedback/models.py:21
+msgid "Email"
+msgstr ""
+
+#: feedback/models.py:22 order/models.py:39
+msgid "Created At"
+msgstr "cтворено"
+
+#: feedback/models.py:29
+msgid "Ratings"
+msgstr ""
+
+#: feedback/models.py:36 order/models.py:43
+msgid "Status"
+msgstr "Статус"
+
+#: feedback/models.py:41 feedback/models.py:46
 msgid "Feedback"
 msgstr ""
 
-#: feedback/models.py:40
+#: feedback/models.py:42
 msgid "Feedbacks"
+msgstr ""
+
+#: feedback/models.py:47 feedback/models.py:72
+#, fuzzy
+#| msgid "Description"
+msgid "Question"
+msgstr "Опис"
+
+#: feedback/models.py:48
+msgid "Answer"
+msgstr ""
+
+#: feedback/models.py:51
+msgid "Rating"
+msgstr ""
+
+#: feedback/models.py:74
+msgid "Average Rating"
 msgstr ""
 
 #: intro/models.py:48 shop/models.py:124 team/models.py:56
@@ -212,10 +257,6 @@ msgstr "Коментар про отримувача"
 msgid "Submitted At"
 msgstr "оформлено"
 
-#: order/models.py:39
-msgid "Created At"
-msgstr "cтворено"
-
 #: order/models.py:40
 msgid "Processed At"
 msgstr "оброблено"
@@ -227,10 +268,6 @@ msgstr "завершено"
 #: order/models.py:42
 msgid "Canceled At"
 msgstr "скасовано"
-
-#: order/models.py:43
-msgid "Status"
-msgstr "Статус"
 
 #: order/models.py:44
 msgid "Parent Order"
@@ -473,13 +510,15 @@ msgstr "Адмін панель Джанго"
 #: venv/lib/python3.9/site-packages/click/_termui_impl.py:518
 #, python-brace-format
 msgid "{editor}: Editing failed"
-msgstr "{editor}: Поля для редагування"  # Added the {editor} placeholder
+msgstr "{editor}: Поля для редагування"
 
+# Added the {editor} placeholder
 #: venv/lib/python3.9/site-packages/click/_termui_impl.py:522
 #, python-brace-format
 msgid "{editor}: Editing failed: {e}"
-msgstr "{editor}: Поле що редагується: {e}"  # Added the {editor} and {e} placeholders
+msgstr "{editor}: Поле що редагується: {e}"
 
+# Added the {editor} and {e} placeholders
 #: venv/lib/python3.9/site-packages/click/core.py:1120
 msgid "Aborted!"
 msgstr "Скасовано"
