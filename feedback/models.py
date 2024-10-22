@@ -6,9 +6,9 @@ from django.utils.translation import gettext_lazy as _
 
 # 1. Model for questions and rating names (aspects)
 class RatingQuestion(models.Model):
-    question = models.CharField(max_length=255, default='Question is ...',verbose_name="Rating Question")
-    aspect_name = models.CharField(max_length=255, verbose_name="Aspect Name",null=True,blank=True)
-    rating_required = models.BooleanField(default=True, verbose_name="Is Rating Required")  # New field
+    question = models.CharField(max_length=255, default='Question is ...',verbose_name=_("Rating Question"))
+    aspect_name = models.CharField(max_length=255, verbose_name=_("Aspect Name"),null=True,blank=True)
+    rating_required = models.BooleanField(default=True, verbose_name=_("Is Rating Required"))  # New field
 
     def __str__(self):
         return self.aspect_name if self.aspect_name else self.question 
@@ -16,23 +16,24 @@ class RatingQuestion(models.Model):
 
 # 2. Model for feedback (answers and rating values)
 class Feedback(models.Model):
-    name = models.CharField(max_length=255, null=True, blank=True)
-    comment = models.TextField(null=True, blank=True)
-    email = models.EmailField(null=True, blank=True)
-    created_at = models.DateTimeField(default=timezone.now)
+    name = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Name"))
+    comment = models.TextField(null=True, blank=True,verbose_name=_("Comment"))
+    email = models.EmailField(null=True, blank=True,verbose_name=_("Email"))
+    created_at = models.DateTimeField(default=timezone.now, verbose_name=_("Created At"))
 
     # Feedback contains multiple ratings related to RatingQuestion
     ratings = models.ManyToManyField(
         RatingQuestion,
         through='RatingAnswer',
-        related_name='feedbacks'
+        related_name='feedbacks',
+        verbose_name=_("Ratings")
     )
 
     STATUS_CHOICES = [
         ('processed', 'Processed'),
         ('complete', 'Complete'),
     ]
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='processed')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='processed',verbose_name=_("Status"))
 
     def __str__(self):
         return f"Feedback from {self.name}"
@@ -42,12 +43,12 @@ class Feedback(models.Model):
 
 # Model to link Feedback and RatingQuestion with the rating value
 class RatingAnswer(models.Model):
-    feedback = models.ForeignKey(Feedback, on_delete=models.CASCADE)
-    question = models.ForeignKey(RatingQuestion, on_delete=models.CASCADE)
-    answer = models.TextField(null=True, blank=True)
+    feedback = models.ForeignKey(Feedback, on_delete=models.CASCADE, verbose_name=_("Feedback"))
+    question = models.ForeignKey(RatingQuestion, on_delete=models.CASCADE, verbose_name=_("Question"))
+    answer = models.TextField(null=True, blank=True, verbose_name=_("Answer"))
     rating = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(10)],
-        verbose_name="Rating",
+        verbose_name=_("Rating"),
         null=True,
         blank=True
     )
@@ -67,9 +68,10 @@ class OverallAverageRating(models.Model):
         RatingQuestion,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='average_rating'
+        related_name='average_rating',
+        verbose_name=_("Question")
     )
-    average_rating = models.FloatField(default=0, editable=False)
+    average_rating = models.FloatField(default=0, editable=False, verbose_name=_("Average Rating"))
 
     def __str__(self):
         return f"Average for {self.question.aspect_name}: {self.average_rating}"
