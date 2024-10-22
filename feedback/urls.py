@@ -4,7 +4,7 @@ from .views import FeedbackViewSet, OverallAverageRatingView, RatingQuestionView
 
 router = DefaultRouter()
 router.register(r'feedback', FeedbackViewSet, basename='feedback')
-router.register(r'rating-questions', RatingQuestionViewSet, basename='rating-questions')  # Register RatingQuestionViewSet
+router.register(r'rating-questions', RatingQuestionViewSet, basename='rating-questions') 
 
 urlpatterns = [
     path('', include(router.urls)),

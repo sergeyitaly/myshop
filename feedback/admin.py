@@ -6,8 +6,12 @@ from .translator import RatingQuestion
 
 @admin.register(RatingQuestion)
 class RatingQuestionAdmin(TranslationAdmin):
-    list_display = ['question_en', 'question_uk','aspect_name_uk','aspect_name_en']
+    list_display = ['id','question_en', 'question_uk','aspect_name_uk','aspect_name_en']
     search_fields = ['question_en', 'question_uk','aspect_name_uk','aspect_name_en']
+    def delete_model(self, request, obj):
+        OverallAverageRating.objects.filter(question=obj).delete()
+        super().delete_model(request, obj)
+
 
 class RatingAnswerInline(admin.TabularInline):
     model = RatingAnswer
@@ -22,7 +26,7 @@ class RatingAnswerInline(admin.TabularInline):
 
 @admin.register(Feedback)
 class FeedbackAdmin(admin.ModelAdmin):
-    list_display = ['name', 'email', 'comment', 'status', 'created_at']
+    list_display = ['id','name', 'email', 'comment', 'status', 'created_at']
     list_filter = ['status']
  #   readonly_fields = ['name', 'email', 'comment']
     inlines = [RatingAnswerInline]
@@ -61,10 +65,12 @@ class OverallAverageRatingAdmin(admin.ModelAdmin):
         self.update_overall_average_ratings()
 
     def get_queryset(self, request):
-        """Customize the queryset to ensure it includes related data."""
+        """Customize the queryset to ensure it includes only required questions."""
         qs = super().get_queryset(request)
-        return qs.select_related('question')  
-
+        # Filter to include only OverallAverageRating with questions requiring a rating
+        return qs.filter(question__rating_required=True).select_related('question')  
+    
+    
 def register_translation_admin(model, admin_class):
     try:
         admin.site.register(model, admin_class)

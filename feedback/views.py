@@ -44,8 +44,11 @@ class FeedbackViewSet(viewsets.ModelViewSet):
 # View for retrieving and calculating the overall average rating
 class OverallAverageRatingView(APIView):
     def get(self, request):
-        OverallAverageRating.calculate_overall_averages()
-        averages = OverallAverageRating.objects.all()
+        # Calculate overall averages (if necessary)
+        OverallAverageRating.calculate_overall_averages()        
+        # Filter averages to only include those where the associated RatingQuestion requires a rating
+        averages = OverallAverageRating.objects.filter(question__rating_required=True)
+        # Serialize the filtered averages
         serializer = OverallAverageRatingSerializer(averages, many=True)
         return Response(serializer.data)
 
@@ -53,3 +56,8 @@ class RatingQuestionViewSet(viewsets.ModelViewSet):
     queryset = RatingQuestion.objects.all()
     serializer_class = RatingQuestionSerializer
     permission_classes = [AllowAny] 
+
+    def retrieve(self, request, pk=None):
+        question = get_object_or_404(RatingQuestion, pk=pk)
+        serializer = self.get_serializer(question)
+        return Response(serializer.data)

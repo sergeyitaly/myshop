@@ -7,10 +7,11 @@ from django.utils.translation import gettext_lazy as _
 # 1. Model for questions and rating names (aspects)
 class RatingQuestion(models.Model):
     question = models.CharField(max_length=255, default='Question is ...',verbose_name="Rating Question")
-    aspect_name = models.CharField(max_length=255, verbose_name="Aspect Name")
+    aspect_name = models.CharField(max_length=255, verbose_name="Aspect Name",null=True,blank=True)
+    rating_required = models.BooleanField(default=True, verbose_name="Is Rating Required")  # New field
 
     def __str__(self):
-        return self.aspect_name
+        return self.aspect_name if self.aspect_name else self.question 
 
 
 # 2. Model for feedback (answers and rating values)
@@ -46,17 +47,26 @@ class RatingAnswer(models.Model):
     answer = models.TextField(null=True, blank=True)
     rating = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(10)],
-        verbose_name="Rating"
+        verbose_name="Rating",
+        null=True,
+        blank=True
     )
 
     def __str__(self):
         return f"{self.question.aspect_name}: {self.rating}"
+    
+    def save(self, *args, **kwargs):
+        # Only require a rating if the question requires it
+        if self.question.rating_required and self.rating is None:
+            raise ValueError("Rating is required for this question.")
+        super().save(*args, **kwargs)
 
 # 3. Model for overall average calculations
 class OverallAverageRating(models.Model):
     question = models.OneToOneField(
         RatingQuestion,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
         related_name='average_rating'
     )
     average_rating = models.FloatField(default=0, editable=False)
@@ -69,6 +79,9 @@ class OverallAverageRating(models.Model):
         """Calculate average ratings for all RatingQuestions."""
         for question in RatingQuestion.objects.all():
             avg_rating = RatingAnswer.objects.filter(question=question).aggregate(average=Avg('rating'))['average'] or 0
+            
+            avg_rating = round(avg_rating, 1)
+            
             overall_avg, created = cls.objects.get_or_create(question=question)
             overall_avg.average_rating = avg_rating
             overall_avg.save()
