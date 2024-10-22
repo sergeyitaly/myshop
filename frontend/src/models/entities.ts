@@ -82,6 +82,7 @@ export interface ProductVariantsModel {
 
 export interface BasketItemModel {
 	productId: number;
+	productIdName: string
 	qty: number;
 }
 
