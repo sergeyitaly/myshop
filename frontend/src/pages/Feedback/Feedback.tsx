@@ -6,15 +6,57 @@ import image from './image.png'
 import {cards} from './fakeData'
 import { useNavigate } from "react-router-dom"
 import { ROUTE } from "../../constants"
+import { useState } from "react"
+import { FeedbackForm } from "../../models/entities"
+import { useCreateFeedbackMutation } from "../../api/feedbackSlice"
+import clsx from "clsx"
 
 
+
+const initialForm: FeedbackForm = {
+    name: 'Alex',
+    comment: 'Comment',
+    email: 'aaa@gmail.com',
+    ratings: cards.map(({id, ratingButtons}) => ({
+            question_id: id,
+            answer: '',
+            rating: ratingButtons ? 0 : 5
+        }) )
+}
 
 export const FeedbackPage = () => {
 
     const navigate = useNavigate()
 
+    const [form, setForm] = useState<FeedbackForm>(initialForm)
+
+    console.log(form.ratings);
+
+    const [sendForm, {isLoading}] = useCreateFeedbackMutation()
+
+
+    const handleClick = (id: number, value: number) => {
+        const newRating = form.ratings.map((oldRating) => {
+            if(oldRating.question_id === id) return {...oldRating, rating: value}
+            return oldRating
+        })
+        setForm({...form, ratings: newRating})
+    }
+
+    // const handleChange = (id: number, value: string) => {
+    //     const newRating = form.ratings.map((oldRating) => {
+    //         if(oldRating.question_id === id) return {...oldRating, answer: value}
+    //         return oldRating
+    //     })
+    //     setForm({...form, ratings: newRating})
+    // }
+
+    const handleSubmit = () => {
+        sendForm(form)
+    }
+
     return (
-        <PageContainer>
+        <PageContainer className={clsx({[styles.loading]: isLoading})}>
             <div className={styles.imageWrapper}>
                 <img 
                     src={image}
@@ -29,11 +71,15 @@ export const FeedbackPage = () => {
             </div>
             <div className={styles.cardContainer}>
                 {
-                    cards.map(({firstQuestion, secondQuestion, value}, index) => (
+                    cards.map(({id, firstQuestion, secondQuestion, ratingButtons}, index) => (
                         <FeedbackCard
+                            key={id}
                             question1={`${index+1}. ${firstQuestion}`}
                             question2={secondQuestion}
-                            showButtons = {value !== null}
+                            showButtons = {ratingButtons}
+                            thisRating={form.ratings.find(({question_id}) => question_id === id)?.rating}
+                            onClick={(val) => handleClick(id, val)}
+
                         />
                     ))
                 }
@@ -42,6 +88,7 @@ export const FeedbackPage = () => {
                 <MainButton
                     color="blue"
                     title="Надіслати"
+                    onClick={handleSubmit}
                 />
                 <button className={styles.button} onClick={() => navigate(ROUTE.HOME)}>Закрити і повернутися на головний екран</button>
             </div>

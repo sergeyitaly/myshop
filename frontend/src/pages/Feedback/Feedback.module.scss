@@ -45,3 +45,8 @@
         text-decoration: underline;
     }
 }
+
+.loading {
+    filter: blur(3px);
+    transition: 0.3s;
+}

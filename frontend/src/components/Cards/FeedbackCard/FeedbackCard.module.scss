@@ -37,6 +37,14 @@
         width: clamp(1.25rem, 0.851vw + 0.984rem, 1.75rem);
         height: clamp(1.25rem, 0.851vw + 0.984rem, 1.75rem);
     }
+  
+}
+
+.active {
+    background: $color-button;
+    svg {
+        fill: $color-background;
+    }
 }
 
 .firstQuestion {

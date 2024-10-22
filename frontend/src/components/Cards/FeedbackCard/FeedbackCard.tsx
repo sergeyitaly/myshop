@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import { IconButton } from '../../UI/IconButton/IconButton'
 import styles from './FeedbackCard.module.scss'
 
@@ -5,15 +6,25 @@ interface FeedbackCardProps {
     question1: string
     question2?: string
     showButtons?: boolean
-    onClick?: (value: string) => void
+    thisRating?: number
+    onClick?: (value: number) => void
     onChangeText?: (text: string) => void
 }
 
 export const FeedbackCard = ({
     question1,
     question2,
+    thisRating,
     showButtons,
+    onClick
 }: FeedbackCardProps) => {
+
+
+    const handleClick = (val: number) => {
+        onClick && onClick(val)
+    }
+
+
     return (
         <div className={styles.card}>
             <p className={styles.firstQuestion}>{question1}</p>
@@ -22,19 +33,31 @@ export const FeedbackCard = ({
                 <div className={styles.buttons}>
                     <IconButton
                         iconName='face1'
-                        className={styles.button}  
+                        className={clsx(styles.button, {
+                            [styles.active]: thisRating === 1
+                        })}  
+                        onClick={() => handleClick(1)}
                     />
                     <IconButton
                         iconName='face2'
-                        className={styles.button}  
+                        className={clsx(styles.button, {
+                            [styles.active]: thisRating === 2
+                        })}  
+                        onClick={() => handleClick(2)} 
                     />
                     <IconButton
                         iconName='face3'
-                        className={styles.button}  
+                        className={clsx(styles.button, {
+                            [styles.active]: thisRating === 3
+                        })}   
+                        onClick={() => handleClick(3)}
                     />
                     <IconButton
                         iconName='face4'
-                        className={styles.button}  
+                        className={clsx(styles.button, {
+                            [styles.active]: thisRating === 4
+                        })}   
+                        onClick={() => handleClick(4)}
                     />
                 </div>
             }

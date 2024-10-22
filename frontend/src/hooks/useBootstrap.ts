@@ -6,10 +6,10 @@ import { BasketItemModel } from "../models/entities"
 import { useAppDispatch } from "../store/hooks"
 import { setProducts } from "../store/basketSlice"
 
-const getBasketIdList = (): number[] => {
+const getBasketIdList = (): string[] => {
     const localStorageBasket = localStorage.getItem(STORAGE.BASKET)
     const localStorageBasketArray: BasketItemModel[] = localStorageBasket ? JSON.parse(localStorageBasket) : []
-    return localStorageBasketArray.map(({productId}) => productId)
+    return localStorageBasketArray.map(({productIdName}) => productIdName) 
 }
 
 
@@ -19,7 +19,13 @@ export const useBootstrap = () => {
 
     const idList = getBasketIdList()
 
+    console.log(idList);
+    
+
     const {data, isLoading} = useGetManyProductsByIdListQuery(idList.length ? idList : skipToken)
+
+    console.log(data);
+    
 
     useEffect(() => {
         if(data){

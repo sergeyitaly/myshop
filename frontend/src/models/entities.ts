@@ -82,6 +82,7 @@ export interface ProductVariantsModel {
 
 export interface BasketItemModel {
 	productId: number;
+	productIdName: string
 	qty: number;
 }
 
@@ -155,4 +156,17 @@ export interface Brand {
 	photo_thumbnail?: string;
 	photo_url: string;
 	photo_thumbnail_url: string;
+}
+
+export interface Ratings {
+    question_id: number
+    answer: string
+    rating: number
+}
+
+export interface FeedbackForm{
+    name: string,
+    comment: string,
+    email: string,
+    ratings: Ratings[]
 }
