@@ -38,7 +38,7 @@ export const productApiSlice = apiSlice.injectEndpoints({
     }),
 
     // Endpoint to fetch products by ID list
-    getManyProductsByIdList: builder.query<Product[], number[]>({
+    getManyProductsByIdList: builder.query<Product[], string[]>({
       queryFn: async (idList) => {
         const products = await Promise.all(idList.map(async (id) => {
           const { data } = await axios.get<Product>(`${apiBaseUrl}/api/${ENDPOINTS.PRODUCT}/${id}/`);
