@@ -170,3 +170,9 @@ export interface FeedbackForm{
     email: string,
     ratings: Ratings[]
 }
+
+export interface Question{
+	id: number,
+	question: string,
+	aspect_name: string | null
+}

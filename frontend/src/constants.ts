@@ -37,6 +37,7 @@ export enum ENDPOINTS {
     COLLECTIONS = 'collections',
     ORDER = 'order',
     FEEDBACK = 'feedback',
+    QUESTIONS = 'rating-questions',
     PRODUCT = 'product',
     PRODUCTS = 'products',
     FILTER = 'products/filter',
