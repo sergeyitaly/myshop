@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import { IconButton } from '../../UI/IconButton/IconButton'
 import styles from './FeedbackCard.module.scss'
+import { ChangeEvent } from 'react'
 
 interface FeedbackCardProps {
     question1: string
@@ -16,12 +17,17 @@ export const FeedbackCard = ({
     question2,
     thisRating,
     showButtons,
-    onClick
+    onClick,
+    onChangeText
 }: FeedbackCardProps) => {
 
 
     const handleClick = (val: number) => {
         onClick && onClick(val)
+    }
+
+    const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+        onChangeText && onChangeText(event.target.value)
     }
 
 
@@ -32,28 +38,28 @@ export const FeedbackCard = ({
                 showButtons &&
                 <div className={styles.buttons}>
                     <IconButton
-                        iconName='face1'
+                        iconName='face4'
                         className={clsx(styles.button, {
                             [styles.active]: thisRating === 1
                         })}  
                         onClick={() => handleClick(1)}
                     />
                     <IconButton
-                        iconName='face2'
+                        iconName='face3'
                         className={clsx(styles.button, {
                             [styles.active]: thisRating === 2
                         })}  
                         onClick={() => handleClick(2)} 
                     />
                     <IconButton
-                        iconName='face3'
+                        iconName='face2'
                         className={clsx(styles.button, {
                             [styles.active]: thisRating === 3
                         })}   
                         onClick={() => handleClick(3)}
                     />
                     <IconButton
-                        iconName='face4'
+                        iconName='face1'
                         className={clsx(styles.button, {
                             [styles.active]: thisRating === 4
                         })}   
@@ -65,6 +71,7 @@ export const FeedbackCard = ({
             <textarea
                 className={styles.textarea}
                 placeholder='Ваша відповідь...'
+                onChange={handleChange}
             />
         </div>
     )
