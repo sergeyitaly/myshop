@@ -157,3 +157,16 @@ export interface Brand {
 	photo_url: string;
 	photo_thumbnail_url: string;
 }
+
+export interface Ratings {
+    question_id: number
+    answer: string
+    rating: number
+}
+
+export interface FeedbackForm{
+    name: string,
+    comment: string,
+    email: string,
+    ratings: Ratings[]
+}
