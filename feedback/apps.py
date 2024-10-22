@@ -7,3 +7,4 @@ class FeedbackConfig(AppConfig):
 
     def ready(self):
         import feedback.signals
+        import feedback.translator
