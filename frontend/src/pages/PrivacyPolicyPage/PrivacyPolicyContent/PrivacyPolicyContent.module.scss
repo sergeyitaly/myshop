@@ -21,10 +21,13 @@
   color: $color-black;
 }
 
+.section:last-child {
+  margin-bottom: 82px;
+}
+
 .customTitle {
   div {
-    margin: 0;
-    padding: 0;
+    margin: 12px 0 0 0;
   }
 
   h1 {
