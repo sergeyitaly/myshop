@@ -70,6 +70,7 @@ export const useBasket = () => {
 
         const newItem: BasketItemModel = {
             productId: product.id,
+            productIdName: product.id_name,
             qty
         }
 
@@ -80,6 +81,7 @@ export const useBasket = () => {
                 if(item.productId === product.id){
                     return {
                         productId: item.productId,
+                        productIdName: item.productIdName,
                         qty: item.qty + qty
                     }
                 }
@@ -104,24 +106,27 @@ export const useBasket = () => {
     }
 
     const increaceCounter = (product: Product) => {
-        const contentArray: BasketItemModel[] = getBasketContent().map(({productId, qty}) => ({
+        const contentArray: BasketItemModel[] = getBasketContent().map(({productId, productIdName, qty}) => ({
             productId,
+            productIdName,
             qty: productId===product.id ? qty+1 : qty
         }))
         saveToLocalStorageAndUpdateState(contentArray)
     }
     
     const reduceCounter = (product: Product) => {
-        const contentArray: BasketItemModel[] = getBasketContent().map(({productId, qty}) => ({
+        const contentArray: BasketItemModel[] = getBasketContent().map(({productId, productIdName, qty}) => ({
             productId,
+            productIdName,
             qty: productId===product.id && qty >1 ? qty-1 : qty
         }))
         saveToLocalStorageAndUpdateState(contentArray)
     }
 
     const changeCounter = (product: Product, counter: number) => {
-        const contentArray: BasketItemModel[] = getBasketContent().map(({productId, qty}) => ({
+        const contentArray: BasketItemModel[] = getBasketContent().map(({productId, productIdName, qty}) => ({
             productId,
+            productIdName,
             qty: productId===product.id ? counter : qty
         }))
         saveToLocalStorageAndUpdateState(contentArray)
