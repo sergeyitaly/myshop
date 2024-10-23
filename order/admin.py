@@ -9,6 +9,10 @@ from django.contrib.admin import SimpleListFilter
 from django.db.models import Sum, F
 from django.utils.translation import gettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
+from modeltranslation.admin import TranslationAdmin
+from modeltranslation.translator import translator, NotRegistered
+from .translator import *  # Ensure this is imported
+from django.urls import reverse
 
 class OrderSummaryAdmin(admin.ModelAdmin):
     list_display = ('chat_id',)
