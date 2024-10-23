@@ -1,18 +1,23 @@
-
 .card {
-    position: relative;
-    cursor: pointer;
+	position: relative;
+	cursor: pointer;
 
-    h1 {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-weight: 500;
-        font-size: clamp(1rem, 1.702vw + 0.468rem, 2rem);
-    }
+	h1 {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		font-weight: 500;
+		font-size: clamp(1rem, 1.702vw + 0.468rem, 2rem);
+		text-align: center;
+
+		padding: clamp(0.188rem, 0.745vw - 0.045rem, 0.625rem)
+			clamp(0.438rem, 2.979vw - 0.493rem, 2.188rem);
+		border-radius: 20px;
+		background: #fff;
+	}
 }
 
 .imageSize {
-    padding-top: 67%;
+	padding-top: 67%;
 }
