@@ -1,58 +1,105 @@
-@import '../../../variables';
+@import "../../../variables";
 
-@mixin checkboxContainer{
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: center;
-    gap: clamp(0.313rem, 1.064vw - 0.02rem, 0.938rem) clamp(0.625rem, 1.064vw + 0.293rem, 1.25rem);
+@mixin checkboxContainer {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	align-items: center;
+	gap: clamp(0.313rem, 1.064vw - 0.02rem, 0.938rem)
+		clamp(0.625rem, 1.064vw + 0.293rem, 1.25rem);
 }
 
-
 .inputsContainer {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: clamp(0.188rem, 0.213vw + 0.121rem, 0.313rem) clamp(0.5rem, 0.745vw + 0.267rem, 0.938rem) ;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: clamp(0.188rem, 0.213vw + 0.121rem, 0.313rem)
+		clamp(0.5rem, 0.745vw + 0.267rem, 0.938rem);
 }
 
 .form {
-    max-width: 690px;
-    display: flex;
-    flex-direction: column;
-    gap: clamp(0.938rem, 0.532vw + 0.771rem, 1.25rem);
+	max-width: 690px;
+	display: flex;
+	flex-direction: column;
+	gap: clamp(0.938rem, 0.532vw + 0.771rem, 1.25rem);
 }
 
 .anotherPersonBox {
-    grid-column: span 2;
-    @include checkboxContainer
+	grid-column: span 2;
+	@include checkboxContainer;
 }
 
-.presentBox {
-    @include checkboxContainer
-}
+// .presentBox {
+// 	@include checkboxContainer;
+// }
 
 .commentButton {
-    font-size: clamp(0.75rem, 0.851vw + 0.484rem, 1.25rem);
-    color: $color-blue;
-    border-bottom: 1px solid transparent;
-    grid-column: 2/-1;
-    justify-self: start;
-    transition: 0.2s;
-    &:hover {
-        border-color: $color-blue;
-    }
+	font-size: clamp(0.75rem, 0.851vw + 0.484rem, 1.25rem);
+	color: $color-blue;
+	border-bottom: 1px solid transparent;
+	grid-column: 2/-1;
+	justify-self: start;
+	transition: 0.2s;
+	&:hover {
+		border-color: $color-blue;
+	}
 }
 
 .textArea {
-    grid-column: 2/-1;
+	grid-column: 2/-1;
 }
 
 @media (max-width: 1000px) {
-    .inputsContainer {
-        grid-template-columns: 1fr;
-    }
+	.inputsContainer {
+		grid-template-columns: 1fr;
+	}
 
-    .anotherPersonBox {
-        grid-column: auto;
-    }
-    
+	.anotherPersonBox {
+		grid-column: auto;
+	}
+}
+
+.giftWrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.giftCheckbox {
+	display: flex;
+	gap: 16px;
+
+	@media (max-width: $screen-mobile) {
+		gap: 8px;
+	}
+}
+
+.giftContainer {
+	display: flex;
+	flex-direction: column;
+	padding-left: 35px;
+}
+
+.giftTitle {
+	font-size: clamp(0.875rem, 0.638vw + 0.676rem, 1.25rem);
+	font-weight: 400;
+	margin-bottom: 12px;
+}
+
+.giftButton {
+	display: flex;
+	font-size: clamp(0.75rem, 0.851vw + 0.484rem, 1.25rem);
+	color: $color-blue;
+	margin-bottom: 12px;
+
+	span {
+		border-bottom: 1px solid transparent;
+		transition: border-color 0.2s;
+
+		&:hover {
+			border-color: $color-blue;
+		}
+	}
+}
+
+.giftTextArea {
+	width: 100%;
 }
