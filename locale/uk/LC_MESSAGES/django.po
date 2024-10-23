@@ -68,6 +68,7 @@ msgstr "cтворено"
 
 #: feedback/models.py:9
 msgid "Rating Question"
+msgstr "Рейтингові питання"
 msgstr "Рейтингове Питання"
 
 #: feedback/models.py:10
@@ -78,14 +79,17 @@ msgstr "Назва продукту"
 
 #: feedback/models.py:11
 msgid "Is Rating Required"
+msgstr "Рейтниг Необхідний"
 msgstr "Рейтинг Потрібен"
 
 #: feedback/models.py:23
 msgid "Email"
+msgstr "Пошта"
 msgstr "Скринька"
 
 #: feedback/models.py:31
 msgid "Ratings"
+msgstr "Рейтинги"
 msgstr "Рейтинг"
 
 #: feedback/models.py:38 order/models.py:45
@@ -95,9 +99,11 @@ msgstr "Статус"
 #: feedback/models.py:43 feedback/models.py:48
 msgid "Feedback"
 msgstr "Відгук"
+msgstr "Відгук"
 
 #: feedback/models.py:44
 msgid "Feedbacks"
+msgstr "Відгуки"
 msgstr "Відгуки"
 
 #: feedback/models.py:49 feedback/models.py:80
@@ -109,13 +115,16 @@ msgstr "Опис"
 #: feedback/models.py:50
 msgid "Answer"
 msgstr "Відповідь"
+msgstr "Відповідь"
 
 #: feedback/models.py:55
 msgid "Rating"
+msgstr "Рейтингийтинг"
 msgstr "Рейтинг"
 
 #: feedback/models.py:82
 msgid "Average Rating"
+msgstr "Середній Рейтинг"
 msgstr "Середеій Рейтинг"
 
 #: intro/models.py:48 shop/models.py:124 team/models.py:56
@@ -137,6 +146,7 @@ msgstr "Англійська"
 
 #: myshop/settings.py:331
 msgid "Ukrainian"
+msgstr "Українська"
 msgstr "Українська"
 
 #: order/admin.py:27
@@ -2106,7 +2116,7 @@ msgstr ""
 
 #: venv/lib/python3.9/site-packages/tornado/locale.py:393
 msgid "yesterday"
-msgstr ""
+msgstr "вчора"
 
 #: venv/lib/python3.9/site-packages/tornado/locale.py:393
 #, python-format
