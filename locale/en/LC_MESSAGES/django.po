@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-22 20:47+0300\n"
+"POT-Creation-Date: 2024-10-23 17:33+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,6 +54,10 @@ msgstr ""
 msgid "Comments"
 msgstr ""
 
+#: feedback/admin.py:65 feedback/models.py:22 order/models.py:39
+msgid "Created At"
+msgstr ""
+
 #: feedback/models.py:9
 msgid "Rating Question"
 msgstr ""
@@ -68,10 +72,6 @@ msgstr ""
 
 #: feedback/models.py:21
 msgid "Email"
-msgstr ""
-
-#: feedback/models.py:22 order/models.py:39
-msgid "Created At"
 msgstr ""
 
 #: feedback/models.py:29
@@ -119,11 +119,11 @@ msgstr ""
 msgid "Intros"
 msgstr ""
 
-#: myshop/settings.py:328
+#: myshop/settings.py:330
 msgid "English"
 msgstr ""
 
-#: myshop/settings.py:329
+#: myshop/settings.py:331
 msgid "Ukrainian"
 msgstr ""
 

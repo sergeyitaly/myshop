@@ -112,7 +112,7 @@ export const OrderForm = ({ className }: OrderFormProps) => {
 					<OrderInfo text={t("payment_on_delivery")} />
 				</OrderFormBox>
 
-				<OrderFormBox title={t("additional")}>
+				<OrderFormBox title={t("additionaly")}>
 					<div className={styles.presentBox}>
 						<FormikCheckBox name="present" />
 						<CheckBoxComment text={t("wrap_as_gift")} />

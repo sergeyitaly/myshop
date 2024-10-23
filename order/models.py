@@ -35,6 +35,7 @@ class Order(models.Model):
     address = models.TextField(null=True, blank=True, verbose_name=_('Address'))
     receiver = models.BooleanField(null=True, help_text=_('Other person'))
     receiver_comments = models.TextField(blank=True, null=True, help_text=_('Comments about the receiver'))
+    congrats = models.TextField(blank=True, null=True, help_text=_('Congrats'))
     submitted_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Submitted At'))
     created_at = models.DateTimeField(null=True, blank=True, verbose_name=_('Created At'))
     processed_at = models.DateTimeField(null=True, blank=True, verbose_name=_('Processed At'))
