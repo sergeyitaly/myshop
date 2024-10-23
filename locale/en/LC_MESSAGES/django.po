@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-18 19:41+0300\n"
+"POT-Creation-Date: 2024-10-22 22:11+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,8 +25,9 @@ msgstr ""
 msgid "Image"
 msgstr ""
 
-#: brand/models.py:46 comments/models.py:10 intro/models.py:46
-#: shop/models.py:122 team/models.py:46 technologies/models.py:46
+#: brand/models.py:46 comments/models.py:10 feedback/models.py:19
+#: intro/models.py:46 shop/models.py:122 team/models.py:46
+#: technologies/models.py:46
 msgid "Name"
 msgstr ""
 
@@ -45,7 +46,7 @@ msgstr ""
 msgid "Brands"
 msgstr ""
 
-#: comments/models.py:13 comments/models.py:21
+#: comments/models.py:13 comments/models.py:21 feedback/models.py:20
 msgid "Comment"
 msgstr ""
 
@@ -53,16 +54,56 @@ msgstr ""
 msgid "Comments"
 msgstr ""
 
-#: feedback/admin.py:52
-msgid "Average Rating"
+#: feedback/admin.py:67 feedback/models.py:22 order/models.py:39
+msgid "Created At"
 msgstr ""
 
-#: feedback/models.py:39
+#: feedback/models.py:9
+msgid "Rating Question"
+msgstr ""
+
+#: feedback/models.py:10
+msgid "Aspect Name"
+msgstr ""
+
+#: feedback/models.py:11
+msgid "Is Rating Required"
+msgstr ""
+
+#: feedback/models.py:21
+msgid "Email"
+msgstr ""
+
+#: feedback/models.py:29
+msgid "Ratings"
+msgstr ""
+
+#: feedback/models.py:36 order/models.py:43
+msgid "Status"
+msgstr ""
+
+#: feedback/models.py:41 feedback/models.py:46
 msgid "Feedback"
 msgstr ""
 
-#: feedback/models.py:40
+#: feedback/models.py:42
 msgid "Feedbacks"
+msgstr ""
+
+#: feedback/models.py:47 feedback/models.py:72
+msgid "Question"
+msgstr ""
+
+#: feedback/models.py:48
+msgid "Answer"
+msgstr ""
+
+#: feedback/models.py:51
+msgid "Rating"
+msgstr ""
+
+#: feedback/models.py:74
+msgid "Average Rating"
 msgstr ""
 
 #: intro/models.py:48 shop/models.py:124 team/models.py:56
@@ -78,11 +119,11 @@ msgstr ""
 msgid "Intros"
 msgstr ""
 
-#: myshop/settings.py:328
+#: myshop/settings.py:330
 msgid "English"
 msgstr ""
 
-#: myshop/settings.py:329
+#: myshop/settings.py:331
 msgid "Ukrainian"
 msgstr ""
 
@@ -203,10 +244,6 @@ msgstr ""
 msgid "Submitted At"
 msgstr ""
 
-#: order/models.py:39
-msgid "Created At"
-msgstr ""
-
 #: order/models.py:40
 msgid "Processed At"
 msgstr ""
@@ -217,10 +254,6 @@ msgstr ""
 
 #: order/models.py:42
 msgid "Canceled At"
-msgstr ""
-
-#: order/models.py:43
-msgid "Status"
 msgstr ""
 
 #: order/models.py:44
