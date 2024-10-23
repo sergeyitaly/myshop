@@ -94,7 +94,7 @@ class OverallAverageRatingAdmin(admin.ModelAdmin):
             # Redirect to the RatingQuestion change page
             rating_question_id = overall_avg_rating.question.id
             return HttpResponseRedirect(reverse('admin:feedback_ratingquestion_change', args=[rating_question_id]))       
-        return super().change_view(request, object_id, form_url, extra_context)
+        return super().change_view(request, object_id, form_url, extra_context)    
 def register_translation_admin(model, admin_class):
     try:
         admin.site.register(model, admin_class)
