@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-22 20:48+0300\n"
+"POT-Creation-Date: 2024-10-23 17:33+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -61,9 +61,13 @@ msgstr "Коментар"
 msgid "Comments"
 msgstr "Коментарі"
 
+#: feedback/admin.py:65 feedback/models.py:22 order/models.py:39
+msgid "Created At"
+msgstr "cтворено"
+
 #: feedback/models.py:9
 msgid "Rating Question"
-msgstr ""
+msgstr "Рейтингове Питання"
 
 #: feedback/models.py:10
 #, fuzzy
@@ -73,19 +77,15 @@ msgstr "Назва продукту"
 
 #: feedback/models.py:11
 msgid "Is Rating Required"
-msgstr ""
+msgstr "Рейтинг Потрібен"
 
 #: feedback/models.py:21
 msgid "Email"
-msgstr ""
-
-#: feedback/models.py:22 order/models.py:39
-msgid "Created At"
-msgstr "cтворено"
+msgstr "Скринька"
 
 #: feedback/models.py:29
 msgid "Ratings"
-msgstr ""
+msgstr "Рейтинг"
 
 #: feedback/models.py:36 order/models.py:43
 msgid "Status"
@@ -93,11 +93,11 @@ msgstr "Статус"
 
 #: feedback/models.py:41 feedback/models.py:46
 msgid "Feedback"
-msgstr ""
+msgstr "Відгук"
 
 #: feedback/models.py:42
 msgid "Feedbacks"
-msgstr ""
+msgstr "Відгуки"
 
 #: feedback/models.py:47 feedback/models.py:72
 #, fuzzy
@@ -107,15 +107,15 @@ msgstr "Опис"
 
 #: feedback/models.py:48
 msgid "Answer"
-msgstr ""
+msgstr "Відповідь"
 
 #: feedback/models.py:51
 msgid "Rating"
-msgstr ""
+msgstr "Рейтинг"
 
 #: feedback/models.py:74
 msgid "Average Rating"
-msgstr ""
+msgstr "Середеій Рейтинг"
 
 #: intro/models.py:48 shop/models.py:124 team/models.py:56
 #: technologies/models.py:48
@@ -130,13 +130,13 @@ msgstr "Вступ"
 msgid "Intros"
 msgstr "Вступи"
 
-#: myshop/settings.py:328
+#: myshop/settings.py:330
 msgid "English"
 msgstr "Англійська"
 
-#: myshop/settings.py:329
+#: myshop/settings.py:331
 msgid "Ukrainian"
-msgstr ""
+msgstr "Українська"
 
 #: order/admin.py:23
 #, fuzzy

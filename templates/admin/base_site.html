@@ -30,3 +30,15 @@
     </select>
 </form>
 {% endblock %}
+
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .inline-related h2, .module h2 {
+        background-color: yellow; 
+        padding: 10px; 
+        color: black; 
+    }
+</style>
+{% endblock %}
