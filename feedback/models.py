@@ -9,7 +9,9 @@ class RatingQuestion(models.Model):
     question = models.CharField(max_length=255, default='Question is ...',verbose_name=_('Rating Question'))
     aspect_name = models.CharField(max_length=255, verbose_name=_('Aspect Name'),null=True,blank=True)
     rating_required = models.BooleanField(default=True, verbose_name=_('Is Rating Required'))  # New field
-
+    order = models.PositiveIntegerField(default=0)
+    class Meta:
+        ordering = ['order'] 
     def __str__(self):
         return self.aspect_name if self.aspect_name else self.question 
 
@@ -48,13 +50,19 @@ class RatingAnswer(models.Model):
     answer = models.TextField(null=True, blank=True, verbose_name=_('Answer'))
     rating = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(10)],
-        verbose_name=_('Rating'),
-        null=True,
-        blank=True
+        null=True,  # Allow NULL values
+        blank=True,  # Allow the field to be blank
+        verbose_name=_('Rating')  # Set verbose name for the field
     )
 
     def __str__(self):
         return f"{self.question.aspect_name}: {self.rating}"
+    
+    def save(self, *args, **kwargs):
+        # Only require a rating if the question requires it
+        if self.question.rating_required and self.rating is None:
+            raise ValueError("Rating is required for this question.")
+        super().save(*args, **kwargs)
     
     def save(self, *args, **kwargs):
         if self.question.rating_required and self.rating is None:
@@ -72,7 +80,9 @@ class OverallAverageRating(models.Model):
         verbose_name=_('Question')
     )
     average_rating = models.FloatField(default=0, editable=False, verbose_name=_('Average Rating'))
-
+    order = models.PositiveIntegerField(default=0)
+    class Meta:
+        ordering = ['order'] 
     def __str__(self):
         return f"Average for {self.question.aspect_name}: {self.average_rating}"
 

@@ -6,6 +6,7 @@ from .translator import RatingQuestion
 from django.utils import formats
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from adminsortable2.admin import SortableAdminMixin
 
 
 class RatingAnswerInline(admin.TabularInline):
@@ -28,8 +29,8 @@ class RatingAnswerInline(admin.TabularInline):
         return qs
 
 @admin.register(RatingQuestion)
-class RatingQuestionAdmin(TranslationAdmin):
-    list_display = ['id', 'question_en', 'question_uk', 'aspect_name_uk', 'aspect_name_en']
+class RatingQuestionAdmin(SortableAdminMixin, TranslationAdmin):
+    list_display = ['id', 'question_en', 'question_uk', 'order']
     search_fields = ['question_en', 'question_uk', 'aspect_name_uk', 'aspect_name_en']
     inlines = [RatingAnswerInline]  # Inline answers displayed in the RatingQuestion admin
 
@@ -65,8 +66,8 @@ class FeedbackAdmin(admin.ModelAdmin):
     formatted_created_at.short_description = _("Created At")
 
 @admin.register(OverallAverageRating)
-class OverallAverageRatingAdmin(admin.ModelAdmin):
-    list_display = ['question', 'average_rating'] 
+class OverallAverageRatingAdmin(SortableAdminMixin,admin.ModelAdmin):
+    list_display = ['question', 'average_rating', 'order'] 
     readonly_fields = ['question','average_rating']  
     search_fields = ['question__question_en', 'question__question_uk'] 
 
