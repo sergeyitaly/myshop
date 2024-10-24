@@ -198,10 +198,12 @@
 	"left_rewiew": "Please write your review",
 	"here": "here",
 	"rate_us": "Rate us",
+	"field_required": "Field required!",
 	"error_name": "Invalid name format. Please enter a correct format.",
 	"error_surname": "Invalid surname format. Please enter a correct format.",
 	"error_email": "Please enter a valid email address.",
 	"error_phone": "Invalid phone number format. Please enter a valid phone number.",
+	"min_order": "Your cart is empty! Please put at least one product in the cart.",
 	"order_place": "Place an order",
 	"order_preview": "Order",
 	"total_sum": "Total sum"
