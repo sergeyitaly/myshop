@@ -5,6 +5,7 @@ import { AppImage } from "../../AppImage/AppImage";
 import { Plug } from "../../Plug/Plug";
 import { countDiscountPrice } from "../../../functions/countDiscountPrice";
 import { useTranslation } from "react-i18next";
+import { useAppTranslator } from "../../../hooks/useAppTranslator";
 import styles from "./OrderItemCard.module.scss";
 
 interface OrderItemCardProps {
@@ -16,15 +17,6 @@ interface OrderItemCardProps {
 	onClickPhoto?: (product: Product) => void;
 }
 
-const getTranslatedProductName = (
-	product: Product,
-	language: string
-): string => {
-	return language === "uk"
-		? product.name_uk || product.name
-		: product.name_en || product.name;
-};
-
 export const OrderItemCard = ({
 	product,
 	qty,
@@ -33,8 +25,9 @@ export const OrderItemCard = ({
 	onClickName,
 	onClickPhoto,
 }: OrderItemCardProps) => {
-	const { i18n, t } = useTranslation();
-	const language = i18n.language;
+	const { t } = useTranslation();
+
+	const { getTranslatedProductName } = useAppTranslator();
 
 	const { photo, price, currency, photo_thumbnail_url } = product;
 
@@ -54,21 +47,19 @@ export const OrderItemCard = ({
 		? countDiscountPrice(product.price, product.discount)
 		: null;
 
-	const translatedName = getTranslatedProductName(product, language);
-
 	return (
 		<div className={styles.card}>
 			<button className={styles.imageBox} onClick={handleClickPhoto}>
 				<AppImage
 					src={photo}
 					previewSrc={photo_thumbnail_url}
-					alt={translatedName}
+					alt={getTranslatedProductName(product)}
 				/>
 				{discountPrice && <Plug className={styles.plug} />}
 			</button>
 			<div className={styles.info}>
 				<div className={styles.title} onClick={handleClickName}>
-					{translatedName}
+					{getTranslatedProductName(product)}
 				</div>
 				<div>
 					<p className={styles.price}>
