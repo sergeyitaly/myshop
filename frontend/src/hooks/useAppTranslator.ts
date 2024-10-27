@@ -6,7 +6,7 @@ import {
 	Currency,
 	Product,
 	Brand,
-    Technology,
+	Technology,
 } from "../models/entities";
 
 export const useAppTranslator = () => {
@@ -56,6 +56,15 @@ export const useAppTranslator = () => {
 		[i18n.language]
 	);
 
+	const getTranslatedColorName = useCallback(
+		(product: Product): string => {
+			return i18n.language === "uk"
+				? product.color_name_uk || product.color_name || ""
+				: product.color_name_en || product.color_name || "";
+		},
+		[i18n.language]
+	);
+
 	const getTranslatedBrandName = useCallback(
 		(brand: Brand): string => {
 			switch (i18n.language) {
@@ -70,7 +79,7 @@ export const useAppTranslator = () => {
 		[i18n.language]
 	);
 
-    const getTranslatedTechnologyName = useCallback(
+	const getTranslatedTechnologyName = useCallback(
 		(technology: Technology): string => {
 			switch (i18n.language) {
 				case "uk":
@@ -92,6 +101,7 @@ export const useAppTranslator = () => {
 		getCollectionName,
 		getTranslatedProductName,
 		getTranslatedBrandName,
-        getTranslatedTechnologyName
+		getTranslatedTechnologyName,
+		getTranslatedColorName,
 	};
 };

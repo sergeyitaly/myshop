@@ -11,19 +11,8 @@ import { useCounter } from "../../../../hooks/useCounter";
 import { formatPrice } from "../../../../functions/formatPrice";
 import { ROUTE } from "../../../../constants";
 import { useTranslation } from "react-i18next";
+import { useAppTranslator } from "../../../../hooks/useAppTranslator";
 import style from "./ProductControl.module.scss";
-
-const getTranslatedProductName = (product: any, language: string): string => {
-	return language === "uk"
-		? product.name_uk || product.name
-		: product.name_en || product.name;
-};
-
-const getTranslatedColorName = (product: any, language: string): string => {
-	return language === "uk"
-		? product.color_name_uk || product.color_name || ""
-		: product.color_name_en || product.color_name || "";
-};
 
 interface ProductControlProps {
 	discountPrice?: number | null;
@@ -41,8 +30,10 @@ export const ProductControl = ({
 	onChangeColor,
 	onChangeSize,
 }: ProductControlProps) => {
-	const { t, i18n } = useTranslation();
-	const language = i18n.language;
+	const { t } = useTranslation();
+
+	const { getTranslatedProductName, getTranslatedColorName } =
+		useAppTranslator();
 
 	const { available, price, currency, color_value } = product;
 	const { colors, sizes } = variants;
@@ -68,9 +59,7 @@ export const ProductControl = ({
 
 	return (
 		<div className={style.container}>
-			<h2 className={style.title}>
-				{getTranslatedProductName(product, language)}
-			</h2>
+			<h2 className={style.title}>{getTranslatedProductName(product)}</h2>
 			<div className={style.price}>
 				{formatPrice(discountPrice ? discountPrice : price, currency)}
 				{discountPrice && (
@@ -86,7 +75,7 @@ export const ProductControl = ({
 			<ProductVariants
 				className={style.color}
 				title={t("color")}
-				value={getTranslatedColorName(product, language)}
+				value={getTranslatedColorName(product)}
 			>
 				{colors.map(({ color }) => (
 					<ValueBox
