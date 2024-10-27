@@ -18,14 +18,14 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: brand/admin.py:20 intro/admin.py:20 shop/admin.py:98 shop/admin.py:173
+#: brand/admin.py:20 intro/admin.py:20 shop/admin.py:97 shop/admin.py:172
 #: shop/models.py:96 shop/models.py:191 team/admin.py:20
 #: technologies/admin.py:20
 #: venv/lib/python3.9/site-packages/django/db/models/fields/files.py:393
 msgid "Image"
 msgstr ""
 
-#: brand/models.py:46 comments/models.py:10 feedback/models.py:19
+#: brand/models.py:46 comments/models.py:10 feedback/models.py:21
 #: intro/models.py:46 shop/models.py:122 team/models.py:46
 #: technologies/models.py:46
 msgid "Name"
@@ -46,7 +46,7 @@ msgstr ""
 msgid "Brands"
 msgstr ""
 
-#: comments/models.py:13 comments/models.py:21 feedback/models.py:20
+#: comments/models.py:13 comments/models.py:21 feedback/models.py:22
 msgid "Comment"
 msgstr ""
 
@@ -70,39 +70,39 @@ msgstr ""
 msgid "Is Rating Required"
 msgstr ""
 
-#: feedback/models.py:21
+#: feedback/models.py:23
 msgid "Email"
 msgstr ""
 
-#: feedback/models.py:29
+#: feedback/models.py:31
 msgid "Ratings"
 msgstr ""
 
-#: feedback/models.py:36 order/models.py:43
+#: feedback/models.py:38 order/models.py:45
 msgid "Status"
 msgstr ""
 
-#: feedback/models.py:41 feedback/models.py:46
+#: feedback/models.py:43 feedback/models.py:48
 msgid "Feedback"
 msgstr ""
 
-#: feedback/models.py:42
+#: feedback/models.py:44
 msgid "Feedbacks"
 msgstr ""
 
-#: feedback/models.py:47 feedback/models.py:72
+#: feedback/models.py:49 feedback/models.py:80
 msgid "Question"
 msgstr ""
 
-#: feedback/models.py:48
+#: feedback/models.py:50
 msgid "Answer"
 msgstr ""
 
-#: feedback/models.py:51
+#: feedback/models.py:55
 msgid "Rating"
 msgstr ""
 
-#: feedback/models.py:74
+#: feedback/models.py:82
 msgid "Average Rating"
 msgstr ""
 
@@ -127,60 +127,60 @@ msgstr ""
 msgid "Ukrainian"
 msgstr ""
 
-#: order/admin.py:23
+#: order/admin.py:27
 msgid "Order Summary (JSON)"
 msgstr ""
 
-#: order/admin.py:55
+#: order/admin.py:59
 msgid "Product Photo"
 msgstr ""
 
-#: order/admin.py:59
+#: order/admin.py:63
 msgid "Product Name"
 msgstr ""
 
-#: order/admin.py:63 shop/admin.py:88 shop/models.py:69 shop/models.py:93
+#: order/admin.py:67 shop/admin.py:87 shop/models.py:69 shop/models.py:93
 #: shop/models.py:121
 msgid "Collection"
 msgstr ""
 
-#: order/admin.py:67 shop/models.py:135
+#: order/admin.py:71 shop/models.py:135
 msgid "Size"
 msgstr ""
 
-#: order/admin.py:71
+#: order/admin.py:75
 msgid "Color"
 msgstr ""
 
-#: order/admin.py:92
+#: order/admin.py:96
 msgid "Has Order Items"
 msgstr ""
 
-#: order/admin.py:93
+#: order/admin.py:97
 msgid "has_order_items"
 msgstr ""
 
-#: order/admin.py:97
+#: order/admin.py:101
 msgid "With Order Items"
 msgstr ""
 
-#: order/admin.py:98
+#: order/admin.py:102
 msgid "Without Order Items"
 msgstr ""
 
-#: order/admin.py:139 order/models.py:12 order/models.py:109
+#: order/admin.py:143 order/models.py:12 order/models.py:111
 msgid "Chat ID"
 msgstr ""
 
-#: order/admin.py:143
+#: order/admin.py:147
 msgid "Last Updated"
 msgstr ""
 
-#: order/admin.py:147
+#: order/admin.py:151
 msgid "Total Quantity"
 msgstr ""
 
-#: order/admin.py:151
+#: order/admin.py:155
 msgid "Total Price"
 msgstr ""
 
@@ -241,104 +241,108 @@ msgid "Comments about the receiver"
 msgstr ""
 
 #: order/models.py:38
-msgid "Submitted At"
+msgid "Congrats"
 msgstr ""
 
 #: order/models.py:40
-msgid "Processed At"
-msgstr ""
-
-#: order/models.py:41
-msgid "Complete At"
+msgid "Submitted At"
 msgstr ""
 
 #: order/models.py:42
-msgid "Canceled At"
+msgid "Processed At"
+msgstr ""
+
+#: order/models.py:43
+msgid "Complete At"
 msgstr ""
 
 #: order/models.py:44
-msgid "Parent Order"
-msgstr ""
-
-#: order/models.py:45
-msgid "Package as a present"
+msgid "Canceled At"
 msgstr ""
 
 #: order/models.py:46
+msgid "Parent Order"
+msgstr ""
+
+#: order/models.py:47
+msgid "Package as a present"
+msgstr ""
+
+#: order/models.py:48
 msgid "telegram user"
 msgstr ""
 
-#: order/models.py:104 order/models.py:134
+#: order/models.py:106 order/models.py:136
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:484
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:491
 msgid "Order"
 msgstr ""
 
-#: order/models.py:105 order/models.py:110
+#: order/models.py:107 order/models.py:112
 msgid "Orders"
 msgstr ""
 
-#: order/models.py:130
+#: order/models.py:132
 msgid "Order summary"
 msgstr ""
 
-#: order/models.py:131
+#: order/models.py:133
 msgid "Order summarys"
 msgstr ""
 
-#: order/models.py:135 shop/admin.py:144 shop/models.py:188 shop/models.py:227
+#: order/models.py:137 shop/admin.py:143 shop/models.py:188 shop/models.py:227
 msgid "Product"
 msgstr ""
 
-#: order/models.py:136
+#: order/models.py:138
 msgid "Quantity"
 msgstr ""
 
-#: order/models.py:137
+#: order/models.py:139
 msgid "Total Sum"
 msgstr ""
 
-#: order/models.py:149
+#: order/models.py:151
 msgid "Order Item"
 msgstr ""
 
-#: order/models.py:150
+#: order/models.py:152
 msgid "Order Items"
 msgstr ""
 
-#: shop/admin.py:17 shop/admin.py:158
+#: shop/admin.py:16 shop/admin.py:157
 msgid "Product Image"
 msgstr ""
 
-#: shop/admin.py:18 shop/admin.py:70 shop/admin.py:182
+#: shop/admin.py:17 shop/admin.py:69 shop/admin.py:181
 msgid "Product Images"
 msgstr ""
 
-#: shop/admin.py:24
+#: shop/admin.py:23
 msgid "Additional Field"
 msgstr ""
 
-#: shop/admin.py:25
+#: shop/admin.py:24
 msgid "Additional Fields"
 msgstr ""
 
-#: shop/admin.py:56
+#: shop/admin.py:55
 msgid "Main Image"
 msgstr ""
 
-#: shop/admin.py:60
+#: shop/admin.py:59
 msgid "Main Image Preview"
 msgstr ""
 
-#: shop/admin.py:89 shop/models.py:94
+#: shop/admin.py:88 shop/models.py:94
 msgid "Collections"
 msgstr ""
 
-#: shop/admin.py:136
+#: shop/admin.py:135
 msgid "Collections and Products"
 msgstr ""
 
-#: shop/admin.py:145 shop/admin.py:199 shop/models.py:189
+#: shop/admin.py:144 shop/admin.py:198 shop/models.py:189
 msgid "Products"
 msgstr ""
 

@@ -7,7 +7,6 @@ from django.utils import formats
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
-
 class RatingAnswerInline(admin.TabularInline):
     model = RatingAnswer
     extra = 0  # Number of empty forms to display
@@ -29,7 +28,7 @@ class RatingAnswerInline(admin.TabularInline):
 
 @admin.register(RatingQuestion)
 class RatingQuestionAdmin(TranslationAdmin):
-    list_display = ['id', 'question_en', 'question_uk', 'aspect_name_uk', 'aspect_name_en']
+    list_display = ['id', 'question_en', 'question_uk']
     search_fields = ['question_en', 'question_uk', 'aspect_name_uk', 'aspect_name_en']
     inlines = [RatingAnswerInline]  # Inline answers displayed in the RatingQuestion admin
 
@@ -95,6 +94,7 @@ class OverallAverageRatingAdmin(admin.ModelAdmin):
             rating_question_id = overall_avg_rating.question.id
             return HttpResponseRedirect(reverse('admin:feedback_ratingquestion_change', args=[rating_question_id]))       
         return super().change_view(request, object_id, form_url, extra_context)    
+
 def register_translation_admin(model, admin_class):
     try:
         admin.site.register(model, admin_class)
