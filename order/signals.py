@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from django.utils.timezone import is_aware, make_naive
+from django.utils.timezone import is_aware, make_aware
 from django.utils.dateparse import parse_datetime
 from .models import Order, OrderSummary, OrderItem
 from .serializers import OrderItemSerializer
@@ -26,12 +26,17 @@ def ensure_datetime(value):
         return parse_datetime(value)
     return value
 
+def make_aware_if_naive(dt):
+    """Converts a naive datetime to aware, using the current timezone."""
+    if dt and not is_aware(dt):
+        return make_aware(dt)  # Converts naive to aware
+    return dt
+
 def datetime_to_str(dt):
-    """Converts a datetime object to string, handling naive and aware datetimes."""
+    """Converts a datetime object to string, ensuring it's aware."""
     dt = ensure_datetime(dt)
     if dt:
-        if is_aware(dt):
-            dt = make_naive(dt)
+        dt = make_aware_if_naive(dt)  # Ensure it's aware before formatting
         return dt.strftime('%Y-%m-%d %H:%M')
     return None
 
@@ -76,41 +81,32 @@ def get_order_summary(order):
     }
 
     return summary
-def update_order_summary():
-    """Updates the summary of orders grouped by Telegram chat ID."""
+
+def update_order_summary(chat_id):
+    """Updates the order summary for a specific chat_id."""
     try:
-        orders = Order.objects.prefetch_related('order_items__product').all()
-        logger.info(f'Fetched {orders.count()} orders.')
-        grouped_orders = {}
+        orders = Order.objects.filter(telegram_user__chat_id=chat_id).prefetch_related('order_items__product')
+        logger.info(f'Fetched {orders.count()} orders for chat ID: {chat_id}.')
+        grouped_orders = []
 
+        # Create summary for each order
         for order in orders:
-            order_chat_id = order.telegram_user.chat_id if order.telegram_user else None
-            if not order_chat_id:
-                continue
-
-            if order_chat_id not in grouped_orders:
-                grouped_orders[order_chat_id] = []
-
             summary = get_order_summary(order)
-            existing_summary = next((o for o in grouped_orders[order_chat_id] if o['order_id'] == order.id), None)
-            
-            if existing_summary:
-                # Update the existing summary with new order details
-                existing_summary.update(summary)
-            else:
-                # Append the new summary if it doesn't exist
-                grouped_orders[order_chat_id].append(summary)
+            grouped_orders.append(summary)
 
-        for chat_id, orders_summary in grouped_orders.items():
-            # Use update_or_create to ensure the summary is updated or created
-            OrderSummary.objects.update_or_create(
-                chat_id=chat_id,
-                defaults={'orders': orders_summary}
-            )
-            logger.info(f'Order summaries created/updated for chat ID {chat_id}')
+        # Convert decimals if necessary
+        converted_orders = [OrderSummary._convert_decimals(order) for order in grouped_orders]
+        order_summary, created = OrderSummary.objects.update_or_create(
+            chat_id=chat_id,
+            defaults={'orders': converted_orders}
+        )
+        order_summary.orders = converted_orders  # Update orders field with converted values
+        order_summary.save()
+
+        logger.info("Order summary updated successfully for chat ID: {chat_id}.")
 
     except Exception as e:
-        logger.error(f'Error while generating order summaries: {e}')
+        logger.error(f"Error updating order summary for chat ID {chat_id}: {str(e)}")
 
 def get_chat_id_from_phone(phone_number):
     """Fetches the Telegram chat ID from the user's phone number."""
@@ -129,7 +125,7 @@ def update_order_summary_on_order_item_change(sender, instance, **kwargs):
     if phone_number:
         chat_id = get_chat_id_from_phone(phone_number)
         if chat_id:
-            update_order_summary()
+            update_order_summary(chat_id)
             logger.debug(f"OrderItem updated for Order ID: {instance.order.id}, summary updated for chat ID: {chat_id}")
 
 @receiver(post_delete, sender=Order)
@@ -158,5 +154,20 @@ def update_order_summary_on_order_item_delete(sender, instance, **kwargs):
     if phone_number:
         chat_id = get_chat_id_from_phone(phone_number)
         if chat_id:
-            update_order_summary()
+            update_order_summary(chat_id)
             logger.debug(f"OrderItem deleted for Order ID: {instance.order.id}, summary updated for chat ID: {chat_id}")
+
+@receiver(post_save, sender=Order)
+def order_post_save(sender, instance, created, **kwargs):
+    """
+    Signal that triggers after an Order instance is saved.
+    Calls update_order_summary to update the OrderSummary records.
+    """
+    phone_number = instance.phone
+    if phone_number:
+        chat_id = get_chat_id_from_phone(phone_number)
+        if chat_id:
+            # Only call update_order_summary if the Order was created
+            if created:
+                update_order_summary(chat_id)
+            logger.info(f"OrderSummary updated after Order (ID: {instance.id}) save.")
