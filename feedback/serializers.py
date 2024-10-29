@@ -33,7 +33,6 @@ class FeedbackSerializer(serializers.ModelSerializer):
 
         for rating_data in ratings_data:
             RatingAnswer.objects.create(feedback=feedback, **rating_data)
-
         return feedback
 
     def update(self, instance, validated_data):
@@ -57,8 +56,6 @@ class FeedbackSerializer(serializers.ModelSerializer):
 
         return instance
 
-
-# Serializer for OverallAverageRating
 class OverallAverageRatingSerializer(serializers.ModelSerializer):
     model = OverallAverageRating
     question = RatingQuestionSerializer(read_only=True)
