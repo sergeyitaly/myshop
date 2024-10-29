@@ -22,6 +22,7 @@ export enum ROUTE {
     ORDER = '/order',
     ABOUT = '/about',
     THANK = '/thank',
+    THANK_FOR_FEEDBACK = '/thank_for_feedback',
     CONTACTS='/contacts',
     FEEDBACK='/feedback',
     SENDCONTACTS = '/sendcontacts',
