@@ -15,13 +15,16 @@ class FeedbackViewSet(viewsets.ModelViewSet):
     serializer_class = FeedbackSerializer
     permission_classes = [AllowAny] 
 
+class FeedbackViewSet(viewsets.ModelViewSet):
+    queryset = Feedback.objects.all()
+    serializer_class = FeedbackSerializer
+    permission_classes = [AllowAny]
+
     def create(self, request, *args, **kwargs):
         feedback_data = request.data
         serializer = self.get_serializer(data=feedback_data)
         if serializer.is_valid():
             feedback = serializer.save()
-            
-            # Handle ratings in the feedback
             ratings_data = feedback_data.get('ratings', [])
             errors = []
 
@@ -31,16 +34,15 @@ class FeedbackViewSet(viewsets.ModelViewSet):
                     errors.append("Missing 'question_id' in rating data.")
                     continue
 
-                # Get the RatingQuestion object
                 question = get_object_or_404(RatingQuestion, id=question_id)
 
                 if question.rating_required:
                     rating = rating_data.get('rating')
                     if rating is None:
-                        errors.append(f"Missing 'rating' in rating data for question_id: {question_id}")
+                        errors.append(f"Missing 'rating' for required question (ID: {question_id})")
                         continue
 
-                    # Create the RatingAnswer since rating is required
+                    # Create the RatingAnswer instance
                     RatingAnswer.objects.create(
                         feedback=feedback,
                         question=question,
@@ -48,15 +50,13 @@ class FeedbackViewSet(viewsets.ModelViewSet):
                         answer=rating_data.get('answer', '')
                     )
                 else:
-                    # Rating is not required, you can choose to log or handle as needed
-                    # Optionally, log that the rating was skipped
-                    print(f"Skipped posting rating for question_id: {question_id} (rating not required).")
+                    logger.info(f"Skipped rating for question (ID: {question_id}): rating not required.")
 
             if errors:
                 return Response({'errors': errors}, status=status.HTTP_400_BAD_REQUEST)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # Endpoint for marking feedback as complete
