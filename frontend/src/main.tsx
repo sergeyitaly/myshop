@@ -6,6 +6,7 @@ import { store } from './store/store.ts'
 import { Provider } from 'react-redux'
 import './index.scss';
 import './i18n'; // Import the i18n configuration
+import 'modern-normalize';
 
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
