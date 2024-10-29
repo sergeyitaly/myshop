@@ -30,6 +30,7 @@
     "dotenv": "^16.4.5",
     "formik": "^2.4.6",
     "libphonenumber-js": "^1.11.4",
+    "modern-normalize": "^3.0.1",
     "nanoid": "^5.0.7",
     "object-query-string": "^1.2.0",
     "react": "^18.3.1",
