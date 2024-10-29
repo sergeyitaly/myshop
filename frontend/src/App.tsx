@@ -17,6 +17,7 @@ import {Contact} from "./pages/Contact/Contact";
 import {ThankYouPage} from "./pages/Contact/ThankYouPage/ThankYouPage";
 import { About } from './pages/About/About';
 import { FeedbackPage } from './pages/Feedback/Feedback';
+import { ThankFeedbackPage } from './pages/Thank_for_feedback/ThankFeedbackPage';
 
 function App() {
 
@@ -32,6 +33,7 @@ function App() {
         <Route path="/products" element={<FilterPage />} />
         <Route path="/test" element={<TestPage />} />
         <Route path={ROUTE.FEEDBACK} element={<FeedbackPage/>}/>
+        <Route path={ROUTE.THANK_FOR_FEEDBACK} element={<ThankFeedbackPage/>}/>
         <Route path={ROUTE.ABOUT} element={<About />} />
         <Route path={ROUTE.THANK} element={<ThankPage />} />
         <Route path={ROUTE.CONTACTS} element={<Contact />} />

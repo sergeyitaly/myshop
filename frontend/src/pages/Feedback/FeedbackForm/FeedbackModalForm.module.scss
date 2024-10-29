@@ -1,0 +1,35 @@
+@import '../../../variables';
+
+.modal {
+    background: $color-background;
+    padding: 30px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    width: 90vw;
+
+    h1 {
+        text-align: center;
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+}
+
+.textarea {
+
+    border-radius: 7px;
+    border: 1px solid $color-gray-100;
+    resize: none;
+    padding: 5px 15px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    height: 80px;
+    font-family: "Inter";
+    outline: 2px solid transparent;
+    transition: 0.3s;
+
+    &:focus {
+        outline-color: $color-blue;
+    }
+}
