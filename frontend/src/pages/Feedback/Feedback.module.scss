@@ -6,19 +6,6 @@
     gap: clamp(1rem, 1.277vw + 0.601rem, 1.75rem);
 }
 
-.imageWrapper {
-    padding-top: 40%;
-    position: relative;
-    img {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-}
-
 .intro {
     font-size: clamp(0.875rem, 1.064vw + 0.543rem, 1.5rem);
     margin-bottom: clamp(1.25rem, 3.191vw + 0.253rem, 3.125rem);

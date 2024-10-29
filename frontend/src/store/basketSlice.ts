@@ -29,8 +29,6 @@ export const basketSlice = createSlice({
         },
 
         setBasketItems: (state, action: PayloadAction<BasketItemModel[]>) => {
-            console.log(action.payload);
-            
             state.basketItems = action.payload
         },
 

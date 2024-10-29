@@ -19,21 +19,13 @@ export const useBootstrap = () => {
 
     const idList = getBasketIdList()
 
-    console.log(idList);
-    
-
     const {data, isLoading} = useGetManyProductsByIdListQuery(idList.length ? idList : skipToken)
-
-    console.log(data);
-    
 
     useEffect(() => {
         if(data){
             dispatch(setProducts(data))
         }
     }, [data])
-
-    
 
     return {
         isLoadingBasket: isLoading,
