@@ -59,3 +59,20 @@
     font-weight: 500;
     margin-bottom: 10px;
 }
+
+.commentText {
+    height: clamp(0.875rem, 0.638vw + 0.676rem, 1.25rem);
+    margin-bottom: 10px;
+    max-width: 400px;
+}
+
+.buttonSkeleton {
+    width: clamp(2.5rem, 0.319vw + 2.4rem, 2.688rem);
+    height: clamp(2.5rem, 0.319vw + 2.4rem, 2.688rem);
+}
+
+.skeletonTitle {
+    height: clamp(1rem, 0.851vw + 0.734rem, 1.5rem);
+    margin-bottom: clamp(0.875rem, 1.064vw + 0.543rem, 1.5rem);
+    max-width: 300px;
+}
