@@ -4,7 +4,6 @@ from .models import Product, ProductImage, Category, Collection, AdditionalField
 from .forms import AdditionalFieldForm, ProductForm, CollectionForm, ProductImageForm
 from django.utils.translation import gettext_lazy as _  # Import gettext_lazy for translations
 from modeltranslation.admin import TranslationAdmin
-
 from modeltranslation.translator import translator, NotRegistered
 from .translator import *  # Ensure this is imported
 from django.urls import reverse

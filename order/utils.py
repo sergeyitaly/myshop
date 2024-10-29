@@ -95,8 +95,8 @@ def prepare_order_summary(order):
                 'collection_name': item['collection_name'],
             } for item in order_items_data
         ],
-        'latest_status_name': datetime_to_str(latest_status_time),  # Reflect latest status with its timestamp
-        'submitted_at': datetime_to_str(order.submitted_at),  # Convert submitted_at timestamp
+        latest_status: datetime_to_str(latest_status_time), 
+        'submitted_at': datetime_to_str(order.submitted_at),
     }
 
     return summary

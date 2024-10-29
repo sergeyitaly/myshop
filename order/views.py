@@ -101,8 +101,7 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
                     'collection_name': item['collection_name'],
                 } for item in order_items_data
             ],
-            'latest_status': latest_status_key,  # Reflect latest status key
-            'latest_status_time': self.datetime_to_str(latest_status_time),  # Reflect latest status timestamp
+            latest_status_key : self.datetime_to_str(latest_status_time), 
             'submitted_at': self.datetime_to_str(submitted_at),
         }
 

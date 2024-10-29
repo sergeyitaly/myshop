@@ -9,6 +9,10 @@ from django.contrib.admin import SimpleListFilter
 from django.db.models import Sum, F
 from django.utils.translation import gettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
+from modeltranslation.admin import TranslationAdmin
+from modeltranslation.translator import translator, NotRegistered
+from .translator import *  # Ensure this is imported
+from django.urls import reverse
 
 class OrderSummaryAdmin(admin.ModelAdmin):
     list_display = ('chat_id',)
@@ -113,7 +117,7 @@ class OrderAdmin(admin.ModelAdmin):
     list_display = ['id', 'status', 'last_updated', 'phone', 'chat_id']
     readonly_fields = ['id', 'name', 'surname', 'phone', 'email', 'receiver', 'receiver_comments', 'total_quantity', 'total_price', 'submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at', 'chat_id']
     fields = [
-        'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments',
+        'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments','congrats',
         'present', 'status', 'total_quantity', 'total_price', 'submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at'
     ]
     list_filter = [
@@ -178,9 +182,6 @@ class OrderAdmin(admin.ModelAdmin):
                 )
         
         super().save_model(request, obj, form, change)
-
-
-
 
 admin.site.register(Order, OrderAdmin)
 admin.site.register(TelegramUser, TelegramUserAdmin)

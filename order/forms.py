@@ -7,6 +7,10 @@ class OrderForm(forms.Form):
     email = forms.EmailField(label='Your Email')
     address = forms.CharField(label='Shipping Address', widget=forms.Textarea)
     phone = forms.CharField(label='Phone', widget=forms.TextInput(attrs={'type': 'tel'}))
+    receiver = forms.CharField(label='Receiver')
+    receiver_comments = forms.CharField(label='Receiver_Coments')
+    congrats = forms.CharField(label='Congrats')
+
 
     def clean_phone(self):
         phone = self.cleaned_data.get('phone')
