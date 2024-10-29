@@ -17,6 +17,9 @@ import {Contact} from "./pages/Contact/Contact";
 import {ThankYouPage} from "./pages/Contact/ThankYouPage/ThankYouPage";
 import { About } from './pages/About/About';
 import { FeedbackPage } from './pages/Feedback/Feedback';
+import { NewProductsPage } from './pages/NewProductsPage/NewProductsPage';
+import { AllCollectionsPage } from './pages/AllCollectionsPage/AllCollectionsPage';
+import { ProductsWithDiscountPage } from './pages/ProductsWithDiscountPage/ProductsWithDiscountPage';
 import { ThankFeedbackPage } from './pages/Thank_for_feedback/ThankFeedbackPage';
 
 function App() {
@@ -41,6 +44,9 @@ function App() {
         <Route path={ROUTE.PAYMENT_DELIVERY} element={<PaymentAndDeliveryPage />} />
         <Route path={ROUTE.PRIVACY_POLICY} element={<PrivacyPolicyPage />} />
         <Route path={ROUTE.RETURNS_REFUNDS} element={<ReturnsRefundsPage />} />
+        <Route path={ROUTE.NEW_ARRIVALS} element={<NewProductsPage />} />
+        <Route path={ROUTE.ALL_COLLECTIONS} element={<AllCollectionsPage />} />
+        <Route path={ROUTE.DISCOUNT} element={<ProductsWithDiscountPage />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
