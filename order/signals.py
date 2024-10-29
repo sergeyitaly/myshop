@@ -42,8 +42,6 @@ def get_order_summary(order):
     processed_at = ensure_datetime(order.processed_at)
     complete_at = ensure_datetime(order.complete_at)
     canceled_at = ensure_datetime(order.canceled_at)
-
-    # Prepare a dictionary of status fields
     status_fields = {
         'submitted_at': submitted_at,
         'created_at': created_at,
@@ -51,8 +49,6 @@ def get_order_summary(order):
         'complete_at': complete_at,
         'canceled_at': canceled_at,
     }
-
-    # Determine the latest status timestamp
     latest_status_key = max(
         status_fields,
         key=lambda k: status_fields[k] or datetime.min
@@ -75,7 +71,7 @@ def get_order_summary(order):
                 'collection_name': item['collection_name'],
             } for item in order_items_data
         ],
-        latest_status_key: datetime_to_str(latest_status_time),  # This field will reflect the latest timestamp
+        latest_status_key: datetime_to_str(latest_status_time),  
         'submitted_at': datetime_to_str(submitted_at),
     }
 
