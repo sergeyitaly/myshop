@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { IconButton } from '../../UI/IconButton/IconButton'
 import styles from './FeedbackCard.module.scss'
 import { ChangeEvent } from 'react'
+import { useAppTranslator } from '../../../hooks/useAppTranslator'
 
 interface FeedbackCardProps {
     question1: string
@@ -21,6 +22,7 @@ export const FeedbackCard = ({
     onChangeText
 }: FeedbackCardProps) => {
 
+    const {t} = useAppTranslator()
 
     const handleClick = (val: number) => {
         onClick && onClick(val)
@@ -70,7 +72,7 @@ export const FeedbackCard = ({
             {question2 && <p className={styles.secondQusetion}>{question2}</p>} 
             <textarea
                 className={styles.textarea}
-                placeholder='Ваша відповідь...'
+                placeholder={`${t('your_answer')}...`}
                 onChange={handleChange}
             />
         </div>

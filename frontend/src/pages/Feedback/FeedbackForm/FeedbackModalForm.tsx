@@ -77,7 +77,7 @@ export const FeedbackModalForm = ({
             />
             <MainButton
                 color="blue"
-                title={isLoading ? "Надсилаю..." : "Надіслати"}
+                title={isLoading ? `${t('sending')}...` : t('send')}
                 type="submit"
             />
 
