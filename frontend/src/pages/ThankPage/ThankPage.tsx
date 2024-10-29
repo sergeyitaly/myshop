@@ -30,7 +30,9 @@ export const ThankPage = () => {
 							{t("contact_us")}
 							<span className={styles.email}>
 								{" "}
-								{t("emailKOLORYT")}
+								<a href="mailto:koloryt@gmail.com">
+									koloryt@gmail.com
+								</a>
 							</span>
 						</p>
 						<div className={styles.telegramContainer}>
@@ -62,7 +64,7 @@ export const ThankPage = () => {
 							</div>
 						)}
 						<Link to={ROUTE.HOME} className={styles.link}>
-							{t("go_home")} {/* Localization */}
+							{t("go_home")} 
 						</Link>
 					</div>
 				</PageContainer>

@@ -4,6 +4,8 @@ pipeline {
        // GITHUB_CREDENTIALS = credentials('github-credentials-id') 
         DOCKER_IMAGE = 'sergeyitaly/koloryt' 
         TAG = 'serhii_test' 
+        PATH = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${env.PATH}"
+
     }
 
     stages {
