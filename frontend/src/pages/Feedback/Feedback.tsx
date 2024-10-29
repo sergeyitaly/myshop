@@ -12,6 +12,8 @@ import { AppModal } from "../../components/AppModal/AppModal"
 import { FeedbackModalForm } from "./FeedbackForm/FeedbackModalForm"
 import { useToggler } from "../../hooks/useToggler"
 import { useAppTranslator } from "../../hooks/useAppTranslator"
+import { MapComponent } from "../../components/MapComponent"
+import { SkeletonFeedbackCard } from "../../components/Cards/FeedbackCard/SkeletonFeedbackCard"
 
 
 
@@ -23,7 +25,7 @@ export const FeedbackPage = () => {
 
     const {t} = useAppTranslator()
 
-    const {data} = useGetAllQuestionsQuery()
+    const {data, isLoading: isLoadingCards} = useGetAllQuestionsQuery()
 
 
     const [form, setForm] = useState<FeedbackForm>({
@@ -87,6 +89,9 @@ export const FeedbackPage = () => {
             </div>
             <div className={styles.cardContainer}>
                 {
+                    isLoadingCards ?
+                    <MapComponent qty={7} component={<SkeletonFeedbackCard/>}/>
+                    :
                     data?.results.map(({id, aspect_name, question}, index) => (
                         <FeedbackCard
                             key={id}
