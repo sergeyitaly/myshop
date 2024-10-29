@@ -20,6 +20,7 @@ import { FeedbackPage } from './pages/Feedback/Feedback';
 import { NewProducts } from './sections/TabSection/NewProducts';
 import { AllCollections } from './sections/TabSection/AllCollections';
 import { ProductsWithDiscount } from './sections/TabSection/ProductsWithDiscount';
+import { ThankFeedbackPage } from './pages/Thank_for_feedback/ThankFeedbackPage';
 
 function App() {
 
@@ -35,6 +36,7 @@ function App() {
         <Route path="/products" element={<FilterPage />} />
         <Route path="/test" element={<TestPage />} />
         <Route path={ROUTE.FEEDBACK} element={<FeedbackPage/>}/>
+        <Route path={ROUTE.THANK_FOR_FEEDBACK} element={<ThankFeedbackPage/>}/>
         <Route path={ROUTE.ABOUT} element={<About />} />
         <Route path={ROUTE.THANK} element={<ThankPage />} />
         <Route path={ROUTE.CONTACTS} element={<Contact />} />

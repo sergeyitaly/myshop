@@ -46,7 +46,7 @@ class FeedbackAdmin(admin.ModelAdmin):
     inlines = [RatingAnswerInline]  # Include RatingAnswer inline editing
 
     def has_delete_permission(self, request, obj=None):
-        return True  # Disable delete permission
+        return True
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)

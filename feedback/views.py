@@ -6,7 +6,9 @@ from .models import Feedback, RatingAnswer, RatingQuestion, OverallAverageRating
 from .serializers import FeedbackSerializer, RatingAnswerSerializer, RatingQuestionSerializer, OverallAverageRatingSerializer
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
+import logging
 
+logger = logging.getLogger(__name__)
 # Feedback ViewSet for creating and listing feedback
 class FeedbackViewSet(viewsets.ModelViewSet):
     queryset = Feedback.objects.all()
@@ -21,16 +23,40 @@ class FeedbackViewSet(viewsets.ModelViewSet):
             
             # Handle ratings in the feedback
             ratings_data = feedback_data.get('ratings', [])
+            errors = []
+
             for rating_data in ratings_data:
-                question = get_object_or_404(RatingQuestion, id=rating_data['question'])
-                RatingAnswer.objects.create(
-                    feedback=feedback,
-                    question=question,
-                    rating=rating_data['rating'],
-                    answer=rating_data.get('answer', '')
-                )
-            
+                question_id = rating_data.get('question_id')
+                if question_id is None:
+                    errors.append("Missing 'question_id' in rating data.")
+                    continue
+
+                # Get the RatingQuestion object
+                question = get_object_or_404(RatingQuestion, id=question_id)
+
+                if question.rating_required:
+                    rating = rating_data.get('rating')
+                    if rating is None:
+                        errors.append(f"Missing 'rating' in rating data for question_id: {question_id}")
+                        continue
+
+                    # Create the RatingAnswer since rating is required
+                    RatingAnswer.objects.create(
+                        feedback=feedback,
+                        question=question,
+                        rating=rating,
+                        answer=rating_data.get('answer', '')
+                    )
+                else:
+                    # Rating is not required, you can choose to log or handle as needed
+                    # Optionally, log that the rating was skipped
+                    print(f"Skipped posting rating for question_id: {question_id} (rating not required).")
+
+            if errors:
+                return Response({'errors': errors}, status=status.HTTP_400_BAD_REQUEST)
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # Endpoint for marking feedback as complete

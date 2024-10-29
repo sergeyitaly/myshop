@@ -1,5 +1,6 @@
 import { ENDPOINTS } from "../constants";
-import { FeedbackForm } from "../models/entities";
+import { FeedbackForm, Question } from "../models/entities";
+import { ShortServerResponce } from "../models/server-responce";
 import { apiSlice } from "./mainApiSlice";
 
 export interface CreateOrderErrorResponce {
@@ -20,10 +21,16 @@ export const feedbackApiSlice = apiSlice.injectEndpoints({
             transformErrorResponse: (baseQueryReturnValue: CreateOrderErrorResponce) => {
                 return baseQueryReturnValue
             },
-        })
+        }),
+        getAllQuestions: builder.query<ShortServerResponce<Question[]>, void>({
+            query: () => {
+              return `${ENDPOINTS.QUESTIONS}/`;
+            }
+          }),
     })
 })
 
 export const {
-    useCreateFeedbackMutation
+    useCreateFeedbackMutation,
+    useGetAllQuestionsQuery
 } = feedbackApiSlice
