@@ -2958,6 +2958,11 @@ minimatch@^9.0.4:
   resolved "https://registry.npmjs.org/minipass/-/minipass-7.1.2.tgz"
   integrity sha512-qOOzS1cBTWYF4BH8fVePDBOO9iptMnGUEZwNc/cMWnTV2nVLZ7VoNWEPHkYczZA0pdoA7dl6e7FL659nX9S2aw==
 
+modern-normalize@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.npmjs.org/modern-normalize/-/modern-normalize-3.0.1.tgz"
+  integrity sha512-VqlMdYi59Uch6fnUPxnpijWUQe+TW6zeWCvyr6Mb7JibheHzSuAAoJi2c71ZwIaWKpECpGpYHoaaBp6rBRr+/g==
+
 ms@2.1.2:
   version "2.1.2"
   resolved "https://registry.npmjs.org/ms/-/ms-2.1.2.tgz"
