@@ -9,11 +9,13 @@ import { useAppTranslator } from "../../../hooks/useAppTranslator"
 
 
 interface FeedbackModalFormProps {
+    isLoading: boolean
     onSubmit: () => void
     onChange: (fieldName: string, value: string) => void
 }
 
 export const FeedbackModalForm = ({
+    isLoading,
     onChange,
     onSubmit
 }: FeedbackModalFormProps) => {
@@ -75,7 +77,7 @@ export const FeedbackModalForm = ({
             />
             <MainButton
                 color="blue"
-                title="Надіслати"
+                title={isLoading ? "Надсилаю..." : "Надіслати"}
                 type="submit"
             />
 

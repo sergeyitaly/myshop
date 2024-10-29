@@ -11,6 +11,7 @@ import clsx from "clsx"
 import { AppModal } from "../../components/AppModal/AppModal"
 import { FeedbackModalForm } from "./FeedbackForm/FeedbackModalForm"
 import { useToggler } from "../../hooks/useToggler"
+import { useAppTranslator } from "../../hooks/useAppTranslator"
 
 
 
@@ -19,6 +20,8 @@ export const FeedbackPage = () => {
     const navigate = useNavigate()
 
     const {openStatus, handleClose, handleOpen} = useToggler()
+
+    const {t} = useAppTranslator()
 
     const {data} = useGetAllQuestionsQuery()
 
@@ -32,21 +35,22 @@ export const FeedbackPage = () => {
 
     useEffect(() => {
         if(data) {
-            const questionsTemplates = data.results.map(({id}) => ({
+            const questionsTemplates = data.results.map(({id, aspect_name}) => ({
                 question_id: id,
                 answer: '',
-                rating: 0
+                rating: aspect_name ? 0 : undefined 
             }))
 
             setForm({...form, ratings: questionsTemplates })
         }
     }, [data]) 
 
-    console.log(form);
-    
 
+    const [sendForm, {isLoading, isSuccess}] = useCreateFeedbackMutation()
 
-    const [sendForm, {isLoading}] = useCreateFeedbackMutation()
+    useEffect (() => {
+        isSuccess && navigate(ROUTE.THANK_FOR_FEEDBACK)
+    }, [isSuccess])
 
     const handleClick = (id: number, value: number) => {
         const newRating = form.ratings.map((oldRating) => {
@@ -66,8 +70,6 @@ export const FeedbackPage = () => {
 
     const handleSubmit = () => {
         sendForm(form)
-        handleClose()
-
     }
 
     const handleChangeHeader = (fieldName: string, value: string) => {
@@ -79,7 +81,7 @@ export const FeedbackPage = () => {
         <PageContainer className={clsx({[styles.loading]: isLoading})}>
          
             <div className={styles.intro}>
-                <p>Вас вітає команда - <span>KOLORYT!</span> </p>
+                <p>{t('greetting')}<span>KOLORYT!</span> </p>
                 <p>Цей сайт,  ми дуже старанно і довго робили, тому, дуже просимо вас подивитись, оцінити його і можливо залишити пару коментарів - відгуків! Це не займе багато часу а для нас буде дуже приємно! </p>
                 <p>P.S Ви також можете поділитись нашим сайтом з друзями і знайомими!</p>
             </div>
@@ -101,7 +103,7 @@ export const FeedbackPage = () => {
             <div className={styles.actions}>
                 <MainButton
                     color="blue"
-                    title="Надіслати"
+                    title={"Надіслати"}
                     onClick={handleOpen}
                 />
                 <button className={styles.button} onClick={() => navigate(ROUTE.HOME)}>Закрити і повернутися на головний екран</button>
@@ -112,6 +114,7 @@ export const FeedbackPage = () => {
             onClickOutside={handleClose}
         >
             <FeedbackModalForm
+                isLoading = {isLoading}
                 onSubmit={handleSubmit}
                 onChange={handleChangeHeader}
             />

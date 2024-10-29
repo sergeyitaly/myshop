@@ -161,7 +161,7 @@ export interface Brand {
 export interface Ratings {
     question_id: number
     answer: string
-    rating: number
+    rating?: number
 }
 
 export interface FeedbackForm{

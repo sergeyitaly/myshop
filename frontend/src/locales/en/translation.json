@@ -50,6 +50,7 @@
 	"thank_you": "Thank you!",
 	"thank_you_message": "Thank you for visiting our online store. You will soon receive a status update about your order via email!",
 	"thank_you_image_alt": "Woman in computer giving heart-shaped present to man",
+	"thank_you_for_feedback_message": "Thank you for answering to our questions and evaluation of the site",
 	"check_email": "Check your email!",
 	"emailKOLORYT": "KOLORYT@gmail.com",
 	"telegram_bot": "Telegram bot",
@@ -206,5 +207,7 @@
 	"min_order": "Your cart is empty! Please put at least one product in the cart.",
 	"order_place": "Place an order",
 	"order_preview": "Order",
-	"total_sum": "Total sum"
+	"total_sum": "Total sum",
+	"greetting": "Greetting from ",
+	"ask_to_rate": "We have made this site for a long time, so we invite you"
 }
