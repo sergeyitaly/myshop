@@ -209,5 +209,9 @@
 	"order_preview": "Order",
 	"total_sum": "Total sum",
 	"greetting": "Greetting from ",
-	"ask_to_rate": "We have made this site for a long time, so we invite you"
+	"ask_to_rate": "We have made this site for a long time, so we invite you to look at, evaluate it, and probably leave couple comments! It won't take you much time, but we will be happy!",
+	"ps": "You can also share this site along with your friends!",
+	"sending": "Sending",
+	"your_answer": "Your answer",
+	"close_and_return": "Close and return back to the main display"
 }

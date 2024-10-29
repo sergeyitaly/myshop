@@ -82,8 +82,8 @@ export const FeedbackPage = () => {
          
             <div className={styles.intro}>
                 <p>{t('greetting')}<span>KOLORYT!</span> </p>
-                <p>Цей сайт,  ми дуже старанно і довго робили, тому, дуже просимо вас подивитись, оцінити його і можливо залишити пару коментарів - відгуків! Це не займе багато часу а для нас буде дуже приємно! </p>
-                <p>P.S Ви також можете поділитись нашим сайтом з друзями і знайомими!</p>
+                <p>{t('ask_to_rate')}</p>
+                <p>P.S {t('ps')}</p>
             </div>
             <div className={styles.cardContainer}>
                 {
@@ -103,10 +103,10 @@ export const FeedbackPage = () => {
             <div className={styles.actions}>
                 <MainButton
                     color="blue"
-                    title={"Надіслати"}
+                    title={t("send")}
                     onClick={handleOpen}
                 />
-                <button className={styles.button} onClick={() => navigate(ROUTE.HOME)}>Закрити і повернутися на головний екран</button>
+                <button className={styles.button} onClick={() => navigate(ROUTE.HOME)}>{t('close_and_return')}</button>
             </div>
         </PageContainer>
         <AppModal
