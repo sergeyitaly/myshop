@@ -28,7 +28,10 @@ export enum ROUTE {
     SENDCONTACTS = '/sendcontacts',
     PAYMENT_DELIVERY = '/payment_delivery',
     PRIVACY_POLICY = '/privacy_policy',
-    RETURNS_REFUNDS = '/returns_refunds'
+    RETURNS_REFUNDS = '/returns_refunds',
+    NEW_ARRIVALS = '/new-arrivals',
+    ALL_COLLECTIONS = '/all-collections',
+    DISCOUNT = '/discounts',
 }
 
 export enum ENDPOINTS {
