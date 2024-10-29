@@ -41,8 +41,6 @@ class FeedbackViewSet(viewsets.ModelViewSet):
                     if rating is None:
                         errors.append(f"Missing 'rating' for required question (ID: {question_id})")
                         continue
-
-                    # Create the RatingAnswer instance
                     RatingAnswer.objects.create(
                         feedback=feedback,
                         question=question,
@@ -67,7 +65,6 @@ class FeedbackViewSet(viewsets.ModelViewSet):
         feedback.save()
         return Response({'status': 'Feedback marked as complete'})
 
-# View for retrieving and calculating the overall average rating
 class OverallAverageRatingView(APIView):
     def get(self, request):
         # Calculate overall averages (if necessary)
@@ -79,7 +76,7 @@ class OverallAverageRatingView(APIView):
         return Response(serializer.data)
 
 class RatingQuestionViewSet(viewsets.ModelViewSet):
-    queryset = RatingQuestion.objects.all()
+    queryset = RatingQuestion.objects.all().order_by('id')     
     serializer_class = RatingQuestionSerializer
     permission_classes = [AllowAny] 
 

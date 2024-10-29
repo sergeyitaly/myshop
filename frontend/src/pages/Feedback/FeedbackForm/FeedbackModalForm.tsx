@@ -9,10 +9,16 @@ import { useAppTranslator } from "../../../hooks/useAppTranslator"
 
 
 interface FeedbackModalFormProps {
-    isLoading: boolean
-    onSubmit: () => void
-    onChange: (fieldName: string, value: string) => void
+    isLoading: boolean;
+    onSubmit: () => void;
+    onChange: (fieldName: string, value: string) => void;
+    translatedLabels: {
+        name: string;
+        email: string;
+        comment: string;
+    };
 }
+
 
 export const FeedbackModalForm = ({
     isLoading,
