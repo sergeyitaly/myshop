@@ -161,7 +161,7 @@ export interface Brand {
 export interface Ratings {
     question_id: number
     answer: string
-    rating: number
+    rating?: number
 }
 
 export interface FeedbackForm{
@@ -169,4 +169,10 @@ export interface FeedbackForm{
     comment: string,
     email: string,
     ratings: Ratings[]
+}
+
+export interface Question{
+	id: number,
+	question: string,
+	aspect_name: string | null
 }

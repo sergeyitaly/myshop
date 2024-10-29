@@ -4,7 +4,7 @@ import { ChangeEvent, DetailedHTMLProps, FocusEvent, InputHTMLAttributes, useSta
 
 interface AppInputProps extends DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>{
     label: string
-    error: boolean
+    error?: boolean
     helperText?: string
 }
 
