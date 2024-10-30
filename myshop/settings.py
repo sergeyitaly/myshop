@@ -45,6 +45,8 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost:8010", # for docker
+    "http://127.0.0.1:8010", # for docker
     VERCEL_DOMAIN,
     AWS_FRONTEND_DOMAIN,    
 ]

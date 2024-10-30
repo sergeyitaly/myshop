@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-23 17:33+0300\n"
+"POT-Creation-Date: 2024-10-30 01:04+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,7 +25,7 @@ msgstr ""
 msgid "Image"
 msgstr ""
 
-#: brand/models.py:46 comments/models.py:10 feedback/models.py:21
+#: brand/models.py:46 comments/models.py:10 feedback/models.py:24
 #: intro/models.py:46 shop/models.py:122 team/models.py:46
 #: technologies/models.py:46
 msgid "Name"
@@ -46,7 +46,7 @@ msgstr ""
 msgid "Brands"
 msgstr ""
 
-#: comments/models.py:13 comments/models.py:21 feedback/models.py:22
+#: comments/models.py:13 comments/models.py:21 feedback/models.py:25
 msgid "Comment"
 msgstr ""
 
@@ -54,11 +54,11 @@ msgstr ""
 msgid "Comments"
 msgstr ""
 
-#: feedback/admin.py:65 feedback/models.py:22 order/models.py:39
+#: feedback/admin.py:64 feedback/models.py:27 order/models.py:45
 msgid "Created At"
 msgstr ""
 
-#: feedback/models.py:9
+#: feedback/models.py:9 feedback/models.py:15
 msgid "Rating Question"
 msgstr ""
 
@@ -70,40 +70,60 @@ msgstr ""
 msgid "Is Rating Required"
 msgstr ""
 
-#: feedback/models.py:23
+#: feedback/models.py:16
+msgid "Rating Questions"
+msgstr ""
+
+#: feedback/models.py:26
 msgid "Email"
 msgstr ""
 
-#: feedback/models.py:31
+#: feedback/models.py:34
 msgid "Ratings"
 msgstr ""
 
-#: feedback/models.py:38 order/models.py:45
+#: feedback/models.py:41 order/models.py:49
 msgid "Status"
 msgstr ""
 
-#: feedback/models.py:43 feedback/models.py:48
+#: feedback/models.py:46 feedback/models.py:51
 msgid "Feedback"
 msgstr ""
 
-#: feedback/models.py:44
+#: feedback/models.py:47
 msgid "Feedbacks"
 msgstr ""
 
-#: feedback/models.py:49 feedback/models.py:80
+#: feedback/models.py:52 feedback/models.py:85
 msgid "Question"
 msgstr ""
 
-#: feedback/models.py:50
+#: feedback/models.py:53
 msgid "Answer"
 msgstr ""
 
-#: feedback/models.py:55
+#: feedback/models.py:58
 msgid "Rating"
 msgstr ""
 
-#: feedback/models.py:82
+#: feedback/models.py:75
+msgid "Rating Answer"
+msgstr ""
+
+#: feedback/models.py:76
+msgid "Rating Answers"
+msgstr ""
+
+#: feedback/models.py:87
 msgid "Average Rating"
+msgstr ""
+
+#: feedback/models.py:106
+msgid "Overal Average Rating"
+msgstr ""
+
+#: feedback/models.py:107
+msgid "Overal Average Ratings"
 msgstr ""
 
 #: intro/models.py:48 shop/models.py:124 team/models.py:56
@@ -119,11 +139,11 @@ msgstr ""
 msgid "Intros"
 msgstr ""
 
-#: myshop/settings.py:330
+#: myshop/settings.py:331
 msgid "English"
 msgstr ""
 
-#: myshop/settings.py:331
+#: myshop/settings.py:332
 msgid "Ukrainian"
 msgstr ""
 
@@ -168,7 +188,7 @@ msgstr ""
 msgid "Without Order Items"
 msgstr ""
 
-#: order/admin.py:143 order/models.py:12 order/models.py:111
+#: order/admin.py:143 order/models.py:17 order/models.py:179
 msgid "Chat ID"
 msgstr ""
 
@@ -184,129 +204,129 @@ msgstr ""
 msgid "Total Price"
 msgstr ""
 
-#: order/models.py:11
+#: order/models.py:16
 msgid "Phone"
 msgstr ""
 
-#: order/models.py:18
+#: order/models.py:23
 msgid "Telegram user"
 msgstr ""
 
-#: order/models.py:19
+#: order/models.py:24
 msgid "Telegram users"
 msgstr ""
 
-#: order/models.py:23
+#: order/models.py:28
 msgid "Submitted"
 msgstr ""
 
-#: order/models.py:24 shop/models.py:128
+#: order/models.py:29 shop/models.py:128
 msgid "Created"
 msgstr ""
 
-#: order/models.py:25
+#: order/models.py:30
 msgid "Processed"
 msgstr ""
 
-#: order/models.py:26
+#: order/models.py:31
 msgid "Complete"
 msgstr ""
 
-#: order/models.py:27
+#: order/models.py:32
 msgid "Canceled"
 msgstr ""
 
-#: order/models.py:31
+#: order/models.py:36
 msgid "Default Name"
 msgstr ""
 
-#: order/models.py:32
+#: order/models.py:37
 msgid "Default Surname"
 msgstr ""
 
-#: order/models.py:33
+#: order/models.py:38
 msgid "Contact phone number"
 msgstr ""
 
-#: order/models.py:35
+#: order/models.py:40
 msgid "Address"
 msgstr ""
 
-#: order/models.py:36
+#: order/models.py:41
 msgid "Other person"
 msgstr ""
 
-#: order/models.py:37
+#: order/models.py:42
 msgid "Comments about the receiver"
 msgstr ""
 
-#: order/models.py:38
+#: order/models.py:43
 msgid "Congrats"
 msgstr ""
 
-#: order/models.py:40
+#: order/models.py:44
 msgid "Submitted At"
 msgstr ""
 
-#: order/models.py:42
+#: order/models.py:46
 msgid "Processed At"
 msgstr ""
 
-#: order/models.py:43
+#: order/models.py:47
 msgid "Complete At"
 msgstr ""
 
-#: order/models.py:44
+#: order/models.py:48
 msgid "Canceled At"
 msgstr ""
 
-#: order/models.py:46
+#: order/models.py:50
 msgid "Parent Order"
 msgstr ""
 
-#: order/models.py:47
+#: order/models.py:51
 msgid "Package as a present"
 msgstr ""
 
-#: order/models.py:48
+#: order/models.py:52
 msgid "telegram user"
 msgstr ""
 
-#: order/models.py:106 order/models.py:136
+#: order/models.py:172 order/models.py:204
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:484
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:491
 msgid "Order"
 msgstr ""
 
-#: order/models.py:107 order/models.py:112
+#: order/models.py:173 order/models.py:180
 msgid "Orders"
 msgstr ""
 
-#: order/models.py:132
+#: order/models.py:200
 msgid "Order summary"
 msgstr ""
 
-#: order/models.py:133
+#: order/models.py:201
 msgid "Order summarys"
 msgstr ""
 
-#: order/models.py:137 shop/admin.py:143 shop/models.py:188 shop/models.py:227
+#: order/models.py:205 shop/admin.py:143 shop/models.py:188 shop/models.py:227
 msgid "Product"
 msgstr ""
 
-#: order/models.py:138
+#: order/models.py:206
 msgid "Quantity"
 msgstr ""
 
-#: order/models.py:139
+#: order/models.py:207
 msgid "Total Sum"
 msgstr ""
 
-#: order/models.py:151
+#: order/models.py:219
 msgid "Order Item"
 msgstr ""
 
-#: order/models.py:152
+#: order/models.py:220
 msgid "Order Items"
 msgstr ""
 
@@ -1026,8 +1046,8 @@ msgstr ""
 #: venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py:1489
 #, python-format
 msgid ""
-"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD HH:MM[:ss[."
-"uuuuuu]][TZ] format."
+"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD "
+"HH:MM[:ss[.uuuuuu]][TZ] format."
 msgstr ""
 
 #: venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py:1497
@@ -1053,8 +1073,8 @@ msgstr ""
 #: venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py:1789
 #, python-format
 msgid ""
-"“%(value)s” value has an invalid format. It must be in [DD] [[HH:]MM:]ss[."
-"uuuuuu] format."
+"“%(value)s” value has an invalid format. It must be in [DD] "
+"[[HH:]MM:]ss[.uuuuuu] format."
 msgstr ""
 
 #: venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py:1793
@@ -1896,8 +1916,8 @@ msgstr ""
 #: venv/lib/python3.9/site-packages/django/views/generic/dates.py:652
 #, python-format
 msgid ""
-"Future %(verbose_name_plural)s not available because %(class_name)s."
-"allow_future is False."
+"Future %(verbose_name_plural)s not available because "
+"%(class_name)s.allow_future is False."
 msgstr ""
 
 #: venv/lib/python3.9/site-packages/django/views/generic/dates.py:692

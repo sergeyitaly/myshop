@@ -71,7 +71,9 @@ class RatingAnswer(models.Model):
         if self.question.rating_required and self.rating is None:
             raise ValueError("Rating is required for this question.")
         super().save(*args, **kwargs)
-
+    class Meta:
+        verbose_name = _('Rating Answer')
+        verbose_name_plural = _('Rating Answers')
 
 # 3. Model for overall average calculations
 class OverallAverageRating(models.Model):
@@ -100,3 +102,6 @@ class OverallAverageRating(models.Model):
             overall_avg, created = cls.objects.get_or_create(question=question)
             overall_avg.average_rating = avg_rating
             overall_avg.save()
+    class Meta:
+        verbose_name = _('Overal Average Rating')
+        verbose_name_plural = _('Overal Average Ratings')
