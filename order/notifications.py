@@ -71,7 +71,7 @@ def update_order_status_with_notification(order_id, order_items, new_status, sta
             )
 
         send_telegram_message(chat_id, message)
-        update_order_summary()
+        update_order_summary(chat_id)
 
     except Order.DoesNotExist:
         logger.error(f"Order with id {order_id} does not exist.")

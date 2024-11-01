@@ -42,11 +42,12 @@ def datetime_to_str(dt):
 
 def get_order_summary(order):
     """Generates a summary of an order."""
-    submitted_at = ensure_datetime(order.submitted_at)
-    created_at = ensure_datetime(order.created_at)
-    processed_at = ensure_datetime(order.processed_at)
-    complete_at = ensure_datetime(order.complete_at)
-    canceled_at = ensure_datetime(order.canceled_at)
+    submitted_at = make_aware_if_naive(ensure_datetime(order.submitted_at))
+    created_at = make_aware_if_naive(ensure_datetime(order.created_at))
+    processed_at = make_aware_if_naive(ensure_datetime(order.processed_at))
+    complete_at = make_aware_if_naive(ensure_datetime(order.complete_at))
+    canceled_at = make_aware_if_naive(ensure_datetime(order.canceled_at))
+    
     status_fields = {
         'submitted_at': submitted_at,
         'created_at': created_at,
@@ -54,9 +55,10 @@ def get_order_summary(order):
         'complete_at': complete_at,
         'canceled_at': canceled_at,
     }
+    
     latest_status_key = max(
         status_fields,
-        key=lambda k: status_fields[k] or datetime.min
+        key=lambda k: status_fields[k] or make_aware_if_naive(datetime.min)
     )
     latest_status_time = status_fields[latest_status_key]
 
@@ -82,6 +84,7 @@ def get_order_summary(order):
 
     return summary
 
+
 def update_order_summary(chat_id):
     """Updates the order summary for a specific chat_id."""
     try:
@@ -94,16 +97,19 @@ def update_order_summary(chat_id):
             summary = get_order_summary(order)
             grouped_orders.append(summary)
 
-        # Convert decimals if necessary
-        converted_orders = [OrderSummary._convert_decimals(order) for order in grouped_orders]
+        # Create an instance of OrderSummary to use its methods
+        order_summary_instance = OrderSummary()
+
+        # Use the instance to call _convert_decimals
+        converted_orders = order_summary_instance._convert_decimals(data=grouped_orders)
+
+        # Update or create the order summary in the database
         order_summary, created = OrderSummary.objects.update_or_create(
             chat_id=chat_id,
             defaults={'orders': converted_orders}
         )
-        order_summary.orders = converted_orders  # Update orders field with converted values
-        order_summary.save()
 
-        logger.info("Order summary updated successfully for chat ID: {chat_id}.")
+        logger.info(f"Order summary updated successfully for chat ID: {chat_id}.")
 
     except Exception as e:
         logger.error(f"Error updating order summary for chat ID {chat_id}: {str(e)}")
@@ -159,15 +165,9 @@ def update_order_summary_on_order_item_delete(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Order)
 def order_post_save(sender, instance, created, **kwargs):
-    """
-    Signal that triggers after an Order instance is saved.
-    Calls update_order_summary to update the OrderSummary records.
-    """
-    phone_number = instance.phone
-    if phone_number:
-        chat_id = get_chat_id_from_phone(phone_number)
+    if created or instance.status in ['processed', 'complete', 'canceled']:
+        chat_id = instance.chat_id
         if chat_id:
-            # Only call update_order_summary if the Order was created
-            if created:
-                update_order_summary(chat_id)
-            logger.info(f"OrderSummary updated after Order (ID: {instance.id}) save.")
+            update_order_summary(chat_id)
+            logger.info(f"OrderSummary updated after Order (ID: {instance.id}) save with status {instance.status}.")
+
