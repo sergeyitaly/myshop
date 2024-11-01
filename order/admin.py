@@ -154,6 +154,8 @@ class OrderAdmin(admin.ModelAdmin):
         return obj.order_items.aggregate(total=Sum('quantity') * Sum('product__price'))['total'] or 0
     total_price.short_description = _('Total Price')
 
+
+
     def save_model(self, request, obj, form, change):
         if change:
             old_obj = self.model.objects.get(pk=obj.pk)
