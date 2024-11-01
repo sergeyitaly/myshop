@@ -1,40 +1,81 @@
+@import "../../variables";
+
 .section {
-    //background-image: url('./vase.jpg');
-    background-size: 50% 100%;
-    background-position: right;
-    background-repeat: no-repeat;
-    padding: 30px 20px 0 20px;
-    font-size: clamp(14px, 3vw, 36px);
-    text-align: center;
+	font-size: clamp(12px, 3vw, 18px);
+	line-height: 1.5;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-top: clamp(5px, 3vw, 40px);
 }
 
 .content {
-    // font-family: "Capriola", sans-serif;
-    max-width: min(950px, 94%);
-    margin-inline: auto;
-    text-align: center;
-    margin-bottom: 70px;
+	position: relative;
+	max-width: 600px;
+	margin-top: clamp(45px, 5vw + 10px, 90px);
+	margin-bottom: clamp(30px, 5vw + 10px, 70px);
+
+	@media (max-width: 375px) {
+		max-width: 100%;
+	}
+
+	@media (max-width: 500px) {
+		max-width: 320px;
+	}
+
+	@media (min-width: 500px) and (max-width: 740px) {
+		max-width: 380px;
+	}
+}
+
+.vase {
+	position: absolute;
+	right: 0;
+	top: 0;
+	max-width: 80%;
+	opacity: 0.9;
+	height: auto;
+	z-index: -1;
+	transform: translate(0, 0);
+
+	@media (max-width: 374.98px) {
+		display: none;
+	}
+
+	@media (min-width: 375px) and (max-width: 499.98px) {
+		max-width: 65%;
+		transform: translate(20px, -30px);
+	}
+
+	@media (min-width: 500px) and (max-width: 740.98px) {
+		transform: translate(50px, -50px);
+	}
+
+	@media (min-width: 741px) and (max-width: 800px) {
+		max-width: 70%;
+		transform: translate(50px, -50px);
+	}
+
+	@media (min-width: 801px) {
+		transform: translate(90px, -90px);
+	}
 }
 
 .blue {
-    color: var(--blue);
+	color: var(--blue);
+	font-size: clamp(20px, 5vw, 30px);
 }
 
 .link {
-    font-size: clamp(12px, 4vw, 20px);
-    color: var(--blue);
+	color: var(--blue);
+	transition: 0.3s color;
 
-    transition: .3s color;
+	@media (min-width: $screen-mobile) {
+		margin-bottom: 60px;
+	}
 
-    &:hover {
-        color: purple;
-    }
-}
-
-
-@media screen and (max-width: 250px) {
-    .section {
-        font-size: 10px;
-    }
-
+	&:hover {
+		border-bottom: 1px solid var(--blue);
+	}
 }
