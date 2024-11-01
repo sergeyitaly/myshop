@@ -108,12 +108,14 @@ export const ProductControl = ({
 			<MainButton
 				className={style.add}
 				title={t("add_to_basket")}
+				disabled={!available}
 				onClick={handleAddToBasket}
 			/>
 			<MainButton
 				className={style.buy}
 				color="blue"
 				title={t("buy_now")}
+				disabled={!available}
 				onClick={handleClickBuyNow}
 			/>
 		</div>
