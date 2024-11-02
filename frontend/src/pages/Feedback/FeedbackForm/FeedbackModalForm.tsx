@@ -10,7 +10,7 @@ import { useAppTranslator } from "../../../hooks/useAppTranslator"
 
 interface FeedbackModalFormProps {
     isLoading: boolean;
-    onSubmit: () => void;
+    onSubmit: (values: { name: string; email: string; comment: string }) => void;
     onChange: (fieldName: string, value: string) => void;
     translatedLabels: {
         name: string;
@@ -18,6 +18,7 @@ interface FeedbackModalFormProps {
         comment: string;
     };
 }
+
 
 
 export const FeedbackModalForm = ({
@@ -45,8 +46,8 @@ export const FeedbackModalForm = ({
             comment: ''
         },
         validationSchema: validationSchema,
-        onSubmit: () => {
-            onSubmit()
+        onSubmit: (values) => {
+            onSubmit(values);
         },
 
     })
