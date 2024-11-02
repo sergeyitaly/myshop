@@ -181,6 +181,6 @@ export interface Question {
 	question: string;
 	question_en?: string;
 	question_uk?: string;
-	// any other properties
+	rating_required: boolean
   }
   
