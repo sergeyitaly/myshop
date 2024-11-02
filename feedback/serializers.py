@@ -21,7 +21,6 @@ class RatingAnswerSerializer(serializers.ModelSerializer):
         fields = ['id', 'question', 'question_id', 'answer', 'rating']
 
 
-# Serializer for Feedback
 class FeedbackSerializer(serializers.ModelSerializer):
     ratings = RatingAnswerSerializer(many=True, write_only=True)
 
@@ -30,7 +29,6 @@ class FeedbackSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'comment', 'email', 'created_at', 'status', 'ratings']
 
     def create(self, validated_data):
-        # Handle nested RatingAnswer creation
         ratings_data = validated_data.pop('ratings', [])
         logger.debug("Received feedback data: %s", validated_data)  # Log the main feedback data
         logger.debug("Received ratings data: %s", ratings_data)  # Log the ratings data
@@ -38,12 +36,19 @@ class FeedbackSerializer(serializers.ModelSerializer):
         # Create the feedback instance
         feedback = Feedback.objects.create(**validated_data)
 
-        # Create RatingAnswer instances
+        # Create RatingAnswer instances only for valid ratings
         for rating_data in ratings_data:
-            try:
-                RatingAnswer.objects.create(feedback=feedback, **rating_data)
-            except Exception as e:
-                logger.error("Error creating RatingAnswer for feedback ID %s: %s", feedback.id, e)
+            question_id = rating_data.get('question_id')
+            # Check if the question requires a rating
+            if question_id:
+                try:
+                    rating_question = RatingQuestion.objects.get(id=question_id)
+                    if rating_question.rating_required or 'rating' in rating_data:
+                        RatingAnswer.objects.create(feedback=feedback, **rating_data)
+                    else:
+                        logger.warning("Rating not provided for non-required question ID %s", question_id)
+                except RatingQuestion.DoesNotExist:
+                    logger.error("RatingQuestion with ID %s does not exist", question_id)
 
         return feedback
 
@@ -58,13 +63,24 @@ class FeedbackSerializer(serializers.ModelSerializer):
         if ratings_data:
             for rating_data in ratings_data:
                 question_id = rating_data.get('question_id')
-                rating_answer = RatingAnswer.objects.filter(feedback=instance, question=question_id).first()
-                if rating_answer:
-                    rating_answer.rating = rating_data.get('rating', rating_answer.rating)
-                    rating_answer.answer = rating_data.get('answer', rating_answer.answer)
-                    rating_answer.save()
-                else:
-                    RatingAnswer.objects.create(feedback=instance, **rating_data)
+                if question_id:
+                    try:
+                        rating_question = RatingQuestion.objects.get(id=question_id)
+                        rating_answer = RatingAnswer.objects.filter(feedback=instance, question=rating_question).first()
+                        if rating_answer:
+                            # Update existing rating answer if the question requires it
+                            if rating_question.rating_required:
+                                rating_answer.rating = rating_data.get('rating', rating_answer.rating)
+                                rating_answer.answer = rating_data.get('answer', rating_answer.answer)
+                                rating_answer.save()
+                        else:
+                            # Create new rating answer if it does not exist
+                            if rating_question.rating_required or 'rating' in rating_data:
+                                RatingAnswer.objects.create(feedback=instance, **rating_data)
+                            else:
+                                logger.warning("Rating not provided for non-required question ID %s", question_id)
+                    except RatingQuestion.DoesNotExist:
+                        logger.error("RatingQuestion with ID %s does not exist", question_id)
 
         return instance
 
