@@ -73,9 +73,14 @@ export const FeedbackPage = () => {
         
     const handleSubmit = async () => {
         console.log("Submitting form data:", JSON.stringify(form));
-        await sendForm(form).unwrap();  // Ensure sendForm returns a promise
+        try {
+            await sendForm(form).unwrap();
+        } catch (error) {
+            console.error("Failed to submit feedback:", error);
+            // Optionally, inform the user about the error
+        }
     };
-
+    
     const handleChangeHeader = (fieldName: string, value: string) => {
         setForm((prevForm) => ({ ...prevForm, [fieldName]: value }));
     };

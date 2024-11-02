@@ -13,10 +13,10 @@ class FeedbackForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Dynamically add rating fields for each RatingQuestion
-        questions = RatingQuestion.objects.all()
+        # Dynamically add rating fields for each RatingQuestion, fetching them once
+        self.questions = RatingQuestion.objects.all()
 
-        for question in questions:
+        for question in self.questions:
             self.fields[f'question_{question.id}_rating'] = forms.IntegerField(
                 label=question.aspect_name,
                 min_value=1,
@@ -34,19 +34,20 @@ class FeedbackForm(forms.ModelForm):
         # Save the Feedback instance first
         feedback = super().save(commit=commit)
 
-        # Save the associated RatingAnswers
-        questions = RatingQuestion.objects.all()
+        # Prepare list to bulk create or update RatingAnswers
+        rating_answers = []
 
-        for question in questions:
+        for question in self.questions:
             rating_value = self.cleaned_data.get(f'question_{question.id}_rating')
             answer_value = self.cleaned_data.get(f'question_{question.id}_answer')
 
-            if rating_value:
-                # Create or update the RatingAnswer for this question and feedback
-                RatingAnswer.objects.update_or_create(
-                    feedback=feedback,
-                    question=question,
-                    defaults={'rating': rating_value, 'answer': answer_value},
+            if rating_value is not None:  # Check if rating_value is provided
+                rating_answers.append(
+                    RatingAnswer(feedback=feedback, question=question, rating=rating_value, answer=answer_value)
                 )
+
+        # Bulk create or update RatingAnswers
+        if rating_answers:
+            RatingAnswer.objects.bulk_create(rating_answers)
 
         return feedback
