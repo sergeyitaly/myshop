@@ -34,9 +34,6 @@ export const FeedbackPage = () => {
         comment: t("comment")
     };
 
-    console.log('ratings', form.ratings);
-    
-
     useEffect(() => {
         if (data) {
             const questionsTemplates = data.results.map(({ id, rating_required }: Question) => ({
@@ -49,9 +46,6 @@ export const FeedbackPage = () => {
     }, [data]);
 
     const [sendForm, { isLoading, isSuccess }] = useCreateFeedbackMutation();
-
-    console.log(data);
-    
 
     useEffect(() => {
         if (isSuccess) {
@@ -66,7 +60,6 @@ export const FeedbackPage = () => {
                 rating.question_id === id ? { ...rating, rating: value } : rating
             )
         }));
-        console.log(`Updated rating for question ID ${id}: ${value}`); // Log for debugging
     };
     
     const handleChange = (id: number, value: string) => {
@@ -78,9 +71,9 @@ export const FeedbackPage = () => {
         }));
     };
         
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         console.log("Submitting form data:", JSON.stringify(form));
-        sendForm(form); 
+        await sendForm(form).unwrap();  // Ensure sendForm returns a promise
     };
 
     const handleChangeHeader = (fieldName: string, value: string) => {
