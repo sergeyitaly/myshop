@@ -100,7 +100,7 @@ class Order(models.Model):
         ordering = ('-submitted_at',)
         verbose_name = _('Order')
         verbose_name_plural = _('Orders')
-
+        
 class OrderSummary(models.Model):
     chat_id = models.CharField(max_length=255, unique=True, null=True, blank=True, verbose_name=_('Chat ID'))
     orders = models.JSONField(default=dict, verbose_name=_('Orders'))
@@ -109,7 +109,6 @@ class OrderSummary(models.Model):
         return str(self.chat_id)
 
     def save(self, *args, **kwargs):
-        # Ensure orders is properly converted before saving
         self.orders = self._convert_decimals(self.orders)
         super().save(*args, **kwargs)
 
