@@ -16,11 +16,11 @@ class FeedbackViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
-        feedback_data = request.data
-        serializer = self.get_serializer(data=feedback_data)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             feedback = serializer.save()
-            ratings_data = feedback_data.get('ratings', [])
+            ratings_data = request.data.get('ratings', [])
+            rating_answers = []
             errors = []
 
             for rating_data in ratings_data:
@@ -30,20 +30,20 @@ class FeedbackViewSet(viewsets.ModelViewSet):
                     continue
 
                 question = get_object_or_404(RatingQuestion, id=question_id)
-
                 if question.rating_required:
                     rating = rating_data.get('rating')
                     if rating is None:
                         errors.append(f"Missing 'rating' for required question (ID: {question_id})")
                         continue
-                    RatingAnswer.objects.create(
-                        feedback=feedback,
-                        question=question,
-                        rating=rating,
-                        answer=rating_data.get('answer', '')
+                    rating_answers.append(
+                        RatingAnswer(feedback=feedback, question=question, rating=rating, answer=rating_data.get('answer', ''))
                     )
                 else:
                     logger.info(f"Skipped rating for question (ID: {question_id}): rating not required.")
+
+            # Bulk create ratings only if there are valid entries
+            if rating_answers:
+                RatingAnswer.objects.bulk_create(rating_answers)
 
             if errors:
                 return Response({'errors': errors}, status=status.HTTP_400_BAD_REQUEST)
