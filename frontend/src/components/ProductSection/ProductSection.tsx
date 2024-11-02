@@ -5,8 +5,15 @@ import { ProductInfo } from "./components/ProductInfo/ProductInfo";
 import { useProduct } from "../../hooks/useProduct";
 import { countDiscountPrice } from "../../functions/countDiscountPrice";
 import style from "./ProducSection.module.scss";
+import clsx from "clsx";
 
-export const ProductSection = () => {
+interface ProductSectionProps {
+	isLoading: boolean
+}
+
+export const ProductSection = ({
+	isLoading
+}: ProductSectionProps) => {
 	const { id } = useParams<{ id: string }>();
 
 	const { product, variants, changeColor, changeSize } = useProduct(id!);
@@ -17,7 +24,7 @@ export const ProductSection = () => {
 
 	return (
 		<section>
-			<PageContainer className={style.aaa}>
+			<PageContainer className={clsx(style.product_section_container, {[style.fetching]: isLoading}) }>
 				{product && (
 					<>
 						<ProductGallery

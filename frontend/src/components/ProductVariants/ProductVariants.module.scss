@@ -28,3 +28,23 @@
     gap: 8px;
 }
 
+.variant_name {
+   height: 20px;
+    max-width: 100px;
+    @media (max-width: $screen-big) {
+        height: 19px;
+    }
+    
+    @media (max-width: $screen-laptop) {
+        height: 18px;
+    }
+   
+    @media (max-width: $screen-tablet) {
+        height: 17px;
+    }
+ 
+    @media (max-width: $screen-mobile) {
+        height: 16px;
+    }
+}
+

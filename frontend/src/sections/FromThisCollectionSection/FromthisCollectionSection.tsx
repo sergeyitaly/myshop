@@ -6,10 +6,11 @@ import { NamedSection } from "../../components/NamedSection/NamedSection";
 import { Pagination } from "../../components/UI/Pagination/Pagination";
 import { useAppTranslator } from "../../hooks/useAppTranslator";
 import { PreviewCard } from "../../components/Cards/PreviewCard/PreviewCard";
-import { Skeleton } from "../../components/Skeleton/Skeleton";
 import { Product } from "../../models/entities";
 import { ROUTE } from "../../constants";
 import styles from "./FromthisCollectionSection.module.scss";
+import { PreviewLoadingCard } from "../../components/Cards/PreviewCard/PreviewLoagingCard";
+import { MapComponent } from "../../components/MapComponent";
 
 interface FromThisCollectionProps {
 	collectionId?: number;
@@ -24,7 +25,7 @@ export const FromThisCollectionSection = ({
 	const [totalPages, setTotalPages] = useState(0);
 	const { t, getTranslatedProductName } = useAppTranslator();
 
-	const { data, isLoading } =
+	const { data, isLoading, isFetching } =
 		useGetProductsFromCollectionByProductFilterQuery(
 			collectionId !== undefined
 				? {
@@ -55,12 +56,12 @@ export const FromThisCollectionSection = ({
 	return (
 		<NamedSection title={t("also_from_this_collection")}>
 			<div className={styles.wrapper}>
-				{isLoading
-					? Array.from({ length: LIMIT }).map((_, index) => (
-							<div key={index} className={styles.skeletonWrapper}>
-								<Skeleton className={styles.imageSkeleton} />
-							</div>
-						))
+				{(isLoading || isFetching)
+					?
+						<MapComponent
+							component={<PreviewLoadingCard/>}
+							qty={4}
+						/>
 					: products.map((product) => (
 							<PreviewCard
 								key={product.id}
