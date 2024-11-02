@@ -4,7 +4,7 @@ import { MainButton } from "../../components/UI/MainButton/MainButton";
 import styles from './Feedback.module.scss';
 import { useNavigate } from "react-router-dom";
 import { ROUTE } from "../../constants";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { FeedbackForm, Question } from "../../models/entities";
 import { useCreateFeedbackMutation, useGetAllQuestionsQuery } from "../../api/feedbackSlice";
 import clsx from "clsx";
@@ -18,7 +18,7 @@ import { SkeletonFeedbackCard } from "../../components/Cards/FeedbackCard/Skelet
 export const FeedbackPage = () => {
     const navigate = useNavigate();
     const { openStatus, handleClose, handleOpen } = useToggler();
-    const { t, i18n } = useAppTranslator();
+    const { t, getTranslatedAspectName, getTranslatedQuestion } = useAppTranslator();
     const { data, isLoading: isLoadingCards } = useGetAllQuestionsQuery();
 
     const [form, setForm] = useState<FeedbackForm>({
@@ -34,19 +34,8 @@ export const FeedbackPage = () => {
         comment: t("comment")
     };
 
-    const getTranslatedQuestion = useCallback(
-        (defaultQuestion: string, question_uk: string = "", question_en: string = ""): string => {
-            return i18n.language === 'uk' ? question_uk || defaultQuestion : question_en || defaultQuestion;
-        },
-        [i18n.language]
-    );
-
-    const getTranslatedAspectName = useCallback(
-        (defaultAspectName: string, aspect_name_uk: string = "", aspect_name_en: string = ""): string => {
-            return i18n.language === 'uk' ? aspect_name_uk || defaultAspectName : aspect_name_en || defaultAspectName;
-        },
-        [i18n.language]
-    );
+    console.log('ratings', form.ratings);
+    
 
     useEffect(() => {
         if (data) {
@@ -60,6 +49,9 @@ export const FeedbackPage = () => {
     }, [data]);
 
     const [sendForm, { isLoading, isSuccess }] = useCreateFeedbackMutation();
+
+    console.log(data);
+    
 
     useEffect(() => {
         if (isSuccess) {
@@ -95,6 +87,7 @@ export const FeedbackPage = () => {
     const handleChangeHeader = (fieldName: string, value: string) => {
         setForm((prevForm) => ({ ...prevForm, [fieldName]: value }));
     };
+ 
 
     return (
         <>
@@ -108,12 +101,12 @@ export const FeedbackPage = () => {
                     {isLoadingCards ? (
                         <MapComponent qty={7} component={<SkeletonFeedbackCard />} />
                     ) : (
-                        data?.results.map(({ id, aspect_name_en, aspect_name_uk, question_en, question_uk }, index) => (
+                        data?.results.map(({ id, aspect_name_en, aspect_name_uk, question_en, question_uk, rating_required }, index) => (
                             <FeedbackCard
                                 key={id || index}
-                                question1={`${index + 1}. ${getTranslatedAspectName(aspect_name_en ?? "", aspect_name_uk ?? "")}`} 
-                                question2={getTranslatedQuestion(question_en ?? "", question_uk ?? "")}
-                                showButtons={Boolean(getTranslatedAspectName(aspect_name_en ?? "", aspect_name_uk ?? ""))}
+                                question1={`${index + 1}. ${rating_required ? getTranslatedAspectName(aspect_name_en ?? "", aspect_name_uk ?? "") : getTranslatedQuestion(question_en ?? "", question_uk ?? "")}`} 
+                                question2={rating_required ? getTranslatedQuestion(question_en ?? "", question_uk ?? ""): undefined}
+                                showButtons={rating_required}
                                 thisRating={form.ratings.find(({ question_id }) => question_id === id)?.rating} 
                                 onClick={(val) => handleClick(id, val)} 
                                 onChangeText={(val) => handleChange(id, val)}

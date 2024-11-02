@@ -163,7 +163,7 @@ export const Breadcrumbs = () => {
 
             if(isProductLoading || isProductFetching)
                 list.push({isLoading: true})
-            else{
+            else if(productResponce){
                 
                 list.push({
                     title: getTranslatedCollectionName(productResponce?.collection, i18n.language),

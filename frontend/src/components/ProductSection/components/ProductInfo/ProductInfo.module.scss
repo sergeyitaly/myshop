@@ -28,3 +28,14 @@
 .applyDropdown {
 grid-column: -1/-6;
 }
+
+.description_skeleton_header {
+    height: clamp(16px, 2.5vw, 32px);
+    max-width: 250px;
+    margin-bottom: clamp(8px, 2vw, 25px);
+}
+
+.description_skeleton_paragraph {
+    height: clamp(14px, 1.5vw, 20px);
+    margin-bottom:  clamp(4px, 1vw, 18px);
+}
