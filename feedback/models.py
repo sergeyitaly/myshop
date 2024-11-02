@@ -27,7 +27,6 @@ class Feedback(models.Model):
     email = models.EmailField(null=True, blank=True,verbose_name=_('Email'))
     created_at = models.DateTimeField(default=timezone.now, verbose_name=_('Created At'))
 
-    # Feedback contains multiple ratings related to RatingQuestion
     ratings = models.ManyToManyField(
         RatingQuestion,
         through='RatingAnswer',
@@ -49,32 +48,28 @@ class Feedback(models.Model):
 
 # Model to link Feedback and RatingQuestion with the rating value
 class RatingAnswer(models.Model):
-    feedback = models.ForeignKey(Feedback, on_delete=models.CASCADE, verbose_name=_('Feedback'))
-    question = models.ForeignKey(RatingQuestion, on_delete=models.CASCADE, verbose_name=_('Question'))
+    feedback = models.ForeignKey(Feedback, on_delete=models.CASCADE, verbose_name=_('Feedback'), db_index=True)  # Index added here
+    question = models.ForeignKey(RatingQuestion, on_delete=models.CASCADE, verbose_name=_('Question'), db_index=True)  # Index added here
     answer = models.TextField(null=True, blank=True, verbose_name=_('Answer'))
     rating = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(10)],
-        null=True,  # Allow NULL values
-        blank=True,  # Allow the field to be blank
-        verbose_name=_('Rating')  # Set verbose name for the field
+        null=True,
+        blank=True,
+        verbose_name=_('Rating')
     )
 
     def __str__(self):
         return f"{self.question.aspect_name}: {self.rating}"
-    
-    def save(self, *args, **kwargs):
-        # Only require a rating if the question requires it
-        if self.question.rating_required and self.rating is None:
-            raise ValueError("Rating is required for this question.")
-        super().save(*args, **kwargs)
-    
+
     def save(self, *args, **kwargs):
         if self.question.rating_required and self.rating is None:
             raise ValueError("Rating is required for this question.")
         super().save(*args, **kwargs)
+
     class Meta:
         verbose_name = _('Rating Answer')
         verbose_name_plural = _('Rating Answers')
+
 
 # 3. Model for overall average calculations
 class OverallAverageRating(models.Model):
@@ -83,7 +78,8 @@ class OverallAverageRating(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         related_name='average_rating',
-        verbose_name=_('Question')
+        verbose_name=_('Question'),
+        db_index=True 
     )
     average_rating = models.FloatField(default=0, editable=False, verbose_name=_('Average Rating'))
 #    order = models.PositiveIntegerField(default=0, blank=False, null=False)
