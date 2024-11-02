@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import RatingQuestion, Feedback, RatingAnswer, OverallAverageRating
 import logging
+from django.db import transaction
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,6 @@ class RatingAnswerSerializer(serializers.ModelSerializer):
         model = RatingAnswer
         fields = ['id', 'question', 'question_id', 'answer', 'rating']
 
-
 class FeedbackSerializer(serializers.ModelSerializer):
     ratings = RatingAnswerSerializer(many=True, write_only=True)
 
@@ -36,22 +36,32 @@ class FeedbackSerializer(serializers.ModelSerializer):
         # Create the feedback instance
         feedback = Feedback.objects.create(**validated_data)
 
+        # Prepare list for bulk creation
+        ratings_to_create = []
+
+        # Pre-fetch all questions that we need in a single query
+        question_ids = {rating['question_id'] for rating in ratings_data if 'question_id' in rating}
+        rating_questions = {question.id: question for question in RatingQuestion.objects.filter(id__in=question_ids)}
+
         # Create RatingAnswer instances only for valid ratings
         for rating_data in ratings_data:
             question_id = rating_data.get('question_id')
-            # Check if the question requires a rating
-            if question_id:
-                try:
-                    rating_question = RatingQuestion.objects.get(id=question_id)
-                    if rating_question.rating_required or 'rating' in rating_data:
-                        RatingAnswer.objects.create(feedback=feedback, **rating_data)
-                    else:
-                        logger.warning("Rating not provided for non-required question ID %s", question_id)
-                except RatingQuestion.DoesNotExist:
-                    logger.error("RatingQuestion with ID %s does not exist", question_id)
+            # Check if the question requires a rating and if it exists
+            if question_id in rating_questions:
+                rating_question = rating_questions[question_id]
+                if rating_question.rating_required or 'rating' in rating_data:
+                    ratings_to_create.append(RatingAnswer(feedback=feedback, **rating_data))
+                else:
+                    logger.warning("Rating not provided for non-required question ID %s", question_id)
+            else:
+                logger.error("RatingQuestion with ID %s does not exist", question_id)
+
+        # Bulk create RatingAnswer instances to reduce database hits
+        if ratings_to_create:
+            RatingAnswer.objects.bulk_create(ratings_to_create)
 
         return feedback
-
+    
     def update(self, instance, validated_data):
         ratings_data = validated_data.pop('ratings', None)
         instance.name = validated_data.get('name', instance.name)
