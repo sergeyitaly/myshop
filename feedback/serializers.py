@@ -1,5 +1,8 @@
 from rest_framework import serializers
 from .models import RatingQuestion, Feedback, RatingAnswer, OverallAverageRating
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # Serializer for RatingQuestion
@@ -28,11 +31,20 @@ class FeedbackSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # Handle nested RatingAnswer creation
-        ratings_data = validated_data.pop('ratings')
+        ratings_data = validated_data.pop('ratings', [])
+        logger.debug("Received feedback data: %s", validated_data)  # Log the main feedback data
+        logger.debug("Received ratings data: %s", ratings_data)  # Log the ratings data
+
+        # Create the feedback instance
         feedback = Feedback.objects.create(**validated_data)
 
+        # Create RatingAnswer instances
         for rating_data in ratings_data:
-            RatingAnswer.objects.create(feedback=feedback, **rating_data)
+            try:
+                RatingAnswer.objects.create(feedback=feedback, **rating_data)
+            except Exception as e:
+                logger.error("Error creating RatingAnswer for feedback ID %s: %s", feedback.id, e)
+
         return feedback
 
     def update(self, instance, validated_data):
