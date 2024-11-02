@@ -77,8 +77,7 @@ export const FeedbackPage = () => {
             )
         }));
     };
-    
-    
+        
     const handleSubmit = () => {
         console.log("Submitting form data:", JSON.stringify(form));
         sendForm(form); 
@@ -88,7 +87,6 @@ export const FeedbackPage = () => {
         setForm((prevForm) => ({ ...prevForm, [fieldName]: value }));
     };
  
-
     return (
         <>
             <PageContainer className={clsx({ [styles.loading]: isLoading })}>
