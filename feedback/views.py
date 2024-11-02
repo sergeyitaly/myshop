@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from .models import Feedback, RatingAnswer, RatingQuestion, OverallAverageRating
 from .serializers import FeedbackSerializer, RatingAnswerSerializer, RatingQuestionSerializer, OverallAverageRatingSerializer
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 import logging
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ class FeedbackViewSet(viewsets.ModelViewSet):
 class FeedbackViewSet(viewsets.ModelViewSet):
     queryset = Feedback.objects.all()
     serializer_class = FeedbackSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         feedback_data = request.data
