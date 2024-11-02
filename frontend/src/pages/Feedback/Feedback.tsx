@@ -39,10 +39,10 @@ export const FeedbackPage = () => {
 
     useEffect(() => {
         if (data) {
-            const questionsTemplates = data.results.map(({ id }: Question) => ({
+            const questionsTemplates = data.results.map(({ id, rating_required }: Question) => ({
                 question_id: id,
                 answer: '',
-                rating: 0
+                rating: rating_required ? 0 : undefined
             }));
             setForm((prevForm) => ({ ...prevForm, ratings: questionsTemplates }));
         }
