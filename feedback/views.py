@@ -6,9 +6,28 @@ from .models import Feedback, RatingAnswer, RatingQuestion, OverallAverageRating
 from .serializers import FeedbackSerializer, RatingAnswerSerializer, RatingQuestionSerializer, OverallAverageRatingSerializer
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
+from django.db.models import Avg
+from django.db import transaction
 import logging
 
 logger = logging.getLogger(__name__)
+
+def update_all_question_averages():
+    """Helper function to update the average rating for all questions."""
+    overall_avgs = []
+    with transaction.atomic():
+        for question in RatingQuestion.objects.all():
+            if question.rating_required:
+                avg_rating = RatingAnswer.objects.filter(question=question).aggregate(average=Avg('rating'))['average'] or 0
+                avg_rating = round(avg_rating, 1)
+
+                # Update or create OverallAverageRating for the question
+                overall_avg, _ = OverallAverageRating.objects.get_or_create(question=question)
+                overall_avg.average_rating = avg_rating
+                overall_avgs.append(overall_avg)
+
+        # Bulk update for efficiency
+        OverallAverageRating.objects.bulk_update(overall_avgs, ['average_rating'])
 
 class FeedbackViewSet(viewsets.ModelViewSet):
     queryset = Feedback.objects.all()
@@ -45,6 +64,9 @@ class FeedbackViewSet(viewsets.ModelViewSet):
             if rating_answers:
                 RatingAnswer.objects.bulk_create(rating_answers)
 
+            # Recalculate averages for all questions
+            update_all_question_averages()
+
             if errors:
                 return Response({'errors': errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -52,7 +74,15 @@ class FeedbackViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # Endpoint for marking feedback as complete
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+
+        # Recalculate averages for all questions after deletion
+        update_all_question_averages()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(detail=True, methods=['patch'], url_path='mark-complete')
     def mark_complete(self, request, pk=None):
         feedback = self.get_object()
@@ -62,11 +92,7 @@ class FeedbackViewSet(viewsets.ModelViewSet):
 
 class OverallAverageRatingView(APIView):
     def get(self, request):
-        # Calculate overall averages (if necessary)
-        OverallAverageRating.calculate_overall_averages()        
-        # Filter averages to only include those where the associated RatingQuestion requires a rating
         averages = OverallAverageRating.objects.filter(question__rating_required=True)
-        # Serialize the filtered averages
         serializer = OverallAverageRatingSerializer(averages, many=True)
         return Response(serializer.data)
 
