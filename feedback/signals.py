@@ -2,7 +2,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.db.models import Avg
 from django.db import transaction
-from .models import RatingAnswer, OverallAverageRating, RatingQuestion, Feedback
+from .models import RatingAnswer, OverallAverageRating, RatingQuestion
 
 def update_average_for_question(question):
     """Helper function to update or delete the average rating for a given question."""
@@ -21,24 +21,19 @@ def update_average_for_question(question):
     overall_avg.save()
     return overall_avg
 
-@receiver(post_save, sender=Feedback)
-def update_average_rating_after_feedback(sender, instance, created, **kwargs):
-    """Update the average rating for all questions related to the feedback after a new Feedback is saved."""
-    if created:  # Only update when a new Feedback instance is created
-        with transaction.atomic():
-            # Iterate over the ratings associated with the feedback
-            for rating_answer in instance.ratings.all():
-                question = rating_answer.question
-                update_average_for_question(question)
+@receiver(post_save, sender=RatingAnswer)
+@receiver(post_delete, sender=RatingAnswer)
+def update_average_rating(sender, instance, **kwargs):
+    """Update the average rating for all questions whenever a RatingAnswer is saved or deleted."""
+    with transaction.atomic():  # Ensure atomic updates
+        overall_avgs = []
+        for question in RatingQuestion.objects.all():
+            overall_avg = update_average_for_question(question)
+            if overall_avg:
+                overall_avgs.append(overall_avg)
 
-@receiver(post_delete, sender=Feedback)
-def recalculate_average_rating_on_feedback_delete(sender, instance, **kwargs):
-    """Recalculate the average ratings for all questions related to the feedback when Feedback is deleted."""
-    with transaction.atomic():
-        # Iterate over the ratings associated with the feedback
-        for rating_answer in instance.ratings.all():
-            question = rating_answer.question
-            update_average_for_question(question)
+        # Bulk update to improve efficiency
+        OverallAverageRating.objects.bulk_update(overall_avgs, ['average_rating'])
 
 @receiver(post_delete, sender=RatingQuestion)
 def delete_overall_average_ratings(sender, instance, **kwargs):
