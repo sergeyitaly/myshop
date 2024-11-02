@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 # 1. Model for questions and rating names (aspects)
 class RatingQuestion(models.Model):
+    id = models.AutoField(primary_key=True)     
     question = models.CharField(max_length=255, default='Question is ...',verbose_name=_('Rating Question'))
     aspect_name = models.CharField(max_length=255, verbose_name=_('Aspect Name'),null=True,blank=True)
     rating_required = models.BooleanField(default=True, verbose_name=_('Is Rating Required'))  # New field
