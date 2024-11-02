@@ -1096,7 +1096,6 @@ async function sendOrderDetails(phoneNumber: string, chatId: string | null): Pro
     await sendMessage(chatId, 'An error occurred while retrieving order details. Please try again later.');
   }
 }
-
 async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
   if (!chatId) {
     console.error('Chat ID is missing.');
@@ -1120,20 +1119,20 @@ async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
       }
 
       const orderItemsSummary = order.order_items.map((item: OrderItem) =>
-        `- ${item.product_name}, ${item.collection_name}, Size: ${item.size || 'N/A'}, Color: ${item.color_name || 'N/A'}, ${item.quantity} pcs, ${parseFloat(item.item_price).toFixed(2)}`
+        `- ${item.product_name}, ${item.collection_name}, Size: ${item.size || 'N/A'}, Color: ${item.color_name || 'N/A'}, ${item.quantity} pcs, Price: $${parseFloat(item.item_price).toFixed(2)}`
       ).join('\n');
 
       const statusDates = {
-        'submitted': order.submitted_at ?? null,
-        'created': order.created_at ?? null,
-        'processed': order.processed_at ?? null,
-        'complete': order.complete_at ?? null,
-        'canceled': order.canceled_at ?? null
+        'submitted': order.submitted_at ? new Date(order.submitted_at).toLocaleString() : 'N/A',
+        'created': order.created_at ? new Date(order.created_at).toLocaleString() : 'N/A',
+        'processed': order.processed_at ? new Date(order.processed_at).toLocaleString() : 'N/A',
+        'complete': order.complete_at ? new Date(order.complete_at).toLocaleString() : 'N/A',
+        'canceled': order.canceled_at ? new Date(order.canceled_at).toLocaleString() : 'N/A'
       };
 
       const latestStatusEntry = getLatestStatusEntry(statusDates);
 
-      return `Order ID: ${order.order_id}\nOrder Items:\n${orderItemsSummary}\n${latestStatusEntry ? latestStatusEntry : ''}`;
+      return `Order ID: ${order.order_id}\nOrder Items:\n${orderItemsSummary}\nLatest Status: ${latestStatusEntry || 'Status not available.'}`;
     }).join('\n\n');
 
     await sendMessage(chatId, `Here are all your order details:\n${ordersMessage}`);
@@ -1141,4 +1140,4 @@ async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
     console.error(`Error retrieving all orders details: ${error}`);
     await sendMessage(chatId, 'An error occurred while retrieving all order details. Please try again later.');
   }
-}
+}                 
