@@ -6,6 +6,7 @@ router = DefaultRouter()
 router.register(r'feedback', FeedbackViewSet, basename='feedback')
 router.register(r'rating-questions', RatingQuestionViewSet, basename='rating-questions') 
 
+
 urlpatterns = [
     path('', include(router.urls)),
     path('average-ratings/', OverallAverageRatingView.as_view(), name='overall-average-ratings'),
