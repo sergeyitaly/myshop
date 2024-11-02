@@ -93,6 +93,20 @@ export const useAppTranslator = () => {
 		[i18n.language]
 	);
 
+	const getTranslatedQuestion = useCallback(
+        (defaultQuestion: string, question_uk: string = "", question_en: string = ""): string => {
+            return i18n.language === 'uk' ? question_uk || defaultQuestion : question_en || defaultQuestion;
+        },
+        [i18n.language]
+    );
+
+	const getTranslatedAspectName = useCallback(
+        (defaultAspectName: string, aspect_name_uk: string = "", aspect_name_en: string = ""): string => {
+            return i18n.language === 'uk' ? aspect_name_uk || defaultAspectName : aspect_name_en || defaultAspectName;
+        },
+        [i18n.language]
+    );
+
 	return {
 		t,
 		i18n,
@@ -103,5 +117,7 @@ export const useAppTranslator = () => {
 		getTranslatedBrandName,
 		getTranslatedTechnologyName,
 		getTranslatedColorName,
+		getTranslatedQuestion,
+		getTranslatedAspectName
 	};
 };

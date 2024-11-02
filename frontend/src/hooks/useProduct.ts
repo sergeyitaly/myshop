@@ -19,7 +19,9 @@ export const useProduct = (idName: string) => {
     const {
       data: product, 
       isLoading: isLoadingProduct, 
-      isFetching
+      isFetching,
+      isSuccess,
+      isError
     } = useGetOneProductByIdNameQuery(idName)
 
     const {
@@ -80,6 +82,8 @@ export const useProduct = (idName: string) => {
         products,
         isLoading: isLoadingProduct || isLoadingProducts,
         isFetching: isFetching || isFetchingProducts,
+        isError,
+        isSuccess,
         variants,
         changeColor,
         changeSize

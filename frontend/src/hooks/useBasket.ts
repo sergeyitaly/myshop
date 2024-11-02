@@ -4,10 +4,13 @@ import { BasketItemModel, Product } from "../models/entities"
 import { setBasketItems, setOpenStatus, setTotalPrice, resetBasket, setProducts, addProduct, deleteProduct } from "../store/basketSlice"
 import { useAppDispatch, useAppSelector } from "../store/hooks"
 import { useSnackbar } from "./useSnackbar"
+import { useAppTranslator } from "./useAppTranslator"
 
 export const useBasket = () => {
 
     const {openStatus, basketItems, totalPrice, products} = useAppSelector(state => state.basket)
+
+    const {t} = useAppTranslator()
 
     const isEmptyBasket = !basketItems.length 
 
@@ -95,7 +98,7 @@ export const useBasket = () => {
 
         const newBasketContentString = JSON.stringify(contentArray)
         localStorage.setItem(STORAGE.BASKET, newBasketContentString)
-        openInfo('Товар додано до кошика');
+        openInfo(t('already_in_the_basket'));
         dispatch(setBasketItems(contentArray))
     }
 

@@ -36,7 +36,7 @@ export const Header = ({ basketLoadingStatus }: HeaderProps) => {
 			: styles.header;
 
 	const handleClickProduct = (product: Product) => {
-		navigate(`${ROUTE.PRODUCT}${product.id}`);
+		navigate(`${ROUTE.PRODUCT}${product.id_name}`);
 		closeSearchBar();
 	};
 
