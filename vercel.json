@@ -4,10 +4,6 @@
     { "src": "myshop/wsgi.py", "use": "@vercel/python", "config": { "maxLambdaSize": "100mb", "runtime": "python3.9", "maxDuration": 20 } },
     { "src": "build_files.sh", "use": "@vercel/static-build" }
   ],
-  "functions": {
-    "myshop/wsgi.py": {
-      "maxDuration": 20
-    },
   "routes": [
     {
       "src": "/static/(.*)",
