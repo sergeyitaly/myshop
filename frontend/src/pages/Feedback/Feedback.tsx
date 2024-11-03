@@ -1,6 +1,6 @@
 import { FeedbackCard } from "../../components/Cards/FeedbackCard/FeedbackCard";
 import { PageContainer } from "../../components/containers/PageContainer";
-import { MainButton } from "../../components/UI/MainButton/MainButton";
+// import { MainButton } from "../../components/UI/MainButton/MainButton";
 import styles from './Feedback.module.scss';
 import { useNavigate } from "react-router-dom";
 import { ROUTE } from "../../constants";
@@ -8,16 +8,16 @@ import { useEffect, useState } from "react";
 import { FeedbackForm, Question } from "../../models/entities";
 import { useCreateFeedbackMutation, useGetAllQuestionsQuery } from "../../api/feedbackSlice";
 import clsx from "clsx";
-import { AppModal } from "../../components/AppModal/AppModal";
-import { FeedbackModalForm } from "./FeedbackForm/FeedbackModalForm";
-import { useToggler } from "../../hooks/useToggler";
+// import { AppModal } from "../../components/AppModal/AppModal";
+// import { FeedbackModalForm } from "./FeedbackForm/FeedbackModalForm";
+// import { useToggler } from "../../hooks/useToggler";
 import { useAppTranslator } from "../../hooks/useAppTranslator";
 import { MapComponent } from "../../components/MapComponent";
 import { SkeletonFeedbackCard } from "../../components/Cards/FeedbackCard/SkeletonFeedbackCard";
 
 export const FeedbackPage = () => {
     const navigate = useNavigate();
-    const { openStatus, handleClose, handleOpen } = useToggler();
+    // const { openStatus, handleClose, handleOpen } = useToggler();
     const { t, getTranslatedAspectName, getTranslatedQuestion } = useAppTranslator();
     const { data, isLoading: isLoadingCards } = useGetAllQuestionsQuery();
 
@@ -28,11 +28,11 @@ export const FeedbackPage = () => {
         ratings: [] 
     });
 
-    const translatedLabels = {
-        name: t("name"),
-        email: t("email"),
-        comment: t("comment")
-    };
+    // const translatedLabels = {
+    //     name: t("name"),
+    //     email: t("email"),
+    //     comment: t("comment")
+    // };
 
     console.log('ratings', form.ratings);
     
@@ -48,7 +48,7 @@ export const FeedbackPage = () => {
         }
     }, [data]);
 
-    const [sendForm, { isLoading, isSuccess }] = useCreateFeedbackMutation();
+    const [_, { isLoading, isSuccess }] = useCreateFeedbackMutation();
 
     console.log(data);
     
@@ -79,19 +79,19 @@ export const FeedbackPage = () => {
     };
     
     
-    const handleSubmit = async (): Promise<void> => {
-        try {
-            console.log("Submitting form data:", JSON.stringify(form));
-            await sendForm(form);
-        } catch (error) {
-            console.error("Error submitting form:", error);
-        }
-    };
+    // const handleSubmit = async (): Promise<void> => {
+    //     try {
+    //         console.log("Submitting form data:", JSON.stringify(form));
+    //         await sendForm(form);
+    //     } catch (error) {
+    //         console.error("Error submitting form:", error);
+    //     }
+    // };
     
 
-    const handleChangeHeader = (fieldName: string, value: string) => {
-        setForm((prevForm) => ({ ...prevForm, [fieldName]: value }));
-    };
+    // const handleChangeHeader = (fieldName: string, value: string) => {
+    //     setForm((prevForm) => ({ ...prevForm, [fieldName]: value }));
+    // };
  
 
     return (
@@ -119,23 +119,23 @@ export const FeedbackPage = () => {
                         ))
                     )}
                 </div>
-                <div className={styles.actions}>
+                {/* <div className={styles.actions}>
                     <MainButton
                         color="blue"
                         title={t("send")}
                         onClick={handleOpen}
                     />
                     <button className={styles.button} onClick={() => navigate(ROUTE.HOME)}>{t('close_and_return')}</button>
-                </div>
+                </div> */}
             </PageContainer>
-            <AppModal open={openStatus} onClickOutside={handleClose}>
+            {/* <AppModal open={openStatus} onClickOutside={handleClose}>
                 <FeedbackModalForm
                     isLoading={isLoading}
                     onSubmit={handleSubmit}
                     onChange={handleChangeHeader}
                     translatedLabels={translatedLabels}  
                 />
-            </AppModal>
+            </AppModal> */}
         </>
     );
 };
