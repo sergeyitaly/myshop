@@ -347,6 +347,8 @@ REDIS_CACHE_LOCATION = os.getenv('REDIS_CACHE_LOCATION')
 CACHES = {
     'default': {
         "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"{os.getenv('REDIS_CACHE_LOCATION', 'redis://127.0.0.1:6379')}/0",
+
         'LOCATION': REDIS_CACHE_LOCATION,
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
