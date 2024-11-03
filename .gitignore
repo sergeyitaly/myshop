@@ -19,8 +19,9 @@ venv/
 .venv/
 */migrations/
 
-*/__pycache__/
+shop/management/commands/__pycache__/
 */*/__pycache__
+*/*/*/__pycache__/
 __pycache__/
 */migrations/*.py
 !*/migrations/__init__.py

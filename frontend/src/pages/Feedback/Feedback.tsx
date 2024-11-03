@@ -72,19 +72,30 @@ export const FeedbackPage = () => {
     };
         
     const handleSubmit = async () => {
-        console.log("Submitting form data:", JSON.stringify(form));
+        const { email, name, comment, ratings } = form;
+        const optimizedPayload: FeedbackForm = {
+            email,
+            name,
+            comment,
+            ratings: ratings.map(({ question_id, rating, answer }) => ({
+                question_id,
+                rating,
+                answer: answer ?? ''
+            })),
+        };
+    
         try {
-            await sendForm(form).unwrap();
+            await sendForm(optimizedPayload).unwrap();
         } catch (error) {
             console.error("Failed to submit feedback:", error);
-            // Optionally, inform the user about the error
         }
     };
+    
     
     const handleChangeHeader = (fieldName: string, value: string) => {
         setForm((prevForm) => ({ ...prevForm, [fieldName]: value }));
     };
- 
+
     return (
         <>
             <PageContainer className={clsx({ [styles.loading]: isLoading })}>
@@ -124,7 +135,7 @@ export const FeedbackPage = () => {
                     isLoading={isLoading}
                     onSubmit={handleSubmit}
                     onChange={handleChangeHeader}
-                    translatedLabels={translatedLabels}  // Pass translated labels to FeedbackModalForm
+                    translatedLabels={translatedLabels}
                 />
             </AppModal>
         </>
