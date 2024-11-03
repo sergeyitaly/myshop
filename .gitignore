@@ -21,6 +21,11 @@ venv/
 
 */__pycache__/
 */*/__pycache__
+__pycache__/
+*/migrations/*.py
+!*/migrations/__init__.py
+
+!**/migrations/__init__.py
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
