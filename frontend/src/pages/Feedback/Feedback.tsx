@@ -34,6 +34,9 @@ export const FeedbackPage = () => {
         comment: t("comment")
     };
 
+    console.log('ratings', form.ratings);
+    
+
     useEffect(() => {
         if (data) {
             const questionsTemplates = data.results.map(({ id, rating_required }: Question) => ({
@@ -46,6 +49,9 @@ export const FeedbackPage = () => {
     }, [data]);
 
     const [sendForm, { isLoading, isSuccess }] = useCreateFeedbackMutation();
+
+    console.log(data);
+    
 
     useEffect(() => {
         if (isSuccess) {
@@ -60,6 +66,7 @@ export const FeedbackPage = () => {
                 rating.question_id === id ? { ...rating, rating: value } : rating
             )
         }));
+        console.log(`Updated rating for question ID ${id}: ${value}`);
     };
     
     const handleChange = (id: number, value: string) => {
@@ -70,31 +77,22 @@ export const FeedbackPage = () => {
             )
         }));
     };
-        
-    const handleSubmit = async () => {
-        const { email, name, comment, ratings } = form;
-        const optimizedPayload: FeedbackForm = {
-            email,
-            name,
-            comment,
-            ratings: ratings.map(({ question_id, rating, answer }) => ({
-                question_id,
-                rating,
-                answer: answer ?? ''
-            })),
-        };
     
+    
+    const handleSubmit = async (): Promise<void> => {
         try {
-            await sendForm(optimizedPayload).unwrap();
+            console.log("Submitting form data:", JSON.stringify(form));
+            await sendForm(form);
         } catch (error) {
-            console.error("Failed to submit feedback:", error);
+            console.error("Error submitting form:", error);
         }
     };
     
-    
+
     const handleChangeHeader = (fieldName: string, value: string) => {
         setForm((prevForm) => ({ ...prevForm, [fieldName]: value }));
     };
+ 
 
     return (
         <>
@@ -135,7 +133,7 @@ export const FeedbackPage = () => {
                     isLoading={isLoading}
                     onSubmit={handleSubmit}
                     onChange={handleChangeHeader}
-                    translatedLabels={translatedLabels}
+                    translatedLabels={translatedLabels}  
                 />
             </AppModal>
         </>
