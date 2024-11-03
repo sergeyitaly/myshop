@@ -346,7 +346,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REDIS_CACHE_LOCATION = os.getenv('REDIS_CACHE_LOCATION')
 CACHES = {
     'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
+        "BACKEND": "django_redis.cache.RedisCache",
         'LOCATION': REDIS_CACHE_LOCATION,
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
@@ -354,8 +354,8 @@ CACHES = {
                 'max_connections': 100,  # Adjust based on load requirements
                 'retry_on_timeout': True,
             },
-            'SOCKET_CONNECT_TIMEOUT': 10,  # seconds
-            'SOCKET_TIMEOUT': 10,  # seconds
+            'SOCKET_CONNECT_TIMEOUT': 25,  # seconds
+            'SOCKET_TIMEOUT': 25,  # seconds
         },
         'KEY_PREFIX': 'imdb',
         'TIMEOUT': 60 * 15,  # Cache timeout in seconds
