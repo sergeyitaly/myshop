@@ -354,8 +354,8 @@ CACHES = {
                 'max_connections': 100,  # Increase if needed
                 'retry_on_timeout': True,
             },
-            'SOCKET_CONNECT_TIMEOUT': 5,  # seconds
-            'SOCKET_TIMEOUT': 5,  # seconds
+            'SOCKET_CONNECT_TIMEOUT': 10,  # seconds
+            'SOCKET_TIMEOUT': 10,  # seconds
         },
         'KEY_PREFIX': 'imdb',
         'TIMEOUT': 60 * 15,  # Cache timeout in seconds (e.g., 15 minutes)
