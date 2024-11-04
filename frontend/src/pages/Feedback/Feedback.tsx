@@ -4,7 +4,7 @@ import { MainButton } from "../../components/UI/MainButton/MainButton";
 import styles from './Feedback.module.scss';
 import { useNavigate } from "react-router-dom";
 import { ROUTE } from "../../constants";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { FeedbackForm, Question } from "../../models/entities";
 import { useCreateFeedbackMutation, useGetAllQuestionsQuery } from "../../api/feedbackSlice";
 import clsx from "clsx";
@@ -14,6 +14,9 @@ import { useToggler } from "../../hooks/useToggler";
 import { useAppTranslator } from "../../hooks/useAppTranslator";
 import { MapComponent } from "../../components/MapComponent";
 import { SkeletonFeedbackCard } from "../../components/Cards/FeedbackCard/SkeletonFeedbackCard";
+import { initialFormData, validationSchema } from "./initialFormData";
+import { useFormik } from "formik";
+import { useSnackbar } from "../../hooks/useSnackbar";
 
 export const FeedbackPage = () => {
     const navigate = useNavigate();
@@ -21,21 +24,18 @@ export const FeedbackPage = () => {
     const { t, getTranslatedAspectName, getTranslatedQuestion } = useAppTranslator();
     const { data, isLoading: isLoadingCards } = useGetAllQuestionsQuery();
 
-    const [form, setForm] = useState<FeedbackForm>({
-        email: '',
-        name: '',
-        comment: '',
-        ratings: [] 
-    });
+    const {openInfo} = useSnackbar()
 
-    const translatedLabels = {
-        name: t("name"),
-        email: t("email"),
-        comment: t("comment")
-    };
-
-    console.log('ratings', form.ratings);
     
+    
+
+
+
+    const {errors, touched,  values, handleSubmit: openPopup, setValues, setFieldTouched, setFieldValue} = useFormik({
+        initialValues: initialFormData.ratings,
+        validationSchema,
+        onSubmit() {handleOpen()},
+    })
 
     useEffect(() => {
         if (data) {
@@ -44,14 +44,11 @@ export const FeedbackPage = () => {
                 answer: '',
                 rating: rating_required ? 0 : undefined
             }));
-            setForm((prevForm) => ({ ...prevForm, ratings: questionsTemplates }));
+            setValues(questionsTemplates)
         }
     }, [data]);
 
     const [sendForm, { isLoading, isSuccess }] = useCreateFeedbackMutation();
-
-    console.log(data);
-    
 
     useEffect(() => {
         if (isSuccess) {
@@ -59,71 +56,74 @@ export const FeedbackPage = () => {
         }
     }, [isSuccess, navigate]);
 
-    const handleClick = (id: number, value: number) => {
-        setForm((prevForm) => ({
-            ...prevForm,
-            ratings: prevForm.ratings.map((rating) =>
-                rating.question_id === id ? { ...rating, rating: value } : rating
-            )
-        }));
-        console.log(`Updated rating for question ID ${id}: ${value}`);
+
+    const handleClick = (index: number, value: number) => {
+        setFieldValue(`${index}.rating`, value)
     };
     
-    const handleChange = (id: number, value: string) => {
-        setForm((prevForm) => ({
-            ...prevForm,
-            ratings: prevForm.ratings.map((rating) =>
-                rating.question_id === id ? { ...rating, answer: value } : rating
-            )
-        }));
+    const handleChange = (index: number, value: string) => {
+        setFieldValue(`${index}.answer`, value)
     };
     
-    
-    const handleSubmit = async (): Promise<void> => {
-        try {
-            console.log("Submitting form data:", JSON.stringify(form));
-            await sendForm(form);
-        } catch (error) {
-            console.error("Error submitting form:", error);
+  
+    const handleBlur = (index: number) => {
+        setFieldTouched(`${index}.rating`, true)
+    }
+
+    const handleSubmit = (f: Omit<FeedbackForm, 'ratings'>) => {
+        sendForm({...f, ratings: values});
+    };
+
+    const handleNextStep = () => {
+        const isConsistErrors = !!Object.keys(errors).length
+        if(isConsistErrors){
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth' 
+              });
+            openInfo(t('check_feedback_list'), 'error')
         }
-    };
-    
-
-    const handleChangeHeader = (fieldName: string, value: string) => {
-        setForm((prevForm) => ({ ...prevForm, [fieldName]: value }));
-    };
+    }
  
-
     return (
         <>
             <PageContainer className={clsx({ [styles.loading]: isLoading })}>
                 <div className={styles.intro}>
-                    <p>{t('greeting')}<span>KOLORYT!</span></p>
+                    <p>{t('greetting')}<span>  KOLORYT!</span></p>
                     <p>{t('ask_to_rate')}</p>
                     <p>P.S {t('ps')}</p>
                 </div>
-                <div className={styles.cardContainer}>
+                <form 
+                    className={styles.cardContainer}
+                    id={'feedback'}
+                    onSubmit={openPopup}
+                >
                     {isLoadingCards ? (
                         <MapComponent qty={7} component={<SkeletonFeedbackCard />} />
                     ) : (
                         data?.results.map(({ id, aspect_name_en, aspect_name_uk, question_en, question_uk, rating_required }, index) => (
                             <FeedbackCard
-                                key={id || index}
+                                key={id}
+                                tabIndex={index}
+                                isError = {!!(touched[index]?.rating && errors[index]?.rating)}
                                 question1={`${index + 1}. ${rating_required ? getTranslatedAspectName(aspect_name_en ?? "", aspect_name_uk ?? "") : getTranslatedQuestion(question_en ?? "", question_uk ?? "")}`} 
                                 question2={rating_required ? getTranslatedQuestion(question_en ?? "", question_uk ?? ""): undefined}
                                 showButtons={rating_required}
-                                thisRating={form.ratings.find(({ question_id }) => question_id === id)?.rating} 
-                                onClick={(val) => handleClick(id, val)} 
-                                onChangeText={(val) => handleChange(id, val)}
+                                thisRating={values.find(({ question_id }) => question_id === id)?.rating} 
+                                onClick={(val) => handleClick(index, val)} 
+                                onChangeText={(val) => handleChange(index, val)}
+                                onBlur={handleBlur}
                             />
                         ))
                     )}
-                </div>
+                </form>
                 <div className={styles.actions}>
                     <MainButton
+                        type="submit"
+                        form = 'feedback'
                         color="blue"
                         title={t("send")}
-                        onClick={handleOpen}
+                        onClick={handleNextStep}
                     />
                     <button className={styles.button} onClick={() => navigate(ROUTE.HOME)}>{t('close_and_return')}</button>
                 </div>
@@ -132,8 +132,6 @@ export const FeedbackPage = () => {
                 <FeedbackModalForm
                     isLoading={isLoading}
                     onSubmit={handleSubmit}
-                    onChange={handleChangeHeader}
-                    translatedLabels={translatedLabels}  
                 />
             </AppModal>
         </>
