@@ -702,19 +702,30 @@ async function processMessage(message: any): Promise<void> {
       await sendMessage(chatId, errorMessage);
     }
   }
-  else if (message.text === '/redis') {
+  else 
+  // Assuming you have a function to update the global auth token
+await updateGlobalAuthToken();
+
+if (message.text === '/redis') {
     try {
-        // Use template literals correctly for the URL
-        const response = await fetch(`${VERCEL_DOMAIN}/redis/`);
+        // Fetch the access token
+        await updateGlobalAuthToken();
+
+        const response = await fetch(`${VERCEL_DOMAIN}/redis/`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Token ${authToken}`, // Use TokenAuthentication format
+                'Content-Type': 'application/json',
+            },
+        });
+
         const result = await response.json();
 
-        // Define the expected structure of the result for TypeScript
         type RedisResult = {
             status: string;
             output: string[];
         };
 
-        // Use type assertion to ensure the result is of the expected type
         const redisResult = result as RedisResult;
 
         if (redisResult.status === 'success') {
@@ -729,28 +740,35 @@ async function processMessage(message: any): Promise<void> {
 }
 
 else if (message.text === '/db') {
-  try {
-      const response = await fetch(`${VERCEL_DOMAIN}/db/`);
+    try {
+        await updateGlobalAuthToken();
 
-      if (!response.ok) {
-          await sendMessage(chatId, `⚠️ Error: ${response.status} - ${response.statusText}`);
-          return;
-      }
+        const response = await fetch(`${VERCEL_DOMAIN}/db/`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Token ${authToken}`, // Use TokenAuthentication format
+                'Content-Type': 'application/json',
+            },
+        });
 
-      const jsonResult: unknown = await response.json();
-      const result = jsonResult as DbPerformanceResult;
+        if (!response.ok) {
+            await sendMessage(chatId, `⚠️ Error: ${response.status} - ${response.statusText}`);
+            return;
+        }
 
-      if (result.status === 'success' && result.output) {
-          const output = result.output.join('\n');
-          await sendMessage(chatId, `Database Performance Results:\n${output}`);
-      } else {
-          await sendMessage(chatId, '⚠️ Failed to retrieve database performance. Please try again later.');
-      }
-  } catch (error) {
-      // Use type assertion to treat `error` as an instance of Error
-      const errorMessage = (error as Error).message || 'Unknown error occurred.';
-      await sendMessage(chatId, `⚠️ An error occurred while fetching database performance: ${errorMessage}`);
-  }
+        const jsonResult: unknown = await response.json();
+        const result = jsonResult as DbPerformanceResult;
+
+        if (result.status === 'success' && result.output) {
+            const output = result.output.join('\n');
+            await sendMessage(chatId, `Database Performance Results:\n${output}`);
+        } else {
+            await sendMessage(chatId, '⚠️ Failed to retrieve database performance. Please try again later.');
+        }
+    } catch (error) {
+        const errorMessage = (error as Error).message || 'Unknown error occurred.';
+        await sendMessage(chatId, `⚠️ An error occurred while fetching database performance: ${errorMessage}`);
+    }
 }
 
   
