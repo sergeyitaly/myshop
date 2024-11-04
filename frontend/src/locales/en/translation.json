@@ -214,5 +214,7 @@
 	"sending": "Sending",
 	"your_answer": "Your answer",
 	"close_and_return": "Close and return back to the main display",
-	"already_in_the_basket": "Product was added to the basket"
+	"already_in_the_basket": "Product was added to the basket",
+	"left_data": "Left your data for feedback",
+	"check_feedback_list":"Check if you have filled in all the cards"
 }
