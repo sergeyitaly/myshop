@@ -187,6 +187,40 @@ async function sendNotificationToAllUsers(chatIds: Set<string>, message: string)
     }
   }
 }
+
+async function sendNotificationToUsersByLanguage(
+  chatIds: Set<string>,
+  enMessage: string,
+  ukMessage: string
+): Promise<void> {
+  await updateGlobalAuthToken();
+
+  for (const chatId of chatIds) {
+    const isEnglish = getUserLanguage(chatId) === 'en';
+    const message = isEnglish ? enMessage : ukMessage;
+
+    try {
+      const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: message,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to send Telegram notification to chat ID ${chatId}: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error(`Error sending notification to chat ID ${chatId}: ${error}`);
+    }
+  }
+}
+
+
+
 async function performHealthCheck(): Promise<void> {
   const healthCheckUrl = `${VERCEL_DOMAIN}/api/health_check`;
   try {
@@ -195,57 +229,52 @@ async function performHealthCheck(): Promise<void> {
       console.log('Vercel health check successful');
 
       if (lastHealthCheckStatus === 'failure') {
-        const successMessage = '✅ Server up and running!';
-        // Ensure cachedChatIds is not empty before sending notifications
-        if (cachedChatIds.size > 0) {
-          await sendNotificationToAllUsers(cachedChatIds, successMessage);
-        }
+        const enSuccessMessage = '✅ Server up and running!';
+        const ukSuccessMessage = '✅ Сервер працює!';
+
+        // Send success notifications based on user language preference
+        await sendNotificationToUsersByLanguage(cachedChatIds, enSuccessMessage, ukSuccessMessage);
         lastHealthCheckStatus = 'success';
       }
 
       cachedChatIds = await fetchChatIds();
     } else {
-      const errorMessage = `🚨 Server is down: ${response.statusText}`;
-      console.error(errorMessage);
+      const enErrorMessage = `🚨 Server is down: ${response.statusText}`;
+      const ukErrorMessage = `🚨 Сервер не працює: ${response.statusText}`;
+      console.error(enErrorMessage);
 
       if (lastHealthCheckStatus !== 'failure') {
-        // Ensure cachedChatIds is not empty before sending notifications
-        if (cachedChatIds.size > 0) {
-          await sendNotificationToAllUsers(cachedChatIds, errorMessage);
-        }
+        await sendNotificationToUsersByLanguage(cachedChatIds, enErrorMessage, ukErrorMessage);
         lastHealthCheckStatus = 'failure';
       }
     }
   } catch (error) {
-    const errorMessage = `❗ Error performing health check: ${error}`;
-    console.error(errorMessage);
+    const enErrorMessage = `❗ Error performing health check: ${error}`;
+    const ukErrorMessage = `❗ Помилка перевірки стану сервера: ${error}`;
+    console.error(enErrorMessage);
 
     if (lastHealthCheckStatus !== 'failure') {
-      // Ensure cachedChatIds is not empty before sending notifications
-      if (cachedChatIds.size > 0) {
-        await sendNotificationToAllUsers(cachedChatIds, errorMessage);
-      }
+      await sendNotificationToUsersByLanguage(cachedChatIds, enErrorMessage, ukErrorMessage);
       lastHealthCheckStatus = 'failure';
     }
   }
 }
 
 
-// Other functions (updateGlobalAuthToken, updateSubmittedToCreated, etc.) should be defined elsewhere in your code.
-
-async function getHealthStatus(): Promise<string> {
+async function getHealthStatus(isEnglish: boolean): Promise<string> {
   const healthCheckUrl = `${VERCEL_DOMAIN}/api/health_check`;
   try {
     const response = await fetch(healthCheckUrl);
     if (response.ok) {
-      return '✅ Server up and running!';
+      return isEnglish ? '✅ Server up and running!' : '✅ Сервер працює!';
     } else {
-      return `🚨 Server is down: ${response.statusText}`;
+      return isEnglish ? `🚨 Server is down: ${response.statusText}` : `🚨 Сервер не працює: ${response.statusText}`;
     }
   } catch (error) {
-    return `❗ Error performing health check: ${error}`;
+    return isEnglish ? `❗ Error performing health check: ${error}` : `❗ Помилка перевірки стану сервера: ${error}`;
   }
 }
+
 
 async function authenticateWithCredentials(): Promise<AuthData | void> {
   const authUrl = `${(globalThis as any).VERCEL_DOMAIN}/api/token/`;
@@ -568,15 +597,31 @@ async function isChatIdRegistered(chatId: string): Promise<boolean> {
   }
 }
 
+// Map to store user language preferences
+const userLanguages = new Map<string | number, string>();
 
+// Helper function to get user's current language or default to 'en'
+function getUserLanguage(chatId: string | number): string {
+  return userLanguages.get(chatId) || 'en';
+}
+
+// Helper function to toggle language
+function toggleUserLanguage(chatId: string | number): void {
+  const currentLanguage = getUserLanguage(chatId);
+  const newLanguage = currentLanguage === 'en' ? 'uk' : 'en';
+  userLanguages.set(chatId, newLanguage);
+}
+
+// Modified processMessage to handle language toggle
 async function processMessage(message: any): Promise<void> {
   const chatId = message.chat.id;
 
   if (message.contact) {
+    // Existing contact handling code
     await updateGlobalAuthToken();
     const phoneNumber = message.contact.phone_number;
     const userExistsFlag = await userExists(phoneNumber, chatId);
-    
+
     if (userExistsFlag) {
       console.warn(`User with phone: ${phoneNumber} and chat ID: ${chatId} already exists.`);
     } else {
@@ -584,23 +629,20 @@ async function processMessage(message: any): Promise<void> {
       await sendChatIdAndPhoneToVercel(phoneNumber, chatId);
     }
 
-    // Store the phone number in the map
     phoneNumbers.set(chatId, phoneNumber);
     chatIds.add(chatId);
 
-    // Send the custom keyboard with "Order", "Orders", and "KOLORYT" buttons
+    // Send the custom keyboard with the appropriate language
     await sendCustomKeyboard(chatId);
 
-  } else if (message.text === 'Start') {
-    const isRegistered = await isChatIdRegistered(chatId);
-    if (!isRegistered) {
-      await sendMessage(chatId, '📞 To get notifications, please share your phone number.');
-      await sendContactRequest(chatId);
-    } else {
-      await sendMessage(chatId, 'You are already registered.');
-    }
+  } else if (message.text === 'En/Uk' || message.text === 'Укр/En') {
+    // Toggle the user's language preference
+    toggleUserLanguage(chatId);
+    // Send updated keyboard with the new language setting
+    await sendCustomKeyboard(chatId);
 
-  } else if (message.text === 'Order') {
+  } else if (message.text === 'Order' || message.text === 'Замовлення') {
+    // Existing order handling code
     await updateGlobalAuthToken();
     const phoneNumber = phoneNumbers.get(chatId);
     if (phoneNumber) {
@@ -610,7 +652,8 @@ async function processMessage(message: any): Promise<void> {
       await sendContactRequest(chatId);
     }
 
-  } else if (message.text === 'Orders') {
+  } else if (message.text === 'Orders' || message.text === 'Всі замовлення') {
+    // Existing orders handling code
     await updateGlobalAuthToken();
     const phoneNumber = phoneNumbers.get(chatId);
     if (phoneNumber) {
@@ -621,26 +664,107 @@ async function processMessage(message: any): Promise<void> {
     }
 
   } else if (message.text === 'KOLORYT') {
-    await sendMessage(chatId, `You can proceed to KOLORYT here: \n${VERCEL_DOMAIN}`);
-    try {
-      const healthStatus = await getHealthStatus();
-      await sendMessage(chatId, `Current status:\n${healthStatus}`);
-    } catch (error) {
-      await sendMessage(chatId, '⚠️ Unable to fetch server status at the moment.');
-    }
+    const isEnglish = getUserLanguage(chatId) === 'en';
+    const message = isEnglish
+    ? `You can proceed to KOLORYT here: \n${VERCEL_DOMAIN}`
+    : `Ви можете перейти до KOLORYT тут: \n${VERCEL_DOMAIN}`;
 
-  } else if (message.text === '/telegram_users') {
+    try {
+      await sendMessage(chatId, message);
+  
+      const healthStatus = await getHealthStatus(isEnglish);
+      await sendMessage(chatId, isEnglish ? `Current status:\n${healthStatus}` : `Поточний статус:\n${healthStatus}`);
+    } catch (error) {
+      await sendMessage(chatId, isEnglish ? '⚠️ Unable to fetch server status at the moment.' : '⚠️ Наразі неможливо отримати стан сервера.');
+    }
+  }
+  else if (message.text === '/telegram_users') {
+    const isEnglish = chatId ? getUserLanguage(chatId) === 'en' : true; // Determine the user's language
+  
     try {
       await updateGlobalAuthToken();
       const allPhoneNumbers = await fetchPhoneNumbersFromVercel();
       const phoneNumberList = allPhoneNumbers.join('\n');
-      await sendMessage(chatId, `Registered phone numbers:\n${phoneNumberList}`);
+  
+      const messageHeader = isEnglish ? 'Registered phone numbers:' : 'Зареєстровані номери телефонів:';
+      
+      await sendMessage(chatId, `${messageHeader}\n${phoneNumberList}`);
     } catch (error) {
-      await sendMessage(chatId, '⚠️ Failed to retrieve phone numbers. Please try again later.');
+      const errorMessage = isEnglish 
+        ? '⚠️ Failed to retrieve phone numbers. Please try again later.' 
+        : '⚠️ Не вдалося отримати номери телефонів. Будь ласка, спробуйте пізніше.';
+        
+      await sendMessage(chatId, errorMessage);
     }
-  } else {
+  }
+  else if (message.text === '/redis') {
+    try {
+        // Use template literals correctly for the URL
+        const response = await fetch(`${VERCEL_DOMAIN}/redis/`);
+        const result = await response.json();
+
+        // Define the expected structure of the result for TypeScript
+        type RedisResult = {
+            status: string;
+            output: string[];
+        };
+
+        // Use type assertion to ensure the result is of the expected type
+        const redisResult = result as RedisResult;
+
+        if (redisResult.status === 'success') {
+            const output = redisResult.output.join('\n');
+            await sendMessage(chatId, `Redis Performance Results:\n${output}`);
+        } else {
+            await sendMessage(chatId, '⚠️ Failed to retrieve Redis performance. Please try again later.');
+        }
+    } catch (error) {
+        await sendMessage(chatId, '⚠️ An error occurred while fetching Redis performance. Please try again later.');
+    }
+}
+
+  
+   else {
     // Send the custom keyboard with correct options
     await sendCustomKeyboard(chatId);
+  }
+}
+
+// Send keyboard with dynamic button labels based on user's language preference
+async function sendCustomKeyboard(chatId: string | number): Promise<void> {
+  const isEnglish = getUserLanguage(chatId) === 'en';
+
+  const orderButtonText = isEnglish ? 'Order' : 'Замовлення';
+  const ordersButtonText = isEnglish ? 'Orders' : 'Всі замовлення';
+  const langButtonText = isEnglish ? 'En/Uk' : 'Укр/En';
+  const kolorytButtonText = 'KOLORYT'; // Assuming this doesn't change
+
+  const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: isEnglish ? 'Choose an action:' : 'Оберіть дію:',
+      reply_markup: {
+        keyboard: [
+          [
+            { text: orderButtonText },
+            { text: ordersButtonText }
+          ],
+          [
+            { text: langButtonText },
+            { text: kolorytButtonText }
+          ]
+        ],
+        one_time_keyboard: false,
+        resize_keyboard: true
+      }
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to send custom keyboard: ${response.statusText}`);
   }
 }
 
@@ -650,11 +774,11 @@ async function processCallbackQuery(callbackQuery: any): Promise<void> {
   const callbackData = callbackQuery.data;
   const phoneNumber = phoneNumbers.get(chatId);
 
-
   if (!phoneNumber) {
-    await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
+    await sendMessage(chatId, getUserLanguage(chatId) === 'en'
+      ? '🔍 Phone number not found. Please share your phone number first.'
+      : '🔍 Номер телефону не знайдено. Спочатку поділіться своїм номером телефону.');
     await sendContactRequest(chatId);
-
     return;
   }
 
@@ -663,17 +787,29 @@ async function processCallbackQuery(callbackQuery: any): Promise<void> {
     await sendOrderDetails(phoneNumber, chatId);
   } else if (callbackData === 'Orders') {
     await sendAllOrdersDetails(chatId);
-  } else if (callbackData === 'Start') {
+  } else if (callbackData === 'En/Uk') {
+    // Toggle language preference
     await updateGlobalAuthToken();
-    await sendMessage(chatId, '📞 To get notifications, please share your phone number.');
-    await sendContactRequest(chatId);
+    const currentLang = getUserLanguage(chatId);
+    const newLang = currentLang === 'en' ? 'uk' : 'en';
+    userLanguages.set(chatId, newLang);
+
+    // Confirm the language change
+    const confirmationText = newLang === 'en' ? 'Language set to English.' : 'Мову змінено на українську.';
+    await sendMessage(chatId, confirmationText);
+
+    // Update keyboard with the new language button label
+    await sendCustomKeyboard(chatId);
   } else {
-    await sendMessage(chatId, '⚠️ Unknown action.');
+    await sendMessage(chatId, getUserLanguage(chatId) === 'en'
+      ? '⚠️ Unknown action.'
+      : '⚠️ Невідома дія.');
   }
 
   // Acknowledge that the callback query has been processed
   await acknowledgeCallbackQuery(callbackQuery.id);
 }
+
 
 async function acknowledgeCallbackQuery(callbackQueryId: string): Promise<void> {
   const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/answerCallbackQuery`;
@@ -688,35 +824,7 @@ async function acknowledgeCallbackQuery(callbackQueryId: string): Promise<void> 
   });
 }
 
-async function sendCustomKeyboard(chatId: string): Promise<void> {
-  const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text: 'Choose an action:',
-      reply_markup: {
-        keyboard: [
-          [
-            { text: 'Order' },
-            { text: 'Orders' }
-          ],
-          [
-            { text: 'Start' },
-            { text: 'KOLORYT' }
-          ]
-        ],
-        one_time_keyboard: false, // Set to false to keep the keyboard visible
-        resize_keyboard: true // Adjusts the size of the keyboard
-      }
-    })
-  });
 
-  if (!response.ok) {
-    throw new Error(`Failed to send custom keyboard: ${response.statusText}`);
-  }
-}
 
 async function sendContactRequest(chatId: string): Promise<void> {
   const url = `https://api.telegram.org/bot${NOTIFICATIONS_API}/sendMessage`;
@@ -983,7 +1091,7 @@ const isOrderItem = (item: any): item is OrderItem => {
     typeof item.color_value === 'string';
 };
 
-const getLatestStatusEntry = (statusDates: Record<string, string | null>): string | undefined => {
+const getLatestStatusEntry = (statusDates: Record<string, string | null>, isEnglish: boolean): string | undefined => {
   const statusEmojis: Record<string, string> = {
     'submitted': '📝',
     'created': '🆕',
@@ -992,13 +1100,25 @@ const getLatestStatusEntry = (statusDates: Record<string, string | null>): strin
     'canceled': '❌',
   };
 
+  const statusLabels: Record<string, { en: string; uk: string }> = {
+    'submitted': { en: 'Submitted', uk: 'Подано' },
+    'created': { en: 'Created', uk: 'Створено' },
+    'processed': { en: 'Processed', uk: 'Оброблено' },
+    'complete': { en: 'Complete', uk: 'Завершено' },
+    'canceled': { en: 'Canceled', uk: 'Скасовано' },
+  };
+
   // Ensure statusDates entries are sorted and mapped correctly
   return Object.entries(statusDates)
     .filter(([_, date]) => date !== null)
     .sort(([_, dateA], [__, dateB]) => new Date(dateB!).getTime() - new Date(dateA!).getTime())
-    .map(([status, date]) => `${statusEmojis[status]} ${status.charAt(0).toUpperCase() + status.slice(1)}: ${formatDate(date!)}`)
+    .map(([status, date]) => {
+      const label = isEnglish ? statusLabels[status].en : statusLabels[status].uk;
+      return `${statusEmojis[status]} ${label}: ${formatDate(date!)}`;
+    })
     .shift();
 };
+
 
 // Example usage
 const formatDate = (date: string): string => {
@@ -1040,63 +1160,66 @@ const fetchOrderSummary = async (chatId: string): Promise<OrderSummaryResponse> 
     throw error;
   }
 };
-
-
 async function sendOrderDetails(phoneNumber: string, chatId: string | null): Promise<void> {
+  const isEnglish = chatId ? getUserLanguage(chatId) === 'en' : true;
+
   if (!chatId) {
+    const errorMessage = isEnglish ? 'Chat ID is missing. Please try again later.' : 'Відсутній ідентифікатор чату. Будь ласка, спробуйте пізніше.';
     console.error('Chat ID is missing.');
-    if (phoneNumber) await sendMessage(phoneNumber, 'Chat ID is missing. Please try again later.');
+    if (phoneNumber) await sendMessage(phoneNumber, errorMessage);
     return;
   }
 
   try {
     const responseBody = await fetchOrderSummary(chatId);
-    console.log('Response Body:', responseBody);
-
     const orderResults = responseBody.results;
+
     if (!orderResults || orderResults.length === 0) {
-      console.log('No orders found for this chat ID.');
-      await sendMessage(chatId, 'No orders found for this chat ID.');
+      const noOrdersMessage = isEnglish ? 'No orders found for this chat ID.' : 'Замовлення для цього чату не знайдено.';
+      await sendMessage(chatId, noOrdersMessage);
       return;
     }
 
-    // Assuming you want the latest order across all results
-    const latestOrder = orderResults.reduce((prev, current) =>
-      prev.order_id > current.order_id ? prev : current
-    );
+    const latestOrder = orderResults.reduce((prev, current) => (prev.order_id > current.order_id ? prev : current));
 
     if (!latestOrder.order_items || latestOrder.order_items.length === 0) {
-      console.log('No order items found for the latest order.');
-      await sendMessage(chatId, 'No order items found for the latest order.');
+      const noItemsMessage = isEnglish ? 'No order items found for the latest order.' : 'Не знайдено товарів для останнього замовлення.';
+      await sendMessage(chatId, noItemsMessage);
       return;
     }
 
     const orderItemsSummary = latestOrder.order_items.map((item: OrderItem) =>
-      `- ${item.product_name}, ${item.collection_name}, Size: ${item.size || 'N/A'}, Color: ${item.color_name || 'N/A'}, ${item.quantity} pcs, ${parseFloat(item.item_price).toFixed(2)}`
+      `- ${item.product_name}, ${item.collection_name}, ${isEnglish ? 'Size' : 'Розмір'}: ${item.size || 'N/A'}, ${isEnglish ? 'Color' : 'Колір'}: ${item.color_name || 'N/A'}, ${item.quantity} ${isEnglish ? 'pcs' : 'шт'}, $${parseFloat(item.item_price).toFixed(2)}`
     ).join('\n');
 
     const statusDates = {
-      'submitted': latestOrder.submitted_at ?? null,
-      'created': latestOrder.created_at ?? null,
-      'processed': latestOrder.processed_at ?? null,
-      'complete': latestOrder.complete_at ?? null,
-      'canceled': latestOrder.canceled_at ?? null
+      submitted: latestOrder.submitted_at ?? null,
+      created: latestOrder.created_at ?? null,
+      processed: latestOrder.processed_at ?? null,
+      complete: latestOrder.complete_at ?? null,
+      canceled: latestOrder.canceled_at ?? null,
     };
 
-    const latestStatusEntry = getLatestStatusEntry(statusDates);
+    // Pass `isEnglish` to getLatestStatusEntry
+    const latestStatusEntry = getLatestStatusEntry(statusDates, isEnglish);
 
     const orderDetailsMessage =
-      `Order ID: ${latestOrder.order_id}\n` +
-      `Order Items:\n${orderItemsSummary}\n` +
-      `${latestStatusEntry ? latestStatusEntry : ''}`;
+      `${isEnglish ? 'Order ID' : 'Номер замовлення'}: ${latestOrder.order_id}\n` +
+      `${isEnglish ? 'Order Items' : 'Товари в замовленні'}:\n${orderItemsSummary}\n` +
+      `${latestStatusEntry || ''}`;
 
-    await sendMessage(chatId, `Thank you! Here are your order details:\n${orderDetailsMessage}`);
+    const thankYouMessage = isEnglish ? 'Thank you! Here are your order details:' : 'Дякуємо! Ось ваші деталі замовлення:';
+    await sendMessage(chatId, `${thankYouMessage}\n${orderDetailsMessage}`);
   } catch (error) {
+    const errorMessage = isEnglish ? 'An error occurred while retrieving order details. Please try again later.' : 'Сталася помилка при отриманні деталей замовлення. Будь ласка, спробуйте пізніше.';
     console.error(`Error retrieving order details: ${error}`);
-    await sendMessage(chatId, 'An error occurred while retrieving order details. Please try again later.');
+    await sendMessage(chatId, errorMessage);
   }
 }
+
 async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
+  const isEnglish = chatId ? getUserLanguage(chatId) === 'en' : true;
+
   if (!chatId) {
     console.error('Chat ID is missing.');
     return;
@@ -1104,40 +1227,42 @@ async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
 
   try {
     const responseBody = await fetchOrderSummary(chatId);
-    console.log('Response Body:', responseBody);
-
     const orderResults = responseBody.results;
+
     if (!orderResults || orderResults.length === 0) {
-      console.log('No orders found for this chat ID.');
-      await sendMessage(chatId, 'No orders found for this chat ID.');
+      const noOrdersMessage = isEnglish ? 'No orders found for this chat ID.' : 'Замовлення для цього чату не знайдено.';
+      await sendMessage(chatId, noOrdersMessage);
       return;
     }
 
     const ordersMessage = orderResults.map(order => {
       if (!order.order_items || order.order_items.length === 0) {
-        return `Order ID: ${order.order_id}\nNo order items found for this order.`;
+        return `${isEnglish ? 'Order ID' : 'Номер замовлення'}: ${order.order_id}\n${isEnglish ? 'No order items found for this order.' : 'Товари для цього замовлення не знайдено.'}`;
       }
 
       const orderItemsSummary = order.order_items.map((item: OrderItem) =>
-        `- ${item.product_name}, ${item.collection_name}, Size: ${item.size || 'N/A'}, Color: ${item.color_name || 'N/A'}, ${item.quantity} pcs, Price: $${parseFloat(item.item_price).toFixed(2)}`
+        `- ${item.product_name}, ${item.collection_name}, ${isEnglish ? 'Size' : 'Розмір'}: ${item.size || 'N/A'}, ${isEnglish ? 'Color' : 'Колір'}: ${item.color_name || 'N/A'}, ${item.quantity} ${isEnglish ? 'pcs' : 'шт'}, $${parseFloat(item.item_price).toFixed(2)}`
       ).join('\n');
 
       const statusDates = {
-        'submitted': order.submitted_at ? new Date(order.submitted_at).toLocaleString() : 'N/A',
-        'created': order.created_at ? new Date(order.created_at).toLocaleString() : 'N/A',
-        'processed': order.processed_at ? new Date(order.processed_at).toLocaleString() : 'N/A',
-        'complete': order.complete_at ? new Date(order.complete_at).toLocaleString() : 'N/A',
-        'canceled': order.canceled_at ? new Date(order.canceled_at).toLocaleString() : 'N/A'
+        submitted: order.submitted_at ? new Date(order.submitted_at).toLocaleString() : 'N/A',
+        created: order.created_at ? new Date(order.created_at).toLocaleString() : 'N/A',
+        processed: order.processed_at ? new Date(order.processed_at).toLocaleString() : 'N/A',
+        complete: order.complete_at ? new Date(order.complete_at).toLocaleString() : 'N/A',
+        canceled: order.canceled_at ? new Date(order.canceled_at).toLocaleString() : 'N/A'
       };
 
-      const latestStatusEntry = getLatestStatusEntry(statusDates);
+      // Pass `isEnglish` to getLatestStatusEntry
+      const latestStatusEntry = getLatestStatusEntry(statusDates, isEnglish);
 
-      return `Order ID: ${order.order_id}\nOrder Items:\n${orderItemsSummary}\nLatest Status: ${latestStatusEntry || 'Status not available.'}`;
+      return `${isEnglish ? 'Order ID' : 'Номер замовлення'}: ${order.order_id}\n${isEnglish ? 'Order Items' : 'Товари в замовленні'}:\n${orderItemsSummary}\n${isEnglish ? 'Latest Status' : 'Останній статус'}: ${latestStatusEntry || (isEnglish ? 'Status not available.' : 'Статус недоступний.')}`;
     }).join('\n\n');
 
-    await sendMessage(chatId, `Here are all your order details:\n${ordersMessage}`);
+    const allOrdersMessage = isEnglish ? 'Here are all your order details:' : 'Ось усі ваші деталі замовлень:';
+    await sendMessage(chatId, `${allOrdersMessage}\n${ordersMessage}`);
   } catch (error) {
+    const errorMessage = isEnglish ? 'An error occurred while retrieving all order details. Please try again later.' : 'Сталася помилка при отриманні всіх деталей замовлень. Будь ласка, спробуйте пізніше.';
     console.error(`Error retrieving all orders details: ${error}`);
-    await sendMessage(chatId, 'An error occurred while retrieving all order details. Please try again later.');
+    await sendMessage(chatId, errorMessage);
   }
-}                 
+}
