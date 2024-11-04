@@ -13,7 +13,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.exceptions import AuthenticationFailed
-
+import subprocess
+from django.http import JsonResponse
+from django.views import View
 
 def index(request):
     return render(request, "index.html")
@@ -47,3 +49,22 @@ class CustomTokenRefreshView(APIView):
             print(f"Error details: {str(e)}")
             raise AuthenticationFailed(f"Token refresh failed: {str(e)}")
 
+class RedisPerformanceView(View):
+    def get(self, request, *args, **kwargs):
+        try:
+            # Run the management command
+            output = subprocess.check_output(['python', 'manage.py', 'redis_performance'], text=True)
+
+            # Split the output into lines for easier processing
+            output_lines = output.splitlines()
+
+            # Return the output as JSON
+            return JsonResponse({
+                'status': 'success',
+                'output': output_lines,
+            })
+        except subprocess.CalledProcessError as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e),
+            }, status=500)

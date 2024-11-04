@@ -678,6 +678,52 @@ async function processMessage(message: any): Promise<void> {
       await sendMessage(chatId, isEnglish ? '⚠️ Unable to fetch server status at the moment.' : '⚠️ Наразі неможливо отримати стан сервера.');
     }
   }
+  else if (message.text === '/telegram_users') {
+    const isEnglish = chatId ? getUserLanguage(chatId) === 'en' : true; // Determine the user's language
+  
+    try {
+      await updateGlobalAuthToken();
+      const allPhoneNumbers = await fetchPhoneNumbersFromVercel();
+      const phoneNumberList = allPhoneNumbers.join('\n');
+  
+      const messageHeader = isEnglish ? 'Registered phone numbers:' : 'Зареєстровані номери телефонів:';
+      
+      await sendMessage(chatId, `${messageHeader}\n${phoneNumberList}`);
+    } catch (error) {
+      const errorMessage = isEnglish 
+        ? '⚠️ Failed to retrieve phone numbers. Please try again later.' 
+        : '⚠️ Не вдалося отримати номери телефонів. Будь ласка, спробуйте пізніше.';
+        
+      await sendMessage(chatId, errorMessage);
+    }
+  }
+  else if (message.text === '/redis') {
+    try {
+        // Use template literals correctly for the URL
+        const response = await fetch(`${VERCEL_DOMAIN}/redis/`);
+        const result = await response.json();
+
+        // Define the expected structure of the result for TypeScript
+        type RedisResult = {
+            status: string;
+            output: string[];
+        };
+
+        // Use type assertion to ensure the result is of the expected type
+        const redisResult = result as RedisResult;
+
+        if (redisResult.status === 'success') {
+            const output = redisResult.output.join('\n');
+            await sendMessage(chatId, `Redis Performance Results:\n${output}`);
+        } else {
+            await sendMessage(chatId, '⚠️ Failed to retrieve Redis performance. Please try again later.');
+        }
+    } catch (error) {
+        await sendMessage(chatId, '⚠️ An error occurred while fetching Redis performance. Please try again later.');
+    }
+}
+
+  
    else {
     // Send the custom keyboard with correct options
     await sendCustomKeyboard(chatId);
