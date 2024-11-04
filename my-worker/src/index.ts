@@ -600,8 +600,7 @@ async function isChatIdRegistered(chatId: string): Promise<boolean> {
 
 interface DbPerformanceResult {
   status: string;
-  output?: string[];
-  message?: string;
+  output: string[];
 }
 // Map to store user language preferences
 const userLanguages = new Map<string | number, string>();
@@ -732,8 +731,14 @@ async function processMessage(message: any): Promise<void> {
 else if (message.text === '/db') {
   try {
       const response = await fetch(`${VERCEL_DOMAIN}/db/`);
-      const jsonResult: unknown = await response.json(); // Initial fetch as unknown
-      const result = jsonResult as DbPerformanceResult;  // Type assertion here
+
+      if (!response.ok) {
+          await sendMessage(chatId, `⚠️ Error: ${response.status} - ${response.statusText}`);
+          return;
+      }
+
+      const jsonResult: unknown = await response.json();
+      const result = jsonResult as DbPerformanceResult;
 
       if (result.status === 'success' && result.output) {
           const output = result.output.join('\n');
@@ -742,7 +747,9 @@ else if (message.text === '/db') {
           await sendMessage(chatId, '⚠️ Failed to retrieve database performance. Please try again later.');
       }
   } catch (error) {
-      await sendMessage(chatId, '⚠️ An error occurred while fetching database performance. Please try again later.');
+      // Use type assertion to treat `error` as an instance of Error
+      const errorMessage = (error as Error).message || 'Unknown error occurred.';
+      await sendMessage(chatId, `⚠️ An error occurred while fetching database performance: ${errorMessage}`);
   }
 }
 
