@@ -597,6 +597,11 @@ async function isChatIdRegistered(chatId: string): Promise<boolean> {
   }
 }
 
+
+interface DbPerformanceResult {
+  status: string;
+  output: string[];
+}
 // Map to store user language preferences
 const userLanguages = new Map<string | number, string>();
 
@@ -697,19 +702,28 @@ async function processMessage(message: any): Promise<void> {
       await sendMessage(chatId, errorMessage);
     }
   }
-  else if (message.text === '/redis') {
+  else 
+
+if (message.text === '/redis') {
     try {
-        // Use template literals correctly for the URL
-        const response = await fetch(`${VERCEL_DOMAIN}/redis/`);
+        // Fetch the access token
+        await updateGlobalAuthToken();
+
+        const response = await fetch(`${VERCEL_DOMAIN}/redis/`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Token ${authToken}`, // Use TokenAuthentication
+            'Content-Type': 'application/json',
+          }
+        });
+
         const result = await response.json();
 
-        // Define the expected structure of the result for TypeScript
         type RedisResult = {
             status: string;
             output: string[];
         };
 
-        // Use type assertion to ensure the result is of the expected type
         const redisResult = result as RedisResult;
 
         if (redisResult.status === 'success') {
@@ -720,6 +734,38 @@ async function processMessage(message: any): Promise<void> {
         }
     } catch (error) {
         await sendMessage(chatId, '⚠️ An error occurred while fetching Redis performance. Please try again later.');
+    }
+}
+
+else if (message.text === '/db') {
+    try {
+        await updateGlobalAuthToken();
+
+        const response = await fetch(`${VERCEL_DOMAIN}/db/`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Token ${authToken}`, // Use TokenAuthentication
+            'Content-Type': 'application/json',
+          }
+        });
+
+        if (!response.ok) {
+            await sendMessage(chatId, `⚠️ Error: ${response.status} - ${response.statusText}`);
+            return;
+        }
+
+        const jsonResult: unknown = await response.json();
+        const result = jsonResult as DbPerformanceResult;
+
+        if (result.status === 'success' && result.output) {
+            const output = result.output.join('\n');
+            await sendMessage(chatId, `Database Performance Results:\n${output}`);
+        } else {
+            await sendMessage(chatId, '⚠️ Failed to retrieve database performance. Please try again later.');
+        }
+    } catch (error) {
+        const errorMessage = (error as Error).message || 'Unknown error occurred.';
+        await sendMessage(chatId, `⚠️ An error occurred while fetching database performance: ${errorMessage}`);
     }
 }
 

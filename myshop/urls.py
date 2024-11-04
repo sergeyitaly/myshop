@@ -22,7 +22,7 @@ from django.contrib import admin
 from dotenv import load_dotenv
 from drf_spectacular.views import SpectacularRedocView
 from django.views.decorators.cache import cache_page
-from .views import RedisPerformanceView
+from .views import *
 
 load_dotenv()
 schema_view = get_schema_view(
@@ -68,6 +68,7 @@ urlpatterns = [
 #    path("", views.index, name="index"),  
     path("", cache_page(60 * 15)(views.index), name="index"),
     path('redis/', RedisPerformanceView.as_view(), name='redis_performance'),
+    path('db/', DatabasePerformanceView.as_view(), name='database_performance'),
 
 #    re_path(r'^(?:.*)/?$', views.index),  # Catch all other routes and serve the same view
     path('i18n/', include('django.conf.urls.i18n')),
