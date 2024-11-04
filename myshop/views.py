@@ -1,7 +1,3 @@
-
-# views.py
-
-
 from django.shortcuts import render
 import os
 from rest_framework_simplejwt.exceptions import TokenError
@@ -16,6 +12,11 @@ from rest_framework.exceptions import AuthenticationFailed
 import subprocess
 from django.http import JsonResponse
 from django.views import View
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
+import subprocess
 
 def index(request):
     return render(request, "index.html")
@@ -48,23 +49,61 @@ class CustomTokenRefreshView(APIView):
         except TokenError as e:
             print(f"Error details: {str(e)}")
             raise AuthenticationFailed(f"Token refresh failed: {str(e)}")
+        
+class RedisPerformanceView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
 
-class RedisPerformanceView(View):
     def get(self, request, *args, **kwargs):
         try:
-            # Run the management command
-            output = subprocess.check_output(['python', 'manage.py', 'redis_performance'], text=True)
-
-            # Split the output into lines for easier processing
+            # Run the management command and capture the output
+            output = subprocess.check_output(['python', 'manage.py', 'redis_perfomance'], text=True)
             output_lines = output.splitlines()
 
-            # Return the output as JSON
-            return JsonResponse({
+            # Return the command output as JSON
+            return Response({
                 'status': 'success',
                 'output': output_lines,
             })
+
         except subprocess.CalledProcessError as e:
-            return JsonResponse({
+            # Capture and return the specific error output for debugging
+            return Response({
                 'status': 'error',
-                'message': str(e),
+                'message': e.output or str(e),  # Use the output attribute for more details if available
+            }, status=500)
+
+        except Exception as e:
+            # General exception handler for unexpected errors
+            return Response({
+                'status': 'error',
+                'message': f"An unexpected error occurred: {str(e)}",
+            }, status=500)
+
+class DatabasePerformanceView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            # Run the management command
+            output = subprocess.check_output(['python', 'manage.py', 'db_perfomance'], text=True)
+            output_lines = output.splitlines()
+
+            # Return the output as JSON
+            return Response({
+                'status': 'success',
+                'output': output_lines,
+            })
+
+        except subprocess.CalledProcessError as e:
+            return Response({
+                'status': 'error',
+                'message': e.output or str(e),
+            }, status=500)
+
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': f"An unexpected error occurred: {str(e)}",
             }, status=500)
