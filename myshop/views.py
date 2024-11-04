@@ -49,9 +49,15 @@ class CustomTokenRefreshView(APIView):
             print(f"Error details: {str(e)}")
             raise AuthenticationFailed(f"Token refresh failed: {str(e)}")
         
-
 class RedisPerformanceView(View):
     def get(self, request, *args, **kwargs):
+        # Check if the user is authenticated
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Unauthorized access. Please log in.',
+            }, status=401)  # 401 Unauthorized
+
         try:
             # Run the management command and capture the output
             output = subprocess.check_output(['python', 'manage.py', 'redis_perfomance'], text=True)
@@ -79,6 +85,13 @@ class RedisPerformanceView(View):
 
 class DatabasePerformanceView(View):
     def get(self, request, *args, **kwargs):
+        # Check if the user is authenticated
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Unauthorized access. Please log in.',
+            }, status=401)  # 401 Unauthorized
+
         try:
             # Run the management command
             output = subprocess.check_output(['python', 'manage.py', 'db_perfomance'], text=True)
