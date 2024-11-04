@@ -597,6 +597,12 @@ async function isChatIdRegistered(chatId: string): Promise<boolean> {
   }
 }
 
+
+interface DbPerformanceResult {
+  status: string;
+  output?: string[];
+  message?: string;
+}
 // Map to store user language preferences
 const userLanguages = new Map<string | number, string>();
 
@@ -721,6 +727,23 @@ async function processMessage(message: any): Promise<void> {
     } catch (error) {
         await sendMessage(chatId, '⚠️ An error occurred while fetching Redis performance. Please try again later.');
     }
+}
+
+else if (message.text === '/db') {
+  try {
+      const response = await fetch(`${VERCEL_DOMAIN}/db/`);
+      const jsonResult: unknown = await response.json(); // Initial fetch as unknown
+      const result = jsonResult as DbPerformanceResult;  // Type assertion here
+
+      if (result.status === 'success' && result.output) {
+          const output = result.output.join('\n');
+          await sendMessage(chatId, `Database Performance Results:\n${output}`);
+      } else {
+          await sendMessage(chatId, '⚠️ Failed to retrieve database performance. Please try again later.');
+      }
+  } catch (error) {
+      await sendMessage(chatId, '⚠️ An error occurred while fetching database performance. Please try again later.');
+  }
 }
 
   

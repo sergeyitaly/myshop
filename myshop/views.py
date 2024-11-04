@@ -48,14 +48,40 @@ class CustomTokenRefreshView(APIView):
         except TokenError as e:
             print(f"Error details: {str(e)}")
             raise AuthenticationFailed(f"Token refresh failed: {str(e)}")
+        
 
 class RedisPerformanceView(View):
     def get(self, request, *args, **kwargs):
         try:
-            # Run the management command
-            output = subprocess.check_output(['python', 'manage.py', 'redis_performance'], text=True)
+            # Run the management command and capture the output
+            output = subprocess.check_output(['python', 'manage.py', 'redis_perfomance'], text=True)
+            output_lines = output.splitlines()
 
-            # Split the output into lines for easier processing
+            # Return the command output as JSON
+            return JsonResponse({
+                'status': 'success',
+                'output': output_lines,
+            })
+
+        except subprocess.CalledProcessError as e:
+            # Capture and return the specific error output for debugging
+            return JsonResponse({
+                'status': 'error',
+                'message': e.output or str(e),  # Use the output attribute for more details if available
+            }, status=500)
+
+        except Exception as e:
+            # General exception handler for unexpected errors
+            return JsonResponse({
+                'status': 'error',
+                'message': f"An unexpected error occurred: {str(e)}",
+            }, status=500)
+
+class DatabasePerformanceView(View):
+    def get(self, request, *args, **kwargs):
+        try:
+            # Run the management command
+            output = subprocess.check_output(['python', 'manage.py', 'db_perfomance'], text=True)
             output_lines = output.splitlines()
 
             # Return the output as JSON
@@ -63,8 +89,15 @@ class RedisPerformanceView(View):
                 'status': 'success',
                 'output': output_lines,
             })
+
         except subprocess.CalledProcessError as e:
             return JsonResponse({
                 'status': 'error',
-                'message': str(e),
+                'message': e.output or str(e),
+            }, status=500)
+
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f"An unexpected error occurred: {str(e)}",
             }, status=500)
