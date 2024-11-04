@@ -36,7 +36,7 @@ LOCAL_HOST = os.getenv('LOCAL_HOST')
 TELEGRAM_BOT_TOKEN=os.getenv('NOTIFICATIONS_API')
 SAYINGS_FILE_PATH = os.path.join(BASE_DIR, 'order', 'sayings.txt')
 AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400, must-revalidate'  # Cache for 1 day
+    'CacheControl': 'max-age=86400, must-revalidate'
 }
 
 
@@ -341,6 +341,10 @@ MODELTRANSLATION_FALLBACK_LANGUAGES = ('en','uk',)
 # DEBUG_TOOLBAR_CONFIG = {
 #    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,  # Only show toolbar in DEBUG mode
 # }
+
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REDIS_CACHE_LOCATION = os.getenv('REDIS_CACHE_LOCATION')
