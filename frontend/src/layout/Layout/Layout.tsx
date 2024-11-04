@@ -12,7 +12,6 @@ import { InfoButton } from '../../components/InfoButton/InfoButton';
 import styles from './Layout.module.scss'
 import { useToggler } from '../../hooks/useToggler';
 import { InfoModal } from '../InfoModal/InfoModal';
-// import { useHistory } from 'react-router-dom';
 
 export const Layout = () => {
 
