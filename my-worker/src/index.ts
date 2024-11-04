@@ -703,8 +703,6 @@ async function processMessage(message: any): Promise<void> {
     }
   }
   else 
-  // Assuming you have a function to update the global auth token
-await updateGlobalAuthToken();
 
 if (message.text === '/redis') {
     try {
@@ -712,11 +710,11 @@ if (message.text === '/redis') {
         await updateGlobalAuthToken();
 
         const response = await fetch(`${VERCEL_DOMAIN}/redis/`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Token ${authToken}`, // Use TokenAuthentication format
-                'Content-Type': 'application/json',
-            },
+          method: 'GET',
+          headers: {
+            'Authorization': `Token ${authToken}`, // Use TokenAuthentication
+            'Content-Type': 'application/json',
+          }
         });
 
         const result = await response.json();
@@ -744,11 +742,11 @@ else if (message.text === '/db') {
         await updateGlobalAuthToken();
 
         const response = await fetch(`${VERCEL_DOMAIN}/db/`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Token ${authToken}`, // Use TokenAuthentication format
-                'Content-Type': 'application/json',
-            },
+          method: 'GET',
+          headers: {
+            'Authorization': `Token ${authToken}`, // Use TokenAuthentication
+            'Content-Type': 'application/json',
+          }
         });
 
         if (!response.ok) {
