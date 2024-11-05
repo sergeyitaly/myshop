@@ -107,3 +107,33 @@ class DatabasePerformanceView(APIView):
                 'status': 'error',
                 'message': f"An unexpected error occurred: {str(e)}",
             }, status=500)
+
+
+
+class S3PerformanceView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            # Run the management command
+            output = subprocess.check_output(['python', 'manage.py', 's3_perfomance'], text=True)
+            output_lines = output.splitlines()
+
+            # Return the output as JSON
+            return Response({
+                'status': 'success',
+                'output': output_lines,
+            })
+
+        except subprocess.CalledProcessError as e:
+            return Response({
+                'status': 'error',
+                'message': e.output or str(e),
+            }, status=500)
+
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': f"An unexpected error occurred: {str(e)}",
+            }, status=500)

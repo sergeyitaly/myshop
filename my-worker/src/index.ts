@@ -769,7 +769,42 @@ else if (message.text === '/db') {
     }
 }
 
-  
+
+else if (message.text === '/s3') {
+  try {
+      await updateGlobalAuthToken();
+
+      const response = await fetch(`${VERCEL_DOMAIN}/s3/`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${authToken}`, // Use TokenAuthentication
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+          await sendMessage(chatId, `⚠️ Error: ${response.status} - ${response.statusText}`);
+          return;
+      }
+
+      const jsonResult: unknown = await response.json();
+      const result = jsonResult as DbPerformanceResult;
+
+      if (result.status === 'success' && result.output) {
+          const output = result.output.join('\n');
+          await sendMessage(chatId, `AWS S3 Performance Results:\n${output}`);
+      } else {
+          await sendMessage(chatId, '⚠️ Failed to retrieve AWS S3 performance. Please try again later.');
+      }
+  } catch (error) {
+      const errorMessage = (error as Error).message || 'Unknown error occurred.';
+      await sendMessage(chatId, `⚠️ An error occurred while fetching AWS S3 performance: ${errorMessage}`);
+  }
+}
+
+
+
+
    else {
     // Send the custom keyboard with correct options
     await sendCustomKeyboard(chatId);

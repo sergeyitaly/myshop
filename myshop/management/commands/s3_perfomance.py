@@ -25,9 +25,8 @@ class Command(BaseCommand):
             return
 
         # Specify the files to check
-        static_file_url = f"https://{aws_s3_custom_domain}/{aws_location}/example_static_file.jpg"
-        media_file_url = f"https://{aws_s3_custom_domain}/{aws_media_location}/example_media_file.jpg"
-
+        static_file_url = f"https://{aws_s3_custom_domain}/{aws_location}main.js"
+        media_file_url = f"https://{aws_s3_custom_domain}/{aws_media_location}/photos/product/arch1.jpg"
         # Check performance for static file
         self.check_file_performance("Static File", static_file_url)
 
