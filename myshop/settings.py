@@ -105,6 +105,7 @@ INSTALLED_APPS = [
     'django_extensions',
       # "debug_toolbar",
     'feedback',
+    'logs',
   #  'admisortable2',
 
 ]

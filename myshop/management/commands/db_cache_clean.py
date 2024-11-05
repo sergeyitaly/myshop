@@ -23,7 +23,7 @@ class Command(BaseCommand):
             'shop', 'accounts', 'account', 'sites', 'admin', 'team',#'admin_interface', 
             'auth', 'authtoken', 'contenttypes', 'knox', 'sessions', 'brand', 'comments',
             #'socialaccount', 
-            'token_blacklist', 'order', 'intro', 'technologies','feedback'
+            'token_blacklist', 'order', 'intro', 'technologies','feedback','logs'
         ]
         for app in apps:
             call_command('makemigrations', app)
