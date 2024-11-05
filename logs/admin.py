@@ -44,4 +44,5 @@ class APILogAdmin(admin.ModelAdmin):
 
         return super().changelist_view(request, extra_context=extra_context)
 
+# Register the APILog model with the custom admin view
 admin.site.register(APILog, APILogAdmin)
