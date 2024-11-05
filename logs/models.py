@@ -4,7 +4,7 @@ class APILog(models.Model):
     endpoint = models.CharField(max_length=255)
     method = models.CharField(max_length=10)
     timestamp = models.DateTimeField(auto_now_add=True)
-    chat_id = models.BigIntegerField()
+    chat_id = models.CharField(max_length=255, null=True, blank=True)
     command = models.CharField(max_length=100)
     source = models.CharField(max_length=20, choices=[('Telegram Bot', 'Telegram Bot'), ('Vercel', 'Vercel')], default='Vercel')
     
