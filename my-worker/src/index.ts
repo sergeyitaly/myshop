@@ -805,6 +805,41 @@ else if (message.text === '/s3') {
 
 
 
+
+
+
+
+
+
+else if (message.text === '/help') {
+  const isEnglish = getUserLanguage(chatId) === 'en';
+  
+  const helpMessage = isEnglish
+      ? `Here are the available commands:\n
+      - /help: Display this help message.
+      - En/Uk: Toggle between English and Ukrainian language options.
+      - Order: Retrieve the details of your latest order.
+      - Orders: Retrieve details of all your orders.
+      - KOLORYT: Provides a link to the KOLORYT page and current server status.
+      - /telegram_users: Get a list of registered phone numbers (requires admin permissions).
+      - /redis: Check Redis performance status.
+      - /db: Check database performance status.
+      - /s3: Check AWS S3 performance status.`
+      : `Ось доступні команди:\n
+      - /help: Показати це повідомлення допомоги.
+      - Укр/En: Переключення між англійською та українською мовами.
+      - Замовлення: Отримати інформацію про ваше останнє замовлення.
+      - Всі замовлення: Отримати інформацію про всі ваші замовлення.
+      - KOLORYT: Надати посилання на сторінку KOLORYT та поточний статус сервера.
+      - /telegram_users: Отримати список зареєстрованих номерів телефонів (потрібні права адміністратора).
+      - /redis: Перевірити стан продуктивності Redis.
+      - /db: Перевірити стан продуктивності бази даних.
+      - /s3: Перевірити стан продуктивності AWS S3.`;
+
+  await sendMessage(chatId, helpMessage);
+}
+
+
    else {
     // Send the custom keyboard with correct options
     await sendCustomKeyboard(chatId);
