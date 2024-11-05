@@ -124,6 +124,8 @@ MIDDLEWARE = [
     #    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'myshop.middleware.CacheControlMiddleware',
+    'logs.middleware.APILogMiddleware',  
+
 ]
 # DIRS = [AWS_TEMPLATES]
 
@@ -401,15 +403,21 @@ LOGGING = {
     'disable_existing_loggers': False,
     'handlers': {
         'console': {
-            'level': 'WARNING',
+            'level': 'DEBUG',  # Capture all log levels, including DEBUG
             'class': 'logging.StreamHandler',
         },
     },
     'loggers': {
         'django.db.backends': {
             'handlers': ['console'],
-            'level': 'WARNING',
+            'level': 'DEBUG',  # Capture all database-related logs
             'propagate': False,
+        },
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',  # Capture all logs for Django core (useful for debugging)
+            'propagate': True,
         },
     },
 }
+
