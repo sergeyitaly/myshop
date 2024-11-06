@@ -60,6 +60,7 @@ urlpatterns = [
     path('api/', include('intro.urls')),
     path('api/', include('technologies.urls')),
     path('api/', include('feedback.urls')),
+    path('api/', include('logs.urls')),
 
 
     path('admin/', admin.site.urls),

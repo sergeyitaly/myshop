@@ -1,72 +1,54 @@
-{% extends "admin/change_list.html" %}
-
-{% block content %}
-<h1>{{ title }}</h1>
-
-<div>
-    <h2>API Log Requests from Telegram</h2>
-    <canvas id="telegramChart" width="400" height="200"></canvas>
-</div>
-
-<div>
-    <h2>API Log Requests from Vercel</h2>
-    <canvas id="vercelChart" width="400" height="200"></canvas>
-</div>
-
+{% load static %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Data for Telegram chart
-    const daysTelegram = {{ days_telegram|safe }};
-    const countsTelegram = {{ counts_telegram|safe }};
-    
-    const ctxTelegram = document.getElementById('telegramChart').getContext('2d');
-    const telegramChart = new Chart(ctxTelegram, {
-        type: 'line',
-        data: {
-            labels: daysTelegram,
-            datasets: [{
-                label: 'Telegram Bot Requests',
-                data: countsTelegram,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderWidth: 1,
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
 
-    // Data for Vercel chart
-    const daysVercel = {{ days_vercel|safe }};
-    const countsVercel = {{ counts_vercel|safe }};
-    
-    const ctxVercel = document.getElementById('vercelChart').getContext('2d');
-    const vercelChart = new Chart(ctxVercel, {
-        type: 'line',
-        data: {
-            labels: daysVercel,
-            datasets: [{
-                label: 'Vercel Requests',
-                data: countsVercel,
-                borderColor: 'rgba(255, 99, 132, 1)',
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderWidth: 1,
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
+<script>
+  var chartData = {{ chart_data|safe }};
+  
+  var ctxDailyTelegram = document.getElementById('chartDailyTelegram').getContext('2d');
+  var ctxDailyVercel = document.getElementById('chartDailyVercel').getContext('2d');
+  
+  var chartDailyTelegram = new Chart(ctxDailyTelegram, {
+      type: 'bar',
+      data: {
+          labels: chartData.daily.telegram.time_period,
+          datasets: [{
+              label: 'Telegram Requests',
+              data: chartData.daily.telegram.counts,
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1
+          }]
+      },
+      options: {
+          scales: {
+              y: {
+                  beginAtZero: true
+              }
+          }
+      }
+  });
+  
+  var chartDailyVercel = new Chart(ctxDailyVercel, {
+      type: 'bar',
+      data: {
+          labels: chartData.daily.vercel.time_period,
+          datasets: [{
+              label: 'Vercel Requests',
+              data: chartData.daily.vercel.counts,
+              backgroundColor: 'rgba(153, 102, 255, 0.2)',
+              borderColor: 'rgba(153, 102, 255, 1)',
+              borderWidth: 1
+          }]
+      },
+      options: {
+          scales: {
+              y: {
+                  beginAtZero: true
+              }
+          }
+      }
+  });
 </script>
 
-{{ block.super }}
-{% endblock %}
+<canvas id="chartDailyTelegram" width="400" height="200"></canvas>
+<canvas id="chartDailyVercel" width="400" height="200"></canvas>
