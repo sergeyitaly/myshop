@@ -1,48 +1,91 @@
-from django.http import JsonResponse
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib import admin
+from django.db.models import Count
 from django.utils import timezone
 from datetime import timedelta
-from .models import APILog  # Assuming APILog is a model
-from django.db.models import Count
+from django.contrib import admin
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 import json
 from django.utils.safestring import mark_safe
+from .models import APILog
+
+class TimePeriodFilter(admin.SimpleListFilter):
+    title = 'Time Period'
+    parameter_name = 'time_period'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('day', 'Today'),
+            ('week', 'This Week'),
+            ('month', 'This Month'),
+            ('year', 'This Year'),
+        )
+
+    def queryset(self, request, queryset):
+        time_period = self.value()
+        if time_period:
+            now = timezone.now()
+            time_delta = {
+                'day': timedelta(days=1),
+                'week': timedelta(weeks=1),
+                'month': timedelta(weeks=4),
+                'year': timedelta(weeks=52)
+            }
+            start_date = now - time_delta.get(time_period, timedelta(days=1))
+            return queryset.filter(timestamp__gte=start_date)
+        return queryset
 
 class APILogAdmin(admin.ModelAdmin):
     list_display = ('endpoint', 'request_count', 'has_chat_id', 'timestamp')
-    list_filter = ('has_chat_id',)
+    list_filter = ('has_chat_id', TimePeriodFilter)  # Added custom filter
+    actions = None  # Optional, to disable default actions if needed
 
-    def get_charts_data(self, time_period):
-        now = timezone.now()
-        time_delta = {
-            'day': timedelta(days=1),
-            'week': timedelta(weeks=1),
-            'month': timedelta(weeks=4),
-            'year': timedelta(weeks=52)
-        }
+def get_charts_data(self, time_period):
+    now = timezone.now()
+    time_delta = {
+        'day': timedelta(days=1),
+        'week': timedelta(weeks=1),
+        'month': timedelta(weeks=4),
+        'year': timedelta(weeks=52)
+    }
 
-        start_date = now - time_delta.get(time_period, timedelta(days=1))
+    start_date = now - time_delta.get(time_period, timedelta(days=1))
 
-        # Query the data based on `has_chat_id`
-        data = APILog.objects.filter(timestamp__gte=start_date)
+    # Query the data based on `has_chat_id`
+    data = APILog.objects.filter(timestamp__gte=start_date)
 
-        # Group data by `has_chat_id` and count the requests
-        grouped_data = data.values('has_chat_id').annotate(request_count=Count('id'))
+    # Generate chart data based on the selected time period
+    if time_period == 'week':
+        # Group data by each day of the week
+        days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        data_grouped = data.extra(select={'day_of_week': 'EXTRACT(DOW FROM timestamp)'}).values('day_of_week').annotate(request_count=Count('id')).order_by('day_of_week')
+        chart_data = {'labels': days_of_week, 'data': [0]*7}
+        for entry in data_grouped:
+            day_of_week = int(entry['day_of_week'])  # Ensure it's an integer
+            chart_data['data'][day_of_week] = entry['request_count']
+    
+    elif time_period == 'month':
+        # Group data by each day of the month
+        chart_data = {'labels': [f'Day {i+1}' for i in range(31)], 'data': [0]*31}
+        data_grouped = data.extra(select={'day_of_month': 'EXTRACT(DAY FROM timestamp)'}).values('day_of_month').annotate(request_count=Count('id')).order_by('day_of_month')
+        for entry in data_grouped:
+            day_of_month = int(entry['day_of_month'])  # Ensure it's an integer
+            chart_data['data'][day_of_month - 1] = entry['request_count']
 
-        # Prepare the response data for the chart
-        chart_data = {
-            'labels': ['Telegram Bot (has_chat_id)', 'Vercel (no_chat_id)'],
-            'data': [0, 0]  # Default counts for both groups
-        }
+    elif time_period == 'year':
+        # Group data by each month of the year
+        months_of_year = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        chart_data = {'labels': months_of_year, 'data': [0]*12}
+        data_grouped = data.extra(select={'month_of_year': 'EXTRACT(MONTH FROM timestamp)'}).values('month_of_year').annotate(request_count=Count('id')).order_by('month_of_year')
+        for entry in data_grouped:
+            month_of_year = int(entry['month_of_year'])  # Ensure it's an integer
+            chart_data['data'][month_of_year - 1] = entry['request_count']
 
-        for entry in grouped_data:
-            if entry['has_chat_id']:  # Telegram bot data
-                chart_data['data'][0] = entry['request_count']
-            else:  # Vercel data
-                chart_data['data'][1] = entry['request_count']
+    else:
+        # Default to day-wise data for any other time period
+        chart_data = {'labels': ['Today'], 'data': [data.count()]}
 
-        return chart_data
+    return chart_data
 
     # Handle AJAX requests for chart data
     @method_decorator(csrf_exempt)
@@ -84,7 +127,7 @@ class APILogAdmin(admin.ModelAdmin):
                             datasets: [{
                                 label: 'Request Count',
                                 data: chartData.data,
-                                backgroundColor: ['#4CAF50', '#FFC107'],
+                                backgroundColor: ['#4CAF50', '#FFC107', '#2196F3'],
                             }]
                         },
                         options: {
