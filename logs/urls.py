@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import api_logs_view
+from . import views
 
 urlpatterns = [
-    path('logs/', api_logs_view, name='api_logs_view'),
+    path('', views.index, name='index'),  # Add your views here
 ]

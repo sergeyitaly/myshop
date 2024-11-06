@@ -1,0 +1,69 @@
+{% block content %}
+    <h2>API Logs - Request Count (Telegram vs Vercel)</h2>
+
+    <form id="timePeriodForm" method="get">
+        <label for="time_period">Select Time Period:</label>
+        <select id="time_period" name="time_period">
+            <option value="day" {% if time_period == 'day' %}selected{% endif %}>Today</option>
+            <option value="week" {% if time_period == 'week' %}selected{% endif %}>This Week</option>
+            <option value="month" {% if time_period == 'month' %}selected{% endif %}>This Month</option>
+            <option value="year" {% if time_period == 'year' %}selected{% endif %}>This Year</option>
+        </select>
+        <button type="submit">Filter</button>
+    </form>
+
+    <canvas id="requestChart" width="400" height="200"></canvas>
+
+    <!-- Include Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const ctx = document.getElementById('requestChart').getContext('2d');
+
+        // Initialize chart with initial data (can be empty or default)
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Telegram', 'Vercel'],  // Labels for each bar
+                datasets: [{
+                    label: 'API Request Count',
+                    data: [0, 0],  // Placeholder data
+                    backgroundColor: ['#0074D9', '#FF4136'],  // Bar colors
+                    borderColor: ['#0074D9', '#FF4136'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Function to fetch data from the server
+        function fetchChartData(timePeriod) {
+            fetch(`/admin/api/logs/chart-data/?time_period=${timePeriod}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Update the chart with new data
+                    chart.data.datasets[0].data = [data.telegram_count, data.vercel_count];
+                    chart.update();  // Re-render the chart
+                })
+                .catch(error => console.error('Error fetching chart data:', error));
+        }
+
+        // Event listener to detect changes in time period
+        document.getElementById('timePeriodForm').addEventListener('submit', function(event) {
+            event.preventDefault();  // Prevent form submission (page reload)
+            const timePeriod = document.getElementById('time_period').value;
+            fetchChartData(timePeriod);
+        });
+
+        // Initial data fetch (default time period or on page load)
+        const initialTimePeriod = '{{ time_period|default:"day" }}';  // Use the selected time period or default to 'day'
+        fetchChartData(initialTimePeriod);
+    </script>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% block content %}
+    <h1>API Logs</h1>
+
+    <!-- Render the chart HTML (Canvas) here -->
+    <div id="chart-container" style="width: 100%; height: 400px;">
+        {{ chart_html }}
+    </div>
+
+    <!-- Include the Chart.js library and the custom JS for rendering and updating the chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('requestChart').getContext('2d');
+            let chartData = {{ chart_data|safe }};
+            
+            const requestChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: 'Request Count',
+                        data: chartData.data,
+                        backgroundColor: '#4CAF50',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                        }
+                    }
+                }
+            });
+
+            const timePeriodSelect = document.getElementById('time_period');
+            if (timePeriodSelect) {
+                timePeriodSelect.addEventListener('change', function() {
+                    const timePeriod = timePeriodSelect.value;
+                    fetch(`/admin/api/logs/chart-data/?time_period=${timePeriod}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            requestChart.data.labels = data.labels;
+                            requestChart.data.datasets[0].data = data.data;
+                            requestChart.update();
+                        });
+                });
+            }
+        });
+    </script>
+
+    <div>
+        <label for="time_period">Select Time Period:</label>
+        <select id="time_period">
+            <option value="day" {% if current_time_period == 'day' %}selected{% endif %}>Today</option>
+            <option value="week" {% if current_time_period == 'week' %}selected{% endif %}>This Week</option>
+            <option value="month" {% if current_time_period == 'month' %}selected{% endif %}>This Month</option>
+            <option value="year" {% if current_time_period == 'year' %}selected{% endif %}>This Year</option>
+        </select>
+    </div>
+
+{% endblock %}
