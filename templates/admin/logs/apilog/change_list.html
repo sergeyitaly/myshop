@@ -1,0 +1,118 @@
+{% extends "admin/change_list.html" %}
+{% load custom_filters %}
+
+{% block content %}
+  <h1>{{ title }}</h1>
+
+  <!-- Time Period Selector -->
+  <div class="time-period-selector" style="margin-bottom: 20px;">
+    <label for="time_period">Select Time Period: </label>
+    <select id="time_period">
+      <option value="day" {% if current_time_period == 'day' %}selected{% endif %}>Today</option>
+      <option value="week" {% if current_time_period == 'week' %}selected{% endif %}>This Week</option>
+      <option value="month" {% if current_time_period == 'month' %}selected{% endif %}>This Month</option>
+      <option value="year" {% if current_time_period == 'year' %}selected{% endif %}>This Year</option>
+    </select>
+  </div>
+
+  <!-- Clear Logs Button -->
+  <div style="margin-bottom: 20px;">
+    <a href="{% url 'admin:clear_logs' %}" class="button" style="background-color: red; color: white;">Clear All Logs</a>
+  </div>
+
+  <!-- Chart Container -->
+  <div id="chart-container">
+    <canvas id="requestChart" width="400" height="200"></canvas>
+  </div>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const ctx = document.getElementById('requestChart').getContext('2d');
+      const chartData = {{ chart_data|safe }};
+  
+      // Initialize the chart
+      const requestChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: chartData.labels,
+          datasets: Object.keys(chartData.data).map(endpoint => ({
+            label: endpoint,
+            data: chartData.data[endpoint],
+            backgroundColor: endpoint === 'Vercel' ? '#4CAF50' : '#FF5733',
+          }))
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'top' },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+            }
+          }
+        }
+      });
+  
+      // Fetch new chart data when time period changes
+      const timePeriodSelect = document.getElementById('time_period');
+      timePeriodSelect.addEventListener('change', function() {
+        const timePeriod = timePeriodSelect.value;
+        fetch(`/admin/api/logs/chart-data/?time_period=${timePeriod}`)
+          .then(response => response.json())
+          .then(data => {
+            requestChart.data.labels = data.labels;
+            requestChart.data.datasets = Object.keys(data.data).map(endpoint => ({
+              label: endpoint,
+              data: data.data[endpoint],
+              backgroundColor: endpoint === 'Vercel' ? '#4CAF50' : '#FF5733',
+            }));
+            requestChart.update();
+          });
+      });
+    });
+  </script>
+
+  <!-- Endpoint Visit Statistics Table -->
+  <div id="endpoint-statistics" class="module" style="margin-top: 40px;">
+    <h2>Endpoint Visit Statistics</h2>
+    <table class="table table-striped table-hover">
+      <thead>
+        <tr>
+          <th>Endpoint</th>
+          <th>Visit Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for endpoint, stats in endpoint_statistics.items %}
+          {% for entry in stats %}
+            <tr class="row1">
+              <td class="field-endpoint">
+                <!-- Split endpoint and request count from the combined string -->
+                {% with entry.endpoint|split:"-" as parts %}
+                  <strong>{{ parts.0 }}</strong>
+                  <span style="color: #4CAF50;">- {{ parts.1 }}</span>
+                {% endwith %}
+              </td>
+              <td class="field-visit-count">
+                {{ entry.visit_count }}
+              </td>
+            </tr>
+          {% endfor %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Render the rest of the change list content -->
+  <div class="results">
+    {% for result in cl.result_list %}
+      <div class="result-item">
+        {{ result }}
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}
