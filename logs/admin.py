@@ -12,7 +12,8 @@ from django.utils.html import format_html
 from django.urls import path
 from django.contrib import messages
 from django.http import HttpResponseRedirect
-from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
+from django.db.models.functions import TruncDate, TruncWeek, TruncMonth, TruncHour
+from collections import defaultdict
 
 # Custom action to clear logs
 def clear_logs(modeladmin, request, queryset):
@@ -61,13 +62,12 @@ class APILogAdmin(admin.ModelAdmin):
     # Exclude unwanted endpoints in the queryset
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
-        
+
         # Exclude unwanted endpoints
         exclude_patterns = [
             '/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/',
             '/api/health_check', '/api/token/refresh/', '/api/telegram_users/', 
-            '/auth/token/login/', '/api/token/',
-
+            '/auth/token/login/', '/api/token/','/admin/api/logs/chart-data/',
         ]
 
         queryset = queryset.filter(endpoint__icontains='/api/')
@@ -75,6 +75,7 @@ class APILogAdmin(admin.ModelAdmin):
         # Exclude the specific endpoints in the exclusion list
         queryset = queryset.exclude(endpoint__in=exclude_patterns)
         return queryset
+
 
     # Add the custom URL for clearing logs
     def get_urls(self):
@@ -108,104 +109,115 @@ class APILogAdmin(admin.ModelAdmin):
         last_visit = APILog.objects.filter(endpoint=obj.endpoint).aggregate(last_visited=Max('timestamp'))['last_visited']
         return last_visit if last_visit else 'Never'
 
+
+
+
     def get_charts_data(self, time_period):
         now = timezone.now()
-        time_delta = {
-            'day': timedelta(days=1),
-            'week': timedelta(weeks=1),
-            'month': timedelta(weeks=4),
-            'year': timedelta(weeks=52)
-        }
+        chart_data = {'labels': [], 'data': {'Telegram': [], 'Vercel': []}}
 
-        start_date = now - time_delta.get(time_period, timedelta(days=1))
-        data = APILog.objects.filter(timestamp__gte=start_date)
-
-        # Exclude non-API endpoints and unwanted specific endpoints
+        # Define the patterns to exclude
         exclude_patterns = [
-            '/favicon.ico', '/admin/', '/api/token/', '/auth/token/login/', '/api/token/refresh/', '/admin/logs/apilog/',
-            '/api/health_check', '/media/', '/admin/jsi18n/'
+            '/favicon.ico', '/admin/', '/api/token/', '/auth/token/login/', 
+            '/api/token/refresh/', '/admin/*', '/api/health_check', '/media/','/admin/api/logs/chart-data/',
         ]
-        
-        # Only include /api/ endpoints and exclude the unwanted ones
-        data = data.filter(endpoint__icontains='/api/').exclude(endpoint__in=exclude_patterns)
 
-        # Group by the appropriate time period
+        # Set date range and group data by appropriate intervals
         if time_period == 'day':
-            data_grouped = data.annotate(day=TruncDate('timestamp')).values('day', 'endpoint').annotate(request_count=Count('id')).order_by('day')
+            date_range = [now - timedelta(hours=x) for x in range(23, -1, -1)]
+            chart_data['labels'] = [hour.strftime('%H:%M') for hour in date_range]
+            
+            # Separate queries for Telegram and Vercel endpoints
+            telegram_data = APILog.objects.filter(
+                timestamp__date=now.date(),
+                endpoint__icontains='by_chat_id'
+            ).exclude(endpoint__in=exclude_patterns) \
+            .annotate(hour=TruncHour('timestamp')).values('hour') \
+            .annotate(telegram_count=Count('id'))
+            
+            vercel_data = APILog.objects.filter(
+                timestamp__date=now.date(),
+                endpoint__icontains='/api/'
+            ).exclude(endpoint__icontains='by_chat_id') \
+            .exclude(endpoint__in=exclude_patterns) \
+            .annotate(hour=TruncHour('timestamp')).values('hour') \
+            .annotate(vercel_count=Count('id'))
+        
         elif time_period == 'week':
-            data_grouped = data.annotate(week=TruncWeek('timestamp')).values('week', 'endpoint').annotate(request_count=Count('id')).order_by('week')
+            date_range = [now - timedelta(days=x) for x in range(6, -1, -1)]
+            chart_data['labels'] = [day.strftime('%A') for day in date_range]
+
+            telegram_data = APILog.objects.filter(
+                timestamp__gte=now - timedelta(days=now.weekday()),
+                endpoint__icontains='by_chat_id'
+            ).exclude(endpoint__in=exclude_patterns) \
+            .annotate(day=TruncDate('timestamp')).values('day') \
+            .annotate(telegram_count=Count('id'))
+            
+            vercel_data = APILog.objects.filter(
+                timestamp__gte=now - timedelta(days=now.weekday()),
+                endpoint__icontains='/api/'
+            ).exclude(endpoint__icontains='by_chat_id') \
+            .exclude(endpoint__in=exclude_patterns) \
+            .annotate(day=TruncDate('timestamp')).values('day') \
+            .annotate(vercel_count=Count('id'))
+        
         elif time_period == 'month':
-            data_grouped = data.annotate(month=TruncMonth('timestamp')).values('month', 'endpoint').annotate(request_count=Count('id')).order_by('month')
+            days_in_month = (now.replace(day=28) + timedelta(days=4)).day
+            date_range = [now - timedelta(days=x) for x in range(days_in_month - 1, -1, -1)]
+            chart_data['labels'] = [day.strftime('%d') for day in date_range]
+
+            telegram_data = APILog.objects.filter(
+                timestamp__month=now.month,
+                endpoint__icontains='by_chat_id'
+            ).exclude(endpoint__in=exclude_patterns) \
+            .annotate(day=TruncDate('timestamp')).values('day') \
+            .annotate(telegram_count=Count('id'))
+            
+            vercel_data = APILog.objects.filter(
+                timestamp__month=now.month,
+                endpoint__icontains='/api/'
+            ).exclude(endpoint__icontains='by_chat_id') \
+            .exclude(endpoint__in=exclude_patterns) \
+            .annotate(day=TruncDate('timestamp')).values('day') \
+            .annotate(vercel_count=Count('id'))
+        
         elif time_period == 'year':
-            data_grouped = data.annotate(year=TruncDate('timestamp')).values('year', 'endpoint').annotate(request_count=Count('id')).order_by('year')
-        else:
-            data_grouped = data.annotate(day=TruncDate('timestamp')).values('day', 'endpoint').annotate(request_count=Count('id')).order_by('day')
+            date_range = [now.replace(month=x, day=1) for x in range(1, 13)]
+            chart_data['labels'] = [month.strftime('%b') for month in date_range]
 
-        # Initialize chart data
-        chart_data = {
-            'labels': [],
-            'data': {
-                'Vercel': [],
-                'Telegram': [],
-                'Total': []
-            }
-        }
+            telegram_data = APILog.objects.filter(
+                timestamp__year=now.year,
+                endpoint__icontains='by_chat_id'
+            ).exclude(endpoint__in=exclude_patterns) \
+            .annotate(month=TruncMonth('timestamp')).values('month') \
+            .annotate(telegram_count=Count('id'))
+            
+            vercel_data = APILog.objects.filter(
+                timestamp__year=now.year,
+                endpoint__icontains='/api/'
+            ).exclude(endpoint__icontains='by_chat_id') \
+            .exclude(endpoint__in=exclude_patterns) \
+            .annotate(month=TruncMonth('timestamp')).values('month') \
+            .annotate(vercel_count=Count('id'))
 
-        # Aggregation logic based on time period
-        if time_period == 'week':
-            days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-            chart_data['labels'] = days_of_week
-            for entry in data_grouped:
-                day = entry['week'].weekday()  # Extract the day of the week
-                endpoint = entry['endpoint']
-                
-                # Classify endpoints as Vercel or Telegram
-                if '/by_chat_id' in endpoint:
-                    chart_data['data']['Telegram'].append(entry['request_count'])
-                else:
-                    chart_data['data']['Vercel'].append(entry['request_count'])
+        # Fill chart data with separate counts for Telegram and Vercel
+        telegram_counts_by_timestamp = {entry['hour' if time_period == 'day' else 'day' if time_period in ['week', 'month'] else 'month']: entry['telegram_count'] for entry in telegram_data}
+        vercel_counts_by_timestamp = {entry['hour' if time_period == 'day' else 'day' if time_period in ['week', 'month'] else 'month']: entry['vercel_count'] for entry in vercel_data}
 
-            # Total bar for the week (sum of Vercel and Telegram)
-            chart_data['data']['Total'] = [sum(x) for x in zip(chart_data['data']['Vercel'], chart_data['data']['Telegram'])]
-
-        elif time_period == 'month':
-            chart_data['labels'] = [f'Day {i+1}' for i in range(31)]
-            for entry in data_grouped:
-                day = entry.get('month').day - 1  # Adjust to 0-indexed for the chart
-                endpoint = entry['endpoint']
-                
-                # Classify endpoints as Vercel or Telegram
-                if '/by_chat_id' in endpoint:
-                    chart_data['data']['Telegram'].append(entry['request_count'])
-                else:
-                    chart_data['data']['Vercel'].append(entry['request_count'])
-
-            # Total bar for the month (sum of Vercel and Telegram)
-            chart_data['data']['Total'] = [sum(x) for x in zip(chart_data['data']['Vercel'], chart_data['data']['Telegram'])]
-
-        elif time_period == 'year':
-            months_of_year = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-            chart_data['labels'] = months_of_year
-            for entry in data_grouped:
-                month = entry.get('year').month - 1  # Adjust to 0-indexed for the chart
-                endpoint = entry['endpoint']
-                
-                # Classify endpoints as Vercel or Telegram
-                if '/by_chat_id' in endpoint:
-                    chart_data['data']['Telegram'].append(entry['request_count'])
-                else:
-                    chart_data['data']['Vercel'].append(entry['request_count'])
-
-            # Total bar for the year (sum of Vercel and Telegram)
-            chart_data['data']['Total'] = [sum(x) for x in zip(chart_data['data']['Vercel'], chart_data['data']['Telegram'])]
-
-        else:
-            chart_data['labels'] = ['Today']
-            chart_data['data']['Vercel'] = [data.exclude(endpoint__icontains='by_chat_id').count()]
-            chart_data['data']['Telegram'] = [data.filter(endpoint__icontains='by_chat_id').count()]
-            chart_data['data']['Total'] = [data.count()]
+        for date in date_range:
+            time_key = date.replace(minute=0, second=0, microsecond=0) if time_period == 'day' else date
+            chart_data['data']['Telegram'].append(telegram_counts_by_timestamp.get(time_key, 0))
+            chart_data['data']['Vercel'].append(vercel_counts_by_timestamp.get(time_key, 0))
 
         return chart_data
+
+    @method_decorator(csrf_exempt)
+    def get_chart_data_ajax(self, request):
+        time_period = request.GET.get('time_period', 'day')
+        chart_data = self.get_charts_data(time_period)
+        return JsonResponse(chart_data)
+
 
     @method_decorator(csrf_exempt)
     def get_chart_data_ajax(self, request):
@@ -239,26 +251,40 @@ class APILogAdmin(admin.ModelAdmin):
                 document.addEventListener('DOMContentLoaded', function() {
                     const ctx = document.getElementById('logChart').getContext('2d');
                     const chartData = JSON.parse('{{ chart_data|escapejs }}');
-                    const chart = new Chart(ctx, {
-                        type: 'line',
+                    
+                    new Chart(ctx, {
+                        type: 'bar',
                         data: {
                             labels: chartData.labels,
-                            datasets: Object.keys(chartData.data).map(function(label) {
-                                let borderColor;
-                                if (label === 'Telegram') {
-                                    borderColor = 'rgb(54, 162, 235)'; // Blue for Telegram
-                                } else if (label === 'Vercel') {
-                                    borderColor = 'rgb(255, 99, 132)'; // Red for Vercel
-                                } else {
-                                    borderColor = 'rgb(75, 192, 192)'; // Green for Total
+                            datasets: [
+                                {
+                                    label: 'Vercel',
+                                    data: chartData.data.Vercel,
+                                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                                    borderColor: 'rgb(255, 99, 132)',
+                                    borderWidth: 1
+                                },
+                                {
+                                    label: 'Telegram',
+                                    data: chartData.data.Telegram,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.5)', // Blue with transparency
+                                    borderColor: 'rgba(54, 162, 235, 1)'
+                                    borderWidth: 1
+                                },
+                                {
+                                    label: 'Total',
+                                    data: chartData.data.Total,
+                                    backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                                    borderColor: 'rgb(75, 192, 192)',
+                                    borderWidth: 1
                                 }
-                                return {
-                                    label: label,
-                                    data: chartData.data[label],
-                                    borderColor: borderColor,
-                                    fill: false
-                                };
-                            })
+                            ]
+                        },
+                        options: {
+                            scales: {
+                                x: { beginAtZero: true },
+                                y: { beginAtZero: true }
+                            }
                         }
                     });
                 });
