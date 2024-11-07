@@ -2,7 +2,6 @@
 {% load custom_filters %}
 
 {% block content %}
-  <h1>{{ title }}</h1>
 
   <!-- Time Period Selector -->
   <div class="time-period-selector" style="margin-bottom: 20px;">
@@ -32,6 +31,16 @@
     document.addEventListener('DOMContentLoaded', function() {
       const ctx = document.getElementById('requestChart').getContext('2d');
       const chartData = {{ chart_data|safe }};
+    
+      // Function to generate a consistent color based on the endpoint name
+      function generateColor(endpoint) {
+        let hash = 0;
+        for (let i = 0; i < endpoint.length; i++) {
+          hash = endpoint.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const color = '#' + ((hash >> 24) & 0xFF).toString(16).padStart(2, '0') + ((hash >> 16) & 0xFF).toString(16).padStart(2, '0') + ((hash >> 8) & 0xFF).toString(16).padStart(2, '0');
+        return color;
+      }
   
       // Initialize the chart
       const requestChart = new Chart(ctx, {
@@ -41,7 +50,7 @@
           datasets: Object.keys(chartData.data).map(endpoint => ({
             label: endpoint,
             data: chartData.data[endpoint],
-            backgroundColor: endpoint === 'Vercel' ? '#4CAF50' : '#FF5733',
+            backgroundColor: generateColor(endpoint),  // Assign a consistent color based on endpoint
           }))
         },
         options: {
@@ -52,11 +61,14 @@
           scales: {
             y: {
               beginAtZero: true,
+              ticks: {
+                stepSize: 1,  
+                },
             }
           }
         }
       });
-  
+    
       // Fetch new chart data when time period changes
       const timePeriodSelect = document.getElementById('time_period');
       timePeriodSelect.addEventListener('change', function() {
@@ -68,14 +80,14 @@
             requestChart.data.datasets = Object.keys(data.data).map(endpoint => ({
               label: endpoint,
               data: data.data[endpoint],
-              backgroundColor: endpoint === 'Vercel' ? '#4CAF50' : '#FF5733',
+              backgroundColor: generateColor(endpoint),  // Assign a consistent color based on endpoint
             }));
             requestChart.update();
           });
       });
     });
   </script>
-
+  
   <!-- Endpoint Visit Statistics Table -->
   <div id="endpoint-statistics" class="module" style="margin-top: 40px;">
     <h2>Endpoint Visit Statistics</h2>
