@@ -65,7 +65,7 @@ class APILogAdmin(admin.ModelAdmin):
 
         # Exclude unwanted endpoints
         exclude_patterns = [
-            '/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/',
+            '/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/*',
             '/api/health_check', '/api/token/refresh/', '/api/telegram_users/', 
             '/auth/token/login/', '/api/token/','/admin/api/logs/chart-data/',
         ]
