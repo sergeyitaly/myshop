@@ -1,4 +1,4 @@
-import { Grid, Pagination } from "swiper/modules";
+import { Autoplay, Grid, Pagination } from "swiper/modules";
 import { SwiperOptions } from "swiper/types";
 
 export const lightSettings: SwiperOptions = 
@@ -12,7 +12,7 @@ export const lightSettings: SwiperOptions =
             clickable: true,
         },
         spaceBetween: 20,
-        modules: [Grid, Pagination],
+        modules: [Grid, Pagination, Autoplay],
         breakpoints:{
             740: {
                 grid: {

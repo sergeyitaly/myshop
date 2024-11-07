@@ -36,7 +36,7 @@ LOCAL_HOST = os.getenv('LOCAL_HOST')
 TELEGRAM_BOT_TOKEN=os.getenv('NOTIFICATIONS_API')
 SAYINGS_FILE_PATH = os.path.join(BASE_DIR, 'order', 'sayings.txt')
 AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400, must-revalidate'  # Cache for 1 day
+    'CacheControl': 'max-age=86400, must-revalidate'
 }
 
 
@@ -105,6 +105,7 @@ INSTALLED_APPS = [
     'django_extensions',
       # "debug_toolbar",
     'feedback',
+    'logs',
   #  'admisortable2',
 
 ]
@@ -123,6 +124,8 @@ MIDDLEWARE = [
     #    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'myshop.middleware.CacheControlMiddleware',
+    'logs.middleware.APILogMiddleware',  
+
 ]
 # DIRS = [AWS_TEMPLATES]
 
@@ -341,6 +344,10 @@ MODELTRANSLATION_FALLBACK_LANGUAGES = ('en','uk',)
 # DEBUG_TOOLBAR_CONFIG = {
 #    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,  # Only show toolbar in DEBUG mode
 # }
+
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REDIS_CACHE_LOCATION = os.getenv('REDIS_CACHE_LOCATION')
@@ -396,15 +403,21 @@ LOGGING = {
     'disable_existing_loggers': False,
     'handlers': {
         'console': {
-            'level': 'WARNING',
+            'level': 'DEBUG',  # Capture all log levels, including DEBUG
             'class': 'logging.StreamHandler',
         },
     },
     'loggers': {
         'django.db.backends': {
             'handlers': ['console'],
-            'level': 'WARNING',
+            'level': 'DEBUG',  # Capture all database-related logs
             'propagate': False,
+        },
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',  # Capture all logs for Django core (useful for debugging)
+            'propagate': True,
         },
     },
 }
+

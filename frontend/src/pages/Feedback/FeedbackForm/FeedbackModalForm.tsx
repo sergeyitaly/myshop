@@ -1,27 +1,19 @@
-import { ChangeEvent } from "react";
 import { AppInput } from "../../../components/UI/AppInput/AppInput";
 import { MainButton } from "../../../components/UI/MainButton/MainButton";
 import styles from './FeedbackModalForm.module.scss';
 import { useFormik } from "formik";
 import { object, string } from 'yup';
 import { useAppTranslator } from "../../../hooks/useAppTranslator";
+import { initialValues } from "./initialValue";
 
 interface FeedbackModalFormProps {
     isLoading: boolean;
-    onSubmit: (values: { name?: string; email?: string; comment?: string }) => Promise<void>; // Fields are optional
-    onChange: (fieldName: string, value: string) => void;
-    translatedLabels: {
-        name: string;
-        email: string;
-        comment: string;
-    };
+    onSubmit: (values: { name: string; email: string; comment: string }) => void
 }
 
 export const FeedbackModalForm = ({
     isLoading,
-    onChange,
     onSubmit,
-    translatedLabels
 }: FeedbackModalFormProps) => {
 
     const { t } = useAppTranslator();
@@ -33,42 +25,36 @@ export const FeedbackModalForm = ({
     });
 
     const {
-        handleChange: handleChangeFormik,
-        handleSubmit,
-        handleBlur,
         errors,
         touched,
+        handleChange,
+        handleSubmit,
+        handleBlur,
     } = useFormik({
-        initialValues: {
-            name: '',
-            email: '',
-            comment: ''
-        },
+        initialValues,
         validationSchema: validationSchema,
         onSubmit: (values) => {
             onSubmit(values); // Call the passed onSubmit function
         },
     });
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        handleChangeFormik(e);
-        onChange(e.target.name, e.target.value);
-    };
+    
+
 
     return (
         <form 
             className={styles.modal}
             onSubmit={handleSubmit}
         >
-            <h1>Залиште свої дані для зворотнього зв'язку</h1>
+            <h1>{t('left_data')}</h1>
             <AppInput
-                label={translatedLabels.name} // Use translated labels
+                label={t("name")} // Use translated labels
                 name="name"
                 onChange={handleChange}
             />
             <AppInput
                 name='email'
-                label={translatedLabels.email} // Use translated labels
+                label={t('email')} // Use translated labels
                 error={touched.email && !!errors.email}
                 helperText={errors.email}
                 onChange={handleChange}
@@ -77,7 +63,7 @@ export const FeedbackModalForm = ({
             <textarea 
                 name="comment"
                 className={styles.textarea}
-                placeholder={translatedLabels.comment} // Use translated labels
+                placeholder={t("add_comment")} // Use translated labels
                 onChange={handleChange}
             />
             <MainButton
