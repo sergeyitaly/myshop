@@ -7,7 +7,7 @@
     outline: 2px solid transparent;
     width: 100%;
     transition: 0.3s;
-    
+
     &:focus {
         outline-color: $color-blue;
     }
@@ -16,10 +16,10 @@
 .label {
     position: relative;
     margin: 5px 0;
-    
+
     span {
         position: absolute;
-        top: 50%;
+        //top: 50%;
         transform: translateY(-50%);
         left: clamp(0.5rem, 0.213vw + 0.434rem, 0.625rem);
         font-size: clamp(0.875rem, 0.213vw + 0.809rem, 1rem);
@@ -49,14 +49,14 @@
 
 .errorMessage {
     z-index: 1;
-    position: absolute;
-    border: 1px solid $color-error;
+    //position: absolute;
+    //border: 1px solid $color-error;
     padding: 0 10px;
     border-radius: 7px;
     font-size: 14px;
     background: $color-background;
     bottom: 0;
     left: 10px;
-    transform: translateY(50%);
-    color: $color-error
+    color: $color-error;
+    margin-bottom: 5px;
 }

@@ -6,7 +6,7 @@ interface ProductVariantsProps {
     title: string
     className?: string
     value?: string
-    children: ReactNode
+    children?: ReactNode
 }
 
 export const ProductVariants = ({
