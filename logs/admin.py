@@ -14,6 +14,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.db.models.functions import TruncDate, TruncWeek, TruncMonth, TruncHour
 from collections import defaultdict
+from django.urls import reverse
 
 # Custom action to clear logs
 def clear_logs(modeladmin, request, queryset):
@@ -51,37 +52,59 @@ class TimePeriodFilter(admin.SimpleListFilter):
             return queryset.filter(timestamp__gte=start_of_year)
         return queryset
 
+class EndpointFilter(admin.SimpleListFilter):
+    title = 'Endpoint'
+    parameter_name = 'endpoint'
+
+    def lookups(self, request, model_admin):
+        # Get all distinct endpoints
+        endpoints = APILog.objects.values('endpoint').distinct()
+        return [(endpoint['endpoint'], endpoint['endpoint']) for endpoint in endpoints]
+
+    def queryset(self, request, queryset):
+        endpoint_filter = self.value()  # The selected endpoint value from the filter
+        if endpoint_filter:
+            return queryset.filter(endpoint=endpoint_filter)
+        return queryset
+
 
 class APILogAdmin(admin.ModelAdmin):
-    list_display = ('endpoint', 'has_chat_id', 'request_count', 'timestamp')
-    list_filter = (TimePeriodFilter,)  # Added custom filter
+    list_display = ('clickable_endpoint', 'has_chat_id', 'request_count', 'timestamp')
+    list_filter = (TimePeriodFilter, EndpointFilter)  # Added custom filters
     actions = [clear_logs]  # Added clear_logs action
     ordering = ('-request_count',)  # Order by request count (highest to lowest)
     search_fields = ['endpoint']  # Allow searching by endpoint
 
-    # Exclude unwanted endpoints in the queryset
+    change_list_template = 'admin/logs/apilog/change_list.html'  # Specify the custom template
+
+
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
 
         # Exclude unwanted endpoints
         exclude_patterns = [
-            '/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/*',
+            '/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/*','/admin/', '/admin/login/',                                                             
             '/api/health_check', '/api/token/refresh/', '/api/telegram_users/', 
             '/auth/token/login/', '/api/token/','/admin/api/logs/chart-data/',
         ]
 
-        queryset = queryset.filter(endpoint__icontains='/api/')
-
-        # Exclude the specific endpoints in the exclusion list
+        # Filter by endpoint if it's passed in the GET request
+        endpoint_filter = request.GET.get('endpoint', '')
+        if endpoint_filter:
+            queryset = queryset.filter(endpoint=endpoint_filter)
+#        queryset = queryset.filter(endpoint__icontains='/api/')
+        queryset = queryset.filter(endpoint__icontains='/')
+        # Exclude specific unwanted endpoints
         queryset = queryset.exclude(endpoint__in=exclude_patterns)
         return queryset
-
 
     # Add the custom URL for clearing logs
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
             path('clear_logs/', self.clear_all_logs, name='clear_logs'),
+            path('filter_by_endpoint/', self.filter_by_endpoint, name='filter_by_endpoint'),
+
         ]
         return custom_urls + urls
 
@@ -95,6 +118,29 @@ class APILogAdmin(admin.ModelAdmin):
             messages.error(request, f"Error clearing logs: {str(e)}")
 
         return HttpResponseRedirect('/admin/logs/apilog/')  # Redirect back to the admin list view
+
+
+    def filter_by_endpoint(self, request):
+        endpoint = request.GET.get('endpoint', '')
+        if endpoint:
+            # Filter logs by the selected endpoint
+            logs = APILog.objects.filter(endpoint=endpoint)
+            # Return a JSON response with the filtered data
+            logs_data = list(logs.values())
+            return JsonResponse({'logs': logs_data})
+        return JsonResponse({'error': 'Endpoint not provided'}, status=400)
+
+    def clickable_endpoint(self, obj):
+        """
+        Display the endpoint as a clickable link in the admin list view.
+        """
+        # Create a URL that will filter logs by this endpoint
+        endpoint_url = reverse('admin:logs_apilog_changelist') + f'?endpoint={obj.endpoint}'
+        return format_html('<a href="{}">{}</a>', endpoint_url, obj.endpoint)
+
+    clickable_endpoint.short_description = 'Endpoint'  # Set the column name
+    clickable_endpoint.admin_order_field = 'endpoint'
+
 
     def request_count(self, obj):
         """
@@ -137,7 +183,9 @@ class APILogAdmin(admin.ModelAdmin):
             
             vercel_data = APILog.objects.filter(
                 timestamp__date=now.date(),
-                endpoint__icontains='/api/'
+                endpoint__icontains='/'
+                #endpoint__icontains='/api/'
+
             ).exclude(endpoint__icontains='by_chat_id') \
             .exclude(endpoint__in=exclude_patterns) \
             .annotate(hour=TruncHour('timestamp')).values('hour') \
@@ -156,7 +204,9 @@ class APILogAdmin(admin.ModelAdmin):
             
             vercel_data = APILog.objects.filter(
                 timestamp__gte=now - timedelta(days=now.weekday()),
-                endpoint__icontains='/api/'
+                endpoint__icontains='/'
+                #endpoint__icontains='/api/'
+
             ).exclude(endpoint__icontains='by_chat_id') \
             .exclude(endpoint__in=exclude_patterns) \
             .annotate(day=TruncDate('timestamp')).values('day') \
@@ -176,7 +226,8 @@ class APILogAdmin(admin.ModelAdmin):
             
             vercel_data = APILog.objects.filter(
                 timestamp__month=now.month,
-                endpoint__icontains='/api/'
+                endpoint__icontains='/'
+                #endpoint__icontains='/api/'
             ).exclude(endpoint__icontains='by_chat_id') \
             .exclude(endpoint__in=exclude_patterns) \
             .annotate(day=TruncDate('timestamp')).values('day') \
@@ -195,7 +246,9 @@ class APILogAdmin(admin.ModelAdmin):
             
             vercel_data = APILog.objects.filter(
                 timestamp__year=now.year,
-                endpoint__icontains='/api/'
+                endpoint__icontains='/'
+                #endpoint__icontains='/api/'
+
             ).exclude(endpoint__icontains='by_chat_id') \
             .exclude(endpoint__in=exclude_patterns) \
             .annotate(month=TruncMonth('timestamp')).values('month') \
@@ -249,47 +302,11 @@ class APILogAdmin(admin.ModelAdmin):
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
-                    const ctx = document.getElementById('logChart').getContext('2d');
-                    const chartData = JSON.parse('{{ chart_data|escapejs }}');
-                    
-                    new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: chartData.labels,
-                            datasets: [
-                                {
-                                    label: 'Vercel',
-                                    data: chartData.data.Vercel,
-                                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                                    borderColor: 'rgb(255, 99, 132)',
-                                    borderWidth: 1
-                                },
-                                {
-                                    label: 'Telegram',
-                                    data: chartData.data.Telegram,
-                                    backgroundColor: 'rgba(54, 162, 235, 0.5)', // Blue with transparency
-                                    borderColor: 'rgba(54, 162, 235, 1)'
-                                    borderWidth: 1
-                                },
-                                {
-                                    label: 'Total',
-                                    data: chartData.data.Total,
-                                    backgroundColor: 'rgba(75, 192, 192, 0.5)',
-                                    borderColor: 'rgb(75, 192, 192)',
-                                    borderWidth: 1
-                                }
-                            ]
-                        },
-                        options: {
-                            scales: {
-                                x: { beginAtZero: true },
-                                y: { beginAtZero: true }
-                            }
-                        }
-                    });
+                    // No need for the custom click event handler, the links are already functional
                 });
             </script>
         """
         return super().render_change_list(request, context, *args, **kwargs)
+
 
 admin.site.register(APILog, APILogAdmin)
