@@ -2,7 +2,6 @@
 {% load custom_filters %}
 
 {% block content %}
-
   <!-- Time Period Selector -->
   <div class="time-period-selector" style="margin-bottom: 20px;">
     <label for="time_period">Select Time Period: </label>
@@ -14,6 +13,21 @@
     </select>
   </div>
 
+  <!-- Endpoint Filter -->
+  <div class="endpoint-filter" style="margin-bottom: 20px;">
+    <label for="endpoint_filter">Select Endpoint: </label>
+    <select id="endpoint_filter">
+      <option value="all">All</option>
+      {% for endpoint, stats in endpoint_statistics.items %}
+        {% for entry in stats %}
+          {% with entry.endpoint|split:"-" as parts %}
+            <option value="{{ parts.0 }}">{{ parts.0 }}</option>
+          {% endwith %}
+        {% endfor %}
+      {% endfor %}
+    </select>
+  </div>
+  
   <!-- Clear Logs Button -->
   <div style="margin-bottom: 20px;">
     <a href="{% url 'admin:clear_logs' %}" class="button" style="background-color: red; color: white;">Clear All Logs</a>
@@ -63,12 +77,12 @@
               beginAtZero: true,
               ticks: {
                 stepSize: 1,  
-                },
+              },
             }
           }
         }
       });
-    
+
       // Fetch new chart data when time period changes
       const timePeriodSelect = document.getElementById('time_period');
       timePeriodSelect.addEventListener('change', function() {
@@ -84,6 +98,31 @@
             }));
             requestChart.update();
           });
+      });
+
+      // Filter chart data by selected endpoint
+      const endpointFilterSelect = document.getElementById('endpoint_filter');
+      endpointFilterSelect.addEventListener('change', function() {
+        const selectedEndpoint = endpointFilterSelect.value;
+
+        if (selectedEndpoint === "all") {
+          // Show all data
+          requestChart.data.labels = chartData.labels;
+          requestChart.data.datasets = Object.keys(chartData.data).map(endpoint => ({
+            label: endpoint,
+            data: chartData.data[endpoint],
+            backgroundColor: generateColor(endpoint),
+          }));
+        } else {
+          // Filter the chart by selected endpoint
+          requestChart.data.labels = chartData.labels;
+          requestChart.data.datasets = chartData.data[selectedEndpoint] ? [{
+            label: selectedEndpoint,
+            data: chartData.data[selectedEndpoint],
+            backgroundColor: generateColor(selectedEndpoint),
+          }] : [];
+        }
+        requestChart.update();
       });
     });
   </script>
