@@ -1,11 +1,13 @@
 @import '../../../variables';
 
 .card {
+    
     background: $color-gray-450;
     padding: 10px;
 }
 
 .buttons {
+    position: relative;
     margin-bottom: clamp(0.875rem, 1.064vw + 0.543rem, 1.5rem);
     display: flex;
     gap: 20px;
@@ -75,4 +77,22 @@
     height: clamp(1rem, 0.851vw + 0.734rem, 1.5rem);
     margin-bottom: clamp(0.875rem, 1.064vw + 0.543rem, 1.5rem);
     max-width: 300px;
+}
+
+.error_plug {
+    position: absolute;
+    top: 8px;
+    left: clamp(14.438rem, 2.553vw + 13.64rem, 15.938rem);
+    font-size: clamp(0.75rem, 0.426vw + 0.617rem, 1rem);
+    background: $color-background;
+    padding: 5px;
+    border: 1px solid $color-error;
+    border-radius: 5px;
+    color: $color-error;
+
+    @media (max-width: $screen-smallMobile) {
+        top: 35px;
+        left: 10px;
+        padding: 1px 5px;
+    }
 }
