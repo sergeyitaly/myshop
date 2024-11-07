@@ -47,10 +47,10 @@
 .counter {
     color: $color-blue;
     position: absolute;
-    top: -2px;
-    right: -2px;
+    top: -1px;
+    right: -1px;
     transform: translateX(100%);
-    font-size: clamp(0.75rem, 0.426vw + 0.617rem, 1rem);
+    font-size: clamp(0.5rem, 0.3vw + 0.4rem, 0.75rem); /* уменьшено значение */
 }
 
 .content {
@@ -59,7 +59,7 @@
     flex-direction: column;
     overflow-y: scroll ;
     overflow-x: hidden ;
-    gap: 40px;
+    gap: 30px;
 }
 
 .center {
@@ -76,10 +76,14 @@
 .actions{
     display: flex;
     flex-direction: column;
-    gap: 10px
+    //gap: 10px
 }
 
 .item {
     border: 1px solid black;
     height: 100px;
+}
+
+.control {
+    font-weight: 400;
 }
