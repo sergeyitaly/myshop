@@ -10,11 +10,13 @@ export const ProductsWithDiscountPage: React.FC = () => {
 
     return (
         <PageContainer>
+            <div style={{ marginTop: '60px' }}>
             <NamedSection
                 title={t('discounts')}
             >
                 <ProductsWithDiscount />
                 </NamedSection>
+            </div>
         </PageContainer>
     );
 };
