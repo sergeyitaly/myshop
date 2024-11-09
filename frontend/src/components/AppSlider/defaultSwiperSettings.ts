@@ -1,4 +1,4 @@
-import { Grid, Pagination, Navigation, Autoplay} from "swiper/modules";
+import { Grid, Pagination, Navigation} from "swiper/modules";
 import { SwiperOptions } from "swiper/types";
 
 export const defaultAppSliderOptions: SwiperOptions = {
@@ -11,7 +11,7 @@ export const defaultAppSliderOptions: SwiperOptions = {
         clickable: true,
     },
     spaceBetween: 20,
-    modules: [Grid, Pagination, Navigation, Autoplay],
+    modules: [Grid, Pagination, Navigation],
     breakpoints:{
         740: {
             grid: {
@@ -19,5 +19,9 @@ export const defaultAppSliderOptions: SwiperOptions = {
             },
             slidesPerView: 4
         }
+    },
+    autoplay:{
+        delay: 1000,
+        pauseOnMouseEnter: true
     }
 } 
