@@ -21,7 +21,6 @@ export const BurgerMenu = () => {
 		{ name: t("discounts"), href: "/discounts" },
 		{ name: t("about_us"), href: "/about" },
 		{ name: t("contacts"), href: "/contacts" },
-		{ name: t("order"), href: "/order" },
 	];
 
 	return (
