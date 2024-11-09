@@ -3,13 +3,16 @@ import { PreviewCard } from "../../components/Cards/PreviewCard/PreviewCard"
 import { AppSlider } from "../../components/AppSlider/AppSlider"
 import { discountSettings } from "./sliderSettings/DiscountSetting"
 import { useNavigate } from "react-router-dom"
-import { ROUTE } from "../../constants"
+import { ROUTE, screens } from "../../constants"
 import { useAppTranslator } from "../../hooks/useAppTranslator"
+import { useMediaQuery } from "@mui/material"
 
 
 export const ProductsWithDiscount = () => {
 
     const navigate = useNavigate()
+
+    const isMobile = useMediaQuery(screens.maxMobile)
 
     const {data, isLoading} = useGetProductsByMainFilterQuery({has_discount: true})
 
@@ -21,6 +24,7 @@ export const ProductsWithDiscount = () => {
         <AppSlider
             isLoading = {isLoading}
             sliderSettings={discountSettings}
+            qtyOfPreloaderCards={isMobile ? 2 : 4}
         >
             {
                 products.map((product) => {
