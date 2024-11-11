@@ -360,7 +360,7 @@ CACHES = {
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'CONNECTION_POOL_KWARGS': {
-                'max_connections': 100,  # Adjust based on load requirements
+                'max_connections': 300,  # Adjust based on load requirements
                 'retry_on_timeout': True,
             },
             'SOCKET_CONNECT_TIMEOUT': 25,  # seconds

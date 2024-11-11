@@ -1,15 +1,16 @@
 from django.utils.translation import gettext as _
-from order.models import Product
+from order.models import Product, Order, TelegramUser
 from django.core.management.base import BaseCommand
-from order.models import Order, OrderSummary
+from order.models import OrderSummary
 from order.serializers import OrderSerializer
 from django.utils.timezone import make_naive, is_aware
 from datetime import datetime
 import logging
+
 logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
-    help = 'Generate order summaries for previously created orders'
+    help = 'Generate order summaries for previously created orders and update telegram_user_id'
 
     def handle(self, *args, **kwargs):
         try:
@@ -20,7 +21,19 @@ class Command(BaseCommand):
 
             # Group orders by chat_id
             grouped_orders = {}
+
             for order in orders:
+                # Fetch or update the TelegramUser by phone number
+                if not order.telegram_user:
+                    try:
+                        # Look up the TelegramUser by the phone number
+                        telegram_user = TelegramUser.objects.get(phone=order.phone)
+                        order.telegram_user = telegram_user
+                        order.save()  # Save the updated order with the telegram_user_id
+                        logger.info(f'Updated order {order.id} with telegram_user_id {telegram_user.id}')
+                    except TelegramUser.DoesNotExist:
+                        logger.warning(f'TelegramUser not found for phone {order.phone} (Order ID: {order.id})')
+                
                 chat_id = order.telegram_user.chat_id if order.telegram_user else None
                 if chat_id not in grouped_orders:
                     grouped_orders[chat_id] = []
@@ -46,7 +59,7 @@ class Command(BaseCommand):
                     'complete_at': complete_at,
                     'canceled_at': canceled_at
                 }
-                
+
                 latest_status_field = max(
                     statuses,
                     key=lambda s: statuses[s] or datetime.min
@@ -84,11 +97,10 @@ class Command(BaseCommand):
                     order_items_en.append({
                         'size': size,
                         'quantity': item.quantity,
-                        'total_sum': item.total_sum,  # Assuming 'total_sum' exists for item
                         'color_name': color_name_en,
-                        'item_price': product.price,  # Assuming 'price' field exists in Product
+                        'price': product.price,  # Assuming 'price' field exists in Product
                         'color_value': product.color_value,  # Assuming 'color_value' exists in Product
-                        'product_name': product_name_en,
+                        'name': product_name_en,
                         'collection_name': product.collection.name if product.collection else _('No Collection')  # Assuming related 'collection'
                     })
 
@@ -96,11 +108,10 @@ class Command(BaseCommand):
                     order_items_uk.append({
                         'size': size,
                         'quantity': item.quantity,
-                        'total_sum': item.total_sum,  # Assuming 'total_sum' exists for item
                         'color_name': color_name_uk,
-                        'item_price': product.price,  # Assuming 'price' field exists and is the same for both languages
+                        'price': product.price,  # Assuming 'price' field exists and is the same for both languages
                         'color_value': product.color_value,  # Assuming 'color_value' exists for both languages
-                        'product_name': product_name_uk,
+                        'name': product_name_uk,
                         'collection_name': product.collection.name_uk if product.collection else _('No Collection')  # Assuming related 'collection' in Ukrainian
                     })
 
