@@ -191,17 +191,20 @@ class TelegramUserViewSet(viewsets.ModelViewSet):
                 order.telegram_user = telegram_user
                 order.save(update_fields=['telegram_user'])
 
-
-class OrderItemViewSet(viewsets.ModelViewSet):
-    queryset = OrderItem.objects.all()
-    serializer_class = OrderItemSerializer
-    permission_classes = [IsAuthenticated]  # Ensure this matches your settings
-
+logger = logging.getLogger(__name__)
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """
+        Override the default queryset to prefetch related telegram_user data.
+        This optimizes the retrieval of related telegram_user objects.
+        """
+        qs = super().get_queryset()
+        return qs.prefetch_related('telegram_user')
 
     def _associate_chat_id(self, order, chat_id):
         """ Helper function to associate a chat_id with the order. """
@@ -289,8 +292,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Override to ensure orders are created correctly."""
         super().perform_create(serializer)
-        logger.info(f"Order {serializer.instance.id} created.")
-    
+        logger.info(f"Order {serializer.instance.id} created.")    
     
 def set_telegram_webhook():
     url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/setWebhook"

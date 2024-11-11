@@ -47,7 +47,8 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='submitted', db_index=True, verbose_name=_('Status'))
     parent_order = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, verbose_name=_('Parent Order'))
     present = models.BooleanField(null=True, help_text=_('Package as a present'))
-    telegram_user = models.ForeignKey(TelegramUser, related_name='orders', on_delete=models.CASCADE, null=True, blank=True, verbose_name=_('Telegram user'))
+#    telegram_user = models.ForeignKey(TelegramUser, related_name='orders', on_delete=models.CASCADE, null=True, blank=True, verbose_name=_('Telegram user'))
+    telegram_user = models.ForeignKey(TelegramUser, on_delete=models.SET_NULL, null=True, blank=True)
 
 
     @property
@@ -97,10 +98,6 @@ class Order(models.Model):
         ordering = ('-submitted_at',)
         verbose_name = _('Order')
         verbose_name_plural = _('Orders')
-    class Meta:
-        ordering = ('-submitted_at',)
-        verbose_name = _('Order')
-        verbose_name_plural = _('Orders')
 
 
 class OrderSummary(models.Model):
@@ -138,7 +135,7 @@ class OrderItem(models.Model):
   #  product = models.ForeignKey(Product, related_name='order_items', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(verbose_name=_('Quantity'))
     total_sum = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, verbose_name=_('Total Sum'))
-
+    language = models.CharField(max_length=2, choices=[('en', 'English'), ('uk', 'Ukrainian')],default='en')
     def save(self, *args, **kwargs):
         if self.product:
             self.total_sum = self.quantity * self.product.price

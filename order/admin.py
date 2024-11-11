@@ -58,8 +58,11 @@ class OrderItemInline(admin.TabularInline):
     collection_name.short_description = _('Collection')
 
     def size(self, obj):
-        return obj.product.size
+        if obj.product and hasattr(obj.product, 'size'):
+            return obj.product.size
+        return 'No Size Available'
     size.short_description = _('Size')
+
 
     def color(self, obj):
         return mark_safe(f'<div style="display: flex; align-items: center;"><div style="width: 10px; height: 10px; background-color: {obj.product.color_value}; margin-right: 5px;"></div>{obj.product.color_name}</div>')
@@ -82,6 +85,7 @@ class TelegramUserFilter(SimpleListFilter):
             return queryset.filter(telegram_user__phone=phone, telegram_user__chat_id=chat_id)
         return queryset
 
+
 class HasOrderItemsFilter(SimpleListFilter):
     title = _('Has Order Items')
     parameter_name = _('has_order_items')
@@ -100,11 +104,12 @@ class HasOrderItemsFilter(SimpleListFilter):
             return queryset.filter(order_items__isnull=True)
         return queryset
 
+
 class OrderAdmin(admin.ModelAdmin):
     list_display = ['id', 'status', 'last_updated', 'phone', 'chat_id']
     readonly_fields = ['id', 'name', 'surname', 'phone', 'email', 'receiver', 'receiver_comments', 'total_quantity', 'total_price', 'submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at', 'chat_id']
     fields = [
-        'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments','congrats',
+        'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments', 'congrats',
         'present', 'status', 'total_quantity', 'total_price', 'submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at'
     ]
     list_filter = [
@@ -142,8 +147,6 @@ class OrderAdmin(admin.ModelAdmin):
         return obj.order_items.aggregate(total=Sum(F('quantity') * F('product__price')))['total'] or 0
     total_price.short_description = _('Total Price')
 
-
-
     def save_model(self, request, obj, form, change):
         if change:
             old_obj = self.model.objects.get(pk=obj.pk)
@@ -162,7 +165,7 @@ class OrderAdmin(admin.ModelAdmin):
 
             # Ensure that obj.telegram_user is not None and has chat_id attribute
             if obj.telegram_user and obj.telegram_user.chat_id:
- # Send notification about status change
+                # Send notification about status change
                 update_order_status_with_notification(
                     obj.id,
                     order_items,
