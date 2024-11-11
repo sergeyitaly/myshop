@@ -7,7 +7,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils.timezone import is_aware, make_aware
 from django.utils.dateparse import parse_datetime
-from .models import Order, OrderSummary, OrderItem
+from .models import Order, OrderSummary, OrderItem, TelegramUser
 from .serializers import OrderItemSerializer
 
 logger = logging.getLogger(__name__)
@@ -166,8 +166,23 @@ def update_order_summary_on_order_item_delete(sender, instance, **kwargs):
 @receiver(post_save, sender=Order)
 def order_post_save(sender, instance, created, **kwargs):
     if created or instance.status in ['processed', 'complete', 'canceled']:
-        chat_id = instance.chat_id
-        if chat_id:
+        # Ensure the order is associated with a TelegramUser and chat_id is correctly populated
+        if not instance.telegram_user:
+            # Fetch chat_id from phone if the order doesn't have a telegram_user
+            chat_id = get_chat_id_from_phone(instance.phone)
+            if chat_id:
+                # Create or update the TelegramUser for the given phone number
+                telegram_user, created = TelegramUser.objects.get_or_create(
+                    phone=instance.phone,
+                    defaults={'chat_id': chat_id}
+                )
+                instance.telegram_user = telegram_user
+                instance.save()  # Save the order again with the updated telegram_user
+
+        # After ensuring the telegram_user is set, update the order summary
+        if instance.telegram_user and instance.telegram_user.chat_id:
+            chat_id = instance.telegram_user.chat_id
             update_order_summary(chat_id)
             logger.info(f"OrderSummary updated after Order (ID: {instance.id}) save with status {instance.status}.")
+
 

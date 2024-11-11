@@ -203,6 +203,17 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
+    def _associate_chat_id(self, order, chat_id):
+        """ Helper function to associate a chat_id with the order. """
+        try:
+            telegram_user = TelegramUser.objects.get(chat_id=chat_id)
+            order.telegram_user = telegram_user
+            order.save(update_fields=['telegram_user'])
+            logger.info(f"Order {order.id} updated with TelegramUser {telegram_user.id}")
+        except TelegramUser.DoesNotExist:
+            logger.error(f"TelegramUser with chat_id {chat_id} not found for Order {order.id}")
+            return Response({"detail": "TelegramUser not found."}, status=status.HTTP_400_BAD_REQUEST)
+
     @swagger_auto_schema(
         operation_description="Retrieve an order by ID",
         responses={200: OrderSerializer, 404: 'Not Found'}
@@ -242,6 +253,43 @@ class OrderViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f"Error fetching orders: {e}")
             return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def create(self, request, *args, **kwargs):
+        logger.debug("Received data: %s", request.data)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        # Get chat_id from the request data
+        chat_id = request.data.get('chat_id')
+        if chat_id:
+            # Get or create a TelegramUser and associate it with the order
+            self._associate_chat_id(serializer.instance, chat_id)
+        
+        # Perform order creation
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+
+        # Return the created order data with additional order summary if needed
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        
+        chat_id = request.data.get('chat_id')
+        if chat_id:
+            self._associate_chat_id(instance, chat_id)
+        
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
+
+    def perform_create(self, serializer):
+        """Override to ensure orders are created correctly."""
+        super().perform_create(serializer)
+        logger.info(f"Order {serializer.instance.id} created.")
     
     
 def set_telegram_webhook():

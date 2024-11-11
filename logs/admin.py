@@ -15,6 +15,8 @@ from django.http import HttpResponseRedirect
 from django.db.models.functions import TruncDate, TruncWeek, TruncMonth, TruncHour
 from collections import defaultdict
 from django.urls import reverse
+from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 
 # Custom action to clear logs
 def clear_logs(modeladmin, request, queryset):
@@ -24,34 +26,38 @@ def clear_logs(modeladmin, request, queryset):
 
 clear_logs.short_description = 'Clear selected logs'
 
-
 class TimePeriodFilter(admin.SimpleListFilter):
-    title = 'Time Period'
+    title = _('Time Period')
     parameter_name = 'time_period'
 
+    # Define the options available in the dropdown
     def lookups(self, request, model_admin):
         return (
-            ('today', 'Today'),
-            ('week', 'This Week'),
-            ('month', 'This Month'),
-            ('year', 'This Year'),
+            ('today', _('Today')),
+            ('week', _('This Week')),
+            ('month', _('This Month')),
+            ('year', _('This Year')),
         )
 
     def queryset(self, request, queryset):
-        today = timezone.now()
-        if self.value() == 'today':
-            return queryset.filter(timestamp__date=today.date())
-        elif self.value() == 'week':
-            start_of_week = today - timedelta(days=today.weekday())
-            return queryset.filter(timestamp__gte=start_of_week)
-        elif self.value() == 'month':
-            start_of_month = today.replace(day=1)
-            return queryset.filter(timestamp__gte=start_of_month)
-        elif self.value() == 'year':
-            start_of_year = today.replace(month=1, day=1)
-            return queryset.filter(timestamp__gte=start_of_year)
-        return queryset
+        time_period = request.GET.get(self.parameter_name)
 
+        # Handle filtering based on selected time period
+        if time_period:
+            now = timezone.now()
+            if time_period == 'today':
+                return queryset.filter(timestamp__date=now.date())
+            elif time_period == 'week':
+                start_of_week = now - timedelta(days=now.weekday())  # start of this week
+                return queryset.filter(timestamp__date__gte=start_of_week.date())
+            elif time_period == 'month':
+                start_of_month = now.replace(day=1)
+                return queryset.filter(timestamp__date__gte=start_of_month.date())
+            elif time_period == 'year':
+                start_of_year = now.replace(month=1, day=1)
+                return queryset.filter(timestamp__date__gte=start_of_year.date())
+        return queryset
+        
 class EndpointFilter(admin.SimpleListFilter):
     title = 'Endpoint'
     parameter_name = 'endpoint'
@@ -70,34 +76,31 @@ class EndpointFilter(admin.SimpleListFilter):
 
 class APILogAdmin(admin.ModelAdmin):
     list_display = ('clickable_endpoint', 'has_chat_id', 'request_count', 'timestamp')
-    list_filter = (TimePeriodFilter, EndpointFilter)  # Added custom filters
-    actions = [clear_logs]  # Added clear_logs action
-    ordering = ('-request_count',)  # Order by request count (highest to lowest)
-    search_fields = ['endpoint']  # Allow searching by endpoint
-
-    change_list_template = 'admin/logs/apilog/change_list.html'  # Specify the custom template
-
+    list_filter = (TimePeriodFilter, EndpointFilter)
+    actions = [clear_logs]
+    ordering = ('-request_count',)
+    search_fields = ['endpoint']
+    change_list_template = 'admin/logs/apilog/change_list.html'
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
 
         # Exclude unwanted endpoints
         exclude_patterns = [
-            '/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/*','/admin/', '/admin/login/',                                                             
-            '/api/health_check', '/api/token/refresh/', '/api/telegram_users/', 
-            '/auth/token/login/', '/api/token/','/admin/api/logs/chart-data/',
+            '/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/*', '/admin/', '/admin/login/',                                                             
+            '/api/health_check', '/api/token/refresh/', '/api/telegram_users/', '/api/logs/chart-data/',
+            '/auth/token/login/', '/api/token/', '/admin/api/logs/chart-data/',
         ]
 
         # Filter by endpoint if it's passed in the GET request
         endpoint_filter = request.GET.get('endpoint', '')
         if endpoint_filter:
             queryset = queryset.filter(endpoint=endpoint_filter)
-#        queryset = queryset.filter(endpoint__icontains='/api/')
-        queryset = queryset.filter(endpoint__icontains='/')
+
         # Exclude specific unwanted endpoints
         queryset = queryset.exclude(endpoint__in=exclude_patterns)
-        return queryset
 
+        return queryset
     # Add the custom URL for clearing logs
     def get_urls(self):
         urls = super().get_urls()
@@ -134,9 +137,11 @@ class APILogAdmin(admin.ModelAdmin):
         """
         Display the endpoint as a clickable link in the admin list view.
         """
-        # Create a URL that will filter logs by this endpoint
-        endpoint_url = reverse('admin:logs_apilog_changelist') + f'?endpoint={obj.endpoint}'
+        # Add a timestamp to the query to prevent the browser from using cached results
+        timestamp = timezone.now().timestamp()
+        endpoint_url = reverse('admin:logs_apilog_changelist') + f'?endpoint={obj.endpoint}&_={timestamp}'
         return format_html('<a href="{}">{}</a>', endpoint_url, obj.endpoint)
+
 
     clickable_endpoint.short_description = 'Endpoint'  # Set the column name
     clickable_endpoint.admin_order_field = 'endpoint'
@@ -164,7 +169,7 @@ class APILogAdmin(admin.ModelAdmin):
 
         # Define the patterns to exclude
         exclude_patterns = [
-            '/favicon.ico', '/admin/', '/api/token/', '/auth/token/login/', 
+            '/favicon.ico', '/admin/', '/api/token/', '/auth/token/login/', '/api/logs/chart-data/',
             '/api/token/refresh/', '/admin/*', '/api/health_check', '/media/','/admin/api/logs/chart-data/',
         ]
 
@@ -172,24 +177,20 @@ class APILogAdmin(admin.ModelAdmin):
         if time_period == 'day':
             date_range = [now - timedelta(hours=x) for x in range(23, -1, -1)]
             chart_data['labels'] = [hour.strftime('%H:%M') for hour in date_range]
-            
-            # Separate queries for Telegram and Vercel endpoints
             telegram_data = APILog.objects.filter(
                 timestamp__date=now.date(),
                 endpoint__icontains='by_chat_id'
             ).exclude(endpoint__in=exclude_patterns) \
-            .annotate(hour=TruncHour('timestamp')).values('hour') \
-            .annotate(telegram_count=Count('id'))
+                .annotate(hour=TruncHour('timestamp')).values('hour') \
+                .annotate(telegram_count=Count('id'))
             
             vercel_data = APILog.objects.filter(
                 timestamp__date=now.date(),
                 endpoint__icontains='/'
-                #endpoint__icontains='/api/'
-
             ).exclude(endpoint__icontains='by_chat_id') \
-            .exclude(endpoint__in=exclude_patterns) \
-            .annotate(hour=TruncHour('timestamp')).values('hour') \
-            .annotate(vercel_count=Count('id'))
+                .exclude(endpoint__in=exclude_patterns) \
+                .annotate(hour=TruncHour('timestamp')).values('hour') \
+                .annotate(vercel_count=Count('id'))
         
         elif time_period == 'week':
             date_range = [now - timedelta(days=x) for x in range(6, -1, -1)]
@@ -271,23 +272,12 @@ class APILogAdmin(admin.ModelAdmin):
         chart_data = self.get_charts_data(time_period)
         return JsonResponse(chart_data)
 
-
-    @method_decorator(csrf_exempt)
-    def get_chart_data_ajax(self, request):
-        time_period = request.GET.get('time_period', 'day')
-        chart_data = self.get_charts_data(time_period)
-        return JsonResponse(chart_data)
-
     def changelist_view(self, request, extra_context=None):
-        # Default to daily view if no time period is selected
         time_period = request.GET.get('time_period', 'day')
-
-        # Get the chart data based on the time period
         chart_data = self.get_charts_data(time_period)
 
         extra_context = extra_context or {}
         extra_context['chart_data'] = json.dumps(chart_data)
-
         extra_context['time_periods'] = {
             'day': 'Today',
             'week': 'This Week',
@@ -297,15 +287,89 @@ class APILogAdmin(admin.ModelAdmin):
 
         return super().changelist_view(request, extra_context=extra_context)
 
+
+
     def render_change_list(self, request, context, *args, **kwargs):
+        # Including Chart.js and configuring the chart
         context['chart_js'] = """
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
             <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    // No need for the custom click event handler, the links are already functional
+                document.addEventListener('DOMContentLoaded', function () {
+                    const timePeriodSelect = document.getElementById('time_period_select');
+                    const chartCanvas = document.getElementById('chart_canvas');
+                    const ctx = chartCanvas.getContext('2d');
+                    let chart;
+
+                    // Initialize the chart with default data
+                    function createChart(data) {
+                        if (chart) {
+                            chart.destroy();
+                        }
+                        chart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: data.labels,
+                                datasets: [
+                                    {
+                                        label: 'Telegram',
+                                        data: data.data.Telegram,
+                                        borderColor: 'rgba(75, 192, 192, 1)',
+                                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                        fill: true,
+                                    },
+                                    {
+                                        label: 'Vercel',
+                                        data: data.data.Vercel,
+                                        borderColor: 'rgba(153, 102, 255, 1)',
+                                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                                        fill: true,
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    x: { 
+                                        beginAtZero: true 
+                                    },
+                                    y: { 
+                                        beginAtZero: true 
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    // Function to update the chart data dynamically
+                    function updateChart(timePeriod) {
+                        fetch(`/admin/logs/apilog/chart-data/?time_period=${timePeriod}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                createChart(data);  // Update the chart with new data
+                            })
+                            .catch(error => console.error('Error fetching chart data:', error));
+                    }
+
+                    // Event listener for time period change
+                    timePeriodSelect.addEventListener('change', function() {
+                        const selectedTimePeriod = timePeriodSelect.value;
+                        updateChart(selectedTimePeriod);
+                    });
+
+                    // Initialize the chart with default 'day' data
+                    updateChart('day');
                 });
             </script>
         """
+        
+        # Pass context variables for the select options
+        context['time_periods'] = {
+            'day': 'Today',
+            'week': 'This Week',
+            'month': 'This Month',
+            'year': 'This Year'
+        }
+
         return super().render_change_list(request, context, *args, **kwargs)
 
 
