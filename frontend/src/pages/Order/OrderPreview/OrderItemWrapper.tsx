@@ -31,6 +31,7 @@ export const OrderItemWrapper = ({
                 <OrderItemCard 
                     product={product}
                     qty={qty}
+                    stock={product.stock}
                     onClickDelete={handleClickDeleteItem}
                 />
             }

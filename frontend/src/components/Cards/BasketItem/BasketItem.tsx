@@ -17,6 +17,7 @@ interface BasketItemProps {
 	qty: number;
 	color: Color;
 	size: string;
+	stock: number;
 	onClickDelete: (product: Product) => void;
 	onClickName?: (product: Product) => void;
 	onClickPhoto?: (product: Product) => void;
@@ -28,6 +29,7 @@ export const BasketItem = ({
 	color,
 	size,
 	qty,
+	stock,
 	onClickDelete,
 	onClickName,
 	onClickPhoto,
@@ -106,6 +108,7 @@ export const BasketItem = ({
 					<Counter
 						className={styles.selfTop}
 						value={qty}
+						stock={stock}
 						onChangeCounter={handleChangeCounter}
 					/>
 				</div>
