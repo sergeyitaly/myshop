@@ -74,7 +74,7 @@ export const useFilters = (initialCollection?: Collection ) => {
 
     useEffect(() => {
         setTempPriceValues({min: fullRangeOfPrice[0], max: fullRangeOfPrice[1]})
-        setActivePriceValues({min: fullRangeOfPrice[0], max: fullRangeOfPrice[1]})
+        // setActivePriceValues({min: fullRangeOfPrice[0], max: fullRangeOfPrice[1]})
     }, [fullRangeOfPrice[0], fullRangeOfPrice[1]])
 
     useEffect(() => {

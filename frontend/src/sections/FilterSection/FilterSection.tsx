@@ -56,9 +56,9 @@ export const FilterSection = ({
         setFullRangeOfPrice,
     } = useFilters(initialCollection);
 
+
     const {
         data: productsResponse,
-        isSuccess: isSuccessGettingProducts,
         isLoading: isLoadingProducts,
         isFetching: isFetchingProducts,
         isError: isErrorWhenFetchingProducts,
@@ -66,7 +66,6 @@ export const FilterSection = ({
 
     let totalPages = 0;
 
-    console.log(productsResponse?.results);
     
 
     useEffect(() => {
@@ -115,10 +114,12 @@ export const FilterSection = ({
         return i18n.language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
     };
 
+
+    
     
     return (
         <section className={clsx(styles.section, {
-            [styles.blur]: isFetchingProducts
+            [styles.blur]: !isLoadingProducts && isFetchingProducts
         })}>
             <PageContainer>
                 <FilterControlBar
@@ -159,8 +160,7 @@ export const FilterSection = ({
                     textWhenEmpty={t('products.empty')}
                 >
                     {
-                        isSuccessGettingProducts &&
-                        productsResponse.results.map((product) => {
+                        productsResponse?.results.map((product) => {
                             const { id, id_name, discount, currency, price, photo_url, photo_thumbnail_url } = product;
 
                             return (
