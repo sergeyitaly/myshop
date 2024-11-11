@@ -1,7 +1,9 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.db.models import Count
-from .models import *  # Replace with actual model
+from .models import APILog  # Replace with actual model
+from django.utils import timezone
+from datetime import timedelta
 
 def index(request):
     return HttpResponse("Hello, this is the logs app!")

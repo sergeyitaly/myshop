@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-30 01:04+0200\n"
+"POT-Creation-Date: 2024-11-10 12:03+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,7 +25,7 @@ msgstr ""
 msgid "Image"
 msgstr ""
 
-#: brand/models.py:46 comments/models.py:10 feedback/models.py:24
+#: brand/models.py:46 comments/models.py:10 feedback/models.py:25
 #: intro/models.py:46 shop/models.py:122 team/models.py:46
 #: technologies/models.py:46
 msgid "Name"
@@ -46,7 +46,7 @@ msgstr ""
 msgid "Brands"
 msgstr ""
 
-#: comments/models.py:13 comments/models.py:21 feedback/models.py:25
+#: comments/models.py:13 comments/models.py:21 feedback/models.py:26
 msgid "Comment"
 msgstr ""
 
@@ -54,27 +54,27 @@ msgstr ""
 msgid "Comments"
 msgstr ""
 
-#: feedback/admin.py:64 feedback/models.py:27 order/models.py:45
+#: feedback/admin.py:71 feedback/models.py:28 order/models.py:47
 msgid "Created At"
 msgstr ""
 
-#: feedback/models.py:9 feedback/models.py:15
+#: feedback/models.py:10 feedback/models.py:16
 msgid "Rating Question"
 msgstr ""
 
-#: feedback/models.py:10
+#: feedback/models.py:11
 msgid "Aspect Name"
 msgstr ""
 
-#: feedback/models.py:11
+#: feedback/models.py:12
 msgid "Is Rating Required"
 msgstr ""
 
-#: feedback/models.py:16
+#: feedback/models.py:17
 msgid "Rating Questions"
 msgstr ""
 
-#: feedback/models.py:26
+#: feedback/models.py:27
 msgid "Email"
 msgstr ""
 
@@ -82,7 +82,7 @@ msgstr ""
 msgid "Ratings"
 msgstr ""
 
-#: feedback/models.py:41 order/models.py:49
+#: feedback/models.py:41 order/models.py:51
 msgid "Status"
 msgstr ""
 
@@ -94,7 +94,7 @@ msgstr ""
 msgid "Feedbacks"
 msgstr ""
 
-#: feedback/models.py:52 feedback/models.py:85
+#: feedback/models.py:52 feedback/models.py:81
 msgid "Question"
 msgstr ""
 
@@ -106,23 +106,23 @@ msgstr ""
 msgid "Rating"
 msgstr ""
 
-#: feedback/models.py:75
+#: feedback/models.py:70
 msgid "Rating Answer"
 msgstr ""
 
-#: feedback/models.py:76
+#: feedback/models.py:71
 msgid "Rating Answers"
 msgstr ""
 
-#: feedback/models.py:87
+#: feedback/models.py:84
 msgid "Average Rating"
 msgstr ""
 
-#: feedback/models.py:106
+#: feedback/models.py:103
 msgid "Overal Average Rating"
 msgstr ""
 
-#: feedback/models.py:107
+#: feedback/models.py:104
 msgid "Overal Average Ratings"
 msgstr ""
 
@@ -139,11 +139,31 @@ msgstr ""
 msgid "Intros"
 msgstr ""
 
-#: myshop/settings.py:331
+#: logs/admin.py:30
+msgid "Time Period"
+msgstr ""
+
+#: logs/admin.py:36
+msgid "Today"
+msgstr ""
+
+#: logs/admin.py:37
+msgid "This Week"
+msgstr ""
+
+#: logs/admin.py:38
+msgid "This Month"
+msgstr ""
+
+#: logs/admin.py:39
+msgid "This Year"
+msgstr ""
+
+#: myshop/settings.py:336
 msgid "English"
 msgstr ""
 
-#: myshop/settings.py:332
+#: myshop/settings.py:337
 msgid "Ukrainian"
 msgstr ""
 
@@ -188,7 +208,7 @@ msgstr ""
 msgid "Without Order Items"
 msgstr ""
 
-#: order/admin.py:143 order/models.py:17 order/models.py:179
+#: order/admin.py:143 order/models.py:19 order/models.py:105
 msgid "Chat ID"
 msgstr ""
 
@@ -204,129 +224,129 @@ msgstr ""
 msgid "Total Price"
 msgstr ""
 
-#: order/models.py:16
+#: order/models.py:18
 msgid "Phone"
 msgstr ""
 
-#: order/models.py:23
+#: order/models.py:25
 msgid "Telegram user"
 msgstr ""
 
-#: order/models.py:24
+#: order/models.py:26
 msgid "Telegram users"
 msgstr ""
 
-#: order/models.py:28
+#: order/models.py:30
 msgid "Submitted"
 msgstr ""
 
-#: order/models.py:29 shop/models.py:128
+#: order/models.py:31 shop/models.py:128
 msgid "Created"
 msgstr ""
 
-#: order/models.py:30
+#: order/models.py:32
 msgid "Processed"
 msgstr ""
 
-#: order/models.py:31
+#: order/models.py:33
 msgid "Complete"
 msgstr ""
 
-#: order/models.py:32
+#: order/models.py:34
 msgid "Canceled"
 msgstr ""
 
-#: order/models.py:36
+#: order/models.py:38
 msgid "Default Name"
 msgstr ""
 
-#: order/models.py:37
+#: order/models.py:39
 msgid "Default Surname"
 msgstr ""
 
-#: order/models.py:38
+#: order/models.py:40
 msgid "Contact phone number"
 msgstr ""
 
-#: order/models.py:40
+#: order/models.py:42
 msgid "Address"
 msgstr ""
 
-#: order/models.py:41
+#: order/models.py:43
 msgid "Other person"
 msgstr ""
 
-#: order/models.py:42
+#: order/models.py:44
 msgid "Comments about the receiver"
 msgstr ""
 
-#: order/models.py:43
+#: order/models.py:45
 msgid "Congrats"
 msgstr ""
 
-#: order/models.py:44
+#: order/models.py:46
 msgid "Submitted At"
 msgstr ""
 
-#: order/models.py:46
+#: order/models.py:48
 msgid "Processed At"
 msgstr ""
 
-#: order/models.py:47
+#: order/models.py:49
 msgid "Complete At"
 msgstr ""
 
-#: order/models.py:48
+#: order/models.py:50
 msgid "Canceled At"
 msgstr ""
 
-#: order/models.py:50
+#: order/models.py:52
 msgid "Parent Order"
 msgstr ""
 
-#: order/models.py:51
+#: order/models.py:53
 msgid "Package as a present"
 msgstr ""
 
-#: order/models.py:52
+#: order/models.py:54
 msgid "telegram user"
 msgstr ""
 
-#: order/models.py:172 order/models.py:204
+#: order/models.py:101 order/models.py:131
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:484
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:491
 msgid "Order"
 msgstr ""
 
-#: order/models.py:173 order/models.py:180
+#: order/models.py:102 order/models.py:106
 msgid "Orders"
 msgstr ""
 
-#: order/models.py:200
+#: order/models.py:127
 msgid "Order summary"
 msgstr ""
 
-#: order/models.py:201
-msgid "Order summarys"
+#: order/models.py:128
+msgid "Order summaries"
 msgstr ""
 
-#: order/models.py:205 shop/admin.py:143 shop/models.py:188 shop/models.py:227
+#: order/models.py:132 shop/admin.py:143 shop/models.py:188 shop/models.py:227
 msgid "Product"
 msgstr ""
 
-#: order/models.py:206
+#: order/models.py:133
 msgid "Quantity"
 msgstr ""
 
-#: order/models.py:207
+#: order/models.py:134
 msgid "Total Sum"
 msgstr ""
 
-#: order/models.py:219
+#: order/models.py:146
 msgid "Order Item"
 msgstr ""
 
-#: order/models.py:220
+#: order/models.py:147
 msgid "Order Items"
 msgstr ""
 
