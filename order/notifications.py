@@ -1,9 +1,9 @@
 from django.utils import timezone
 from django.conf import settings
-from django.utils.translation import gettext as _
 from .models import Order
 import logging
 import requests
+from django.utils.translation import gettext as _  # Import gettext for translation
 from .shared_utils import get_random_saying
 from .signals import update_order_summary
 
@@ -18,9 +18,6 @@ STATUS_EMOJIS = {
 }
 
 def send_telegram_message(chat_id, message):
-    """
-    Send a message via Telegram using the bot token and chat ID.
-    """
     bot_token = settings.TELEGRAM_BOT_TOKEN
     url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
     
@@ -44,45 +41,47 @@ def send_telegram_message(chat_id, message):
         raise
 
 def update_order_status_with_notification(order_id, order_items, new_status, status_field, chat_id):
-    """
-    Update the status of an order and send a notification via Telegram.
-    """
     try:
         order = Order.objects.get(id=order_id)
         setattr(order, status_field, timezone.now())
         order.status = new_status
         order.save()
 
-        # Determine language for the notification based on the order items
-        language = 'en' if not order_items[0].product_name_uk else 'uk'
-        
-        # Construct the order items list based on the determined language
-        order_items_details = "\n".join([
-            f"{item.product.product_name_en if language == 'en' else item.product.product_name_uk} - "
-            f"{item.quantity} x {item.product.price} {item.product.currency}" 
-            for item in order_items
-        ])
-
-        # Compose the notification message based on order status
         status = new_status.capitalize()
         emoji = STATUS_EMOJIS.get(new_status, '')
 
+        # Determine the language from the `order_items` (assuming you have language fields like `product_name_en` and `product_name_uk`)
+        # Here, we will just check the first item to get the language preference, assuming it's consistent across all items
+        language = 'en'  # Default to English if no language field found
+        if order_items:
+            # Check the first order item for the language
+            first_item = order_items[0]
+            if first_item.product_name_uk:  # Assuming 'product_name_uk' exists in your model
+                language = 'uk'  # If Ukrainian name exists, use Ukrainian language
+            
+        # Adjusting the order items details based on the detected language
+        order_items_details = "\n".join([
+            f"{item.product.product_name_en} - {item.quantity} x {item.product.price} {item.product.currency}" 
+            if language == 'en' else
+            f"{item.product.product_name_uk} - {item.quantity} x {item.product.price} {item.product.currency}" 
+            for item in order_items
+        ])
+
         if new_status == 'submitted':
             message = (
-                f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. "
-                f"{_('You have a new order')} #{order_id}. {_('Order Status:')} {emoji} {status}. \n"
-                f"{_('Order Details:')}\n{order_items_details}\n\n"
-                f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i>"
+                f"\n"
+                f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. {_(f'You have a new order #{order_id}. Status of order:')} {emoji} {status}. \n"
+                f"{_(f'Order Details:')}\n{order_items_details}\n\n"
+                f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i> \n"
             )
         else:
             message = (
-                f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. "
-                f"{_('Order')} #{order_id} {_('status changed to')} {emoji} {status}. \n"
-                f"{_('Order Details:')}\n{order_items_details}\n\n"
-                f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i>"
+                f"\n"
+                f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. {_(f'Status of order #{order_id} has been changed to')} {emoji} {status}. \n"
+                f"{_(f'Order Details:')}\n{order_items_details}\n\n"
+                f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i> \n"
             )
 
-        # Send the message and update order summary
         send_telegram_message(chat_id, message)
         update_order_summary(chat_id)
 
