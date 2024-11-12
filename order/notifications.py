@@ -1,9 +1,9 @@
+# notifications.py
 from django.utils import timezone
 from django.conf import settings
 from .models import Order
 import logging
 import requests
-from django.utils.translation import gettext as _  # Import gettext for translation
 from .shared_utils import get_random_saying
 from .signals import update_order_summary
 
@@ -50,40 +50,28 @@ def update_order_status_with_notification(order_id, order_items, new_status, sta
         status = new_status.capitalize()
         emoji = STATUS_EMOJIS.get(new_status, '')
 
-        # Determine the language from the `order_items` (assuming you have language fields like `product_name_en` and `product_name_uk`)
-        # Here, we will just check the first item to get the language preference, assuming it's consistent across all items
-        language = 'en'  # Default to English if no language field found
-        if order_items:
-            # Check the first order item for the language
-            first_item = order_items[0]
-            if first_item.product_name_uk:  # Assuming 'product_name_uk' exists in your model
-                language = 'uk'  # If Ukrainian name exists, use Ukrainian language
-            
-        # Adjusting the order items details based on the detected language
         order_items_details = "\n".join([
-            f"{item.product.product_name_en} - {item.quantity} x {item.product.price} {item.product.currency}" 
-            if language == 'en' else
-            f"{item.product.product_name_uk} - {item.quantity} x {item.product.price} {item.product.currency}" 
+            f"{item.product.name} - {item.quantity} x {item.product.price} {item.product.currency}" 
             for item in order_items
         ])
 
-        if new_status == 'submitted':
+        if new_status == 'submitted':       
             message = (
                 f"\n"
-                f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. {_(f'You have a new order #{order_id}. Status of order:')} {emoji} {status}. \n"
-                f"{_(f'Order Details:')}\n{order_items_details}\n\n"
+                f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. You have a new order #{order_id}. Status of order:  {emoji} {status}. \n"
+                f"Order Details:\n{order_items_details}\n\n"
                 f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i> \n"
             )
         else:
             message = (
                 f"\n"
-                f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. {_(f'Status of order #{order_id} has been changed to')} {emoji} {status}. \n"
-                f"{_(f'Order Details:')}\n{order_items_details}\n\n"
+                f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. Status of order #{order_id} has been changed to {emoji} {status}. \n"
+                f"Order Details:\n{order_items_details}\n\n"
                 f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i> \n"
             )
 
         send_telegram_message(chat_id, message)
-        update_order_summary(chat_id)
+        update_order_summary()
 
     except Order.DoesNotExist:
         logger.error(f"Order with id {order_id} does not exist.")

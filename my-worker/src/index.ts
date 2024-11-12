@@ -1110,13 +1110,12 @@ interface TelegramUser {
 }
 
 interface OrderItem {
-  size?: string;
+  name: string;
+  size: string;
+  price: number;
   quantity: number;
-  total_sum: number;
-  color_name?: string;
-  item_price: string;
+  color_name: string;
   color_value: string;
-  product_name: string;
   collection_name: string;
 }
 
@@ -1129,10 +1128,13 @@ interface Order {
   complete_at?: string | null;
   canceled_at?: string | null;
   submitted_at?: string | null;
-  order_items?: OrderItem[];
+  order_items_en?: OrderItem[]; 
+  order_items_uk?: OrderItem[];
   TelegramUser?: TelegramUser[];
   email?: string;
 }
+
+
 
 interface OrderSummaryResponse {
   results: Order[];
@@ -1242,6 +1244,7 @@ const formatDate = (date: string): string => {
   return new Date(date).toLocaleDateString();
 };
 
+
 const fetchOrderSummary = async (chatId: string): Promise<OrderSummaryResponse> => {
   try {
     const response = await fetch(`${VERCEL_DOMAIN}/api/order_summary/by_chat_id/${chatId}/`, {
@@ -1276,8 +1279,31 @@ const fetchOrderSummary = async (chatId: string): Promise<OrderSummaryResponse> 
     throw error;
   }
 };
+
+// Helper function to create order item summary
+function createOrderItemsSummary(orderItems: any[], isEnglish: boolean): string {
+  return orderItems.map(item =>
+    `- ${item.name}, ${item.collection_name}, ${isEnglish ? 'Size' : 'Розмір'}: ${item.size || 'N/A'}, ${isEnglish ? 'Color' : 'Колір'}: ${item.color_name || 'N/A'}, ${item.quantity} ${isEnglish ? 'pcs' : 'шт'}, $${item.price.toFixed(2)}`
+  ).join('\n');
+}
+
+// Helper function to create order status message
+function createOrderStatusMessage(order: any, isEnglish: boolean): string {
+  const statusDates = {
+    submitted: order.submitted_at ?? null,
+    created: order.created_at ?? null,
+    processed: order.processed_at ?? null,
+    complete: order.complete_at ?? null,
+    canceled: order.canceled_at ?? null,
+  };
+  const latestStatusEntry = getLatestStatusEntry(statusDates, isEnglish);
+  return `${isEnglish ? 'Latest Status' : 'Останній статус'}: ${latestStatusEntry || (isEnglish ? 'Status not available.' : 'Статус недоступний.')}`;
+}
+
+// Main function for sending details for a specific order
 async function sendOrderDetails(phoneNumber: string, chatId: string | null): Promise<void> {
   const isEnglish = chatId ? getUserLanguage(chatId) === 'en' : true;
+  const itemsKey = isEnglish ? 'order_items_en' : 'order_items_uk';
 
   if (!chatId) {
     const errorMessage = isEnglish ? 'Chat ID is missing. Please try again later.' : 'Відсутній ідентифікатор чату. Будь ласка, спробуйте пізніше.';
@@ -1297,32 +1323,21 @@ async function sendOrderDetails(phoneNumber: string, chatId: string | null): Pro
     }
 
     const latestOrder = orderResults.reduce((prev, current) => (prev.order_id > current.order_id ? prev : current));
+    const orderItems = latestOrder[itemsKey];
 
-    if (!latestOrder.order_items || latestOrder.order_items.length === 0) {
+    if (!orderItems || orderItems.length === 0) {
       const noItemsMessage = isEnglish ? 'No order items found for the latest order.' : 'Не знайдено товарів для останнього замовлення.';
       await sendMessage(chatId, noItemsMessage);
       return;
     }
 
-    const orderItemsSummary = latestOrder.order_items.map((item: OrderItem) =>
-      `- ${item.product_name}, ${item.collection_name}, ${isEnglish ? 'Size' : 'Розмір'}: ${item.size || 'N/A'}, ${isEnglish ? 'Color' : 'Колір'}: ${item.color_name || 'N/A'}, ${item.quantity} ${isEnglish ? 'pcs' : 'шт'}, $${parseFloat(item.item_price).toFixed(2)}`
-    ).join('\n');
-
-    const statusDates = {
-      submitted: latestOrder.submitted_at ?? null,
-      created: latestOrder.created_at ?? null,
-      processed: latestOrder.processed_at ?? null,
-      complete: latestOrder.complete_at ?? null,
-      canceled: latestOrder.canceled_at ?? null,
-    };
-
-    // Pass `isEnglish` to getLatestStatusEntry
-    const latestStatusEntry = getLatestStatusEntry(statusDates, isEnglish);
+    const orderItemsSummary = createOrderItemsSummary(orderItems, isEnglish);
+    const orderStatusMessage = createOrderStatusMessage(latestOrder, isEnglish);
 
     const orderDetailsMessage =
       `${isEnglish ? 'Order ID' : 'Номер замовлення'}: ${latestOrder.order_id}\n` +
       `${isEnglish ? 'Order Items' : 'Товари в замовленні'}:\n${orderItemsSummary}\n` +
-      `${latestStatusEntry || ''}`;
+      `${orderStatusMessage}`;
 
     const thankYouMessage = isEnglish ? 'Thank you! Here are your order details:' : 'Дякуємо! Ось ваші деталі замовлення:';
     await sendMessage(chatId, `${thankYouMessage}\n${orderDetailsMessage}`);
@@ -1333,8 +1348,10 @@ async function sendOrderDetails(phoneNumber: string, chatId: string | null): Pro
   }
 }
 
+// Main function for sending details for all orders
 async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
   const isEnglish = chatId ? getUserLanguage(chatId) === 'en' : true;
+  const itemsKey = isEnglish ? 'order_items_en' : 'order_items_uk';
 
   if (!chatId) {
     console.error('Chat ID is missing.');
@@ -1352,26 +1369,16 @@ async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
     }
 
     const ordersMessage = orderResults.map(order => {
-      if (!order.order_items || order.order_items.length === 0) {
+      const orderItems = order[itemsKey];
+
+      if (!orderItems || orderItems.length === 0) {
         return `${isEnglish ? 'Order ID' : 'Номер замовлення'}: ${order.order_id}\n${isEnglish ? 'No order items found for this order.' : 'Товари для цього замовлення не знайдено.'}`;
       }
 
-      const orderItemsSummary = order.order_items.map((item: OrderItem) =>
-        `- ${item.product_name}, ${item.collection_name}, ${isEnglish ? 'Size' : 'Розмір'}: ${item.size || 'N/A'}, ${isEnglish ? 'Color' : 'Колір'}: ${item.color_name || 'N/A'}, ${item.quantity} ${isEnglish ? 'pcs' : 'шт'}, $${parseFloat(item.item_price).toFixed(2)}`
-      ).join('\n');
+      const orderItemsSummary = createOrderItemsSummary(orderItems, isEnglish);
+      const orderStatusMessage = createOrderStatusMessage(order, isEnglish);
 
-      const statusDates = {
-        submitted: order.submitted_at ? new Date(order.submitted_at).toLocaleString() : 'N/A',
-        created: order.created_at ? new Date(order.created_at).toLocaleString() : 'N/A',
-        processed: order.processed_at ? new Date(order.processed_at).toLocaleString() : 'N/A',
-        complete: order.complete_at ? new Date(order.complete_at).toLocaleString() : 'N/A',
-        canceled: order.canceled_at ? new Date(order.canceled_at).toLocaleString() : 'N/A'
-      };
-
-      // Pass `isEnglish` to getLatestStatusEntry
-      const latestStatusEntry = getLatestStatusEntry(statusDates, isEnglish);
-
-      return `${isEnglish ? 'Order ID' : 'Номер замовлення'}: ${order.order_id}\n${isEnglish ? 'Order Items' : 'Товари в замовленні'}:\n${orderItemsSummary}\n${isEnglish ? 'Latest Status' : 'Останній статус'}: ${latestStatusEntry || (isEnglish ? 'Status not available.' : 'Статус недоступний.')}`;
+      return `${isEnglish ? 'Order ID' : 'Номер замовлення'}: ${order.order_id}\n${isEnglish ? 'Order Items' : 'Товари в замовленні'}:\n${orderItemsSummary}\n${orderStatusMessage}`;
     }).join('\n\n');
 
     const allOrdersMessage = isEnglish ? 'Here are all your order details:' : 'Ось усі ваші деталі замовлень:';
