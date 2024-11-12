@@ -16,7 +16,6 @@ export const BurgerMenu = () => {
 
 	const links = [
 		{ name: t("collections"), href: "/collections" },
-		{ name: t("new_arrivals"), href: "/new-arrivals" },
 		{ name: t("all_collections"), href: "/all-collections" },
 		{ name: t("discounts"), href: "/discounts" },
 		{ name: t("about_us"), href: "/about" },
