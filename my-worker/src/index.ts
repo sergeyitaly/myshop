@@ -1348,7 +1348,7 @@ async function sendOrderDetails(phoneNumber: string, chatId: string | null): Pro
   }
 }
 
-// Main function for sending details for all orders
+
 async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
   const isEnglish = chatId ? getUserLanguage(chatId) === 'en' : true;
   const itemsKey = isEnglish ? 'order_items_en' : 'order_items_uk';
@@ -1371,14 +1371,29 @@ async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
     const ordersMessage = orderResults.map(order => {
       const orderItems = order[itemsKey];
 
+      // Collect available statuses with timestamps
+      const statuses = [
+        { icon: '❌', text: isEnglish ? 'Canceled' : 'Скасовано', date: order.canceled_at },
+        { icon: '✅', text: isEnglish ? 'Completed' : 'Завершено', date: order.complete_at },
+        { icon: '🔄', text: isEnglish ? 'Processed' : 'Оброблено', date: order.processed_at },
+        { icon: '📝', text: isEnglish ? 'Submitted' : 'Оформлено', date: order.submitted_at },
+        { icon: '🆕', text: isEnglish ? 'Created' : 'Створено', date: order.created_at }
+      ];
+
+      // Find the latest status based on the date
+      const latestStatus = statuses
+        .filter(status => status.date) // Remove null or undefined dates
+        .sort((a, b) => new Date(b.date!).getTime() - new Date(a.date!).getTime())[0]; // Sort and get the most recent
+
       if (!orderItems || orderItems.length === 0) {
         return `${isEnglish ? 'Order ID' : 'Номер замовлення'}: ${order.order_id}\n${isEnglish ? 'No order items found for this order.' : 'Товари для цього замовлення не знайдено.'}`;
       }
 
-      const orderItemsSummary = createOrderItemsSummary(orderItems, isEnglish);
-      const orderStatusMessage = createOrderStatusMessage(order, isEnglish);
+      const orderItemsSummary = orderItems.map(item =>
+        `- ${item.name}, ${item.collection_name}, ${isEnglish ? 'Size' : 'Розмір'}: ${item.size}, ${isEnglish ? 'Color' : 'Колір'}: ${item.color_name}, ${item.quantity} ${isEnglish ? 'pcs' : 'шт'}, $${item.price.toFixed(2)}`
+      ).join('\n');
 
-      return `${isEnglish ? 'Order ID' : 'Номер замовлення'}: ${order.order_id}\n${isEnglish ? 'Order Items' : 'Товари в замовленні'}:\n${orderItemsSummary}\n${orderStatusMessage}`;
+      return `${isEnglish ? 'Order ID' : 'Номер замовлення'}: ${order.order_id}\n${isEnglish ? 'Order Items' : 'Товари в замовленні'}:\n${orderItemsSummary}\n${isEnglish ? 'Latest Status' : 'Останній статус'}: ${latestStatus.icon} ${latestStatus.text}: ${new Date(latestStatus.date!).toLocaleDateString('uk-UA')}`;
     }).join('\n\n');
 
     const allOrdersMessage = isEnglish ? 'Here are all your order details:' : 'Ось усі ваші деталі замовлень:';
