@@ -15,6 +15,7 @@ interface BasketItemProps {
 	qty: number;
 	color: Color;
 	size: string;
+	stock: number;
 	onClickDelete: (product: Product) => void;
 	onClickName?: (product: Product) => void;
 	onClickPhoto?: (product: Product) => void;
@@ -25,6 +26,7 @@ export const BasketItem = ({
 	product,
 	size,
 	qty,
+	stock,
 	onClickDelete,
 	onClickName,
 	onClickPhoto,
@@ -88,16 +90,46 @@ export const BasketItem = ({
 						<div className={styles.sizeLabel}>{t("size")}:</div>
 						<div> &nbsp; {size}</div>
 					</div>
-					<div style={{ fontSize: '0.75rem' }}>
-						<Counter
-							className={styles.selfTop}
-							value={qty}
-							onChangeCounter={handleChangeCounter}
-						/>
-					</div>
 
+						{/*/>*/}
+{/*<<<<<<< HEAD*/}
+{/*					</div>*/}
 
+						{/*<div style={{ fontSize: '0.75rem' }}>*/}
+						{/*	<Counter*/}
+						{/*		className={styles.selfTop}*/}
+						{/*		value={qty}*/}
+						{/*		onChangeCounter={handleChangeCounter}*/}
+{/*=======*/}
+{/*					</ProductVariants>*/}
+{/*					<Counter*/}
+{/*						className={styles.selfTop}*/}
+{/*						value={qty}*/}
+{/*						stock={stock}*/}
+{/*						onChangeCounter={handleChangeCounter}*/}
+{/*					/>*/}
+{/*>>>>>>> 8a014415d487d5b8dfaa15940665f35a585fcdea*/}
 				</div>
+			<div className={styles.counterBox}>
+				<ProductVariants
+					className={styles.characteristic}
+					title={t("size")}
+				>
+					<ValueBox
+						className={styles.noPointer}
+						key={size}
+						value={size}
+						title={size}
+						isActive
+					/>
+				</ProductVariants>
+				<Counter
+					className={styles.selfTop}
+					value={qty}
+					stock={stock}
+					onChangeCounter={handleChangeCounter}
+				/>
+			</div>
 				<div className={styles.control}>
 					<p>{formatPrice(price, currency)}</p>
 					{discountPrice && (

@@ -78,99 +78,143 @@ class OrderSummarySerializer(serializers.ModelSerializer):
         return value
     
 class OrderItemSerializer(serializers.ModelSerializer):
-    product_id = serializers.IntegerField(write_only=True)
-    product_name = serializers.CharField(source='product.name', read_only=True)
-    collection_name = serializers.CharField(source='product.collection.name', read_only=True)
-    size = serializers.CharField(source='product.size', read_only=True)
-    color_name = serializers.CharField(source='product.color_name', read_only=True)
-    color_value = serializers.CharField(source='product.color_value', read_only=True)
-    item_price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=2, read_only=True)
-    total_sum = serializers.SerializerMethodField()
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=False, write_only=True)
+    product_id = serializers.CharField(write_only=True)  # Accept product_id in the request
+    total_sum = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+
+    def validate_quantity(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Quantity must be a positive integer.")
+        return value
+
+    def validate(self, data):
+        product_id = data.get('product_id')
+        if not product_id:
+            raise serializers.ValidationError({'product': 'This field is required.'})
+
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            raise serializers.ValidationError({'product': 'Product does not exist.'})
+
+        # Add the product to the validated data
+        data['product'] = product
+        return data
 
     class Meta:
         model = OrderItem
-        fields = [
-            'product_id', 'quantity', 'product_name', 'collection_name', 
-            'size', 'color_name', 'color_value', 'item_price', 'total_sum'
-        ]
+        fields = ['product_id', 'product', 'quantity', 'total_sum']
 
-    def get_total_sum(self, obj):
-        return obj.total_sum  # Return total_sum directly
-
-    def create(self, validated_data):
-        product_id = validated_data.pop('product_id')
-        return OrderItem.objects.create(product_id=product_id, **validated_data)
 
 class OrderSerializer(serializers.ModelSerializer):
-    order_items = OrderItemSerializer(many=True)
+    order_items = OrderItemSerializer(many=True, required=True)
     telegram_user = TelegramUserSerializer(required=False, allow_null=True)
 
     class Meta:
         model = Order
-        fields = [
-            'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments', 'congrats',
-            'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments','congrats',
-            'submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at', 'parent_order',
-            'present', 'status', 'order_items', 'telegram_user'
-        ]
+        fields = '__all__'
 
+    def validate(self, attrs):
+        if not attrs.get('order_items'):
+            raise serializers.ValidationError("Order must contain at least one item with a valid product.")
+        
+        # Validate chat_id if telegram_user is provided
+        telegram_user_data = attrs.get('telegram_user')
+        if telegram_user_data and not telegram_user_data.get('chat_id'):
+            raise serializers.ValidationError({"telegram_user": "chat_id is required for the TelegramUser."})
+        
+        return attrs
+    
     def create(self, validated_data):
         items_data = validated_data.pop('order_items', [])
         telegram_user_data = validated_data.pop('telegram_user', None)
-        
-        telegram_user = None
+
+        # Create the order instance
+        order = Order.objects.create(**validated_data)
+
+        # Create order items
+        for item_data in items_data:
+            # Extract product_id from item_data, ensure it's used for product lookup
+            product_id = item_data.pop('product_id', None)
+            if not product_id:
+                raise serializers.ValidationError("Product ID must be provided.")
+
+            # Ensure 'product' is not in item_data before creating the OrderItem
+            item_data.pop('product', None)
+
+            try:
+                # Get the product instance
+                product_instance = Product.objects.get(id=product_id)
+            except Product.DoesNotExist:
+                raise serializers.ValidationError(f"Product with ID {product_id} does not exist.")
+
+            # Calculate the total sum for the item
+            item_data['total_sum'] = product_instance.price * item_data.get('quantity', 1)
+
+            # Create OrderItem and associate the product explicitly
+            OrderItem.objects.create(order=order, product=product_instance, **item_data)
+
+        # Handle telegram_user if provided
         if telegram_user_data:
+            # Get or create the TelegramUser instance
             telegram_user, created = TelegramUser.objects.get_or_create(
                 phone=telegram_user_data['phone'],
-                defaults={'chat_id': telegram_user_data['chat_id']}
+                defaults={'chat_id': telegram_user_data.get('chat_id')}  # Make sure to pass chat_id in defaults
             )
 
-        # Create the Order instance
-        order = Order.objects.create(telegram_user=telegram_user, **validated_data)
+            # If the user already exists, update chat_id if it is provided
+            if not created and telegram_user_data.get('chat_id'):
+                telegram_user.chat_id = telegram_user_data['chat_id']
+                telegram_user.save()
 
-        # Create related OrderItems
-        for item_data in items_data:
-            product_id = item_data.pop('product_id')
-            OrderItem.objects.create(order=order, product_id=product_id, **item_data)
+            # Link the TelegramUser to the order
+            order.telegram_user = telegram_user
+            order.save()  # Save the order after linking the telegram_user
 
         return order
+
+
 
     def update(self, instance, validated_data):
         items_data = validated_data.pop('order_items', [])
         telegram_user_data = validated_data.pop('telegram_user', None)
 
+        # Update telegram_user if provided
         if telegram_user_data:
             telegram_user, created = TelegramUser.objects.get_or_create(
                 phone=telegram_user_data['phone'],
-                defaults={'chat_id': telegram_user_data['chat_id']}
+                defaults={'chat_id': telegram_user_data.get('chat_id')}
             )
+
+            if not created and telegram_user_data.get('chat_id'):
+                telegram_user.chat_id = telegram_user_data['chat_id']
+                telegram_user.save()
+
             instance.telegram_user = telegram_user
 
-        # Update the Order instance
+        # Update other fields on the order
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
-        new_status = validated_data.get('status', instance.status)
-        if new_status and new_status != instance.status:
-            instance.update_status(new_status)
-
         instance.save()
 
-        # Update OrderItems
-        existing_items = {item.product_id: item for item in instance.order_items.all()}
+        # Handle order items update
+        existing_items = {item.product.id: item for item in instance.order_items.all()}
         for item_data in items_data:
-            product_id = item_data.pop('product_id')
-            if product_id in existing_items:
-                # Update existing item
-                item = existing_items.pop(product_id)
+            product = item_data.pop('product')
+            if not Product.objects.filter(id=product.id).exists():
+                raise serializers.ValidationError(f"Product with ID {product.id} does not exist.")
+
+            if product.id in existing_items:
+                item = existing_items.pop(product.id)
                 for attr, value in item_data.items():
                     setattr(item, attr, value)
                 item.save()
             else:
-                # Create new item
-                OrderItem.objects.create(order=instance, product_id=product_id, **item_data)
+                item_data['total_sum'] = product.price * item_data['quantity']
+                OrderItem.objects.create(order=instance, product=product, **item_data)
 
-        # Delete any items that were not in the updated list
+        # Delete removed order items
         for item in existing_items.values():
             item.delete()
 

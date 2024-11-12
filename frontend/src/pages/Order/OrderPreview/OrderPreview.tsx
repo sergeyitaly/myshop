@@ -41,6 +41,7 @@ export const OrderPreview = ({
                         key={product.id}
                         product={product}
                         qty={qty}
+                        stock={product.stock}
                         onClickDelete={deleteFromBasket}
                         onChangeCounter={(val) => changeCounter(product, val)}
                         onClickName={handleClickCard}

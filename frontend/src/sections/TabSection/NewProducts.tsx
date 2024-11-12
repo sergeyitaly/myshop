@@ -4,12 +4,15 @@ import { useGetAllCollectionsQuery } from "../../api/collectionSlice"
 import { newProductsSettings } from "./sliderSettings/NewProductSetting"
 import { useAppTranslator } from "../../hooks/useAppTranslator"
 import { useNavigate } from "react-router-dom"
-import { ROUTE } from "../../constants"
+import { ROUTE, screens } from "../../constants"
+import { useMediaQuery } from "@mui/material"
 
 
 export const NewProducts = () => {
 
     const navigate = useNavigate()
+
+    const isMobile = useMediaQuery(screens.maxMobile)
 
     const {data, isLoading} = useGetAllCollectionsQuery()    
 
@@ -21,6 +24,7 @@ export const NewProducts = () => {
         <AppSlider
             isLoading = {isLoading}
             sliderSettings={newProductsSettings}
+            qtyOfPreloaderCards={isMobile ? 1 : 2}
         >
             {
                 collections.map((collection) => {

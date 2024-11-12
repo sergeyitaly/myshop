@@ -4,13 +4,16 @@ import { AppSlider } from "../../components/AppSlider/AppSlider"
 import { lightSettings } from "./sliderSettings/LightSettings"
 import styles from './TabSection.module.scss'
 import { useNavigate } from "react-router-dom"
-import { ROUTE } from "../../constants"
+import { ROUTE, screens } from "../../constants"
 import { useAppTranslator } from "../../hooks/useAppTranslator"
+import { useMediaQuery } from "@mui/material"
 
 
 export const LightSection = () => {
 
     const navigate = useNavigate()
+
+    const isMobile = useMediaQuery(screens.maxMobile)
 
     const {data, isLoading} = useGetProductsByMainFilterQuery({category: '5'})
 
@@ -25,6 +28,7 @@ export const LightSection = () => {
         <AppSlider
             isLoading = {isLoading}
             sliderSettings={lightSettings}
+            qtyOfPreloaderCards={isMobile ? 2 : 3}
         >
             {
                 products.map((product) => {

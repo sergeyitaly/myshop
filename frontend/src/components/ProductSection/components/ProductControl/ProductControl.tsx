@@ -35,13 +35,15 @@ export const ProductControl = ({
 	const { getTranslatedProductName, getTranslatedColorName } =
 		useAppTranslator();
 
-	const { available, price, currency, color_value } = product;
+	const { available, price, currency, color_value, stock } = product;
 	const { colors, sizes } = variants;
 
 	const { qty, setCounter } = useCounter(1);
 
 	useEffect(() => {
-		setCounter(1);
+		if (!available) {
+			setCounter(0);
+		} else setCounter(1);
 	}, [product.id]);
 
 	const { addToBasket, openBasket } = useBasket();
@@ -102,6 +104,7 @@ export const ProductControl = ({
 				<Counter
 					className={style.counter}
 					value={qty}
+					stock={stock}
 					onChangeCounter={setCounter}
 				/>
 			</div>

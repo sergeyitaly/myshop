@@ -10,11 +10,13 @@ export const NewProductsPage: React.FC = () => {
 
     return (
         <PageContainer>
+            <div style={{ marginTop: '60px' }}>
             <NamedSection
                 title={t('new_arrivals')}
             >
                 <NewProducts />
                 </NamedSection>
+            </div>
         </PageContainer>
     );
 };

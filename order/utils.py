@@ -3,6 +3,7 @@ from order.models import Order, OrderSummary
 from .notifications import update_order_status_with_notification
 from django.utils.dateformat import format as date_format
 from django.db import transaction
+from django.utils.translation import gettext as _  # Import gettext for translation
 
 def update_order_statuses():
     now = timezone.now()
@@ -20,7 +21,7 @@ def update_orders(current_status, new_status, threshold_minutes, timestamp_field
                 # Update the order status and corresponding timestamp
                 update_order_status(order, new_status, now, timestamp_field)
 
-                # Prepare the order summary
+                # Prepare the order summary, checking for the user's language preference
                 order_summary = prepare_order_summary(order)
 
                 # Use a transaction to ensure atomicity
@@ -65,10 +66,10 @@ def prepare_order_summary(order):
     ]
 
     status_mapping = {
-        'created': (order.created_at, 'Created'),
-        'processed': (order.processed_at, 'Processed'),
-        'completed': (order.complete_at, 'Completed'),
-        'canceled': (order.canceled_at, 'Canceled'),
+        'created': (order.created_at, _('Created')),
+        'processed': (order.processed_at, _('Processed')),
+        'completed': (order.complete_at, _('Completed')),
+        'canceled': (order.canceled_at, _('Canceled')),
     }
 
     latest_status = None
@@ -95,7 +96,8 @@ def prepare_order_summary(order):
                 'collection_name': item['collection_name'],
             } for item in order_items_data
         ],
-        latest_status: datetime_to_str(latest_status_time), 
+        'latest_status': latest_status,
+        'latest_status_time': datetime_to_str(latest_status_time),
         'submitted_at': datetime_to_str(order.submitted_at),
     }
 

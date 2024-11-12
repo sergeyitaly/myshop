@@ -17,15 +17,13 @@ const ProductPage: React.FC = () => {
 
 	const { t } = useTranslation();
 
-	const { product, isLoading, isFetching, isSuccess } = useProduct(id!);
+	const { product, isLoading, isFetching } = useProduct(id!);
 
 	const collectionName = product?.collection?.name ?? skipToken;
 
 	const { data: collection } = useGetCollectionByNameQuery(collectionName);
 
 
-	console.log(isSuccess, isFetching);
-	
 	return (
 		<MainContainer >
 			{
