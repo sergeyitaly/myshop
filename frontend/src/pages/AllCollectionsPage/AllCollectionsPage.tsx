@@ -10,11 +10,13 @@ export const AllCollectionsPage: React.FC = () => {
 
     return (
         <PageContainer>
+            <div style={{ marginTop: '60px' }}>
             <NamedSection
                 title={t('all_collections')}
             >
                 <AllCollections />
                 </NamedSection>
+            </div>
         </PageContainer>
     );
 };

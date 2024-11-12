@@ -27,7 +27,7 @@ export const AppSlider = ({
     isLoading,
     children,
     qtyOfPreloaderCards = 4,
-    sliderSettings = defaultAppSliderOptions
+    sliderSettings
 }: ProductSliderProps) => {
 
 
@@ -62,16 +62,10 @@ export const AppSlider = ({
         
     }, [children.length])
 
+
     useEffect(() => {
-
-        if(swiperRef && !isLoading){
-            swiperRef.autoplay.start()
-        }
-
+            (swiperRef && isLoading) ? swiperRef?.autoplay?.stop() : swiperRef?.autoplay?.start()
     }, [isLoading, swiperRef])
-   
-   
-
 
 const handlePrev = () => {
     swiperRef?.slidePrev()
@@ -88,11 +82,10 @@ const handleNext = () => {
         <Swiper 
             className={style.slider}
             onSwiper={setSwiperRef}
-            onSlideChange={(a) => console.log(a)}
             onPaginationRender={(_, paginationEl) => setPaginationEl(paginationEl)}
+            {...defaultAppSliderOptions}
             {...sliderSettings}
         >
-           
             {
                 isLoading ?
                 preloaderArray.map((_, i) => (
@@ -106,8 +99,6 @@ const handleNext = () => {
                 children.map((child) => (
                     <SwiperSlide
                         key={child.key}
-                        onMouseEnter={() => {swiperRef?.autoplay.pause()}}
-                        onMouseLeave={() => {swiperRef?.autoplay.resume()}}
                     >
                         {child}
                     </SwiperSlide>
@@ -135,7 +126,6 @@ const handleNext = () => {
                 
                 }
             </div>
-
         </Swiper>
     )
 }

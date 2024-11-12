@@ -30,11 +30,16 @@
         background: inherit;
     }
 
+    @media (max-width: $screen-mobile) {
+        font-size: 12px;
+        font-weight: 600;
+    }
+
 }
 
 .dropDownButton {
     display: flex;
-    justify-content: space-between;
+    gap: 5px;
     align-items: center;
 }
 

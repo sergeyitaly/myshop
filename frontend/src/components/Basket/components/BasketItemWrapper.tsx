@@ -27,6 +27,7 @@ export const BasketItemWrapper = ({
             qty={qty}
             color={{color: data.color_value || '', name: data.color_name || ''}}
             size={data.size || ''}
+            stock={data.stock || 0}
             onClickDelete={onClickDelete}
         />)
 }

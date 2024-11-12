@@ -16,11 +16,21 @@
 .label {
     position: relative;
     margin: 5px 0;
+//<<<<<<< HEAD
 
     span {
         position: absolute;
         //top: 50%;
         transform: translateY(-50%);
+//=======
+//    // border: 1px solid black;
+//
+//    span {
+//        position: absolute;
+//        top: 10px;
+//        // top: 50%;
+//        // transform: translateY(-50%);
+//>>>>>>> 8a014415d487d5b8dfaa15940665f35a585fcdea
         left: clamp(0.5rem, 0.213vw + 0.434rem, 0.625rem);
         font-size: clamp(0.875rem, 0.213vw + 0.809rem, 1rem);
         color: $color-gray-300;
@@ -30,7 +40,8 @@
     }
 
     .activeSpan {
-        top: 0%;
+        top: 0;
+        transform: translateY(-50%);
     }
 }
 
@@ -49,6 +60,7 @@
 
 .errorMessage {
     z-index: 1;
+//<<<<<<< HEAD
     //position: absolute;
     //border: 1px solid $color-error;
     padding: 0 10px;
@@ -59,4 +71,10 @@
     left: 10px;
     color: $color-error;
     margin-bottom: 5px;
+//=======
+//    font-size: 14px;
+//    background: $color-background;
+//    margin-top: 2px;
+//    color: $color-error
+//>>>>>>> 8a014415d487d5b8dfaa15940665f35a585fcdea
 }

@@ -1,4 +1,4 @@
-import { Grid, Pagination } from "swiper/modules";
+import { Autoplay, Grid, Pagination } from "swiper/modules";
 import { SwiperOptions } from "swiper/types";
 
 export const technologybrandSettings: SwiperOptions = {
@@ -13,7 +13,7 @@ export const technologybrandSettings: SwiperOptions = {
 	},
 	spaceBetween: 20,
 	speed: 1200,
-	modules: [Grid, Pagination],
+	modules: [Grid, Pagination, Autoplay],
 	breakpoints: {
 		740: {
 			grid: {

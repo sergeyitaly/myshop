@@ -5,11 +5,11 @@
   <!-- Time Period Selector -->
   <div class="time-period-selector" style="margin-bottom: 20px;">
     <label for="time_period">Select Time Period: </label>
-    <select id="time_period">
-      <option value="day" {% if current_time_period == 'day' %}selected{% endif %}>Today</option>
-      <option value="week" {% if current_time_period == 'week' %}selected{% endif %}>This Week</option>
-      <option value="month" {% if current_time_period == 'month' %}selected{% endif %}>This Month</option>
-      <option value="year" {% if current_time_period == 'year' %}selected{% endif %}>This Year</option>
+    <select id="time_period" onchange="updateTimePeriod()">
+        <option value="day" {% if current_time_period == 'day' %}selected{% endif %}>Today</option>
+        <option value="week" {% if current_time_period == 'week' %}selected{% endif %}>This Week</option>
+        <option value="month" {% if current_time_period == 'month' %}selected{% endif %}>This Month</option>
+        <option value="year" {% if current_time_period == 'year' %}selected{% endif %}>This Year</option>
     </select>
   </div>
 
@@ -27,7 +27,7 @@
       {% endfor %}
     </select>
   </div>
-  
+
   <!-- Clear Logs Button -->
   <div style="margin-bottom: 20px;">
     <a href="{% url 'admin:clear_logs' %}" class="button" style="background-color: red; color: white;">Clear All Logs</a>
@@ -45,17 +45,18 @@
     document.addEventListener('DOMContentLoaded', function() {
       const ctx = document.getElementById('requestChart').getContext('2d');
       const chartData = {{ chart_data|safe }};
-    
+
       // Function to generate a consistent color based on the endpoint name
       function generateColor(endpoint) {
         let hash = 0;
         for (let i = 0; i < endpoint.length; i++) {
           hash = endpoint.charCodeAt(i) + ((hash << 5) - hash);
         }
-        const color = '#' + ((hash >> 24) & 0xFF).toString(16).padStart(2, '0') + ((hash >> 16) & 0xFF).toString(16).padStart(2, '0') + ((hash >> 8) & 0xFF).toString(16).padStart(2, '0');
-        return color;
+        return '#' + ((hash >> 24) & 0xFF).toString(16).padStart(2, '0') +
+                      ((hash >> 16) & 0xFF).toString(16).padStart(2, '0') +
+                      ((hash >> 8) & 0xFF).toString(16).padStart(2, '0');
       }
-  
+
       // Initialize the chart
       const requestChart = new Chart(ctx, {
         type: 'bar',
@@ -64,7 +65,7 @@
           datasets: Object.keys(chartData.data).map(endpoint => ({
             label: endpoint,
             data: chartData.data[endpoint],
-            backgroundColor: generateColor(endpoint),  // Assign a consistent color based on endpoint
+            backgroundColor: generateColor(endpoint),
           }))
         },
         options: {
@@ -75,58 +76,64 @@
           scales: {
             y: {
               beginAtZero: true,
-              ticks: {
-                stepSize: 1,  
-              },
-            }
-          }
-        }
+              ticks: { stepSize: 1 },
+            },
+          },
+        },
       });
 
-      // Fetch new chart data when time period changes
+      // Event listeners for filters
+      const endpointFilterSelect = document.getElementById('endpoint_filter');
       const timePeriodSelect = document.getElementById('time_period');
-      timePeriodSelect.addEventListener('change', function() {
-        const timePeriod = timePeriodSelect.value;
-        fetch(`/admin/api/logs/chart-data/?time_period=${timePeriod}`)
+
+      // Function to update chart data based on selected filters
+      function updateChartData() {
+        const selectedEndpoint = endpointFilterSelect.value;
+        const selectedTimePeriod = timePeriodSelect.value;
+
+        fetch(`/admin/api/logs/chart-data/?time_period=${selectedTimePeriod}&endpoint=${selectedEndpoint}`)
           .then(response => response.json())
           .then(data => {
-            requestChart.data.labels = data.labels;
-            requestChart.data.datasets = Object.keys(data.data).map(endpoint => ({
-              label: endpoint,
-              data: data.data[endpoint],
-              backgroundColor: generateColor(endpoint),  // Assign a consistent color based on endpoint
-            }));
-            requestChart.update();
+            if (data && data.labels && data.data) {
+              requestChart.data.labels = data.labels;
+
+              if (selectedEndpoint === "all") {
+                requestChart.data.datasets = Object.keys(data.data).map(endpoint => ({
+                  label: endpoint,
+                  data: data.data[endpoint],
+                  backgroundColor: generateColor(endpoint),
+                }));
+              } else {
+                requestChart.data.datasets = data.data[selectedEndpoint] ? [{
+                  label: selectedEndpoint,
+                  data: data.data[selectedEndpoint],
+                  backgroundColor: generateColor(selectedEndpoint),
+                }] : [];
+              }
+              requestChart.update();
+            } else {
+              console.error('Unexpected data format received:', data);
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching chart data:', error);
           });
-      });
+      }
 
-      // Filter chart data by selected endpoint
-      const endpointFilterSelect = document.getElementById('endpoint_filter');
-      endpointFilterSelect.addEventListener('change', function() {
-        const selectedEndpoint = endpointFilterSelect.value;
-
-        if (selectedEndpoint === "all") {
-          // Show all data
-          requestChart.data.labels = chartData.labels;
-          requestChart.data.datasets = Object.keys(chartData.data).map(endpoint => ({
-            label: endpoint,
-            data: chartData.data[endpoint],
-            backgroundColor: generateColor(endpoint),
-          }));
-        } else {
-          // Filter the chart by selected endpoint
-          requestChart.data.labels = chartData.labels;
-          requestChart.data.datasets = chartData.data[selectedEndpoint] ? [{
-            label: selectedEndpoint,
-            data: chartData.data[selectedEndpoint],
-            backgroundColor: generateColor(selectedEndpoint),
-          }] : [];
-        }
-        requestChart.update();
-      });
+      // Add event listeners for the dropdowns
+      endpointFilterSelect.addEventListener('change', updateChartData);
+      timePeriodSelect.addEventListener('change', updateChartData);
     });
+
+    // Function to update the time period and reload the page with the selected period
+    function updateTimePeriod() {
+      const selectedTimePeriod = document.getElementById('time_period').value;
+      const urlParams = new URLSearchParams(window.location.search);
+      urlParams.set('time_period', selectedTimePeriod);  // Set time_period parameter
+      window.location.search = urlParams.toString();     // Reload page with new params
+    }
   </script>
-  
+
   <!-- Endpoint Visit Statistics Table -->
   <div id="endpoint-statistics" class="module" style="margin-top: 40px;">
     <h2>Endpoint Visit Statistics</h2>
