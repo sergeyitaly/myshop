@@ -9,6 +9,7 @@ import { Plug } from "../../Plug/Plug";
 import { ProductVariants } from "../../ProductVariants/ProductVariants";
 import { IconButton } from "../../UI/IconButton/IconButton";
 import styles from "./BasketItem.module.scss";
+import {ValueBox} from "../../ProductVariants/ValueBox/ValueBox";
 
 interface BasketItemProps {
 	product: Product;
@@ -85,51 +86,21 @@ export const BasketItem = ({
 					value={getTranslatedColorName(product)}
 				>
 				</ProductVariants>
+
 				<div className={styles.counterBox}>
 					<div style={{display:'flex', flexDirection:'row', fontSize:'15px'}}>
 						<div className={styles.sizeLabel}>{t("size")}:</div>
 						<div> &nbsp; {size}</div>
 					</div>
-
-						{/*/>*/}
-{/*<<<<<<< HEAD*/}
-{/*					</div>*/}
-
-						{/*<div style={{ fontSize: '0.75rem' }}>*/}
-						{/*	<Counter*/}
-						{/*		className={styles.selfTop}*/}
-						{/*		value={qty}*/}
-						{/*		onChangeCounter={handleChangeCounter}*/}
-{/*=======*/}
-{/*					</ProductVariants>*/}
-{/*					<Counter*/}
-{/*						className={styles.selfTop}*/}
-{/*						value={qty}*/}
-{/*						stock={stock}*/}
-{/*						onChangeCounter={handleChangeCounter}*/}
-{/*					/>*/}
-{/*>>>>>>> 8a014415d487d5b8dfaa15940665f35a585fcdea*/}
+						<div style={{ fontSize: '0.75rem' }}>
+							<Counter
+								className={styles.selfTop}
+								value={qty}
+								stock={stock}
+								onChangeCounter={handleChangeCounter}
+							/>
+						</div>
 				</div>
-			<div className={styles.counterBox}>
-				<ProductVariants
-					className={styles.characteristic}
-					title={t("size")}
-				>
-					<ValueBox
-						className={styles.noPointer}
-						key={size}
-						value={size}
-						title={size}
-						isActive
-					/>
-				</ProductVariants>
-				<Counter
-					className={styles.selfTop}
-					value={qty}
-					stock={stock}
-					onChangeCounter={handleChangeCounter}
-				/>
-			</div>
 				<div className={styles.control}>
 					<p>{formatPrice(price, currency)}</p>
 					{discountPrice && (
