@@ -80,7 +80,7 @@ const OrderPage: React.FC = () => {
 				subject: "Order Confirmation",
 				body: `Dear ${name}, \n\nYour order has been successfully submitted. \n\nThank you for shopping with us.`,
 			});
-			console.log("Email sent successfully!");
+			// console.log("Email sent successfully!");
 		} catch (error) {
 			console.error("Error sending email:", error);
 		}
