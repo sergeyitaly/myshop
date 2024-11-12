@@ -43,7 +43,7 @@ export const Header = ({ basketLoadingStatus }: HeaderProps) => {
 	return (
 		<header
 			className={clsx(headerClassName, {
-				[styles.noLine]: location.pathname === "/thank",
+				[styles.noLine]: location.pathname === "/thank" || location.pathname ==="/thank_for_feedback",
 			})}
 		>
 			<PageContainer className={styles.container}>
