@@ -9,7 +9,6 @@ import { Plug } from "../../Plug/Plug";
 import { ProductVariants } from "../../ProductVariants/ProductVariants";
 import { IconButton } from "../../UI/IconButton/IconButton";
 import styles from "./BasketItem.module.scss";
-import {ValueBox} from "../../ProductVariants/ValueBox/ValueBox";
 
 interface BasketItemProps {
 	product: Product;
