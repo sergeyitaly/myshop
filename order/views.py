@@ -475,6 +475,8 @@ def format_order_summary(order):
         latest_status_field: datetime_to_str(latest_status_timestamp)
     }
 
+
+
 @api_view(['POST'])
 def update_order(request):
     chat_id = request.data.get('chat_id')
@@ -487,31 +489,32 @@ def update_order(request):
         return Response({"detail": "Orders must be a list."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        # Retrieve existing orders based on the incoming order data
-        updated_orders = []
+        # Collect formatted orders
+        formatted_orders = []
         for order_data in orders:
             order_id = order_data.get('order_id')
             if not order_id:
                 return Response({"detail": "Order ID is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-            order = Order.objects.get(id=order_id)  # Adjust as needed based on your logic
-            formatted_order = format_order_summary(order)
-            updated_orders.append(formatted_order)
+            # Retrieve and format the order
+            try:
+                order = Order.objects.get(id=order_id)
+                formatted_order = format_order_summary(order)  # Use the helper function here
+                formatted_orders.append(formatted_order)
+            except Order.DoesNotExist:
+                return Response({"error": f"Order with ID {order_id} not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        # Update or create the OrderSummary with the formatted orders
+        # Update or create the OrderSummary for the given chat_id
         OrderSummary.objects.update_or_create(
             chat_id=chat_id,
-            defaults={'orders': updated_orders}
+            defaults={'orders': formatted_orders}
         )
 
         return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
 
-    except Order.DoesNotExist:
-        return Response({"error": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
-    except OrderSummary.DoesNotExist:
-        return Response({"error": "Order summary not found."}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -520,43 +523,43 @@ def get_order_summary_by_chat_id(request, chat_id):
         return Response({'error': 'Chat ID is required.'}, status=400)
 
     try:
-        summaries = OrderSummary.objects.filter(chat_id=chat_id)
-        if not summaries.exists():
-            return Response({'error': 'No summaries found for this chat ID.'}, status=404)
+        # Query orders by chat_id, prefetching related order_items
+        orders = Order.objects.filter(chat_id=chat_id).prefetch_related('order_items')
+        
+        if not orders.exists():
+            return Response({'error': 'No orders found for this chat ID.'}, status=404)
 
-        # Initialize a new list to hold the summary data for the response
+        # Initialize a list to store order summaries
         summary_data = []
-
-        # Iterate over each summary for the specified chat ID
-        for summary in summaries:
-            orders = summary.orders  # Assuming this is a list of order dictionaries
-            for order in orders:
-                # Construct a dictionary for each order
-                order_data = {
-                    'order_id': order.get('order_id'),
-                    'created_at': order.get('created_at'),
-                    'submitted_at': order.get('submitted_at'),
-                    'processed_at': order.get('processed_at'),
-                    'complete_at': order.get('complete_at'),
-                    'canceled_at': order.get('canceled_at'),
-                    'order_items': [
-                        {
-                            'product_name': item.get('product_name'),
-                            'collection_name': item.get('collection_name'),
-                            'size': item.get('size'),
-                            'color_name': item.get('color_name'),
-                            'quantity': item.get('quantity'),
-                            'total_sum': float(item.get('total_sum', 0)),  
-                            'item_price': str(item.get('item_price', '0')),  
-                            'color_value': item.get('color_value')
-                        }
-                        for item in order.get('order_items', [])
-                    ]
-                }
-                # Append the constructed order_data to the summary_data list
-                summary_data.append(order_data)
-
-        # Return the constructed summary_data as the response
+        
+        # Loop over each order
+        for order in orders:
+            # Construct order data
+            order_data = {
+                'order_id': order.id,
+                'created_at': order.created_at,
+                'submitted_at': order.submitted_at,
+                'processed_at': order.processed_at,
+                'complete_at': order.complete_at,
+                'canceled_at': order.canceled_at,
+                'order_items': [
+                    {
+                        'product_name': item.product.name,
+                        'collection_name': item.product.collection.name,
+                        'size': item.size,
+                        'color_name': item.color_name,
+                        'quantity': item.quantity,
+                        'total_sum': float(item.total_sum),
+                        'item_price': str(item.price),
+                        'color_value': item.color_value,
+                    }
+                    for item in order.order_items.all()
+                ]
+            }
+            # Append to summary data
+            summary_data.append(order_data)
+        
+        # Return the constructed summary data as the response
         return Response({'results': summary_data}, status=200)
 
     except Exception as e:
