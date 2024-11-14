@@ -442,38 +442,95 @@ def safe_make_naive(dt):
     return make_naive(dt) if is_aware(dt) else dt
 
 def format_order_summary(order):
-    submitted_at = safe_make_naive(order.submitted_at)
-    processed_at = safe_make_naive(order.processed_at)
-    complete_at = safe_make_naive(order.complete_at)
-    canceled_at = safe_make_naive(order.canceled_at)
-
-    statuses = {
-        'submitted_at': submitted_at,
-        'processed_at': processed_at,
-        'complete_at': complete_at,
-        'canceled_at': canceled_at
+    """Helper function to format an Order instance into a summary dictionary."""
+    # Collect and format order details here as per your summary structure
+    status_timestamps = {
+        'created_at': order.created_at,
+        'submitted_at': order.submitted_at,
+        'processed_at': order.processed_at,
+        'complete_at': order.complete_at,
+        'canceled_at': order.canceled_at,
     }
-    
-    latest_status_field = max(
-        statuses,
-        key=lambda s: statuses[s] or datetime.min
+    latest_status_timestamp = max(
+        (timestamp for timestamp in status_timestamps.values() if timestamp is not None),
+        default=None
     )
-    latest_status_timestamp = statuses[latest_status_field]
-
-    def datetime_to_str(dt):
-        if dt:
-            return dt.strftime('%Y-%m-%d %H:%M')
-        return None
-
-    serializer = OrderSerializer(order)
-    order_data = serializer.data
+    latest_status_field = next(
+        (field for field, timestamp in status_timestamps.items() if timestamp == latest_status_timestamp),
+        None
+    )
 
     return {
         'order_id': order.id,
-        'order_items': order_data['order_items'],
-        'submitted_at': datetime_to_str(submitted_at),
-        latest_status_field: datetime_to_str(latest_status_timestamp)
+        'order_items_en': [
+            {
+                'product_name': item.product_name_en,
+                'collection_name': item.collection_name_en,
+                'size': item.size_en,
+                'color_name': item.color_name_en,
+                'quantity': item.quantity_en,
+                'total_sum': float(item.total_sum_en),
+                'item_price': str(item.item_price_en),
+                'color_value': item.color_value_en
+            }
+            for item in order.order_items
+        ],
+        'order_items_uk': [
+            {
+                'product_name': item.product_name_uk,
+                'collection_name': item.collection_name_uk,
+                'size': item.size_uk,
+                'color_name': item.color_name_uk,
+                'quantity': item.quantity_uk,
+                'total_sum': float(item.total_sum_uk),
+                'item_price': str(item.item_price_uk),
+                'color_value': item.color_value_uk
+            }
+            for item in order.order_items
+        ],
+        'submitted_at': order.submitted_at.isoformat() if order.submitted_at else None,
+        latest_status_field: latest_status_timestamp.isoformat() if latest_status_timestamp else None,
     }
+
+@api_view(['POST'])
+def update_order(request):
+    chat_id = request.data.get('chat_id')
+    orders = request.data.get('orders')
+
+    if not chat_id:
+        return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not isinstance(orders, list):
+        return Response({"detail": "Orders must be a list."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        # Retrieve or initialize order summaries
+        updated_orders = []
+        for order_data in orders:
+            order_id = order_data.get('order_id')
+            if not order_id:
+                return Response({"detail": "Order ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                order = Order.objects.get(id=order_id)
+            except Order.DoesNotExist:
+                return Response({"error": f"Order with ID {order_id} not found."}, status=status.HTTP_404_NOT_FOUND)
+
+            # Format order for summary
+            formatted_order = format_order_summary(order)
+            updated_orders.append(formatted_order)
+
+        # Update or create the OrderSummary with the new order data
+        OrderSummary.objects.update_or_create(
+            chat_id=chat_id,
+            defaults={'orders': updated_orders}
+        )
+
+        return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
 def update_order(request):
@@ -516,7 +573,7 @@ def update_order(request):
 def datetime_to_str(dt):
     """Convert datetime to string in a specific format."""
     if dt:
-        return dt.strftime('%Y-%m-%d %H:%M:%S')  # Modify the format as needed
+        return dt.strftime('%Y-%m-%d %H:%M:%S')
     return None
 
 @api_view(['GET'])
@@ -526,18 +583,20 @@ def get_order_summary_by_chat_id(request, chat_id):
         return Response({'error': 'Chat ID is required.'}, status=400)
 
     try:
+        # Fetch the OrderSummary for the given chat_id
         summaries = OrderSummary.objects.filter(chat_id=chat_id)
         if not summaries.exists():
             return Response({'error': 'No summaries found for this chat ID.'}, status=404)
 
-        # Initialize a new list to hold the summary data for the response
+        # Initialize a list to collect each order's summary data
         summary_data = []
 
-        # Iterate over each summary for the specified chat ID
+        # Iterate over each summary entry for the specified chat ID
         for summary in summaries:
-            orders = summary.orders  # Assuming this is a list of order dictionaries
+            orders = summary.orders  # Access the JSON data in orders
+
             for order in orders:
-                # Extract timestamps for the order status fields
+                # Extract the timestamps for different order statuses
                 status_timestamps = {
                     'created_at': order.get('created_at'),
                     'submitted_at': order.get('submitted_at'),
@@ -546,32 +605,32 @@ def get_order_summary_by_chat_id(request, chat_id):
                     'canceled_at': order.get('canceled_at'),
                 }
 
-                # Find the latest status timestamp (ignore None values)
+                # Find the latest status timestamp among non-None values
                 latest_status_timestamp = max(
                     (timestamp for timestamp in status_timestamps.values() if timestamp is not None),
                     default=None
                 )
 
-                # Determine the field name for the latest status
+                # Determine the field name associated with the latest status timestamp
                 latest_status_field = None
                 for status, timestamp in status_timestamps.items():
                     if timestamp == latest_status_timestamp:
                         latest_status_field = status
                         break
 
-                # Construct a dictionary for each order
+                # Construct the order data dictionary for each order
                 order_data = {
                     'order_id': order.get('order_id'),
                     'order_items_en': [
                         {
-                            'product_name': item.get('product_name'),
-                            'collection_name': item.get('collection_name'),
-                            'size': item.get('size'),
-                            'color_name': item.get('color_name'),
-                            'quantity': item.get('quantity'),
-                            'total_sum': float(item.get('total_sum', 0)),
-                            'item_price': str(item.get('item_price', '0')),
-                            'color_value': item.get('color_value')
+                            'product_name': item.get('product_name_en'),
+                            'collection_name': item.get('collection_name_en'),
+                            'size': item.get('size_en'),
+                            'color_name': item.get('color_name_en'),
+                            'quantity': item.get('quantity_en'),
+                            'total_sum': float(item.get('total_sum_en', 0)),
+                            'item_price': str(item.get('item_price_en', '0')),
+                            'color_value': item.get('color_value_en')
                         }
                         for item in order.get('order_items', [])
                     ],
@@ -591,11 +650,13 @@ def get_order_summary_by_chat_id(request, chat_id):
                     'submitted_at': datetime_to_str(order.get('submitted_at')),
                     latest_status_field: datetime_to_str(latest_status_timestamp) if latest_status_timestamp else None
                 }
-                # Append the constructed order_data to the summary_data list
+
+                # Append each constructed order_data to summary_data list
                 summary_data.append(order_data)
 
-        # Return the constructed summary_data as the response
+        # Return the response with the collected summary data
         return Response({'results': summary_data}, status=200)
 
     except Exception as e:
+        # Handle any unexpected errors
         return Response({'error': str(e)}, status=500)
