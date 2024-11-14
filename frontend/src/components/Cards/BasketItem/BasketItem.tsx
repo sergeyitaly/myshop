@@ -87,9 +87,9 @@ export const BasketItem = ({
 				</ProductVariants>
 
 				<div className={styles.counterBox}>
-					<div style={{display:'flex', flexDirection:'row', fontSize:'15px'}}>
-						<div className={styles.sizeLabel}>{t("size")}:</div>
-						<div> &nbsp; {size}</div>
+					<div>
+						<div className={styles.sizeLabel}>{t("size")}:&nbsp;</div>
+						<span>{size}</span>
 					</div>
 						<div style={{ fontSize: '0.75rem' }}>
 							<Counter
