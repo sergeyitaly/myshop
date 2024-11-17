@@ -1180,28 +1180,22 @@ const isOrderSummaryResponse = (data: any): data is OrderSummaryResponse => {
       (order.processed_at === null || typeof order.processed_at === 'string') &&
       (order.complete_at === null || typeof order.complete_at === 'string') &&
       (order.canceled_at === null || typeof order.canceled_at === 'string') &&
-      Array.isArray(order.order_items) &&
-      order.order_items.every((item: any) =>
-        typeof item.product_name === 'string' &&
-        typeof item.collection_name === 'string' &&
-        typeof item.size === 'string' &&
-        typeof item.color_name === 'string' &&
-        typeof item.quantity === 'number' &&
-        typeof item.total_sum === 'number' &&
-        typeof item.item_price === 'string' &&
-        typeof item.color_value === 'string'
-      )
+      Array.isArray(order.order_items_en || order.order_items_uk) && // Adjusted for both fields
+      (order.order_items_en ? order.order_items_en.every(isOrderItem) : true) &&
+      (order.order_items_uk ? order.order_items_uk.every(isOrderItem) : true) &&
+      (order.TelegramUser ? Array.isArray(order.TelegramUser) : true) &&
+      ['string', 'undefined'].includes(typeof order.email)
     );
 };
 
+
 const isOrderItem = (item: any): item is OrderItem => {
-  return item && typeof item.product_name === 'string' &&
+  return item && typeof item.name === 'string' && // Adjusted field name to match the response
     typeof item.collection_name === 'string' &&
     typeof item.size === 'string' &&
     typeof item.color_name === 'string' &&
     typeof item.quantity === 'number' &&
-    typeof item.total_sum === 'number' &&
-    typeof item.item_price === 'string' &&
+    typeof item.price === 'number' && // Ensure `price` is validated correctly
     typeof item.color_value === 'string';
 };
 
@@ -1234,7 +1228,7 @@ const getLatestStatusEntry = (statusDates: Record<string, string | null>, isEngl
 };
 
 
-// Example usage
+
 const formatDate = (date: string): string => {
   // Dummy implementation for formatting dates
   return new Date(date).toLocaleDateString();
@@ -1273,8 +1267,9 @@ const fetchOrderSummary = async (chatId: string): Promise<OrderSummaryResponse> 
 // Utility to safely parse date strings to Date objects
 const parseDate = (dateString: string): Date | null => {
   const date = new Date(dateString);
-  return isNaN(date.getTime()) ? null : date;  // Return null if the date is invalid
+  return isNaN(date.getTime()) ? null : date;  // Return null if invalid date
 };
+
 
 const createOrderItemsSummary = (orderItems: OrderItem[], isEnglish: boolean): string => {
   return orderItems.map(item =>

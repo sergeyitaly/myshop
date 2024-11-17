@@ -2,12 +2,48 @@ from rest_framework import serializers
 from .models import *
 import decimal
 
+from rest_framework import serializers
+from .models import *
+import decimal
+
 class TelegramUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = TelegramUser
         fields = ['id', 'phone', 'chat_id']
 
+class OrderItemSerializer(serializers.ModelSerializer):
+    # You can either link product or use product_id directly for lookup
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=False, write_only=True)
+    product_id = serializers.CharField(write_only=True)  # Accept product_id in the request
+    total_sum = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+
+    class Meta:
+        model = OrderItem
+        fields = ['product_id', 'product', 'quantity', 'total_sum', 'name', 'size', 'color_name', 'color_value', 'collection_name']
+
+    def validate_quantity(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Quantity must be a positive integer.")
+        return value
+
+    def validate(self, data):
+        product_id = data.get('product_id')
+        if not product_id:
+            raise serializers.ValidationError({'product': 'This field is required.'})
+
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            raise serializers.ValidationError({'product': 'Product does not exist.'})
+
+        data['product'] = product
+        return data
+
 class OrderSummarySerializer(serializers.ModelSerializer):
+    # Include both English and Ukrainian order items
+    order_items_en = OrderItemSerializer(many=True, required=False)
+    order_items_uk = OrderItemSerializer(many=True, required=False)
+
     class Meta:
         model = OrderSummary
         fields = ['chat_id', 'orders']
@@ -55,9 +91,12 @@ class OrderSummarySerializer(serializers.ModelSerializer):
             
             filtered_order = {
                 'order_id': order['order_id'],
-                'submitted_at': order.get('submitted_at'),  # Make sure this field exists in your order data
+                'created_at': order.get('created_at'),
+                'submitted_at': order.get('submitted_at'),
                 'latest_status_time': latest_status_time,
-                'latest_status': latest_status  # The status name (like 'processed', etc.)
+                'latest_status': latest_status,  # The status name (like 'processed', etc.)
+                'order_items_en': order.get('order_items_en', []),
+                'order_items_uk': order.get('order_items_uk', [])
             }
             filtered_orders.append(filtered_order)
 
@@ -78,33 +117,6 @@ class OrderSummarySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("chat_id cannot be null.")
         return value
 
-class OrderItemSerializer(serializers.ModelSerializer):
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=False, write_only=True)
-    product_id = serializers.CharField(write_only=True)  # Accept product_id in the request
-    total_sum = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
-
-    def validate_quantity(self, value):
-        if value <= 0:
-            raise serializers.ValidationError("Quantity must be a positive integer.")
-        return value
-
-    def validate(self, data):
-        product_id = data.get('product_id')
-        if not product_id:
-            raise serializers.ValidationError({'product': 'This field is required.'})
-
-        try:
-            product = Product.objects.get(id=product_id)
-        except Product.DoesNotExist:
-            raise serializers.ValidationError({'product': 'Product does not exist.'})
-
-        # Add the product to the validated data
-        data['product'] = product
-        return data
-
-    class Meta:
-        model = OrderItem
-        fields = ['product_id', 'product', 'quantity', 'total_sum']
 
 class OrderSerializer(serializers.ModelSerializer):
     order_items = OrderItemSerializer(many=True, required=True)
