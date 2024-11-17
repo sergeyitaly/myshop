@@ -592,7 +592,7 @@ def get_order_summary_by_chat_id(request, chat_id):
                     latest_status_field: latest_status_timestamp.isoformat() if latest_status_timestamp else None
                 }
                 summary_data.append(order_data)
-
+        logger.debug(f"Order summary response: {summary_data}")
         return Response({'results': summary_data}, status=status.HTTP_200_OK)
 
     except Exception as e:
