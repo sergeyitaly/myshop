@@ -94,6 +94,7 @@ def get_order_summary(order):
         'submitted_at': datetime_to_str(submitted_at),
     }
     return summary
+
 def update_order_summary():
     """Updates the summary of orders grouped by Telegram chat ID."""
     try:
