@@ -436,21 +436,28 @@ def get_orders(request):
     except Exception as e:
         logger.error(f"Error fetching orders: {e}")
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-def safe_make_naive(dt):
-    if dt is None:
-        return None
-    return make_naive(dt) if is_aware(dt) else dt
+
+def safe_make_naive(timestamp):
+    """
+    Safely convert a timestamp to naive datetime. Handles strings and datetime objects.
+    """
+    if isinstance(timestamp, str):
+        try:
+            timestamp = datetime.fromisoformat(timestamp)  # Parse string to datetime
+        except ValueError:
+            logger.error(f"Invalid timestamp format: {timestamp}")
+            return None
+    return make_naive(timestamp) if timestamp else None
 
 def format_order_summary(order):
     """Helper function to format an Order instance into a summary dictionary."""
     # Collect and format order details here as per your summary structure
     status_timestamps = {
-        'created_at': order.created_at,
-        'submitted_at': order.submitted_at,
-        'processed_at': order.processed_at,
-        'complete_at': order.complete_at,
-        'canceled_at': order.canceled_at,
+        'created_at': safe_make_naive(order.created_at),
+        'submitted_at': safe_make_naive(order.submitted_at),
+        'processed_at': safe_make_naive(order.processed_at),
+        'complete_at': safe_make_naive(order.complete_at),
+        'canceled_at': safe_make_naive(order.canceled_at),
     }
     latest_status_timestamp = max(
         (timestamp for timestamp in status_timestamps.values() if timestamp is not None),
@@ -493,7 +500,6 @@ def format_order_summary(order):
         latest_status_field: latest_status_timestamp.isoformat() if latest_status_timestamp else None,
     }
 
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def update_order(request):
@@ -535,11 +541,6 @@ def update_order(request):
         logger.error(f"Error updating order summary: {e}")
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-def datetime_to_str(dt):
-    """Convert datetime to string in a specific format."""
-    if dt:
-        return dt.strftime('%Y-%m-%d %H:%M:%S')
-    return None
 
 # Get order summary by chat ID
 @api_view(['GET'])
@@ -557,13 +558,16 @@ def get_order_summary_by_chat_id(request, chat_id):
         for summary in summaries:
             orders = summary.orders
             for order in orders:
+                # Parse status timestamps
                 status_timestamps = {
-                    'created_at': order.get('created_at'),
-                    'submitted_at': order.get('submitted_at'),
-                    'processed_at': order.get('processed_at'),
-                    'complete_at': order.get('complete_at'),
-                    'canceled_at': order.get('canceled_at'),
+                    'created_at': safe_make_naive(order.get('created_at')),
+                    'submitted_at': safe_make_naive(order.get('submitted_at')),
+                    'processed_at': safe_make_naive(order.get('processed_at')),
+                    'complete_at': safe_make_naive(order.get('complete_at')),
+                    'canceled_at': safe_make_naive(order.get('canceled_at')),
                 }
+
+                # Determine the latest status
                 latest_status_timestamp = max(
                     (timestamp for timestamp in status_timestamps.values() if timestamp is not None),
                     default=None
@@ -573,12 +577,13 @@ def get_order_summary_by_chat_id(request, chat_id):
                     None
                 )
 
+                # Build the order data
                 order_data = {
                     'order_id': order.get('order_id'),
                     'order_items_en': order.get('order_items_en', []),
                     'order_items_uk': order.get('order_items_uk', []),
-                    'submitted_at': safe_make_naive(order.get('submitted_at')).isoformat() if order.get('submitted_at') else None,
-                    latest_status_field: safe_make_naive(latest_status_timestamp).isoformat() if latest_status_timestamp else None
+                    'submitted_at': status_timestamps['submitted_at'].isoformat() if status_timestamps['submitted_at'] else None,
+                    latest_status_field: latest_status_timestamp.isoformat() if latest_status_timestamp else None
                 }
                 summary_data.append(order_data)
 
