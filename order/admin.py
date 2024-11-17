@@ -126,11 +126,9 @@ class OrderAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.prefetch_related('order_items', 'telegram_user')  # Pre-fetch related telegram_user
-
+        return qs.prefetch_related('order_items')
     def chat_id(self, obj):
-        # Access the related TelegramUser's chat_id through the ForeignKey field `telegram_user`
-        return obj.telegram_user.chat_id if obj.telegram_user else None
+        return obj.chat_id if obj.chat_id else None
     chat_id.short_description = _('Chat ID')
 
     def last_updated(self, obj):
@@ -146,42 +144,32 @@ class OrderAdmin(admin.ModelAdmin):
     total_price.short_description = _('Total Price')
 
     def save_model(self, request, obj, form, change):
-        try:
-            if change:
-                # Fetching the previous order object
-                old_obj = self.model.objects.get(pk=obj.pk)
-                if old_obj.status != obj.status:
-                    # Update status timestamps based on the new status
-                    if obj.status == 'submitted':
-                        obj.submitted_at = timezone.now()
-                    elif obj.status == 'created':
-                        obj.created_at = timezone.now()
-                    elif obj.status == 'processed':
-                        obj.processed_at = timezone.now()
-                    elif obj.status == 'complete':
-                        obj.complete_at = timezone.now()
-                    elif obj.status == 'canceled':
-                        obj.canceled_at = timezone.now()
+        if change:
+            old_obj = self.model.objects.get(pk=obj.pk)
+            if old_obj.status != obj.status or old_obj.status == obj.status:
+                if obj.status == 'submited':
+                    obj.submitted_at = timezone.now()
+                if obj.status == 'created':
+                    obj.created_at = timezone.now()
+                if obj.status == 'processed':
+                    obj.processed_at = timezone.now()
+                elif obj.status == 'complete':
+                    obj.complete_at = timezone.now()
+                elif obj.status == 'canceled':
+                    obj.canceled_at = timezone.now()
+                order_items = obj.order_items.all()
 
-                    # Ensure chat_id is fetched properly
-                    if obj.telegram_user and obj.telegram_user.chat_id:
-                        # Fetch order items
-                        order_items = obj.order_items.all()
-                        
-                        # Update the Order Summary and notify Telegram
-                        update_order_status_with_notification(
-                            obj.id,
-                            order_items,
-                            obj.status,
-                            f'{obj.status}_at',
-                            obj.telegram_user.chat_id
-                        )
-
-                        # After updating the order, call the function to update the order summary
-        except Exception as e:
-            self.message_user(request, f"Error updating order: {e}", level='error')
-
-        # Proceed with the standard save process after custom logic
+            # Ensure that obj.telegram_user is not None and has chat_id attribute
+            if obj.telegram_user and obj.telegram_user.chat_id:
+ # Send notification about status change
+                update_order_status_with_notification(
+                    obj.id,
+                    order_items,
+                    obj.status,
+                    f'{obj.status}_at',
+                    obj.telegram_user.chat_id
+                )
+        
         super().save_model(request, obj, form, change)
 
 # Register the Order model
