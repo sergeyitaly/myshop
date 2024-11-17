@@ -115,13 +115,11 @@ class OrderAdmin(admin.ModelAdmin):
     list_filter = [
         'status',
         'phone',
-        TelegramUserFilter,
         'created_at',
         'processed_at',
         'complete_at',
         'canceled_at',
         'present',
-        HasOrderItemsFilter,
     ]
     search_fields = ['phone', 'email', 'name', 'surname']
     inlines = [OrderItemInline]
@@ -150,9 +148,11 @@ class OrderAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         try:
             if change:
+                # Fetching the previous order object
                 old_obj = self.model.objects.get(pk=obj.pk)
                 if old_obj.status != obj.status:
-                    if obj.status == 'submited':
+                    # Update status timestamps based on the new status
+                    if obj.status == 'submitted':
                         obj.submitted_at = timezone.now()
                     elif obj.status == 'created':
                         obj.created_at = timezone.now()
@@ -162,10 +162,13 @@ class OrderAdmin(admin.ModelAdmin):
                         obj.complete_at = timezone.now()
                     elif obj.status == 'canceled':
                         obj.canceled_at = timezone.now()
-                    
-                    # Fetch order items and send notification
-                    order_items = obj.order_items.all()
+
+                    # Ensure chat_id is fetched properly
                     if obj.telegram_user and obj.telegram_user.chat_id:
+                        # Fetch order items
+                        order_items = obj.order_items.all()
+                        
+                        # Update the Order Summary and notify Telegram
                         update_order_status_with_notification(
                             obj.id,
                             order_items,
@@ -173,12 +176,15 @@ class OrderAdmin(admin.ModelAdmin):
                             f'{obj.status}_at',
                             obj.telegram_user.chat_id
                         )
+
+                        # After updating the order, call the function to update the order summary
         except Exception as e:
             self.message_user(request, f"Error updating order: {e}", level='error')
 
+        # Proceed with the standard save process after custom logic
         super().save_model(request, obj, form, change)
 
-
+# Register the Order model
 admin.site.register(Order, OrderAdmin)
 admin.site.register(TelegramUser, TelegramUserAdmin)
 admin.site.register(OrderSummary, OrderSummaryAdmin)

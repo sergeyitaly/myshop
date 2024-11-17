@@ -98,12 +98,10 @@ def get_order_summary(order):
 def update_order_summary():
     """Updates the summary of orders grouped by Telegram chat ID."""
     try:
-        # Prefetch related data to optimize database queries
-        orders = Order.objects.prefetch_related('order_items__product', 'telegram_user').all()
+        orders = Order.objects.prefetch_related('order_items__product').all()
         logger.info(f'Fetched {orders.count()} orders.')
         grouped_orders = {}
 
-        # Group orders by chat_id to minimize updates
         for order in orders:
             order_chat_id = order.telegram_user.chat_id if order.telegram_user else None
             if not order_chat_id:
@@ -114,7 +112,7 @@ def update_order_summary():
 
             summary = get_order_summary(order)
             existing_summary = next((o for o in grouped_orders[order_chat_id] if o['order_id'] == order.id), None)
-
+            
             if existing_summary:
                 # Update the existing summary with new order details
                 existing_summary.update(summary)
@@ -122,18 +120,13 @@ def update_order_summary():
                 # Append the new summary if it doesn't exist
                 grouped_orders[order_chat_id].append(summary)
 
-        # Bulk update or create order summaries
-        order_summary_objects = []
         for chat_id, orders_summary in grouped_orders.items():
-            order_summary_objects.append(OrderSummary(chat_id=chat_id, orders=orders_summary))
-
-        # Use bulk_create for creating or updating the OrderSummary
-        OrderSummary.objects.bulk_create(order_summary_objects, ignore_conflicts=True)
-        logger.info(f'Order summaries created/updated for chat IDs: {", ".join(grouped_orders.keys())}')
-
-        # Clear the cache for each updated order summary
-        for chat_id in grouped_orders:
-            cache.delete(f'order_summary_{chat_id}')
+            # Use update_or_create to ensure the summary is updated or created
+            OrderSummary.objects.update_or_create(
+                chat_id=chat_id,
+                defaults={'orders': orders_summary}
+            )
+            logger.info(f'Order summaries created/updated for chat ID {chat_id}')
 
     except Exception as e:
         logger.error(f'Error while generating order summaries: {e}')
@@ -148,22 +141,55 @@ def get_chat_id_from_phone(phone_number):
         logger.error(f"Request to /api/telegram_user failed: {e}")
         return None
 
+@receiver(post_save, sender=OrderItem)
+def update_order_summary_on_order_item_change(sender, instance, **kwargs):
+    """Updates the order summary when an OrderItem is changed."""
+    phone_number = instance.order.phone
+    if phone_number:
+        chat_id = get_chat_id_from_phone(phone_number)
+        if chat_id:
+            # Check if the order item's status or item data has changed meaningfully
+            order = instance.order
+            previous_status = instance.__class__.objects.get(id=instance.id).status if instance.pk else None
+            
+            # Here we assume that meaningful changes are related to order status or significant item changes
+            status_changed = instance.order.status != previous_status
+
+            # If the status or key details of the order have changed, update the summary
+            if status_changed or has_meaningful_item_changes(instance, order):
+                update_order_summary()  # Trigger the summary update
+                logger.debug(f"OrderItem updated for Order ID: {instance.order.id}, summary updated for chat ID: {chat_id}")
+            else:
+                logger.debug(f"No significant changes in OrderItem for Order ID: {instance.order.id}. Skipping summary update.")
+
+
 @receiver(post_save, sender=Order)
 def update_order_summary_on_order_status_change(sender, instance, **kwargs):
-    """Updates the order summary when the order is saved or its status changes."""
-    chat_id = instance.telegram_user.chat_id if instance.telegram_user else None
-    if chat_id:
-        update_order_summary()  # Optimized version will be called here
-        logger.debug(f"Order status or details updated for Order ID: {instance.id}, summary updated for chat ID: {chat_id}")
-        
-@receiver(post_save, sender=OrderItem)
-@receiver(post_delete, sender=OrderItem)
-def update_order_summary_on_order_item_change(sender, instance, **kwargs):
-    """Updates the order summary when an OrderItem is added, updated, or deleted."""
-    chat_id = instance.order.telegram_user.chat_id if instance.order.telegram_user else None
-    if chat_id:
-        update_order_summary()  # Optimized version will be called here
-        logger.debug(f"OrderItem change detected for Order ID: {instance.order.id}, summary updated for chat ID: {chat_id}")
+    """Updates the order summary when an Order's status changes."""
+    phone_number = instance.phone
+    if phone_number:
+        chat_id = get_chat_id_from_phone(phone_number)
+        if chat_id:
+            # If the order status has changed, trigger summary update
+            update_order_summary()
+            logger.debug(f"Order status updated for Order ID: {instance.id}, summary updated for chat ID: {chat_id}")
+
+
+def has_meaningful_item_changes(instance, order):
+    """Determine if there were meaningful changes to the order items."""
+    # Track changes that could impact the summary (e.g., added, removed, quantity, or price change)
+    # You could also check if the item was newly added or removed, if the quantity was changed, etc.
+    
+    original_item = OrderItem.objects.get(id=instance.id) if instance.pk else None
+    if original_item:
+        return (
+            original_item.quantity != instance.quantity or
+            original_item.price != instance.price or
+            original_item.size != instance.size or
+            original_item.color_name != instance.color_name
+        )
+    return False
+
 
 @receiver(post_delete, sender=Order)
 def remove_order_from_summary(sender, instance, **kwargs):
@@ -173,16 +199,33 @@ def remove_order_from_summary(sender, instance, **kwargs):
         chat_id = get_chat_id_from_phone(phone_number)
         if chat_id:
             try:
+                # Attempt to fetch the OrderSummary for the given chat_id
                 order_summary = OrderSummary.objects.get(chat_id=chat_id)
+                
+                # Filter out the deleted order from the orders list
                 updated_orders = [o for o in order_summary.orders if o['order_id'] != instance.id]
-                order_summary.orders = updated_orders
-                order_summary.save()
-                cache.delete(f'order_summary_{chat_id}')
-                logger.debug(f"Removed order ID {instance.id} from summary for chat ID {chat_id}")
+                
+                # If there are changes to the orders list, update the OrderSummary
+                if len(updated_orders) != len(order_summary.orders):
+                    order_summary.orders = updated_orders
+                    order_summary.save()
+                    logger.debug(f"Removed order ID {instance.id} from summary for chat ID {chat_id}")
+                else:
+                    logger.debug(f"No change in order summary for chat ID {chat_id} (order ID {instance.id} already removed)")
+
+                # Check if the cache key exists before trying to delete it
+                cache_key = f'order_summary_{chat_id}'
+                if cache.get(cache_key):
+                    cache.delete(cache_key)
+                    logger.debug(f"Cache for order summary {cache_key} deleted")
+                else:
+                    logger.warning(f"Cache for order summary {cache_key} not found (not deleted)")
+
             except OrderSummary.DoesNotExist:
                 logger.warning(f"OrderSummary for chat ID {chat_id} does not exist.")
             except Exception as e:
                 logger.error(f"Error removing order from summary: {e}")
+
 
 @receiver(post_delete, sender=OrderItem)
 def update_order_summary_on_order_item_delete(sender, instance, **kwargs):
@@ -191,5 +234,5 @@ def update_order_summary_on_order_item_delete(sender, instance, **kwargs):
     if phone_number:
         chat_id = get_chat_id_from_phone(phone_number)
         if chat_id:
-            update_order_summary()  # Optimized version will be called here
+            update_order_summary()
             logger.debug(f"OrderItem deleted for Order ID: {instance.order.id}, summary updated for chat ID: {chat_id}")
