@@ -98,7 +98,7 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
             return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        order_summary_data = self.prepare_order_summary(serializer.instance)
+        order_summary_data = prepare_order_summary(serializer.instance)
         return Response(order_summary_data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
@@ -111,9 +111,12 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        if getattr(instance, '_prefetched_objects_cache', None):
-            instance._prefetched_objects_cache = {}
-        order_summary_data = self.prepare_order_summary(instance)
+        
+        # Refresh the instance to reload any related fields if necessary
+        instance.refresh_from_db()
+
+        # Prepare the updated order summary data
+        order_summary_data = prepare_order_summary(instance)
         return Response(order_summary_data)
     
 class TelegramUserViewSet(viewsets.ModelViewSet):

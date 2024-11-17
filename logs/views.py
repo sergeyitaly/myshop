@@ -15,3 +15,4 @@ def endpoint_statistics_view(request):
         'endpoint_statistics': endpoint_data
     }
     return render(request, 'admin/logs/apilog/change_list.html', context)
+

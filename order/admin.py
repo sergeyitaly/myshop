@@ -146,30 +146,36 @@ class OrderAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         if change:
             old_obj = self.model.objects.get(pk=obj.pk)
-            if old_obj.status != obj.status or old_obj.status == obj.status:
-                if obj.status == 'submited':
-                    obj.submitted_at = timezone.now()
-                if obj.status == 'created':
-                    obj.created_at = timezone.now()
-                if obj.status == 'processed':
-                    obj.processed_at = timezone.now()
-                elif obj.status == 'complete':
-                    obj.complete_at = timezone.now()
-                elif obj.status == 'canceled':
-                    obj.canceled_at = timezone.now()
+
+            # If the status has changed, update the corresponding timestamp
+            if old_obj.status != obj.status:
+                status_timestamps = {
+                    'submited': 'submitted_at',
+                    'created': 'created_at',
+                    'processed': 'processed_at',
+                    'complete': 'complete_at',
+                    'canceled': 'canceled_at',
+                }
+
+                # Get the corresponding timestamp field for the status
+                status_field = status_timestamps.get(obj.status)
+                if status_field:
+                    setattr(obj, status_field, timezone.now())
+
                 order_items = obj.order_items.all()
 
-            # Ensure that obj.telegram_user is not None and has chat_id attribute
-            if obj.telegram_user and obj.telegram_user.chat_id:
- # Send notification about status change
-                update_order_status_with_notification(
-                    obj.id,
-                    order_items,
-                    obj.status,
-                    f'{obj.status}_at',
-                    obj.telegram_user.chat_id
-                )
-        
+                # If there's a telegram user and chat_id, send a notification
+                if obj.telegram_user and obj.telegram_user.chat_id:
+                    update_order_status_with_notification(
+                        obj.id,
+                        order_items,
+                        obj.status,
+                        status_field,
+                        obj.telegram_user.chat_id
+                    )
+                else:
+                    logger.warning(f"Telegram user or chat_id is missing for order {obj.id}")
+
         super().save_model(request, obj, form, change)
 
 # Register the Order model
