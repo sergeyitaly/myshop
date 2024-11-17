@@ -106,6 +106,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
         model = OrderItem
         fields = ['product_id', 'product', 'quantity', 'total_sum']
 
+        
 class OrderSerializer(serializers.ModelSerializer):
     order_items = OrderItemSerializer(many=True, required=True)
     telegram_user = TelegramUserSerializer(required=False, allow_null=True)
@@ -134,42 +135,32 @@ class OrderSerializer(serializers.ModelSerializer):
 
         # Create order items
         for item_data in items_data:
-            # Extract product_id from item_data, ensure it's used for product lookup
             product_id = item_data.pop('product_id', None)
             if not product_id:
                 raise serializers.ValidationError("Product ID must be provided.")
-
-            # Ensure 'product' is not in item_data before creating the OrderItem
             item_data.pop('product', None)
 
             try:
-                # Get the product instance
                 product_instance = Product.objects.get(id=product_id)
             except Product.DoesNotExist:
                 raise serializers.ValidationError(f"Product with ID {product_id} does not exist.")
 
-            # Calculate the total sum for the item
             item_data['total_sum'] = product_instance.price * item_data.get('quantity', 1)
-
-            # Create OrderItem and associate the product explicitly
             OrderItem.objects.create(order=order, product=product_instance, **item_data)
 
         # Handle telegram_user if provided
         if telegram_user_data:
-            # Get or create the TelegramUser instance
             telegram_user, created = TelegramUser.objects.get_or_create(
                 phone=telegram_user_data['phone'],
-                defaults={'chat_id': telegram_user_data.get('chat_id')}  # Make sure to pass chat_id in defaults
+                defaults={'chat_id': telegram_user_data.get('chat_id')}  # Pass chat_id in defaults
             )
 
-            # If the user already exists, update chat_id if it is provided
             if not created and telegram_user_data.get('chat_id'):
                 telegram_user.chat_id = telegram_user_data['chat_id']
                 telegram_user.save()
 
-            # Link the TelegramUser to the order
-            order.telegram_user = telegram_user
-            order.save()  # Save the order after linking the telegram_user
+            order.telegram_user = telegram_user  # Link TelegramUser to the order
+            order.save()
 
         return order
 
