@@ -23,6 +23,7 @@ from rest_framework.response import Response
 from django.utils.dateformat import format as date_format
 from django.utils.timezone import make_naive, is_aware
 from datetime import datetime
+from django.db import transaction
 
 
 
@@ -473,7 +474,7 @@ def format_order_summary(order):
                 'item_price': str(item.item_price_en),
                 'color_value': item.color_value_en
             }
-            for item in order.order_items
+            for item in order.order_items_en
         ],
         'order_items_uk': [
             {
@@ -486,13 +487,15 @@ def format_order_summary(order):
                 'item_price': str(item.item_price_uk),
                 'color_value': item.color_value_uk
             }
-            for item in order.order_items
+            for item in order.order_items_uk
         ],
         'submitted_at': order.submitted_at.isoformat() if order.submitted_at else None,
         latest_status_field: latest_status_timestamp.isoformat() if latest_status_timestamp else None,
     }
 
+
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def update_order(request):
     chat_id = request.data.get('chat_id')
     orders = request.data.get('orders')
@@ -504,71 +507,33 @@ def update_order(request):
         return Response({"detail": "Orders must be a list."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        # Retrieve or initialize order summaries
-        updated_orders = []
-        for order_data in orders:
-            order_id = order_data.get('order_id')
-            if not order_id:
-                return Response({"detail": "Order ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+        with transaction.atomic():
+            updated_orders = []
+            for order_data in orders:
+                order_id = order_data.get('order_id')
+                if not order_id:
+                    return Response({"detail": "Order ID is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-            try:
-                order = Order.objects.get(id=order_id)
-            except Order.DoesNotExist:
-                return Response({"error": f"Order with ID {order_id} not found."}, status=status.HTTP_404_NOT_FOUND)
+                try:
+                    order = Order.objects.get(id=order_id)
+                except Order.DoesNotExist:
+                    return Response({"error": f"Order with ID {order_id} not found."}, status=status.HTTP_404_NOT_FOUND)
 
-            # Format order for summary
-            formatted_order = format_order_summary(order)
-            updated_orders.append(formatted_order)
+                # Format the order summary
+                formatted_order = format_order_summary(order)
+                updated_orders.append(formatted_order)
 
-        # Update or create the OrderSummary with the new order data
-        OrderSummary.objects.update_or_create(
-            chat_id=chat_id,
-            defaults={'orders': updated_orders}
-        )
+            # Update or create the OrderSummary
+            OrderSummary.objects.update_or_create(
+                chat_id=chat_id,
+                defaults={'orders': updated_orders}
+            )
 
         return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
 
     except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['POST'])
-def update_order(request):
-    chat_id = request.data.get('chat_id')
-    orders = request.data.get('orders')
-
-    if not chat_id:
-        return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-    if not isinstance(orders, list):
-        return Response({"detail": "Orders must be a list."}, status=status.HTTP_400_BAD_REQUEST)
-
-    try:
-        # Retrieve existing orders based on the incoming order data
-        updated_orders = []
-        for order_data in orders:
-            order_id = order_data.get('order_id')
-            if not order_id:
-                return Response({"detail": "Order ID is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-            order = Order.objects.get(id=order_id)  # Adjust as needed based on your logic
-            formatted_order = format_order_summary(order)
-            updated_orders.append(formatted_order)
-
-        # Update or create the OrderSummary with the formatted orders
-        OrderSummary.objects.update_or_create(
-            chat_id=chat_id,
-            defaults={'orders': updated_orders}
-        )
-
-        return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
-
-    except Order.DoesNotExist:
-        return Response({"error": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
-    except OrderSummary.DoesNotExist:
-        return Response({"error": "Order summary not found."}, status=status.HTTP_404_NOT_FOUND)
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        logger.error(f"Error updating order summary: {e}")
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 def datetime_to_str(dt):
     """Convert datetime to string in a specific format."""
@@ -576,27 +541,22 @@ def datetime_to_str(dt):
         return dt.strftime('%Y-%m-%d %H:%M:%S')
     return None
 
+# Get order summary by chat ID
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_order_summary_by_chat_id(request, chat_id):
     if not chat_id:
-        return Response({'error': 'Chat ID is required.'}, status=400)
+        return Response({'error': 'Chat ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        # Fetch the OrderSummary for the given chat_id
         summaries = OrderSummary.objects.filter(chat_id=chat_id)
         if not summaries.exists():
-            return Response({'error': 'No summaries found for this chat ID.'}, status=404)
+            return Response({'error': 'No summaries found for this chat ID.'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Initialize a list to collect each order's summary data
         summary_data = []
-
-        # Iterate over each summary entry for the specified chat ID
         for summary in summaries:
-            orders = summary.orders  # Access the JSON data in orders
-
+            orders = summary.orders
             for order in orders:
-                # Extract the timestamps for different order statuses
                 status_timestamps = {
                     'created_at': order.get('created_at'),
                     'submitted_at': order.get('submitted_at'),
@@ -604,59 +564,26 @@ def get_order_summary_by_chat_id(request, chat_id):
                     'complete_at': order.get('complete_at'),
                     'canceled_at': order.get('canceled_at'),
                 }
-
-                # Find the latest status timestamp among non-None values
                 latest_status_timestamp = max(
                     (timestamp for timestamp in status_timestamps.values() if timestamp is not None),
                     default=None
                 )
+                latest_status_field = next(
+                    (field for field, timestamp in status_timestamps.items() if timestamp == latest_status_timestamp),
+                    None
+                )
 
-                # Determine the field name associated with the latest status timestamp
-                latest_status_field = None
-                for status, timestamp in status_timestamps.items():
-                    if timestamp == latest_status_timestamp:
-                        latest_status_field = status
-                        break
-
-                # Construct the order data dictionary for each order
                 order_data = {
                     'order_id': order.get('order_id'),
-                    'order_items_en': [
-                        {
-                            'product_name': item.get('product_name_en'),
-                            'collection_name': item.get('collection_name_en'),
-                            'size': item.get('size_en'),
-                            'color_name': item.get('color_name_en'),
-                            'quantity': item.get('quantity_en'),
-                            'total_sum': float(item.get('total_sum_en', 0)),
-                            'item_price': str(item.get('item_price_en', '0')),
-                            'color_value': item.get('color_value_en')
-                        }
-                        for item in order.get('order_items', [])
-                    ],
-                    'order_items_uk': [
-                        {
-                            'product_name': item.get('product_name_uk'),
-                            'collection_name': item.get('collection_name_uk'),
-                            'size': item.get('size_uk'),
-                            'color_name': item.get('color_name_uk'),
-                            'quantity': item.get('quantity_uk'),
-                            'total_sum': float(item.get('total_sum_uk', 0)),
-                            'item_price': str(item.get('item_price_uk', '0')),
-                            'color_value': item.get('color_value_uk')
-                        }
-                        for item in order.get('order_items', [])
-                    ],
-                    'submitted_at': datetime_to_str(order.get('submitted_at')),
-                    latest_status_field: datetime_to_str(latest_status_timestamp) if latest_status_timestamp else None
+                    'order_items_en': order.get('order_items_en', []),
+                    'order_items_uk': order.get('order_items_uk', []),
+                    'submitted_at': safe_make_naive(order.get('submitted_at')).isoformat() if order.get('submitted_at') else None,
+                    latest_status_field: safe_make_naive(latest_status_timestamp).isoformat() if latest_status_timestamp else None
                 }
-
-                # Append each constructed order_data to summary_data list
                 summary_data.append(order_data)
 
-        # Return the response with the collected summary data
-        return Response({'results': summary_data}, status=200)
+        return Response({'results': summary_data}, status=status.HTTP_200_OK)
 
     except Exception as e:
-        # Handle any unexpected errors
-        return Response({'error': str(e)}, status=500)
+        logger.error(f"Error fetching order summaries: {e}")
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
