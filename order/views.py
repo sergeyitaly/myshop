@@ -517,6 +517,7 @@ def update_order(request):
             updated_orders = []
             for order_data in orders:
                 order_id = order_data.get('order_id')
+                status = order_data.get('status')  # Assuming the status is passed in the request
                 if not order_id:
                     return Response({"detail": "Order ID is required."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -525,7 +526,12 @@ def update_order(request):
                 except Order.DoesNotExist:
                     return Response({"error": f"Order with ID {order_id} not found."}, status=status.HTTP_404_NOT_FOUND)
 
-                # Format the order summary
+                # Update the order's status if it has changed
+                if status and order.status != status:
+                    order.status = status
+                    order.save()
+
+                # Format the order summary, including status change timestamp
                 formatted_order = format_order_summary(order)
                 updated_orders.append(formatted_order)
 
