@@ -30,126 +30,128 @@ from django.db import transaction
 logger = logging.getLogger(__name__)
 def health_check(request):
     return JsonResponse({'status': 'ok'})
+# Helper function to handle datetime conversion
+def ensure_datetime(value):
+    """Ensure a value is converted to a datetime object if it's not None."""
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError:
+        logger.error(f"Invalid datetime format: {value}")
+        return None
 
+def format_timestamp(timestamp):
+    """Format timestamp to 'Y-m-d H:i'."""
+    return timestamp.strftime('%Y-%m-%d %H:%M') if timestamp else None
+
+def prepare_order_summary(order):
+    """Generate a unified summary of an order with the latest status as created_at."""
+    # Ensure timestamps are parsed correctly
+    status_timestamps = {
+        'submitted_at': ensure_datetime(order.submitted_at),
+        'processed_at': ensure_datetime(order.processed_at),
+        'complete_at': ensure_datetime(order.complete_at),
+        'canceled_at': ensure_datetime(order.canceled_at),
+    }
+
+    # Get the latest status key and its corresponding timestamp
+    latest_status_key, latest_status_time = max(
+        status_timestamps.items(),
+        key=lambda item: item[1] or datetime.min,
+        default=(None, None)
+    )
+
+    # Serialize order items for both languages
+    order_items_data_en = OrderItemSerializer(order.order_items.all(), many=True).data
+    order_items_data_uk = OrderItemSerializer(order.order_items.all(), many=True).data  # assuming translation logic exists
+
+    # Prepare the final order summary
+    return {
+        'order_id': order.id,
+        'created_at': format_timestamp(latest_status_time),  # latest status timestamp
+        'submitted_at': format_timestamp(status_timestamps['submitted_at']),
+        'order_items_en': [
+            {
+                'name': item['product_name'],
+                'size': item['size'],
+                'price': item['item_price'],
+                'quantity': item['quantity'],
+                'color_name': item['color_name'],
+                'color_value': item['color_value'],
+                'collection_name': item['collection_name'],
+            } for item in order_items_data_en
+        ],
+        'order_items_uk': [
+            {
+                'name': item['product_name'],  # Here you would adjust for translations if needed
+                'size': item['size'],
+                'price': item['item_price'],
+                'quantity': item['quantity'],
+                'color_name': item['color_name'],
+                'color_value': item['color_value'],
+                'collection_name': item['collection_name'],
+            } for item in order_items_data_uk
+        ],
+        'latest_status': latest_status_key,
+        'latest_status_time': format_timestamp(latest_status_time),
+    }
 
 class OrderSummaryViewSet(viewsets.ModelViewSet):
     queryset = OrderSummary.objects.all()
     serializer_class = OrderSummarySerializer
 
-    def format_timestamp(self, timestamp):
-        """Format timestamp to 'Y-m-d H:i'."""
-        return date_format(timestamp, 'Y-m-d H:i') if timestamp else None
-
-    def make_aware_if_naive(self, dt):
-        """Convert naive datetime to aware using Django's timezone support."""
-        if dt and isinstance(dt, datetime):
-            if timezone.is_naive(dt):
-                return timezone.make_aware(dt)
-        return dt
-
-    def ensure_datetime(self, value):
-        """Converts a value to a datetime object if it's not None."""
-        if value is None:
-            return None
-        if isinstance(value, datetime):
-            return value
-        return datetime.fromisoformat(value)
-
-    def datetime_to_str(self, value):
-        """Converts a datetime object to a string."""
-        if value is None:
-            return None
-        return value.strftime("%Y-%m-%d %H:%M")  # Adjust the format as needed
-
-    def prepare_order_summary(self, order):
-        """Generates a unified summary of an order with correct status naming."""
-        submitted_at = self.ensure_datetime(order.submitted_at)
-        processed_at = self.ensure_datetime(order.processed_at)
-        complete_at = self.ensure_datetime(order.complete_at)
-        canceled_at = self.ensure_datetime(order.canceled_at)
-
-        # Prepare a dictionary of relevant status fields
-        status_fields = {
-            'submitted_at': submitted_at,
-            'processed_at': processed_at,
-            'complete_at': complete_at,
-            'canceled_at': canceled_at,
-        }
-
-        # Determine the latest status key based on the timestamp values
-        latest_status_key = max(
-            status_fields,
-            key=lambda k: status_fields[k] or datetime.min
-        )
-
-        latest_status_time = status_fields[latest_status_key]  # Get the corresponding timestamp
-
-        # Serialize order items
-        order_items_data = OrderItemSerializer(order.order_items.all(), many=True).data
-
-        # Prepare the summary with only the two required statuses
-        summary = {
-            'order_id': order.id,
-            'order_items': [
-                {
-                    'size': item['size'],
-                    'quantity': item['quantity'],
-                    'total_sum': item['total_sum'],
-                    'color_name': item['color_name'],
-                    'item_price': item['item_price'],
-                    'color_value': item['color_value'],
-                    'product_name': item['product_name'],
-                    'collection_name': item['collection_name'],
-                } for item in order_items_data
-            ],
-            'latest_status': latest_status_key,  # Reflect latest status key
-            'latest_status_time': self.datetime_to_str(latest_status_time),  # Reflect latest status timestamp
-            'submitted_at': self.datetime_to_str(submitted_at),
-        }
-
-        return summary
-
     def create(self, request, *args, **kwargs):
-        logger.debug("Received data: %s", request.data)
+        """Create a new order and update the related OrderSummary."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         chat_id = serializer.validated_data.get('chat_id')
         if not chat_id:
-            logger.error("chat_id is missing in the request data.")
             return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Perform creation
+
+        # Perform order creation
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
 
-        # Prepare formatted order summary
-        order_summary_data = self.prepare_order_summary(serializer.instance)
-        
+        # Update order summary
+        order_summary_data = prepare_order_summary(serializer.instance)
+        # Update or create order summary in the database
+        OrderSummary.objects.update_or_create(
+            chat_id=chat_id,
+            defaults={'orders': [order_summary_data]}
+        )
+
         return Response(order_summary_data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
+        """Update an existing order and automatically update its summary."""
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        
+
         chat_id = request.data.get('chat_id')
         if not chat_id:
-            logger.error("chat_id is missing in the request data.")
             return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Validate and update instance
+
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        
-        # Handle potential prefetched objects cache
+
         if getattr(instance, '_prefetched_objects_cache', None):
             instance._prefetched_objects_cache = {}
 
-        # Prepare updated order summary
-        order_summary_data = self.prepare_order_summary(instance)
+        # Update the order summary
+        order_summary_data = prepare_order_summary(instance)
+        # Update the order summary associated with the chat_id
+        OrderSummary.objects.update_or_create(
+            chat_id=chat_id,
+            defaults={'orders': [order_summary_data]}
+        )
 
-        return Response(order_summary_data)
+        return Response(order_summary_data, status=status.HTTP_200_OK)
+
 
 
 class TelegramUserViewSet(viewsets.ModelViewSet):
@@ -512,6 +514,7 @@ def format_order_summary(order):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def update_order(request):
+    """Bulk update order(s) and their associated summaries."""
     chat_id = request.data.get('chat_id')
     orders = request.data.get('orders')
 
@@ -548,8 +551,8 @@ def update_order(request):
                     for item in order_items:
                         OrderItem.objects.create(order=order, **item)
 
-                # Format the updated order for the summary
-                formatted_order = format_order_summary(order)
+                # Format and append the updated order summary
+                formatted_order = prepare_order_summary(order)
                 updated_orders.append(formatted_order)
 
             # Update or create the OrderSummary
@@ -563,7 +566,6 @@ def update_order(request):
     except Exception as e:
         logger.error(f"Error updating order summary: {e}")
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 # Get order summary by chat ID
 @api_view(['GET'])

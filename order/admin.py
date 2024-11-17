@@ -148,32 +148,34 @@ class OrderAdmin(admin.ModelAdmin):
     total_price.short_description = _('Total Price')
 
     def save_model(self, request, obj, form, change):
-        if change:
-            old_obj = self.model.objects.get(pk=obj.pk)
-            if old_obj.status != obj.status or old_obj.status == obj.status:
-                if obj.status == 'submited':
-                    obj.submitted_at = timezone.now()
-                if obj.status == 'created':
-                    obj.created_at = timezone.now()
-                if obj.status == 'processed':
-                    obj.processed_at = timezone.now()
-                elif obj.status == 'complete':
-                    obj.complete_at = timezone.now()
-                elif obj.status == 'canceled':
-                    obj.canceled_at = timezone.now()
-                order_items = obj.order_items.all()
+        try:
+            if change:
+                old_obj = self.model.objects.get(pk=obj.pk)
+                if old_obj.status != obj.status:
+                    if obj.status == 'submited':
+                        obj.submitted_at = timezone.now()
+                    elif obj.status == 'created':
+                        obj.created_at = timezone.now()
+                    elif obj.status == 'processed':
+                        obj.processed_at = timezone.now()
+                    elif obj.status == 'complete':
+                        obj.complete_at = timezone.now()
+                    elif obj.status == 'canceled':
+                        obj.canceled_at = timezone.now()
+                    
+                    # Fetch order items and send notification
+                    order_items = obj.order_items.all()
+                    if obj.telegram_user and obj.telegram_user.chat_id:
+                        update_order_status_with_notification(
+                            obj.id,
+                            order_items,
+                            obj.status,
+                            f'{obj.status}_at',
+                            obj.telegram_user.chat_id
+                        )
+        except Exception as e:
+            self.message_user(request, f"Error updating order: {e}", level='error')
 
-            # Ensure that obj.telegram_user is not None and has chat_id attribute
-            if obj.telegram_user and obj.telegram_user.chat_id:
-                # Send notification about status change
-                update_order_status_with_notification(
-                    obj.id,
-                    order_items,
-                    obj.status,
-                    f'{obj.status}_at',
-                    obj.telegram_user.chat_id
-                )
-        
         super().save_model(request, obj, form, change)
 
 
