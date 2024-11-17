@@ -135,11 +135,21 @@ def get_chat_id_from_phone(phone_number):
     """Fetches the Telegram chat ID from the user's phone number."""
     try:
         response = requests.get(f'{settings.VERCEL_DOMAIN}/api/telegram_user', params={'phone': phone_number})
-        response.raise_for_status()
-        return response.json().get('chat_id')
+        response.raise_for_status()  # Raises HTTPError for bad responses
+        
+        # Log the raw response for debugging
+        logger.debug(f"Response from /api/telegram_user: {response.text}")
+        
+        # Ensure response is in JSON format
+        response_json = response.json()
+        return response_json.get('chat_id')
     except requests.exceptions.RequestException as e:
         logger.error(f"Request to /api/telegram_user failed: {e}")
         return None
+    except ValueError as e:
+        logger.error(f"Failed to parse response as JSON: {e}")
+        return None
+
 
 @receiver(post_save, sender=OrderItem)
 def update_order_summary_on_order_item_change(sender, instance, **kwargs):
