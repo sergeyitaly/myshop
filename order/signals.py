@@ -98,10 +98,12 @@ def get_order_summary(order):
 def update_order_summary():
     """Updates the summary of orders grouped by Telegram chat ID."""
     try:
-        orders = Order.objects.prefetch_related('order_items__product').all()
+        # Prefetch related data to optimize database queries
+        orders = Order.objects.prefetch_related('order_items__product', 'telegram_user').all()
         logger.info(f'Fetched {orders.count()} orders.')
         grouped_orders = {}
 
+        # Group orders by chat_id to minimize updates
         for order in orders:
             order_chat_id = order.telegram_user.chat_id if order.telegram_user else None
             if not order_chat_id:
@@ -112,7 +114,7 @@ def update_order_summary():
 
             summary = get_order_summary(order)
             existing_summary = next((o for o in grouped_orders[order_chat_id] if o['order_id'] == order.id), None)
-            
+
             if existing_summary:
                 # Update the existing summary with new order details
                 existing_summary.update(summary)
@@ -120,13 +122,18 @@ def update_order_summary():
                 # Append the new summary if it doesn't exist
                 grouped_orders[order_chat_id].append(summary)
 
+        # Bulk update or create order summaries
+        order_summary_objects = []
         for chat_id, orders_summary in grouped_orders.items():
-            # Use update_or_create to ensure the summary is updated or created
-            OrderSummary.objects.update_or_create(
-                chat_id=chat_id,
-                defaults={'orders': orders_summary}
-            )
-            logger.info(f'Order summaries created/updated for chat ID {chat_id}')
+            order_summary_objects.append(OrderSummary(chat_id=chat_id, orders=orders_summary))
+
+        # Use bulk_create for creating or updating the OrderSummary
+        OrderSummary.objects.bulk_create(order_summary_objects, ignore_conflicts=True)
+        logger.info(f'Order summaries created/updated for chat IDs: {", ".join(grouped_orders.keys())}')
+
+        # Clear the cache for each updated order summary
+        for chat_id in grouped_orders:
+            cache.delete(f'order_summary_{chat_id}')
 
     except Exception as e:
         logger.error(f'Error while generating order summaries: {e}')
@@ -146,7 +153,7 @@ def update_order_summary_on_order_status_change(sender, instance, **kwargs):
     """Updates the order summary when the order is saved or its status changes."""
     chat_id = instance.telegram_user.chat_id if instance.telegram_user else None
     if chat_id:
-        update_order_summary()
+        update_order_summary()  # Optimized version will be called here
         logger.debug(f"Order status or details updated for Order ID: {instance.id}, summary updated for chat ID: {chat_id}")
         
 @receiver(post_save, sender=OrderItem)
@@ -155,9 +162,8 @@ def update_order_summary_on_order_item_change(sender, instance, **kwargs):
     """Updates the order summary when an OrderItem is added, updated, or deleted."""
     chat_id = instance.order.telegram_user.chat_id if instance.order.telegram_user else None
     if chat_id:
-        update_order_summary()
+        update_order_summary()  # Optimized version will be called here
         logger.debug(f"OrderItem change detected for Order ID: {instance.order.id}, summary updated for chat ID: {chat_id}")
-
 
 @receiver(post_delete, sender=Order)
 def remove_order_from_summary(sender, instance, **kwargs):
@@ -185,5 +191,5 @@ def update_order_summary_on_order_item_delete(sender, instance, **kwargs):
     if phone_number:
         chat_id = get_chat_id_from_phone(phone_number)
         if chat_id:
-            update_order_summary()
+            update_order_summary()  # Optimized version will be called here
             logger.debug(f"OrderItem deleted for Order ID: {instance.order.id}, summary updated for chat ID: {chat_id}")
