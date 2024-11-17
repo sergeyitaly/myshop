@@ -2,12 +2,12 @@ import requests
 import logging
 from datetime import datetime
 from django.conf import settings
-from django.core.cache import cache
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils.timezone import is_aware, make_aware
 from order.models import Order, OrderSummary, OrderItem, TelegramUser
 from order.serializers import OrderItemSerializer
+from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
@@ -150,6 +150,17 @@ def update_order_summary_on_order_item_change(sender, instance, **kwargs):
         if chat_id:
             update_order_summary()
             logger.debug(f"OrderItem updated for Order ID: {instance.order.id}, summary updated for chat ID: {chat_id}")
+
+@receiver(post_save, sender=Order)
+def update_order_summary_on_order_status_change(sender, instance, **kwargs):
+    """Updates the order summary when the order status is updated."""
+    if instance.status:
+        phone_number = instance.phone
+        if phone_number:
+            chat_id = get_chat_id_from_phone(phone_number)
+            if chat_id:
+                update_order_summary()
+                logger.debug(f"Order status updated for Order ID: {instance.id}, summary updated for chat ID: {chat_id}")
 
 @receiver(post_delete, sender=Order)
 def remove_order_from_summary(sender, instance, **kwargs):
