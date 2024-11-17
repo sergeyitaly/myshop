@@ -122,13 +122,13 @@ def update_order_summary():
 
 def get_chat_id_from_phone(phone_number):
     try:
-        response = requests.get(f'{settings.VERCEL_DOMAIN}/api/telegram_user', params={'phone': phone_number})
+        response = requests.get(f'{settings.VERCEL_DOMAIN}/api/telegram_users', params={'phone': phone_number})
         response.raise_for_status()  # Raises HTTPError for bad responses
-        logger.debug(f"Response from /api/telegram_user: {response.text}")
+        logger.debug(f"Response from /api/telegram_users: {response.text}")
         response_json = response.json()
         return response_json.get('chat_id')
     except requests.exceptions.RequestException as e:
-        logger.error(f"Request to /api/telegram_user failed: {e}")
+        logger.error(f"Request to /api/telegram_users failed: {e}")
         return None
     except ValueError as e:
         logger.error(f"Failed to parse response as JSON: {e}")
