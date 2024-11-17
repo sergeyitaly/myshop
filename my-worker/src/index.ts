@@ -1146,33 +1146,29 @@ interface OrderResponse {
 
 const isOrderResponse = (data: any): data is OrderResponse => {
   return data &&
-    typeof data.order_id === 'number' &&
-    (data.created_at === null || typeof data.created_at === 'string') &&
-    (data.submitted_at === null || typeof data.submitted_at === 'string') &&
-    (data.processed_at === null || typeof data.processed_at === 'string') &&
-    (data.complete_at === null || typeof data.complete_at === 'string') &&
-    (data.canceled_at === null || typeof data.canceled_at === 'string') &&
-    Array.isArray(data.order_items) &&
-    data.order_items.every((item: any) =>
-      typeof item.product_name === 'string' &&
-      typeof item.collection_name === 'string' &&
-      typeof item.size === 'string' &&
-      typeof item.color_name === 'string' &&
-      typeof item.quantity === 'number' &&
-      typeof item.total_sum === 'number' &&
-      typeof item.item_price === 'string' &&
-      typeof item.color_value === 'string'
+    Array.isArray(data.results) &&
+    data.results.every((order: any) =>
+      typeof order.order_id === 'number' &&
+      (order.created_at === null || typeof order.created_at === 'string') &&
+      (order.submitted_at === null || typeof order.submitted_at === 'string') &&
+      (order.processed_at === null || typeof order.processed_at === 'string') &&
+      (order.complete_at === null || typeof order.complete_at === 'string') &&
+      (order.canceled_at === null || typeof order.canceled_at === 'string') &&
+      Array.isArray(order.order_items_en || order.order_items_uk) &&
+      (order.TelegramUser ? Array.isArray(order.TelegramUser) : true) &&
+      ['string', 'undefined'].includes(typeof order.email)
     );
 };
 
 const isValidOrder = (order: any): order is Order => {
   return order && typeof order.order_id === 'number' &&
     ['string', 'undefined'].includes(typeof order.phone) &&
-    ['string', 'undefined', 'object'].includes(typeof order.TelegramUser) &&
-    ['string', 'undefined', 'object'].includes(typeof order.email) &&
+    (order.TelegramUser ? Array.isArray(order.TelegramUser) : true) &&
+    (['string', 'undefined'].includes(typeof order.email)) &&
     (order.created_at === null || typeof order.created_at === 'string') &&
-    Array.isArray(order.order_items_en || order.order_items_uk);
+    (Array.isArray(order.order_items_en) || Array.isArray(order.order_items_uk));
 };
+
 
 const isOrderSummaryResponse = (data: any): data is OrderSummaryResponse => {
   return data &&
@@ -1246,6 +1242,8 @@ const formatDate = (date: string): string => {
 
 const fetchOrderSummary = async (chatId: string): Promise<OrderSummaryResponse> => {
   try {
+
+
     const response = await fetch(`${VERCEL_DOMAIN}/api/order_summary/by_chat_id/${chatId}/`, {
       method: 'GET',
       headers: {
@@ -1272,28 +1270,34 @@ const fetchOrderSummary = async (chatId: string): Promise<OrderSummaryResponse> 
   }
 };
 
+// Utility to safely parse date strings to Date objects
+const parseDate = (dateString: string): Date | null => {
+  const date = new Date(dateString);
+  return isNaN(date.getTime()) ? null : date;  // Return null if the date is invalid
+};
 
-const createOrderItemsSummary = (orderItems: any[], isEnglish: boolean): string => {
+const createOrderItemsSummary = (orderItems: OrderItem[], isEnglish: boolean): string => {
   return orderItems.map(item =>
     `- ${item?.name || 'N/A'}, ${item?.collection_name || 'N/A'}, ${isEnglish ? 'Size' : 'Розмір'}: ${item?.size || 'N/A'}, ${isEnglish ? 'Color' : 'Колір'}: ${item?.color_name || 'N/A'}, ${item?.quantity || 0} ${isEnglish ? 'pcs' : 'шт'}, $${item?.price?.toFixed(2) || '0.00'}`
   ).join('\n');
 };
 
 
-// Helper function to create order status message
 function createOrderStatusMessage(order: any, isEnglish: boolean): string {
-  const statusDates = {
-    submitted: order.submitted_at ?? null,
-    created: order.created_at ?? null,
-    processed: order.processed_at ?? null,
-    complete: order.complete_at ?? null,
-    canceled: order.canceled_at ?? null,
+  const statusDates: Record<string, string | null> = {
+    submitted: order.submitted_at ? new Date(order.submitted_at).toISOString() : null,
+    created: order.created_at ? new Date(order.created_at).toISOString() : null,
+    processed: order.processed_at ? new Date(order.processed_at).toISOString() : null,
+    complete: order.complete_at ? new Date(order.complete_at).toISOString() : null,
+    canceled: order.canceled_at ? new Date(order.canceled_at).toISOString() : null,
   };
+
+  // Check if the latest status can be found
   const latestStatusEntry = getLatestStatusEntry(statusDates, isEnglish);
   return `${isEnglish ? 'Latest Status' : 'Останній статус'}: ${latestStatusEntry || (isEnglish ? 'Status not available.' : 'Статус недоступний.')}`;
 }
 
-// Main function for sending details for a specific order
+
 async function sendOrderDetails(phoneNumber: string, chatId: string | null): Promise<void> {
   const isEnglish = chatId ? getUserLanguage(chatId) === 'en' : true;
   const itemsKey = isEnglish ? 'order_items_en' : 'order_items_uk';
@@ -1320,6 +1324,7 @@ async function sendOrderDetails(phoneNumber: string, chatId: string | null): Pro
 
     if (!orderItems || orderItems.length === 0) {
       const noItemsMessage = isEnglish ? 'No order items found for the latest order.' : 'Не знайдено товарів для останнього замовлення.';
+      console.log('No order items found:', orderItems);
       await sendMessage(chatId, noItemsMessage);
       return;
     }
@@ -1340,8 +1345,6 @@ async function sendOrderDetails(phoneNumber: string, chatId: string | null): Pro
     await sendMessage(chatId, errorMessage);
   }
 }
-
-
 async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
   const isEnglish = chatId ? getUserLanguage(chatId) === 'en' : true;
   const itemsKey = isEnglish ? 'order_items_en' : 'order_items_uk';
@@ -1367,7 +1370,7 @@ async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
       // Collect available statuses with timestamps
       const statuses = [
         { icon: '❌', text: isEnglish ? 'Canceled' : 'Скасовано', date: order.canceled_at },
-        { icon: '✅', text: isEnglish ? 'Completed' : 'Завершено', date: order.complete_at },
+        { icon: '✅', text: isEnglish ? 'Complete' : 'Завершено', date: order.complete_at },
         { icon: '🔄', text: isEnglish ? 'Processed' : 'Оброблено', date: order.processed_at },
         { icon: '📝', text: isEnglish ? 'Submitted' : 'Оформлено', date: order.submitted_at },
         { icon: '🆕', text: isEnglish ? 'Created' : 'Створено', date: order.created_at }
@@ -1393,7 +1396,7 @@ async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
     await sendMessage(chatId, `${allOrdersMessage}\n${ordersMessage}`);
   } catch (error) {
     const errorMessage = isEnglish ? 'An error occurred while retrieving all order details. Please try again later.' : 'Сталася помилка при отриманні всіх деталей замовлень. Будь ласка, спробуйте пізніше.';
-    console.error(`Error retrieving all orders details: ${error}`);
+    console.error(`Error retrieving order details: ${error}`);
     await sendMessage(chatId, errorMessage);
   }
 }
