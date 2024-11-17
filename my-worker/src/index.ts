@@ -1167,13 +1167,13 @@ const isOrderResponse = (data: any): data is OrderResponse => {
 
 const isValidOrder = (order: any): order is Order => {
   return order && typeof order.order_id === 'number' &&
+    ['string', 'undefined'].includes(typeof order.phone) &&
+    ['string', 'undefined', 'object'].includes(typeof order.TelegramUser) &&
+    ['string', 'undefined', 'object'].includes(typeof order.email) &&
     (order.created_at === null || typeof order.created_at === 'string') &&
-    (order.submitted_at === null || typeof order.submitted_at === 'string') &&
-    (order.processed_at === null || typeof order.processed_at === 'string') &&
-    (order.complete_at === null || typeof order.complete_at === 'string') &&
-    (order.canceled_at === null || typeof order.canceled_at === 'string') &&
-    Array.isArray(order.order_items) && order.order_items.every(isOrderItem);
+    Array.isArray(order.order_items_en || order.order_items_uk);
 };
+
 const isOrderSummaryResponse = (data: any): data is OrderSummaryResponse => {
   return data &&
     Array.isArray(data.results) &&
@@ -1244,7 +1244,6 @@ const formatDate = (date: string): string => {
   return new Date(date).toLocaleDateString();
 };
 
-
 const fetchOrderSummary = async (chatId: string): Promise<OrderSummaryResponse> => {
   try {
     const response = await fetch(`${VERCEL_DOMAIN}/api/order_summary/by_chat_id/${chatId}/`, {
@@ -1259,33 +1258,27 @@ const fetchOrderSummary = async (chatId: string): Promise<OrderSummaryResponse> 
       throw new Error(`Failed to retrieve order summary. Status: ${response.status}`);
     }
 
-    const contentType = response.headers.get('Content-Type');
-    if (!contentType || !contentType.includes('application/json')) {
-      throw new Error('Unexpected Content-Type. Expected application/json.');
-    }
+    const data = await response.json();
+    console.log('Response Data:', data);
 
-    const responseBody: unknown = await response.json();
-    console.log('Response Body:', responseBody);
-
-    if (isOrderSummaryResponse(responseBody)) {
-      return responseBody;
+    if (isOrderSummaryResponse(data)) {
+      return data;
     } else {
-      console.error('Invalid response format:', responseBody);
       throw new Error('Invalid response format.');
     }
-
   } catch (error) {
-    console.error(`Error during fetch operation: ${error}`);
+    console.error('Fetch operation error:', error);
     throw error;
   }
 };
 
-// Helper function to create order item summary
-function createOrderItemsSummary(orderItems: any[], isEnglish: boolean): string {
+
+const createOrderItemsSummary = (orderItems: any[], isEnglish: boolean): string => {
   return orderItems.map(item =>
-    `- ${item.name}, ${item.collection_name}, ${isEnglish ? 'Size' : 'Розмір'}: ${item.size || 'N/A'}, ${isEnglish ? 'Color' : 'Колір'}: ${item.color_name || 'N/A'}, ${item.quantity} ${isEnglish ? 'pcs' : 'шт'}, $${item.price.toFixed(2)}`
+    `- ${item?.name || 'N/A'}, ${item?.collection_name || 'N/A'}, ${isEnglish ? 'Size' : 'Розмір'}: ${item?.size || 'N/A'}, ${isEnglish ? 'Color' : 'Колір'}: ${item?.color_name || 'N/A'}, ${item?.quantity || 0} ${isEnglish ? 'pcs' : 'шт'}, $${item?.price?.toFixed(2) || '0.00'}`
   ).join('\n');
-}
+};
+
 
 // Helper function to create order status message
 function createOrderStatusMessage(order: any, isEnglish: boolean): string {
