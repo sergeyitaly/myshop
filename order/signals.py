@@ -141,26 +141,23 @@ def get_chat_id_from_phone(phone_number):
         logger.error(f"Request to /api/telegram_user failed: {e}")
         return None
 
-@receiver(post_save, sender=OrderItem)
-def update_order_summary_on_order_item_change(sender, instance, **kwargs):
-    """Updates the order summary when an OrderItem is changed."""
-    phone_number = instance.order.phone
-    if phone_number:
-        chat_id = get_chat_id_from_phone(phone_number)
-        if chat_id:
-            update_order_summary()
-            logger.debug(f"OrderItem updated for Order ID: {instance.order.id}, summary updated for chat ID: {chat_id}")
-
 @receiver(post_save, sender=Order)
 def update_order_summary_on_order_status_change(sender, instance, **kwargs):
-    """Updates the order summary when the order status is updated."""
-    if instance.status:
-        phone_number = instance.phone
-        if phone_number:
-            chat_id = get_chat_id_from_phone(phone_number)
-            if chat_id:
-                update_order_summary()
-                logger.debug(f"Order status updated for Order ID: {instance.id}, summary updated for chat ID: {chat_id}")
+    """Updates the order summary when the order is saved or its status changes."""
+    chat_id = instance.telegram_user.chat_id if instance.telegram_user else None
+    if chat_id:
+        update_order_summary()
+        logger.debug(f"Order status or details updated for Order ID: {instance.id}, summary updated for chat ID: {chat_id}")
+        
+@receiver(post_save, sender=OrderItem)
+@receiver(post_delete, sender=OrderItem)
+def update_order_summary_on_order_item_change(sender, instance, **kwargs):
+    """Updates the order summary when an OrderItem is added, updated, or deleted."""
+    chat_id = instance.order.telegram_user.chat_id if instance.order.telegram_user else None
+    if chat_id:
+        update_order_summary()
+        logger.debug(f"OrderItem change detected for Order ID: {instance.order.id}, summary updated for chat ID: {chat_id}")
+
 
 @receiver(post_delete, sender=Order)
 def remove_order_from_summary(sender, instance, **kwargs):
