@@ -508,6 +508,7 @@ def format_order_summary(order):
         latest_status_field: latest_status_timestamp.isoformat() if latest_status_timestamp else None,
     }
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def update_order(request):
@@ -525,21 +526,29 @@ def update_order(request):
             updated_orders = []
             for order_data in orders:
                 order_id = order_data.get('order_id')
-                status = order_data.get('status')  # Assuming the status is passed in the request
+                status = order_data.get('status')
+                order_items = order_data.get('order_items', [])
+
                 if not order_id:
                     return Response({"detail": "Order ID is required."}, status=status.HTTP_400_BAD_REQUEST)
 
                 try:
-                    order = Order.objects.get(id=order_id)
+                    order = Order.objects.prefetch_related('order_items').get(id=order_id)
                 except Order.DoesNotExist:
                     return Response({"error": f"Order with ID {order_id} not found."}, status=status.HTTP_404_NOT_FOUND)
 
-                # Update the order's status if it has changed
+                # Update status
                 if status and order.status != status:
                     order.status = status
                     order.save()
 
-                # Format the order summary, including status change timestamp
+                # Update order items if provided
+                if order_items:
+                    order.order_items.all().delete()
+                    for item in order_items:
+                        OrderItem.objects.create(order=order, **item)
+
+                # Format the updated order for the summary
                 formatted_order = format_order_summary(order)
                 updated_orders.append(formatted_order)
 

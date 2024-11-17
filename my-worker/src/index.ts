@@ -1109,13 +1109,14 @@ interface TelegramUser {
   chat_id: string;
 }
 
+
 interface OrderItem {
   name: string;
   size: string;
   price: number;
   quantity: number;
   color_name: string;
-  color_value: string;
+  color_value?: string; // Optional field
   collection_name: string;
 }
 
@@ -1128,21 +1129,20 @@ interface Order {
   complete_at?: string | null;
   canceled_at?: string | null;
   submitted_at?: string | null;
-  order_items_en?: OrderItem[]; 
+  order_items_en?: OrderItem[];
   order_items_uk?: OrderItem[];
   TelegramUser?: TelegramUser[];
   email?: string;
 }
 
-
-
 interface OrderSummaryResponse {
-  results: Order[];
+  results: Order[]; // This is an object with a results field that contains an array of orders
 }
 
 interface OrderResponse {
   results: Order[];
 }
+
 
 const isOrderResponse = (data: any): data is OrderResponse => {
   return data &&
@@ -1172,30 +1172,31 @@ const isValidOrder = (order: any): order is Order => {
 
 const isOrderSummaryResponse = (data: any): data is OrderSummaryResponse => {
   return data &&
-    Array.isArray(data.results) &&
-    data.results.every((order: any) =>
+    Array.isArray(data.results) && // Check if results is an array
+    data.results.every((order: any) => 
       typeof order.order_id === 'number' &&
       (order.created_at === null || typeof order.created_at === 'string') &&
       (order.submitted_at === null || typeof order.submitted_at === 'string') &&
       (order.processed_at === null || typeof order.processed_at === 'string') &&
       (order.complete_at === null || typeof order.complete_at === 'string') &&
       (order.canceled_at === null || typeof order.canceled_at === 'string') &&
-      Array.isArray(order.order_items_en || order.order_items_uk) && // Adjusted for both fields
+      (Array.isArray(order.order_items_en) || Array.isArray(order.order_items_uk)) &&
       (order.order_items_en ? order.order_items_en.every(isOrderItem) : true) &&
       (order.order_items_uk ? order.order_items_uk.every(isOrderItem) : true) &&
       (order.TelegramUser ? Array.isArray(order.TelegramUser) : true) &&
-      ['string', 'undefined'].includes(typeof order.email)
+      (['string', 'undefined'].includes(typeof order.email))
     );
 };
 
 
+
 const isOrderItem = (item: any): item is OrderItem => {
-  return item && typeof item.name === 'string' && // Adjusted field name to match the response
+  return item && typeof item.name === 'string' &&
     typeof item.collection_name === 'string' &&
     typeof item.size === 'string' &&
     typeof item.color_name === 'string' &&
     typeof item.quantity === 'number' &&
-    typeof item.price === 'number' && // Ensure `price` is validated correctly
+    typeof item.price === 'number' &&
     typeof item.color_value === 'string';
 };
 
@@ -1234,10 +1235,9 @@ const formatDate = (date: string): string => {
   return new Date(date).toLocaleDateString();
 };
 
-const fetchOrderSummary = async (chatId: string): Promise<OrderSummaryResponse> => {
+
+const fetchOrderSummary = async (chatId: string): Promise<Order[]> => {
   try {
-
-
     const response = await fetch(`${VERCEL_DOMAIN}/api/order_summary/by_chat_id/${chatId}/`, {
       method: 'GET',
       headers: {
@@ -1250,20 +1250,23 @@ const fetchOrderSummary = async (chatId: string): Promise<OrderSummaryResponse> 
       throw new Error(`Failed to retrieve order summary. Status: ${response.status}`);
     }
 
-    const data = await response.json();
-    console.log('Response Data:', data);
+    // Parse the response as JSON and assert the type as OrderSummaryResponse
+    const data = await response.json() as OrderSummaryResponse;
 
-    if (isOrderSummaryResponse(data)) {
-      return data;
+    console.log('Raw Response Data:', data);  // Log the raw response data
+
+    // Check if results exist and are an array
+    if (data.results && Array.isArray(data.results)) {
+      // You can now access the results directly
+      return data.results;  // Return the 'results' array of orders
     } else {
-      throw new Error('Invalid response format.');
+      throw new Error('No results found in the response.');
     }
   } catch (error) {
     console.error('Fetch operation error:', error);
     throw error;
   }
 };
-
 // Utility to safely parse date strings to Date objects
 const parseDate = (dateString: string): Date | null => {
   const date = new Date(dateString);
@@ -1287,7 +1290,7 @@ function createOrderStatusMessage(order: any, isEnglish: boolean): string {
     canceled: order.canceled_at ? new Date(order.canceled_at).toISOString() : null,
   };
 
-  // Check if the latest status can be found
+  // Ensure the latest status entry is correctly formatted
   const latestStatusEntry = getLatestStatusEntry(statusDates, isEnglish);
   return `${isEnglish ? 'Latest Status' : 'Останній статус'}: ${latestStatusEntry || (isEnglish ? 'Status not available.' : 'Статус недоступний.')}`;
 }
@@ -1306,7 +1309,8 @@ async function sendOrderDetails(phoneNumber: string, chatId: string | null): Pro
 
   try {
     const responseBody = await fetchOrderSummary(chatId);
-    const orderResults = responseBody.results;
+    console.log('Order response:', responseBody);
+    const orderResults = responseBody;
 
     if (!orderResults || orderResults.length === 0) {
       const noOrdersMessage = isEnglish ? 'No orders found for this chat ID.' : 'Замовлення для цього чату не знайдено.';
@@ -1314,9 +1318,12 @@ async function sendOrderDetails(phoneNumber: string, chatId: string | null): Pro
       return;
     }
 
-    const latestOrder = orderResults.reduce((prev, current) => (prev.order_id > current.order_id ? prev : current));
+    const latestOrder = orderResults.reduce((prev: Order, current: Order): Order => {
+      return prev.order_id > current.order_id ? prev : current;
+    });
+    console.log('Latest order:', latestOrder);
+    
     const orderItems = latestOrder[itemsKey];
-
     if (!orderItems || orderItems.length === 0) {
       const noItemsMessage = isEnglish ? 'No order items found for the latest order.' : 'Не знайдено товарів для останнього замовлення.';
       console.log('No order items found:', orderItems);
@@ -1340,6 +1347,7 @@ async function sendOrderDetails(phoneNumber: string, chatId: string | null): Pro
     await sendMessage(chatId, errorMessage);
   }
 }
+
 async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
   const isEnglish = chatId ? getUserLanguage(chatId) === 'en' : true;
   const itemsKey = isEnglish ? 'order_items_en' : 'order_items_uk';
@@ -1351,7 +1359,7 @@ async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
 
   try {
     const responseBody = await fetchOrderSummary(chatId);
-    const orderResults = responseBody.results;
+    const orderResults = responseBody
 
     if (!orderResults || orderResults.length === 0) {
       const noOrdersMessage = isEnglish ? 'No orders found for this chat ID.' : 'Замовлення для цього чату не знайдено.';
@@ -1359,10 +1367,8 @@ async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
       return;
     }
 
-    const ordersMessage = orderResults.map(order => {
+    const ordersMessage = orderResults.map((order: Order) => {
       const orderItems = order[itemsKey];
-
-      // Collect available statuses with timestamps
       const statuses = [
         { icon: '❌', text: isEnglish ? 'Canceled' : 'Скасовано', date: order.canceled_at },
         { icon: '✅', text: isEnglish ? 'Complete' : 'Завершено', date: order.complete_at },
@@ -1371,27 +1377,26 @@ async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
         { icon: '🆕', text: isEnglish ? 'Created' : 'Створено', date: order.created_at }
       ];
 
-      // Find the latest status based on the date
       const latestStatus = statuses
-        .filter(status => status.date) // Remove null or undefined dates
-        .sort((a, b) => new Date(b.date!).getTime() - new Date(a.date!).getTime())[0]; // Sort and get the most recent
+        .filter(status => status.date)
+        .sort((a, b) => new Date(b.date!).getTime() - new Date(a.date!).getTime())[0];
 
       if (!orderItems || orderItems.length === 0) {
         return `${isEnglish ? 'Order ID' : 'Номер замовлення'}: ${order.order_id}\n${isEnglish ? 'No order items found for this order.' : 'Товари для цього замовлення не знайдено.'}`;
       }
 
-      const orderItemsSummary = orderItems.map(item =>
+      const orderItemsSummary = orderItems.map((item: OrderItem) =>
         `- ${item.name}, ${item.collection_name}, ${isEnglish ? 'Size' : 'Розмір'}: ${item.size}, ${isEnglish ? 'Color' : 'Колір'}: ${item.color_name}, ${item.quantity} ${isEnglish ? 'pcs' : 'шт'}, $${item.price.toFixed(2)}`
       ).join('\n');
 
-      return `${isEnglish ? 'Order ID' : 'Номер замовлення'}: ${order.order_id}\n${isEnglish ? 'Order Items' : 'Товари в замовленні'}:\n${orderItemsSummary}\n${isEnglish ? 'Latest Status' : 'Останній статус'}: ${latestStatus.icon} ${latestStatus.text}: ${new Date(latestStatus.date!).toLocaleDateString('uk-UA')}`;
+      return `${isEnglish ? 'Order ID' : 'Номер замовлення'}: ${order.order_id}\n${isEnglish ? 'Order Items' : 'Товари в замовленні'}:\n${orderItemsSummary}\n${isEnglish ? 'Latest Status' : 'Останній статус'}: ${latestStatus.icon} ${latestStatus.text}`;
     }).join('\n\n');
 
-    const allOrdersMessage = isEnglish ? 'Here are all your order details:' : 'Ось усі ваші деталі замовлень:';
-    await sendMessage(chatId, `${allOrdersMessage}\n${ordersMessage}`);
+    const thankYouMessage = isEnglish ? 'Thank you! Here are all your orders:' : 'Дякуємо! Ось всі ваші замовлення:';
+    await sendMessage(chatId, `${thankYouMessage}\n\n${ordersMessage}`);
   } catch (error) {
-    const errorMessage = isEnglish ? 'An error occurred while retrieving all order details. Please try again later.' : 'Сталася помилка при отриманні всіх деталей замовлень. Будь ласка, спробуйте пізніше.';
-    console.error(`Error retrieving order details: ${error}`);
+    const errorMessage = isEnglish ? 'An error occurred while retrieving all orders. Please try again later.' : 'Сталася помилка при отриманні всіх замовлень. Будь ласка, спробуйте пізніше.';
+    console.error(`Error retrieving all orders: ${error}`);
     await sendMessage(chatId, errorMessage);
   }
 }
