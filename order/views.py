@@ -125,6 +125,13 @@ class TelegramUserViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
+    def get_queryset(self):
+        phone = self.request.query_params.get('phone')
+        if phone:
+            return TelegramUser.objects.filter(phone=phone)
+        return super().get_queryset()  # Returns all TelegramUser objects by default
+
+
     def create(self, request, *args, **kwargs):
         logger.info(f"Request headers: {request.headers}")
         return super().create(request, *args, **kwargs)

@@ -88,51 +88,58 @@ def get_order_summary(order):
     }
     return summary
 
+def validate_telegram_user(telegram_user):
+    if not telegram_user or not telegram_user.chat_id:
+        logger.warning("Invalid Telegram user or missing chat_id.")
+        return False
+    return True
+
+
 def update_order_summary():
     try:
         orders = Order.objects.prefetch_related('order_items__product').all()
-        logger.info(f'Fetched {orders.count()} orders.')
         grouped_orders = {}
 
         for order in orders:
-            order_chat_id = order.telegram_user.chat_id if order.telegram_user else None
-            if not order_chat_id:
+            telegram_user = order.telegram_user
+            if not validate_telegram_user(telegram_user):
+                logger.warning(f"Skipping order {order.id}: Invalid Telegram user or missing chat_id.")
                 continue
 
-            if order_chat_id not in grouped_orders:
-                grouped_orders[order_chat_id] = []
+            chat_id = telegram_user.chat_id
+            if chat_id not in grouped_orders:
+                grouped_orders[chat_id] = []
 
             summary = get_order_summary(order)
-            existing_summary = next((o for o in grouped_orders[order_chat_id] if o['order_id'] == order.id), None)
-            
-            if existing_summary:
-                existing_summary.update(summary)
-            else:
-                grouped_orders[order_chat_id].append(summary)
+            grouped_orders[chat_id].append(summary)
 
         for chat_id, orders_summary in grouped_orders.items():
             OrderSummary.objects.update_or_create(
                 chat_id=chat_id,
                 defaults={'orders': orders_summary}
             )
-            logger.info(f'Order summaries created/updated for chat ID {chat_id}')
+            logger.info(f"Order summaries created/updated for chat ID {chat_id}")
 
     except Exception as e:
-        logger.error(f'Error while generating order summaries: {e}')
+        logger.error(f"Error while generating order summaries: {e}")
+
 
 def get_chat_id_from_phone(phone_number):
     try:
         response = requests.get(f'{settings.VERCEL_DOMAIN}/api/telegram_users', params={'phone': phone_number})
-        response.raise_for_status()  # Raises HTTPError for bad responses
-        logger.debug(f"Response from /api/telegram_users: {response.text}")
+        response.raise_for_status()
         response_json = response.json()
+        if not isinstance(response_json, dict):
+            logger.error(f"Unexpected response format: {response.text}")
+            return None
         return response_json.get('chat_id')
     except requests.exceptions.RequestException as e:
         logger.error(f"Request to /api/telegram_users failed: {e}")
         return None
     except ValueError as e:
-        logger.error(f"Failed to parse response as JSON: {e}")
+        logger.error(f"Invalid JSON response: {e}")
         return None
+
 
 
 @receiver(post_save, sender=OrderItem)
