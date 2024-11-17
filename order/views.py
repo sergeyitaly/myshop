@@ -439,7 +439,8 @@ def get_orders(request):
 
 def safe_make_naive(timestamp):
     """
-    Safely convert a timestamp to naive datetime. Handles strings and datetime objects.
+    Safely convert a timestamp to naive datetime. Handles strings, datetime objects,
+    and checks if the datetime is already naive.
     """
     if isinstance(timestamp, str):
         try:
@@ -447,7 +448,14 @@ def safe_make_naive(timestamp):
         except ValueError:
             logger.error(f"Invalid timestamp format: {timestamp}")
             return None
-    return make_naive(timestamp) if timestamp else None
+    
+    if timestamp is not None and is_aware(timestamp):
+        # If the datetime is aware, convert it to naive
+        return make_naive(timestamp)
+    elif timestamp is not None and not is_aware(timestamp):
+        # If the datetime is already naive, return it as is
+        return timestamp
+    return None
 
 def format_order_summary(order):
     """Helper function to format an Order instance into a summary dictionary."""
