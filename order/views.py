@@ -1,4 +1,3 @@
-from django.utils.dateformat import format
 from django.utils.timezone import localtime
 from django.conf import settings
 from django.core.mail import EmailMessage
@@ -18,21 +17,16 @@ from django.views import View
 import logging, requests, json
 from rest_framework.decorators import action
 from .notifications import update_order_status_with_notification
-from rest_framework import viewsets, status
 from rest_framework.response import Response
-from django.utils.dateformat import format as date_format
 from django.utils.timezone import make_naive, is_aware
 from datetime import datetime
 from django.db import transaction
 
-
-
 logger = logging.getLogger(__name__)
-def health_check(request):
+def health_check(request):                                                                                                              
     return JsonResponse({'status': 'ok'})
-# Helper function to handle datetime conversion
+
 def ensure_datetime(value):
-    """Ensure a value is converted to a datetime object if it's not None."""
     if value is None:
         return None
     if isinstance(value, datetime):
@@ -44,31 +38,22 @@ def ensure_datetime(value):
         return None
 
 def format_timestamp(timestamp):
-    """Format timestamp to 'Y-m-d H:i'."""
     return timestamp.strftime('%Y-%m-%d %H:%M') if timestamp else None
 
 def prepare_order_summary(order):
-    """Generate a unified summary of an order with the latest status as created_at."""
-    # Ensure timestamps are parsed correctly
     status_timestamps = {
         'submitted_at': ensure_datetime(order.submitted_at),
         'processed_at': ensure_datetime(order.processed_at),
         'complete_at': ensure_datetime(order.complete_at),
         'canceled_at': ensure_datetime(order.canceled_at),
     }
-
-    # Get the latest status key and its corresponding timestamp
     latest_status_key, latest_status_time = max(
         status_timestamps.items(),
         key=lambda item: item[1] or datetime.min,
         default=(None, None)
     )
-
-    # Serialize order items for both languages
     order_items_data_en = OrderItemSerializer(order.order_items.all(), many=True).data
     order_items_data_uk = OrderItemSerializer(order.order_items.all(), many=True).data  # assuming translation logic exists
-
-    # Prepare the final order summary
     return {
         'order_id': order.id,
         'created_at': format_timestamp(latest_status_time),  # latest status timestamp
@@ -86,7 +71,7 @@ def prepare_order_summary(order):
         ],
         'order_items_uk': [
             {
-                'name': item['product_name'],  # Here you would adjust for translations if needed
+                'name': item['product_name'],
                 'size': item['size'],
                 'price': item['item_price'],
                 'quantity': item['quantity'],
@@ -104,56 +89,33 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSummarySerializer
 
     def create(self, request, *args, **kwargs):
-        """Create a new order and update the related OrderSummary."""
+        logger.debug("Received data: %s", request.data)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         chat_id = serializer.validated_data.get('chat_id')
         if not chat_id:
+            logger.error("chat_id is missing in the request data.")
             return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Perform order creation
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-
-        # Update order summary
-        order_summary_data = prepare_order_summary(serializer.instance)
-        # Update or create order summary in the database
-        OrderSummary.objects.update_or_create(
-            chat_id=chat_id,
-            defaults={'orders': [order_summary_data]}
-        )
-
+        order_summary_data = self.prepare_order_summary(serializer.instance)
         return Response(order_summary_data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
-        """Update an existing order and automatically update its summary."""
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-
         chat_id = request.data.get('chat_id')
         if not chat_id:
+            logger.error("chat_id is missing in the request data.")
             return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
-
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-
         if getattr(instance, '_prefetched_objects_cache', None):
             instance._prefetched_objects_cache = {}
-
-        # Update the order summary
-        order_summary_data = prepare_order_summary(instance)
-        # Update the order summary associated with the chat_id
-        OrderSummary.objects.update_or_create(
-            chat_id=chat_id,
-            defaults={'orders': [order_summary_data]}
-        )
-
-        return Response(order_summary_data, status=status.HTTP_200_OK)
-
-
-
+        order_summary_data = self.prepare_order_summary(instance)
+        return Response(order_summary_data)
+    
 class TelegramUserViewSet(viewsets.ModelViewSet):
     queryset = TelegramUser.objects.all()
     serializer_class = TelegramUserSerializer
@@ -177,7 +139,6 @@ class TelegramUserViewSet(viewsets.ModelViewSet):
                 return Response({"detail": "TelegramUser not found."}, status=status.HTTP_404_NOT_FOUND)
         return Response({"detail": "Bad request. Phone and chat_id required."}, status=status.HTTP_400_BAD_REQUEST)
 
-
     def perform_create(self, serializer):
         telegram_user = serializer.save()
         orders = Order.objects.filter(phone=telegram_user.phone)
@@ -191,16 +152,14 @@ class TelegramUserViewSet(viewsets.ModelViewSet):
         telegram_user = serializer.save()
         orders = Order.objects.filter(phone=telegram_user.phone)
         for order in orders:
-            if not order.telegram_user:  # Ensure only orders without an associated TelegramUser are updated
+            if not order.telegram_user: 
                 order.telegram_user = telegram_user
                 order.save(update_fields=['telegram_user'])
-
 
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
-    permission_classes = [IsAuthenticated]  # Ensure this matches your settings
-
+    permission_classes = [IsAuthenticated] 
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
@@ -238,7 +197,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         phone_number = request.query_params.get('phone_number', None)
         if not phone_number:
             return Response({'error': 'Phone number is required'}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             orders = Order.objects.filter(phone=phone_number)
             serializer = self.get_serializer(orders, many=True)
@@ -246,7 +204,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f"Error fetching orders: {e}")
             return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
     
 def set_telegram_webhook():
     url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/setWebhook"
@@ -263,14 +220,11 @@ class TelegramWebhook(View):
             data = json.loads(request.body)
             chat_id = data['message']['chat']['id']
             contact = data['message'].get('contact')
-
             if not contact:
                 return JsonResponse({'status': 'error', 'message': 'No contact information'}, status=400)
-            
             phone = contact.get('phone_number')
             if not phone:
                 return JsonResponse({'status': 'error', 'message': 'No phone number in contact information'}, status=400)
-            
             telegram_user, created = TelegramUser.objects.update_or_create(
                 phone=phone, defaults={'chat_id': chat_id}
             )
@@ -293,21 +247,14 @@ def create_order(request):
     try:
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
-            # Save the order first
             order = serializer.save()
-
-            # Extract phone and get chat_id
             phone = request.data.get('phone')
             try:
                 telegram_user = TelegramUser.objects.get(phone=phone)
                 if telegram_user:
                     order.telegram_user = telegram_user
                     order.save(update_fields=['telegram_user'])
-
-                    # Prepare order items
                     order_items = order.order_items.all()
-
-                    # Notify the user about the new order status
                     update_order_status_with_notification(
                         order.id,
                         order_items,
@@ -321,8 +268,6 @@ def create_order(request):
             except TelegramUser.DoesNotExist:
                 logger.warning(f"No TelegramUser found with phone: {phone}")
 
-
-            # Send the confirmation email
             formatted_date = localtime(order.submitted_at).strftime('%Y-%m-%d %H:%M')
             order_items = order.order_items.all()
             total_sum = sum(item.quantity * item.product.price for item in order_items)
@@ -405,9 +350,6 @@ def create_order(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_order(request, order_id):
-    """
-    Retrieve a specific order by its ID.
-    """
     try:
         order = Order.objects.get(id=order_id)
         serializer = OrderSerializer(order)
@@ -421,9 +363,6 @@ def get_order(request, order_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_orders(request):
-    """
-    Retrieve all orders related to a specific Telegram user.
-    """
     chat_id = request.query_params.get('chat_id', None)
     if not chat_id:
         return Response({'error': 'Chat ID is required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -440,28 +379,19 @@ def get_orders(request):
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 def safe_make_naive(timestamp):
-    """
-    Safely convert a timestamp to naive datetime. Handles strings, datetime objects,
-    and checks if the datetime is already naive.
-    """
     if isinstance(timestamp, str):
         try:
             timestamp = datetime.fromisoformat(timestamp)  # Parse string to datetime
         except ValueError:
             logger.error(f"Invalid timestamp format: {timestamp}")
             return None
-    
     if timestamp is not None and is_aware(timestamp):
-        # If the datetime is aware, convert it to naive
         return make_naive(timestamp)
     elif timestamp is not None and not is_aware(timestamp):
-        # If the datetime is already naive, return it as is
         return timestamp
     return None
 
 def format_order_summary(order):
-    """Helper function to format an Order instance into a summary dictionary."""
-    # Collect and format order details here as per your summary structure
     status_timestamps = {
         'created_at': safe_make_naive(order.created_at),
         'submitted_at': safe_make_naive(order.submitted_at),
@@ -510,20 +440,15 @@ def format_order_summary(order):
         latest_status_field: latest_status_timestamp.isoformat() if latest_status_timestamp else None,
     }
 
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def update_order(request):
-    """Bulk update order(s) and their associated summaries."""
     chat_id = request.data.get('chat_id')
     orders = request.data.get('orders')
-
     if not chat_id:
         return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
-
     if not isinstance(orders, list):
         return Response({"detail": "Orders must be a list."}, status=status.HTTP_400_BAD_REQUEST)
-
     try:
         with transaction.atomic():
             updated_orders = []
@@ -531,43 +456,31 @@ def update_order(request):
                 order_id = order_data.get('order_id')
                 status = order_data.get('status')
                 order_items = order_data.get('order_items', [])
-
                 if not order_id:
                     return Response({"detail": "Order ID is required."}, status=status.HTTP_400_BAD_REQUEST)
-
                 try:
                     order = Order.objects.prefetch_related('order_items').get(id=order_id)
                 except Order.DoesNotExist:
                     return Response({"error": f"Order with ID {order_id} not found."}, status=status.HTTP_404_NOT_FOUND)
 
-                # Update status
                 if status and order.status != status:
                     order.status = status
                     order.save()
-
-                # Update order items if provided
                 if order_items:
                     order.order_items.all().delete()
                     for item in order_items:
                         OrderItem.objects.create(order=order, **item)
-
-                # Format and append the updated order summary
                 formatted_order = prepare_order_summary(order)
                 updated_orders.append(formatted_order)
-
-            # Update or create the OrderSummary
             OrderSummary.objects.update_or_create(
                 chat_id=chat_id,
                 defaults={'orders': updated_orders}
             )
-
         return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
-
     except Exception as e:
         logger.error(f"Error updating order summary: {e}")
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-# Get order summary by chat ID
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_order_summary_by_chat_id(request, chat_id):
@@ -583,7 +496,6 @@ def get_order_summary_by_chat_id(request, chat_id):
         for summary in summaries:
             orders = summary.orders
             for order in orders:
-                # Parse status timestamps
                 status_timestamps = {
                     'created_at': safe_make_naive(order.get('created_at')),
                     'submitted_at': safe_make_naive(order.get('submitted_at')),
@@ -591,8 +503,6 @@ def get_order_summary_by_chat_id(request, chat_id):
                     'complete_at': safe_make_naive(order.get('complete_at')),
                     'canceled_at': safe_make_naive(order.get('canceled_at')),
                 }
-
-                # Determine the latest status
                 latest_status_timestamp = max(
                     (timestamp for timestamp in status_timestamps.values() if timestamp is not None),
                     default=None
@@ -601,8 +511,6 @@ def get_order_summary_by_chat_id(request, chat_id):
                     (field for field, timestamp in status_timestamps.items() if timestamp == latest_status_timestamp),
                     None
                 )
-
-                # Build the order data
                 order_data = {
                     'order_id': order.get('order_id'),
                     'order_items_en': order.get('order_items_en', []),
@@ -613,7 +521,6 @@ def get_order_summary_by_chat_id(request, chat_id):
                 summary_data.append(order_data)
         logger.debug(f"Order summary response: {summary_data}")
         return Response({'results': summary_data}, status=status.HTTP_200_OK)
-
     except Exception as e:
         logger.error(f"Error fetching order summaries: {e}")
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
