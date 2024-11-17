@@ -127,6 +127,7 @@ class OrderAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return qs.prefetch_related('order_items')
+    
     def chat_id(self, obj):
         return obj.chat_id if obj.chat_id else None
     chat_id.short_description = _('Chat ID')
