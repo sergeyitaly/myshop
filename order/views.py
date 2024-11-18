@@ -120,38 +120,19 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
         return Response(order_summary_data)
     
 class TelegramUserViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for managing Telegram users.
-    """
     queryset = TelegramUser.objects.all()
     serializer_class = TelegramUserSerializer
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
-    def get_queryset(self):
-        """
-        Filters TelegramUser records based on phone query parameter, if provided.
-        """
-        phone = self.request.query_params.get('phone')
-        if phone:
-            return TelegramUser.objects.filter(phone=phone)
-        return super().get_queryset()
-
     def create(self, request, *args, **kwargs):
-        """
-        Handles creation of a new TelegramUser and logs the request headers.
-        """
         logger.info(f"Request headers: {request.headers}")
         return super().create(request, *args, **kwargs)
-
+        
     def retrieve(self, request, *args, **kwargs):
-        """
-        Retrieves a specific TelegramUser based on phone and chat_id query parameters.
-        """
         phone = request.query_params.get('phone')
         chat_id = request.query_params.get('chat_id')
         logger.info(f"Retrieve request received with phone: {phone} and chat_id: {chat_id}")
-        
         if phone and chat_id:
             try:
                 user = TelegramUser.objects.get(phone=phone, chat_id=chat_id)
@@ -159,33 +140,25 @@ class TelegramUserViewSet(viewsets.ModelViewSet):
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except TelegramUser.DoesNotExist:
                 return Response({"detail": "TelegramUser not found."}, status=status.HTTP_404_NOT_FOUND)
-        
         return Response({"detail": "Bad request. Phone and chat_id required."}, status=status.HTTP_400_BAD_REQUEST)
 
+
     def perform_create(self, serializer):
-        """
-        Automatically associates orders with the TelegramUser after creation.
-        """
         telegram_user = serializer.save()
-        self._associate_orders_with_user(telegram_user)
-
-    def perform_update(self, serializer):
-        """
-        Automatically associates orders with the TelegramUser after update.
-        """
-        telegram_user = serializer.save()
-        self._associate_orders_with_user(telegram_user)
-
-    def _associate_orders_with_user(self, telegram_user):
-        """
-        Helper method to associate orders with the TelegramUser.
-        """
         orders = Order.objects.filter(phone=telegram_user.phone)
         for order in orders:
-            if not order.telegram_user:  # Only update orders that aren't already associated
+            if not order.telegram_user:  # Ensure only orders without an associated TelegramUser are updated
                 order.telegram_user = telegram_user
                 order.save(update_fields=['telegram_user'])
-                logger.info(f"Updated Order {order.id} with TelegramUser {telegram_user.id}")
+                self.stdout.write(f'Updated Order {order.id} with TelegramUser {telegram_user.id}\n')
+
+    def perform_update(self, serializer):
+        telegram_user = serializer.save()
+        orders = Order.objects.filter(phone=telegram_user.phone)
+        for order in orders:
+            if not order.telegram_user:  # Ensure only orders without an associated TelegramUser are updated
+                order.telegram_user = telegram_user
+                order.save(update_fields=['telegram_user'])
 
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
@@ -238,7 +211,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     
 def set_telegram_webhook():
     url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/setWebhook"
-    webhook_url = f"{settings.VERCEL_DOMAIN}/api/telegram_webhook/"  # Ensure this endpoint matches your Django webhook view
+    webhook_url = f"{settings.VERCEL_DOMAIN}/api/telegram_webhook/"  
     payload = {'url': webhook_url}
     response = requests.post(url, json=payload)
     response.raise_for_status()
@@ -378,9 +351,13 @@ def create_order(request):
         return Response({'error': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_order(request, order_id):
+    """
+    Retrieve a specific order by its ID.
+    """
     try:
         order = Order.objects.get(id=order_id)
         serializer = OrderSerializer(order)
@@ -394,6 +371,9 @@ def get_order(request, order_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_orders(request):
+    """
+    Retrieve all orders related to a specific Telegram user.
+    """
     chat_id = request.query_params.get('chat_id', None)
     if not chat_id:
         return Response({'error': 'Chat ID is required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -408,6 +388,7 @@ def get_orders(request):
     except Exception as e:
         logger.error(f"Error fetching orders: {e}")
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 
 def safe_make_naive(timestamp):
     if isinstance(timestamp, str):
@@ -472,45 +453,42 @@ def format_order_summary(order):
     }
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def update_order(request):
     chat_id = request.data.get('chat_id')
     orders = request.data.get('orders')
+
     if not chat_id:
         return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
     if not isinstance(orders, list):
         return Response({"detail": "Orders must be a list."}, status=status.HTTP_400_BAD_REQUEST)
-    try:
-        with transaction.atomic():
-            updated_orders = []
-            for order_data in orders:
-                order_id = order_data.get('order_id')
-                status = order_data.get('status')
-                order_items = order_data.get('order_items', [])
-                if not order_id:
-                    return Response({"detail": "Order ID is required."}, status=status.HTTP_400_BAD_REQUEST)
-                try:
-                    order = Order.objects.prefetch_related('order_items').get(id=order_id)
-                except Order.DoesNotExist:
-                    return Response({"error": f"Order with ID {order_id} not found."}, status=status.HTTP_404_NOT_FOUND)
 
-                if status and order.status != status:
-                    order.status = status
-                    order.save()
-                if order_items:
-                    order.order_items.all().delete()
-                    for item in order_items:
-                        OrderItem.objects.create(order=order, **item)
-                formatted_order = prepare_order_summary(order)
-                updated_orders.append(formatted_order)
-            OrderSummary.objects.update_or_create(
-                chat_id=chat_id,
-                defaults={'orders': updated_orders}
-            )
+    try:
+        # Retrieve existing orders based on the incoming order data
+        updated_orders = []
+        for order_data in orders:
+            order_id = order_data.get('order_id')
+            if not order_id:
+                return Response({"detail": "Order ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            order = Order.objects.get(id=order_id)  # Adjust as needed based on your logic
+            formatted_order = format_order_summary(order)
+            updated_orders.append(formatted_order)
+
+        # Update or create the OrderSummary with the formatted orders
+        OrderSummary.objects.update_or_create(
+            chat_id=chat_id,
+            defaults={'orders': updated_orders}
+        )
+
         return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
+
+    except Order.DoesNotExist:
+        return Response({"error": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
+    except OrderSummary.DoesNotExist:
+        return Response({"error": "Order summary not found."}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
-        logger.error(f"Error updating order summary: {e}")
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

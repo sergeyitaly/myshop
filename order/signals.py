@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils.timezone import is_aware, make_aware
-from order.models import Order, OrderSummary, OrderItem, TelegramUser
+from order.models import Order, OrderSummary, OrderItem
 from order.serializers import OrderItemSerializer
 from django.core.cache import cache
 
@@ -93,6 +93,7 @@ def validate_telegram_user(telegram_user):
         logger.warning("Invalid Telegram user or missing chat_id.")
         return False
     return True
+
 def update_order_summary():
     try:
         orders = Order.objects.prefetch_related(
@@ -127,9 +128,8 @@ def update_order_summary():
         logger.exception("Error while updating order summaries: %s", e)
 
 def get_chat_id_from_phone(phone_number):
-    """Fetches the Telegram chat ID from the user's phone number."""
     try:
-        response = requests.get(f'{settings.VERCEL_DOMAIN}/api/telegram_users/', params={'phone': phone_number})
+        response = requests.get(f'{settings.VERCEL_DOMAIN}/api/telegram_user', params={'phone': phone_number})
         response.raise_for_status()
         return response.json().get('chat_id')
     except requests.exceptions.RequestException as e:
@@ -161,7 +161,6 @@ def update_order_summary_on_order_status_change(sender, instance, **kwargs):
     if phone_number:
         chat_id = get_chat_id_from_phone(phone_number)
         if chat_id:
-            # If the order status has changed, trigger summary update
             update_order_summary()
             logger.debug(f"Order status updated for Order ID: {instance.id}, summary updated for chat ID: {chat_id}")
 
