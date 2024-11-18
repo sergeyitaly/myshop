@@ -124,21 +124,46 @@ def update_order_summary():
         logger.error(f"Error while generating order summaries: {e}")
 
 
-def get_chat_id_from_phone(phone_number):
+def refresh_token():
+    """Fetch a new token using the refresh endpoint."""
     try:
-        # Query the existing endpoint with the phone filter
-        response = requests.get(f'{settings.VERCEL_DOMAIN}/api/telegram_users/', params={'phone': phone_number})
-        response.raise_for_status()  # Raise exception for HTTP errors
-        data = response.json()
+        response = requests.post(
+            f'{settings.VERCEL_DOMAIN}/api/token/refresh/',
+            json={"refresh": settings.REFRESH_TOKEN},  # Replace with your actual refresh token
+        )
+        response.raise_for_status()
+        token_data = response.json()
+        if 'access' in token_data:
+            return token_data['access']  # Return the new access token
+        logger.error(f"Access token not found in response: {token_data}")
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Failed to refresh token: {e}")
+    except ValueError as e:
+        logger.error(f"Invalid JSON response while refreshing token: {e}")
+    return None
 
-        # Ensure data format and extract chat_id
-        if data and isinstance(data, list):  # Assuming the endpoint returns a list of objects
-            chat_id = data[0].get('chat_id') if data else None
-            if chat_id:
-                return chat_id
-            logger.error(f"Chat ID not found in response for phone {phone_number}: {data}")
-        else:
-            logger.error(f"Unexpected response format for phone {phone_number}: {data}")
+def get_chat_id_from_phone(phone_number):
+    """Fetch chat ID for a given phone number."""
+    try:
+        # Get a new access token
+        access_token = refresh_token()
+        if not access_token:
+            logger.error("Failed to retrieve access token for API call.")
+            return None
+
+        headers = {
+            "Authorization": f"Bearer {access_token}",  # Use the refreshed token
+        }
+        response = requests.get(
+            f'{settings.VERCEL_DOMAIN}/api/telegram_users/',
+            params={'phone': phone_number},
+            headers=headers,
+        )
+        response.raise_for_status()
+        data = response.json()
+        if data and isinstance(data, list) and len(data) > 0:
+            return data[0].get('chat_id')  # Return the chat_id of the first matching user
+        logger.error(f"Unexpected response format or no results for phone {phone_number}: {data}")
     except requests.exceptions.RequestException as e:
         logger.error(f"Request to /api/telegram_users/ failed for phone {phone_number}: {e}")
     except ValueError as e:
