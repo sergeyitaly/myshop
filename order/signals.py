@@ -93,82 +93,48 @@ def validate_telegram_user(telegram_user):
         logger.warning("Invalid Telegram user or missing chat_id.")
         return False
     return True
-
-
 def update_order_summary():
     try:
-        orders = Order.objects.prefetch_related('order_items__product').all()
-        grouped_orders = {}
+        orders = Order.objects.prefetch_related(
+            'order_items__product'
+        ).select_related('telegram_user')
 
+        grouped_orders = {}
         for order in orders:
-            telegram_user = order.telegram_user
-            if not validate_telegram_user(telegram_user):
-                logger.warning(f"Skipping order {order.id}: Invalid Telegram user or missing chat_id.")
+            if not validate_telegram_user(order.telegram_user):
+                logger.warning(f"Invalid Telegram user for order {order.id}.")
                 continue
 
-            chat_id = telegram_user.chat_id
-            if chat_id not in grouped_orders:
-                grouped_orders[chat_id] = []
-
+            chat_id = order.telegram_user.chat_id
             summary = get_order_summary(order)
-            grouped_orders[chat_id].append(summary)
+            grouped_orders.setdefault(chat_id, []).append(summary)
 
-        for chat_id, orders_summary in grouped_orders.items():
-            OrderSummary.objects.update_or_create(
+        bulk_update = []
+        for chat_id, summaries in grouped_orders.items():
+            summary_obj, created = OrderSummary.objects.get_or_create(
                 chat_id=chat_id,
-                defaults={'orders': orders_summary}
+                defaults={'orders': summaries}
             )
-            logger.info(f"Order summaries created/updated for chat ID {chat_id}")
+            if not created:
+                summary_obj.orders = summaries
+                bulk_update.append(summary_obj)
+
+        if bulk_update:
+            OrderSummary.objects.bulk_update(bulk_update, ['orders'])
+            logger.info("Order summaries updated successfully.")
 
     except Exception as e:
-        logger.error(f"Error while generating order summaries: {e}")
-
-
-def refresh_token():
-    """Fetch a new token using the refresh endpoint."""
-    try:
-        response = requests.post(
-            f'{settings.VERCEL_DOMAIN}/api/token/refresh/',
-            json={"refresh": settings.REFRESH_TOKEN},  # Replace with your actual refresh token
-        )
-        response.raise_for_status()
-        token_data = response.json()
-        if 'access' in token_data:
-            return token_data['access']  # Return the new access token
-        logger.error(f"Access token not found in response: {token_data}")
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Failed to refresh token: {e}")
-    except ValueError as e:
-        logger.error(f"Invalid JSON response while refreshing token: {e}")
-    return None
+        logger.exception("Error while updating order summaries: %s", e)
 
 def get_chat_id_from_phone(phone_number):
-    """Fetch chat ID for a given phone number."""
+    """Fetches the Telegram chat ID from the user's phone number."""
     try:
-        # Get a new access token
-        access_token = refresh_token()
-        if not access_token:
-            logger.error("Failed to retrieve access token for API call.")
-            return None
-
-        headers = {
-            "Authorization": f"Bearer {access_token}",  # Use the refreshed token
-        }
-        response = requests.get(
-            f'{settings.VERCEL_DOMAIN}/api/telegram_users/',
-            params={'phone': phone_number},
-            headers=headers,
-        )
+        response = requests.get(f'{settings.VERCEL_DOMAIN}/api/telegram_users/', params={'phone': phone_number})
         response.raise_for_status()
-        data = response.json()
-        if data and isinstance(data, list) and len(data) > 0:
-            return data[0].get('chat_id')  # Return the chat_id of the first matching user
-        logger.error(f"Unexpected response format or no results for phone {phone_number}: {data}")
+        return response.json().get('chat_id')
     except requests.exceptions.RequestException as e:
-        logger.error(f"Request to /api/telegram_users/ failed for phone {phone_number}: {e}")
-    except ValueError as e:
-        logger.error(f"Invalid JSON response for phone {phone_number}: {e}")
-    return None
+        logger.error(f"Request to /api/telegram_user failed: {e}")
+        return None
 
 
 
