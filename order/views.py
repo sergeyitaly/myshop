@@ -122,7 +122,7 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
 class TelegramUserViewSet(viewsets.ModelViewSet):
     queryset = TelegramUser.objects.all()
     serializer_class = TelegramUserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     authentication_classes = [TokenAuthentication]
 
     def create(self, request, *args, **kwargs):
