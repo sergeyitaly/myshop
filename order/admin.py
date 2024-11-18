@@ -104,14 +104,8 @@ class HasOrderItemsFilter(SimpleListFilter):
             return queryset.filter(order_items__isnull=True)
         return queryset
 
-
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'status', 'last_updated', 'phone', 'chat_id']
-    readonly_fields = ['id', 'name', 'surname', 'phone', 'email', 'receiver', 'receiver_comments', 'total_quantity', 'total_price', 'submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at', 'chat_id']
-    fields = [
-        'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments', 'congrats',
-        'present', 'status', 'total_quantity', 'total_price', 'submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at'
-    ]
+    list_display = ['id', 'status', 'last_updated', 'phone', 'telegram_user_chat_id']
     list_filter = [
         'status',
         'phone',
@@ -123,14 +117,36 @@ class OrderAdmin(admin.ModelAdmin):
     ]
     search_fields = ['phone', 'email', 'name', 'surname']
     inlines = [OrderItemInline]
+    readonly_fields = [
+        'id', 'name', 'surname', 'phone', 'email', 'total_quantity', 'total_price', 
+        'submitted_at', 'created_at', 'processed_at', 'complete_at', 
+        'canceled_at', 'chat_id', 'display_receiver', 'display_receiver_comments'
+    ]
+
+    fields = [
+        'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 
+        'receiver_comments', 'congrats', 'present', 'status', 'total_quantity', 
+        'total_price', 'submitted_at', 'created_at', 'processed_at', 
+        'complete_at', 'canceled_at'
+    ]
+
+    def display_receiver(self, obj):
+        return "Yes" if obj.receiver else "No"
+    display_receiver.short_description = "Receiver"
+
+    def display_receiver_comments(self, obj):
+        return obj.receiver_comments or "No comments"
+    display_receiver_comments.short_description = "Receiver Comments"
+
+    # Custom method to display chat_id
+    def telegram_user_chat_id(self, obj):
+        return obj.chat_id  # This will use the `chat_id` property from the `Order` model
+    telegram_user_chat_id.admin_order_field = 'telegram_user__chat_id'  # Enable ordering by chat_id
+    telegram_user_chat_id.short_description = 'Telegram Chat ID'  # Column header in admin
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return qs.prefetch_related('order_items')
-    
-    def chat_id(self, obj):
-        return obj.chat_id if obj.chat_id else None
-    chat_id.short_description = _('Chat ID')
 
     def last_updated(self, obj):
         return obj.last_updated
