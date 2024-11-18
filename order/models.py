@@ -85,14 +85,29 @@ class Order(models.Model):
         self.save()
 
     def save(self, *args, **kwargs):
-        """Override save method to prevent excessive updates."""
+        """Override save method to prevent excessive updates and link Telegram user."""
         # Avoid recursive signal calls by checking if instance has changed
         if self.pk:
             old_instance = Order.objects.get(pk=self.pk)
             if old_instance.status != self.status:
+                # Check and link Telegram user only if it's not already set
+                if not self.telegram_user and self.phone:
+                    try:
+                        telegram_user = TelegramUser.objects.get(phone=self.phone)
+                        self.telegram_user = telegram_user
+                    except TelegramUser.DoesNotExist:
+                        self.telegram_user = None
                 super().save(*args, **kwargs)  # Only save if status changed
         else:
+            # Link Telegram user for new instances
+            if not self.telegram_user and self.phone:
+                try:
+                    telegram_user = TelegramUser.objects.get(phone=self.phone)
+                    self.telegram_user = telegram_user
+                except TelegramUser.DoesNotExist:
+                    self.telegram_user = None
             super().save(*args, **kwargs)  # Save new instance
+
 
     class Meta:
         ordering = ('-submitted_at',)
