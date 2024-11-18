@@ -120,26 +120,38 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
         return Response(order_summary_data)
     
 class TelegramUserViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing Telegram users.
+    """
     queryset = TelegramUser.objects.all()
     serializer_class = TelegramUserSerializer
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
     def get_queryset(self):
+        """
+        Filters TelegramUser records based on phone query parameter, if provided.
+        """
         phone = self.request.query_params.get('phone')
         if phone:
             return TelegramUser.objects.filter(phone=phone)
-        return super().get_queryset()  # Returns all TelegramUser objects by default
-
+        return super().get_queryset()
 
     def create(self, request, *args, **kwargs):
+        """
+        Handles creation of a new TelegramUser and logs the request headers.
+        """
         logger.info(f"Request headers: {request.headers}")
         return super().create(request, *args, **kwargs)
-        
+
     def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves a specific TelegramUser based on phone and chat_id query parameters.
+        """
         phone = request.query_params.get('phone')
         chat_id = request.query_params.get('chat_id')
         logger.info(f"Retrieve request received with phone: {phone} and chat_id: {chat_id}")
+        
         if phone and chat_id:
             try:
                 user = TelegramUser.objects.get(phone=phone, chat_id=chat_id)
@@ -147,24 +159,33 @@ class TelegramUserViewSet(viewsets.ModelViewSet):
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except TelegramUser.DoesNotExist:
                 return Response({"detail": "TelegramUser not found."}, status=status.HTTP_404_NOT_FOUND)
+        
         return Response({"detail": "Bad request. Phone and chat_id required."}, status=status.HTTP_400_BAD_REQUEST)
 
     def perform_create(self, serializer):
+        """
+        Automatically associates orders with the TelegramUser after creation.
+        """
         telegram_user = serializer.save()
-        orders = Order.objects.filter(phone=telegram_user.phone)
-        for order in orders:
-            if not order.telegram_user:  # Ensure only orders without an associated TelegramUser are updated
-                order.telegram_user = telegram_user
-                order.save(update_fields=['telegram_user'])
-                self.stdout.write(f'Updated Order {order.id} with TelegramUser {telegram_user.id}\n')
+        self._associate_orders_with_user(telegram_user)
 
     def perform_update(self, serializer):
+        """
+        Automatically associates orders with the TelegramUser after update.
+        """
         telegram_user = serializer.save()
+        self._associate_orders_with_user(telegram_user)
+
+    def _associate_orders_with_user(self, telegram_user):
+        """
+        Helper method to associate orders with the TelegramUser.
+        """
         orders = Order.objects.filter(phone=telegram_user.phone)
         for order in orders:
-            if not order.telegram_user: 
+            if not order.telegram_user:  # Only update orders that aren't already associated
                 order.telegram_user = telegram_user
                 order.save(update_fields=['telegram_user'])
+                logger.info(f"Updated Order {order.id} with TelegramUser {telegram_user.id}")
 
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()

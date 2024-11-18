@@ -126,19 +126,25 @@ def update_order_summary():
 
 def get_chat_id_from_phone(phone_number):
     try:
-        response = requests.get(f'{settings.VERCEL_DOMAIN}/api/telegram_users', params={'phone': phone_number})
-        response.raise_for_status()
-        response_json = response.json()
-        if not isinstance(response_json, dict):
-            logger.error(f"Unexpected response format: {response.text}")
-            return None
-        return response_json.get('chat_id')
+        # Query the existing endpoint with the phone filter
+        response = requests.get(f'{settings.VERCEL_DOMAIN}/api/telegram_users/', params={'phone': phone_number})
+        response.raise_for_status()  # Raise exception for HTTP errors
+        data = response.json()
+
+        # Ensure data format and extract chat_id
+        if data and isinstance(data, list):  # Assuming the endpoint returns a list of objects
+            chat_id = data[0].get('chat_id') if data else None
+            if chat_id:
+                return chat_id
+            logger.error(f"Chat ID not found in response for phone {phone_number}: {data}")
+        else:
+            logger.error(f"Unexpected response format for phone {phone_number}: {data}")
     except requests.exceptions.RequestException as e:
-        logger.error(f"Request to /api/telegram_users failed: {e}")
-        return None
+        logger.error(f"Request to /api/telegram_users/ failed for phone {phone_number}: {e}")
     except ValueError as e:
-        logger.error(f"Invalid JSON response: {e}")
-        return None
+        logger.error(f"Invalid JSON response for phone {phone_number}: {e}")
+    return None
+
 
 
 
