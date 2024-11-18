@@ -7,6 +7,9 @@ class TelegramUserSerializer(serializers.ModelSerializer):
         model = TelegramUser
         fields = ['id', 'phone', 'chat_id']
 
+    def get_queryset(self):
+        return TelegramUser.objects.all().order_by('id')
+
 class OrderSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderSummary
@@ -106,7 +109,6 @@ class OrderItemSerializer(serializers.ModelSerializer):
         model = OrderItem
         fields = ['product_id', 'product', 'quantity', 'total_sum']
 
-        
 class OrderSerializer(serializers.ModelSerializer):
     order_items = OrderItemSerializer(many=True, required=True)
     telegram_user = TelegramUserSerializer(required=False, allow_null=True)
@@ -148,19 +150,17 @@ class OrderSerializer(serializers.ModelSerializer):
             item_data['total_sum'] = product_instance.price * item_data.get('quantity', 1)
             OrderItem.objects.create(order=order, product=product_instance, **item_data)
 
-        # Handle telegram_user if provided
-        if telegram_user_data:
-            telegram_user, created = TelegramUser.objects.get_or_create(
-                phone=telegram_user_data['phone'],
-                defaults={'chat_id': telegram_user_data.get('chat_id')}  # Pass chat_id in defaults
-            )
+        # Handle telegram_user based on phone number if provided
+        phone = validated_data.get('phone')
+        if phone:
+            try:
+                telegram_user = TelegramUser.objects.get(phone=phone)
+            except TelegramUser.DoesNotExist:
+                telegram_user = None  # Optionally handle creation or other behavior if user not found
 
-            if not created and telegram_user_data.get('chat_id'):
-                telegram_user.chat_id = telegram_user_data['chat_id']
-                telegram_user.save()
-
-            order.telegram_user = telegram_user  # Link TelegramUser to the order
-            order.save()
+            if telegram_user:
+                order.telegram_user = telegram_user  # Link TelegramUser to the order
+                order.save()
 
         return order
 
@@ -168,24 +168,22 @@ class OrderSerializer(serializers.ModelSerializer):
         items_data = validated_data.pop('order_items', [])
         telegram_user_data = validated_data.pop('telegram_user', None)
 
-        # Update telegram_user if provided
-        if telegram_user_data:
-            telegram_user, created = TelegramUser.objects.get_or_create(
-                phone=telegram_user_data['phone'],
-                defaults={'chat_id': telegram_user_data.get('chat_id')}
-            )
-
-            if not created and telegram_user_data.get('chat_id'):
-                telegram_user.chat_id = telegram_user_data['chat_id']
-                telegram_user.save()
-
-            instance.telegram_user = telegram_user
-
         # Update other fields on the order
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-
         instance.save()
+
+        # Handle telegram_user based on phone number if provided
+        phone = validated_data.get('phone')
+        if phone:
+            try:
+                telegram_user = TelegramUser.objects.get(phone=phone)
+            except TelegramUser.DoesNotExist:
+                telegram_user = None  # Optionally handle creation or other behavior if user not found
+
+            if telegram_user:
+                instance.telegram_user = telegram_user  # Link TelegramUser to the order
+                instance.save()
 
         # Handle order items update
         existing_items = {item.product.id: item for item in instance.order_items.all()}
