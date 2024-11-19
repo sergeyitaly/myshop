@@ -72,13 +72,6 @@ class Command(BaseCommand):
                         return dt.strftime('%Y-%m-%d %H:%M')
                     return None
 
-                # Use the serializer to format the order and items
-                serializer = OrderSerializer(order)
-                order_data = serializer.data
-
-                # Log the order items for debugging
-                logger.info(f'Serialized Order Data: {order_data}')
-
                 # Create the order items in both English and Ukrainian
                 order_items_en = []
                 order_items_uk = []

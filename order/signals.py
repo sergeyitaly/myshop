@@ -59,33 +59,39 @@ def get_chat_id_from_phone(phone_number):
 def get_order_summary(order):
     try:
         submitted_at = make_aware_if_naive(ensure_datetime(order.submitted_at))
+        
+        # Serialize the order items for English and Ukrainian
         order_items_data_en = OrderItemSerializer(order.order_items.filter(language='en'), many=True).data
         order_items_data_uk = OrderItemSerializer(order.order_items.filter(language='uk'), many=True).data
 
+        order_items_en = [
+            {
+                'size': item.get('size'),
+                'quantity': item.get('quantity'),
+                'color_name': item.get('color_name'),
+                'price': item.get('price'),
+                'color_value': item.get('color_value'),
+                'name': item.get('name'),
+                'collection_name': item.get('collection_name'),
+            } for item in order_items_data_en
+        ]
+        
+        order_items_uk = [
+            {
+                'size': item.get('size'),
+                'quantity': item.get('quantity'),
+                'color_name': item.get('color_name'),
+                'price': item.get('price'),
+                'color_value': item.get('color_value'),
+                'name': item.get('name'),
+                'collection_name': item.get('collection_name'),
+            } for item in order_items_data_uk
+        ]
+
         return {
             'order_id': order.id,
-            'order_items_en': [
-                {
-                    'size': item.get('size'),
-                    'quantity': item.get('quantity'),
-                    'color_name': item.get('color_name'),
-                    'price': item.get('price'),
-                    'color_value': item.get('color_value'),
-                    'name': item.get('name'),
-                    'collection_name': item.get('collection_name'),
-                } for item in order_items_data_en
-            ],
-            'order_items_uk': [
-                {
-                    'size': item.get('size'),
-                    'quantity': item.get('quantity'),
-                    'color_name': item.get('color_name'),
-                    'price': item.get('price'),
-                    'color_value': item.get('color_value'),
-                    'name': item.get('name'),
-                    'collection_name': item.get('collection_name'),
-                } for item in order_items_data_uk
-            ],
+            'order_items_en': order_items_en,
+            'order_items_uk': order_items_uk,
             'submitted_at': datetime_to_str(submitted_at),
         }
     except Exception as e:
