@@ -4,6 +4,7 @@ import decimal
 from rest_framework import serializers
 from django.utils.translation import gettext as _
 from django.utils import translation
+from django.utils.translation import override as translation_override
 
 class TelegramUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -119,7 +120,6 @@ class OrderItemSerializer(serializers.ModelSerializer):
             'size', 'name', 'color_name', 'collection_name'
         ]
 
-
 class OrderSerializer(serializers.ModelSerializer):
     order_items_uk = serializers.SerializerMethodField()
     order_items_en = serializers.SerializerMethodField()
@@ -134,25 +134,35 @@ class OrderSerializer(serializers.ModelSerializer):
         ]
 
     def get_order_items_uk(self, obj):
-        return self._get_localized_order_items(obj, language='uk')
+        return self._get_order_items_for_language(obj, language='uk')
 
     def get_order_items_en(self, obj):
-        return self._get_localized_order_items(obj, language='en')
+        return self._get_order_items_for_language(obj, language='en')
 
-    def _get_localized_order_items(self, obj, language):
-        items = obj.order_items.all()  # Fetch all related order items
+    def _get_order_items_for_language(self, obj, language):
+        """Fetch order items localized for the specified language."""
+        items = obj.order_items.all()
         localized_items = []
 
-        # Temporarily override the language context
-        with translation.override(language):
-            for item in items:
+        for item in items:
+            with translation_override(language):
                 localized_items.append({
                     "name": _(item.product.name),  # Localized product name
-                    "size": item.product.size,  # Use product.size
-                    "price": item.product.price,  # Use product.price
-                    "quantity": item.quantity,
+                    "size": item.product.size,  # Product size
+                    "price": item.product.price,  # Product price
+                    "quantity": item.quantity,  # Item quantity
                     "color_name": _(item.product.color_name),  # Localized color name
-                    "color_value": item.product.color_value,
+                    "color_value": item.product.color_value,  # Color value
                     "collection_name": _(item.product.collection.name),  # Localized collection name
                 })
         return localized_items
+
+    def to_representation(self, instance):
+        """Override to_representation to populate both fields in the response."""
+        representation = super().to_representation(instance)
+
+        # Populate both English and Ukrainian fields simultaneously
+        representation['order_items_en'] = self.get_order_items_en(instance)
+        representation['order_items_uk'] = self.get_order_items_uk(instance)
+
+        return representation
