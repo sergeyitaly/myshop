@@ -83,16 +83,15 @@ class OrderSummarySerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError("chat_id cannot be null.")
         return value
-
 class OrderItemSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=False, write_only=True)
     product_id = serializers.CharField(write_only=True)  # Accept product_id in the request
     total_sum = serializers.DecimalField(max_digits=10, decimal_places=2)
     price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=2, read_only=True)
-    color_value = serializers.CharField(source='product.color.value', read_only=True)
+    color_value = serializers.CharField(source='product.color_value', read_only=True)
+    size = serializers.CharField(source='product.size', read_only=True)
 
-    # Assuming the 'color' is a related model (e.g., ForeignKey or OneToOne field)
-    color_name = serializers.CharField(source='product.color.name', read_only=True)
+    color_name = serializers.CharField(source='product.color_name', read_only=True)
     name = serializers.CharField(source='product.name', read_only=True)
     collection_name = serializers.CharField(source='product.collection.name', read_only=True)
 
@@ -115,9 +114,11 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderItem
-        fields = ['product_id', 'product', 'quantity', 'total_sum', 'price', 'color_value',
-                  'name','color_name', 'collection_name'
-                  ]
+        fields = [
+            'product_id', 'product', 'quantity', 'total_sum', 'price', 'color_value',
+            'size', 'name', 'color_name', 'collection_name'
+        ]
+
 
 class OrderSerializer(serializers.ModelSerializer):
     order_items_uk = serializers.SerializerMethodField()
@@ -146,12 +147,12 @@ class OrderSerializer(serializers.ModelSerializer):
         with translation.override(language):
             for item in items:
                 localized_items.append({
-                    "name": _(item.product.name),
-                    "size": item.size,
-                    "price": item.price,
+                    "name": _(item.product.name),  # Localized product name
+                    "size": item.product.size,  # Use product.size
+                    "price": item.product.price,  # Use product.price
                     "quantity": item.quantity,
-                    "color_name": _(item.color_name),
-                    "color_value": item.color_value,
-                    "collection_name": _(item.product.collection.name),
+                    "color_name": _(item.product.color_name),  # Localized color name
+                    "color_value": item.product.color_value,
+                    "collection_name": _(item.product.collection.name),  # Localized collection name
                 })
         return localized_items
