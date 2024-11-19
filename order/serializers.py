@@ -116,8 +116,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
         fields = ['product_id', 'product', 'quantity', 'total_sum', 'price', 'color_value',
-                  'name_en','color_name_en', 'color_value_en', 'collection_name_en',
-                  'name_uk','color_name_uk', 'color_value_uk', 'collection_name_uk'
+                  'name_en','color_name_en', 'collection_name_en',
+                  'name_uk','color_name_uk',  'collection_name_uk'
 
                   ]
 
