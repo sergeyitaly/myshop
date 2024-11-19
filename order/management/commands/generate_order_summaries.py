@@ -77,7 +77,7 @@ class Command(BaseCommand):
                 order_data = serializer.data
 
                 # Log the order items for debugging
-                logger.info(f'Order {order.id} has {len(order_data["order_items"])} items.')
+                #logger.info(f'Order {order.id} has {len(order_data["order_items"])} items.')
                 logger.info(f'Serialized Order Data: {order_data}')
 
                 # Create the order items in both English and Ukrainian
