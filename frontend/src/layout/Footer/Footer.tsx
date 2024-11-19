@@ -16,7 +16,6 @@ export const Footer = () => {
 				<div className={styles.content}>
 					<nav className={styles.nav}>
 						<p className={styles.title}>{t("contact_us")}</p>{" "}
-						{/* Localized text */}
 						<Link className={styles.link} to="/contacts">
 							{t("contacts")}
 						</Link>
@@ -39,7 +38,6 @@ export const Footer = () => {
 					</nav>
 					<nav className={styles.nav}>
 						<p className={styles.title}>{t("info")}</p>{" "}
-						{/* Localized text */}
 						<Link className={styles.link} to="/about">
 							{t("about_us")}
 						</Link>
@@ -58,7 +56,7 @@ export const Footer = () => {
 							{t("privacy_policy")}
 						</Link>
 						<p className={styles.payment}>
-							{t("payment")}: {/* Localized text */}
+							{t("payment")}:
 							<img src={VisaImg} alt="visa icon" />
 						</p>
 						<LanguageDropDown />
