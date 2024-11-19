@@ -79,6 +79,7 @@ class TelegramUserFilter(SimpleListFilter):
             for user in telegram_users
         ]
 
+
     def queryset(self, request, queryset):
         if self.value():
             phone, chat_id = self.value().split(' - ')
@@ -104,16 +105,12 @@ class HasOrderItemsFilter(SimpleListFilter):
             return queryset.filter(order_items__isnull=True)
         return queryset
 
+
 class OrderAdmin(admin.ModelAdmin):
     list_display = ['id', 'status', 'last_updated', 'phone', 'telegram_user_chat_id']
     list_filter = [
-        'status',
-        'phone',
-        'created_at',
-        'processed_at',
-        'complete_at',
-        'canceled_at',
-        'present',
+        'status', 'phone', 'created_at', 'processed_at', 'complete_at', 
+        'canceled_at', 'present',
     ]
     search_fields = ['phone', 'email', 'name', 'surname']
     inlines = [OrderItemInline]
@@ -122,7 +119,6 @@ class OrderAdmin(admin.ModelAdmin):
         'submitted_at', 'created_at', 'processed_at', 'complete_at', 
         'canceled_at', 'chat_id', 'display_receiver', 'display_receiver_comments'
     ]
-
     fields = [
         'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 
         'receiver_comments', 'congrats', 'present', 'status', 'total_quantity', 
@@ -138,9 +134,8 @@ class OrderAdmin(admin.ModelAdmin):
         return obj.receiver_comments or "No comments"
     display_receiver_comments.short_description = "Receiver Comments"
 
-    # Custom method to display chat_id
     def telegram_user_chat_id(self, obj):
-        return obj.chat_id  # This will use the `chat_id` property from the `Order` model
+        return obj.telegram_user.chat_id if obj.telegram_user else "No chat ID"  # Handle None case
     telegram_user_chat_id.admin_order_field = 'telegram_user__chat_id'  # Enable ordering by chat_id
     telegram_user_chat_id.short_description = 'Telegram Chat ID'  # Column header in admin
 
@@ -163,11 +158,9 @@ class OrderAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         if change:
             old_obj = self.model.objects.get(pk=obj.pk)
-
-            # If the status has changed, update the corresponding timestamp
             if old_obj.status != obj.status:
                 status_timestamps = {
-                    'submited': 'submitted_at',
+                    'submitted': 'submitted_at',
                     'created': 'created_at',
                     'processed': 'processed_at',
                     'complete': 'complete_at',

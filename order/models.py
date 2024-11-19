@@ -47,16 +47,18 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='submitted', db_index=True, verbose_name=_('Status'))
     parent_order = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, verbose_name=_('Parent Order'))
     present = models.BooleanField(null=True, help_text=_('Package as a present'))
-    telegram_user = models.ForeignKey(TelegramUser, related_name='orders', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('Telegram user'))
+    telegram_user = models.ForeignKey(TelegramUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders')
 #    telegram_user = models.ForeignKey(TelegramUser, on_delete=models.SET_NULL, null=True, blank=True)
 
+    def __str__(self):
+        return f"Order #{self.id} ({self.name})"
 
     @property
     def chat_id(self):
-        return self.telegram_user.chat_id if self.telegram_user else None
-    
-    def __str__(self):
-        return f"Order {self.id}"
+        # Ensure chat_id is valid and exists before returning
+        if self.telegram_user:
+            return self.telegram_user.chat_id
+        return None
 
     @property
     def last_updated(self):
