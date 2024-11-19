@@ -496,12 +496,13 @@ def get_order_summary_by_chat_id(request, chat_id):
     except Exception as e:
         logger.error(f"Error fetching order summaries: {e}")
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+    
 @api_view(['POST'])
 def update_order(request):
     chat_id = request.data.get('chat_id')
     orders = request.data.get('orders', [])
 
+    # Validate required fields
     if not chat_id:
         return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -517,9 +518,10 @@ def update_order(request):
                 return Response({"detail": "Order ID is required for each order."}, status=status.HTTP_400_BAD_REQUEST)
 
             try:
+                # Fetch order with related order items and products
                 order = Order.objects.prefetch_related('order_items__product').get(id=order_id)
 
-                # Extract datetime fields and determine the latest status
+                # Extract and process datetime fields using safe_make_naive
                 statuses = {
                     'submitted_at': safe_make_naive(order.submitted_at),
                     'created_at': safe_make_naive(order.created_at),
@@ -527,18 +529,20 @@ def update_order(request):
                     'complete_at': safe_make_naive(order.complete_at),
                     'canceled_at': safe_make_naive(order.canceled_at),
                 }
+
+                # Determine the latest status timestamp
                 latest_status_field = max(
                     statuses, key=lambda s: statuses[s] or datetime.min
                 )
                 latest_status_timestamp = statuses[latest_status_field]
 
-                # Create order items in English and Ukrainian
+                # Serialize order items in English and Ukrainian
                 order_items_en = []
                 order_items_uk = []
                 for item in order.order_items.all():
                     product = item.product
 
-                    # Append English items
+                    # Serialize English order item
                     order_items_en.append({
                         'name': product.name_en,
                         'size': product.size,
@@ -549,7 +553,7 @@ def update_order(request):
                         'collection_name': product.collection.name_en if product.collection else 'No Collection',
                     })
 
-                    # Append Ukrainian items
+                    # Serialize Ukrainian order item
                     order_items_uk.append({
                         'name': product.name_uk,
                         'size': product.size,
@@ -560,7 +564,7 @@ def update_order(request):
                         'collection_name': product.collection.name_uk if product.collection else 'No Collection',
                     })
 
-                # Add order summary with latest status
+                # Prepare the grouped order summary
                 grouped_orders.append({
                     'order_id': order.id,
                     'submitted_at': statuses['submitted_at'].strftime('%Y-%m-%d %H:%M') if statuses['submitted_at'] else None,
