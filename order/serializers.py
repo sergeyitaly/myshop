@@ -86,10 +86,13 @@ class OrderItemSerializer(serializers.ModelSerializer):
     product_id = serializers.CharField(write_only=True)  # Accept product_id in the request
     total_sum = serializers.DecimalField(max_digits=10, decimal_places=2)
     name = serializers.CharField(source='product.name', read_only=True)
-    price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=2)
-    color_name = serializers.CharField(source='product.color.name')
-    color_value = serializers.CharField(source='product.color.value')
-    collection_name = serializers.CharField(source='product.collection.name')
+    price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=2, read_only=True)
+    
+    # Accessing the directly related fields 'color_name' and 'color_value' from Product
+    color_name = serializers.CharField(source='product.color_name', read_only=True)
+    color_value = serializers.CharField(source='product.color_value', read_only=True)
+    
+    collection_name = serializers.CharField(source='product.collection.name', read_only=True)
 
     def validate_quantity(self, value):
         if value <= 0:
@@ -111,6 +114,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
         fields = ['product_id', 'product', 'quantity', 'total_sum', 'name', 'price', 'color_name', 'color_value', 'collection_name']
+
 
 class OrderSerializer(serializers.ModelSerializer):
     order_items = OrderItemSerializer(many=True)
