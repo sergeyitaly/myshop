@@ -6,6 +6,7 @@ from django.utils.translation import gettext as _
 from django.utils import translation
 from django.utils.translation import override as translation_override
 
+
 class TelegramUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = TelegramUser
@@ -84,6 +85,7 @@ class OrderSummarySerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError("chat_id cannot be null.")
         return value
+
 class OrderItemSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=False, write_only=True)
     product_id = serializers.CharField(write_only=True)  # Accept product_id in the request
@@ -92,6 +94,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
     color_value = serializers.CharField(source='product.color_value', read_only=True)
     size = serializers.CharField(source='product.size', read_only=True)
 
+    # Assuming the 'color' is a related model (e.g., ForeignKey or OneToOne field)
     color_name = serializers.CharField(source='product.color_name', read_only=True)
     name = serializers.CharField(source='product.name', read_only=True)
     collection_name = serializers.CharField(source='product.collection.name', read_only=True)
@@ -115,54 +118,49 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderItem
-        fields = [
-            'product_id', 'product', 'quantity', 'total_sum', 'price', 'color_value',
-            'size', 'name', 'color_name', 'collection_name'
-        ]
+        fields = ['product_id', 'product', 'quantity', 'total_sum', 'price', 'color_value','size',
+                  'name','color_name', 'collection_name'
+                  ]
+
+from rest_framework import serializers
+from django.utils.translation import gettext as _
+from order.models import Order, TelegramUser
+
 
 class OrderSerializer(serializers.ModelSerializer):
-    order_items_uk = serializers.SerializerMethodField()
     order_items_en = serializers.SerializerMethodField()
-    telegram_user = TelegramUserSerializer(required=False, allow_null=True)
+    order_items_uk = serializers.SerializerMethodField()
+    telegram_user = serializers.PrimaryKeyRelatedField(queryset=TelegramUser.objects.all(), required=False)
 
     class Meta:
         model = Order
         fields = [
             'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments',
             'congrats', 'submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at',
-            'parent_order', 'present', 'status', 'order_items_uk', 'order_items_en', 'telegram_user'
+            'parent_order', 'present', 'status', 'order_items_en', 'order_items_uk', 'telegram_user'
         ]
 
-    def get_order_items_uk(self, obj):
-        return self._get_order_items_for_language(obj, language='uk')
-
     def get_order_items_en(self, obj):
-        return self._get_order_items_for_language(obj, language='en')
+        """Generate order items in English."""
+        return self._get_order_items(obj, language='en')
 
-    def _get_order_items_for_language(self, obj, language):
-        """Fetch order items localized for the specified language."""
-        items = obj.order_items.all()
-        localized_items = []
+    def get_order_items_uk(self, obj):
+        """Generate order items in Ukrainian."""
+        return self._get_order_items(obj, language='uk')
 
-        for item in items:
-            with translation_override(language):
-                localized_items.append({
-                    "name": _(item.product.name),  # Localized product name
-                    "size": item.product.size,  # Product size
-                    "price": item.product.price,  # Product price
-                    "quantity": item.quantity,  # Item quantity
-                    "color_name": _(item.product.color_name),  # Localized color name
-                    "color_value": item.product.color_value,  # Color value
-                    "collection_name": _(item.product.collection.name),  # Localized collection name
-                })
-        return localized_items
-
-    def to_representation(self, instance):
-        """Override to_representation to populate both fields in the response."""
-        representation = super().to_representation(instance)
-
-        # Populate both English and Ukrainian fields simultaneously
-        representation['order_items_en'] = self.get_order_items_en(instance)
-        representation['order_items_uk'] = self.get_order_items_uk(instance)
-
-        return representation
+    def _get_order_items(self, obj, language):
+        """Helper method to generate order items for a given language."""
+        items = []
+        for item in obj.order_items.all():
+            product = item.product
+            collection_name = product.collection.name_en if language == 'en' else product.collection.name_uk
+            items.append({
+                'size': product.size,
+                'quantity': item.quantity,
+                'color_name': product.color_name_en if language == 'en' else product.color_name_uk,
+                'price': product.price,
+                'color_value': product.color_value,
+                'name': product.name_en if language == 'en' else product.name_uk,
+                'collection_name': collection_name if collection_name else _('No Collection')
+            })
+        return items
