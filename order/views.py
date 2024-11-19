@@ -17,11 +17,8 @@ from django.views import View
 import logging, requests, json
 from rest_framework.decorators import action
 from .notifications import update_order_status_with_notification
-from rest_framework.response import Response
 from django.utils.timezone import make_naive, is_aware
 from datetime import datetime
-from django.db import transaction
-from django.db.models import Prefetch
 
 logger = logging.getLogger(__name__)
 def health_check(request):                                                                                                              
@@ -41,50 +38,6 @@ def ensure_datetime(value):
 def format_timestamp(timestamp):
     return timestamp.strftime('%Y-%m-%d %H:%M') if timestamp else None
 
-def prepare_order_summary(order):
-    status_timestamps = {
-        'submitted_at': ensure_datetime(order.submitted_at),
-        'processed_at': ensure_datetime(order.processed_at),
-        'complete_at': ensure_datetime(order.complete_at),
-        'canceled_at': ensure_datetime(order.canceled_at),
-    }
-    latest_status_key, latest_status_time = max(
-        status_timestamps.items(),
-        key=lambda item: item[1] or datetime.min,
-        default=(None, None)
-    )
-    order_items_data_en = OrderItemSerializer(order.order_items.all(), many=True).data
-    order_items_data_uk = OrderItemSerializer(order.order_items.all(), many=True).data 
-    return {
-        'order_id': order.id,
-        'created_at': format_timestamp(latest_status_time),  # latest status timestamp
-        'submitted_at': format_timestamp(status_timestamps['submitted_at']),
-        'order_items_en': [
-            {
-                'name': item['product_name_en'],
-                'size': item['size'],
-                'price': item['item_price'],
-                'quantity': item['quantity'],
-                'color_name': item['color_name_en'],
-                'color_value': item['color_value'],
-                'collection_name': item['collection_name_en'],
-            } for item in order_items_data_en
-        ],
-        'order_items_uk': [
-            {
-                'name': item['product_name_uk'],
-                'size': item['size'],
-                'price': item['item_price'],
-                'quantity': item['quantity'],
-                'color_name': item['color_name_uk'],
-                'color_value': item['color_value'],
-                'collection_name': item['collection_name_uk'],
-            } for item in order_items_data_uk
-        ],
-        'latest_status': latest_status_key,
-        'latest_status_time': format_timestamp(latest_status_time),
-    }
-
 class OrderSummaryViewSet(viewsets.ModelViewSet):
     queryset = OrderSummary.objects.all()
     serializer_class = OrderSummarySerializer
@@ -99,7 +52,7 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
             return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        order_summary_data = prepare_order_summary(serializer.instance)
+        order_summary_data = format_order_summary(serializer.instance)  # Directly call the updated method
         return Response(order_summary_data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
@@ -117,7 +70,7 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
         instance.refresh_from_db()
 
         # Prepare the updated order summary data
-        order_summary_data = prepare_order_summary(instance)
+        order_summary_data = format_order_summary(instance)  # Directly call the updated method
         return Response(order_summary_data)
     
 class TelegramUserViewSet(viewsets.ModelViewSet):
@@ -351,8 +304,6 @@ def create_order(request):
         logger.error(f"Order creation exception: {e}")
         return Response({'error': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_order(request, order_id):
@@ -389,7 +340,6 @@ def get_orders(request):
     except Exception as e:
         logger.error(f"Error fetching orders: {e}")
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
 
 def safe_make_naive(timestamp):
     if isinstance(timestamp, str):
@@ -403,45 +353,49 @@ def safe_make_naive(timestamp):
     elif timestamp is not None and not is_aware(timestamp):
         return timestamp
     return None
+
 def format_order_summary(order):
-    # Extract status timestamps and find the latest
-    status_timestamps = {
-        'created_at': safe_make_naive(order.created_at),
+    statuses = {
         'submitted_at': safe_make_naive(order.submitted_at),
+        'created_at': safe_make_naive(order.created_at),
         'processed_at': safe_make_naive(order.processed_at),
         'complete_at': safe_make_naive(order.complete_at),
         'canceled_at': safe_make_naive(order.canceled_at),
     }
-
-    # Format timestamps
-    formatted_timestamps = {
-        field: timestamp.strftime('%Y-%m-%d %H:%M') if timestamp else None
-        for field, timestamp in status_timestamps.items()
-    }
-
-    # Generate order items for English and Ukrainian
-    def generate_order_items(language):
-        return [
-            {
-                'name': getattr(item.product, f'name_{language}', "No Name"),
-                'size': item.product.size or "N/A",
-                'price': float(item.product.price),
-                'quantity': item.quantity,
-                'color_name': getattr(item.product, f'color_name_{language}', "No Color"),
-                'color_value': item.product.color_value or "#000000",
-                'collection_name': getattr(
-                    item.product.collection, f'name_{language}', "No Collection"
-                ) if item.product.collection else "No Collection",
-            }
-            for item in order.order_items.all()
-        ]
-
+    latest_status_field = max(
+        statuses, key=lambda s: statuses[s] or datetime.min
+    )
+    latest_status_timestamp = statuses[latest_status_field]
+    order_items_en = []
+    order_items_uk = []
+    for item in order.order_items.all():
+        product = item.product
+        order_items_en.append({
+            'name': product.name_en,
+            'size': product.size,
+            'price': str(product.price),
+            'quantity': item.quantity,
+            'color_name': product.color_name_en,
+            'color_value': product.color_value,
+            'collection_name': product.collection.name_en if product.collection else 'No Collection',
+        })
+        order_items_uk.append({
+            'name': product.name_uk,
+            'size': product.size,
+            'price': str(product.price),
+            'quantity': item.quantity,
+            'color_name': product.color_name_uk,
+            'color_value': product.color_value,
+            'collection_name': product.collection.name_uk if product.collection else 'No Collection',
+        })
     return {
         'order_id': order.id,
-        **{k: v for k, v in formatted_timestamps.items() if v},  # Only include non-null timestamps
-        'order_items_en': generate_order_items('en'),
-        'order_items_uk': generate_order_items('uk'),
+        'submitted_at': format_timestamp(statuses['submitted_at']),
+        latest_status_field: format_timestamp(latest_status_timestamp),
+        'order_items_en': order_items_en,
+        'order_items_uk': order_items_uk,
     }
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -491,89 +445,28 @@ def get_order_summary_by_chat_id(request, chat_id):
 def update_order(request):
     chat_id = request.data.get('chat_id')
     orders = request.data.get('orders', [])
-
-    # Validate required fields
     if not chat_id:
         return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
-
     if not isinstance(orders, list):
         return Response({"detail": "Orders must be a list."}, status=status.HTTP_400_BAD_REQUEST)
-
     try:
         grouped_orders = []
-
         for order_data in orders:
             order_id = order_data.get('order_id')
             if not order_id:
                 return Response({"detail": "Order ID is required for each order."}, status=status.HTTP_400_BAD_REQUEST)
-
             try:
-                # Fetch order with related order items and products
                 order = Order.objects.prefetch_related('order_items__product').get(id=order_id)
-
-                # Extract and process datetime fields using safe_make_naive
-                statuses = {
-                    'submitted_at': safe_make_naive(order.submitted_at),
-                    'created_at': safe_make_naive(order.created_at),
-                    'processed_at': safe_make_naive(order.processed_at),
-                    'complete_at': safe_make_naive(order.complete_at),
-                    'canceled_at': safe_make_naive(order.canceled_at),
-                }
-
-                # Determine the latest status timestamp
-                latest_status_field = max(
-                    statuses, key=lambda s: statuses[s] or datetime.min
-                )
-                latest_status_timestamp = statuses[latest_status_field]
-
-                # Serialize order items in English and Ukrainian
-                order_items_en = []
-                order_items_uk = []
-                for item in order.order_items.all():
-                    product = item.product
-
-                    # Serialize English order item
-                    order_items_en.append({
-                        'name': product.name_en,
-                        'size': product.size,
-                        'price': str(product.price),
-                        'quantity': item.quantity,
-                        'color_name': product.color_name_en,
-                        'color_value': product.color_value,
-                        'collection_name': product.collection.name_en if product.collection else 'No Collection',
-                    })
-
-                    # Serialize Ukrainian order item
-                    order_items_uk.append({
-                        'name': product.name_uk,
-                        'size': product.size,
-                        'price': str(product.price),
-                        'quantity': item.quantity,
-                        'color_name': product.color_name_uk,
-                        'color_value': product.color_value,
-                        'collection_name': product.collection.name_uk if product.collection else 'No Collection',
-                    })
-
-                # Prepare the grouped order summary
-                grouped_orders.append({
-                    'order_id': order.id,
-                    'submitted_at': statuses['submitted_at'].strftime('%Y-%m-%d %H:%M') if statuses['submitted_at'] else None,
-                    latest_status_field: latest_status_timestamp.strftime('%Y-%m-%d %H:%M') if latest_status_timestamp else None,
-                    'order_items_en': order_items_en,
-                    'order_items_uk': order_items_uk,
-                })
+                order_summary = format_order_summary(order)
+                grouped_orders.append(order_summary)
 
             except Order.DoesNotExist:
                 return Response({"error": f"Order with ID {order_id} not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        # Update or create the OrderSummary for the given chat_id
         OrderSummary.objects.update_or_create(
             chat_id=chat_id,
             defaults={'orders': grouped_orders},
         )
-
         return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
-
     except Exception as e:
         logger.error(f"Error updating order summary: {e}")
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
