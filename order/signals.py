@@ -4,7 +4,7 @@ from datetime import datetime
 from django.conf import settings
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from django.utils.timezone import is_aware, make_aware
+from django.utils.timezone import is_aware, make_aware, make_naive
 from django.db import transaction
 from django.core.cache import cache
 from order.models import Order, OrderSummary, OrderItem
@@ -36,6 +36,23 @@ def make_aware_if_naive(dt):
         return make_aware(dt)
     return dt
 
+def safe_make_naive(timestamp):
+    if isinstance(timestamp, str):
+        try:
+            timestamp = datetime.fromisoformat(timestamp)  # Parse string to datetime
+        except ValueError:
+            logger.error(f"Invalid timestamp format: {timestamp}")
+            return None
+    if timestamp is not None and is_aware(timestamp):
+        return make_naive(timestamp)
+    elif timestamp is not None and not is_aware(timestamp):
+        return timestamp
+    return None
+
+
+def format_timestamp(timestamp):
+    return timestamp.strftime('%Y-%m-%d %H:%M') if timestamp else None
+
 def datetime_to_str(dt):
     dt = ensure_datetime(dt)
     if dt:
@@ -56,14 +73,10 @@ def get_chat_id_from_phone(phone_number):
         logger.error(f"Request to /api/telegram_user failed: {e}")
         return None
     
-
+    
 def get_order_summary(order):
     try:
-        # Ensure submitted_at is aware if it is naive
-        submitted_at = make_aware_if_naive(ensure_datetime(order.submitted_at))
         order_items_data = OrderItemSerializer(order.order_items.all(), many=True).data
-
-        # Prepare order items for English and Ukrainian views simultaneously
         order_items_en = []
         order_items_uk = []
 
@@ -76,20 +89,17 @@ def get_order_summary(order):
                 'color_value': item.get('color_value'),
             }
 
-            latest_status_time, latest_status_key = None, None
-            for status in STATUS_EMOJIS.keys():
-                status_key = f"{status}_at"
-                status_time = ensure_datetime(item.get(status_key))
-                if status_time:
-                    if not latest_status_time or status_time > latest_status_time:
-                        latest_status_time = status_time
-                        latest_status_key = status_key
-
-            # If no valid status was found, use submitted_at as the latest status
-            if not latest_status_key:
-                latest_status_time = submitted_at
-                latest_status_key = 'submitted_at'
-
+            statuses = {
+                'submitted_at': safe_make_naive(order.submitted_at),
+                'created_at': safe_make_naive(order.created_at),
+                'processed_at': safe_make_naive(order.processed_at),
+                'complete_at': safe_make_naive(order.complete_at),
+                'canceled_at': safe_make_naive(order.canceled_at),
+            }
+            latest_status_field = max(
+                statuses, key=lambda s: statuses[s] or datetime.min
+            )
+            latest_status_timestamp = statuses[latest_status_field]
             order_items_en.append({
                 **order_item_common,
                 'name': item.get('name_en'),
@@ -107,8 +117,9 @@ def get_order_summary(order):
             'order_id': order.id,
             'order_items_en': order_items_en,
             'order_items_uk': order_items_uk,
-            'submitted_at': datetime_to_str(submitted_at),
-            latest_status_key: latest_status_time,
+            'submitted_at': format_timestamp(statuses['submitted_at']),
+            latest_status_field: format_timestamp(latest_status_timestamp),
+
         }
     except Exception as e:
         logger.error(f"Error generating order summary for Order ID {order.id}: {e}")
