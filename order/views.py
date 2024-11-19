@@ -464,29 +464,52 @@ def update_order(request):
         return Response({"detail": "Orders must be a list."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        # Retrieve existing orders based on the incoming order data
-        updated_orders = []
+        # Retrieve and format orders based on the required structure
+        formatted_orders = []
         for order_data in orders:
             order_id = order_data.get('order_id')
             if not order_id:
                 return Response({"detail": "Order ID is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-            order = Order.objects.get(id=order_id)  # Adjust as needed based on your logic
-            formatted_order = format_order_summary(order)
-            updated_orders.append(formatted_order)
+            order = Order.objects.get(id=order_id)
 
-        # Update or create the OrderSummary with the formatted orders
+            # Prepare status timestamps
+            status_timestamps = {
+                'created_at': safe_make_naive(order.created_at),
+                'submitted_at': safe_make_naive(order.submitted_at),
+                'processed_at': safe_make_naive(order.processed_at),
+                'complete_at': safe_make_naive(order.complete_at),
+                'canceled_at': safe_make_naive(order.canceled_at),
+            }
+            latest_status_timestamp = max(
+                (timestamp for timestamp in status_timestamps.values() if timestamp is not None),
+                default=None
+            )
+            latest_status_field = next(
+                (field for field, timestamp in status_timestamps.items() if timestamp == latest_status_timestamp),
+                None
+            )
+
+            # Format order data for summary
+            formatted_order = {
+                'order_id': order.id,
+                'order_items_en': order_data.get('order_items_en', []),
+                'order_items_uk': order_data.get('order_items_uk', []),
+                'submitted_at': status_timestamps['submitted_at'].isoformat() if status_timestamps['submitted_at'] else None,
+                latest_status_field: latest_status_timestamp.isoformat() if latest_status_timestamp else None
+            }
+            formatted_orders.append(formatted_order)
+
+        # Update or create the OrderSummary for the given chat_id
         OrderSummary.objects.update_or_create(
             chat_id=chat_id,
-            defaults={'orders': updated_orders}
+            defaults={'orders': formatted_orders}
         )
 
         return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
 
     except Order.DoesNotExist:
         return Response({"error": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
-    except OrderSummary.DoesNotExist:
-        return Response({"error": "Order summary not found."}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
