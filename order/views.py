@@ -497,7 +497,6 @@ def get_order_summary_by_chat_id(request, chat_id):
         logger.error(f"Error fetching order summaries: {e}")
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
 @api_view(['POST'])
 def update_order(request):
     chat_id = request.data.get('chat_id')
@@ -520,10 +519,6 @@ def update_order(request):
             try:
                 order = Order.objects.prefetch_related('order_items__product').get(id=order_id)
 
-                # Serialize the order
-                serializer = OrderSerializer(order)
-                serialized_data = serializer.data
-
                 # Extract datetime fields and determine the latest status
                 statuses = {
                     'submitted_at': safe_make_naive(order.submitted_at),
@@ -537,11 +532,41 @@ def update_order(request):
                 )
                 latest_status_timestamp = statuses[latest_status_field]
 
-                # Add additional fields for order summary
+                # Create order items in English and Ukrainian
+                order_items_en = []
+                order_items_uk = []
+                for item in order.order_items.all():
+                    product = item.product
+
+                    # Append English items
+                    order_items_en.append({
+                        'name': product.name_en,
+                        'size': product.size,
+                        'price': str(product.price),
+                        'quantity': item.quantity,
+                        'color_name': product.color_name_en,
+                        'color_value': product.color_value,
+                        'collection_name': product.collection.name_en if product.collection else 'No Collection',
+                    })
+
+                    # Append Ukrainian items
+                    order_items_uk.append({
+                        'name': product.name_uk,
+                        'size': product.size,
+                        'price': str(product.price),
+                        'quantity': item.quantity,
+                        'color_name': product.color_name_uk,
+                        'color_value': product.color_value,
+                        'collection_name': product.collection.name_uk if product.collection else 'No Collection',
+                    })
+
+                # Add order summary with latest status
                 grouped_orders.append({
-                    **serialized_data,
+                    'order_id': order.id,
                     'submitted_at': statuses['submitted_at'].strftime('%Y-%m-%d %H:%M') if statuses['submitted_at'] else None,
                     latest_status_field: latest_status_timestamp.strftime('%Y-%m-%d %H:%M') if latest_status_timestamp else None,
+                    'order_items_en': order_items_en,
+                    'order_items_uk': order_items_uk,
                 })
 
             except Order.DoesNotExist:
