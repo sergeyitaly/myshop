@@ -160,61 +160,37 @@ class OrderSerializer(serializers.ModelSerializer):
         return order
 
     def update(self, instance, validated_data):
-        # Separate the order_items by language
-        order_items_uk_data = validated_data.pop('order_items_uk', [])
-        order_items_en_data = validated_data.pop('order_items_en', [])
-        telegram_user_data = validated_data.pop('telegram_user', None)
-
-        # Handle telegram_user update or creation if provided
-        if telegram_user_data:
-            telegram_user, created = TelegramUser.objects.get_or_create(
-                phone=telegram_user_data['phone'],
-                defaults={'chat_id': telegram_user_data['chat_id']}
-            )
-            instance.telegram_user = telegram_user
-
-        # Update the Order instance
+        # Update all standard fields on the Order instance
         for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+            if attr != 'order_items':  # Skip `order_items` for now
+                setattr(instance, attr, value)
 
-        new_status = validated_data.get('status', instance.status)
-        if new_status and new_status != instance.status:
-            instance.update_status(new_status)
-
+        # Save updated instance fields before handling related data
         instance.save()
 
-        # Update or create OrderItems for 'uk'
-        existing_uk_items = {item.product_id: item for item in instance.order_items.filter(language='uk')}
-        for item_data in order_items_uk_data:
-            product_id = item_data.pop('product_id')
-            if product_id in existing_uk_items:
-                # Update existing item
-                item = existing_uk_items.pop(product_id)
-                for attr, value in item_data.items():
-                    setattr(item, attr, value)
-                item.save()
-            else:
-                # Create new item for 'uk'
-                OrderItem.objects.create(order=instance, product_id=product_id, language='uk', **item_data)
+        # Handle `order_items` dynamically, regardless of language
+        if 'order_items' in validated_data:
+            updated_items_data = validated_data.pop('order_items')
+            
+            # Create a map of existing items by product_id for efficient updating
+            existing_items = {item.product_id: item for item in instance.order_items.all()}
+            
+            # Process updated items
+            for item_data in updated_items_data:
+                product_id = item_data.pop('product_id')
+                
+                if product_id in existing_items:
+                    # Update existing item
+                    existing_item = existing_items.pop(product_id)
+                    for key, value in item_data.items():
+                        setattr(existing_item, key, value)
+                    existing_item.save()
+                else:
+                    # Create new item if it doesn't exist
+                    OrderItem.objects.create(order=instance, product_id=product_id, **item_data)
 
-        # Update or create OrderItems for 'en'
-        existing_en_items = {item.product_id: item for item in instance.order_items.filter(language='en')}
-        for item_data in order_items_en_data:
-            product_id = item_data.pop('product_id')
-            if product_id in existing_en_items:
-                # Update existing item
-                item = existing_en_items.pop(product_id)
-                for attr, value in item_data.items():
-                    setattr(item, attr, value)
-                item.save()
-            else:
-                # Create new item for 'en'
-                OrderItem.objects.create(order=instance, product_id=product_id, language='en', **item_data)
-
-        # Delete any items for 'uk' and 'en' that were not in the updated list
-        for item in existing_uk_items.values():
-            item.delete()
-        for item in existing_en_items.values():
-            item.delete()
+            # Delete any items that were not in the updated data
+            for remaining_item in existing_items.values():
+                remaining_item.delete()
 
         return instance
