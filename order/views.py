@@ -54,7 +54,7 @@ def prepare_order_summary(order):
         default=(None, None)
     )
     order_items_data_en = OrderItemSerializer(order.order_items.all(), many=True).data
-    order_items_data_uk = OrderItemSerializer(order.order_items.all(), many=True).data  # assuming translation logic exists
+    order_items_data_uk = OrderItemSerializer(order.order_items.all(), many=True).data 
     return {
         'order_id': order.id,
         'created_at': format_timestamp(latest_status_time),  # latest status timestamp
@@ -403,8 +403,8 @@ def safe_make_naive(timestamp):
     elif timestamp is not None and not is_aware(timestamp):
         return timestamp
     return None
-
 def format_order_summary(order):
+    # Extract status timestamps and find the latest
     status_timestamps = {
         'created_at': safe_make_naive(order.created_at),
         'submitted_at': safe_make_naive(order.submitted_at),
@@ -412,45 +412,35 @@ def format_order_summary(order):
         'complete_at': safe_make_naive(order.complete_at),
         'canceled_at': safe_make_naive(order.canceled_at),
     }
-    latest_status_timestamp = max(
-        (timestamp for timestamp in status_timestamps.values() if timestamp is not None),
-        default=None
-    )
-    latest_status_field = next(
-        (field for field, timestamp in status_timestamps.items() if timestamp == latest_status_timestamp),
-        None
-    )
+
+    # Format timestamps
+    formatted_timestamps = {
+        field: timestamp.strftime('%Y-%m-%d %H:%M') if timestamp else None
+        for field, timestamp in status_timestamps.items()
+    }
+
+    # Generate order items for English and Ukrainian
+    def generate_order_items(language):
+        return [
+            {
+                'name': getattr(item.product, f'name_{language}', "No Name"),
+                'size': item.product.size or "N/A",
+                'price': float(item.product.price),
+                'quantity': item.quantity,
+                'color_name': getattr(item.product, f'color_name_{language}', "No Color"),
+                'color_value': item.product.color_value or "#000000",
+                'collection_name': getattr(
+                    item.product.collection, f'name_{language}', "No Collection"
+                ) if item.product.collection else "No Collection",
+            }
+            for item in order.order_items.all()
+        ]
 
     return {
         'order_id': order.id,
-        'order_items_en': [
-            {
-                'product_name': item.product_name_en,
-                'collection_name': item.collection_name_en,
-                'size': item.size_en,
-                'color_name': item.color_name_en,
-                'quantity': item.quantity_en,
-                'total_sum': float(item.total_sum_en),
-                'item_price': str(item.item_price_en),
-                'color_value': item.color_value_en
-            }
-            for item in order.order_items_en
-        ],
-        'order_items_uk': [
-            {
-                'product_name': item.product_name_uk,
-                'collection_name': item.collection_name_uk,
-                'size': item.size_uk,
-                'color_name': item.color_name_uk,
-                'quantity': item.quantity_uk,
-                'total_sum': float(item.total_sum_uk),
-                'item_price': str(item.item_price_uk),
-                'color_value': item.color_value_uk
-            }
-            for item in order.order_items_uk
-        ],
-        'submitted_at': order.submitted_at.isoformat() if order.submitted_at else None,
-        latest_status_field: latest_status_timestamp.isoformat() if latest_status_timestamp else None,
+        **{k: v for k, v in formatted_timestamps.items() if v},  # Only include non-null timestamps
+        'order_items_en': generate_order_items('en'),
+        'order_items_uk': generate_order_items('uk'),
     }
 
 @api_view(['GET'])

@@ -131,8 +131,6 @@ class OrderItemSerializer(serializers.ModelSerializer):
             'name_en', 'color_name_en', 'collection_name_en',
             'name_uk', 'color_name_uk', 'collection_name_uk'
         ]
-
-
 class OrderSerializer(serializers.ModelSerializer):
     order_items_en = serializers.SerializerMethodField()
     order_items_uk = serializers.SerializerMethodField()
@@ -146,31 +144,49 @@ class OrderSerializer(serializers.ModelSerializer):
             'parent_order', 'present', 'status', 'order_items_en', 'order_items_uk', 'telegram_user'
         ]
 
+    def to_representation(self, instance):
+        """
+        Override to customize the output structure.
+        Format the order details with language-specific order items.
+        """
+        representation = super().to_representation(instance)
+        
+        # Map the language-specific order items for 'en' and 'uk'
+        representation['order_items_en'] = self.get_order_items_en(instance)
+        representation['order_items_uk'] = self.get_order_items_uk(instance)
+        
+        # Format the order details for the response as required
+        return {
+            'order_id': representation['id'],
+            'created_at': representation['created_at'],
+            'submitted_at': representation['submitted_at'],
+            'order_items_en': representation['order_items_en'],
+            'order_items_uk': representation['order_items_uk'],
+            'processed_at': representation.get('processed_at', None),
+            'complete_at': representation.get('complete_at', None),
+            'canceled_at': representation.get('canceled_at', None),
+        }
+
     def get_order_items_en(self, obj):
+        """Fetches order items with English language details."""
         return self._get_order_items(obj, language='en')
 
     def get_order_items_uk(self, obj):
+        """Fetches order items with Ukrainian language details."""
         return self._get_order_items(obj, language='uk')
 
     def _get_order_items(self, obj, language=None):
+        """Generates a list of order items based on the specified language."""
         items = []
         for item in obj.order_items.all():
             product = item.product
 
-            # Defaults for missing fields
+            # Define default values
             default_name = _("No Name")
             default_color = _("No Color")
             default_collection = _("No Collection")
 
-            # Extract fields with fallbacks
-            name_en = product.name_en or default_name
-            color_name_en = product.color_name_en or default_color
-            collection_name_en = (product.collection.name_en if product.collection else None) or default_collection
-
-            name_uk = product.name_uk or default_name
-            color_name_uk = product.color_name_uk or default_color
-            collection_name_uk = (product.collection.name_uk if product.collection else None) or default_collection
-
+            # Extract language-specific fields with fallbacks
             item_data = {
                 'size': product.size,
                 'quantity': item.quantity,
@@ -178,18 +194,17 @@ class OrderSerializer(serializers.ModelSerializer):
                 'color_value': product.color_value,
             }
 
-            # Add data for specified language
             if language == 'en':
                 item_data.update({
-                    'name': name_en,
-                    'color_name': color_name_en,
-                    'collection_name': collection_name_en,
+                    'name': product.name_en or default_name,
+                    'color_name': product.color_name_en or default_color,
+                    'collection_name': (product.collection.name_en if product.collection else None) or default_collection,
                 })
             elif language == 'uk':
                 item_data.update({
-                    'name': name_uk,
-                    'color_name': color_name_uk,
-                    'collection_name': collection_name_uk,
+                    'name': product.name_uk or default_name,
+                    'color_name': product.color_name_uk or default_color,
+                    'collection_name': (product.collection.name_uk if product.collection else None) or default_collection,
                 })
 
             items.append(item_data)
