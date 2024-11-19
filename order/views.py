@@ -22,6 +22,13 @@ from django.utils.timezone import make_naive, is_aware
 from datetime import datetime
 from django.db import transaction
 from django.db.models import Prefetch
+from rest_framework import status
+from .models import Order, OrderSummary, OrderItem, TelegramUser
+from .serializers import OrderSerializer
+
+logger = logging.getLogger(__name__)
+
+
 
 logger = logging.getLogger(__name__)
 def health_check(request):                                                                                                              
@@ -546,8 +553,8 @@ def update_order(request):
                         'color_name': product.color_name_en,
                         'price': product.price,
                         'color_value': product.color_value,
-                        'name': product.name,
-                        'collection_name': product.collection.name if product.collection else 'No Collection',
+                        'name': product.name_en,
+                        'collection_name': product.collection.name_en if product.collection else 'No Collection',
                     })
                     order_items_uk.append({
                         'size': product.size,
