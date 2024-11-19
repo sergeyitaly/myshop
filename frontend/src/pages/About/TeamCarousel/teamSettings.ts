@@ -25,6 +25,10 @@ export const teamSettings: SwiperOptions = {
 		500: {
 			slidesPerView: 3,
 		},
+		375: { 
+			slidesPerView: 2,
+			slidesPerGroup: 2,
+		},
 		0: {
 			slidesPerView: 2,
 		},
