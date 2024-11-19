@@ -131,7 +131,6 @@ class OrderItemSerializer(serializers.ModelSerializer):
             'name_uk', 'color_name_uk', 'collection_name_uk'
         ]
 
-
 class OrderSerializer(serializers.ModelSerializer):
     order_items_en = serializers.SerializerMethodField()
     order_items_uk = serializers.SerializerMethodField()
@@ -151,18 +150,31 @@ class OrderSerializer(serializers.ModelSerializer):
     def get_order_items_uk(self, obj):
         return self._get_order_items(obj, language='uk')
 
-    def _get_order_items(self, obj, language):
+    def _get_order_items(self, obj, language=None):
         items = []
         for item in obj.order_items.all():
             product = item.product
-            collection_name = product.collection.name_en if language == 'en' else product.collection.name_uk
+
+            # For English order items
+            name_en = product.name_en if product.name_en else _('No Name')
+            color_name_en = product.color_name_en if product.color_name_en else _('No Color')
+            collection_name_en = product.collection.name_en if product.collection and product.collection.name_en else _('No Collection')
+
+            # For Ukrainian order items
+            name_uk = product.name_uk if product.name_uk else _('No Name')
+            color_name_uk = product.color_name_uk if product.color_name_uk else _('No Color')
+            collection_name_uk = product.collection.name_uk if product.collection and product.collection.name_uk else _('No Collection')
+
+            # Add the order items for both languages
             items.append({
                 'size': product.size,
                 'quantity': item.quantity,
-                'color_name': product.color_name_en if language == 'en' else product.color_name_uk,
-                'price': product.price,
+                'color_name': color_name_en,
+                'price': str(product.price),
                 'color_value': product.color_value,
-                'name': product.name_en if language == 'en' else product.name_uk,
-                'collection_name': collection_name if collection_name else _('No Collection')
+                'name': name_en,
+                'collection_name': collection_name_en,
             })
+        
         return items
+
