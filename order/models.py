@@ -47,7 +47,7 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='submitted', db_index=True, verbose_name=_('Status'))
     parent_order = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, verbose_name=_('Parent Order'))
     present = models.BooleanField(null=True, help_text=_('Package as a present'))
-    telegram_user = models.ForeignKey(TelegramUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders')
+    telegram_user = models.ForeignKey(TelegramUser, related_name='orders', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('Telegram user'))
 #    telegram_user = models.ForeignKey(TelegramUser, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
@@ -153,13 +153,24 @@ class OrderItem(models.Model):
     quantity = models.PositiveIntegerField(verbose_name=_('Quantity'))
     total_sum = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, verbose_name=_('Total Sum'))
     language = models.CharField(max_length=2, choices=[('en', 'English'), ('uk', 'Ukrainian')],default='en')
+    
     def save(self, *args, **kwargs):
         if self.product:
             self.total_sum = self.quantity * self.product.price
         super().save(*args, **kwargs)
-
     def __str__(self):
         return f"{self.quantity} of {self.product.name}"
+    def get_product_name(self):
+        """Get the product name in the specified language."""
+        return getattr(self.product, f'name_{self.language}', self.product.name)
+
+    def get_color_name(self):
+        """Get the color name in the specified language."""
+        return getattr(self.product, f'color_name_{self.language}', self.product.color_name)
+
+    def get_collection_name(self):
+        """Get the collection name in the specified language."""
+        return getattr(self.product, f'collection_name_{self.language}', self.product.collection_name)
 
     class Meta:
         verbose_name = _('Order Item')

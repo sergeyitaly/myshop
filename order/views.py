@@ -61,24 +61,24 @@ def prepare_order_summary(order):
         'submitted_at': format_timestamp(status_timestamps['submitted_at']),
         'order_items_en': [
             {
-                'name': item['product_name'],
+                'name': item['product_name_en'],
                 'size': item['size'],
                 'price': item['item_price'],
                 'quantity': item['quantity'],
-                'color_name': item['color_name'],
+                'color_name': item['color_name_en'],
                 'color_value': item['color_value'],
-                'collection_name': item['collection_name'],
+                'collection_name': item['collection_name_en'],
             } for item in order_items_data_en
         ],
         'order_items_uk': [
             {
-                'name': item['product_name'],
+                'name': item['product_name_uk'],
                 'size': item['size'],
                 'price': item['item_price'],
                 'quantity': item['quantity'],
-                'color_name': item['color_name'],
+                'color_name': item['color_name_uk'],
                 'color_value': item['color_value'],
-                'collection_name': item['collection_name'],
+                'collection_name': item['collection_name_uk'],
             } for item in order_items_data_uk
         ],
         'latest_status': latest_status_key,

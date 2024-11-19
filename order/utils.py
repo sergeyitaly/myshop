@@ -51,19 +51,32 @@ def update_order_status(order, new_status, now, timestamp_field):
     order.save()
 
 def prepare_order_summary(order):
-    order_items_data = [
-        {
+    order_items_data_en = []
+    order_items_data_uk = []
+
+    for item in order.order_items.all():
+        # Assuming `item.product_name_en`, `item.product_name_uk`, etc., are available
+        order_items_data_en.append({
             "size": item.size,
             "quantity": item.quantity,
             "total_sum": item.total_sum,
-            "color_name": item.color_name,
+            "color_name": item.color_name_en if item.color_name_en else _("No Color"),
             "item_price": str(item.item_price),
             "color_value": item.color_value,
-            "product_name": item.product_name,
-            "collection_name": item.collection_name,
-        }
-        for item in order.order_items.all()
-    ]
+            "product_name": item.product_name_en if item.product_name_en else _("No Name"),
+            "collection_name": item.collection_name_en if item.collection_name_en else _("No Collection"),
+        })
+
+        order_items_data_uk.append({
+            "size": item.size,
+            "quantity": item.quantity,
+            "total_sum": item.total_sum,
+            "color_name": item.color_name_uk if item.color_name_uk else _("No Color"),
+            "item_price": str(item.item_price),
+            "color_value": item.color_value,
+            "product_name": item.product_name_uk if item.product_name_uk else _("No Name"),
+            "collection_name": item.collection_name_uk if item.collection_name_uk else _("No Collection"),
+        })
 
     status_mapping = {
         'created': (order.created_at, _('Created')),
@@ -84,18 +97,8 @@ def prepare_order_summary(order):
     # Prepare the order summary
     summary = {
         'order_id': order.id,
-        'order_items': [
-            {
-                'size': item['size'],
-                'quantity': item['quantity'],
-                'total_sum': item['total_sum'],
-                'color_name': item['color_name'],
-                'item_price': item['item_price'],
-                'color_value': item['color_value'],
-                'product_name': item['product_name'],
-                'collection_name': item['collection_name'],
-            } for item in order_items_data
-        ],
+        'order_items_en': order_items_data_en,
+        'order_items_uk': order_items_data_uk,
         'latest_status': latest_status,
         'latest_status_time': datetime_to_str(latest_status_time),
         'submitted_at': datetime_to_str(order.submitted_at),
