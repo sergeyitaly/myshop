@@ -22,13 +22,6 @@ from django.utils.timezone import make_naive, is_aware
 from datetime import datetime
 from django.db import transaction
 from django.db.models import Prefetch
-from rest_framework import status
-from .models import Order, OrderSummary, OrderItem, TelegramUser
-from .serializers import OrderSerializer
-
-logger = logging.getLogger(__name__)
-
-
 
 logger = logging.getLogger(__name__)
 def health_check(request):                                                                                                              
@@ -503,6 +496,7 @@ def get_order_summary_by_chat_id(request, chat_id):
     except Exception as e:
         logger.error(f"Error fetching order summaries: {e}")
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 @api_view(['POST'])
