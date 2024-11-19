@@ -1,6 +1,9 @@
 from rest_framework import serializers
 from .models import *
 import decimal
+from rest_framework import serializers
+from django.utils.translation import gettext as _
+from django.utils import translation
 
 class TelegramUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -116,10 +119,9 @@ class OrderItemSerializer(serializers.ModelSerializer):
                   'name','color_name', 'collection_name'
                   ]
 
-
 class OrderSerializer(serializers.ModelSerializer):
-    order_items_uk = OrderItemSerializer(many=True, required=False)
-    order_items_en = OrderItemSerializer(many=True, required=False)
+    order_items_uk = serializers.SerializerMethodField()
+    order_items_en = serializers.SerializerMethodField()
     telegram_user = TelegramUserSerializer(required=False, allow_null=True)
 
     class Meta:
@@ -130,67 +132,26 @@ class OrderSerializer(serializers.ModelSerializer):
             'parent_order', 'present', 'status', 'order_items_uk', 'order_items_en', 'telegram_user'
         ]
 
-    def create(self, validated_data):
-        # Separate the order_items by language
-        order_items_uk_data = validated_data.pop('order_items_uk', [])
-        order_items_en_data = validated_data.pop('order_items_en', [])
-        telegram_user_data = validated_data.pop('telegram_user', None)
-        
-        # Handle telegram_user creation if provided
-        telegram_user = None
-        if telegram_user_data:
-            telegram_user, created = TelegramUser.objects.get_or_create(
-                phone=telegram_user_data['phone'],
-                defaults={'chat_id': telegram_user_data['chat_id']}
-            )
+    def get_order_items_uk(self, obj):
+        return self._get_localized_order_items(obj, language='uk')
 
-        # Create the Order instance
-        order = Order.objects.create(telegram_user=telegram_user, **validated_data)
+    def get_order_items_en(self, obj):
+        return self._get_localized_order_items(obj, language='en')
 
-        # Create related OrderItems for 'uk'
-        for item_data in order_items_uk_data:
-            product_id = item_data.pop('product_id')
-            OrderItem.objects.create(order=order, product_id=product_id, **item_data)
+    def _get_localized_order_items(self, obj, language):
+        items = obj.order_items.all()  # Fetch all related order items
+        localized_items = []
 
-        # Create related OrderItems for 'en'
-        for item_data in order_items_en_data:
-            product_id = item_data.pop('product_id')
-            OrderItem.objects.create(order=order, product_id=product_id, **item_data)
-
-        return order
-
-    def update(self, instance, validated_data):
-        # Update all standard fields on the Order instance
-        for attr, value in validated_data.items():
-            if attr != 'order_items':  # Skip `order_items` for now
-                setattr(instance, attr, value)
-
-        # Save updated instance fields before handling related data
-        instance.save()
-
-        # Handle `order_items` dynamically, regardless of language
-        if 'order_items' in validated_data:
-            updated_items_data = validated_data.pop('order_items')
-            
-            # Create a map of existing items by product_id for efficient updating
-            existing_items = {item.product_id: item for item in instance.order_items.all()}
-            
-            # Process updated items
-            for item_data in updated_items_data:
-                product_id = item_data.pop('product_id')
-                
-                if product_id in existing_items:
-                    # Update existing item
-                    existing_item = existing_items.pop(product_id)
-                    for key, value in item_data.items():
-                        setattr(existing_item, key, value)
-                    existing_item.save()
-                else:
-                    # Create new item if it doesn't exist
-                    OrderItem.objects.create(order=instance, product_id=product_id, **item_data)
-
-            # Delete any items that were not in the updated data
-            for remaining_item in existing_items.values():
-                remaining_item.delete()
-
-        return instance
+        # Temporarily override the language context
+        with translation.override(language):
+            for item in items:
+                localized_items.append({
+                    "name": _(item.product.name),
+                    "size": item.size,
+                    "price": item.price,
+                    "quantity": item.quantity,
+                    "color_name": _(item.color_name),
+                    "color_value": item.color_value,
+                    "collection_name": _(item.product.collection.name),
+                })
+        return localized_items
