@@ -6,6 +6,9 @@ from django.utils.translation import gettext as _
 from django.utils import translation
 from django.utils.translation import override as translation_override
 
+from rest_framework import serializers
+from django.utils.translation import gettext as _
+from order.models import Order, TelegramUser
 
 class TelegramUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -85,7 +88,6 @@ class OrderSummarySerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError("chat_id cannot be null.")
         return value
-
 class OrderItemSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=False, write_only=True)
     product_id = serializers.CharField(write_only=True)  # Accept product_id in the request
@@ -94,10 +96,15 @@ class OrderItemSerializer(serializers.ModelSerializer):
     color_value = serializers.CharField(source='product.color_value', read_only=True)
     size = serializers.CharField(source='product.size', read_only=True)
 
-    # Assuming the 'color' is a related model (e.g., ForeignKey or OneToOne field)
-    color_name = serializers.CharField(source='product.color_name', read_only=True)
-    name = serializers.CharField(source='product.name', read_only=True)
-    collection_name = serializers.CharField(source='product.collection.name', read_only=True)
+    # English fields
+    color_name_en = serializers.CharField(source='product.color_name_en', read_only=True)
+    name_en = serializers.CharField(source='product.name_en', read_only=True)
+    collection_name_en = serializers.CharField(source='product.collection.name_en', read_only=True)
+
+    # Ukrainian fields
+    color_name_uk = serializers.CharField(source='product.color_name_uk', read_only=True)
+    name_uk = serializers.CharField(source='product.name_uk', read_only=True)
+    collection_name_uk = serializers.CharField(source='product.collection.name_uk', read_only=True)
 
     def validate_quantity(self, value):
         if value <= 0:
@@ -118,13 +125,11 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderItem
-        fields = ['product_id', 'product', 'quantity', 'total_sum', 'price', 'color_value','size',
-                  'name','color_name', 'collection_name'
-                  ]
-
-from rest_framework import serializers
-from django.utils.translation import gettext as _
-from order.models import Order, TelegramUser
+        fields = [
+            'product_id', 'product', 'quantity', 'total_sum', 'price', 'color_value', 'size',
+            'name_en', 'color_name_en', 'collection_name_en',
+            'name_uk', 'color_name_uk', 'collection_name_uk'
+        ]
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -141,15 +146,12 @@ class OrderSerializer(serializers.ModelSerializer):
         ]
 
     def get_order_items_en(self, obj):
-        """Generate order items in English."""
         return self._get_order_items(obj, language='en')
 
     def get_order_items_uk(self, obj):
-        """Generate order items in Ukrainian."""
         return self._get_order_items(obj, language='uk')
 
     def _get_order_items(self, obj, language):
-        """Helper method to generate order items for a given language."""
         items = []
         for item in obj.order_items.all():
             product = item.product
