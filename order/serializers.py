@@ -88,7 +88,7 @@ class OrderSummarySerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError("chat_id cannot be null.")
         return value
-    
+
 class OrderItemSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=False, write_only=True)
     product_id = serializers.CharField(write_only=True)  # Accept product_id in the request
@@ -98,32 +98,19 @@ class OrderItemSerializer(serializers.ModelSerializer):
     size = serializers.CharField(source='product.size', read_only=True)
 
     # English fields
-    color_name_en = serializers.SerializerMethodField()
-    name_en = serializers.SerializerMethodField()
-    collection_name_en = serializers.SerializerMethodField()
+    color_name = serializers.CharField(source='product.color_name', read_only=True)
+    name = serializers.CharField(source='product.name', read_only=True)
+    collection_name = serializers.CharField(source='product.collection.name', read_only=True)
 
     # Ukrainian fields
-    color_name_uk = serializers.SerializerMethodField()
-    name_uk = serializers.SerializerMethodField()
-    collection_name_uk = serializers.SerializerMethodField()
+#    color_name_uk = serializers.CharField(source='product.color_name_uk', read_only=True)
+#    name_uk = serializers.CharField(source='product.name_uk', read_only=True)
+#    collection_name_uk = serializers.CharField(source='product.collection.name_uk', read_only=True)
 
-    def get_color_name_en(self, obj):
-        return getattr(obj.product, 'color_name_en', '')
-
-    def get_name_en(self, obj):
-        return getattr(obj.product, 'name_en', '')
-
-    def get_collection_name_en(self, obj):
-        return getattr(obj.product.collection, 'name_en', '')
-
-    def get_color_name_uk(self, obj):
-        return getattr(obj.product, 'color_name_uk', '')
-
-    def get_name_uk(self, obj):
-        return getattr(obj.product, 'name_uk', '')
-
-    def get_collection_name_uk(self, obj):
-        return getattr(obj.product.collection, 'name_uk', '')
+    def validate_quantity(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Quantity must be a positive integer.")
+        return value
 
     def validate(self, data):
         product_id = data.get('product_id')
@@ -141,8 +128,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
         model = OrderItem
         fields = [
             'product_id', 'product', 'quantity', 'total_sum', 'price', 'color_value', 'size',
-            'name_en', 'color_name_en', 'collection_name_en',
-            'name_uk', 'color_name_uk', 'collection_name_uk' 
+            'name', 'color_name', 'collection_name',
+#            'name_uk', 'color_name_uk', 'collection_name_uk'
         ]
 
 class OrderSerializer(serializers.ModelSerializer):
