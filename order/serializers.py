@@ -94,7 +94,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
     collection_name_en = serializers.CharField(source='product.collection.name_en', read_only=True)
     color_name_uk = serializers.CharField(source='product.color.name_uk', read_only=True)
     name_uk = serializers.CharField(source='product.name', read_only=True)
-    collection_name = serializers.CharField(source='product.collection.name_uk', read_only=True)
+    collection_name_uk = serializers.CharField(source='product.collection.name_uk', read_only=True)
 
     def validate_quantity(self, value):
         if value <= 0:
