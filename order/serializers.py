@@ -80,10 +80,15 @@ class OrderSummarySerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError("chat_id cannot be null.")
         return value
-
+    
 class OrderItemSerializer(serializers.ModelSerializer):
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=False, write_only=True)
-    product_id = serializers.CharField(write_only=True)  # Accept product_id in the request
+    # Output detailed product information
+    product_id = serializers.CharField(write_only=True)  # For input
+    name = serializers.CharField(source='product.name', read_only=True)
+    price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=2, read_only=True)
+    color_name = serializers.CharField(source='product.color.name', read_only=True)
+    color_value = serializers.CharField(source='product.color.value', read_only=True)
+    collection_name = serializers.CharField(source='product.collection.name', read_only=True)
     total_sum = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
 
     def validate_quantity(self, value):
@@ -94,20 +99,23 @@ class OrderItemSerializer(serializers.ModelSerializer):
     def validate(self, data):
         product_id = data.get('product_id')
         if not product_id:
-            raise serializers.ValidationError({'product': 'This field is required.'})
+            raise serializers.ValidationError({'product_id': 'This field is required.'})
 
         try:
             product = Product.objects.get(id=product_id)
         except Product.DoesNotExist:
-            raise serializers.ValidationError({'product': 'Product does not exist.'})
+            raise serializers.ValidationError({'product_id': 'Product does not exist.'})
 
-        # Add the product to the validated data
+        # Add the product instance to the validated data
         data['product'] = product
         return data
 
     class Meta:
         model = OrderItem
-        fields = ['product_id', 'product', 'quantity', 'total_sum']
+        fields = [
+            'product_id', 'name', 'price', 'quantity', 'color_name', 
+            'color_value', 'collection_name', 'total_sum'
+        ]
 
 class OrderSerializer(serializers.ModelSerializer):
     order_items = OrderItemSerializer(many=True)
