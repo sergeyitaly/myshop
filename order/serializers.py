@@ -89,12 +89,9 @@ class OrderItemSerializer(serializers.ModelSerializer):
     color_value = serializers.CharField(source='product.color.value', read_only=True)
 
     # Assuming the 'color' is a related model (e.g., ForeignKey or OneToOne field)
-    color_name_en = serializers.CharField(source='product.color.name_en', read_only=True)
-    name_en = serializers.CharField(source='product.name_en', read_only=True)
-    collection_name_en = serializers.CharField(source='product.collection.name_en', read_only=True)
-    color_name_uk = serializers.CharField(source='product.color.name_uk', read_only=True)
-    name_uk = serializers.CharField(source='product.name', read_only=True)
-    collection_name_uk = serializers.CharField(source='product.collection.name_uk', read_only=True)
+    color_name = serializers.CharField(source='product.color.name', read_only=True)
+    name = serializers.CharField(source='product.name', read_only=True)
+    collection_name = serializers.CharField(source='product.collection.name', read_only=True)
 
     def validate_quantity(self, value):
         if value <= 0:
@@ -116,9 +113,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
         fields = ['product_id', 'product', 'quantity', 'total_sum', 'price', 'color_value',
-                  'name_en','color_name_en', 'collection_name_en',
-                  'name_uk','color_name_uk',  'collection_name_uk'
-
+                  'name','color_name', 'collection_name'
                   ]
 
 
