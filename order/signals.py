@@ -17,7 +17,7 @@ STATUS_EMOJIS = {
     'created': '🆕',
     'processed': '🔄',
     'complete': '✅',
-    'canceled': '❌',
+    'canceled': '❌'
 }
 
 def ensure_datetime(value):
@@ -48,30 +48,32 @@ def get_chat_id_from_phone(phone_number):
         response = requests.get(
             f'{settings.VERCEL_DOMAIN}/api/telegram_user',
             params={'phone': phone_number},
-            timeout=10
+            timeout=10  # Added timeout for request
         )
         response.raise_for_status()
         return response.json().get('chat_id')
     except requests.exceptions.RequestException as e:
         logger.error(f"Request to /api/telegram_user failed: {e}")
         return None
-
+    
 def get_order_summary(order):
     try:
         submitted_at = make_aware_if_naive(ensure_datetime(order.submitted_at))
         order_items_data = OrderItemSerializer(order.order_items.all(), many=True).data
 
-        order_items_en, order_items_uk = [], []
+        # Prepare order items for English and Ukrainian views simultaneously
+        order_items_en = []
+        order_items_uk = []
 
         for item in order_items_data:
-            common_data = {
+            # Extract common fields
+            order_item_common = {
                 'size': item.get('size'),
                 'quantity': item.get('quantity'),
                 'price': item.get('price'),
                 'color_value': item.get('color_value'),
             }
 
-            # Determine the latest status and its timestamp
             latest_status_time, latest_status_key = None, None
             for status in STATUS_EMOJIS.keys():
                 status_key = f"{status}_at"
@@ -79,15 +81,14 @@ def get_order_summary(order):
                 if status_time and (not latest_status_time or status_time > latest_status_time):
                     latest_status_time = status_time
                     latest_status_key = status_key
-
             order_items_en.append({
-                **common_data,
+                **order_item_common,
                 'name': item.get('name_en'),
                 'color_name': item.get('color_name_en'),
                 'collection_name': item.get('collection_name_en'),
             })
             order_items_uk.append({
-                **common_data,
+                **order_item_common,
                 'name': item.get('name_uk'),
                 'color_name': item.get('color_name_uk'),
                 'collection_name': item.get('collection_name_uk'),
@@ -98,12 +99,12 @@ def get_order_summary(order):
             'order_items_en': order_items_en,
             'order_items_uk': order_items_uk,
             'submitted_at': datetime_to_str(submitted_at),
-             latest_status_key: datetime_to_str(latest_status_time),
+            latest_status_key:  latest_status_time,
+
         }
     except Exception as e:
         logger.error(f"Error generating order summary for Order ID {order.id}: {e}")
         return {}
-
 
 @transaction.atomic
 def update_order_summary():
@@ -132,13 +133,14 @@ def update_order_summary():
         if bulk_update:
             OrderSummary.objects.bulk_update(bulk_update, ['orders'])
             logger.info("Order summaries updated successfully.")
+
     except Exception as e:
         logger.exception("Error updating order summaries: %s", e)
 
 @receiver(post_save, sender=OrderItem)
 @receiver(post_save, sender=Order)
 def update_summary_on_change(sender, instance, **kwargs):
-    phone_number = getattr(instance, 'phone', None)
+    phone_number = getattr(instance.order, 'phone', None) if sender == OrderItem else instance.phone
     if phone_number:
         chat_id = get_chat_id_from_phone(phone_number)
         if chat_id:
