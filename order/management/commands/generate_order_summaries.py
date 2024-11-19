@@ -87,7 +87,7 @@ class Command(BaseCommand):
                     product = item.product  # Get the actual Product instance
 
                     # Directly access translated fields for English and Ukrainian
-                    product_name_en = product.name  # Access translated 'name' field for current language
+                    product_name_en = product.name_en  # Access translated 'name' field for current language
                     product_name_uk = product.name_uk  # Access translated 'name_uk' field (make sure 'name_uk' exists)
                     color_name_en = product.color_name_en  # Assuming 'color_name' field is translated
                     color_name_uk = product.color_name_uk  # Assuming 'color_name_uk' exists
@@ -101,7 +101,7 @@ class Command(BaseCommand):
                         'price': product.price,  # Assuming 'price' field exists in Product
                         'color_value': product.color_value,  # Assuming 'color_value' exists in Product
                         'name': product_name_en,
-                        'collection_name': product.collection.name if product.collection else _('No Collection')  # Assuming related 'collection'
+                        'collection_name': product.collection.name_en if product.collection else _('No Collection')  # Assuming related 'collection'
                     })
 
                     # Ukrainian order item (using translation)

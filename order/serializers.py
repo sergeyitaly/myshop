@@ -110,26 +110,23 @@ class OrderItemSerializer(serializers.ModelSerializer):
         fields = ['product_id', 'product', 'quantity', 'total_sum']
 
 
+
 class OrderSerializer(serializers.ModelSerializer):
-    order_items_uk = OrderItemSerializer(many=True, required=False)
-    order_items_en = OrderItemSerializer(many=True, required=False)
+    order_items = OrderItemSerializer(many=True)
     telegram_user = TelegramUserSerializer(required=False, allow_null=True)
 
     class Meta:
         model = Order
         fields = [
-            'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments',
-            'congrats', 'submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at',
-            'parent_order', 'present', 'status', 'order_items_uk', 'order_items_en', 'telegram_user'
+            'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments','congrats',
+            'submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at', 'parent_order',
+            'present', 'status', 'order_items', 'telegram_user'
         ]
 
     def create(self, validated_data):
-        # Separate the order_items by language
-        order_items_uk_data = validated_data.pop('order_items_uk', [])
-        order_items_en_data = validated_data.pop('order_items_en', [])
+        items_data = validated_data.pop('order_items', [])
         telegram_user_data = validated_data.pop('telegram_user', None)
         
-        # Handle telegram_user creation if provided
         telegram_user = None
         if telegram_user_data:
             telegram_user, created = TelegramUser.objects.get_or_create(
@@ -140,25 +137,17 @@ class OrderSerializer(serializers.ModelSerializer):
         # Create the Order instance
         order = Order.objects.create(telegram_user=telegram_user, **validated_data)
 
-        # Create related OrderItems for 'uk'
-        for item_data in order_items_uk_data:
-            product_id = item_data.pop('product_id')
-            OrderItem.objects.create(order=order, product_id=product_id, **item_data)
-
-        # Create related OrderItems for 'en'
-        for item_data in order_items_en_data:
+        # Create related OrderItems
+        for item_data in items_data:
             product_id = item_data.pop('product_id')
             OrderItem.objects.create(order=order, product_id=product_id, **item_data)
 
         return order
 
     def update(self, instance, validated_data):
-        # Separate the order_items by language
-        order_items_uk_data = validated_data.pop('order_items_uk', [])
-        order_items_en_data = validated_data.pop('order_items_en', [])
+        items_data = validated_data.pop('order_items', [])
         telegram_user_data = validated_data.pop('telegram_user', None)
 
-        # Handle telegram_user update or creation if provided
         if telegram_user_data:
             telegram_user, created = TelegramUser.objects.get_or_create(
                 phone=telegram_user_data['phone'],
@@ -176,38 +165,22 @@ class OrderSerializer(serializers.ModelSerializer):
 
         instance.save()
 
-        # Update or create OrderItems for 'uk'
-        existing_uk_items = {item.product_id: item for item in instance.order_items.filter(language='uk')}
-        for item_data in order_items_uk_data:
+        # Update OrderItems
+        existing_items = {item.product_id: item for item in instance.order_items.all()}
+        for item_data in items_data:
             product_id = item_data.pop('product_id')
-            if product_id in existing_uk_items:
+            if product_id in existing_items:
                 # Update existing item
-                item = existing_uk_items.pop(product_id)
+                item = existing_items.pop(product_id)
                 for attr, value in item_data.items():
                     setattr(item, attr, value)
                 item.save()
             else:
-                # Create new item for 'uk'
-                OrderItem.objects.create(order=instance, product_id=product_id, language='uk', **item_data)
+                # Create new item
+                OrderItem.objects.create(order=instance, product_id=product_id, **item_data)
 
-        # Update or create OrderItems for 'en'
-        existing_en_items = {item.product_id: item for item in instance.order_items.filter(language='en')}
-        for item_data in order_items_en_data:
-            product_id = item_data.pop('product_id')
-            if product_id in existing_en_items:
-                # Update existing item
-                item = existing_en_items.pop(product_id)
-                for attr, value in item_data.items():
-                    setattr(item, attr, value)
-                item.save()
-            else:
-                # Create new item for 'en'
-                OrderItem.objects.create(order=instance, product_id=product_id, language='en', **item_data)
-
-        # Delete any items for 'uk' and 'en' that were not in the updated list
-        for item in existing_uk_items.values():
-            item.delete()
-        for item in existing_en_items.values():
+        # Delete any items that were not in the updated list
+        for item in existing_items.values():
             item.delete()
 
         return instance
