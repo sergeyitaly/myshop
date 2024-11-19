@@ -88,6 +88,7 @@ class OrderSummarySerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError("chat_id cannot be null.")
         return value
+    
 class OrderItemSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=False, write_only=True)
     product_id = serializers.CharField(write_only=True)  # Accept product_id in the request
@@ -155,26 +156,36 @@ class OrderSerializer(serializers.ModelSerializer):
         for item in obj.order_items.all():
             product = item.product
 
-            # For English order items
+            # Fetch English translation values or default to '_('No Name')'
             name_en = product.name_en if product.name_en else _('No Name')
             color_name_en = product.color_name_en if product.color_name_en else _('No Color')
             collection_name_en = product.collection.name_en if product.collection and product.collection.name_en else _('No Collection')
 
-            # For Ukrainian order items
+            # Fetch Ukrainian translation values or default to '_('No Name')'
             name_uk = product.name_uk if product.name_uk else _('No Name')
             color_name_uk = product.color_name_uk if product.color_name_uk else _('No Color')
             collection_name_uk = product.collection.name_uk if product.collection and product.collection.name_uk else _('No Collection')
 
             # Add the order items for both languages
-            items.append({
-                'size': product.size,
-                'quantity': item.quantity,
-                'color_name': color_name_en,
-                'price': str(product.price),
-                'color_value': product.color_value,
-                'name': name_en,
-                'collection_name': collection_name_en,
-            })
-        
-        return items
+            if language == 'en':
+                items.append({
+                    'size': product.size,
+                    'quantity': item.quantity,
+                    'color_name': color_name_en,
+                    'price': str(product.price),
+                    'color_value': product.color_value,
+                    'name': name_en,
+                    'collection_name': collection_name_en,
+                })
+            elif language == 'uk':
+                items.append({
+                    'size': product.size,
+                    'quantity': item.quantity,
+                    'color_name': color_name_uk,
+                    'price': str(product.price),
+                    'color_value': product.color_value,
+                    'name': name_uk,
+                    'collection_name': collection_name_uk,
+                })
 
+        return items
