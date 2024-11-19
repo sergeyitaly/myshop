@@ -88,7 +88,7 @@ class OrderSummarySerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError("chat_id cannot be null.")
         return value
-    
+
 class OrderItemSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=False, write_only=True)
     product_id = serializers.CharField(write_only=True)  # Accept product_id in the request
@@ -132,6 +132,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
             'name_uk', 'color_name_uk', 'collection_name_uk'
         ]
 
+
 class OrderSerializer(serializers.ModelSerializer):
     order_items_en = serializers.SerializerMethodField()
     order_items_uk = serializers.SerializerMethodField()
@@ -156,36 +157,41 @@ class OrderSerializer(serializers.ModelSerializer):
         for item in obj.order_items.all():
             product = item.product
 
-            # Fetch English translation values or default to '_('No Name')'
-            name_en = product.name_en if product.name_en else _('No Name')
-            color_name_en = product.color_name_en if product.color_name_en else _('No Color')
-            collection_name_en = product.collection.name_en if product.collection and product.collection.name_en else _('No Collection')
+            # Defaults for missing fields
+            default_name = _("No Name")
+            default_color = _("No Color")
+            default_collection = _("No Collection")
 
-            # Fetch Ukrainian translation values or default to '_('No Name')'
-            name_uk = product.name_uk if product.name_uk else _('No Name')
-            color_name_uk = product.color_name_uk if product.color_name_uk else _('No Color')
-            collection_name_uk = product.collection.name_uk if product.collection and product.collection.name_uk else _('No Collection')
+            # Extract fields with fallbacks
+            name_en = product.name_en or default_name
+            color_name_en = product.color_name_en or default_color
+            collection_name_en = (product.collection.name_en if product.collection else None) or default_collection
 
-            # Add the order items for both languages
+            name_uk = product.name_uk or default_name
+            color_name_uk = product.color_name_uk or default_color
+            collection_name_uk = (product.collection.name_uk if product.collection else None) or default_collection
+
+            item_data = {
+                'size': product.size,
+                'quantity': item.quantity,
+                'price': float(product.price),
+                'color_value': product.color_value,
+            }
+
+            # Add data for specified language
             if language == 'en':
-                items.append({
-                    'size': product.size,
-                    'quantity': item.quantity,
-                    'color_name': color_name_en,
-                    'price': str(product.price),
-                    'color_value': product.color_value,
+                item_data.update({
                     'name': name_en,
+                    'color_name': color_name_en,
                     'collection_name': collection_name_en,
                 })
             elif language == 'uk':
-                items.append({
-                    'size': product.size,
-                    'quantity': item.quantity,
-                    'color_name': color_name_uk,
-                    'price': str(product.price),
-                    'color_value': product.color_value,
+                item_data.update({
                     'name': name_uk,
+                    'color_name': color_name_uk,
                     'collection_name': collection_name_uk,
                 })
+
+            items.append(item_data)
 
         return items
