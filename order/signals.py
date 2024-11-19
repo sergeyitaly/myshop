@@ -55,44 +55,54 @@ def get_chat_id_from_phone(phone_number):
     except requests.exceptions.RequestException as e:
         logger.error(f"Request to /api/telegram_user failed: {e}")
         return None
-
+    
 def get_order_summary(order):
     try:
         submitted_at = make_aware_if_naive(ensure_datetime(order.submitted_at))
-        
-        # Serialize the order items for English and Ukrainian
-        order_items_data_en = OrderItemSerializer(order.order_items.filter(language='en'), many=True).data
-        order_items_data_uk = OrderItemSerializer(order.order_items.filter(language='uk'), many=True).data
+        order_items_data = OrderItemSerializer(order.order_items.all(), many=True).data
 
-        order_items_en = [
-            {
+        # Prepare order items for English and Ukrainian views simultaneously
+        order_items_en = []
+        order_items_uk = []
+
+        for item in order_items_data:
+            # Extract common fields
+            order_item_common = {
                 'size': item.get('size'),
                 'quantity': item.get('quantity'),
-                'color_name': item.get('color_name'),
                 'price': item.get('price'),
                 'color_value': item.get('color_value'),
-                'name': item.get('name'),
-                'collection_name': item.get('collection_name'),
-            } for item in order_items_data_en
-        ]
-        
-        order_items_uk = [
-            {
-                'size': item.get('size'),
-                'quantity': item.get('quantity'),
-                'color_name': item.get('color_name'),
-                'price': item.get('price'),
-                'color_value': item.get('color_value'),
-                'name': item.get('name'),
-                'collection_name': item.get('collection_name'),
-            } for item in order_items_data_uk
-        ]
+            }
+
+            # Determine the latest status and timestamp
+            latest_status_time = None
+            latest_status = None
+
+            for status in ['submitted', 'created', 'processed', 'complete', 'canceled']:
+                status_time = item.get(f'{status}_at')
+                if status_time and (latest_status_time is None or status_time > latest_status_time):
+                    latest_status_time = status_time
+                    latest_status = status+'_at'
+            order_items_en.append({
+                **order_item_common,
+                'name': item.get('name_en'),
+                'color_name': item.get('color_name_en'),
+                'collection_name': item.get('collection_name_en'),
+            })
+            order_items_uk.append({
+                **order_item_common,
+                'name': item.get('name_uk'),
+                'color_name': item.get('color_name_uk'),
+                'collection_name': item.get('collection_name_uk'),
+            })
 
         return {
             'order_id': order.id,
             'order_items_en': order_items_en,
             'order_items_uk': order_items_uk,
             'submitted_at': datetime_to_str(submitted_at),
+            latest_status:  latest_status_time,
+
         }
     except Exception as e:
         logger.error(f"Error generating order summary for Order ID {order.id}: {e}")

@@ -98,14 +98,14 @@ class OrderItemSerializer(serializers.ModelSerializer):
     size = serializers.CharField(source='product.size', read_only=True)
 
     # English fields
-    color_name_en = serializers.CharField(source='product.color_name_en', read_only=True)
-    name_en = serializers.CharField(source='product.name_en', read_only=True)
-    collection_name_en = serializers.CharField(source='product.collection.name_en', read_only=True)
+    color_name = serializers.CharField(source='product.color_name', read_only=True)
+    name = serializers.CharField(source='product.name', read_only=True)
+    collection_name = serializers.CharField(source='product.collection.name', read_only=True)
 
     # Ukrainian fields
-    color_name_uk = serializers.CharField(source='product.color_name_uk', read_only=True)
-    name_uk = serializers.CharField(source='product.name_uk', read_only=True)
-    collection_name_uk = serializers.CharField(source='product.collection.name_uk', read_only=True)
+#    color_name_uk = serializers.CharField(source='product.color_name_uk', read_only=True)
+#    name_uk = serializers.CharField(source='product.name_uk', read_only=True)
+#    collection_name_uk = serializers.CharField(source='product.collection.name_uk', read_only=True)
 
     def validate_quantity(self, value):
         if value <= 0:
@@ -128,8 +128,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
         model = OrderItem
         fields = [
             'product_id', 'product', 'quantity', 'total_sum', 'price', 'color_value', 'size',
-            'name_en', 'color_name_en', 'collection_name_en',
-            'name_uk', 'color_name_uk', 'collection_name_uk'
+            'name', 'color_name', 'collection_name',
+#            'name_uk', 'color_name_uk', 'collection_name_uk'
         ]
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -146,16 +146,8 @@ class OrderSerializer(serializers.ModelSerializer):
         ]
 
     def to_representation(self, instance):
-        """
-        Override to customize the output structure.
-        Format the order details with language-specific order items.
-        """
         representation = super().to_representation(instance)
-
-        # Map the language-specific order items for both 'en' and 'uk' at once
         representation['order_items_en'], representation['order_items_uk'] = self.get_order_items(instance)
-
-        # Format the order details for the response as required
         return {
             'order_id': representation['id'],
             'created_at': representation['created_at'],
@@ -168,11 +160,9 @@ class OrderSerializer(serializers.ModelSerializer):
         }
 
     def get_order_items(self, obj):
-        """Fetches order items with both English and Ukrainian language details."""
         return self._get_order_items(obj)
 
     def _get_order_items(self, obj):
-        """Generates a list of order items for both English and Ukrainian languages."""
         items_en = []
         items_uk = []
         for item in obj.order_items.all():
@@ -182,8 +172,6 @@ class OrderSerializer(serializers.ModelSerializer):
             default_name = _("No Name")
             default_color = _("No Color")
             default_collection = _("No Collection")
-
-            # Extract fields with fallbacks for both languages
             item_data_en = {
                 'size': product.size,
                 'quantity': item.quantity,
