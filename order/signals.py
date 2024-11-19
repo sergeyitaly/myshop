@@ -56,8 +56,10 @@ def get_chat_id_from_phone(phone_number):
         logger.error(f"Request to /api/telegram_user failed: {e}")
         return None
     
+
 def get_order_summary(order):
     try:
+        # Ensure submitted_at is aware if it is naive
         submitted_at = make_aware_if_naive(ensure_datetime(order.submitted_at))
         order_items_data = OrderItemSerializer(order.order_items.all(), many=True).data
 
@@ -78,9 +80,16 @@ def get_order_summary(order):
             for status in STATUS_EMOJIS.keys():
                 status_key = f"{status}_at"
                 status_time = ensure_datetime(item.get(status_key))
-                if status_time and (not latest_status_time or status_time > latest_status_time):
-                    latest_status_time = status_time
-                    latest_status_key = status_key
+                if status_time:
+                    if not latest_status_time or status_time > latest_status_time:
+                        latest_status_time = status_time
+                        latest_status_key = status_key
+
+            # If no valid status was found, use submitted_at as the latest status
+            if not latest_status_key:
+                latest_status_time = submitted_at
+                latest_status_key = 'submitted_at'
+
             order_items_en.append({
                 **order_item_common,
                 'name': item.get('name_en'),
@@ -99,8 +108,7 @@ def get_order_summary(order):
             'order_items_en': order_items_en,
             'order_items_uk': order_items_uk,
             'submitted_at': datetime_to_str(submitted_at),
-            latest_status_key:  latest_status_time,
-
+            latest_status_key: latest_status_time,
         }
     except Exception as e:
         logger.error(f"Error generating order summary for Order ID {order.id}: {e}")
