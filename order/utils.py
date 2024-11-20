@@ -99,8 +99,7 @@ def prepare_order_summary(order):
         'order_id': order.id,
         'order_items_en': order_items_data_en,
         'order_items_uk': order_items_data_uk,
-        'latest_status': latest_status,
-        'latest_status_time': datetime_to_str(latest_status_time),
+        latest_status : datetime_to_str(latest_status_time),
         'submitted_at': datetime_to_str(order.submitted_at),
     }
 

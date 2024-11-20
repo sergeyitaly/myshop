@@ -82,7 +82,10 @@ class OrderSummarySerializer(serializers.ModelSerializer):
             return [self._convert_decimals(item) for item in data]
         elif isinstance(data, decimal.Decimal):
             return float(data)
+        elif isinstance(data, datetime.datetime):
+            return data.isoformat()  # Convert datetime to ISO format
         return data
+
 
     def validate_chat_id(self, value):
         if not value:
