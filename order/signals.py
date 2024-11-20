@@ -62,15 +62,23 @@ def datetime_to_str(dt):
 
 def get_chat_id_from_phone(phone_number):
     try:
+        # Use the correct endpoint with the 'by-phone' path
         response = requests.get(
-            f'{settings.VERCEL_DOMAIN}/api/telegram_user',
-            params={'phone': phone_number},
+            f'{settings.VERCEL_DOMAIN}/api/telegram_users/by-phone/',  # Updated URL
+            params={'phone': phone_number},  # Pass the phone number as a query parameter
             timeout=10  # Added timeout for request
         )
-        response.raise_for_status()
-        return response.json().get('chat_id')
+        response.raise_for_status()  # This will raise an error for any non-2xx status codes
+
+        # If the response is successful, check for 'chat_id' in the response
+        response_data = response.json()
+        if 'chat_id' in response_data:
+            return response_data['chat_id']
+        else:
+            logger.error(f"No chat_id found for phone number {phone_number}.")
+            return None
     except requests.exceptions.RequestException as e:
-        logger.error(f"Request to /api/telegram_user failed: {e}")
+        logger.error(f"Request to /api/telegram_users/by-phone failed: {e}")
         return None
     
 def get_order_summary(order):
