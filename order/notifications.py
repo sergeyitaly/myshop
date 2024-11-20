@@ -1,4 +1,3 @@
-# notifications.py
 from django.utils import timezone
 from django.conf import settings
 from .models import Order
@@ -15,6 +14,22 @@ STATUS_EMOJIS = {
     'processed': '🔄',
     'complete': '✅',
     'canceled': '❌'
+}
+
+# Translations for messages based on language
+MESSAGES = {
+    'en': {
+        'submitted': "You have a new order #{order_id}. Status of order: {emoji} {status}.",
+        'status_changed': "Status of order #{order_id} has been changed to {emoji} {status}.",
+        'order_details': "Order Details:\n{order_items}",
+        'random_saying': "💬 {saying}",
+    },
+    'uk': {
+        'submitted': "У вас нове замовлення #{order_id}. Статус замовлення: {emoji} {status}.",
+        'status_changed': "Статус замовлення #{order_id} змінено на {emoji} {status}.",
+        'order_details': "Деталі замовлення:\n{order_items}",
+        'random_saying': "💬 {saying}",
+    }
 }
 
 def send_telegram_message(chat_id, message):
@@ -40,13 +55,11 @@ def send_telegram_message(chat_id, message):
         logger.error(f"Request to Telegram API failed: {e}")
         raise
 
+
 def update_order_status_with_notification(order_id, order_items, new_status, status_field, chat_id):
     try:
         order = Order.objects.get(id=order_id)
-        setattr(order, status_field, timezone.now())
-        order.status = new_status
-        order.save()
-
+        language = order.language  # Get the language of the order
         status = new_status.capitalize()
         emoji = STATUS_EMOJIS.get(new_status, '')
 
@@ -55,22 +68,44 @@ def update_order_status_with_notification(order_id, order_items, new_status, sta
             for item in order_items
         ])
 
-        if new_status == 'submitted':       
-            message = (
-                f"\n"
-                f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. You have a new order #{order_id}. Status of order:  {emoji} {status}. \n"
-                f"Order Details:\n{order_items_details}\n\n"
-                f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i> \n"
-            )
+        # Check language and construct message accordingly
+        if language == 'uk':
+            # Ukrainian message format
+            if new_status == 'submitted':
+                message = (
+                    f"\n<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. "
+                    f"{MESSAGES['uk']['submitted'].format(order_id=order_id, emoji=emoji, status=status)}\n"
+                    f"{MESSAGES['uk']['order_details'].format(order_items=order_items_details)}\n\n"
+                    f"<i>{MESSAGES['uk']['random_saying'].format(saying=get_random_saying(settings.SAYINGS_FILE_PATH))}</i>\n"
+                )
+            else:
+                message = (
+                    f"\n<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. "
+                    f"{MESSAGES['uk']['status_changed'].format(order_id=order_id, emoji=emoji, status=status)}\n"
+                    f"{MESSAGES['uk']['order_details'].format(order_items=order_items_details)}\n\n"
+                    f"<i>{MESSAGES['uk']['random_saying'].format(saying=get_random_saying(settings.SAYINGS_FILE_PATH))}</i>\n"
+                )
         else:
-            message = (
-                f"\n"
-                f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. Status of order #{order_id} has been changed to {emoji} {status}. \n"
-                f"Order Details:\n{order_items_details}\n\n"
-                f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i> \n"
-            )
+            # Default to English message format
+            if new_status == 'submitted':
+                message = (
+                    f"\n<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. "
+                    f"{MESSAGES['en']['submitted'].format(order_id=order_id, emoji=emoji, status=status)}\n"
+                    f"{MESSAGES['en']['order_details'].format(order_items=order_items_details)}\n\n"
+                    f"<i>{MESSAGES['en']['random_saying'].format(saying=get_random_saying(settings.SAYINGS_FILE_PATH))}</i>\n"
+                )
+            else:
+                message = (
+                    f"\n<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. "
+                    f"{MESSAGES['en']['status_changed'].format(order_id=order_id, emoji=emoji, status=status)}\n"
+                    f"{MESSAGES['en']['order_details'].format(order_items=order_items_details)}\n\n"
+                    f"<i>{MESSAGES['en']['random_saying'].format(saying=get_random_saying(settings.SAYINGS_FILE_PATH))}</i>\n"
+                )
 
+        # Send the message via Telegram
         send_telegram_message(chat_id, message)
+
+        # Call the signal to update the order summary (if any)
         update_order_summary()
 
     except Order.DoesNotExist:
