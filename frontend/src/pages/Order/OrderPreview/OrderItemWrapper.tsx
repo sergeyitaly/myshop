@@ -1,6 +1,7 @@
 import { OrderItemCard } from "../../../components/Cards/OrderItemCard/OrderItemCard"
 import { useProduct } from "../../../hooks/useProduct"
 import { BasketItemModel, Product } from "../../../models/entities"
+import { useTranslation } from "react-i18next";
 
 interface OrderItemWrapperProps {
     basketItem: BasketItemModel
@@ -16,6 +17,7 @@ export const OrderItemWrapper = ({
 }: OrderItemWrapperProps) => {
 
     const { productId, qty } = basketItem
+	const { i18n } = useTranslation();
 
     const {product} = useProduct(productId.toString())
 
@@ -31,6 +33,7 @@ export const OrderItemWrapper = ({
                 <OrderItemCard 
                     product={product}
                     qty={qty}
+                    language={i18n.language}
                     stock={product.stock}
                     onClickDelete={handleClickDeleteItem}
                 />

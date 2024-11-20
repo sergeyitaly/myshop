@@ -143,14 +143,18 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = [
-            'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments',
+            'id', 'language', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments',
             'congrats', 'submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at',
             'parent_order', 'present', 'status', 'order_items_en', 'order_items_uk', 'telegram_user'
         ]
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['order_items_en'], representation['order_items_uk'] = self.get_order_items(instance)
+        # Ensure you're calling the method correctly to get the order items
+        order_items_en, order_items_uk = self.get_order_items(instance)
+        representation['order_items_en'] = order_items_en
+        representation['order_items_uk'] = order_items_uk
+
         return {
             'order_id': representation['id'],
             'created_at': representation['created_at'],
@@ -163,6 +167,7 @@ class OrderSerializer(serializers.ModelSerializer):
         }
 
     def get_order_items(self, obj):
+        # Return the order items in both languages
         return self._get_order_items(obj)
 
     def _get_order_items(self, obj):
@@ -175,10 +180,11 @@ class OrderSerializer(serializers.ModelSerializer):
             default_name = _("No Name")
             default_color = _("No Color")
             default_collection = _("No Collection")
+
             item_data_en = {
                 'size': product.size,
                 'quantity': item.quantity,
-                'price': float(product.price),
+                'price': product.price,
                 'color_value': product.color_value,
                 'name': product.name_en or default_name,
                 'color_name': product.color_name_en or default_color,
@@ -188,7 +194,7 @@ class OrderSerializer(serializers.ModelSerializer):
             item_data_uk = {
                 'size': product.size,
                 'quantity': item.quantity,
-                'price': float(product.price),
+                'price': product.price,
                 'color_value': product.color_value,
                 'name': product.name_uk or default_name,
                 'color_name': product.color_name_uk or default_color,

@@ -195,8 +195,6 @@ class TelegramWebhook(View):
             return JsonResponse({'status': 'error', 'message': 'Internal server error'}, status=500)
 
 telegram_webhook = TelegramWebhook.as_view()
-
-
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_order(request):
@@ -212,11 +210,14 @@ def create_order(request):
                 if telegram_user:
                     order.telegram_user = telegram_user
                     order.save(update_fields=['telegram_user'])
+
                     order_items = order.order_items.all()
+
+                    # Assuming 'submitted' is the initial order status
                     update_order_status_with_notification(
                         order.id,
                         order_items,
-                        'submitted',  # Assuming 'submitted' is the initial status
+                        'submitted',
                         'submitted_at',
                         telegram_user.chat_id
                     )
@@ -226,47 +227,74 @@ def create_order(request):
             except TelegramUser.DoesNotExist:
                 logger.warning(f"No TelegramUser found with phone: {phone}")
 
+            # Get formatted order details
             formatted_date = localtime(order.submitted_at).strftime('%Y-%m-%d %H:%M')
-            order_items = order.order_items.all()
-            total_sum = sum(item.quantity * item.product.price for item in order_items)
-            currency = order_items.first().product.currency if order_items.exists() else "UAH"
-            order_items_rows = "".join([
-                f"""
-                <tr>
-                    <td>{index + 1}</td>
-                    <td><img src="{item.product.photo.url}" alt="{item.product.name}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
-                    <td>{item.product.name}</td>
-                    <td>{item.product.collection.name}</td>
-                    <td>{item.quantity}</td>
-                    <td>{item.product.size}</td>
-                    <td>{item.product.color_name}<br> <div style="width: 10px; height: 10px; background-color: {item.product.color_value}; display: inline-block;"></div></td>
-                    <td>{item.product.price} {currency}</td>
-                </tr>
-                """
-                for index, item in enumerate(order_items)
-            ])
 
-            order_items_table = f"""
-            <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
-                <thead>
+            # Get language from order
+            language = order.language
+
+            # Extract order items from request data
+            order_items_en = request.data.get('order_items_en', [])
+            order_items_uk = request.data.get('order_items_uk', [])
+
+            # Generate email content based on the language
+            def generate_order_items_table(order_items):
+                return "".join([
+                    f"""
                     <tr>
-                        <th>Номер</th>
-                        <th>Фото продукту</th>
-                        <th>Назва продукту</th>
-                        <th>Колекція</th>
-                        <th>Кількість</th>
-                        <th>Розмір</th>
-                        <th>Колір</th>
-                        <th>Ціна</th>
+                        <td>{index + 1}</td>
+                        <td><img src="{item['product']['photo']}" alt="{item['product']['name']}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
+                        <td>{item['product']['name']}</td>
+                        <td>{item['product']['collection']['name']}</td>
+                        <td>{item['quantity']}</td>
+                        <td>{item['product']['size']}</td>
+                        <td>{item['product']['color_name']}<br> <div style="width: 10px; height: 10px; background-color: {item['product']['color_value']}; display: inline-block;"></div></td>
+                        <td>{item['product']['price']} {item['product']['currency']}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    {order_items_rows}
-                </tbody>
-            </table>
+                    """
+                    for index, item in enumerate(order_items)
+                ])
+
+            # Email body in English
+            email_body_en = f"""
+            <html>
+            <head>
+                <style>
+                    /* Add any CSS styling here */
+                </style>
+            </head>
+            <body>
+                <h2>Order Confirmation #{order.id} from KOLORYT</h2>
+                <p>Order Date: {formatted_date}</p>
+                <h3>Items in English</h3>
+                <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Photo</th>
+                            <th>Product Name</th>
+                            <th>Collection</th>
+                            <th>Quantity</th>
+                            <th>Size</th>
+                            <th>Color</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {generate_order_items_table(order_items_en)}
+                    </tbody>
+                </table>
+                <p><strong>Total:</strong> {sum(item['total_sum'] for item in order_items_en)} {order_items_en[0]['product']['currency'] if order_items_en else 'USD'}</p>
+                <p>If you have any questions, feel free to contact us.</p>
+                <p>Best regards,<br>
+                KOLORYT Team <a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a></p>
+                <p><a href='{settings.VERCEL_DOMAIN}'>Unsubscribe</a></p>
+            </body>
+            </html>
             """
 
-            email_body = f"""
+            # Email body in Ukrainian
+            email_body_uk = f"""
             <html>
             <head>
                 <style>
@@ -275,9 +303,26 @@ def create_order(request):
             </head>
             <body>
                 <h2>Підтвердження замовлення #{order.id} на сайті KOLORYT</h2>
-                {formatted_date}
-                {order_items_table}
-                <p><strong>Разом:</strong> {total_sum} {currency}</p>
+                <p>Дата замовлення: {formatted_date}</p>
+                <h3>Продукти українською</h3>
+                <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th>Номер</th>
+                            <th>Фото продукту</th>
+                            <th>Назва продукту</th>
+                            <th>Колекція</th>
+                            <th>Кількість</th>
+                            <th>Розмір</th>
+                            <th>Колір</th>
+                            <th>Ціна</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {generate_order_items_table(order_items_uk)}
+                    </tbody>
+                </table>
+                <p><strong>Разом:</strong> {sum(item['total_sum'] for item in order_items_uk)} {order_items_uk[0]['product']['currency'] if order_items_uk else 'UAH'}</p>
                 <p>Якщо у вас є питання, не вагайтеся зв'язатися з нами.</p>
                 <p>З найкращими побажаннями,<br>
                 Команда <a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a></p>
@@ -286,8 +331,14 @@ def create_order(request):
             </html>
             """
 
+            # Send email based on language
+            if language == 'en':
+                email_body = email_body_en
+            else:
+                email_body = email_body_uk
+
             email = EmailMessage(
-                subject=f'Підтвердження замовлення #{order.id}',
+                subject=f'Order Confirmation #{order.id}',
                 body=email_body,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[order.email],
@@ -295,6 +346,22 @@ def create_order(request):
             )
             email.content_subtype = "html"
             email.send(fail_silently=False)
+
+            # Prepare Telegram message based on language
+            if language == 'en':
+                telegram_message = f"Your order #{order.id} has been successfully placed. Thank you for choosing KOLORYT! You will receive a confirmation email shortly."
+            else:
+                telegram_message = f"Ваше замовлення #{order.id} було успішно оформлено. Дякуємо, що обрали KOLORYT! Ви отримаєте підтвердження на електронну пошту."
+
+            # Update order status with the Telegram message and notification
+            if telegram_user:
+                update_order_status_with_notification(
+                    order.id,
+                    order_items,
+                    'submitted',  # Assuming 'submitted' is the status you want to set
+                    'submitted_at',
+                    telegram_user.chat_id  # Sends the Telegram message via update_order_status_with_notification
+                )
 
             return Response({'status': 'Order created', 'order_id': order.id}, status=status.HTTP_201_CREATED)
         else:
@@ -373,7 +440,7 @@ def format_order_summary(order):
         order_items_en.append({
             'name': product.name_en,
             'size': product.size,
-            'price': str(product.price),
+            'price': product.price,
             'quantity': item.quantity,
             'color_name': product.color_name_en,
             'color_value': product.color_value,
@@ -382,7 +449,7 @@ def format_order_summary(order):
         order_items_uk.append({
             'name': product.name_uk,
             'size': product.size,
-            'price': str(product.price),
+            'price': product.price,
             'quantity': item.quantity,
             'color_name': product.color_name_uk,
             'color_value': product.color_value,

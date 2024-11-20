@@ -18,7 +18,7 @@ export const OrderPreview = ({
 }: OrderPreviewProps) => {
 
     const navigate = useNavigate();
-    const { t } = useTranslation(); // Initialize useTranslation
+    const { t, i18n } = useTranslation();
 
 
     const { basketItems, totalPrice, deleteFromBasket, changeCounter} = useBasket()
@@ -41,6 +41,7 @@ export const OrderPreview = ({
                         key={product.id}
                         product={product}
                         qty={qty}
+                        language={i18n.language}
                         stock={product.stock}
                         onClickDelete={deleteFromBasket}
                         onChangeCounter={(val) => changeCounter(product, val)}
