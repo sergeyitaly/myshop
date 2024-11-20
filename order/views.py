@@ -79,6 +79,18 @@ class TelegramUserViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
     authentication_classes = [TokenAuthentication]
 
+    @action(detail=False, methods=['get'], url_path='by-phone')
+    def get_by_phone(self, request):
+        phone = request.query_params.get('phone')
+        if phone:
+            try:
+                user = TelegramUser.objects.get(phone=phone)
+                serializer = self.get_serializer(user)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except TelegramUser.DoesNotExist:
+                return Response({"detail": "TelegramUser not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Phone parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+
     def create(self, request, *args, **kwargs):
         logger.info(f"Request headers: {request.headers}")
         return super().create(request, *args, **kwargs)
