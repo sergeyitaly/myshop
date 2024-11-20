@@ -135,9 +135,11 @@ class OrderItemSerializer(serializers.ModelSerializer):
             'name_uk', 'color_name_uk', 'collection_name_uk'
         ]
 
+
+
 class OrderSerializer(serializers.ModelSerializer):
-    order_items_en = serializers.SerializerMethodField()
-    order_items_uk = serializers.SerializerMethodField()
+    order_items_en = OrderItemSerializer(many=True, read_only=True)
+    order_items_uk = OrderItemSerializer(many=True, read_only=True)
     telegram_user = serializers.PrimaryKeyRelatedField(queryset=TelegramUser.objects.all(), required=False)
 
     class Meta:
@@ -150,21 +152,12 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        # Ensure you're calling the method correctly to get the order items
         order_items_en, order_items_uk = self.get_order_items(instance)
         representation['order_items_en'] = order_items_en
         representation['order_items_uk'] = order_items_uk
+        return representation
 
-        return {
-            'order_id': representation['id'],
-            'created_at': representation['created_at'],
-            'submitted_at': representation['submitted_at'],
-            'order_items_en': representation['order_items_en'],
-            'order_items_uk': representation['order_items_uk'],
-            'processed_at': representation.get('processed_at', None),
-            'complete_at': representation.get('complete_at', None),
-            'canceled_at': representation.get('canceled_at', None),
-        }
+
 
     def get_order_items(self, obj):
         # Return the order items in both languages

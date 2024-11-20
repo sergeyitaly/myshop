@@ -207,6 +207,8 @@ class TelegramWebhook(View):
             return JsonResponse({'status': 'error', 'message': 'Internal server error'}, status=500)
 
 telegram_webhook = TelegramWebhook.as_view()
+
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_order(request):
