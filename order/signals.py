@@ -73,33 +73,42 @@ def get_chat_id_from_phone(phone_number):
         logger.error(f"Request to /api/telegram_user failed: {e}")
         return None
     
-    
 def get_order_summary(order):
     try:
+        # Serialize order items
         order_items_data = OrderItemSerializer(order.order_items.all(), many=True).data
         order_items_en = []
         order_items_uk = []
 
+        # Safely gather status timestamps
+        try:
+            statuses = {
+                'submitted_at': safe_make_naive(getattr(order, 'submitted_at', None)),
+                'created_at': safe_make_naive(getattr(order, 'created_at', None)),
+                'processed_at': safe_make_naive(getattr(order, 'processed_at', None)),
+                'complete_at': safe_make_naive(getattr(order, 'complete_at', None)),
+                'canceled_at': safe_make_naive(getattr(order, 'canceled_at', None)),
+            }
+        except Exception as e:
+            logger.error(f"Error initializing statuses for Order ID {order.id}: {e}")
+            statuses = {'submitted_at': None}
+
+        # Determine the latest status field and timestamp
+        latest_status_field, latest_status_timestamp = 'submitted_at', statuses.get('submitted_at')
+        if statuses:
+            latest_status_field = max(
+                statuses, key=lambda s: statuses[s] or datetime.min
+            )
+            latest_status_timestamp = statuses.get(latest_status_field)
+
+        # Process order items for English and Ukrainian views
         for item in order_items_data:
-            # Extract common fields
             order_item_common = {
                 'size': item.get('size'),
                 'quantity': item.get('quantity'),
                 'price': item.get('price'),
                 'color_value': item.get('color_value'),
             }
-
-            statuses = {
-                'submitted_at': safe_make_naive(order.submitted_at),
-                'created_at': safe_make_naive(order.created_at),
-                'processed_at': safe_make_naive(order.processed_at),
-                'complete_at': safe_make_naive(order.complete_at),
-                'canceled_at': safe_make_naive(order.canceled_at),
-            }
-            latest_status_field = max(
-                statuses, key=lambda s: statuses[s] or datetime.min
-            )
-            latest_status_timestamp = statuses[latest_status_field]
             order_items_en.append({
                 **order_item_common,
                 'name': item.get('name_en'),
@@ -113,14 +122,15 @@ def get_order_summary(order):
                 'collection_name': item.get('collection_name_uk'),
             })
 
+        # Return the summary
         return {
             'order_id': order.id,
             'order_items_en': order_items_en,
             'order_items_uk': order_items_uk,
-            'submitted_at': format_timestamp(statuses['submitted_at']),
+            'submitted_at': format_timestamp(statuses.get('submitted_at')),
             latest_status_field: format_timestamp(latest_status_timestamp),
-
         }
+
     except Exception as e:
         logger.error(f"Error generating order summary for Order ID {order.id}: {e}")
         return {}
