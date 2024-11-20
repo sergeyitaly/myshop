@@ -94,8 +94,10 @@ class OrderSummarySerializer(serializers.ModelSerializer):
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=False, write_only=True)
-    product_id = serializers.CharField(write_only=True)  # Accept product_id in the request
-    total_sum = serializers.DecimalField(max_digits=10, decimal_places=2)
+#    product_id = serializers.CharField(write_only=True)  # Accept product_id in the request
+    product_id = serializers.IntegerField(write_only=True)
+
+    total_sum = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
     price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=2, read_only=True)
     color_value = serializers.CharField(source='product.color_value', read_only=True)
     size = serializers.CharField(source='product.size', read_only=True)
@@ -126,7 +128,10 @@ class OrderItemSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'product': 'Product does not exist.'})
         data['product'] = product
         return data
-
+    
+    def get_total_sum(self, obj):
+        return obj.total_sum 
+    
     class Meta:
         model = OrderItem
         fields = [
@@ -134,6 +139,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
             'name_en', 'color_name_en', 'collection_name_en',
             'name_uk', 'color_name_uk', 'collection_name_uk'
         ]
+
 
 
 
