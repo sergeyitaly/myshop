@@ -208,16 +208,19 @@ class TelegramWebhook(View):
 
 telegram_webhook = TelegramWebhook.as_view()
 
-
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_order(request):
     logger.info(f"Order creation request data: {request.data}")
 
     try:
+        # Deserialize order data
         serializer = OrderSerializer(data=request.data)
+        
         if serializer.is_valid():
             order = serializer.save()
+
+            # Handle TelegramUser logic if needed
             phone = request.data.get('phone')
             try:
                 telegram_user = TelegramUser.objects.get(phone=phone)
@@ -241,17 +244,35 @@ def create_order(request):
             except TelegramUser.DoesNotExist:
                 logger.warning(f"No TelegramUser found with phone: {phone}")
 
-            # Get formatted order details
+            # Ensure order_items are present
+            order_items_data = request.data.get('order_items', [])
+            if not order_items_data:
+                return Response({'error': 'Order must contain at least one item'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Create order items
+            for item_data in order_items_data:
+                product_id = item_data.get('product')
+                quantity = item_data.get('quantity')
+
+                if not product_id or quantity is None:
+                    return Response({'error': 'Product and quantity must be provided for each order item'}, status=status.HTTP_400_BAD_REQUEST)
+
+                product = Product.objects.get(id=product_id)
+                total_sum = product.price * quantity
+
+                OrderItem.objects.create(
+                    order=order,
+                    product=product,
+                    quantity=quantity,
+                    total_sum=total_sum
+                )
+
+            # Process order items and email content
             formatted_date = localtime(order.submitted_at).strftime('%Y-%m-%d %H:%M')
-
-            # Get language from order
             language = order.language
+            order_items_en = order_items_data  # We assume the provided `order_items` are in English format
+            order_items_uk = order_items_data  # Same here for Ukrainian
 
-            # Extract order items from request data
-            order_items_en = request.data.get('order_items_en', [])
-            order_items_uk = request.data.get('order_items_uk', [])
-
-            # Generate email content based on the language
             def generate_order_items_table(order_items):
                 return "".join([
                     f"""
@@ -280,7 +301,7 @@ def create_order(request):
             <body>
                 <h2>Order Confirmation #{order.id} from KOLORYT</h2>
                 <p>Order Date: {formatted_date}</p>
-                <h3>Items in English</h3>
+                <h3>Items in the order: </h3>
                 <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
                     <thead>
                         <tr>
@@ -318,7 +339,7 @@ def create_order(request):
             <body>
                 <h2>Підтвердження замовлення #{order.id} на сайті KOLORYT</h2>
                 <p>Дата замовлення: {formatted_date}</p>
-                <h3>Продукти українською</h3>
+                <h3>Продукти в замовленні: </h3>
                 <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
                     <thead>
                         <tr>
