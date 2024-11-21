@@ -93,52 +93,37 @@ class OrderSummarySerializer(serializers.ModelSerializer):
         return value
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=False, write_only=True)
-#    product_id = serializers.CharField(write_only=True)  # Accept product_id in the request
+    # The product field will automatically resolve using PrimaryKeyRelatedField
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=True)
     product_id = serializers.IntegerField(write_only=True)
 
+    # Other fields related to the product
     total_sum = serializers.DecimalField(max_digits=10, decimal_places=2, write_only=True)
-    price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=2, write_only=True)
-    color_value = serializers.CharField(source='product.color_value', write_only=True)
-    size = serializers.CharField(source='product.size', write_only=True)
+    price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=2, read_only=True)
+    color_value = serializers.CharField(source='product.color_value', read_only=True)
+    size = serializers.CharField(source='product.size', read_only=True)
 
     # English fields
-    color_name_en = serializers.CharField(source='product.color_name_en', write_only=True)
-    name_en = serializers.CharField(source='product.name_en', write_only=True)
-    collection_name_en = serializers.CharField(source='product.collection.name_en', write_only=True)
+    color_name_en = serializers.CharField(source='product.color_name_en', read_only=True)
+    name_en = serializers.CharField(source='product.name_en', read_only=True)
+    collection_name_en = serializers.CharField(source='product.collection.name_en', read_only=True)
 
     # Ukrainian fields
-    color_name_uk = serializers.CharField(source='product.color_name_uk', write_only=True)
-    name_uk = serializers.CharField(source='product.name_uk', write_only=True)
-    collection_name_uk = serializers.CharField(source='product.collection.name_uk', write_only=True)
+    color_name_uk = serializers.CharField(source='product.color_name_uk', read_only=True)
+    name_uk = serializers.CharField(source='product.name_uk', read_only=True)
+    collection_name_uk = serializers.CharField(source='product.collection.name_uk', read_only=True)
 
     def validate_quantity(self, value):
         if value <= 0:
             raise serializers.ValidationError("Quantity must be a positive integer.")
         return value
 
-    def validate(self, data):
-        product_id = data.get('product_id')
-        if not product_id:
-            raise serializers.ValidationError({'product': 'This field is required.'})
-
-        try:
-            product = Product.objects.get(id=product_id)
-        except Product.DoesNotExist:
-            raise serializers.ValidationError({'product': 'Product does not exist.'})
-        data['product'] = product
-        return data
-
-    
     class Meta:
         model = OrderItem
         fields = [
-            'product_id', 'product', 'quantity', 'total_sum', 'price', 'color_value', 'size',
-            'name_en', 'color_name_en', 'collection_name_en',
-            'name_uk', 'color_name_uk', 'collection_name_uk'
+            'product', 'product_id','quantity', 'total_sum', 'price', 'color_value', 'size',
+            'name_en', 'color_name_en', 'collection_name_en', 'name_uk', 'color_name_uk', 'collection_name_uk'
         ]
-
-
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -146,25 +131,24 @@ class OrderSerializer(serializers.ModelSerializer):
     order_items_uk = OrderItemSerializer(many=True, read_only=True)
     telegram_user = serializers.PrimaryKeyRelatedField(queryset=TelegramUser.objects.all(), required=False)
 
-    class Meta:
-        model = Order
-        fields = [
-            'id', 'language', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments',
-            'congrats', 'submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at',
-            'parent_order', 'present', 'status', 'order_items_en', 'order_items_uk', 'telegram_user'
-        ]
+    def __init__(self, *args, **kwargs):
+        # Dynamically remove order_items_en and order_items_uk if it's a POST request
+        super().__init__(*args, **kwargs)
+        if self.context.get('request') and self.context['request'].method == 'POST':
+            # Remove these fields for POST requests
+            self.fields.pop('order_items_en', None)
+            self.fields.pop('order_items_uk', None)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
+        # Add order items for GET responses
         order_items_en, order_items_uk = self.get_order_items(instance)
         representation['order_items_en'] = order_items_en
         representation['order_items_uk'] = order_items_uk
         return representation
 
-
-
     def get_order_items(self, obj):
-        # Return the order items in both languages
+        # Return order items in both languages
         return self._get_order_items(obj)
 
     def _get_order_items(self, obj):
@@ -173,7 +157,7 @@ class OrderSerializer(serializers.ModelSerializer):
         for item in obj.order_items.all():
             product = item.product
 
-            # Define default values
+            # Default values
             default_name = _("No Name")
             default_color = _("No Color")
             default_collection = _("No Collection")
@@ -202,3 +186,8 @@ class OrderSerializer(serializers.ModelSerializer):
             items_uk.append(item_data_uk)
 
         return items_en, items_uk
+
+    class Meta:
+        model = Order
+        # Do not include order_items_en and order_items_uk for POST requests
+        fields = '__all__'
