@@ -60,26 +60,35 @@ def datetime_to_str(dt):
         return dt.strftime('%Y-%m-%d %H:%M')
     return None
 
-def get_chat_id_from_phone(phone_number):
-    try:
-        # Use the correct endpoint with the 'by-phone' path
-        response = requests.get(
-            f'{settings.VERCEL_DOMAIN}/api/telegram_users/by-phone/',  # Updated URL
-            params={'phone': phone_number},  # Pass the phone number as a query parameter
-            timeout=10  # Added timeout for request
-        )
-        response.raise_for_status()  # This will raise an error for any non-2xx status codes
 
-        # If the response is successful, check for 'chat_id' in the response
+def get_chat_id_from_phone(phone_number):
+    # Check if the chat_id is already cached
+    cached_chat_id = cache.get(f'chat_id_{phone_number}')
+    if cached_chat_id:
+        return cached_chat_id
+
+    try:
+        # If not cached, make the request
+        response = requests.get(
+            f'{settings.VERCEL_DOMAIN}/api/telegram_users/by-phone/',
+            params={'phone': phone_number},
+            timeout=10
+        )
+        response.raise_for_status()
+
         response_data = response.json()
         if 'chat_id' in response_data:
-            return response_data['chat_id']
+            chat_id = response_data['chat_id']
+            # Cache the chat_id for 24 hours (86400 seconds)
+            cache.set(f'chat_id_{phone_number}', chat_id, timeout=86400)
+            return chat_id
         else:
             logger.error(f"No chat_id found for phone number {phone_number}.")
             return None
     except requests.exceptions.RequestException as e:
         logger.error(f"Request to /api/telegram_users/by-phone failed: {e}")
         return None
+
     
 def get_order_summary(order):
     try:
@@ -115,6 +124,7 @@ def get_order_summary(order):
                 'size': item.get('size'),
                 'quantity': item.get('quantity'),
                 'price': item.get('price'),
+                'currency': item.get('currency'),
                 'color_value': item.get('color_value'),
             }
             order_items_en.append({
