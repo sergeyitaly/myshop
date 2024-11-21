@@ -98,8 +98,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
     product_id = serializers.IntegerField(write_only=True)
 
     # Other fields related to the product
-    total_sum = serializers.DecimalField(max_digits=10, decimal_places=2, write_only=True)
-    price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=2, read_only=True)
+    total_sum = serializers.DecimalField(max_digits=10, decimal_places=1, write_only=True)
+    price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=1, read_only=True)
     color_value = serializers.CharField(source='product.color_value', read_only=True)
     size = serializers.CharField(source='product.size', read_only=True)
 
@@ -165,7 +165,7 @@ class OrderSerializer(serializers.ModelSerializer):
             item_data_en = {
                 'size': product.size,
                 'quantity': item.quantity,
-                'price': product.price,
+                'price': float(product.price),
                 'color_value': product.color_value,
                 'name': product.name_en or default_name,
                 'color_name': product.color_name_en or default_color,
@@ -175,7 +175,7 @@ class OrderSerializer(serializers.ModelSerializer):
             item_data_uk = {
                 'size': product.size,
                 'quantity': item.quantity,
-                'price': product.price,
+                'price': float(product.price), 
                 'color_value': product.color_value,
                 'name': product.name_uk or default_name,
                 'color_name': product.color_name_uk or default_color,

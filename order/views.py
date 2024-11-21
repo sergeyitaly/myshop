@@ -216,7 +216,7 @@ def create_order(request):
     try:
         # Deserialize order data
         serializer = OrderSerializer(data=request.data)
-        
+
         if serializer.is_valid():
             order = serializer.save()
 
@@ -475,7 +475,7 @@ def format_order_summary(order):
         order_items_en.append({
             'name': product.name_en,
             'size': product.size,
-            'price': product.price,
+            'price': float(product.price),
             'quantity': item.quantity,
             'color_name': product.color_name_en,
             'color_value': product.color_value,
@@ -484,7 +484,7 @@ def format_order_summary(order):
         order_items_uk.append({
             'name': product.name_uk,
             'size': product.size,
-            'price': product.price,
+            'price': float(product.price),
             'quantity': item.quantity,
             'color_name': product.color_name_uk,
             'color_value': product.color_value,
