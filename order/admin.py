@@ -41,7 +41,7 @@ class TelegramUserAdmin(admin.ModelAdmin):
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
-    readonly_fields = ['product_photo', 'product_name', 'collection_name', 'size', 'color', 'total_sum']
+    readonly_fields = ['product_photo', 'product_name', 'collection_name', 'size', 'color', 'price','currency']
 
     def product_photo(self, obj):
         if obj.product.photo:
@@ -52,6 +52,15 @@ class OrderItemInline(admin.TabularInline):
     def product_name(self, obj):
         return obj.product.name
     product_name.short_description = _('Product Name')
+
+
+    def price(self, obj):
+        return obj.product.price
+    price.short_description = _('Price')
+
+    def currency(self, obj):
+        return obj.product.currency
+    currency.short_description = _('Currency')
 
     def collection_name(self, obj):
         return obj.product.collection.name

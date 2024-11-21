@@ -59,8 +59,8 @@ def prepare_order_summary(order):
         order_items_data_en.append({
             "size": item.size,
             "quantity": item.quantity,
-            "total_sum": item.total_sum,
             "color_name": item.color_name_en if item.color_name_en else _("No Color"),
+            "currency" : item.currency,
             "item_price": float(item.item_price),
             "color_value": item.color_value,
             "product_name": item.product_name_en if item.product_name_en else _("No Name"),
@@ -70,9 +70,9 @@ def prepare_order_summary(order):
         order_items_data_uk.append({
             "size": item.size,
             "quantity": item.quantity,
-            "total_sum": item.total_sum,
             "color_name": item.color_name_uk if item.color_name_uk else _("No Color"),
             "item_price": float(item.item_price),
+            "currency" : item.currency,
             "color_value": item.color_value,
             "product_name": item.product_name_uk if item.product_name_uk else _("No Name"),
             "collection_name": item.collection_name_uk if item.collection_name_uk else _("No Collection"),

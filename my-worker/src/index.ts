@@ -652,8 +652,10 @@ async function processMessage(message: any): Promise<void> {
     const phoneNumber = phoneNumbers.get(chatId);
     if (phoneNumber) {
       await sendOrderDetails(phoneNumber, chatId);
-    } else {
-      await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
+    } else 
+    {
+      const isEnglish = getUserLanguage(chatId) === 'en';
+      await sendMessage(chatId, isEnglish ? `🔍 Phone number not found. Please share your phone number first.` : `🔍 Номер телефону не знайдено. Будь ласка, спочатку надайте ваш номер телефону.`);
       await sendContactRequest(chatId);
     }
 
@@ -663,9 +665,11 @@ async function processMessage(message: any): Promise<void> {
     const phoneNumber = phoneNumbers.get(chatId);
     if (phoneNumber) {
       await sendAllOrdersDetails(chatId);
-    } else {
-      await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
-      await sendContactRequest(chatId);
+    } else 
+    {
+        const isEnglish = getUserLanguage(chatId) === 'en';
+        await sendMessage(chatId, isEnglish ? `🔍 Phone number not found. Please share your phone number first.` : `🔍 Номер телефону не знайдено. Будь ласка, спочатку надайте ваш номер телефону.`);
+        await sendContactRequest(chatId);
     }
 
   } else if (message.text === 'KOLORYT') {
@@ -801,13 +805,6 @@ else if (message.text === '/s3') {
       await sendMessage(chatId, `⚠️ An error occurred while fetching AWS S3 performance: ${errorMessage}`);
   }
 }
-
-
-
-
-
-
-
 
 
 
