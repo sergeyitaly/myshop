@@ -5,10 +5,13 @@ from rest_framework import serializers
 from django.utils.translation import gettext as _
 from django.utils import translation
 from django.utils.translation import override as translation_override
-
 from rest_framework import serializers
 from django.utils.translation import gettext as _
 from order.models import Order, TelegramUser
+import logging
+from rest_framework.exceptions import ValidationError
+
+logger = logging.getLogger(__name__)
 
 class TelegramUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,27 +28,16 @@ class OrderSummarySerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        
-        # Ensure Decimal values are serialized properly
         representation['orders'] = self._convert_decimals(representation['orders'])
-        
-        # Create a mapping of existing orders by order_id
         existing_orders = {order['order_id']: order for order in representation['orders']}
-        
-        # Incoming orders from validated data
         incoming_orders = self.initial_data.get('orders', [])
-        
-        # Process incoming orders
         for new_order in incoming_orders:
             order_id = new_order.get('order_id')
             if order_id in existing_orders:
-                # Update the existing order's fields
                 existing_orders[order_id].update(new_order)
             else:
-                # Add new order if it does not exist
                 existing_orders[order_id] = new_order
         
-        # Convert the dictionary back to a list for output
         updated_orders = list(existing_orders.values())
         
         # Filter to include only necessary fields: 'submitted_at' and 'latest_status_time'
@@ -93,63 +85,153 @@ class OrderSummarySerializer(serializers.ModelSerializer):
         return value
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    # The product field will automatically resolve using PrimaryKeyRelatedField
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=True)
-    product_id = serializers.IntegerField(write_only=True)
+    product_id = serializers.IntegerField(write_only=True, required=False)
+#    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=False, write_only=True)
+
+    total_sum = serializers.SerializerMethodField()
 
     # Other fields related to the product
-    total_sum = serializers.DecimalField(max_digits=10, decimal_places=1, write_only=True)
     price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=1, read_only=True)
     color_value = serializers.CharField(source='product.color_value', read_only=True)
-    size = serializers.CharField(source='product.size', read_only=True)
+    size = serializers.CharField(source='product.size', read_only=True, required=False)
 
     # English fields
-    color_name_en = serializers.CharField(source='product.color_name_en', read_only=True)
+    color_name_en = serializers.CharField(source='product.color_name_en', read_only=True, required=False)
     name_en = serializers.CharField(source='product.name_en', read_only=True)
-    collection_name_en = serializers.CharField(source='product.collection.name_en', read_only=True)
+    collection_name_en = serializers.CharField(source='product.collection.name_en', read_only=True, required=False)
 
     # Ukrainian fields
-    color_name_uk = serializers.CharField(source='product.color_name_uk', read_only=True)
+    color_name_uk = serializers.CharField(source='product.color_name_uk', read_only=True, required=False)
     name_uk = serializers.CharField(source='product.name_uk', read_only=True)
-    collection_name_uk = serializers.CharField(source='product.collection.name_uk', read_only=True)
-
-    def validate_quantity(self, value):
-        if value <= 0:
-            raise serializers.ValidationError("Quantity must be a positive integer.")
-        return value
+    collection_name_uk = serializers.CharField(source='product.collection.name_uk', read_only=True, required=False)
 
     class Meta:
         model = OrderItem
         fields = [
-            'product', 'product_id','quantity', 'total_sum', 'price', 'color_value', 'size',
+            'product_id', 'quantity', 'price', 'color_value', 'size', 'total_sum',
             'name_en', 'color_name_en', 'collection_name_en', 'name_uk', 'color_name_uk', 'collection_name_uk'
         ]
 
+    def get_total_sum(self, obj):
+        return obj.total_sum  # Return total_sum directly
+        
+    def create(self, validated_data):
+        product_id = validated_data.pop('product_id')
+        return OrderItem.objects.create(product_id=product_id, **validated_data)
+    
+
 
 class OrderSerializer(serializers.ModelSerializer):
-    order_items_en = OrderItemSerializer(many=True, read_only=True)
-    order_items_uk = OrderItemSerializer(many=True, read_only=True)
+    order_items = OrderItemSerializer(many=True, write_only=True)
     telegram_user = serializers.PrimaryKeyRelatedField(queryset=TelegramUser.objects.all(), required=False)
 
     def __init__(self, *args, **kwargs):
-        # Dynamically remove order_items_en and order_items_uk if it's a POST request
         super().__init__(*args, **kwargs)
-        if self.context.get('request') and self.context['request'].method == 'POST':
-            # Remove these fields for POST requests
+        request = self.context.get('request')
+        if request and request.method == 'POST':
+            # Remove unnecessary read-only fields for POST requests
             self.fields.pop('order_items_en', None)
             self.fields.pop('order_items_uk', None)
 
+
+    def create(self, validated_data):
+        # Print the validated data to ensure it's correct
+        print("Start creating order with validated_data:", validated_data)
+        
+        # Extract and print order items
+        items_data = validated_data.pop('order_items', [])
+        print("Extracted items_data:", items_data)
+
+        # Extract and print telegram user data
+        telegram_user_data = validated_data.pop('telegram_user', None)
+        print("Extracted telegram_user_data:", telegram_user_data)
+
+        telegram_user = None
+        if telegram_user_data:
+            print(f"Attempting to fetch or create TelegramUser with phone: {telegram_user_data.get('phone')}")
+            
+            # Fetch or create the TelegramUser and print the result
+            telegram_user, created = TelegramUser.objects.get_or_create(
+                phone=telegram_user_data.get('phone'),
+                defaults={'chat_id': telegram_user_data.get('chat_id')}
+            )
+            print(f"Fetched/created telegram_user: {telegram_user} (created: {created})")
+        
+        # Create the order and print the result
+        print(f"Creating Order with telegram_user: {telegram_user}")
+        order = Order.objects.create(telegram_user=telegram_user, **validated_data)
+        print(f"Created order: {order}")
+
+        # Process each item and print each step
+        for item_data in items_data:
+            print(f"Processing item_data: {item_data}")
+            
+            product_id = item_data.pop('product_id', None)
+            if not product_id:
+                print(f"Error: Missing product_id in item_data: {item_data}")
+                raise ValidationError("product_id is required for order items.")
+
+            try:
+                # Ensure the product exists
+                product = Product.objects.get(id=product_id)
+            except Product.DoesNotExist:
+                print(f"Error: Product with id {product_id} not found.")
+                raise ValidationError(f"Product with id {product_id} does not exist.")
+
+            # Create the order item and print the result
+            order_item = OrderItem.objects.create(order=order, product=product, quantity=item_data['quantity'])
+            print(f"Created OrderItem with product_id: {product_id}, OrderItem: {order_item}")
+
+        return order
+
+
+    def update(self, instance, validated_data):
+        items_data = validated_data.pop('order_items', [])
+        telegram_user_data = validated_data.pop('telegram_user', None)
+
+        if telegram_user_data:
+            telegram_user, created = TelegramUser.objects.get_or_create(
+                phone=telegram_user_data.get('phone'),
+                defaults={'chat_id': telegram_user_data.get('chat_id')}
+            )
+            instance.telegram_user = telegram_user
+
+        # Update the Order instance
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        new_status = validated_data.get('status', instance.status)
+        if new_status and new_status != instance.status:
+            instance.update_status(new_status)
+
+        instance.save()
+
+        # Update OrderItems
+        existing_items = {item.product_id: item for item in instance.order_items.all()}
+        for item_data in items_data:
+            product_id = item_data.pop('product_id')
+            if product_id in existing_items:
+                # Update existing item
+                item = existing_items.pop(product_id)
+                for attr, value in item_data.items():
+                    setattr(item, attr, value)
+                item.save()
+            else:
+                # Create new item
+                OrderItem.objects.create(order=instance, product_id=product_id, **item_data)
+
+        # Delete any items not in the updated list
+        for item in existing_items.values():
+            item.delete()
+
+        return instance
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        # Add order items for GET responses
-        order_items_en, order_items_uk = self.get_order_items(instance)
+        order_items_en, order_items_uk = self._get_order_items(instance)
         representation['order_items_en'] = order_items_en
         representation['order_items_uk'] = order_items_uk
         return representation
-
-    def get_order_items(self, obj):
-        # Return order items in both languages
-        return self._get_order_items(obj)
 
     def _get_order_items(self, obj):
         items_en = []
@@ -170,16 +252,18 @@ class OrderSerializer(serializers.ModelSerializer):
                 'name': product.name_en or default_name,
                 'color_name': product.color_name_en or default_color,
                 'collection_name': (product.collection.name_en if product.collection else None) or default_collection,
+                'total_sum': str(item.total_sum),
             }
 
             item_data_uk = {
                 'size': product.size,
                 'quantity': item.quantity,
-                'price': float(product.price), 
+                'price': float(product.price),
                 'color_value': product.color_value,
                 'name': product.name_uk or default_name,
                 'color_name': product.color_name_uk or default_color,
                 'collection_name': (product.collection.name_uk if product.collection else None) or default_collection,
+                'total_sum': str(item.total_sum),
             }
 
             items_en.append(item_data_en)
@@ -189,5 +273,4 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        # Do not include order_items_en and order_items_uk for POST requests
         fields = '__all__'

@@ -149,15 +149,18 @@ class OrderSummary(models.Model):
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='order_items', on_delete=models.CASCADE, verbose_name=_('Order'))
     product = models.ForeignKey(Product, related_name='order_items', verbose_name=_('Product'), on_delete=models.CASCADE)
+    
 #    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name=_('Product'))
   #  product = models.ForeignKey(Product, related_name='order_items', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(verbose_name=_('Quantity'))
     total_sum = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, verbose_name=_('Total Sum'))
-    
+
     def save(self, *args, **kwargs):
         if self.product:
             self.total_sum = self.quantity * self.product.price
         super().save(*args, **kwargs)
+
+        
     def __str__(self):
         return f"{self.quantity} of {self.product.name}"
     def get_product_name(self):
