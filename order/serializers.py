@@ -97,20 +97,20 @@ class OrderItemSerializer(serializers.ModelSerializer):
 #    product_id = serializers.CharField(write_only=True)  # Accept product_id in the request
     product_id = serializers.IntegerField(write_only=True)
 
-    total_sum = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
-    price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=2, read_only=True)
-    color_value = serializers.CharField(source='product.color_value', read_only=True)
-    size = serializers.CharField(source='product.size', read_only=True)
+    total_sum = serializers.DecimalField(max_digits=10, decimal_places=2, write_only=True)
+    price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=2, write_only=True)
+    color_value = serializers.CharField(source='product.color_value', write_only=True)
+    size = serializers.CharField(source='product.size', write_only=True)
 
     # English fields
-    color_name_en = serializers.CharField(source='product.color_name_en', read_only=True)
-    name_en = serializers.CharField(source='product.name_en', read_only=True)
-    collection_name_en = serializers.CharField(source='product.collection.name_en', read_only=True)
+    color_name_en = serializers.CharField(source='product.color_name_en', write_only=True)
+    name_en = serializers.CharField(source='product.name_en', write_only=True)
+    collection_name_en = serializers.CharField(source='product.collection.name_en', write_only=True)
 
     # Ukrainian fields
-    color_name_uk = serializers.CharField(source='product.color_name_uk', read_only=True)
-    name_uk = serializers.CharField(source='product.name_uk', read_only=True)
-    collection_name_uk = serializers.CharField(source='product.collection.name_uk', read_only=True)
+    color_name_uk = serializers.CharField(source='product.color_name_uk', write_only=True)
+    name_uk = serializers.CharField(source='product.name_uk', write_only=True)
+    collection_name_uk = serializers.CharField(source='product.collection.name_uk', write_only=True)
 
     def validate_quantity(self, value):
         if value <= 0:
@@ -128,9 +128,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'product': 'Product does not exist.'})
         data['product'] = product
         return data
-    
-    def get_total_sum(self, obj):
-        return obj.total_sum 
+
     
     class Meta:
         model = OrderItem
