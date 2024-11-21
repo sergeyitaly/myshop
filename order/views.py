@@ -208,12 +208,13 @@ class TelegramWebhook(View):
 
 telegram_webhook = TelegramWebhook.as_view()
 
+
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_order(request):
-    logger.info(f"Order creation request data: {request.data}")
-
     try:
+        language = request.data.get('language', 'uk')
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
             order = serializer.save()
@@ -237,28 +238,37 @@ def create_order(request):
             except TelegramUser.DoesNotExist:
                 logger.warning(f"No TelegramUser found with phone: {phone}")
 
-            # Ensure order_items are present
-  #          order_items_data = order.order_items.all()
-  #          if not order_items_data:
-  #              return Response({'error': 'Order must contain at least one item'}, status=status.HTTP_400_BAD_REQUEST)                                                              
-
-            # Process order items and email content
             formatted_date = localtime(order.submitted_at).strftime('%Y-%m-%d %H:%M')
-            language = order.language
-            order_items_en, order_items_uk = serializer._get_order_items(order)
+            order_items_en = serializer.get_order_items_en(order)
+            order_items_uk = serializer.get_order_items_uk(order)
 
-
-            def generate_order_items_table(order_items):
+            def generate_order_items_en_table(order_items):
                 return "".join([
                     f"""
                     <tr>
                         <td>{index + 1}</td>
-                        <td><img src="{item['product']['photo']}" alt="{item['product']['name']}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
-                        <td>{item['product']['name']}</td>
-                        <td>{item['product']['collection']['name']}</td>
+                        <td><img src="{item['product']['photo']}" alt="{item['product']['name_en']}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
+                        <td>{item['product']['name_en']}</td>
+                        <td>{item['product']['collection']['name_en']}</td>
                         <td>{item['quantity']}</td>
                         <td>{item['product']['size']}</td>
-                        <td>{item['product']['color_name']}<br> <div style="width: 10px; height: 10px; background-color: {item['product']['color_value']}; display: inline-block;"></div></td>
+                        <td>{item['product']['color_name_en']}<br> <div style="width: 10px; height: 10px; background-color: {item['product']['color_value']}; display: inline-block;"></div></td>
+                        <td>{item['product']['price']} {item['product']['currency']}</td>
+                    </tr>
+                    """
+                    for index, item in enumerate(order_items)
+                ])
+            def generate_order_items_uk_table(order_items):
+                return "".join([
+                    f"""
+                    <tr>
+                        <td>{index + 1}</td>
+                        <td><img src="{item['product']['photo']}" alt="{item['product']['name_uk']}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
+                        <td>{item['product']['name_uk']}</td>
+                        <td>{item['product']['collection']['name_uk']}</td>
+                        <td>{item['quantity']}</td>
+                        <td>{item['product']['size']}</td>
+                        <td>{item['product']['color_name_uk']}<br> <div style="width: 10px; height: 10px; background-color: {item['product']['color_value']}; display: inline-block;"></div></td>
                         <td>{item['product']['price']} {item['product']['currency']}</td>
                     </tr>
                     """
@@ -289,7 +299,7 @@ def create_order(request):
                         </tr>
                     </thead>
                     <tbody>
-                        {generate_order_items_table(order_items_en)}
+                        {generate_order_items_en_table(order_items_en)}
                     </tbody>
                 </table>
                 <p><strong>Total:</strong> {sum(item['total_sum'] for item in order_items_en)} {order_items_en[0]['product']['currency'] if order_items_en else 'USD'}</p>
@@ -325,7 +335,7 @@ def create_order(request):
                         </tr>
                     </thead>
                     <tbody>
-                        {generate_order_items_table(order_items_uk)}
+                        {generate_order_items_uk_table(order_items_uk)}
                     </tbody>
                 </table>
                 <p><strong>Разом:</strong> {sum(item['total_sum'] for item in order_items_uk)} {order_items_uk[0]['product']['currency'] if order_items_uk else 'UAH'}</p>
@@ -338,15 +348,22 @@ def create_order(request):
             """
             if language == 'en':
                 email_body = email_body_en
-            else:
-                email_body = email_body_uk
-            email = EmailMessage(
+                email = EmailMessage(
                 subject=f'Order Confirmation #{order.id}',
                 body=email_body,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[order.email],
                 headers={'Content-Type': 'text/html; charset=utf-8'}
-            )
+                 )
+            else:
+                email_body = email_body_uk
+                email = EmailMessage(
+                subject=f'Підтвердження замовлення #{order.id}',
+                body=email_body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[order.email],
+                headers={'Content-Type': 'text/html; charset=utf-8'}
+                )
             email.content_subtype = "html"
             email.send(fail_silently=False)
 
@@ -428,6 +445,7 @@ def format_order_summary(order):
             'name': product.name_en,
             'size': product.size,
             'price': float(product.price),
+            'currency': product.currency,
             'quantity': item.quantity,
             'color_name': product.color_name_en,
             'color_value': product.color_value,
@@ -437,6 +455,7 @@ def format_order_summary(order):
             'name': product.name_uk,
             'size': product.size,
             'price': float(product.price),
+            'currency': product.currency,
             'quantity': item.quantity,
             'color_name': product.color_name_uk,
             'color_value': product.color_value,

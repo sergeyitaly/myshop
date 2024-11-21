@@ -86,8 +86,6 @@ class OrderSummarySerializer(serializers.ModelSerializer):
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product_id = serializers.IntegerField(write_only=True, required=False)
-#    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=False, write_only=True)
-
     total_sum = serializers.SerializerMethodField()
 
     # Other fields related to the product
@@ -114,76 +112,95 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
     def get_total_sum(self, obj):
         return obj.total_sum  # Return total_sum directly
-        
+
     def create(self, validated_data):
         product_id = validated_data.pop('product_id')
         return OrderItem.objects.create(product_id=product_id, **validated_data)
     
 
-
 class OrderSerializer(serializers.ModelSerializer):
-    order_items = OrderItemSerializer(many=True, write_only=True)
+    order_items = OrderItemSerializer(many=True, write_only=True)  # Keep order_items for creation
+    order_items_en = serializers.SerializerMethodField()
+    order_items_uk = serializers.SerializerMethodField()
     telegram_user = serializers.PrimaryKeyRelatedField(queryset=TelegramUser.objects.all(), required=False)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        request = self.context.get('request')
-        if request and request.method == 'POST':
-            # Remove unnecessary read-only fields for POST requests
-            self.fields.pop('order_items_en', None)
-            self.fields.pop('order_items_uk', None)
+    def get_order_items_en(self, order):
+        order_items = []
+        for item in order.order_items.all():
+            # Ensure product information is included
+            product = item.product
+            collection = product.collection  # Assuming the product has a related collection
+
+            order_items.append({
+                'product': {
+                    'photo': product.photo.url if product.photo else None,  # Include photo if available
+                    'name_en': product.name_en,  # Product name in English
+                    'collection': {
+                        'name_en': collection.name_en if collection else None  # Collection name in English
+                    },
+                    'price': product.price,  # Assuming `item` has a price field
+                    'currency': product.currency,
+                    'size': product.size,  # Item size
+                    'color_name_en': product.color_name_en,  # Color name in English
+                    'color_value': product.color_value,  # Color value (hex)
+                },
+                'quantity': item.quantity,  # Quantity of the item
+                'total_sum': item.total_sum  # Total sum for the item
+            })
+        return order_items
+
+    def get_order_items_uk(self, order):
+        order_items = []
+        for item in order.order_items.all():
+            # Ensure product information is included
+            product = item.product
+            collection = product.collection  # Assuming the product has a related collection
+
+            order_items.append({
+                'product': {
+                    'photo': product.photo.url if product.photo else None, 
+                    'name_uk': product.name_uk,
+                    'collection': {
+                        'name_uk': collection.name_uk if collection else None 
+                    },
+                    'price': product.price,
+                    'currency': product.currency,
+                    'size': product.size,
+                    'color_name_uk': product.color_name_uk,
+                    'color_value': product.color_value,
+                },
+                'quantity': item.quantity,
+                'total_sum': item.total_sum
+            })
+        return order_items
 
 
     def create(self, validated_data):
-        # Print the validated data to ensure it's correct
-        print("Start creating order with validated_data:", validated_data)
-        
-        # Extract and print order items
         items_data = validated_data.pop('order_items', [])
-        print("Extracted items_data:", items_data)
-
-        # Extract and print telegram user data
         telegram_user_data = validated_data.pop('telegram_user', None)
-        print("Extracted telegram_user_data:", telegram_user_data)
-
         telegram_user = None
         if telegram_user_data:
-            print(f"Attempting to fetch or create TelegramUser with phone: {telegram_user_data.get('phone')}")
-            
-            # Fetch or create the TelegramUser and print the result
             telegram_user, created = TelegramUser.objects.get_or_create(
                 phone=telegram_user_data.get('phone'),
                 defaults={'chat_id': telegram_user_data.get('chat_id')}
             )
-            print(f"Fetched/created telegram_user: {telegram_user} (created: {created})")
-        
-        # Create the order and print the result
-        print(f"Creating Order with telegram_user: {telegram_user}")
         order = Order.objects.create(telegram_user=telegram_user, **validated_data)
-        print(f"Created order: {order}")
-
-        # Process each item and print each step
         for item_data in items_data:
-            print(f"Processing item_data: {item_data}")
-            
             product_id = item_data.pop('product_id', None)
             if not product_id:
-                print(f"Error: Missing product_id in item_data: {item_data}")
                 raise ValidationError("product_id is required for order items.")
-
+            
             try:
                 # Ensure the product exists
                 product = Product.objects.get(id=product_id)
             except Product.DoesNotExist:
-                print(f"Error: Product with id {product_id} not found.")
                 raise ValidationError(f"Product with id {product_id} does not exist.")
 
-            # Create the order item and print the result
+            # Create the order item if the product is valid
             order_item = OrderItem.objects.create(order=order, product=product, quantity=item_data['quantity'])
             print(f"Created OrderItem with product_id: {product_id}, OrderItem: {order_item}")
 
         return order
-
 
     def update(self, instance, validated_data):
         items_data = validated_data.pop('order_items', [])
@@ -225,51 +242,8 @@ class OrderSerializer(serializers.ModelSerializer):
             item.delete()
 
         return instance
+        
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        order_items_en, order_items_uk = self._get_order_items(instance)
-        representation['order_items_en'] = order_items_en
-        representation['order_items_uk'] = order_items_uk
-        return representation
-
-    def _get_order_items(self, obj):
-        items_en = []
-        items_uk = []
-        for item in obj.order_items.all():
-            product = item.product
-
-            # Default values
-            default_name = _("No Name")
-            default_color = _("No Color")
-            default_collection = _("No Collection")
-
-            item_data_en = {
-                'size': product.size,
-                'quantity': item.quantity,
-                'price': float(product.price),
-                'color_value': product.color_value,
-                'name': product.name_en or default_name,
-                'color_name': product.color_name_en or default_color,
-                'collection_name': (product.collection.name_en if product.collection else None) or default_collection,
-                'total_sum': str(item.total_sum),
-            }
-
-            item_data_uk = {
-                'size': product.size,
-                'quantity': item.quantity,
-                'price': float(product.price),
-                'color_value': product.color_value,
-                'name': product.name_uk or default_name,
-                'color_name': product.color_name_uk or default_color,
-                'collection_name': (product.collection.name_uk if product.collection else None) or default_collection,
-                'total_sum': str(item.total_sum),
-            }
-
-            items_en.append(item_data_en)
-            items_uk.append(item_data_uk)
-
-        return items_en, items_uk
 
     class Meta:
         model = Order

@@ -90,7 +90,8 @@ class Command(BaseCommand):
                         'size': size,
                         'quantity': item.quantity,
                         'color_name': color_name_en,
-                        'price': product.price,  # Assuming 'price' field exists in Product
+                        'price': str(product.price),  # Assuming 'price' field exists in Product
+                        'currency': product.currency,
                         'color_value': product.color_value,  # Assuming 'color_value' exists in Product
                         'name': product_name_en,
                         'collection_name': product.collection.name_en if product.collection else _('No Collection')  # Assuming related 'collection'
@@ -101,7 +102,8 @@ class Command(BaseCommand):
                         'size': size,
                         'quantity': item.quantity,
                         'color_name': color_name_uk,
-                        'price': product.price,  # Assuming 'price' field exists and is the same for both languages
+                        'price': str(product.price),  # Assuming 'price' field exists and is the same for both languages
+                        'currency': product.currency,
                         'color_value': product.color_value,  # Assuming 'color_value' exists for both languages
                         'name': product_name_uk,
                         'collection_name': product.collection.name_uk if product.collection else _('No Collection')  # Assuming related 'collection' in Ukrainian
