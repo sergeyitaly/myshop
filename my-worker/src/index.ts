@@ -1113,8 +1113,8 @@ interface TelegramUser {
 interface OrderItem {
   name: string;
   size: string;
-  price: number;
-  quantity: number;
+  price: string;
+  quantity: string;
   color_name: string;
   color_value?: string; // Optional field
   collection_name: string;
@@ -1195,8 +1195,8 @@ const isOrderItem = (item: any): item is OrderItem => {
     typeof item.collection_name === 'string' &&
     typeof item.size === 'string' &&
     typeof item.color_name === 'string' &&
-    typeof item.quantity === 'number' &&
-    typeof item.price === 'number' &&
+    typeof item.quantity === 'string' &&
+    typeof item.price === 'string' &&
     typeof item.color_value === 'string';
 };
 
@@ -1276,7 +1276,7 @@ const parseDate = (dateString: string): Date | null => {
 
 const createOrderItemsSummary = (orderItems: OrderItem[], isEnglish: boolean): string => {
   return orderItems.map(item =>
-    `- ${item?.name || 'N/A'}, ${item?.collection_name || 'N/A'}, ${isEnglish ? 'Size' : 'Розмір'}: ${item?.size || 'N/A'}, ${isEnglish ? 'Color' : 'Колір'}: ${item?.color_name || 'N/A'}, ${item?.quantity || 0} ${isEnglish ? 'pcs' : 'шт'}, $${item?.price?.toFixed(2) || '0.00'}`
+    `- ${item?.name || 'N/A'}, ${item?.collection_name || 'N/A'}, ${isEnglish ? 'Size' : 'Розмір'}: ${item?.size || 'N/A'}, ${isEnglish ? 'Color' : 'Колір'}: ${item?.color_name || 'N/A'}, ${item?.quantity || 0} ${isEnglish ? 'pcs' : 'шт'}, $${item?.price || '0.00'}`
   ).join('\n');
 };
 
@@ -1386,7 +1386,7 @@ async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
       }
 
       const orderItemsSummary = orderItems.map((item: OrderItem) =>
-        `- ${item.name}, ${item.collection_name}, ${isEnglish ? 'Size' : 'Розмір'}: ${item.size}, ${isEnglish ? 'Color' : 'Колір'}: ${item.color_name}, ${item.quantity} ${isEnglish ? 'pcs' : 'шт'}, $${item.price.toFixed(2)}`
+        `- ${item.name}, ${item.collection_name}, ${isEnglish ? 'Size' : 'Розмір'}: ${item.size}, ${isEnglish ? 'Color' : 'Колір'}: ${item.color_name}, ${item.quantity} ${isEnglish ? 'pcs' : 'шт'}, $${item.price}`
       ).join('\n');
 
       return `${isEnglish ? 'Order ID' : 'Номер замовлення'}: ${order.order_id}\n${isEnglish ? 'Order Items' : 'Товари в замовленні'}:\n${orderItemsSummary}\n${isEnglish ? 'Latest Status' : 'Останній статус'}: ${latestStatus.icon} ${latestStatus.text}`;
