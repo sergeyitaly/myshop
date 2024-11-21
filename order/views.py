@@ -214,23 +214,16 @@ def create_order(request):
     logger.info(f"Order creation request data: {request.data}")
 
     try:
-        # Deserialize order data
         serializer = OrderSerializer(data=request.data)
-
         if serializer.is_valid():
             order = serializer.save()
-
-            # Handle TelegramUser logic if needed
             phone = request.data.get('phone')
             try:
                 telegram_user = TelegramUser.objects.get(phone=phone)
                 if telegram_user:
                     order.telegram_user = telegram_user
                     order.save(update_fields=['telegram_user'])
-
                     order_items = order.order_items.all()
-
-                    # Assuming 'submitted' is the initial order status
                     update_order_status_with_notification(
                         order.id,
                         order_items,
@@ -245,33 +238,15 @@ def create_order(request):
                 logger.warning(f"No TelegramUser found with phone: {phone}")
 
             # Ensure order_items are present
-            order_items_data = request.data.get('order_items', [])
-            if not order_items_data:
-                return Response({'error': 'Order must contain at least one item'}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Create order items
-            for item_data in order_items_data:
-                product_id = item_data.get('product')
-                quantity = item_data.get('quantity')
-
-                if not product_id or quantity is None:
-                    return Response({'error': 'Product and quantity must be provided for each order item'}, status=status.HTTP_400_BAD_REQUEST)
-
-                product = Product.objects.get(id=product_id)
-                total_sum = product.price * quantity
-
-                OrderItem.objects.create(
-                    order=order,
-                    product=product,
-                    quantity=quantity,
-                    total_sum=total_sum
-                )
+  #          order_items_data = order.order_items.all()
+  #          if not order_items_data:
+  #              return Response({'error': 'Order must contain at least one item'}, status=status.HTTP_400_BAD_REQUEST)                                                              
 
             # Process order items and email content
             formatted_date = localtime(order.submitted_at).strftime('%Y-%m-%d %H:%M')
             language = order.language
-            order_items_en = order_items_data  # We assume the provided `order_items` are in English format
-            order_items_uk = order_items_data  # Same here for Ukrainian
+            order_items_en, order_items_uk = serializer._get_order_items(order)
+
 
             def generate_order_items_table(order_items):
                 return "".join([
@@ -289,8 +264,6 @@ def create_order(request):
                     """
                     for index, item in enumerate(order_items)
                 ])
-
-            # Email body in English
             email_body_en = f"""
             <html>
             <head>
@@ -327,8 +300,6 @@ def create_order(request):
             </body>
             </html>
             """
-
-            # Email body in Ukrainian
             email_body_uk = f"""
             <html>
             <head>
@@ -365,13 +336,10 @@ def create_order(request):
             </body>
             </html>
             """
-
-            # Send email based on language
             if language == 'en':
                 email_body = email_body_en
             else:
                 email_body = email_body_uk
-
             email = EmailMessage(
                 subject=f'Order Confirmation #{order.id}',
                 body=email_body,
@@ -381,22 +349,6 @@ def create_order(request):
             )
             email.content_subtype = "html"
             email.send(fail_silently=False)
-
-            # Prepare Telegram message based on language
-            if language == 'en':
-                telegram_message = f"Your order #{order.id} has been successfully placed. Thank you for choosing KOLORYT! You will receive a confirmation email shortly."
-            else:
-                telegram_message = f"Ваше замовлення #{order.id} було успішно оформлено. Дякуємо, що обрали KOLORYT! Ви отримаєте підтвердження на електронну пошту."
-
-            # Update order status with the Telegram message and notification
-            if telegram_user:
-                update_order_status_with_notification(
-                    order.id,
-                    order_items,
-                    'submitted',  # Assuming 'submitted' is the status you want to set
-                    'submitted_at',
-                    telegram_user.chat_id  # Sends the Telegram message via update_order_status_with_notification
-                )
 
             return Response({'status': 'Order created', 'order_id': order.id}, status=status.HTTP_201_CREATED)
         else:

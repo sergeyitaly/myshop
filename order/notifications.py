@@ -59,7 +59,11 @@ def send_telegram_message(chat_id, message):
 def update_order_status_with_notification(order_id, order_items, new_status, status_field, chat_id):
     try:
         order = Order.objects.get(id=order_id)
+        setattr(order, status_field, timezone.now())
+        order.status = new_status
+#        order.save()
         language = order.language  # Get the language of the order
+
         status = new_status.capitalize()
         emoji = STATUS_EMOJIS.get(new_status, '')
 
@@ -67,7 +71,6 @@ def update_order_status_with_notification(order_id, order_items, new_status, sta
             f"{item.product.name} - {item.quantity} x {item.product.price} {item.product.currency}" 
             for item in order_items
         ])
-
         # Check language and construct message accordingly
         if language == 'uk':
             # Ukrainian message format
