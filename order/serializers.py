@@ -90,6 +90,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
     # Other fields related to the product
     price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=1, read_only=True)
+    currency = serializers.CharField(source='product.currency', read_only=True)
+
     color_value = serializers.CharField(source='product.color_value', read_only=True)
     size = serializers.CharField(source='product.size', read_only=True, required=False)
 
@@ -106,7 +108,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
         fields = [
-            'product_id', 'quantity', 'price', 'color_value', 'size', 'total_sum',
+            'product_id', 'quantity', 'price', 'currency','color_value', 'size', 'total_sum',
             'name_en', 'color_name_en', 'collection_name_en', 'name_uk', 'color_name_uk', 'collection_name_uk'
         ]
 
@@ -127,9 +129,8 @@ class OrderSerializer(serializers.ModelSerializer):
     def get_order_items_en(self, order):
         order_items = []
         for item in order.order_items.all():
-            # Ensure product information is included
             product = item.product
-            collection = product.collection  # Assuming the product has a related collection
+            collection = product.collection
 
             order_items.append({
                 'product': {

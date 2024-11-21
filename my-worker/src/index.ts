@@ -1278,7 +1278,7 @@ const parseDate = (dateString: string): Date | null => {
 
 const createOrderItemsSummary = (orderItems: OrderItem[], isEnglish: boolean): string => {
   return orderItems.map(item =>
-    `- ${item?.name || 'N/A'}, ${item?.collection_name || 'N/A'}, ${isEnglish ? 'Size' : 'Розмір'}: ${item?.size || 'N/A'}, ${isEnglish ? 'Color' : 'Колір'}: ${item?.color_name || 'N/A'}, ${item?.quantity || 0} ${isEnglish ? 'pcs' : 'шт'}, ${item?.price || '0.00'}  ${item.currency}`
+    `- ${item?.name || 'N/A'}, ${item?.collection_name || 'N/A'}, ${isEnglish ? 'Size' : 'Розмір'}: ${item?.size || 'N/A'}, ${isEnglish ? 'Color' : 'Колір'}: ${item?.color_name || 'N/A'}, ${item?.quantity || 0} ${isEnglish ? 'pcs' : 'шт'}, ${item?.price || '0.00'}  ${item?.currency}`
   ).join('\n');
 };
 
