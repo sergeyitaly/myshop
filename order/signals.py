@@ -195,6 +195,8 @@ def remove_order_from_summary(sender, instance, **kwargs):
                 order_summary.orders = [o for o in order_summary.orders if o['order_id'] != instance.id]
                 order_summary.save()
                 cache.delete(f'order_summary_{chat_id}')
+                update_order_summary()
+
                 logger.info(f"Order ID {instance.id} removed from summary for chat ID {chat_id}")
             except OrderSummary.DoesNotExist:
                 logger.warning(f"No summary found for chat ID {chat_id}")
