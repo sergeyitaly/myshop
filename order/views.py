@@ -214,7 +214,6 @@ telegram_webhook = TelegramWebhook.as_view()
 @permission_classes([AllowAny])
 def create_order(request):
     try:
-        language = request.data.get('language', 'uk')
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
             order = serializer.save()
@@ -223,6 +222,7 @@ def create_order(request):
                 telegram_user = TelegramUser.objects.get(phone=phone)
                 if telegram_user:
                     order.telegram_user = telegram_user
+                    language = order.language
                     order.save(update_fields=['telegram_user'])
                     order_items = order.order_items.all()
                     update_order_status_with_notification(
@@ -248,7 +248,7 @@ def create_order(request):
                     f"""
                     <tr>
                         <td>{index + 1}</td>
-                        <td><img src="{item.product.photo.url if item.product.photo else ''}" alt="{item.product.name}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
+                        <td><img src="{item['product']['photo']['url']}" alt="{item['product']['name_en']}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
                         <td>{item['product']['name_en']}</td>
                         <td>{item['product']['collection']['name_en']}</td>
                         <td>{item['quantity']}</td>
@@ -264,7 +264,7 @@ def create_order(request):
                     f"""
                     <tr>
                         <td>{index + 1}</td>
-                        <td><img src="{item.product.photo.url if item.product.photo else ''}" alt="{item.product.name}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
+                        <td><img src="{item['product']['photo']['url']}" alt="{item['product']['name_uk']}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
                         <td>{item['product']['name_uk']}</td>
                         <td>{item['product']['collection']['name_uk']}</td>
                         <td>{item['quantity']}</td>
