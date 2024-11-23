@@ -62,7 +62,7 @@ def update_order_status_with_notification(order_id, order_items, new_status, sta
         setattr(order, status_field, timezone.now())
         order.status = new_status
         order.save()
-        language = getattr(order, 'language')
+        language = order.language
         print('bot = ',language)
         status = new_status.capitalize()
         emoji = STATUS_EMOJIS.get(new_status, '')
