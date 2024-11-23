@@ -219,8 +219,10 @@ def create_order(request):
             order = serializer.save()
             phone = request.data.get('phone')
             language = request.data.get('language')
-
-            print('views create = ', language)
+            if language not in ['en', 'uk']:
+                return Response({"detail": "Invalid language."}, status=status.HTTP_400_BAD_REQUEST)
+            order.language = language
+            order.save(update_fields=['language'])
             try:
                 telegram_user = TelegramUser.objects.get(phone=phone)
                 if telegram_user:
@@ -521,6 +523,7 @@ def get_order_summary_by_chat_id(request, chat_id):
 def update_order(request):
     chat_id = request.data.get('chat_id')
     orders = request.data.get('orders', [])
+    language = request.data.get('language')                                         
     if not chat_id:
         return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
     if not isinstance(orders, list):
@@ -532,6 +535,9 @@ def update_order(request):
             if not order_id:
                 return Response({"detail": "Order ID is required for each order."}, status=status.HTTP_400_BAD_REQUEST)
             try:
+                if language:
+                    order.language = language
+                    order.save()
                 order = Order.objects.prefetch_related('order_items__product').get(id=order_id)
                 order_summary = format_order_summary(order)
                 grouped_orders.append(order_summary)
