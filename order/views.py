@@ -218,7 +218,7 @@ def create_order(request):
         if serializer.is_valid():
             order = serializer.save()
             phone = request.data.get('phone')
-            language = language or order.language or 'en'
+            language = request.data.get('language', order.language if order.language else 'uk')
 
             try:
                 telegram_user = TelegramUser.objects.get(phone=phone)
