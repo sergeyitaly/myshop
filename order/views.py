@@ -514,33 +514,49 @@ def get_order_summary_by_chat_id(request, chat_id):
     except Exception as e:
         logger.error(f"Error fetching order summaries: {e}")
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
 @api_view(['POST'])
 def update_order(request):
     chat_id = request.data.get('chat_id')
     orders = request.data.get('orders', [])
+    
+    # Validate the input
     if not chat_id:
         return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
     if not isinstance(orders, list):
         return Response({"detail": "Orders must be a list."}, status=status.HTTP_400_BAD_REQUEST)
+    
     try:
         grouped_orders = []
         for order_data in orders:
             order_id = order_data.get('order_id')
             if not order_id:
                 return Response({"detail": "Order ID is required for each order."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Fetch the order by ID
             try:
                 order = Order.objects.prefetch_related('order_items__product').get(id=order_id)
+                
+                # Check if the language has changed
+                new_language = order_data.get('language', order.language)
+                if new_language != order.language:
+                    order.language = new_language
+                    order.save()  # Save the updated language
+
+                # Format the order summary
                 order_summary = format_order_summary(order)
                 grouped_orders.append(order_summary)
 
             except Order.DoesNotExist:
                 return Response({"error": f"Order with ID {order_id} not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Update or create the OrderSummary object
         OrderSummary.objects.update_or_create(
             chat_id=chat_id,
             defaults={'orders': grouped_orders},
         )
+        
         return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
+    
     except Exception as e:
         logger.error(f"Error updating order summary: {e}")
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

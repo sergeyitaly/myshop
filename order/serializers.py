@@ -125,6 +125,7 @@ class OrderSerializer(serializers.ModelSerializer):
     order_items_en = serializers.SerializerMethodField()
     order_items_uk = serializers.SerializerMethodField()
     telegram_user = serializers.PrimaryKeyRelatedField(queryset=TelegramUser.objects.all(), required=False)
+    language = serializers.ChoiceField(choices=['en', 'uk'], required=True)
 
     def get_order_items_en(self, order):
         order_items = []
@@ -179,13 +180,15 @@ class OrderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         items_data = validated_data.pop('order_items', [])
         telegram_user_data = validated_data.pop('telegram_user', None)
+        language = validated_data.pop('language')
+
         telegram_user = None
         if telegram_user_data:
             telegram_user, created = TelegramUser.objects.get_or_create(
                 phone=telegram_user_data.get('phone'),
                 defaults={'chat_id': telegram_user_data.get('chat_id')}
             )
-        order = Order.objects.create(telegram_user=telegram_user, **validated_data)
+        order = Order.objects.create(telegram_user=telegram_user, language=language, **validated_data)
         for item_data in items_data:
             product_id = item_data.pop('product_id', None)
             if not product_id:
@@ -206,6 +209,7 @@ class OrderSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         items_data = validated_data.pop('order_items', [])
         telegram_user_data = validated_data.pop('telegram_user', None)
+        language = validated_data.get('language', instance.language)
 
         if telegram_user_data:
             telegram_user, created = TelegramUser.objects.get_or_create(
@@ -218,6 +222,7 @@ class OrderSerializer(serializers.ModelSerializer):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
+        instance.language = language
         new_status = validated_data.get('status', instance.status)
         if new_status and new_status != instance.status:
             instance.update_status(new_status)
@@ -244,8 +249,6 @@ class OrderSerializer(serializers.ModelSerializer):
 
         return instance
         
-
-
     class Meta:
         model = Order
         fields = '__all__'
