@@ -180,7 +180,7 @@ class OrderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         items_data = validated_data.pop('order_items', [])
         telegram_user_data = validated_data.pop('telegram_user', None)
-        language = validated_data.pop('language')
+        language = validated_data.get('language', 'en')
 
         telegram_user = None
         if telegram_user_data:
