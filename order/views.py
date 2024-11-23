@@ -230,7 +230,8 @@ def create_order(request):
                         order_items,
                         'submitted',
                         'submitted_at',
-                        telegram_user.chat_id
+                        telegram_user.chat_id,
+                        language
                     )
                 else:
                     logger.warning(f"No TelegramUser found with phone: {phone}")
