@@ -214,11 +214,12 @@ telegram_webhook = TelegramWebhook.as_view()
 @permission_classes([AllowAny])
 def create_order(request):
     try:
-        language = request.data.get('language', 'uk')
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
             order = serializer.save()
             phone = request.data.get('phone')
+            language = language or order.language or 'en'
+
             try:
                 telegram_user = TelegramUser.objects.get(phone=phone)
                 if telegram_user:

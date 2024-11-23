@@ -56,13 +56,13 @@ def send_telegram_message(chat_id, message):
         raise
 
 
-def update_order_status_with_notification(order_id, order_items, new_status, status_field, chat_id, language):
+def update_order_status_with_notification(order_id, order_items, new_status, status_field, chat_id, language=None):
     try:
         order = Order.objects.get(id=order_id)
         setattr(order, status_field, timezone.now())
         order.status = new_status
 #        order.save()
-        language = order.language
+        language = language or order.language or 'uk'
 
         status = new_status.capitalize()
         emoji = STATUS_EMOJIS.get(new_status, '')
