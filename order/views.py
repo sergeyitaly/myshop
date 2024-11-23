@@ -214,6 +214,7 @@ telegram_webhook = TelegramWebhook.as_view()
 @permission_classes([AllowAny])
 def create_order(request):
     try:
+        language = request.data.get('language', 'uk')
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
             order = serializer.save()
@@ -222,7 +223,6 @@ def create_order(request):
                 telegram_user = TelegramUser.objects.get(phone=phone)
                 if telegram_user:
                     order.telegram_user = telegram_user
-                    language = order.language
                     order.save(update_fields=['telegram_user'])
                     order_items = order.order_items.all()
                     update_order_status_with_notification(
@@ -244,58 +244,37 @@ def create_order(request):
             order_items_uk = serializer.get_order_items_uk(order)
 
             def generate_order_items_en_table(order_items):
-                try:            
-                    return "".join([
-                        f"""
-                        <tr>
-                            <td>{index + 1}</td>
-                            <td><img src="{item['product']['photo'].get('url', '')}" 
-                                alt="{item['product'].get('name_en', 'N/A')}" 
-                                style="width: 50px; height: 50px; object-fit: cover;" /></td>
-                            <td>{item['product'].get('name_en', 'N/A')}</td>
-                            <td>{item['product']['collection'].get('name_en', 'N/A') if 'collection' in item['product'] else 'N/A'}</td>
-                            <td>{item.get('quantity', 0)}</td>
-                            <td>{item['product'].get('size', 'N/A')}</td>
-                            <td>{item['product'].get('color_name_en', 'N/A')}<br> 
-                                <div style="width: 10px; height: 10px; background-color: {item['product'].get('color_value', '#ffffff')}; display: inline-block;"></div>
-                            </td>
-                            <td>{item['product'].get('price', 0)} {item['product'].get('currency', '')}</td>
-                        </tr>
-                        """
-                        for index, item in enumerate(order_items)
-                    ])
-                except KeyError as e:
-                    raise ValueError(f"Missing expected key in order item: {e}") from e
-                except TypeError as e:
-                    raise ValueError(f"Invalid order_items structure: {order_items}") from e
-
-
+                return "".join([
+                    f"""
+                    <tr>
+                        <td>{index + 1}</td>
+                        <td><img src="{item['product']['photo']}" alt="{item['product']['name_en']}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
+                        <td>{item['product']['name_en']}</td>
+                        <td>{item['product']['collection']['name_en']}</td>
+                        <td>{item['quantity']}</td>
+                        <td>{item['product']['size']}</td>
+                        <td>{item['product']['color_name_en']}<br> <div style="width: 10px; height: 10px; background-color: {item['product']['color_value']}; display: inline-block;"></div></td>
+                        <td>{item['product']['price']} {item['product']['currency']}</td>
+                    </tr>
+                    """
+                    for index, item in enumerate(order_items)
+                ])
             def generate_order_items_uk_table(order_items):
-                try:
-                    return "".join([
-                        f"""
-                        <tr>
-                            <td>{index + 1}</td>
-                            <td><img src="{item['product']['photo'].get('url', '')}" 
-                                alt="{item['product'].get('name_uk', 'N/A')}" 
-                                style="width: 50px; height: 50px; object-fit: cover;" /></td>
-                            <td>{item['product'].get('name_uk', 'N/A')}</td>
-                            <td>{item['product']['collection'].get('name_uk', 'N/A') if 'collection' in item['product'] else 'N/A'}</td>
-                            <td>{item.get('quantity', 0)}</td>
-                            <td>{item['product'].get('size', 'N/A')}</td>
-                            <td>{item['product'].get('color_name_uk', 'N/A')}<br> 
-                                <div style="width: 10px; height: 10px; background-color: {item['product'].get('color_value', '#ffffff')}; display: inline-block;"></div>
-                            </td>
-                            <td>{item['product'].get('price', 0)} {item['product'].get('currency', '')}</td>
-                        </tr>
-                        """
-                        for index, item in enumerate(order_items)
-                    ])
-                except KeyError as e:
-                    raise ValueError(f"Missing expected key in order item: {e}") from e
-                except TypeError as e:
-                    raise ValueError(f"Invalid order_items structure: {order_items}") from e
-
+                return "".join([
+                    f"""
+                    <tr>
+                        <td>{index + 1}</td>
+                        <td><img src="{item['product']['photo']}" alt="{item['product']['name_uk']}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
+                        <td>{item['product']['name_uk']}</td>
+                        <td>{item['product']['collection']['name_uk']}</td>
+                        <td>{item['quantity']}</td>
+                        <td>{item['product']['size']}</td>
+                        <td>{item['product']['color_name_uk']}<br> <div style="width: 10px; height: 10px; background-color: {item['product']['color_value']}; display: inline-block;"></div></td>
+                        <td>{item['product']['price']} {item['product']['currency']}</td>
+                    </tr>
+                    """
+                    for index, item in enumerate(order_items)
+                ])
             email_body_en = f"""
             <html>
             <head>
