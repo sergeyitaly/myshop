@@ -124,12 +124,12 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ['phone', 'email', 'name', 'surname']
     inlines = [OrderItemInline]
     readonly_fields = [
-        'id', 'name', 'surname', 'phone', 'email', 'total_quantity', 'total_price', 
+        'id', 'language','name', 'surname', 'phone', 'email', 'total_quantity', 'total_price', 
         'submitted_at', 'created_at', 'processed_at', 'complete_at', 
         'canceled_at', 'chat_id', 'display_receiver', 'display_receiver_comments'
     ]
     fields = [
-        'id', 'language','name', 'surname', 'phone', 'email', 'address', 'receiver', 
+        'id',  'name', 'surname', 'phone', 'email', 'address', 'receiver', 
         'receiver_comments', 'congrats', 'present', 'status', 'total_quantity', 
         'total_price', 'submitted_at', 'created_at', 'processed_at', 
         'complete_at', 'canceled_at'
@@ -190,7 +190,8 @@ class OrderAdmin(admin.ModelAdmin):
                         order_items,
                         obj.status,
                         status_field,
-                        obj.telegram_user.chat_id
+                        obj.telegram_user.chat_id,
+                        obj.language
                     )
                 else:
                     logger.warning(f"Telegram user or chat_id is missing for order {obj.id}")
