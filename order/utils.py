@@ -42,7 +42,8 @@ def update_orders(current_status, new_status, threshold_minutes, timestamp_field
                         order_summary["order_items"],
                         new_status,
                         f'{new_status}_at',
-                        chat_id
+                        chat_id,
+                        order.language
                     )
 
 def update_order_status(order, new_status, now, timestamp_field):
