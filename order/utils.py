@@ -20,13 +20,9 @@ def update_orders(current_status, new_status, threshold_minutes, timestamp_field
             if chat_id:
                 # Update the order status and corresponding timestamp
                 update_order_status(order, new_status, now, timestamp_field)
-
-                # Prepare the order summary, checking for the user's language preference
+                language = order.language   
                 order_summary = prepare_order_summary(order)
-
-                # Use a transaction to ensure atomicity
                 with transaction.atomic():
-                    # Check if the OrderSummary already exists
                     order_summary_instance, created = OrderSummary.objects.update_or_create(
                         chat_id=chat_id,
                         defaults={
@@ -35,15 +31,13 @@ def update_orders(current_status, new_status, threshold_minutes, timestamp_field
                             'latest_status_time': order_summary["latest_status_time"],  # Include latest status timestamp
                         }
                     )
-
-                    # Notify user with the updated order summary
                     update_order_status_with_notification(
                         order.id,
                         order_summary["order_items"],
                         new_status,
                         f'{new_status}_at',
                         chat_id,
-                        order.language
+                        language
                     )
 
 def update_order_status(order, new_status, now, timestamp_field):
@@ -56,7 +50,6 @@ def prepare_order_summary(order):
     order_items_data_uk = []
 
     for item in order.order_items.all():
-        # Assuming `item.product_name_en`, `item.product_name_uk`, etc., are available
         order_items_data_en.append({
             "size": item.size,
             "quantity": item.quantity,
