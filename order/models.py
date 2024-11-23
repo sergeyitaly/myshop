@@ -100,6 +100,9 @@ class Order(models.Model):
                         self.telegram_user = telegram_user
                     except TelegramUser.DoesNotExist:
                         self.telegram_user = None
+
+                if old_instance.language != self.language:
+                    pass
                 super().save(*args, **kwargs)  # Only save if status changed
         else:
             # Link Telegram user for new instances

@@ -59,11 +59,16 @@ def send_telegram_message(chat_id, message):
 def update_order_status_with_notification(order_id, order_items, new_status, status_field, chat_id, language):
     try:
         order = Order.objects.get(id=order_id)
+
+        if language and language != order.language:
+            order.language = language
+            order.save()    
         setattr(order, status_field, timezone.now())
         order.status = new_status
         order.save()
-        language = order.language
-        print('bot = ',language)
+        language = order.language or 'en'
+        print('tekegram language = ', language )
+
         status = new_status.capitalize()
         emoji = STATUS_EMOJIS.get(new_status, '')
 
