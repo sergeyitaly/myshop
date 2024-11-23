@@ -244,8 +244,6 @@ class OrderSerializer(serializers.ModelSerializer):
 
         return instance
         
-
-
     class Meta:
         model = Order
         fields = '__all__'

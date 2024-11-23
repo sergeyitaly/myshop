@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-19 22:15+0200\n"
+"POT-Creation-Date: 2024-11-23 15:52+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -179,50 +179,58 @@ msgstr ""
 msgid "Product Name"
 msgstr ""
 
-#: order/admin.py:58 shop/admin.py:87 shop/models.py:69 shop/models.py:93
+#: order/admin.py:59 shop/models.py:125
+msgid "Price"
+msgstr ""
+
+#: order/admin.py:63 shop/models.py:143
+msgid "Currency"
+msgstr ""
+
+#: order/admin.py:67 shop/admin.py:87 shop/models.py:69 shop/models.py:93
 #: shop/models.py:121
 msgid "Collection"
 msgstr ""
 
-#: order/admin.py:64 shop/models.py:135
+#: order/admin.py:73 shop/models.py:135
 msgid "Size"
 msgstr ""
 
-#: order/admin.py:69
+#: order/admin.py:78
 msgid "Color"
 msgstr ""
 
-#: order/admin.py:91
+#: order/admin.py:100
 msgid "Has Order Items"
 msgstr ""
 
-#: order/admin.py:92
+#: order/admin.py:101
 msgid "has_order_items"
 msgstr ""
 
-#: order/admin.py:96
+#: order/admin.py:105
 msgid "With Order Items"
 msgstr ""
 
-#: order/admin.py:97
+#: order/admin.py:106
 msgid "Without Order Items"
 msgstr ""
 
-#: order/admin.py:148
+#: order/admin.py:157
 msgid "Last Updated"
 msgstr ""
 
-#: order/admin.py:152
+#: order/admin.py:161
 msgid "Total Quantity"
 msgstr ""
 
-#: order/admin.py:156
+#: order/admin.py:165
 msgid "Total Price"
 msgstr ""
 
-#: order/management/commands/generate_order_summaries.py:103
-#: order/management/commands/generate_order_summaries.py:114
-#: order/serializers.py:163 order/utils.py:67 order/utils.py:78
+#: order/management/commands/generate_order_summaries.py:97
+#: order/management/commands/generate_order_summaries.py:109 order/utils.py:68
+#: order/utils.py:79
 msgid "No Collection"
 msgstr ""
 
@@ -230,7 +238,7 @@ msgstr ""
 msgid "Phone"
 msgstr ""
 
-#: order/models.py:15 order/models.py:121
+#: order/models.py:15 order/models.py:122
 msgid "Chat ID"
 msgstr ""
 
@@ -246,11 +254,11 @@ msgstr ""
 msgid "Submitted"
 msgstr ""
 
-#: order/models.py:28 order/utils.py:82 shop/models.py:128
+#: order/models.py:28 order/utils.py:83 shop/models.py:128
 msgid "Created"
 msgstr ""
 
-#: order/models.py:29 order/utils.py:83
+#: order/models.py:29 order/utils.py:84
 msgid "Processed"
 msgstr ""
 
@@ -258,7 +266,7 @@ msgstr ""
 msgid "Complete"
 msgstr ""
 
-#: order/models.py:31 order/utils.py:85
+#: order/models.py:31 order/utils.py:86
 msgid "Canceled"
 msgstr ""
 
@@ -314,53 +322,53 @@ msgstr ""
 msgid "Package as a present"
 msgstr ""
 
-#: order/models.py:116 order/models.py:149
+#: order/models.py:117 order/models.py:150
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:484
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:491
 msgid "Order"
 msgstr ""
 
-#: order/models.py:117 order/models.py:122
+#: order/models.py:118 order/models.py:123
 msgid "Orders"
 msgstr ""
 
-#: order/models.py:144
+#: order/models.py:145
 msgid "Order summary"
 msgstr ""
 
-#: order/models.py:145
+#: order/models.py:146
 msgid "Order summaries"
 msgstr ""
 
-#: order/models.py:150 shop/admin.py:143 shop/models.py:188 shop/models.py:227
+#: order/models.py:151 shop/admin.py:143 shop/models.py:188 shop/models.py:227
 msgid "Product"
 msgstr ""
 
-#: order/models.py:153
+#: order/models.py:155
 msgid "Quantity"
 msgstr ""
 
-#: order/models.py:154
+#: order/models.py:156
 msgid "Total Sum"
 msgstr ""
 
-#: order/models.py:176
+#: order/models.py:179
 msgid "Order Item"
 msgstr ""
 
-#: order/models.py:177
+#: order/models.py:180
 msgid "Order Items"
 msgstr ""
 
-#: order/serializers.py:161 order/utils.py:66 order/utils.py:77
-msgid "No Name"
-msgstr ""
-
-#: order/serializers.py:162 order/utils.py:63 order/utils.py:74
+#: order/utils.py:63 order/utils.py:74
 msgid "No Color"
 msgstr ""
 
-#: order/utils.py:84
+#: order/utils.py:67 order/utils.py:78
+msgid "No Name"
+msgstr ""
+
+#: order/utils.py:85
 msgid "Completed"
 msgstr ""
 
@@ -424,10 +432,6 @@ msgstr ""
 msgid "ID Name"
 msgstr ""
 
-#: shop/models.py:125
-msgid "Price"
-msgstr ""
-
 #: shop/models.py:126
 msgid "Stock"
 msgstr ""
@@ -478,10 +482,6 @@ msgstr ""
 
 #: shop/models.py:136
 msgid "Discount"
-msgstr ""
-
-#: shop/models.py:143
-msgid "Currency"
 msgstr ""
 
 #: shop/models.py:196 shop/models.py:198
