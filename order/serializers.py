@@ -125,7 +125,6 @@ class OrderSerializer(serializers.ModelSerializer):
     order_items_en = serializers.SerializerMethodField()
     order_items_uk = serializers.SerializerMethodField()
     telegram_user = serializers.PrimaryKeyRelatedField(queryset=TelegramUser.objects.all(), required=False)
-    language = serializers.ChoiceField(choices=['en', 'uk'], required=True)
 
     def get_order_items_en(self, order):
         order_items = []
