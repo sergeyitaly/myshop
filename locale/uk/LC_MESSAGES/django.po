@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-19 22:18+0200\n"
+"POT-Creation-Date: 2024-11-23 15:56+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -202,50 +202,58 @@ msgstr "Фото продукту"
 msgid "Product Name"
 msgstr "Назва продукту"
 
-#: order/admin.py:58 shop/admin.py:87 shop/models.py:69 shop/models.py:93
+#: order/admin.py:59 shop/models.py:125
+msgid "Price"
+msgstr "Ціна"
+
+#: order/admin.py:63 shop/models.py:143
+msgid "Currency"
+msgstr "Валюта"
+
+#: order/admin.py:67 shop/admin.py:87 shop/models.py:69 shop/models.py:93
 #: shop/models.py:121
 msgid "Collection"
 msgstr "Коллекція"
 
-#: order/admin.py:64 shop/models.py:135
+#: order/admin.py:73 shop/models.py:135
 msgid "Size"
 msgstr "Розмір"
 
-#: order/admin.py:69
+#: order/admin.py:78
 msgid "Color"
 msgstr "Колір"
 
-#: order/admin.py:91
+#: order/admin.py:100
 msgid "Has Order Items"
 msgstr "Має елементи замовлення"
 
-#: order/admin.py:92
+#: order/admin.py:101
 msgid "has_order_items"
 msgstr "Має елементи замовлення"
 
-#: order/admin.py:96
+#: order/admin.py:105
 msgid "With Order Items"
 msgstr "З"
 
-#: order/admin.py:97
+#: order/admin.py:106
 msgid "Without Order Items"
 msgstr "Без"
 
-#: order/admin.py:148
+#: order/admin.py:157
 msgid "Last Updated"
 msgstr "Останнє оновлення"
 
-#: order/admin.py:152
+#: order/admin.py:161
 msgid "Total Quantity"
 msgstr "Загальна кількість"
 
-#: order/admin.py:156
+#: order/admin.py:165
 msgid "Total Price"
 msgstr "Загальна ціна"
 
-#: order/management/commands/generate_order_summaries.py:103
-#: order/management/commands/generate_order_summaries.py:114
-#: order/serializers.py:163 order/utils.py:67 order/utils.py:78
+#: order/management/commands/generate_order_summaries.py:97
+#: order/management/commands/generate_order_summaries.py:109 order/utils.py:68
+#: order/utils.py:79
 #, fuzzy
 #| msgid "Collection"
 msgid "No Collection"
@@ -255,7 +263,7 @@ msgstr "Коллекція"
 msgid "Phone"
 msgstr "Телефон"
 
-#: order/models.py:15 order/models.py:121
+#: order/models.py:15 order/models.py:122
 msgid "Chat ID"
 msgstr "Чат ІД"
 
@@ -271,11 +279,11 @@ msgstr "Телеграм користувачі"
 msgid "Submitted"
 msgstr "Оформлено"
 
-#: order/models.py:28 order/utils.py:82 shop/models.py:128
+#: order/models.py:28 order/utils.py:83 shop/models.py:128
 msgid "Created"
 msgstr "Створено"
 
-#: order/models.py:29 order/utils.py:83
+#: order/models.py:29 order/utils.py:84
 msgid "Processed"
 msgstr "В обробці"
 
@@ -283,7 +291,7 @@ msgstr "В обробці"
 msgid "Complete"
 msgstr "Завершено"
 
-#: order/models.py:31 order/utils.py:85
+#: order/models.py:31 order/utils.py:86
 msgid "Canceled"
 msgstr "Скасовано"
 
@@ -339,59 +347,59 @@ msgstr "Батьківське замовлення"
 msgid "Package as a present"
 msgstr "Пакування як подарунок"
 
-#: order/models.py:116 order/models.py:149
+#: order/models.py:117 order/models.py:150
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:484
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:491
 msgid "Order"
 msgstr "Замовлення"
 
-#: order/models.py:117 order/models.py:122
+#: order/models.py:118 order/models.py:123
 msgid "Orders"
 msgstr "Замовлення"
 
-#: order/models.py:144
+#: order/models.py:145
 msgid "Order summary"
 msgstr "JSON замовлення"
 
-#: order/models.py:145
+#: order/models.py:146
 #, fuzzy
 #| msgid "Order summarys"
 msgid "Order summaries"
 msgstr "JSON замовлень"
 
-#: order/models.py:150 shop/admin.py:143 shop/models.py:188 shop/models.py:227
+#: order/models.py:151 shop/admin.py:143 shop/models.py:188 shop/models.py:227
 msgid "Product"
 msgstr "Продукт"
 
-#: order/models.py:153
+#: order/models.py:155
 msgid "Quantity"
 msgstr "Кількість"
 
-#: order/models.py:154
+#: order/models.py:156
 msgid "Total Sum"
 msgstr "Загальна сума"
 
-#: order/models.py:176
+#: order/models.py:179
 msgid "Order Item"
 msgstr "Елемент замовлення"
 
-#: order/models.py:177
+#: order/models.py:180
 msgid "Order Items"
 msgstr "Елементи замовлення"
 
-#: order/serializers.py:161 order/utils.py:66 order/utils.py:77
-#, fuzzy
-#| msgid "Name"
-msgid "No Name"
-msgstr "Ім'я"
-
-#: order/serializers.py:162 order/utils.py:63 order/utils.py:74
+#: order/utils.py:63 order/utils.py:74
 #, fuzzy
 #| msgid "Color"
 msgid "No Color"
 msgstr "Колір"
 
-#: order/utils.py:84
+#: order/utils.py:67 order/utils.py:78
+#, fuzzy
+#| msgid "Name"
+msgid "No Name"
+msgstr "Ім'я"
+
+#: order/utils.py:85
 #, fuzzy
 #| msgid "Complete"
 msgid "Completed"
@@ -465,10 +473,6 @@ msgstr "Кількість продаж"
 msgid "ID Name"
 msgstr "Ім'я"
 
-#: shop/models.py:125
-msgid "Price"
-msgstr "Ціна"
-
 #: shop/models.py:126
 msgid "Stock"
 msgstr "В наявності"
@@ -520,10 +524,6 @@ msgstr "Знажка в %"
 #: shop/models.py:136
 msgid "Discount"
 msgstr "Знижка"
-
-#: shop/models.py:143
-msgid "Currency"
-msgstr "Валюта"
 
 #: shop/models.py:196 shop/models.py:198
 msgid "images"

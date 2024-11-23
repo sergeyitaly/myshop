@@ -218,8 +218,9 @@ def create_order(request):
         if serializer.is_valid():
             order = serializer.save()
             phone = request.data.get('phone')
-            language = request.data.get('language', order.language if order.language else 'uk')
+            language = request.data.get('language')
 
+            print('views create = ', language)
             try:
                 telegram_user = TelegramUser.objects.get(phone=phone)
                 if telegram_user:

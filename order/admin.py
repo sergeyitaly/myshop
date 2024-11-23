@@ -124,12 +124,12 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ['phone', 'email', 'name', 'surname']
     inlines = [OrderItemInline]
     readonly_fields = [
-        'id', 'language','name', 'surname', 'phone', 'email', 'total_quantity', 'total_price', 
+        'id', 'name', 'surname', 'phone', 'email', 'total_quantity', 'total_price', 
         'submitted_at', 'created_at', 'processed_at', 'complete_at', 
         'canceled_at', 'chat_id', 'display_receiver', 'display_receiver_comments'
     ]
     fields = [
-        'id',  'name', 'surname', 'phone', 'email', 'address', 'receiver', 
+        'id', 'language','name', 'surname', 'phone', 'email', 'address', 'receiver', 
         'receiver_comments', 'congrats', 'present', 'status', 'total_quantity', 
         'total_price', 'submitted_at', 'created_at', 'processed_at', 
         'complete_at', 'canceled_at'
