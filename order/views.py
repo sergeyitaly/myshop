@@ -247,7 +247,7 @@ def create_order(request):
                     f"""
                     <tr>
                         <td>{index + 1}</td>
-                        <td><img src="{item['product']['photo']}" alt="{item['product']['name_en']}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
+                        <td><img src="{item['product']['photo.url']}" alt="{item['product']['name_en']}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
                         <td>{item['product']['name_en']}</td>
                         <td>{item['product']['collection']['name_en']}</td>
                         <td>{item['quantity']}</td>
@@ -263,7 +263,7 @@ def create_order(request):
                     f"""
                     <tr>
                         <td>{index + 1}</td>
-                        <td><img src="{item['product']['photo']}" alt="{item['product']['name_uk']}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
+                        <td><img src="{item['product']['photo.url']}" alt="{item['product']['name_uk']}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
                         <td>{item['product']['name_uk']}</td>
                         <td>{item['product']['collection']['name_uk']}</td>
                         <td>{item['quantity']}</td>

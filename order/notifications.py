@@ -2,7 +2,7 @@ from django.utils import timezone
 from django.conf import settings
 from .models import Order
 import logging
-import requests
+import logging, requests, json
 from .shared_utils import get_random_saying
 from .signals import update_order_summary
 
@@ -56,13 +56,13 @@ def send_telegram_message(chat_id, message):
         raise
 
 
-def update_order_status_with_notification(order_id, order_items, new_status, status_field, chat_id):
+def update_order_status_with_notification(order_id, order_items, new_status, status_field, chat_id, language):
     try:
         order = Order.objects.get(id=order_id)
         setattr(order, status_field, timezone.now())
         order.status = new_status
 #        order.save()
-        language = order.language  # Get the language of the order
+        language = order.language
 
         status = new_status.capitalize()
         emoji = STATUS_EMOJIS.get(new_status, '')
