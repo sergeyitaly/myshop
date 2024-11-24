@@ -193,12 +193,10 @@ class OrderSerializer(serializers.ModelSerializer):
                 raise ValidationError("product_id is required for order items.")
             
             try:
-                # Ensure the product exists
                 product = Product.objects.get(id=product_id)
             except Product.DoesNotExist:
                 raise ValidationError(f"Product with id {product_id} does not exist.")
 
-            # Create the order item if the product is valid
             order_item = OrderItem.objects.create(order=order, product=product, quantity=item_data['quantity'])
             print(f"Created OrderItem with product_id: {product_id}, OrderItem: {order_item}")
 
@@ -207,7 +205,7 @@ class OrderSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         items_data = validated_data.pop('order_items', [])
         telegram_user_data = validated_data.pop('telegram_user', None)
-        language = validated_data.get('language', instance.language)
+        language = validated_data.pop('language', instance.language)
 
         if telegram_user_data:
             telegram_user, created = TelegramUser.objects.get_or_create(
@@ -216,7 +214,6 @@ class OrderSerializer(serializers.ModelSerializer):
             )
             instance.telegram_user = telegram_user
 
-        # Update the Order instance
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
@@ -227,21 +224,17 @@ class OrderSerializer(serializers.ModelSerializer):
 
         instance.save()
 
-        # Update OrderItems
         existing_items = {item.product_id: item for item in instance.order_items.all()}
         for item_data in items_data:
             product_id = item_data.pop('product_id')
             if product_id in existing_items:
-                # Update existing item
                 item = existing_items.pop(product_id)
                 for attr, value in item_data.items():
                     setattr(item, attr, value)
                 item.save()
             else:
-                # Create new item
                 OrderItem.objects.create(order=instance, product_id=product_id, **item_data)
 
-        # Delete any items not in the updated list
         for item in existing_items.values():
             item.delete()
 
