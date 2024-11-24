@@ -167,6 +167,7 @@ class OrderAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         if change:
             old_obj = self.model.objects.get(pk=obj.pk)
+            
             if old_obj.status != obj.status:
                 status_timestamps = {
                     'submitted': 'submitted_at',

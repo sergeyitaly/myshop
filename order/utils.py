@@ -19,8 +19,8 @@ def update_orders(current_status, new_status, threshold_minutes, timestamp_field
             chat_id = order.telegram_user.chat_id if order.telegram_user else None
             if chat_id:
                 # Update the order status and corresponding timestamp
-                update_order_status(order, new_status, now, timestamp_field)
                 language = order.language   
+                update_order_status(order, new_status, now, timestamp_field)
                 order_summary = prepare_order_summary(order)
                 with transaction.atomic():
                     order_summary_instance, created = OrderSummary.objects.update_or_create(

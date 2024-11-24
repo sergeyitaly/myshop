@@ -537,25 +537,15 @@ def update_order(request):
             order_id = order_data.get('order_id')
             if not order_id:
                 return Response({"detail": "Order ID is required for each order."}, status=status.HTTP_400_BAD_REQUEST)
-            
-            # Fetch the order by ID
             try:
                 order = Order.objects.prefetch_related('order_items__product').get(id=order_id)
-                
-                # Check if the language has changed
-                new_language = order_data.get('language', order.language)
-                if new_language != order.language:
-                    order.language = new_language
-                    order.save()  # Save the updated language
-
-                # Format the order summary
+                order.save()
                 order_summary = format_order_summary(order)
                 grouped_orders.append(order_summary)
 
             except Order.DoesNotExist:
                 return Response({"error": f"Order with ID {order_id} not found."}, status=status.HTTP_404_NOT_FOUND)
         
-        # Update or create the OrderSummary object
         OrderSummary.objects.update_or_create(
             chat_id=chat_id,
             defaults={'orders': grouped_orders},
