@@ -535,11 +535,15 @@ def update_order(request):
         grouped_orders = []
         for order_data in orders:
             order_id = order_data.get('order_id')
+            language = order_data.get('language')
             if not order_id:
                 return Response({"detail": "Order ID is required for each order."}, status=status.HTTP_400_BAD_REQUEST)
             try:
                 order = Order.objects.prefetch_related('order_items__product').get(id=order_id)
+                if language:
+                    order.language = language 
                 order.save()
+
                 order_summary = format_order_summary(order)
                 grouped_orders.append(order_summary)
 
