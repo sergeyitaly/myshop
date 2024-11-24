@@ -205,7 +205,6 @@ class OrderSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         items_data = validated_data.pop('order_items', [])
         telegram_user_data = validated_data.pop('telegram_user', None)
-        language = validated_data.pop('language', instance.language)
 
         if telegram_user_data:
             telegram_user, created = TelegramUser.objects.get_or_create(
@@ -217,7 +216,6 @@ class OrderSerializer(serializers.ModelSerializer):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
-        instance.language = language
         new_status = validated_data.get('status', instance.status)
         if new_status and new_status != instance.status:
             instance.update_status(new_status)
