@@ -179,7 +179,6 @@ class OrderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         items_data = validated_data.pop('order_items', [])
         telegram_user_data = validated_data.pop('telegram_user', None)
-        language = validated_data.get('language', 'en')
 
         telegram_user = None
         if telegram_user_data:
@@ -187,7 +186,7 @@ class OrderSerializer(serializers.ModelSerializer):
                 phone=telegram_user_data.get('phone'),
                 defaults={'chat_id': telegram_user_data.get('chat_id')}
             )
-        order = Order.objects.create(telegram_user=telegram_user, language=language, **validated_data)
+        order = Order.objects.create(telegram_user=telegram_user, **validated_data)
         for item_data in items_data:
             product_id = item_data.pop('product_id', None)
             if not product_id:

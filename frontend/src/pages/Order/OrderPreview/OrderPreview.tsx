@@ -7,8 +7,6 @@ import { ROUTE } from '../../../constants'
 import { Product } from '../../../models/entities'
 import { useNavigate } from 'react-router-dom'
 import {useTranslation} from "react-i18next";
-import i18n from "i18next";
-
 
 interface OrderPreviewProps {
 	className?: string;
@@ -21,10 +19,7 @@ export const OrderPreview = ({
 
     const navigate = useNavigate();
     const { t  } = useTranslation();
-
-
     const { basketItems, totalPrice, deleteFromBasket, changeCounter} = useBasket()
-
     const handleClickCard = (product: Product) => {
         navigate(ROUTE.PRODUCT+product.id_name)
     }
@@ -43,7 +38,6 @@ export const OrderPreview = ({
                         key={product.id}
                         product={product}
                         qty={qty}
-                        language={i18n.language}
                         stock={product.stock}
                         onClickDelete={deleteFromBasket}
                         onChangeCounter={(val) => changeCounter(product, val)}
