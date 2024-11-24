@@ -7,6 +7,7 @@ import decimal
 from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import make_naive
 import datetime
+from django.db.models.fields import Field
 
 logger = logging.getLogger(__name__)
 
@@ -88,31 +89,31 @@ class Order(models.Model):
         self.save()
 
     def save(self, *args, **kwargs):
-        """Override save method to prevent excessive updates and link Telegram user."""
-        # Avoid recursive signal calls by checking if instance has changed
-        if self.pk:
+        if self.pk:  # If this is an update (not a new instance)
             old_instance = Order.objects.get(pk=self.pk)
-            if old_instance.status != self.status:
-                # Check and link Telegram user only if it's not already set
-                if not self.telegram_user and self.phone:
-                    try:
-                        telegram_user = TelegramUser.objects.get(phone=self.phone)
-                        self.telegram_user = telegram_user
-                    except TelegramUser.DoesNotExist:
-                        self.telegram_user = None
+            changes = {}
 
-                if old_instance.language != self.language:
-                    pass
-                super().save(*args, **kwargs)  # Only save if status changed
-        else:
-            # Link Telegram user for new instances
-            if not self.telegram_user and self.phone:
-                try:
-                    telegram_user = TelegramUser.objects.get(phone=self.phone)
-                    self.telegram_user = telegram_user
-                except TelegramUser.DoesNotExist:
-                    self.telegram_user = None
-            super().save(*args, **kwargs)  # Save new instance
+            for field in self._meta.fields:
+                field_name = field.name
+                old_value = getattr(old_instance, field_name)
+                new_value = getattr(self, field_name)
+                
+                if old_value != new_value:
+                    changes[field_name] = {"old": old_value, "new": new_value}
+
+    #        if changes:
+    #            print("Changes detected:", changes)  # Replace with actual logging or handling logic
+
+        # Link Telegram user for new instances or when phone is updated
+        if not self.telegram_user and self.phone:
+            try:
+                telegram_user = TelegramUser.objects.get(phone=self.phone)
+                self.telegram_user = telegram_user
+            except TelegramUser.DoesNotExist:
+                self.telegram_user = None
+
+        # Save the instance
+        super().save(*args, **kwargs)
 
 
     class Meta:
