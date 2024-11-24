@@ -12,7 +12,6 @@ interface OrderItemCardProps {
 	product: Product;
 	qty: number;
 	stock: number;
-	language: string;
 	onClickDelete?: (product: Product) => void;
 	onChangeCounter?: (value: number) => void;
 	onClickName?: (product: Product) => void;

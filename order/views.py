@@ -215,10 +215,15 @@ telegram_webhook = TelegramWebhook.as_view()
 def create_order(request):
     try:
         serializer = OrderSerializer(data=request.data)
+        language = request.data.get('language')
+        order_data = request.data.copy()
+        order_data['language'] = language   
+  
         if serializer.is_valid():
             order = serializer.save()
             phone = request.data.get('phone')
-            language = request.data.get('language')
+            order_items_en = serializer.get_order_items_en(order)
+            order_items_uk = serializer.get_order_items_uk(order)   
             try:
                 telegram_user = TelegramUser.objects.get(phone=phone)
                 if telegram_user:
@@ -240,8 +245,7 @@ def create_order(request):
                 logger.warning(f"No TelegramUser found with phone: {phone}")
 
             formatted_date = localtime(order.submitted_at).strftime('%Y-%m-%d %H:%M')
-            order_items_en = serializer.get_order_items_en(order)
-            order_items_uk = serializer.get_order_items_uk(order)
+
 
             def generate_order_items_en_table(order_items):
                 return "".join([
@@ -514,6 +518,8 @@ def get_order_summary_by_chat_id(request, chat_id):
     except Exception as e:
         logger.error(f"Error fetching order summaries: {e}")
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    
 @api_view(['POST'])
 def update_order(request):
     chat_id = request.data.get('chat_id')
