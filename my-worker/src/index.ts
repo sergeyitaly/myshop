@@ -654,9 +654,9 @@ async function processMessage(message: any): Promise<void> {
       await sendOrderDetails(phoneNumber, chatId);
     } else 
     {
-      const isEnglish = getUserLanguage(chatId) === 'en';
-      await sendMessage(chatId, isEnglish ? `🔍 Phone number not found. Please share your phone number first.` : `🔍 Номер телефону не знайдено. Будь ласка, спочатку надайте ваш номер телефону.`);
-      await sendContactRequest(chatId);
+        const isEnglish = getUserLanguage(chatId) === 'en';
+        await sendMessage(chatId, isEnglish ? `🔍 Phone number not found. Please share your phone number first.` : `🔍 Номер телефону не знайдено. Будь ласка, спочатку надайте ваш номер телефону.`);
+        await sendContactRequest(chatId);
     }
 
   } else if (message.text === 'Orders' || message.text === 'Всі замовлення') {
