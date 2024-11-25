@@ -15,8 +15,7 @@ pipeline {
                 script {
                     echo "Building Android APK inside the running container..."
                     sh """
-                    docker exec django_web \
-                        ./gradlew assembleRelease
+                    /usr/local/bin/docker exec django_web ./gradlew assembleRelease
                     """
                 }
             }
