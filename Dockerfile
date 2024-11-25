@@ -43,7 +43,7 @@ RUN yes | sdkmanager --licenses \
     && sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;23.1.7779620"
 
 # Copy Android project files
-COPY /app/android/ ./android/
+COPY android/ ./android/
 
 # Build APK
 RUN ./gradlew assembleRelease
