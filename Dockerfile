@@ -40,10 +40,10 @@ ENV PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$A
 # Accept SDK licenses and install build tools
 RUN yes | sdkmanager --licenses \
     && sdkmanager --update \
-    && sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+    && sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;23.1.7779620"
 
 # Copy Android project files
-COPY android/ /app/android/
+COPY /app/android/ ./android/
 
 # Build APK
 RUN ./gradlew assembleRelease
