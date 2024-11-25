@@ -1,20 +1,17 @@
-plugins {
-    id 'com.android.application' version '8.1.0' apply false
+buildscript {
+    repositories {
+        google()  // Required for Android tools
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.0'
+    }
 }
 
-android {
-    compileSdkVersion 33
-    defaultConfig {
-        applicationId "com.example.myshop"
-        minSdkVersion 21
-        targetSdkVersion 33
-        versionCode 1
-        versionName "1.0"
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
+allprojects {
+    repositories {
+        google()  // Required for Android tools
+        mavenCentral()
     }
 }
+
