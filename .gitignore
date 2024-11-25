@@ -63,3 +63,15 @@ graphviz*
 erd_graph.png
 
 koloryt-project-658aa790b0ef.json
+
+# Gradle wrapper
+/gradle/wrapper/gradle-wrapper.jar
+
+# Gradle build files
+.gradle/
+
+# Gradle user home directory
+gradle/
+
+# Build output
+/build/
