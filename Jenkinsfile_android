@@ -2,53 +2,34 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE_ANDROID = 'sergeyitaly/android-builder'
-        TAG = 'latest'
-        PLAY_STORE_JSON_KEY = credentials('play-store-json-key')
-        PATH = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${env.PATH}"
+        DOCKER_IMAGE = 'sergeyitaly/koloryt'
+        TAG = 'serhii_test'
+        APK_OUTPUT_DIR = '/app/android/build/outputs/apk/release'
+        GOOGLE_PLAY_CREDENTIALS = credentials('play-store-json-key')
     }
 
     stages {
-        stage('Checkout Code') {
+
+        stage('Build Android APK') {
             steps {
                 script {
-                    echo "Checking out the repository..."
-                    git branch: 'main', credentialsId: 'github-credentials-id', url: 'https://github.com/sergeyitaly/myshop.git'
-                    sh "ls -lat"
+                    echo "Building Android APK inside the running container..."
+                    sh """
+                    docker exec django_web \
+                        ./gradlew assembleRelease
+                    """
                 }
             }
         }
 
-        stage('Build Android Docker Image') {
+        stage('Archive APK') {
             steps {
                 script {
-                    echo "Building Docker image for Android..."
-                    dockerImageAndroid = docker.build("${DOCKER_IMAGE_ANDROID}:${TAG}", "-f Dockerfile_android .")
-                    echo "Docker image built: ${DOCKER_IMAGE_ANDROID}:${TAG}"
-                }
-            }
-        }
-
-        stage('Generate APK') {
-            steps {
-                script {
-                    echo "Generating APK using Docker image..."
-                    dockerImageAndroid.inside {
-                        sh "fastlane android build"
-                        echo "APK successfully generated!"
-                    }
-                }
-            }
-        }
-
-        stage('Validate Google Play Key') {
-            steps {
-                script {
-                    echo "Validating Google Play Store JSON Key..."
-                    dockerImageAndroid.inside {
-                        sh "fastlane supply init --json_key ${PLAY_STORE_JSON_KEY}"
-                        echo "Validation successful!"
-                    }
+                    echo "Archiving the built APK..."
+                    sh """
+                    docker cp django_web:${APK_OUTPUT_DIR}/app-release.apk ${WORKSPACE}/app-release.apk
+                    """
+                    archiveArtifacts artifacts: 'app-release.apk', allowEmptyArchive: true
                 }
             }
         }
@@ -57,12 +38,28 @@ pipeline {
             steps {
                 script {
                     echo "Deploying APK to Google Play Store..."
-                    dockerImageAndroid.inside {
-                        sh "fastlane supply --apk app/build/outputs/apk/release/app-release.apk --track production --json_key ${PLAY_STORE_JSON_KEY}"
-                        echo "Deployment to Play Store successful!"
+                    withCredentials([file(credentialsId: 'play-store-json-key', variable: 'GOOGLE_PLAY_JSON')]) {
+                        // Run fastlane supply inside the running container
+                        sh """
+                        docker exec django_web \
+                            fastlane supply \
+                            --json_key /app/google_play_key.json \
+                            --package_name com.example.myapp \
+                            --apk ${APK_OUTPUT_DIR}/app-release.apk \
+                            --track production
+                        """
                     }
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo "Pipeline completed successfully!"
+        }
+        failure {
+            echo "Pipeline failed. Check logs for details."
         }
     }
 }
