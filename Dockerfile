@@ -8,7 +8,7 @@ RUN npm install
 COPY frontend/ .
 RUN npm run build
 
-# Stage 2: Setup Python Environment and Install Dependencies
+# Stage 1: Setup Python Environment and Install Dependencies
 FROM python:3.11 AS python-build
 
 WORKDIR /app
@@ -21,6 +21,33 @@ COPY requirements.txt ./
 RUN /app/venv/bin/pip install --upgrade pip
 RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt
 
+
+# Stage 2: Build APK
+FROM openjdk:11-jdk AS android-build
+
+WORKDIR /app/android
+
+# Install Android SDK and Gradle
+RUN apt-get update && apt-get install -y wget unzip git
+RUN wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O /cmdline-tools.zip \
+    && mkdir -p /sdk/cmdline-tools \
+    && unzip /cmdline-tools.zip -d /sdk/cmdline-tools \
+    && mv /sdk/cmdline-tools/cmdline-tools /sdk/cmdline-tools/latest \
+    && rm /cmdline-tools.zip
+ENV ANDROID_HOME=/sdk
+ENV PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools:$PATH"
+
+# Accept SDK licenses and install build tools
+RUN yes | sdkmanager --licenses \
+    && sdkmanager --update \
+    && sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+
+# Copy Android project files
+COPY android/ /app/android/
+
+# Build APK
+RUN ./gradlew assembleRelease
+
 # Stage 3: Final Image
 FROM python:3.11
 
@@ -31,6 +58,10 @@ COPY --from=python-build /app/venv /app/venv
 
 # Copy frontend build files from the frontend-build stage
 COPY --from=frontend-build /app/dist /app/dist
+
+# Copy APK from android-build stage
+COPY --from=android-build /app/android/app/build/outputs/apk/release/app-release.apk /app/app-release.apk
+
 
 # Copy the rest of the project files
 COPY . .
