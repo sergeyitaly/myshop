@@ -2,50 +2,57 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'sergeyitaly/koloryt'
-        TAG = 'serhii_test'
-        APK_OUTPUT_DIR = '/app/android/build/outputs/apk/release'
-        GOOGLE_PLAY_CREDENTIALS = credentials('play-store-json-key')
+        IMAGE_NAME = "sergeyitaly/koloryt:serhii_test" // Define the Docker image name
+        CONTAINER_NAME = "koloryt_container"          // Temporary container name
+        APK_OUTPUT = "app-release.apk"               // APK output filename
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                // Clone the Git repository
+                checkout scm
+            }
+        }
 
-        stage('Build Android APK') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    echo "Building Android APK inside the running container..."
-                    sh """
-                    /usr/local/bin/docker exec django_web ./gradlew assembleRelease
-                    """
+                    // Build the Docker image
+                    sh "docker build -t ${IMAGE_NAME} ."
+                }
+            }
+        }
+
+        stage('Run Container and Build APK') {
+            steps {
+                script {
+                    // Run the container
+                    sh "docker run --name ${CONTAINER_NAME} ${IMAGE_NAME} true"
+
+                    // Copy APK from the container to the workspace
+                    sh "docker cp ${CONTAINER_NAME}:/app/app-release.apk ${WORKSPACE}/${APK_OUTPUT}"
                 }
             }
         }
 
         stage('Archive APK') {
             steps {
-                script {
-                    echo "Archiving the built APK..."
-                    sh """
-                    docker cp django_web:${APK_OUTPUT_DIR}/app-release.apk ${WORKSPACE}/app-release.apk
-                    """
-                    archiveArtifacts artifacts: 'app-release.apk', allowEmptyArchive: true
-                }
+                // Archive the APK in Jenkins
+                archiveArtifacts artifacts: "${APK_OUTPUT}", fingerprint: true
             }
         }
 
-        stage('Deploy to Google Play') {
+        stage('Deploy APK to Google Play') {
             steps {
                 script {
-                    echo "Deploying APK to Google Play Store..."
-                    withCredentials([file(credentialsId: 'play-store-json-key', variable: 'GOOGLE_PLAY_JSON')]) {
-                        // Run fastlane supply inside the running container
+                    // Use Fastlane for deployment
+                    withCredentials([file(credentialsId: 'google-play-service-account-key', variable: 'SERVICE_ACCOUNT_JSON')]) {
                         sh """
-                        docker exec django_web \
-                            fastlane supply \
-                            --json_key /app/google_play_key.json \
-                            --package_name com.example.myapp \
-                            --apk ${APK_OUTPUT_DIR}/app-release.apk \
-                            --track production
+                        fastlane supply \
+                        --apk ${APK_OUTPUT} \
+                        --track production \
+                        --json_key ${SERVICE_ACCOUNT_JSON}
                         """
                     }
                 }
@@ -54,11 +61,14 @@ pipeline {
     }
 
     post {
-        success {
-            echo "Pipeline completed successfully!"
+        always {
+            // Clean up the container after build
+            script {
+                sh "docker rm -f ${CONTAINER_NAME} || true"
+            }
         }
-        failure {
-            echo "Pipeline failed. Check logs for details."
+        cleanup {
+            cleanWs() // Clean up the workspace
         }
     }
 }
