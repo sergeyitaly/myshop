@@ -1,28 +1,47 @@
-# Base image with OpenJDK for Android development
-FROM openjdk:11 AS android-build
+# Base image for Android development
+FROM openjdk:11-jdk-slim
 
-# Set working directory
-WORKDIR /app/android
-
-# Install required tools and dependencies
-RUN apt-get update && apt-get install -y wget unzip lib32stdc++6 lib32z1 ruby-full && rm -rf /var/lib/apt/lists/*
-
-# Download and set up Android SDK
-RUN wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip && \
-    unzip cmdline-tools.zip -d /sdk && rm cmdline-tools.zip && \
-    mkdir -p /sdk/cmdline-tools/latest && mv /sdk/cmdline-tools/* /sdk/cmdline-tools/latest && \
-    yes | /sdk/cmdline-tools/latest/bin/sdkmanager --licenses && \
-    /sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
-
-# Set environment variables for Android SDK
-ENV ANDROID_HOME=/sdk
-ENV PATH=$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+# Install required packages and dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    unzip \
+    curl \
+    git \
+    ruby \
+    ruby-dev \
+    build-essential && \
+    apt-get clean
 
 # Install Fastlane
-RUN gem install fastlane
+RUN gem install fastlane -NV
 
-# Copy Android project files
-COPY android/ /app/android/
+# Set environment variables for Android SDK
+ENV ANDROID_SDK_ROOT=/usr/local/android-sdk
+ENV PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
 
-# Build APK using Fastlane
-RUN fastlane android build
+# Download and install Android Command Line Tools
+RUN mkdir -p $ANDROID_SDK_ROOT/cmdline-tools && \
+    wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O /tmp/tools.zip && \
+    unzip -q /tmp/tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools && \
+    mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest && \
+    rm /tmp/tools.zip
+
+# Accept Android licenses and install SDK components
+RUN yes | sdkmanager --licenses && \
+    sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+
+# Install Gradle
+ENV GRADLE_VERSION=7.5
+RUN wget -q https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -O /tmp/gradle.zip && \
+    unzip -q /tmp/gradle.zip -d /opt/ && \
+    ln -s /opt/gradle-${GRADLE_VERSION}/bin/gradle /usr/bin/gradle && \
+    rm /tmp/gradle.zip
+
+# Set working directory
+WORKDIR /app
+
+# Copy project files into the container
+COPY . .
+
+# Default command
+CMD ["bash"]
