@@ -75,3 +75,5 @@ gradle/
 
 # Build output
 /build/
+
+android/build/
