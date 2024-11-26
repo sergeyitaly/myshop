@@ -45,7 +45,9 @@ pipeline {
                     sh './gradlew test'
                 }
             }
-        }        stage('Deploy to Google Play') {
+        }        
+        
+        stage('Deploy to Google Play') {
             steps {
                 script {
                     withCredentials([file(credentialsId: 'play-store-json-key', variable: 'GOOGLE_PLAY_CREDENTIALS_JSON')]) {
