@@ -7,6 +7,7 @@ pipeline {
         ANDROID_WORKDIR = '/app/android'
         GOOGLE_PLAY_CREDENTIALS = credentials('play-store-json-key')
         TAG = 'latest'
+        DOCKER_HOST = "unix:///var/run/docker.sock"
     }
 
     stages {
