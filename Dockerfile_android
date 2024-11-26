@@ -21,6 +21,17 @@ COPY requirements.txt ./
 RUN /app/venv/bin/pip install --upgrade pip
 RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt
 
+# Stage 3: Build APK using Base Android SDK Image
+FROM mobiledevops/android-sdk-image:latest AS android-build
+
+WORKDIR /app/android
+
+# Copy Android project files
+COPY android/ /app/android/
+
+# Clean and build APK with Gradle
+RUN ./gradlew clean assembleRelease
+
 # Stage 4: Final Image
 FROM python:3.11
 
@@ -31,6 +42,9 @@ COPY --from=python-build /app/venv /app/venv
 
 # Copy frontend build files from the frontend-build stage
 COPY --from=frontend-build /app/dist /app/dist
+
+# Copy APK from android-build stage
+COPY --from=android-build /app/android/app/build/outputs/apk/release/app-release.apk /app/app-release.apk
 
 # Copy the rest of the project files
 COPY . .
