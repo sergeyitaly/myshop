@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_ANDROID_IMAGE = 'android-build-image'
         DJANGO_CONTAINER_NAME = 'django-web'
-        ANDROID_WORKDIR = '/app/android'
+        ANDROID_WORKDIR = 'android'  // Specify the Android project directory
         GOOGLE_PLAY_CREDENTIALS = credentials('play-store-json-key')
         TAG = 'latest'
         DOCKER_HOST = "unix:///var/run/docker.sock"
@@ -26,8 +26,10 @@ pipeline {
         stage('Setup') {
             steps {
                 script {
-                    // Ensure gradlew is executable
-                    sh 'chmod +x ./gradlew'
+                    // Navigate to the Android project directory
+                    dir("${ANDROID_WORKDIR}") {
+                        sh 'chmod +x ./gradlew'
+                    }
                 }
             }
         }
@@ -35,8 +37,10 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    // Build the Android project
-                    sh './gradlew build'
+                    // Navigate to the Android project directory and build the APK
+                    dir("${ANDROID_WORKDIR}") {
+                        sh './gradlew build'
+                    }
                 }
             }
         }
@@ -44,8 +48,10 @@ pipeline {
         stage('Run tests') {
             steps {
                 script {
-                    // Run tests for the Android project
-                    sh './gradlew test'
+                    // Navigate to the Android project directory and run tests
+                    dir("${ANDROID_WORKDIR}") {
+                        sh './gradlew test'
+                    }
                 }
             }
         }
