@@ -5,7 +5,8 @@ pipeline {
         DOCKER_ANDROID_IMAGE = 'android-build-image'
         DJANGO_CONTAINER_NAME = 'django-web'
         ANDROID_WORKDIR = '/app/android'
-        GOOGLE_PLAY_CREDENTIALS = credentials('play-store-json-key') 
+        GOOGLE_PLAY_CREDENTIALS = credentials('play-store-json-key')
+        TAG = 'serhii_test' 
     }
 
     stages {
@@ -23,8 +24,8 @@ pipeline {
                 script {
                     // Build the Docker image using Dockerfile_android
                     sh """
-                    dockerImage = docker.build("${DOCKER_ANDROID_IMAGE}:${TAG}", "-f Dockerfile_android .")
-                    echo "Docker image built: ${DOCKER_ANDROID_IMAGE}:${TAG}"
+                    docker build -t $DOCKER_ANDROID_IMAGE:$TAG -f Dockerfile_android .
+                    echo "Docker image built: $DOCKER_ANDROID_IMAGE:$TAG"
                     """
                 }
             }
@@ -35,7 +36,7 @@ pipeline {
                 script {
                     // Use the built image to run the APK build
                     sh """
-                    docker run --rm --name android-build-container $DOCKER_ANDROID_IMAGE
+                    docker run --rm --name android-build-container $DOCKER_ANDROID_IMAGE:$TAG
                     """
                 }
             }
