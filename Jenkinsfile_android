@@ -2,39 +2,48 @@ pipeline {
     agent any
 
     environment {
-        DJANGO_CONTAINER_NAME = 'django-web' 
-        ANDROID_WORKDIR = '/app/android' 
-        APK_OUTPUT_PATH = '/app/android/app/build/outputs/apk/release/app-release.apk'
-        GOOGLE_PLAY_CREDENTIALS = credentials('play-store-json-key')
+        DOCKER_ANDROID_IMAGE = 'android-build-image'
+        DJANGO_CONTAINER_NAME = 'django-web'
+        ANDROID_WORKDIR = '/app/android'
+        GOOGLE_PLAY_CREDENTIALS = credentials('play-store-json-key') 
     }
 
     stages {
         stage('Checkout') {
             steps {
-                echo 'Code is already running inside the django-web container.'
+                git 'https://github.com/sergeyitaly/myshop' 
             }
         }
 
-        stage('Build APK') {
+        stage('Build Android Image') {
             steps {
                 script {
-                    // Execute Gradle commands inside the running container
+                    // Build the Docker image using Dockerfile_android
                     sh """
-                    docker exec $DJANGO_CONTAINER_NAME bash -c '
-                    cd /app/android &&
-                    ./gradlew clean assembleRelease
-                    '
+                    docker build -t $DOCKER_ANDROID_IMAGE -f Dockerfile_android .
                     """
                 }
             }
         }
 
-
-        stage('Retrieve APK') {
+        stage('Run APK Build') {
             steps {
                 script {
-                    // Copy the generated APK from the running container to the host machine
-                    sh "docker cp $DJANGO_CONTAINER_NAME:$APK_OUTPUT_PATH ./app-release.apk"
+                    // Use the built image to run the APK build
+                    sh """
+                    docker run --rm --name android-build-container $DOCKER_ANDROID_IMAGE
+                    """
+                }
+            }
+        }
+
+        stage('Copy APK') {
+            steps {
+                script {
+                    // Copy the built APK from the container to the host
+                    sh """
+                    docker cp android-build-container:/app/app-release.apk ./app-release.apk
+                    """
                 }
             }
         }
@@ -42,7 +51,6 @@ pipeline {
         stage('Deploy to Google Play') {
             steps {
                 script {
-                    // Deploy the APK to Google Play using gcloud CLI
                     withCredentials([file(credentialsId: 'play-store-json-key', variable: 'GOOGLE_PLAY_CREDENTIALS_JSON')]) {
                         sh '''
                         gcloud auth activate-service-account --key-file=$GOOGLE_PLAY_CREDENTIALS_JSON
@@ -56,7 +64,6 @@ pipeline {
 
     post {
         always {
-            // Clean up workspace
             cleanWs()
         }
     }
