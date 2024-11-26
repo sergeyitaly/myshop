@@ -1,83 +1,20 @@
-# Stage 1: Build Frontend
-FROM node:18 AS frontend-build
-
-WORKDIR /app/frontend
-ENV VITE_API_BASE_URL=http://localhost:8010
-COPY frontend/package*.json ./
-RUN npm install
-COPY frontend/ .
-RUN npm run build
-
-# Stage 2: Setup Python Environment and Install Dependencies
-FROM python:3.11 AS python-build
-
-WORKDIR /app
-
-# Create virtual environment
-RUN python3 -m venv /app/venv
-
-# Activate virtual environment and install Python dependencies
-COPY requirements.txt ./
-RUN /app/venv/bin/pip install --upgrade pip
-RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt
-
-# Stage 3: Build APK using Base Android SDK Image
+# Use the android SDK image as a base image for building the APK
 FROM mobiledevops/android-sdk-image:latest AS android-build
 
+# Set the working directory for the Android app
 WORKDIR /app/android
 
-# Copy Android project files
+# Copy your Android project into the container
 COPY android/ /app/android/
 
-# Clean and build APK with Gradle
+# Run the Gradle build process to clean and assemble the release APK
 RUN ./gradlew clean assembleRelease
 
-# Stage 4: Final Image
-FROM python:3.11
-
-WORKDIR /app
-
-# Copy the virtual environment from the build stage
-COPY --from=python-build /app/venv /app/venv
-
-# Copy frontend build files from the frontend-build stage
-COPY --from=frontend-build /app/dist /app/dist
-
-# Copy APK from android-build stage
+# Copy the APK output from the build stage to the final image
 COPY --from=android-build /app/android/app/build/outputs/apk/release/app-release.apk /app/app-release.apk
 
-# Copy the rest of the project files
+# Copy the rest of the files from your existing Django container (if needed)
 COPY . .
 
-# List directory contents for debugging
+# Check the files in the final image
 RUN ls -al
-
-# Activate virtual environment
-ENV PATH="/app/venv/bin:$PATH"
-
-# Copy the entrypoint script
-COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-
-# Apply Django migrations 
-RUN python manage.py makemigrations
-RUN python manage.py migrate
-
-# Clone images
-RUN python manage.py process_thumbnails
-
-# Collect static files
-RUN python manage.py collectstatic --noinput --clear
-
-# Remove the .env file to ensure it is not included in the final image
-RUN rm /app/.env
-
-# Display disk usage for debugging
-RUN du -h --max-depth=5 | sort -rh
-
-EXPOSE 8010
-
-# Set the entrypoint
-ENTRYPOINT ["/app/entrypoint.sh"]
-# Define the entry point for the container
-CMD ["/app/venv/bin/gunicorn", "--config", "gunicorn_config.py", "myshop.wsgi:application"]
