@@ -1,6 +1,7 @@
 pipeline {
-    agent any  // Define a general agent to run the pipeline
-
+    agent {
+        docker { image 'cimg/android:2023.09.1' }
+    }
     environment {
         DOCKER_ANDROID_IMAGE = 'android-build-image'
         DJANGO_CONTAINER_NAME = 'django-web'
