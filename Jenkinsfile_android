@@ -21,13 +21,14 @@ pipeline {
                     // Execute Gradle commands inside the running container
                     sh """
                     docker exec $DJANGO_CONTAINER_NAME bash -c '
-                    cd $ANDROID_WORKDIR &&
+                    cd /app/android &&
                     ./gradlew clean assembleRelease
                     '
                     """
                 }
             }
         }
+
 
         stage('Retrieve APK') {
             steps {
