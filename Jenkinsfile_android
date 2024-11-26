@@ -1,7 +1,5 @@
 pipeline {
-    agent {
-        docker { image 'cimg/android:2023.09.1' }
-    }
+    agent any  // Define a general agent to run the pipeline
 
     environment {
         DOCKER_ANDROID_IMAGE = 'android-build-image'
@@ -16,7 +14,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    deleteDir()
+                    deleteDir()  // Clean workspace before checking out
                     echo "Workspace is deleted..."
                     echo "Checking out the repository..."
                     git branch: 'main', credentialsId: 'github-credentials-id', url: 'https://github.com/sergeyitaly/myshop.git'
@@ -26,27 +24,32 @@ pipeline {
         }
 
         stage('Setup') {
-          steps {
-            dir(DIR) {
-              sh 'chmod +x ./gradlew'
+            steps {
+                script {
+                    // Ensure gradlew is executable
+                    sh 'chmod +x ./gradlew'
+                }
             }
-          }
         }
+
         stage('Build') {
-          steps {
-            dir(DIR) {
-                sh './gradlew build'
+            steps {
+                script {
+                    // Build the Android project
+                    sh './gradlew build'
+                }
             }
-          }
         }
+
         stage('Run tests') {
             steps {
-                dir(DIR) {
+                script {
+                    // Run tests for the Android project
                     sh './gradlew test'
                 }
             }
-        }        
-        
+        }
+
         stage('Deploy to Google Play') {
             steps {
                 script {
@@ -63,7 +66,7 @@ pipeline {
 
     post {
         always {
-            cleanWs()
+            cleanWs()  // Clean workspace after the pipeline is finished
         }
     }
 }
