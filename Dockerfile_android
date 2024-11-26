@@ -1,20 +1,36 @@
-# Use the android SDK image as a base image for building the APK
+# Step 1: Build Android APK
 FROM mobiledevops/android-sdk-image:latest AS android-build
 
-# Set the working directory for the Android app
+# Install Android SDK, Gradle, and other dependencies (if not included)
 WORKDIR /app/android
 
-# Copy your Android project into the container
+# Copy your Android project files into the container
 COPY android/ /app/android/
 
-# Run the Gradle build process to clean and assemble the release APK
+# Install Gradle and other necessary tools (if not included)
 RUN ./gradlew clean assembleRelease
 
-# Copy the APK output from the build stage to the final image
+# Install system dependencies for Django and Android SDK
+RUN apt-get update && apt-get install -y \
+    openjdk-11-jdk \
+    wget \
+    unzip \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Android SDK (if not present in the base image)
+RUN wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O android-sdk.zip \
+    && unzip android-sdk.zip -d /opt/android-sdk \
+    && yes | /opt/android-sdk/cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk --licenses \
+    && /opt/android-sdk/cmdline-tools/bin/sdkmanager --update \
+    && /opt/android-sdk/cmdline-tools/bin/sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.3"
+
+WORKDIR /app
+
+# Copy the Django project files into the container
+COPY . /app/
+
+# Copy the APK from the android build stage
 COPY --from=android-build /app/android/app/build/outputs/apk/release/app-release.apk /app/app-release.apk
 
-# Copy the rest of the files from your existing Django container (if needed)
-COPY . .
-
-# Check the files in the final image
-RUN ls -al
