@@ -6,27 +6,28 @@ pipeline {
         DJANGO_CONTAINER_NAME = 'django-web'
         ANDROID_WORKDIR = '/app/android'
         GOOGLE_PLAY_CREDENTIALS = credentials('play-store-json-key')
-        TAG = 'serhii_test' 
+        TAG = 'latest'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                checkout([$class: 'GitSCM',
-                          branches: [[name: '*/main']],
-                          userRemoteConfigs: [[url: 'https://github.com/sergeyitaly/myshop']]
-                ])
+                script {
+                    deleteDir()
+                    echo "Workspace is deleted..."
+                    echo "Checking out the repository..."
+                    git branch: 'main', credentialsId: 'github-credentials-id', url: 'https://github.com/sergeyitaly/myshop.git'
+                    sh "ls -lat"
+                }
             }
         }
 
         stage('Build Android Image') {
             steps {
                 script {
-                    // Build the Docker image using Dockerfile_android
-                    sh """
-                    docker build -t $DOCKER_ANDROID_IMAGE:$TAG -f Dockerfile_android .
+                    echo "Building Docker image..."
+                    dockerImage = docker.build("${DOCKER_ANDROID_IMAGE}:${TAG}", "-f Dockerfile .")
                     echo "Docker image built: $DOCKER_ANDROID_IMAGE:$TAG"
-                    """
                 }
             }
         }
