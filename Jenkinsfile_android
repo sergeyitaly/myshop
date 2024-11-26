@@ -26,7 +26,7 @@ pipeline {
             steps {
                 script {
                     echo "Building Docker image..."
-                    dockerImage = docker.build("${DOCKER_ANDROID_IMAGE}:${TAG}", "-f Dockerfile .")
+                    dockerImage = docker.build("${DOCKER_ANDROID_IMAGE}:${TAG}", "-f Dockerfile_android .")
                     echo "Docker image built: $DOCKER_ANDROID_IMAGE:$TAG"
                 }
             }
