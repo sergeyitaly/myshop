@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        docker { image 'cimg/android:2023.09.1' }
+    }
 
     environment {
         DOCKER_ANDROID_IMAGE = 'android-build-image'
@@ -23,39 +25,27 @@ pipeline {
             }
         }
 
-        stage('Build Android Image') {
+        stage('Setup') {
+          steps {
+            dir(DIR) {
+              sh 'chmod +x ./gradlew'
+            }
+          }
+        }
+        stage('Build') {
+          steps {
+            dir(DIR) {
+                sh './gradlew build'
+            }
+          }
+        }
+        stage('Run tests') {
             steps {
-                script {
-                    echo "Building Docker image..."
-                    dockerImage = docker.build("${DOCKER_ANDROID_IMAGE}:${TAG}", "-f Dockerfile_android .")
-                    echo "Docker image built: $DOCKER_ANDROID_IMAGE:$TAG"
+                dir(DIR) {
+                    sh './gradlew test'
                 }
             }
-        }
-
-        stage('Run APK Build') {
-            steps {
-                script {
-                    // Use the built image to run the APK build
-                    sh """
-                    docker run --rm --name android-build-container $DOCKER_ANDROID_IMAGE:$TAG
-                    """
-                }
-            }
-        }
-
-        stage('Copy APK') {
-            steps {
-                script {
-                    // Copy the built APK from the container to the host
-                    sh """
-                    docker cp android-build-container:/app/app-release.apk ./app-release.apk
-                    """
-                }
-            }
-        }
-
-        stage('Deploy to Google Play') {
+        }        stage('Deploy to Google Play') {
             steps {
                 script {
                     withCredentials([file(credentialsId: 'play-store-json-key', variable: 'GOOGLE_PLAY_CREDENTIALS_JSON')]) {
