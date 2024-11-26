@@ -23,7 +23,8 @@ pipeline {
                 script {
                     // Build the Docker image using Dockerfile_android
                     sh """
-                    docker build -t $DOCKER_ANDROID_IMAGE -f Dockerfile_android .
+                    dockerImage = docker.build("${DOCKER_ANDROID_IMAGE}:${TAG}", "-f Dockerfile_android .")
+                    echo "Docker image built: ${DOCKER_ANDROID_IMAGE}:${TAG}"
                     """
                 }
             }
