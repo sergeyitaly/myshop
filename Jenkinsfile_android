@@ -15,11 +15,13 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    deleteDir()  // Clean workspace before checking out
-                    echo "Workspace is deleted..."
-                    echo "Checking out the repository..."
-                    git branch: 'main', credentialsId: 'github-credentials-id', url: 'https://github.com/sergeyitaly/myshop.git'
-                    sh "ls -lat"
+                    node {
+                        deleteDir()  // Clean workspace before checking out
+                        echo "Workspace is deleted..."
+                        echo "Checking out the repository..."
+                        git branch: 'main', credentialsId: 'github-credentials-id', url: 'https://github.com/sergeyitaly/myshop.git'
+                        sh "ls -lat"
+                    }
                 }
             }
         }
@@ -27,9 +29,11 @@ pipeline {
         stage('Setup') {
             steps {
                 script {
-                    // Navigate to the Android project directory
-                    dir("${ANDROID_WORKDIR}") {
-                        sh 'chmod +x ./gradlew'
+                    node {
+                        // Navigate to the Android project directory
+                        dir("${ANDROID_WORKDIR}") {
+                            sh 'chmod +x ./gradlew'
+                        }
                     }
                 }
             }
@@ -38,9 +42,11 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    // Navigate to the Android project directory and build the APK
-                    dir("${ANDROID_WORKDIR}") {
-                        sh './gradlew build'
+                    node {
+                        // Navigate to the Android project directory and build the APK
+                        dir("${ANDROID_WORKDIR}") {
+                            sh './gradlew build'
+                        }
                     }
                 }
             }
@@ -49,9 +55,11 @@ pipeline {
         stage('Run tests') {
             steps {
                 script {
-                    // Navigate to the Android project directory and run tests
-                    dir("${ANDROID_WORKDIR}") {
-                        sh './gradlew test'
+                    node {
+                        // Navigate to the Android project directory and run tests
+                        dir("${ANDROID_WORKDIR}") {
+                            sh './gradlew test'
+                        }
                     }
                 }
             }
@@ -60,11 +68,13 @@ pipeline {
         stage('Deploy to Google Play') {
             steps {
                 script {
-                    withCredentials([file(credentialsId: 'play-store-json-key', variable: 'GOOGLE_PLAY_CREDENTIALS_JSON')]) {
-                        sh '''
-                        gcloud auth activate-service-account --key-file=$GOOGLE_PLAY_CREDENTIALS_JSON
-                        gcloud firebase appdistribution releases upload ./app-release.apk --app <firebase-app-id> --groups <distribution-group>
-                        '''
+                    node {
+                        withCredentials([file(credentialsId: 'play-store-json-key', variable: 'GOOGLE_PLAY_CREDENTIALS_JSON')]) {
+                            sh '''
+                            gcloud auth activate-service-account --key-file=$GOOGLE_PLAY_CREDENTIALS_JSON
+                            gcloud firebase appdistribution releases upload ./app-release.apk --app <firebase-app-id> --groups <distribution-group>
+                            '''
+                        }
                     }
                 }
             }
