@@ -84,7 +84,7 @@ export const FeedbackCard = ({
                         })}   
                         onClick={() => handleClick(4)}
                     />
-                    { isError && <div className={styles.error_plug}>Оберіть будь ласка рейтинг</div>}
+                    { isError && <div className={styles.error_plug}>{t("change_rating")}</div>}
                 </div>
             }
             {question2 && <p className={styles.secondQusetion}>{question2}</p>} 
