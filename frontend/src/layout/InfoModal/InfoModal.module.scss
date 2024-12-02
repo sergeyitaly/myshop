@@ -54,22 +54,24 @@
 }
 
 .info {
+    text-align: center;
     p {
         flex-grow: 1;
         font-size: clamp(1rem, 0.851vw + 0.734rem, 1.5rem);
-        text-align: center;
         &:first-child {
             margin-bottom: clamp(1.563rem, 2.872vw + 0.665rem, 3.25rem);
         }
     }
 
-    button {
-        font-size: inherit;
-        color: $color-blue;
+    .link{
+    text-align: center;
+    font-size: clamp(1rem, 0.851vw + 0.734rem, 1.5rem);;
+    color: var(--blue);
+    transition: 0.3s;
+    border-bottom: 1px solid transparent;
         &:hover {
-            text-decoration: underline;
+            border-bottom: 1px solid $color-blue;
         }
     }
-
-    
 }
+
