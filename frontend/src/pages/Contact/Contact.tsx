@@ -114,7 +114,6 @@ export const Contact = () => {
 					<span style={{whiteSpace: "wrap"}}>
 					{t("hello_part_2")}<br />
 					</span>
-					{/*{t("hello_part_2")}<br />*/}
 					{t("hello_part_3")}
 
 				</p>
