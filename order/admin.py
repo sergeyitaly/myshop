@@ -41,7 +41,7 @@ class TelegramUserAdmin(admin.ModelAdmin):
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
-    readonly_fields = ['product_photo', 'product_name', 'collection_name', 'size', 'color', 'total_sum']
+    readonly_fields = ['product_photo', 'product_name', 'collection_name', 'size', 'color', 'price','currency']
 
     def product_photo(self, obj):
         if obj.product.photo:
@@ -52,6 +52,15 @@ class OrderItemInline(admin.TabularInline):
     def product_name(self, obj):
         return obj.product.name
     product_name.short_description = _('Product Name')
+
+
+    def price(self, obj):
+        return obj.product.price
+    price.short_description = _('Price')
+
+    def currency(self, obj):
+        return obj.product.currency
+    currency.short_description = _('Currency')
 
     def collection_name(self, obj):
         return obj.product.collection.name
@@ -78,6 +87,7 @@ class TelegramUserFilter(SimpleListFilter):
             (f"{user.phone} - {user.chat_id}", f"{user.chat_id}")
             for user in telegram_users
         ]
+
 
     def queryset(self, request, queryset):
         if self.value():
@@ -106,34 +116,41 @@ class HasOrderItemsFilter(SimpleListFilter):
 
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'status', 'last_updated', 'phone', 'chat_id']
-    readonly_fields = ['id', 'name', 'surname', 'phone', 'email', 'receiver', 'receiver_comments', 'total_quantity', 'total_price', 'submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at', 'chat_id']
-    fields = [
-        'id', 'name', 'surname', 'phone', 'email', 'address', 'receiver', 'receiver_comments', 'congrats',
-        'present', 'status', 'total_quantity', 'total_price', 'submitted_at', 'created_at', 'processed_at', 'complete_at', 'canceled_at'
-    ]
+    list_display = ['id', 'status', 'last_updated', 'phone', 'telegram_user_chat_id','language']
     list_filter = [
-        'status',
-        'phone',
-        TelegramUserFilter,
-        'created_at',
-        'processed_at',
-        'complete_at',
-        'canceled_at',
-        'present',
-        HasOrderItemsFilter,
+        'status', 'phone', 'created_at', 'processed_at', 'complete_at', 
+        'canceled_at', 'present',
     ]
     search_fields = ['phone', 'email', 'name', 'surname']
     inlines = [OrderItemInline]
+    readonly_fields = [
+        'id', 'name', 'surname', 'phone', 'email', 'total_quantity', 'total_price', 
+        'submitted_at', 'created_at', 'processed_at', 'complete_at', 
+        'canceled_at', 'chat_id', 'display_receiver', 'display_receiver_comments'
+    ]
+    fields = [
+        'id', 'language','name', 'surname', 'phone', 'email', 'address', 'receiver', 
+        'receiver_comments', 'congrats', 'present', 'status', 'total_quantity', 
+        'total_price', 'submitted_at', 'created_at', 'processed_at', 
+        'complete_at', 'canceled_at'
+    ]
+
+    def display_receiver(self, obj):
+        return "Yes" if obj.receiver else "No"
+    display_receiver.short_description = "Receiver"
+
+    def display_receiver_comments(self, obj):
+        return obj.receiver_comments or "No comments"
+    display_receiver_comments.short_description = "Receiver Comments"
+
+    def telegram_user_chat_id(self, obj):
+        return obj.telegram_user.chat_id if obj.telegram_user else "No chat ID"  # Handle None case
+    telegram_user_chat_id.admin_order_field = 'telegram_user__chat_id'  # Enable ordering by chat_id
+    telegram_user_chat_id.short_description = 'Telegram Chat ID'  # Column header in admin
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.prefetch_related('order_items', 'telegram_user')  # Pre-fetch related telegram_user
-
-    def chat_id(self, obj):
-        # Access the related TelegramUser's chat_id through the ForeignKey field `telegram_user`
-        return obj.telegram_user.chat_id if obj.telegram_user else None
-    chat_id.short_description = _('Chat ID')
+        return qs.prefetch_related('order_items')
 
     def last_updated(self, obj):
         return obj.last_updated
@@ -150,33 +167,39 @@ class OrderAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         if change:
             old_obj = self.model.objects.get(pk=obj.pk)
-            if old_obj.status != obj.status or old_obj.status == obj.status:
-                if obj.status == 'submited':
-                    obj.submitted_at = timezone.now()
-                if obj.status == 'created':
-                    obj.created_at = timezone.now()
-                if obj.status == 'processed':
-                    obj.processed_at = timezone.now()
-                elif obj.status == 'complete':
-                    obj.complete_at = timezone.now()
-                elif obj.status == 'canceled':
-                    obj.canceled_at = timezone.now()
+            
+            if old_obj.status != obj.status:
+                status_timestamps = {
+                    'submitted': 'submitted_at',
+                    'created': 'created_at',
+                    'processed': 'processed_at',
+                    'complete': 'complete_at',
+                    'canceled': 'canceled_at',
+                }
+
+                # Get the corresponding timestamp field for the status
+                status_field = status_timestamps.get(obj.status)
+                if status_field:
+                    setattr(obj, status_field, timezone.now())
+
                 order_items = obj.order_items.all()
 
-            # Ensure that obj.telegram_user is not None and has chat_id attribute
-            if obj.telegram_user and obj.telegram_user.chat_id:
-                # Send notification about status change
-                update_order_status_with_notification(
-                    obj.id,
-                    order_items,
-                    obj.status,
-                    f'{obj.status}_at',
-                    obj.telegram_user.chat_id
-                )
-        
+                # If there's a telegram user and chat_id, send a notification
+                if obj.telegram_user and obj.telegram_user.chat_id:
+                    update_order_status_with_notification(
+                        obj.id,
+                        order_items,
+                        obj.status,
+                        status_field,
+                        obj.telegram_user.chat_id,
+                        obj.language
+                    )
+                else:
+                    logger.warning(f"Telegram user or chat_id is missing for order {obj.id}")
+
         super().save_model(request, obj, form, change)
 
-
+# Register the Order model
 admin.site.register(Order, OrderAdmin)
 admin.site.register(TelegramUser, TelegramUserAdmin)
 admin.site.register(OrderSummary, OrderSummaryAdmin)

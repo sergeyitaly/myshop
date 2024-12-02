@@ -21,7 +21,7 @@ COPY requirements.txt ./
 RUN /app/venv/bin/pip install --upgrade pip
 RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt
 
-# Stage 3: Final Image
+# Stage 4: Final Image
 FROM python:3.11
 
 WORKDIR /app
@@ -49,15 +49,11 @@ RUN chmod +x /app/entrypoint.sh
 RUN python manage.py makemigrations
 RUN python manage.py migrate
 
-#clone images
+# Clone images
 RUN python manage.py process_thumbnails
-
-#copy images
-#COPY media /app/media
 
 # Collect static files
 RUN python manage.py collectstatic --noinput --clear
-
 
 # Remove the .env file to ensure it is not included in the final image
 RUN rm /app/.env

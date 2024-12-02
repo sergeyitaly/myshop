@@ -652,9 +652,11 @@ async function processMessage(message: any): Promise<void> {
     const phoneNumber = phoneNumbers.get(chatId);
     if (phoneNumber) {
       await sendOrderDetails(phoneNumber, chatId);
-    } else {
-      await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
-      await sendContactRequest(chatId);
+    } else 
+    {
+        const isEnglish = getUserLanguage(chatId) === 'en';
+        await sendMessage(chatId, isEnglish ? `🔍 Phone number not found. Please share your phone number first.` : `🔍 Номер телефону не знайдено. Будь ласка, спочатку надайте ваш номер телефону.`);
+        await sendContactRequest(chatId);
     }
 
   } else if (message.text === 'Orders' || message.text === 'Всі замовлення') {
@@ -663,9 +665,11 @@ async function processMessage(message: any): Promise<void> {
     const phoneNumber = phoneNumbers.get(chatId);
     if (phoneNumber) {
       await sendAllOrdersDetails(chatId);
-    } else {
-      await sendMessage(chatId, '🔍 Phone number not found. Please share your phone number first.');
-      await sendContactRequest(chatId);
+    } else 
+    {
+        const isEnglish = getUserLanguage(chatId) === 'en';
+        await sendMessage(chatId, isEnglish ? `🔍 Phone number not found. Please share your phone number first.` : `🔍 Номер телефону не знайдено. Будь ласка, спочатку надайте ваш номер телефону.`);
+        await sendContactRequest(chatId);
     }
 
   } else if (message.text === 'KOLORYT') {
@@ -801,13 +805,6 @@ else if (message.text === '/s3') {
       await sendMessage(chatId, `⚠️ An error occurred while fetching AWS S3 performance: ${errorMessage}`);
   }
 }
-
-
-
-
-
-
-
 
 
 
@@ -1109,14 +1106,15 @@ interface TelegramUser {
   chat_id: string;
 }
 
+
 interface OrderItem {
-  size?: string;
-  quantity: number;
-  total_sum: number;
-  color_name?: string;
-  item_price: string;
-  color_value: string;
-  product_name: string;
+  name: string;
+  size: string;
+  price: string;
+  currency: string;
+  quantity: string;
+  color_name: string;
+  color_value?: string; // Optional field
   collection_name: string;
 }
 
@@ -1129,50 +1127,22 @@ interface Order {
   complete_at?: string | null;
   canceled_at?: string | null;
   submitted_at?: string | null;
-  order_items?: OrderItem[];
+  order_items_en?: OrderItem[];
+  order_items_uk?: OrderItem[];
   TelegramUser?: TelegramUser[];
   email?: string;
 }
 
 interface OrderSummaryResponse {
-  results: Order[];
+  results: Order[]; // This is an object with a results field that contains an array of orders
 }
 
 interface OrderResponse {
   results: Order[];
 }
 
-const isOrderResponse = (data: any): data is OrderResponse => {
-  return data &&
-    typeof data.order_id === 'number' &&
-    (data.created_at === null || typeof data.created_at === 'string') &&
-    (data.submitted_at === null || typeof data.submitted_at === 'string') &&
-    (data.processed_at === null || typeof data.processed_at === 'string') &&
-    (data.complete_at === null || typeof data.complete_at === 'string') &&
-    (data.canceled_at === null || typeof data.canceled_at === 'string') &&
-    Array.isArray(data.order_items) &&
-    data.order_items.every((item: any) =>
-      typeof item.product_name === 'string' &&
-      typeof item.collection_name === 'string' &&
-      typeof item.size === 'string' &&
-      typeof item.color_name === 'string' &&
-      typeof item.quantity === 'number' &&
-      typeof item.total_sum === 'number' &&
-      typeof item.item_price === 'string' &&
-      typeof item.color_value === 'string'
-    );
-};
 
-const isValidOrder = (order: any): order is Order => {
-  return order && typeof order.order_id === 'number' &&
-    (order.created_at === null || typeof order.created_at === 'string') &&
-    (order.submitted_at === null || typeof order.submitted_at === 'string') &&
-    (order.processed_at === null || typeof order.processed_at === 'string') &&
-    (order.complete_at === null || typeof order.complete_at === 'string') &&
-    (order.canceled_at === null || typeof order.canceled_at === 'string') &&
-    Array.isArray(order.order_items) && order.order_items.every(isOrderItem);
-};
-const isOrderSummaryResponse = (data: any): data is OrderSummaryResponse => {
+const isOrderResponse = (data: any): data is OrderResponse => {
   return data &&
     Array.isArray(data.results) &&
     data.results.every((order: any) =>
@@ -1182,28 +1152,50 @@ const isOrderSummaryResponse = (data: any): data is OrderSummaryResponse => {
       (order.processed_at === null || typeof order.processed_at === 'string') &&
       (order.complete_at === null || typeof order.complete_at === 'string') &&
       (order.canceled_at === null || typeof order.canceled_at === 'string') &&
-      Array.isArray(order.order_items) &&
-      order.order_items.every((item: any) =>
-        typeof item.product_name === 'string' &&
-        typeof item.collection_name === 'string' &&
-        typeof item.size === 'string' &&
-        typeof item.color_name === 'string' &&
-        typeof item.quantity === 'number' &&
-        typeof item.total_sum === 'number' &&
-        typeof item.item_price === 'string' &&
-        typeof item.color_value === 'string'
-      )
+      Array.isArray(order.order_items_en || order.order_items_uk) &&
+      (order.TelegramUser ? Array.isArray(order.TelegramUser) : true) &&
+      ['string', 'undefined'].includes(typeof order.email)
     );
 };
 
+const isValidOrder = (order: any): order is Order => {
+  return order && typeof order.order_id === 'number' &&
+    ['string', 'undefined'].includes(typeof order.phone) &&
+    (order.TelegramUser ? Array.isArray(order.TelegramUser) : true) &&
+    (['string', 'undefined'].includes(typeof order.email)) &&
+    (order.created_at === null || typeof order.created_at === 'string') &&
+    (Array.isArray(order.order_items_en) || Array.isArray(order.order_items_uk));
+};
+
+
+const isOrderSummaryResponse = (data: any): data is OrderSummaryResponse => {
+  return data &&
+    Array.isArray(data.results) && // Check if results is an array
+    data.results.every((order: any) => 
+      typeof order.order_id === 'number' &&
+      (order.created_at === null || typeof order.created_at === 'string') &&
+      (order.submitted_at === null || typeof order.submitted_at === 'string') &&
+      (order.processed_at === null || typeof order.processed_at === 'string') &&
+      (order.complete_at === null || typeof order.complete_at === 'string') &&
+      (order.canceled_at === null || typeof order.canceled_at === 'string') &&
+      (Array.isArray(order.order_items_en) || Array.isArray(order.order_items_uk)) &&
+      (order.order_items_en ? order.order_items_en.every(isOrderItem) : true) &&
+      (order.order_items_uk ? order.order_items_uk.every(isOrderItem) : true) &&
+      (order.TelegramUser ? Array.isArray(order.TelegramUser) : true) &&
+      (['string', 'undefined'].includes(typeof order.email))
+    );
+};
+
+
+
 const isOrderItem = (item: any): item is OrderItem => {
-  return item && typeof item.product_name === 'string' &&
+  return item && typeof item.name === 'string' &&
     typeof item.collection_name === 'string' &&
     typeof item.size === 'string' &&
     typeof item.color_name === 'string' &&
-    typeof item.quantity === 'number' &&
-    typeof item.total_sum === 'number' &&
-    typeof item.item_price === 'string' &&
+    typeof item.quantity === 'string' &&
+    typeof item.price === 'string' &&
+    typeof item.currency === 'string' &&
     typeof item.color_value === 'string';
 };
 
@@ -1236,13 +1228,14 @@ const getLatestStatusEntry = (statusDates: Record<string, string | null>, isEngl
 };
 
 
-// Example usage
+
 const formatDate = (date: string): string => {
   // Dummy implementation for formatting dates
   return new Date(date).toLocaleDateString();
 };
 
-const fetchOrderSummary = async (chatId: string): Promise<OrderSummaryResponse> => {
+
+const fetchOrderSummary = async (chatId: string): Promise<Order[]> => {
   try {
     const response = await fetch(`${VERCEL_DOMAIN}/api/order_summary/by_chat_id/${chatId}/`, {
       method: 'GET',
@@ -1256,28 +1249,55 @@ const fetchOrderSummary = async (chatId: string): Promise<OrderSummaryResponse> 
       throw new Error(`Failed to retrieve order summary. Status: ${response.status}`);
     }
 
-    const contentType = response.headers.get('Content-Type');
-    if (!contentType || !contentType.includes('application/json')) {
-      throw new Error('Unexpected Content-Type. Expected application/json.');
-    }
+    // Parse the response as JSON and assert the type as OrderSummaryResponse
+    const data = await response.json() as OrderSummaryResponse;
 
-    const responseBody: unknown = await response.json();
-    console.log('Response Body:', responseBody);
+    console.log('Raw Response Data:', data);  // Log the raw response data
 
-    if (isOrderSummaryResponse(responseBody)) {
-      return responseBody;
+    // Check if results exist and are an array
+    if (data.results && Array.isArray(data.results)) {
+      // You can now access the results directly
+      return data.results;  // Return the 'results' array of orders
     } else {
-      console.error('Invalid response format:', responseBody);
-      throw new Error('Invalid response format.');
+      throw new Error('No results found in the response.');
     }
-
   } catch (error) {
-    console.error(`Error during fetch operation: ${error}`);
+    console.error('Fetch operation error:', error);
     throw error;
   }
 };
+// Utility to safely parse date strings to Date objects
+const parseDate = (dateString: string): Date | null => {
+  const date = new Date(dateString);
+  return isNaN(date.getTime()) ? null : date;  // Return null if invalid date
+};
+
+
+const createOrderItemsSummary = (orderItems: OrderItem[], isEnglish: boolean): string => {
+  return orderItems.map(item =>
+    `- ${item?.name || 'N/A'}, ${item?.collection_name || 'N/A'}, ${isEnglish ? 'Size' : 'Розмір'}: ${item?.size || 'N/A'}, ${isEnglish ? 'Color' : 'Колір'}: ${item?.color_name || 'N/A'}, ${item?.quantity || 0} ${isEnglish ? 'pcs' : 'шт'}, ${item?.price || '0.00'}  ${item?.currency}`
+  ).join('\n');
+};
+
+
+function createOrderStatusMessage(order: any, isEnglish: boolean): string {
+  const statusDates: Record<string, string | null> = {
+    submitted: order.submitted_at ? new Date(order.submitted_at).toISOString() : null,
+    created: order.created_at ? new Date(order.created_at).toISOString() : null,
+    processed: order.processed_at ? new Date(order.processed_at).toISOString() : null,
+    complete: order.complete_at ? new Date(order.complete_at).toISOString() : null,
+    canceled: order.canceled_at ? new Date(order.canceled_at).toISOString() : null,
+  };
+
+  // Ensure the latest status entry is correctly formatted
+  const latestStatusEntry = getLatestStatusEntry(statusDates, isEnglish);
+  return `${isEnglish ? 'Latest Status' : 'Останній статус'}: ${latestStatusEntry || (isEnglish ? 'Status not available.' : 'Статус недоступний.')}`;
+}
+
+
 async function sendOrderDetails(phoneNumber: string, chatId: string | null): Promise<void> {
   const isEnglish = chatId ? getUserLanguage(chatId) === 'en' : true;
+  const itemsKey = isEnglish ? 'order_items_en' : 'order_items_uk';
 
   if (!chatId) {
     const errorMessage = isEnglish ? 'Chat ID is missing. Please try again later.' : 'Відсутній ідентифікатор чату. Будь ласка, спробуйте пізніше.';
@@ -1288,7 +1308,8 @@ async function sendOrderDetails(phoneNumber: string, chatId: string | null): Pro
 
   try {
     const responseBody = await fetchOrderSummary(chatId);
-    const orderResults = responseBody.results;
+    console.log('Order response:', responseBody);
+    const orderResults = responseBody;
 
     if (!orderResults || orderResults.length === 0) {
       const noOrdersMessage = isEnglish ? 'No orders found for this chat ID.' : 'Замовлення для цього чату не знайдено.';
@@ -1296,33 +1317,26 @@ async function sendOrderDetails(phoneNumber: string, chatId: string | null): Pro
       return;
     }
 
-    const latestOrder = orderResults.reduce((prev, current) => (prev.order_id > current.order_id ? prev : current));
-
-    if (!latestOrder.order_items || latestOrder.order_items.length === 0) {
+    const latestOrder = orderResults.reduce((prev: Order, current: Order): Order => {
+      return prev.order_id > current.order_id ? prev : current;
+    });
+    console.log('Latest order:', latestOrder);
+    
+    const orderItems = latestOrder[itemsKey];
+    if (!orderItems || orderItems.length === 0) {
       const noItemsMessage = isEnglish ? 'No order items found for the latest order.' : 'Не знайдено товарів для останнього замовлення.';
+      console.log('No order items found:', orderItems);
       await sendMessage(chatId, noItemsMessage);
       return;
     }
 
-    const orderItemsSummary = latestOrder.order_items.map((item: OrderItem) =>
-      `- ${item.product_name}, ${item.collection_name}, ${isEnglish ? 'Size' : 'Розмір'}: ${item.size || 'N/A'}, ${isEnglish ? 'Color' : 'Колір'}: ${item.color_name || 'N/A'}, ${item.quantity} ${isEnglish ? 'pcs' : 'шт'}, $${parseFloat(item.item_price).toFixed(2)}`
-    ).join('\n');
-
-    const statusDates = {
-      submitted: latestOrder.submitted_at ?? null,
-      created: latestOrder.created_at ?? null,
-      processed: latestOrder.processed_at ?? null,
-      complete: latestOrder.complete_at ?? null,
-      canceled: latestOrder.canceled_at ?? null,
-    };
-
-    // Pass `isEnglish` to getLatestStatusEntry
-    const latestStatusEntry = getLatestStatusEntry(statusDates, isEnglish);
+    const orderItemsSummary = createOrderItemsSummary(orderItems, isEnglish);
+    const orderStatusMessage = createOrderStatusMessage(latestOrder, isEnglish);
 
     const orderDetailsMessage =
       `${isEnglish ? 'Order ID' : 'Номер замовлення'}: ${latestOrder.order_id}\n` +
       `${isEnglish ? 'Order Items' : 'Товари в замовленні'}:\n${orderItemsSummary}\n` +
-      `${latestStatusEntry || ''}`;
+      `${orderStatusMessage}`;
 
     const thankYouMessage = isEnglish ? 'Thank you! Here are your order details:' : 'Дякуємо! Ось ваші деталі замовлення:';
     await sendMessage(chatId, `${thankYouMessage}\n${orderDetailsMessage}`);
@@ -1335,6 +1349,7 @@ async function sendOrderDetails(phoneNumber: string, chatId: string | null): Pro
 
 async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
   const isEnglish = chatId ? getUserLanguage(chatId) === 'en' : true;
+  const itemsKey = isEnglish ? 'order_items_en' : 'order_items_uk';
 
   if (!chatId) {
     console.error('Chat ID is missing.');
@@ -1343,7 +1358,7 @@ async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
 
   try {
     const responseBody = await fetchOrderSummary(chatId);
-    const orderResults = responseBody.results;
+    const orderResults = responseBody
 
     if (!orderResults || orderResults.length === 0) {
       const noOrdersMessage = isEnglish ? 'No orders found for this chat ID.' : 'Замовлення для цього чату не знайдено.';
@@ -1351,34 +1366,36 @@ async function sendAllOrdersDetails(chatId: string | null): Promise<void> {
       return;
     }
 
-    const ordersMessage = orderResults.map(order => {
-      if (!order.order_items || order.order_items.length === 0) {
+    const ordersMessage = orderResults.map((order: Order) => {
+      const orderItems = order[itemsKey];
+      const statuses = [
+        { icon: '❌', text: isEnglish ? 'Canceled' : 'Скасовано', date: order.canceled_at },
+        { icon: '✅', text: isEnglish ? 'Complete' : 'Завершено', date: order.complete_at },
+        { icon: '🔄', text: isEnglish ? 'Processed' : 'Оброблено', date: order.processed_at },
+        { icon: '📝', text: isEnglish ? 'Submitted' : 'Оформлено', date: order.submitted_at },
+        { icon: '🆕', text: isEnglish ? 'Created' : 'Створено', date: order.created_at }
+      ];
+
+      const latestStatus = statuses
+        .filter(status => status.date)
+        .sort((a, b) => new Date(b.date!).getTime() - new Date(a.date!).getTime())[0];
+
+      if (!orderItems || orderItems.length === 0) {
         return `${isEnglish ? 'Order ID' : 'Номер замовлення'}: ${order.order_id}\n${isEnglish ? 'No order items found for this order.' : 'Товари для цього замовлення не знайдено.'}`;
       }
 
-      const orderItemsSummary = order.order_items.map((item: OrderItem) =>
-        `- ${item.product_name}, ${item.collection_name}, ${isEnglish ? 'Size' : 'Розмір'}: ${item.size || 'N/A'}, ${isEnglish ? 'Color' : 'Колір'}: ${item.color_name || 'N/A'}, ${item.quantity} ${isEnglish ? 'pcs' : 'шт'}, $${parseFloat(item.item_price).toFixed(2)}`
+      const orderItemsSummary = orderItems.map((item: OrderItem) =>
+        `- ${item.name}, ${item.collection_name}, ${isEnglish ? 'Size' : 'Розмір'}: ${item.size}, ${isEnglish ? 'Color' : 'Колір'}: ${item.color_name}, ${item.quantity} ${isEnglish ? 'pcs' : 'шт'}, ${item.price} ${item.currency}`
       ).join('\n');
 
-      const statusDates = {
-        submitted: order.submitted_at ? new Date(order.submitted_at).toLocaleString() : 'N/A',
-        created: order.created_at ? new Date(order.created_at).toLocaleString() : 'N/A',
-        processed: order.processed_at ? new Date(order.processed_at).toLocaleString() : 'N/A',
-        complete: order.complete_at ? new Date(order.complete_at).toLocaleString() : 'N/A',
-        canceled: order.canceled_at ? new Date(order.canceled_at).toLocaleString() : 'N/A'
-      };
-
-      // Pass `isEnglish` to getLatestStatusEntry
-      const latestStatusEntry = getLatestStatusEntry(statusDates, isEnglish);
-
-      return `${isEnglish ? 'Order ID' : 'Номер замовлення'}: ${order.order_id}\n${isEnglish ? 'Order Items' : 'Товари в замовленні'}:\n${orderItemsSummary}\n${isEnglish ? 'Latest Status' : 'Останній статус'}: ${latestStatusEntry || (isEnglish ? 'Status not available.' : 'Статус недоступний.')}`;
+      return `${isEnglish ? 'Order ID' : 'Номер замовлення'}: ${order.order_id}\n${isEnglish ? 'Order Items' : 'Товари в замовленні'}:\n${orderItemsSummary}\n${isEnglish ? 'Latest Status' : 'Останній статус'}: ${latestStatus.icon} ${latestStatus.text}`;
     }).join('\n\n');
 
-    const allOrdersMessage = isEnglish ? 'Here are all your order details:' : 'Ось усі ваші деталі замовлень:';
-    await sendMessage(chatId, `${allOrdersMessage}\n${ordersMessage}`);
+    const thankYouMessage = isEnglish ? 'Thank you! Here are all your orders:' : 'Дякуємо! Ось всі ваші замовлення:';
+    await sendMessage(chatId, `${thankYouMessage}\n\n${ordersMessage}`);
   } catch (error) {
-    const errorMessage = isEnglish ? 'An error occurred while retrieving all order details. Please try again later.' : 'Сталася помилка при отриманні всіх деталей замовлень. Будь ласка, спробуйте пізніше.';
-    console.error(`Error retrieving all orders details: ${error}`);
+    const errorMessage = isEnglish ? 'An error occurred while retrieving all orders. Please try again later.' : 'Сталася помилка при отриманні всіх замовлень. Будь ласка, спробуйте пізніше.';
+    console.error(`Error retrieving all orders: ${error}`);
     await sendMessage(chatId, errorMessage);
   }
 }

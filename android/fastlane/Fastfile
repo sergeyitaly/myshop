@@ -1,0 +1,17 @@
+default_platform(:android)
+
+platform :android do
+  desc "Build Android APK"
+  lane :build do
+    gradle(task: "clean assembleRelease")
+  end
+
+  desc "Deploy APK to Google Play Store"
+  lane :deploy do
+    supply(
+      apk: "./app/build/outputs/apk/release/app-release.apk",
+      track: "production",
+      json_key: "koloryt-project-658aa790b0ef.json"
+    )
+  end
+end

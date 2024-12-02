@@ -20,18 +20,17 @@
     <script>
         const ctx = document.getElementById('requestChart').getContext('2d');
 
-        // Access the counts passed from Django
         const telegramData = {{ telegram_requests_count|default:0 }};
         const vercelData = {{ vercel_requests_count|default:0 }};
 
         const chart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['Telegram', 'Vercel'],  // Labels for each bar
+                labels: ['Telegram', 'Vercel'],
                 datasets: [{
                     label: 'API Request Count',
-                    data: [telegramData, vercelData],  // Data for the bars
-                    backgroundColor: ['#0074D9', '#FF4136'],  // Bar colors
+                    data: [telegramData, vercelData],
+                    backgroundColor: ['#0074D9', '#FF4136'],
                     borderColor: ['#0074D9', '#FF4136'],
                     borderWidth: 1
                 }]

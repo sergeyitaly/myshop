@@ -10,8 +10,6 @@ class OrderForm(forms.Form):
     receiver = forms.CharField(label='Receiver')
     receiver_comments = forms.CharField(label='Receiver_Coments')
     congrats = forms.CharField(label='Congrats')
-
-
     def clean_phone(self):
         phone = self.cleaned_data.get('phone')
         if not phone:

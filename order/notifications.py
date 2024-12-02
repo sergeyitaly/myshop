@@ -2,19 +2,42 @@ from django.utils import timezone
 from django.conf import settings
 from .models import Order
 import logging
-import requests
-from django.utils.translation import gettext as _  # Import gettext for translation
+import logging, requests, json
 from .shared_utils import get_random_saying
 from .signals import update_order_summary
 
 logger = logging.getLogger(__name__)
 
 STATUS_EMOJIS = {
-    'submitted': '📝',
-    'created': '🆕',
-    'processed': '🔄',
-    'complete': '✅',
-    'canceled': '❌'
+    'en': {
+        'submitted': '📝',
+        'created': '🆕',
+        'processed': '🔄',
+        'complete': '✅',
+        'canceled': '❌'
+    },
+    'uk': {
+        'submitted': '📝',
+        'created': '🆕',
+        'processed': '🔄',
+        'complete': '✅',
+        'canceled': '❌'
+    }
+}
+
+MESSAGES = {
+    'en': {
+        'submitted': "You have a new order #{order_id}. Status of order: {emoji} {status}.",
+        'status_changed': "Status of order #{order_id} has been changed to {emoji} {status}.",
+        'order_details': "Order Details:\n{order_items_en}",
+        'random_saying': "💬 {saying}",
+    },
+    'uk': {
+        'submitted': "У вас нове замовлення #{order_id}. Статус замовлення: {emoji} {status}.",
+        'status_changed': "Статус замовлення #{order_id} змінено на {emoji} {status}.",
+        'order_details': "Деталі замовлення:\n{order_items_uk}",
+        'random_saying': "💬 {saying}",
+    }
 }
 
 def send_telegram_message(chat_id, message):
@@ -40,50 +63,45 @@ def send_telegram_message(chat_id, message):
         logger.error(f"Request to Telegram API failed: {e}")
         raise
 
-def update_order_status_with_notification(order_id, order_items, new_status, status_field, chat_id):
+def update_order_status_with_notification(order_id, order_items, new_status, status_field, chat_id, language):
     try:
         order = Order.objects.get(id=order_id)
         setattr(order, status_field, timezone.now())
         order.status = new_status
         order.save()
+        order.language = language
 
-        status = new_status.capitalize()
-        emoji = STATUS_EMOJIS.get(new_status, '')
+        emoji = STATUS_EMOJIS[language].get(new_status, '')
+        status_translation = new_status.capitalize() if language == 'en' else {
+            'submitted': 'Подано',
+            'created': 'Створено',
+            'processed': 'Оброблено',
+            'complete': 'Завершено',
+            'canceled': 'Скасовано'
+        }.get(new_status, '')
 
-        # Determine the language from the `order_items` (assuming you have language fields like `product_name_en` and `product_name_uk`)
-        # Here, we will just check the first item to get the language preference, assuming it's consistent across all items
-        language = 'en'  # Default to English if no language field found
-        if order_items:
-            # Check the first order item for the language
-            first_item = order_items[0]
-            if first_item.product_name_uk:  # Assuming 'product_name_uk' exists in your model
-                language = 'uk'  # If Ukrainian name exists, use Ukrainian language
-            
-        # Adjusting the order items details based on the detected language
+        # Prepare order details for the message
         order_items_details = "\n".join([
-            f"{item.product.product_name_en} - {item.quantity} x {item.product.price} {item.product.currency}" 
-            if language == 'en' else
-            f"{item.product.product_name_uk} - {item.quantity} x {item.product.price} {item.product.currency}" 
+            f"{item.product.name_uk if language == 'uk' else item.product.name_en} - {item.quantity} x {item.product.price} {item.product.currency}" 
             for item in order_items
         ])
 
         if new_status == 'submitted':
             message = (
-                f"\n"
-                f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. {_(f'You have a new order #{order_id}. Status of order:')} {emoji} {status}. \n"
-                f"{_(f'Order Details:')}\n{order_items_details}\n\n"
-                f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i> \n"
+                f"\n<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. "
+                f"{MESSAGES[language]['submitted'].format(order_id=order_id, emoji=emoji, status=status_translation)}\n"
+                f"{MESSAGES[language]['order_details'].replace('{order_items_uk}', '{order_items_en}' if language == 'en' else '{order_items_uk}').format(order_items_en=order_items_details, order_items_uk=order_items_details)}\n\n"
+                f"<i>{MESSAGES[language]['random_saying'].format(saying=get_random_saying(settings.SAYINGS_FILE_PATH))}</i>\n"
             )
         else:
             message = (
-                f"\n"
-                f"<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. {_(f'Status of order #{order_id} has been changed to')} {emoji} {status}. \n"
-                f"{_(f'Order Details:')}\n{order_items_details}\n\n"
-                f"<i>💬 {get_random_saying(settings.SAYINGS_FILE_PATH)}</i> \n"
+                f"\n<a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a>. "
+                f"{MESSAGES[language]['status_changed'].format(order_id=order_id, emoji=emoji, status=status_translation)}\n"
+                f"{MESSAGES[language]['order_details'].replace('{order_items_uk}', '{order_items_en}' if language == 'en' else '{order_items_uk}').format(order_items_en=order_items_details, order_items_uk=order_items_details)}\n\n"
+                f"<i>{MESSAGES[language]['random_saying'].format(saying=get_random_saying(settings.SAYINGS_FILE_PATH))}</i>\n"
             )
-
         send_telegram_message(chat_id, message)
-        update_order_summary(chat_id)
+        update_order_summary()
 
     except Order.DoesNotExist:
         logger.error(f"Order with id {order_id} does not exist.")
