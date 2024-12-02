@@ -7,6 +7,8 @@ from urllib.parse import urlparse
 import json
 from decimal import Decimal
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor
+
 
 class Command(BaseCommand):
     help = 'Connects to Redis and Supabase PostgreSQL database and caches all data from PostgreSQL in Redis'
@@ -31,7 +33,6 @@ class Command(BaseCommand):
 
         # Parse the REDIS_CACHE_LOCATION to get Redis connection details
         url = urlparse(redis_cache_location)
-
         redis_password = url.password
         redis_host = url.hostname
         redis_port = url.port
@@ -69,37 +70,16 @@ class Command(BaseCommand):
 
         # Fetch and cache data from all tables in PostgreSQL
         try:
-            # Get the list of all tables in the current database
             cursor.execute("""
                 SELECT table_name FROM information_schema.tables 
                 WHERE table_schema = 'public';
             """)
             tables = cursor.fetchall()
 
-            for table in tables:
-                table_name = table[0]
-                self.stdout.write(self.style.SUCCESS(f'Caching data from table: {table_name}'))
-                
-                cursor.execute(f"SELECT * FROM {table_name};")
-                rows = cursor.fetchall()
-                columns = [desc[0] for desc in cursor.description]
-
-                # Cache each row in Redis with key pattern `<table_name>:<id>`
-                for row in rows:
-                    row_data = dict(zip(columns, row))
-                    
-                    # Convert any Decimal fields to float and datetime fields to string
-                    for key, value in row_data.items():
-                        if isinstance(value, Decimal):
-                            row_data[key] = float(value)
-                        elif isinstance(value, datetime):
-                            row_data[key] = value.isoformat()  # Convert datetime to ISO format
-                    
-                    item_id = row_data.get('id')
-                    if item_id:
-                        redis_key = f"{table_name}:{item_id}"
-                        redis_client.set(redis_key, json.dumps(row_data))
-                        self.stdout.write(self.style.SUCCESS(f"Cached {table_name} with id {item_id} in Redis."))
+            # Use ThreadPoolExecutor for parallel processing
+            with ThreadPoolExecutor() as executor:
+                for table in tables:
+                    executor.submit(self.cache_table_data, cursor, redis_client, table[0])
 
             self.stdout.write(self.style.SUCCESS("Successfully cached all data from the database in Redis."))
         except Exception as e:
@@ -109,3 +89,49 @@ class Command(BaseCommand):
             cursor.close()
             connection.close()
             self.stdout.write(self.style.SUCCESS("Closed PostgreSQL connection."))
+
+    def cache_table_data(self, cursor, redis_client, table_name):
+        try:
+            self.stdout.write(self.style.SUCCESS(f'Caching data from table: {table_name}'))
+
+            cursor.execute(f"SELECT * FROM {table_name};")
+            rows = cursor.fetchall()
+            columns = [desc[0] for desc in cursor.description]
+
+            # Use Redis pipeline to batch commands
+            pipeline = redis_client.pipeline()
+            batch_size = 100  # Number of commands per batch
+            batch_count = 0  # Counter for batching commands
+
+            for row in rows:
+                row_data = dict(zip(columns, row))
+
+                # Convert Decimal and datetime fields
+                for key, value in row_data.items():
+                    if isinstance(value, Decimal):
+                        row_data[key] = float(value)
+                    elif isinstance(value, datetime):
+                        row_data[key] = value.isoformat()
+
+                item_id = row_data.get('id')
+                if item_id:
+                    redis_key = f"{table_name}:{item_id}"
+
+                    # Check if the key exists before setting
+                    if not redis_client.exists(redis_key):
+                        pipeline.set(redis_key, json.dumps(row_data))
+                        batch_count += 1
+
+                        # Execute pipeline in batches
+                        if batch_count >= batch_size:
+                            pipeline.execute()  # Execute the batch
+                            batch_count = 0
+                            pipeline = redis_client.pipeline()  # Reset the pipeline
+
+            # Final execution for remaining items if any
+            if batch_count > 0:
+                pipeline.execute()
+
+            self.stdout.write(self.style.SUCCESS(f"Successfully cached data from table {table_name} in Redis."))
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f"Failed to cache data from table {table_name}: {e}"))

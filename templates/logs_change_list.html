@@ -1,19 +1,20 @@
 {% block content %}
     <h1>API Logs</h1>
 
-    <!-- Render the chart HTML (Canvas) here -->
+    <!-- Chart Container -->
     <div id="chart-container" style="width: 100%; height: 400px;">
-        {{ chart_html }}
+        {{ chart_html }} <!-- Ensure this includes the canvas element with the correct ID -->
     </div>
 
-    <!-- Include the Chart.js library and the custom JS for rendering and updating the chart -->
+    <!-- Include Chart.js library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <!-- Chart and Time Period Script -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const ctx = document.getElementById('requestChart').getContext('2d');
-            let chartData = {{ chart_data|safe }};
-            
+            const ctx = document.querySelector('#requestChart').getContext('2d'); // Ensure the ID matches the chart element
+            const chartData = {{ chart_data|safe }};
+
             const requestChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -37,6 +38,7 @@
                 }
             });
 
+            // Update Chart on Time Period Change
             const timePeriodSelect = document.getElementById('time_period');
             if (timePeriodSelect) {
                 timePeriodSelect.addEventListener('change', function() {
@@ -47,12 +49,14 @@
                             requestChart.data.labels = data.labels;
                             requestChart.data.datasets[0].data = data.data;
                             requestChart.update();
-                        });
+                        })
+                        .catch(error => console.error('Error fetching chart data:', error));
                 });
             }
         });
     </script>
 
+    <!-- Time Period Selection -->
     <div>
         <label for="time_period">Select Time Period:</label>
         <select id="time_period">
@@ -62,5 +66,4 @@
             <option value="year" {% if current_time_period == 'year' %}selected{% endif %}>This Year</option>
         </select>
     </div>
-
 {% endblock %}

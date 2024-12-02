@@ -25,12 +25,6 @@ export const Counter = ({
 		setVal(value);
 	}, [value]);
 
-	// const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-	// 	const v = +e.target.value
-	// 	if (!isNaN(v)) 
-	// 		setVal(v)
-	// };
-
 	const handleReduce = () => {
 		if (val > 1) {
 			setVal(val - 1);
@@ -47,9 +41,9 @@ export const Counter = ({
 
 	return (
 		<div className={clsx(style.container, className)}>
-			<button onClick={handleReduce}>-</button>
+			<button onClick={handleReduce} disabled={stock === 0}>-</button>
 			<input type="number" value={val} readOnly />
-			<button onClick={handleIncrement}>+</button>
+			<button onClick={handleIncrement} disabled={stock === 0}>+</button>
 		</div>
 	);
 };

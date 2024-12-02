@@ -72,14 +72,6 @@ class Command(BaseCommand):
                         return dt.strftime('%Y-%m-%d %H:%M')
                     return None
 
-                # Use the serializer to format the order and items
-                serializer = OrderSerializer(order)
-                order_data = serializer.data
-
-                # Log the order items for debugging
-                logger.info(f'Order {order.id} has {len(order_data["order_items"])} items.')
-                logger.info(f'Serialized Order Data: {order_data}')
-
                 # Create the order items in both English and Ukrainian
                 order_items_en = []
                 order_items_uk = []
@@ -87,8 +79,8 @@ class Command(BaseCommand):
                     product = item.product  # Get the actual Product instance
 
                     # Directly access translated fields for English and Ukrainian
-                    product_name_en = product.name  # Access translated 'name' field for current language
-                    product_name_uk = product.name_uk  # Access translated 'name_uk' field (make sure 'name_uk' exists)
+                    product_name_en = product.name_en  # Access translated 'name' field for current language
+                    product_name_uk = product.name_uk  # Access translated 'name_uk' field
                     color_name_en = product.color_name_en  # Assuming 'color_name' field is translated
                     color_name_uk = product.color_name_uk  # Assuming 'color_name_uk' exists
                     size = product.size  # Assuming 'size' field is translated
@@ -98,10 +90,11 @@ class Command(BaseCommand):
                         'size': size,
                         'quantity': item.quantity,
                         'color_name': color_name_en,
-                        'price': product.price,  # Assuming 'price' field exists in Product
+                        'price': str(product.price),  # Assuming 'price' field exists in Product
+                        'currency': product.currency,
                         'color_value': product.color_value,  # Assuming 'color_value' exists in Product
                         'name': product_name_en,
-                        'collection_name': product.collection.name if product.collection else _('No Collection')  # Assuming related 'collection'
+                        'collection_name': product.collection.name_en if product.collection else _('No Collection')  # Assuming related 'collection'
                     })
 
                     # Ukrainian order item (using translation)
@@ -109,7 +102,8 @@ class Command(BaseCommand):
                         'size': size,
                         'quantity': item.quantity,
                         'color_name': color_name_uk,
-                        'price': product.price,  # Assuming 'price' field exists and is the same for both languages
+                        'price': str(product.price),  # Assuming 'price' field exists and is the same for both languages
+                        'currency': product.currency,
                         'color_value': product.color_value,  # Assuming 'color_value' exists for both languages
                         'name': product_name_uk,
                         'collection_name': product.collection.name_uk if product.collection else _('No Collection')  # Assuming related 'collection' in Ukrainian

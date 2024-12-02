@@ -1,3 +1,0 @@
-pyodbc
-pydot
-docker

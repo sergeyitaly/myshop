@@ -24,37 +24,51 @@ import { ProductAndPriceFormikUpdate } from "./ProductAndPriceFormikUpdate/Produ
 import { useTranslation } from "react-i18next";
 import bird from "./bird.svg";
 import styles from "./OrderForm.module.scss";
+import { STORAGE } from "../../../constants";
 
-const initialValues: OrderDTO = {
-	name: "",
-	surname: "",
-	email: "",
-	phone: "+380",
-	receiver: false,
-	present: false,
-	order_items: [],
-	receiver_comments: "",
-	congrats: "",
-};
+
+
+
 
 interface OrderFormProps {
 	className?: string;
 }
 
 export const OrderForm = ({ className }: OrderFormProps) => {
-	const { t } = useTranslation();
+    const { t } = useTranslation();
 	const navigate = useNavigate();
 	const [isOpenComment, setOpenComment] = useState<boolean>(false);
 	const [isOpenCongrats, setOpenCongrats] = useState<boolean>(false);
 	const { clearBasket } = useBasket();
 	const [createOrder, { isSuccess, error, isError, isLoading }] =
 		useCreateOrderMutation();
+	
+	const [language, setLanguage] = useState<string>(localStorage.getItem(STORAGE.LANGUAGE) || '');
 
+	useEffect(() => {
+		const storedLanguage = localStorage.getItem(STORAGE.LANGUAGE) || '';
+		setLanguage(storedLanguage);
+	}, [localStorage.getItem(STORAGE.LANGUAGE)]);
+	
+
+	const initialValues: OrderDTO = {
+		name: "",
+		surname: "",
+		email: "",
+		phone: "+380",
+		receiver: false,
+		present: false,
+		order_items: [],
+		receiver_comments: "",
+		congrats: "",
+		language: language,
+	};
+
+	console.log(language);
 	let errorResponce: CreateOrderErrorResponce | null = null;
 	if (isError) {
 		errorResponce = error as CreateOrderErrorResponce;
 	}
-
 	useEffect(() => {
 		if (isSuccess) {
 			navigate(ROUTE.THANK);
@@ -69,15 +83,16 @@ export const OrderForm = ({ className }: OrderFormProps) => {
 	const handleClickAddCongrats = () => {
 		setOpenCongrats(!isOpenCongrats);
 	};
-
-	return (
-		<Formik
-			initialValues={initialValues}
-			validationSchema={getOrderValidSchema(t)}
-			onSubmit={(form) => {
-				createOrder(form);
+    return (
+        <Formik
+            initialValues={{
+                ...initialValues
 			}}
-		>
+            validationSchema={getOrderValidSchema(t)}
+            onSubmit={(form) => {
+                createOrder(form);
+            }}
+        >
 			<Form className={clsx(styles.form, className)}>
 				<OrderFormBox title={t("recipient")}>
 					<div className={styles.inputsContainer}>
