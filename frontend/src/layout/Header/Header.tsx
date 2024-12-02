@@ -39,11 +39,12 @@ export const Header = ({ basketLoadingStatus }: HeaderProps) => {
 		navigate(`${ROUTE.PRODUCT}${product.id_name}`);
 		closeSearchBar();
 	};
+	
 
 	return (
 		<header
 			className={clsx(headerClassName, {
-				[styles.noLine]: location.pathname === "/thank",
+				[styles.noLine]: location.pathname === "/thank" || location.pathname ==="/thank_for_feedback",
 			})}
 		>
 			<PageContainer className={styles.container}>

@@ -197,7 +197,7 @@
 	"thank_you_text_part3": "We are always happy to help!",
 	"pay_attantion": "Pay attention!",
 	"training_project": "This site is a training project.",
-	"left_rewiew": "Please write your review",
+	"left_rewiew": "Leave your feedback",
 	"here": "here",
 	"rate_us": "Rate us",
 	"field_required": "Field required!",
@@ -217,5 +217,6 @@
 	"close_and_return": "Close and return back to the main display",
 	"already_in_the_basket": "Product was added to the basket",
 	"left_data": "Left your data for feedback",
-	"check_feedback_list":"Check if you have filled in all the cards"
+	"check_feedback_list":"Check if you have filled in all the cards",
+	"change_rating": "Please select a rating"
 }
