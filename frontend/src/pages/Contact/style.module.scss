@@ -1,16 +1,8 @@
 @import "../../variables";
 
 .titleContainer {
-	padding: 100px 140px;
+	padding: clamp(20px, 10vw, 90px) clamp(20px, 10vw, 140px);
 	font-weight: 400;
-
-	@media (max-width: $screen-mobile) {
-		padding: 40px 75px;
-	}
-
-	@media (max-width: $screen-smallMobile) {
-		padding: 50px;
-	}
 }
 
 .name {
@@ -22,7 +14,6 @@
 	font-size: 32px;
 	text-align: center;
 	white-space: nowrap;
-
 
 	@media (max-width: $screen-mobile) {
 		font-size: 20px;
