@@ -77,3 +77,4 @@ gradle/
 /build/
 
 android/build/
+koloryt-release-key.keystore

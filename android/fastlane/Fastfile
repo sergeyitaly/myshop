@@ -1,17 +1,21 @@
-default_platform(:android)
-
 platform :android do
-  desc "Build Android APK"
+  desc "Build Android App Bundle"
   lane :build do
-    gradle(task: "clean assembleRelease")
+    gradle(
+      task: "clean bundleRelease"
+    )
   end
 
-  desc "Deploy APK to Google Play Store"
+  desc "Deploy APK/AAB to Google Play Store"
   lane :deploy do
-    supply(
-      apk: "./app/build/outputs/apk/release/app-release.apk",
-      track: "production",
-      json_key: "koloryt-project-658aa790b0ef.json"
+    gradle(
+      task: 'assemble',
+      build_type: 'Release'
+    )
+    upload_to_play_store(
+      json_key: "../../koloryt-project-658aa790b0ef.json",
+      track: "production", # Change to 'beta' or 'production' as per your track
+      package_name: "com.koloryt"
     )
   end
 end
