@@ -4,29 +4,6 @@ plugins {
     id 'com.github.johnrengelman.processes' version '0.5.0'
     }
 
-task getCommitCount {
-    doLast {
-        def commitCount = "git rev-list --count HEAD".execute().text.trim()
-        project.ext.commitCount = commitCount.toInteger() 
-    }
-}
-
-def dotenvFile = rootProject.file('.env')
-if (dotenvFile.exists()) {
-    println "Loading environment variables from .env file"
-    dotenvFile.eachLine { line ->
-        def (key, value) = line.split('=')
-        // Remove surrounding single quotes if present
-        value = value.replaceAll(/^'|'$/, '')
-        project.ext.set(key, value)
-        println "Loaded $key = $value"
-    }
-} else {
-    println ".env file not found!"
-}
-
-
-
 android {
     namespace 'com.koloryt'
     compileSdk 35
@@ -35,8 +12,9 @@ android {
         applicationId "com.koloryt"
         minSdk 21
         targetSdk 35
-        versionCode project.hasProperty('commitCount') ? project.commitCount : 1 // Default to 1 if commitCount is not set
+        versionCode Integer.parseInt(new java.text.SimpleDateFormat("ddMMyyHHmm").format(new Date()))
         versionName "1.0"
+
     }
     
     lint {
