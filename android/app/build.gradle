@@ -2,7 +2,13 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'com.github.johnrengelman.processes' version '0.5.0'
-    }
+}
+
+// Custom method to get the last Git commit hash
+def getGitCommitHash() {
+    def process = "git rev-parse --short HEAD".execute()
+    return process.text.trim()
+}
 
 android {
     namespace 'com.koloryt'
@@ -12,25 +18,24 @@ android {
         applicationId "com.koloryt"
         minSdk 21
         targetSdk 35
-        versionCode Integer.parseInt(new java.text.SimpleDateFormat("ddMMyyHHmm").format(new Date()))
         versionName "1.0"
 
+        // Dynamically generate versionCode
+        versionCode project.hasProperty('dynamicVersionCode') ? project.dynamicVersionCode : 1
     }
-    
+
     lint {
         baseline = file("lint-baseline.xml")
     }
 
-signingConfigs {
-    release {
-        storeFile file("../../koloryt-release-key.keystore")
-        storePassword "000000"
-        keyAlias "koloryt-key-alias"
-        keyPassword "000000"
+    signingConfigs {
+        release {
+            storeFile file("../../koloryt-release-key.keystore")
+            storePassword "000000"
+            keyAlias "koloryt-key-alias"
+            keyPassword "000000"
+        }
     }
-}
-
-
 
     sourceSets {
         main {
@@ -52,7 +57,7 @@ signingConfigs {
     }
 
     kotlinOptions {
-        jvmTarget = "17" 
+        jvmTarget = "17"
     }
 
     testOptions {
@@ -61,6 +66,25 @@ signingConfigs {
         }
     }
 }
+
+// Custom task to generate versionCode dynamically
+task generateVersionCode {
+    doLast {
+        def gitCommitHash = getGitCommitHash()
+        def timestamp = System.currentTimeMillis() // Get the current timestamp
+
+        // Ensure version code is a valid integer (within the range of 0 to 2,147,483,647)
+        def versionCode = ((timestamp % 1000000) * 1000 + gitCommitHash.replaceAll("[^0-9]", "").take(4).toInteger()) % Integer.MAX_VALUE
+
+        // Log the version code
+        println "Generated versionCode: ${versionCode}"
+
+        project.ext.dynamicVersionCode = versionCode // Set dynamic versionCode as a project property
+    }
+}
+
+// Ensure generateVersionCode task runs before the build
+preBuild.dependsOn generateVersionCode
 
 tasks.withType(JavaCompile) {
     options.compilerArgs += '-Xlint:deprecation'  // Add deprecation warnings
@@ -83,5 +107,4 @@ dependencies {
     // Optional: Android test dependencies
     androidTestImplementation libs.androidxTestJunit
     androidTestImplementation libs.espressoCore
-
 }
