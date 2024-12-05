@@ -22,15 +22,22 @@ class TelegramUser(models.Model):
         verbose_name = _('Telegram user')
         verbose_name_plural = _('Telegram users')
 
-
 class TelegramMessage(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     sent_to = models.ManyToManyField('TelegramUser', related_name='messages', blank=True)
-    class Meta:
-        db_table = 'order_telegrammessage'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Explicitly save the many-to-many relationship after saving the instance
+        if self.sent_to.exists():
+            self.sent_to.through.objects.filter(telegrammessage=self).delete()  # Remove existing relations
+            for user in self.sent_to.all():
+                self.sent_to.through.objects.create(telegrammessage=self, telegramuser=user)
+
     def __str__(self):
         return f"Message sent on {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
+
 
 class Order(models.Model):
     STATUS_CHOICES = (
