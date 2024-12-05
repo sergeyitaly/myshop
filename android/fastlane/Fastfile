@@ -1,4 +1,14 @@
+######## Android CONFIGURATIONS
+
+package_name = "com.koloryt"
+json_key_file = "g../../koloryt-project-658aa790b0ef.json"
+gradle_file_path = "./app/build.gradle"
+######## END Android CONFIGURATIONS
+
+default_platform(:android)
+
 platform :android do
+
   desc "Build Android App Bundle"
   lane :build do
     gradle(
@@ -13,9 +23,8 @@ platform :android do
       build_type: 'Release'
     )
     upload_to_play_store(
-      json_key: "../../koloryt-project-658aa790b0ef.json",
-      track: "production", # Change to 'beta' or 'production' as per your track
-      package_name: "com.koloryt"
+      track: "Test Closed", 
+      aab: "app/build/outputs/bundle/release/app-release.aab",
     )
   end
-end
+end 

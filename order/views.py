@@ -19,6 +19,7 @@ from rest_framework.decorators import action
 from .notifications import update_order_status_with_notification
 from django.utils.timezone import make_naive, is_aware
 from datetime import datetime
+from rest_framework.generics import ListCreateAPIView, RetrieveAPIView
 
 logger = logging.getLogger(__name__)
 def health_check(request):                                                                                                              
@@ -72,7 +73,8 @@ class OrderSummaryViewSet(viewsets.ModelViewSet):
         # Prepare the updated order summary data
         order_summary_data = format_order_summary(instance)  # Directly call the updated method
         return Response(order_summary_data)
-    
+
+
 class TelegramUserViewSet(viewsets.ModelViewSet):
     queryset = TelegramUser.objects.all()
     serializer_class = TelegramUserSerializer
@@ -125,6 +127,14 @@ class TelegramUserViewSet(viewsets.ModelViewSet):
             if not order.telegram_user:  # Ensure only orders without an associated TelegramUser are updated
                 order.telegram_user = telegram_user
                 order.save(update_fields=['telegram_user'])
+
+class TelegramMessageListCreateView(ListCreateAPIView):
+    queryset = TelegramMessage.objects.all()
+    serializer_class = TelegramMessageSerializer
+
+class TelegramMessageDetailView(RetrieveAPIView):
+    queryset = TelegramMessage.objects.all()
+    serializer_class = TelegramMessageSerializer
 
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()

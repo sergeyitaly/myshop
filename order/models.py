@@ -23,6 +23,15 @@ class TelegramUser(models.Model):
         verbose_name_plural = _('Telegram users')
 
 
+class TelegramMessage(models.Model):
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    sent_to = models.ManyToManyField('TelegramUser', related_name='messages', blank=True)
+    class Meta:
+        db_table = 'order_telegrammessage'
+    def __str__(self):
+        return f"Message sent on {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
+
 class Order(models.Model):
     STATUS_CHOICES = (
         ('submitted', _('Submitted')),

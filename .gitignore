@@ -72,7 +72,7 @@ koloryt-project-658aa790b0ef.json
 
 # Gradle user home directory
 gradle/
-
+android/fastlane/report.xml
 # Build output
 /build/
 

@@ -7,7 +7,7 @@ from django.utils import translation
 from django.utils.translation import override as translation_override
 from rest_framework import serializers
 from django.utils.translation import gettext as _
-from order.models import Order, TelegramUser
+from order.models import *
 import logging
 from rest_framework.exceptions import ValidationError
 
@@ -20,6 +20,14 @@ class TelegramUserSerializer(serializers.ModelSerializer):
 
     def get_queryset(self):
         return TelegramUser.objects.all().order_by('id')
+
+class TelegramMessageSerializer(serializers.ModelSerializer):
+    sent_to = TelegramUserSerializer(many=True, read_only=True)  # Include user details
+
+    class Meta:
+        model = TelegramMessage
+        fields = ['id', 'content', 'created_at', 'sent_to']
+        read_only_fields = ['created_at', 'sent_to']
 
 class OrderSummarySerializer(serializers.ModelSerializer):
     class Meta:
