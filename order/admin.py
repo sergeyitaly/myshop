@@ -10,45 +10,7 @@ from .notifications import update_order_status_with_notification
 from django.contrib.admin import SimpleListFilter
 import json
 import requests
-from django.conf import settings
-
-def send_mass_message_with_logging(telegram_message):
-    """
-    Send a mass message to all Telegram users and log the users it was sent to.
-    """
-    bot_token = settings.TELEGRAM_BOT_TOKEN
-    base_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-
-    # Website URL from settings
-    website_url = settings.VERCEL_DOMAIN
-
-    users = TelegramUser.objects.all()
-    sent_users = []
-
-    for user in users:
-        # Append the website link to the message
-        message_with_link = (
-            f"{telegram_message.content}\n\n"
-            f"<a href='{website_url}'>Visit our website</a>"
-        )
-
-        payload = {
-            'chat_id': user.chat_id,
-            'text': message_with_link,
-            'parse_mode': 'HTML',  # Enable HTML to render the link
-        }
-
-        try:
-            response = requests.post(base_url, json=payload)
-            response.raise_for_status()  # Raise an error for failed requests
-            sent_users.append(user)
-        except requests.exceptions.RequestException as e:
-            print(f"Failed to send message to {user.chat_id}: {e}")
-
-    # Log the successfully sent users to the message record
-    telegram_message.sent_to.add(*sent_users)
-
-
+from .utils import send_mass_message_with_logging 
 
 @admin.register(TelegramMessage)
 class TelegramMessageAdmin(admin.ModelAdmin):
@@ -66,7 +28,6 @@ class TelegramMessageAdmin(admin.ModelAdmin):
             send_mass_message_with_logging(message)  # Call the function for each selected message
         self.message_user(request, "Mass message sent successfully!")
     send_mass_message_with_logging_action.short_description = "Send mass message to selected Telegram messages"
-
 
 class OrderSummaryAdmin(admin.ModelAdmin):
     list_display = ('chat_id',)

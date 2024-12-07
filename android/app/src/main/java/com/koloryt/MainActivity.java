@@ -15,6 +15,10 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.core.splashscreen.SplashScreen;
+import android.content.Intent;
+import android.net.Uri;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,7 +27,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        // Install the splash screen
+        SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
+
         super.onCreate(savedInstanceState);
+        setTheme(R.style.SplashTheme);
 
         // Enforce light mode for all versions
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
@@ -67,16 +76,50 @@ public class MainActivity extends AppCompatActivity {
 
         // Set WebView client to handle URL loading
         webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                view.loadUrl(request.getUrl().toString());
-                return true; // Handle links within the WebView
+           // @Override
+           // public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+           //     view.loadUrl(request.getUrl().toString());
+           //     return true;
+           // }
+            
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            String url = request.getUrl().toString();
+            if (url.startsWith("tg://")) {
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    if (intent.resolveActivity(getPackageManager()) != null) {
+                        startActivity(intent); // Open Telegram app
+                        return true; // Indicate that the URL was handled
+                    } else {
+                        Toast.makeText(MainActivity.this, "Telegram app not installed.", Toast.LENGTH_SHORT).show();
+                        return true; // Indicate that we handled the URL
+                    }
+                } catch (Exception e) {
+                    Log.e("WebView", "Error opening Telegram link", e);
+                }
             }
+            view.loadUrl(url);
+            return true;
+        }
 
-            @Override
-            public void onReceivedError(WebView view, WebResourceRequest request, android.webkit.WebResourceError error) {
-                super.onReceivedError(view, request, error);
-                Log.e("WebViewError", "Error loading URL: " + error.getDescription().toString());
+        @Override
+          public void onReceivedError(WebView view, WebResourceRequest request, android.webkit.WebResourceError error) {
+            super.onReceivedError(view, request, error);
+
+            // Check if this is a main frame error (so we don't handle iframe or secondary resource errors)
+            if (request.isForMainFrame()) {
+                // Display a custom HTML message in the WebView
+                setTheme(R.style.AppTheme);
+
+                String customErrorPage = "<html><body style='text-align:center; margin-top: 50%;'>" +
+                        "<h2>No Internet Connection</h2>" +
+                        "<p>Please check your internet connection and try again.</p>" +
+                        "<button onclick='window.location.reload();' style='background-color: #0b0599; color: #fff; border: 1px solid #0b0599; padding: 10px 20px; font-size: 16px; cursor: pointer;'>Reload</button>" +
+                        "</body></html>";
+
+                view.loadData(customErrorPage, "text/html", "UTF-8");
+                }
             }
         });
     }

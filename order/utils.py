@@ -4,6 +4,9 @@ from .notifications import update_order_status_with_notification
 from django.utils.dateformat import format as date_format
 from django.db import transaction
 from django.utils.translation import gettext as _  # Import gettext for translation
+import requests
+from django.conf import settings
+from .models import *
 
 def update_order_statuses():
     now = timezone.now()
@@ -102,3 +105,32 @@ def prepare_order_summary(order):
 def datetime_to_str(dt):
     """Convert a datetime object to a formatted string."""
     return date_format(dt, 'Y-m-d H:i') if dt else None
+
+def send_mass_message_with_logging(telegram_message):
+    bot_token = settings.TELEGRAM_BOT_TOKEN
+    base_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    website_url = settings.VERCEL_DOMAIN
+
+    users = TelegramUser.objects.all()
+    sent_users = []
+
+    for user in users:
+        message_with_link = (
+            f"{telegram_message.content}\n\n"
+            f"<a href='{website_url}'>Visit our website</a>"
+        )
+
+        payload = {
+            'chat_id': user.chat_id,
+            'text': message_with_link,
+            'parse_mode': 'HTML',  # Enable HTML to render the link
+        }
+
+        try:
+            response = requests.post(base_url, json=payload)
+            response.raise_for_status()  # Raise an error for failed requests
+            sent_users.append(user)
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to send message to {user.chat_id}: {e}")
+
+    telegram_message.sent_to.add(*sent_users)  # Log the sent users

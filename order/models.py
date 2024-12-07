@@ -25,7 +25,7 @@ class TelegramUser(models.Model):
 class TelegramMessage(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    sent_to = models.ManyToManyField('TelegramUser', related_name='messages', blank=True)
+    sent_to = models.ManyToManyField('TelegramUser', related_name='sent_messages', blank=True)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

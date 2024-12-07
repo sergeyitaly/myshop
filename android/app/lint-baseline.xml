@@ -30,7 +30,7 @@
         errorLine2="                                                                    ~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/koloryt/MainActivity.java"
-            line="79"
+            line="84"
             column="69"/>
     </issue>
 
@@ -42,6 +42,50 @@
         <location
             file="src/main/res/values/styles.xml"
             line="3"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`android:windowSplashScreenBackground` requires API level 31 (current min is 21)"
+        errorLine1="        &lt;item name=&quot;android:windowSplashScreenBackground&quot;>@color/splash_background&lt;/item>"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/themes.xml"
+            line="4"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`android:windowSplashScreenAnimatedIcon` requires API level 31 (current min is 21)"
+        errorLine1="        &lt;item name=&quot;android:windowSplashScreenAnimatedIcon&quot;>@drawable/logo&lt;/item>"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/themes.xml"
+            line="5"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`android:windowSplashScreenAnimationDuration` requires API level 31 (current min is 21)"
+        errorLine1="        &lt;item name=&quot;android:windowSplashScreenAnimationDuration&quot;>300&lt;/item>"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/themes.xml"
+            line="6"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`android:forceDarkAllowed` requires API level 29 (current min is 21)"
+        errorLine1="        &lt;item name=&quot;android:forceDarkAllowed&quot;>false&lt;/item>"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/themes.xml"
+            line="9"
             column="15"/>
     </issue>
 
@@ -63,8 +107,48 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/koloryt/MainActivity.java"
-            line="57"
+            line="62"
             column="9"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.splash_background` appears to be unused"
+        errorLine1="    &lt;color name=&quot;splash_background&quot;>#FFFFFF&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="2"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.logo` appears to be unused">
+        <location
+            file="src/main/res/drawable/logo.png"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.drawable.splash_screen` appears to be unused"
+        errorLine1="&lt;layer-list xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;>"
+        errorLine2="^">
+        <location
+            file="src/main/res/drawable/splash_screen.xml"
+            line="2"
+            column="1"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.style.Theme_MyApp` appears to be unused"
+        errorLine1="    &lt;style name=&quot;Theme.MyApp&quot; parent=&quot;Theme.MaterialComponents.DayNight.NoActionBar&quot;>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/themes.xml"
+            line="2"
+            column="12"/>
     </issue>
 
     <issue
@@ -118,8 +202,15 @@
     </issue>
 
     <issue
-        id="IconDuplicatesConfig"
-        message="The `ic_launcher.png` icon has identical contents in the following configuration folders: mipmap-hdpi, mipmap-mdpi, mipmap-xhdpi, mipmap-xxhdpi, mipmap-xxxhdpi">
+        id="IconLocation"
+        message="Found bitmap drawable `res/drawable/logo.png` in densityless folder">
+        <location
+            file="src/main/res/drawable/logo.png"/>
+    </issue>
+
+    <issue
+        id="IconDuplicates"
+        message="The following unrelated icon files have identical contents: logo.png, ic_launcher.png, ic_launcher.png, ic_launcher.png, ic_launcher.png, ic_launcher.png">
         <location
             file="src/main/res/mipmap-xxxhdpi/ic_launcher.png"/>
         <location
@@ -130,6 +221,8 @@
             file="src/main/res/mipmap-mdpi/ic_launcher.png"/>
         <location
             file="src/main/res/mipmap-hdpi/ic_launcher.png"/>
+        <location
+            file="src/main/res/drawable/logo.png"/>
     </issue>
 
 </issues>

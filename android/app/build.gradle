@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'com.github.johnrengelman.processes' version '0.5.0'
+    id 'com.google.gms.google-services'
     }
 
 android {
@@ -72,7 +73,7 @@ dependencies {
     implementation libs.appCompat
     implementation libs.material
     implementation 'io.github.cdimascio:dotenv-java:3.0.2'
-
+    implementation "androidx.core:core-splashscreen:1.2.0-alpha02"
     // JUnit 5 for unit testing
     testImplementation libs.junitJupiterApi
     testRuntimeOnly libs.junitJupiterEngine
@@ -83,5 +84,7 @@ dependencies {
     // Optional: Android test dependencies
     androidTestImplementation libs.androidxTestJunit
     androidTestImplementation libs.espressoCore
+    implementation platform('com.google.firebase:firebase-bom:33.7.0')
+    implementation 'com.google.firebase:firebase-analytics'
 
 }
