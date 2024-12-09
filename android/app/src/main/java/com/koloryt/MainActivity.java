@@ -2,11 +2,11 @@ package com.koloryt;
 
 import android.os.Bundle;
 import android.webkit.CookieManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Window;
 import androidx.activity.OnBackPressedCallback;
@@ -16,9 +16,12 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.core.splashscreen.SplashScreen;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.widget.Toast;
+import android.content.ActivityNotFoundException;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,12 +30,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         // Install the splash screen
         SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
 
         super.onCreate(savedInstanceState);
-        setTheme(R.style.SplashTheme);
+        setTheme(R.style.AppTheme);
 
         // Enforce light mode for all versions
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
@@ -74,53 +76,73 @@ public class MainActivity extends AppCompatActivity {
         webView.clearCache(true);
         webView.clearHistory();
 
+        // Add JavaScript interface
+        webView.addJavascriptInterface(new WebAppInterface(), "Android");
+
         // Set WebView client to handle URL loading
         webView.setWebViewClient(new WebViewClient() {
-           // @Override
-           // public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-           //     view.loadUrl(request.getUrl().toString());
-           //     return true;
-           // }
-            
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-            String url = request.getUrl().toString();
-            if (url.startsWith("tg://")) {
-                try {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    if (intent.resolveActivity(getPackageManager()) != null) {
-                        startActivity(intent); // Open Telegram app
-                        return true; // Indicate that the URL was handled
-                    } else {
-                        Toast.makeText(MainActivity.this, "Telegram app not installed.", Toast.LENGTH_SHORT).show();
-                        return true; // Indicate that we handled the URL
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (url.startsWith("mailto:")) {
+                    // Handle email links
+                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+                    emailIntent.setData(Uri.parse(url));
+                    try {
+                        view.getContext().startActivity(emailIntent);
+                    } catch (ActivityNotFoundException e) {
+                        // Handle case where no email app is installed
+                        Toast.makeText(view.getContext(), "No email app found", Toast.LENGTH_SHORT).show();
                     }
-                } catch (Exception e) {
-                    Log.e("WebView", "Error opening Telegram link", e);
+                    return true;
+                } else if (url.startsWith("tg://")) {
+                    // Handle Telegram links
+                    Intent telegramIntent = new Intent(Intent.ACTION_VIEW);
+                    telegramIntent.setData(Uri.parse(url));
+                    try {
+                        view.getContext().startActivity(telegramIntent);
+                    } catch (ActivityNotFoundException e) {
+                        // Handle case where Telegram is not installed
+                        Toast.makeText(view.getContext(), "Telegram is not installed", Toast.LENGTH_SHORT).show();
+                    }
+                    return true;
+                } else {
+                    // Handle other URLs normally (e.g., open in the WebView or external browser)
+                    if (url.contains("example.com")) { // Adjust this condition as needed
+                        view.loadUrl(url);
+                        return false; // Stay in WebView
+                    } else {
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setData(Uri.parse(url));
+                        view.getContext().startActivity(intent);
+                        return true; // Open in external browser
+                    }
                 }
             }
-            view.loadUrl(url);
-            return true;
-        }
 
-        @Override
-          public void onReceivedError(WebView view, WebResourceRequest request, android.webkit.WebResourceError error) {
-            super.onReceivedError(view, request, error);
 
-            // Check if this is a main frame error (so we don't handle iframe or secondary resource errors)
-            if (request.isForMainFrame()) {
-                // Display a custom HTML message in the WebView
-                setTheme(R.style.AppTheme);
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, android.webkit.WebResourceError error) {
+                super.onReceivedError(view, request, error);
 
-                String customErrorPage = "<html><body style='text-align:center; margin-top: 50%;'>" +
-                        "<h2>No Internet Connection</h2>" +
-                        "<p>Please check your internet connection and try again.</p>" +
-                        "<button onclick='window.location.reload();' style='background-color: #0b0599; color: #fff; border: 1px solid #0b0599; padding: 10px 20px; font-size: 16px; cursor: pointer;'>Reload</button>" +
-                        "</body></html>";
-
-                view.loadData(customErrorPage, "text/html", "UTF-8");
+                // Check if this is a main frame error (not iframe or secondary resource errors)
+                if (request.isForMainFrame()) {
+                    String customErrorPage = "<html><body style='text-align:center; margin-top: 50%;'>" +
+                            "<h2>No Internet Connection</h2>" +
+                            "<p>Please check your internet connection and try again.</p>" +
+                            "<br>"+
+                            "<button onclick='goToHomePage()'> Reload </button>" +
+                            "<script>" +
+                            "function goToHomePage() {" +
+                            "   Android.goToHomePage();" +
+                            "}" +
+                            "</script>" +
+                            "</body></html>";
+                            //style='background-color: #0b0599; color: #fff; border: 1px solid #0b0599; padding: 10px 20px; font-size: 16px; cursor: pointer;
+                    view.loadData(customErrorPage, "text/html", "UTF-8");
                 }
             }
+
         });
     }
 
@@ -163,4 +185,17 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onKeyDown(keyCode, event);
     }
+
+        // JavaScript Interface class
+        private class WebAppInterface {
+            @JavascriptInterface
+            public void goToHomePage() {
+                runOnUiThread(() -> {
+                    if (webView != null) {
+                        webView.loadUrl("https://myshop-topaz-five.vercel.app/"); // Navigate to the home page
+                    }
+                });
+            }
+        }
+
 }
