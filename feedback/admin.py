@@ -52,6 +52,13 @@ class FeedbackAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
         self.update_overall_average_ratings()
 
+
+    def delete_model(self, request, obj):
+        # Call the parent delete_model method to delete the feedback
+        super().delete_model(request, obj)
+        # Recalculate overall average ratings after deletion
+        self.update_overall_average_ratings()
+
     def update_overall_average_ratings(self):
         OverallAverageRating.calculate_overall_averages()
 
@@ -75,7 +82,6 @@ class OverallAverageRatingAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
     
-
     def update_overall_average_ratings(self):
         OverallAverageRating.calculate_overall_averages()
 

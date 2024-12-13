@@ -6,23 +6,40 @@ from .models import Feedback, RatingAnswer, RatingQuestion, OverallAverageRating
 from .serializers import FeedbackSerializer, RatingAnswerSerializer, RatingQuestionSerializer, OverallAverageRatingSerializer
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
+from django.db.models import Avg
+from django.db import transaction
 import logging
 
 logger = logging.getLogger(__name__)
-# Feedback ViewSet for creating and listing feedback
+
+def update_all_question_averages():
+    """Helper function to update the average rating for all questions."""
+    overall_avgs = []
+    with transaction.atomic():
+        for question in RatingQuestion.objects.all():
+            if question.rating_required:
+                avg_rating = RatingAnswer.objects.filter(question=question).aggregate(average=Avg('rating'))['average'] or 0
+                avg_rating = round(avg_rating, 1)
+
+                # Update or create OverallAverageRating for the question
+                overall_avg, _ = OverallAverageRating.objects.get_or_create(question=question)
+                overall_avg.average_rating = avg_rating
+                overall_avgs.append(overall_avg)
+
+        # Bulk update for efficiency
+        OverallAverageRating.objects.bulk_update(overall_avgs, ['average_rating'])
+
 class FeedbackViewSet(viewsets.ModelViewSet):
     queryset = Feedback.objects.all()
     serializer_class = FeedbackSerializer
-    permission_classes = [AllowAny] 
+    permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
-        feedback_data = request.data
-        serializer = self.get_serializer(data=feedback_data)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             feedback = serializer.save()
-            
-            # Handle ratings in the feedback
-            ratings_data = feedback_data.get('ratings', [])
+            ratings_data = request.data.get('ratings', [])
+            rating_answers = []
             errors = []
 
             for rating_data in ratings_data:
@@ -31,35 +48,41 @@ class FeedbackViewSet(viewsets.ModelViewSet):
                     errors.append("Missing 'question_id' in rating data.")
                     continue
 
-                # Get the RatingQuestion object
                 question = get_object_or_404(RatingQuestion, id=question_id)
-
                 if question.rating_required:
                     rating = rating_data.get('rating')
                     if rating is None:
-                        errors.append(f"Missing 'rating' in rating data for question_id: {question_id}")
+                        errors.append(f"Missing 'rating' for required question (ID: {question_id})")
                         continue
-
-                    # Create the RatingAnswer since rating is required
-                    RatingAnswer.objects.create(
-                        feedback=feedback,
-                        question=question,
-                        rating=rating,
-                        answer=rating_data.get('answer', '')
+                    rating_answers.append(
+                        RatingAnswer(feedback=feedback, question=question, rating=rating, answer=rating_data.get('answer', ''))
                     )
                 else:
-                    # Rating is not required, you can choose to log or handle as needed
-                    # Optionally, log that the rating was skipped
-                    print(f"Skipped posting rating for question_id: {question_id} (rating not required).")
+                    logger.info(f"Skipped rating for question (ID: {question_id}): rating not required.")
+
+            # Bulk create ratings only if there are valid entries
+            if rating_answers:
+                RatingAnswer.objects.bulk_create(rating_answers)
+
+            # Recalculate averages for all questions
+            update_all_question_averages()
 
             if errors:
                 return Response({'errors': errors}, status=status.HTTP_400_BAD_REQUEST)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # Endpoint for marking feedback as complete
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+
+        # Recalculate averages for all questions after deletion
+        update_all_question_averages()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(detail=True, methods=['patch'], url_path='mark-complete')
     def mark_complete(self, request, pk=None):
         feedback = self.get_object()
@@ -67,19 +90,14 @@ class FeedbackViewSet(viewsets.ModelViewSet):
         feedback.save()
         return Response({'status': 'Feedback marked as complete'})
 
-# View for retrieving and calculating the overall average rating
 class OverallAverageRatingView(APIView):
     def get(self, request):
-        # Calculate overall averages (if necessary)
-        OverallAverageRating.calculate_overall_averages()        
-        # Filter averages to only include those where the associated RatingQuestion requires a rating
         averages = OverallAverageRating.objects.filter(question__rating_required=True)
-        # Serialize the filtered averages
         serializer = OverallAverageRatingSerializer(averages, many=True)
         return Response(serializer.data)
 
 class RatingQuestionViewSet(viewsets.ModelViewSet):
-    queryset = RatingQuestion.objects.all()
+    queryset = RatingQuestion.objects.all().order_by('id')     
     serializer_class = RatingQuestionSerializer
     permission_classes = [AllowAny] 
 

@@ -11,6 +11,7 @@ import styles from "./OrderItemCard.module.scss";
 interface OrderItemCardProps {
 	product: Product;
 	qty: number;
+	stock: number;
 	onClickDelete?: (product: Product) => void;
 	onChangeCounter?: (value: number) => void;
 	onClickName?: (product: Product) => void;
@@ -76,6 +77,7 @@ export const OrderItemCard = ({
 					<Counter
 						className={styles.counter}
 						value={qty}
+						stock={product.stock}
 						onChangeCounter={onChangeCounter}
 					/>
 					<button

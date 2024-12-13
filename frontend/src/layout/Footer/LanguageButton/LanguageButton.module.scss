@@ -10,6 +10,11 @@
     &:hover {
         background: $color-gray-100;
     }
+
+    @media (max-width: $screen-mobile) {
+        gap: 5px;
+        padding: 5px 0px;
+    }
 }
 
 .flag {

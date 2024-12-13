@@ -1,30 +1,41 @@
 .container {
-    flex-grow: 1;
-    width: 80%;
+  flex-grow: 1;
+  width: 80%;
 }
 
 .productInfo {
-    grid-column: span 5;
-    grid-row: span 2;
-    display: flex;
-    flex-direction: column;
-    gap: clamp(0.938rem, 2.128vw + 0.273rem, 2.188rem);
-    container-type: inline-size;
+  grid-column: span 5;
+  grid-row: span 2;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.938rem, 2.128vw + 0.273rem, 2.188rem);
+  container-type: inline-size;
 }
 
 .description {
-    h3{ 
-        font-size: clamp(16px, 2.5vw, 32px);
-        font-weight: 400;
-        margin-bottom: clamp(8px, 2vw, 25px);
-    }
+  h3 {
+    font-size: clamp(16px, 2.5vw, 32px);
+    font-weight: 400;
+    margin-bottom: clamp(8px, 2vw, 25px);
+  }
 
-    p{
-        font-size: clamp(14px, 1.5vw, 20px);
-        font-weight: 400;
-    }
+  p {
+    font-size: clamp(14px, 1.5vw, 20px);
+    font-weight: 400;
+  }
 }
 
 .applyDropdown {
-grid-column: -1/-6;
+  grid-column: -1/-6;
+}
+
+.description_skeleton_header {
+  height: clamp(16px, 2.5vw, 32px);
+  max-width: 250px;
+  margin-bottom: clamp(8px, 2vw, 25px);
+}
+
+.description_skeleton_paragraph {
+  height: clamp(14px, 1.5vw, 20px);
+  margin-bottom: clamp(4px, 1vw, 18px);
 }

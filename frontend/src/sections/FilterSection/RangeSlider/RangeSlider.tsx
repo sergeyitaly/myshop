@@ -26,8 +26,6 @@ export const AppRangeSlider = ({
 
     const value1 = useDebounce(value[0].toString(), 1000)
     const value2 = useDebounce(value[1].toString(), 1000)
-
-    console.log(startValue1FromScratch);
     
     
     useEffect(() => {
@@ -76,13 +74,10 @@ export const AppRangeSlider = ({
 
         
         let transformedValue = parseFloat(e.target.value.replace(/\s/g, '').replace(/,/g, '.'))
-        console.log(transformedValue);
 
         if(startValue1FromScratch){
-            console.log('fromScratch');
             
             const lastIndex = transformedValue.toString().length
-            console.log(lastIndex);
             
             transformedValue = +transformedValue.toString()[lastIndex - 1]
         }

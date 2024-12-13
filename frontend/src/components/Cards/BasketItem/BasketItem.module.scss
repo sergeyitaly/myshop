@@ -21,7 +21,7 @@
 .imgWrapper {
     position: relative;
     align-self: self-start;
-    max-width: 156px;
+    max-width: 120px;
     min-width: 100px;
     width: 100%;
 
@@ -51,14 +51,19 @@
 .info {
     display: flex;
     flex-direction: column;
-    gap: clamp(0.5rem, 0.745vw + 0.267rem, 0.938rem);
+    gap: clamp(0.25rem, 0.4vw + 0.1rem, 0.4rem); /* Уменьшено значение */
     flex-grow: 1;
     font-weight: 400;
 
     h4 {
-        font-size: clamp(0.875rem, 0.638vw + 0.676rem, 1.25rem);
+        font-size: 15px; /* Уменьшен размер */
         font-weight: 500;
     }
+
+    @media (max-width: $screen-smallMobile) {
+        gap: 3px;
+    }
+
 }
 
 .counterBox {
@@ -68,7 +73,7 @@
 
 .control {
     p {
-        font-size: clamp(1rem, 0.426vw + 0.867rem, 1.25rem);
+        font-size: 15px; /* Уменьшен размер */
         font-weight: 500;
     }
 }
@@ -81,11 +86,19 @@
 
 .selfTop {
     align-self: flex-start;
+    button{
+        font-size: 16px;
+        padding: 1px 12px;
+    }
+    input{
+        font-size: 14px;
+        
+    }
 }
 
 .characteristic {
     p {
-        font-size: clamp(0.875rem, 0.213vw + 0.809rem, 1rem);
+        font-size: 15px; /* Уменьшен размер */
     }
 }
 
@@ -94,7 +107,7 @@
 }
 
 .title {
-    font-size: clamp(0.875rem, 0.638vw + 0.676rem, 1.25rem);
+    font-size: clamp(0.75rem, 0.4vw + 0.5rem, 1rem);
     font-weight: 500;
     text-decoration: none;
     cursor: pointer;
@@ -105,3 +118,6 @@
     text-decoration: line-through;
 }
 
+.sizeLabel {
+    display: inline;
+}

@@ -1,0 +1,17 @@
+rootProject.name = "android"
+include ':app'
+
+dependencyResolutionManagement {
+    versionCatalogs {
+        create("libs") {
+            library("coreKtx", "androidx.core:core-ktx:1.15.0")
+            library("appCompat", "androidx.appcompat:appcompat:1.7.0")
+            library("material", "com.google.android.material:material:1.12.0")
+            library("junitJupiterApi", "org.junit.jupiter:junit-jupiter-api:5.11.3")
+            library("junitJupiterEngine", "org.junit.jupiter:junit-jupiter-engine:5.11.3")
+            library("mockitoCore", "org.mockito:mockito-core:5.6.0")
+            library("androidxTestJunit", "androidx.test.ext:junit:1.2.1")
+            library("espressoCore", "androidx.test.espresso:espresso-core:3.6.1")
+        }
+    }
+}

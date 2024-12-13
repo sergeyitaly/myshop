@@ -89,20 +89,12 @@ export const TeamItem: React.FC<TeamMemberProps> = ({ member }) => {
 					</a>
 				)}
 				{github && (
-					<a
-						href={github}
-						target="_blank"
-						rel="noopener noreferrer"
-					>
+					<a href={github} target="_blank" rel="noopener noreferrer">
 						<GitHub />
 					</a>
 				)}
 				{behance && (
-					<a
-						href={behance}
-						target="_blank"
-						rel="noopener noreferrer"
-					>
+					<a href={behance} target="_blank" rel="noopener noreferrer">
 						<FaBehance />
 					</a>
 				)}

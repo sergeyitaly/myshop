@@ -1,4 +1,4 @@
-import { Grid, Pagination } from "swiper/modules";
+import { Autoplay, Grid, Pagination } from "swiper/modules";
 import { SwiperOptions } from "swiper/types";
 
 export const teamSettings: SwiperOptions = {
@@ -13,7 +13,7 @@ export const teamSettings: SwiperOptions = {
 	},
 	spaceBetween: 20,
 	speed: 1000,
-	modules: [Grid, Pagination],
+	modules: [Grid, Pagination, Autoplay],
 
 	breakpoints: {
 		1024: {
@@ -24,6 +24,10 @@ export const teamSettings: SwiperOptions = {
 		},
 		500: {
 			slidesPerView: 3,
+		},
+		375: { 
+			slidesPerView: 2,
+			slidesPerGroup: 2,
 		},
 		0: {
 			slidesPerView: 2,

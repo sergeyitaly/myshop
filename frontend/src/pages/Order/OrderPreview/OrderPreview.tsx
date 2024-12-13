@@ -18,11 +18,8 @@ export const OrderPreview = ({
 }: OrderPreviewProps) => {
 
     const navigate = useNavigate();
-    const { t } = useTranslation(); // Initialize useTranslation
-
-
+    const { t  } = useTranslation();
     const { basketItems, totalPrice, deleteFromBasket, changeCounter} = useBasket()
-
     const handleClickCard = (product: Product) => {
         navigate(ROUTE.PRODUCT+product.id_name)
     }
@@ -41,6 +38,7 @@ export const OrderPreview = ({
                         key={product.id}
                         product={product}
                         qty={qty}
+                        stock={product.stock}
                         onClickDelete={deleteFromBasket}
                         onChangeCounter={(val) => changeCounter(product, val)}
                         onClickName={handleClickCard}

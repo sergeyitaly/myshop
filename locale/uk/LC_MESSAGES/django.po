@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-23 17:33+0300\n"
+"POT-Creation-Date: 2024-12-05 22:23+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,7 +28,7 @@ msgstr ""
 msgid "Image"
 msgstr "Картинка"
 
-#: brand/models.py:46 comments/models.py:10 feedback/models.py:21
+#: brand/models.py:46 comments/models.py:10 feedback/models.py:25
 #: intro/models.py:46 shop/models.py:122 team/models.py:46
 #: technologies/models.py:46
 msgid "Name"
@@ -49,7 +49,7 @@ msgstr "Бренд"
 msgid "Brands"
 msgstr "Бренди"
 
-#: comments/models.py:13 comments/models.py:21 feedback/models.py:22
+#: comments/models.py:13 comments/models.py:21 feedback/models.py:26
 #, fuzzy
 #| msgid "Commands"
 msgid "Comment"
@@ -61,71 +61,91 @@ msgstr "Коментар"
 msgid "Comments"
 msgstr "Коментарі"
 
-#: feedback/admin.py:65 feedback/models.py:22 order/models.py:39
-#: feedback/admin.py:66 feedback/models.py:24 order/models.py:41
+#: feedback/admin.py:71 feedback/models.py:28 order/models.py:53
 msgid "Created At"
 msgstr "cтворено"
 
-#: feedback/models.py:9
+#: feedback/models.py:10 feedback/models.py:16
 msgid "Rating Question"
 msgstr "Рейтингові питання"
-msgstr "Рейтингове Питання"
 
-#: feedback/models.py:10
+#: feedback/models.py:11
 #, fuzzy
 #| msgid "Product Name"
 msgid "Aspect Name"
 msgstr "Назва продукту"
 
-#: feedback/models.py:11
+#: feedback/models.py:12
 msgid "Is Rating Required"
 msgstr "Рейтниг Необхідний"
-msgstr "Рейтинг Потрібен"
 
-#: feedback/models.py:23
+#: feedback/models.py:17
+#, fuzzy
+#| msgid "Rating Question"
+msgid "Rating Questions"
+msgstr "Рейтингові питання"
+
+#: feedback/models.py:27
 msgid "Email"
 msgstr "Пошта"
-msgstr "Скринька"
 
-#: feedback/models.py:31
+#: feedback/models.py:34
 msgid "Ratings"
 msgstr "Рейтинги"
-msgstr "Рейтинг"
 
-#: feedback/models.py:38 order/models.py:45
+#: feedback/models.py:41 order/models.py:57
 msgid "Status"
 msgstr "Статус"
 
-#: feedback/models.py:43 feedback/models.py:48
+#: feedback/models.py:46 feedback/models.py:51
 msgid "Feedback"
 msgstr "Відгук"
-msgstr "Відгук"
 
-#: feedback/models.py:44
+#: feedback/models.py:47
 msgid "Feedbacks"
 msgstr "Відгуки"
-msgstr "Відгуки"
 
-#: feedback/models.py:49 feedback/models.py:80
+#: feedback/models.py:52 feedback/models.py:81
 #, fuzzy
 #| msgid "Description"
 msgid "Question"
 msgstr "Опис"
 
-#: feedback/models.py:50
+#: feedback/models.py:53
 msgid "Answer"
 msgstr "Відповідь"
-msgstr "Відповідь"
 
-#: feedback/models.py:55
+#: feedback/models.py:58
 msgid "Rating"
-msgstr "Рейтингийтинг"
 msgstr "Рейтинг"
 
-#: feedback/models.py:82
+#: feedback/models.py:70
+#, fuzzy
+#| msgid "Ratings"
+msgid "Rating Answer"
+msgstr "Рейтинги"
+
+#: feedback/models.py:71
+#, fuzzy
+#| msgid "Ratings"
+msgid "Rating Answers"
+msgstr "Рейтинги"
+
+#: feedback/models.py:84
 msgid "Average Rating"
 msgstr "Середній Рейтинг"
-msgstr "Середеій Рейтинг"
+
+#: feedback/models.py:103
+#, fuzzy
+#| msgid "Average Rating"
+msgid "Overal Average Rating"
+msgstr "Середній Рейтинг"
+
+#: feedback/models.py:104
+#, fuzzy
+#| msgid "Average Rating"
+msgid "Overal Average Ratings"
+msgstr "Середній Рейтинг"
 
 #: intro/models.py:48 shop/models.py:124 team/models.py:56
 #: technologies/models.py:48
@@ -140,201 +160,250 @@ msgstr "Вступ"
 msgid "Intros"
 msgstr "Вступи"
 
-#: myshop/settings.py:330
+#: logs/admin.py:30
+msgid "Time Period"
+msgstr ""
+
+#: logs/admin.py:36
+msgid "Today"
+msgstr ""
+
+#: logs/admin.py:37
+msgid "This Week"
+msgstr ""
+
+#: logs/admin.py:38
+msgid "This Month"
+msgstr ""
+
+#: logs/admin.py:39
+msgid "This Year"
+msgstr ""
+
+#: myshop/settings.py:337
 msgid "English"
 msgstr "Англійська"
 
-#: myshop/settings.py:331
+#: myshop/settings.py:338
 msgid "Ukrainian"
 msgstr "Українська"
-msgstr "Українська"
 
-#: order/admin.py:27
+#: order/admin.py:79
 #, fuzzy
 #| msgid "Order summary"
 msgid "Order Summary (JSON)"
 msgstr "JSON замовлення"
 
-#: order/admin.py:59
+#: order/admin.py:108
 msgid "Product Photo"
 msgstr "Фото продукту"
 
-#: order/admin.py:63
+#: order/admin.py:112
 msgid "Product Name"
 msgstr "Назва продукту"
 
-#: order/admin.py:67 shop/admin.py:87 shop/models.py:69 shop/models.py:93
+#: order/admin.py:117 shop/models.py:125
+msgid "Price"
+msgstr "Ціна"
+
+#: order/admin.py:121 shop/models.py:143
+msgid "Currency"
+msgstr "Валюта"
+
+#: order/admin.py:125 shop/admin.py:87 shop/models.py:69 shop/models.py:93
 #: shop/models.py:121
 msgid "Collection"
 msgstr "Коллекція"
 
-#: order/admin.py:71 shop/models.py:135
+#: order/admin.py:131 shop/models.py:135
 msgid "Size"
 msgstr "Розмір"
 
-#: order/admin.py:75
+#: order/admin.py:136
 msgid "Color"
 msgstr "Колір"
 
-#: order/admin.py:96
+#: order/admin.py:158
 msgid "Has Order Items"
 msgstr "Має елементи замовлення"
 
-#: order/admin.py:97
+#: order/admin.py:159
 msgid "has_order_items"
 msgstr "Має елементи замовлення"
 
-#: order/admin.py:101
+#: order/admin.py:163
 msgid "With Order Items"
 msgstr "З"
 
-#: order/admin.py:102
+#: order/admin.py:164
 msgid "Without Order Items"
 msgstr "Без"
 
-#: order/admin.py:143 order/models.py:12 order/models.py:111
-msgid "Chat ID"
-msgstr "Чат ІД"
-
-#: order/admin.py:147
+#: order/admin.py:215
 msgid "Last Updated"
 msgstr "Останнє оновлення"
 
-#: order/admin.py:151
+#: order/admin.py:219
 msgid "Total Quantity"
 msgstr "Загальна кількість"
 
-#: order/admin.py:155
+#: order/admin.py:223
 msgid "Total Price"
 msgstr "Загальна ціна"
 
-#: order/models.py:11
+#: order/management/commands/generate_order_summaries.py:97
+#: order/management/commands/generate_order_summaries.py:109 order/utils.py:61
+#: order/utils.py:72
+#, fuzzy
+#| msgid "Collection"
+msgid "No Collection"
+msgstr "Коллекція"
+
+#: order/models.py:15
 msgid "Phone"
 msgstr "Телефон"
 
-#: order/models.py:18
+#: order/models.py:16 order/models.py:135
+msgid "Chat ID"
+msgstr "Чат ІД"
+
+#: order/models.py:22 order/models.py:60
 msgid "Telegram user"
 msgstr "користувач Телеграм"
 
-#: order/models.py:19
+#: order/models.py:23
 msgid "Telegram users"
 msgstr "Телеграм користувачі"
 
-#: order/models.py:23
+#: order/models.py:37
 msgid "Submitted"
 msgstr "Оформлено"
 
-#: order/models.py:24 shop/models.py:128
+#: order/models.py:38 order/utils.py:76 shop/models.py:128
 msgid "Created"
 msgstr "Створено"
 
-#: order/models.py:25
+#: order/models.py:39 order/utils.py:77
 msgid "Processed"
 msgstr "В обробці"
 
-#: order/models.py:26
+#: order/models.py:40
 msgid "Complete"
 msgstr "Завершено"
 
-#: order/models.py:27
+#: order/models.py:41 order/utils.py:79
 msgid "Canceled"
 msgstr "Скасовано"
 
-#: order/models.py:31
+#: order/models.py:44
 msgid "Default Name"
 msgstr "Назва за замовчуванням"
 
-#: order/models.py:32
+#: order/models.py:45
 msgid "Default Surname"
 msgstr "Прізвищє"
 
-#: order/models.py:33
+#: order/models.py:46
 msgid "Contact phone number"
 msgstr "Контактний номер телефону"
 
-#: order/models.py:35
+#: order/models.py:48
 msgid "Address"
 msgstr "Адресса"
 
-#: order/models.py:36
+#: order/models.py:49
 msgid "Other person"
 msgstr "Інша особа"
 
-#: order/models.py:37
+#: order/models.py:50
 msgid "Comments about the receiver"
 msgstr "Коментар про отримувача"
 
-#: order/models.py:38
+#: order/models.py:51
 msgid "Congrats"
 msgstr "Привітання!"
 
-#: order/models.py:40
+#: order/models.py:52
 msgid "Submitted At"
 msgstr "оформлено"
 
-#: order/models.py:42
+#: order/models.py:54
 msgid "Processed At"
 msgstr "оброблено"
 
-#: order/models.py:43
+#: order/models.py:55
 msgid "Complete At"
 msgstr "завершено"
 
-#: order/models.py:44
+#: order/models.py:56
 msgid "Canceled At"
 msgstr "скасовано"
 
-#: order/models.py:46
+#: order/models.py:58
 msgid "Parent Order"
 msgstr "Батьківське замовлення"
 
-#: order/models.py:47
+#: order/models.py:59
 msgid "Package as a present"
 msgstr "Пакування як подарунок"
 
-#: order/models.py:48
-#, fuzzy
-#| msgid "Telegram user"
-msgid "telegram user"
-msgstr "користувач Телеграм"
-
-#: order/models.py:106 order/models.py:136
+#: order/models.py:130 order/models.py:163
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:484
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:491
 msgid "Order"
 msgstr "Замовлення"
 
-#: order/models.py:107 order/models.py:112
+#: order/models.py:131 order/models.py:136
 msgid "Orders"
 msgstr "Замовлення"
 
-#: order/models.py:132
+#: order/models.py:158
 msgid "Order summary"
 msgstr "JSON замовлення"
 
-#: order/models.py:133
-msgid "Order summarys"
+#: order/models.py:159
+#, fuzzy
+#| msgid "Order summarys"
+msgid "Order summaries"
 msgstr "JSON замовлень"
 
-#: order/models.py:137 shop/admin.py:143 shop/models.py:188 shop/models.py:227
+#: order/models.py:164 shop/admin.py:143 shop/models.py:188 shop/models.py:227
 msgid "Product"
 msgstr "Продукт"
 
-#: order/models.py:138
+#: order/models.py:168
 msgid "Quantity"
 msgstr "Кількість"
 
-#: order/models.py:139
+#: order/models.py:169
 msgid "Total Sum"
 msgstr "Загальна сума"
 
-#: order/models.py:151
+#: order/models.py:192
 msgid "Order Item"
 msgstr "Елемент замовлення"
 
-#: order/models.py:152
+#: order/models.py:193
 msgid "Order Items"
 msgstr "Елементи замовлення"
+
+#: order/utils.py:56 order/utils.py:67
+#, fuzzy
+#| msgid "Color"
+msgid "No Color"
+msgstr "Колір"
+
+#: order/utils.py:60 order/utils.py:71
+#, fuzzy
+#| msgid "Name"
+msgid "No Name"
+msgstr "Ім'я"
+
+#: order/utils.py:78
+#, fuzzy
+#| msgid "Complete"
+msgid "Completed"
+msgstr "Завершено"
 
 #: shop/admin.py:16 shop/admin.py:157
 msgid "Product Image"
@@ -404,10 +473,6 @@ msgstr "Кількість продаж"
 msgid "ID Name"
 msgstr "Ім'я"
 
-#: shop/models.py:125
-msgid "Price"
-msgstr "Ціна"
-
 #: shop/models.py:126
 msgid "Stock"
 msgstr "В наявності"
@@ -459,10 +524,6 @@ msgstr "Знажка в %"
 #: shop/models.py:136
 msgid "Discount"
 msgstr "Знижка"
-
-#: shop/models.py:143
-msgid "Currency"
-msgstr "Валюта"
 
 #: shop/models.py:196 shop/models.py:198
 msgid "images"
@@ -547,7 +608,7 @@ msgstr "Показати це сповіщення иа вийти"
 #: venv/lib/python3.9/site-packages/click/core.py:1370
 #, python-brace-format
 msgid "(Deprecated) {text}"
-msgstr "Застаріло"
+msgstr "Застаріло {text}"
 
 #: venv/lib/python3.9/site-packages/click/core.py:1387
 msgid "Options"
@@ -1064,8 +1125,8 @@ msgstr ""
 #: venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py:1489
 #, python-format
 msgid ""
-"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD HH:MM[:ss[."
-"uuuuuu]][TZ] format."
+"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD "
+"HH:MM[:ss[.uuuuuu]][TZ] format."
 msgstr ""
 
 #: venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py:1497
@@ -1091,8 +1152,8 @@ msgstr ""
 #: venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py:1789
 #, python-format
 msgid ""
-"“%(value)s” value has an invalid format. It must be in [DD] [[HH:]MM:]ss[."
-"uuuuuu] format."
+"“%(value)s” value has an invalid format. It must be in [DD] "
+"[[HH:]MM:]ss[.uuuuuu] format."
 msgstr ""
 
 #: venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py:1793
@@ -1934,8 +1995,8 @@ msgstr ""
 #: venv/lib/python3.9/site-packages/django/views/generic/dates.py:652
 #, python-format
 msgid ""
-"Future %(verbose_name_plural)s not available because %(class_name)s."
-"allow_future is False."
+"Future %(verbose_name_plural)s not available because "
+"%(class_name)s.allow_future is False."
 msgstr ""
 
 #: venv/lib/python3.9/site-packages/django/views/generic/dates.py:692
@@ -2185,6 +2246,11 @@ msgstr ""
 msgctxt "stick"
 msgid "club"
 msgstr ""
+
+#, fuzzy
+#~| msgid "Telegram user"
+#~ msgid "telegram user"
+#~ msgstr "користувач Телеграм"
 
 #~ msgid "Telegram User"
 #~ msgstr "Користувач Телеграм"

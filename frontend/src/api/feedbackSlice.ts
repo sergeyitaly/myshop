@@ -3,13 +3,14 @@ import { FeedbackForm, Question } from "../models/entities";
 import { ShortServerResponce } from "../models/server-responce";
 import { apiSlice } from "./mainApiSlice";
 
-export interface CreateOrderErrorResponce {
-    status: number
+export interface CreateFeedbackErrorResponse {
+    status: number;
     data: {
-        name: string
+        name?: string; 
+        email?: string; 
+        comment?: string; 
     }
 }
-
 export const feedbackApiSlice = apiSlice.injectEndpoints({
     endpoints: builder => ({
         createFeedback: builder.mutation<string, FeedbackForm>({
@@ -18,9 +19,9 @@ export const feedbackApiSlice = apiSlice.injectEndpoints({
                 method: 'POST',
                 url: `${ENDPOINTS.FEEDBACK}/`
             }),
-            transformErrorResponse: (baseQueryReturnValue: CreateOrderErrorResponce) => {
-                return baseQueryReturnValue
-            },
+            transformErrorResponse: (baseQueryReturnValue: CreateFeedbackErrorResponse) => {
+                const { status, data } = baseQueryReturnValue;
+                return { status, errors: data };             },
         }),
         getAllQuestions: builder.query<ShortServerResponce<Question[]>, void>({
             query: () => {

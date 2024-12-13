@@ -37,19 +37,19 @@ export const AppInput = ({
     }
 
     return (
-        <label className={clsx(styles.label, {
-            [styles.error]: error
-        })}>
-            <input
-                autoComplete="off"
-                className={clsx(styles.input)} 
-                {...props}
-                onFocus={handleFocus}
-                onChange={handleChange}
-                onBlur={handleBlur}
-            />
-            <span className={clsx({[styles.activeSpan]: active || value})}>{label}</span>
-            {error && <p className={styles.errorMessage}>{helperText}</p>}
-        </label>
+            <label className={clsx(styles.label, {
+                [styles.error]: error
+            })}>
+                <input
+                    autoComplete="off"
+                    className={clsx(styles.input)} 
+                    {...props}
+                    onFocus={handleFocus}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                />
+                <span className={clsx({[styles.activeSpan]: active || value})}>{label}</span>
+                {error && <p className={styles.errorMessage}>{helperText}</p>}
+            </label>
     )
 }

@@ -1,0 +1,82 @@
+pipeline {
+    agent {
+        docker { image 'cimg/android:2023.09.1' }
+    }
+    environment {
+        DOCKER_ANDROID_IMAGE = 'android-build-image'
+        DJANGO_CONTAINER_NAME = 'django-web'
+        ANDROID_WORKDIR = 'android'  // Specify the Android project directory
+        GOOGLE_PLAY_CREDENTIALS = credentials('play-store-json-key')
+        TAG = 'latest'
+        DOCKER_HOST = "unix:///var/run/docker.sock"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    deleteDir()  // Clean workspace before checking out
+                    echo "Workspace is deleted..."
+                    echo "Checking out the repository..."
+                    git branch: 'main', credentialsId: 'github-credentials-id', url: 'https://github.com/sergeyitaly/myshop.git'
+                    sh "ls -lat"
+                }
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    // Navigate to the Android project directory and install dependencies
+                    dir("${ANDROID_WORKDIR}") {
+                        sh './gradlew dependencies'
+                    }
+                }
+            }
+        }
+
+        stage('Build APK') {
+            steps {
+                script {
+                    // Navigate to the Android project directory and build the APK
+                    dir("${ANDROID_WORKDIR}") {
+                        sh './gradlew assembleRelease'
+                    }
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                script {
+                    // Navigate to the Android project directory and run tests
+                    dir("${ANDROID_WORKDIR}") {
+                        sh './gradlew test'
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Google Play') {
+            steps {
+                script {
+                    withCredentials([file(credentialsId: 'play-store-json-key', variable: 'GOOGLE_PLAY_CREDENTIALS_JSON')]) {
+                        sh '''
+                        # Authenticate with Google Play using the service account JSON key
+                        gcloud auth activate-service-account --key-file=$GOOGLE_PLAY_CREDENTIALS_JSON
+                        
+                        # Deploy the release APK to Google Play
+                        gcloud play android publish-apk --apk=./app/build/outputs/apk/release/app-release.apk --track=production
+                        '''
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()  // Clean workspace after the pipeline is finished
+        }
+    }
+}

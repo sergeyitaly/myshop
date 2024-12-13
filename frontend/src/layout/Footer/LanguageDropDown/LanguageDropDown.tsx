@@ -41,7 +41,7 @@ export const LanguageDropDown = () => {
 
     const handleLanguageChange = (lang: string) => {
         localStorage.setItem(STORAGE.LANGUAGE, lang)
-        i18n.changeLanguage(lang); // Change the language
+        i18n.changeLanguage(lang);
         handleClose()
     };
 

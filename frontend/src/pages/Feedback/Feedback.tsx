@@ -1,124 +1,139 @@
-import { FeedbackCard } from "../../components/Cards/FeedbackCard/FeedbackCard"
-import { PageContainer } from "../../components/containers/PageContainer"
-import { MainButton } from "../../components/UI/MainButton/MainButton"
-import styles from './Feedback.module.scss'
-import { useNavigate } from "react-router-dom"
-import { ROUTE } from "../../constants"
-import { useEffect, useState } from "react"
-import { FeedbackForm } from "../../models/entities"
-import { useCreateFeedbackMutation, useGetAllQuestionsQuery } from "../../api/feedbackSlice"
-import clsx from "clsx"
-import { AppModal } from "../../components/AppModal/AppModal"
-import { FeedbackModalForm } from "./FeedbackForm/FeedbackModalForm"
-import { useToggler } from "../../hooks/useToggler"
-import { useAppTranslator } from "../../hooks/useAppTranslator"
-
-
+import { FeedbackCard } from "../../components/Cards/FeedbackCard/FeedbackCard";
+import { PageContainer } from "../../components/containers/PageContainer";
+import { MainButton } from "../../components/UI/MainButton/MainButton";
+import styles from './Feedback.module.scss';
+import { useNavigate } from "react-router-dom";
+import { ROUTE } from "../../constants";
+import { useEffect } from "react";
+import { FeedbackForm, Question } from "../../models/entities";
+import { useCreateFeedbackMutation, useGetAllQuestionsQuery } from "../../api/feedbackSlice";
+import clsx from "clsx";
+import { AppModal } from "../../components/AppModal/AppModal";
+import { FeedbackModalForm } from "./FeedbackForm/FeedbackModalForm";
+import { useToggler } from "../../hooks/useToggler";
+import { useAppTranslator } from "../../hooks/useAppTranslator";
+import { MapComponent } from "../../components/MapComponent";
+import { SkeletonFeedbackCard } from "../../components/Cards/FeedbackCard/SkeletonFeedbackCard";
+import { initialFormData, validationSchema } from "./initialFormData";
+import { useFormik } from "formik";
+import { useSnackbar } from "../../hooks/useSnackbar";
 
 export const FeedbackPage = () => {
+    const navigate = useNavigate();
+    const { openStatus, handleClose, handleOpen } = useToggler();
+    const { t, getTranslatedAspectName, getTranslatedQuestion } = useAppTranslator();
+    const { data, isLoading: isLoadingCards } = useGetAllQuestionsQuery();
 
-    const navigate = useNavigate()
+    const {openInfo} = useSnackbar()
 
-    const {openStatus, handleClose, handleOpen} = useToggler()
-
-    const {t} = useAppTranslator()
-
-    const {data} = useGetAllQuestionsQuery()
+    
+    
 
 
-    const [form, setForm] = useState<FeedbackForm>({
-        email: '',
-        name: '',
-        comment: '',
-        ratings: []
+
+    const {errors, touched,  values, handleSubmit: openPopup, setValues, setFieldTouched, setFieldValue} = useFormik({
+        initialValues: initialFormData.ratings,
+        validationSchema,
+        onSubmit() {handleOpen()},
     })
 
     useEffect(() => {
-        if(data) {
-            const questionsTemplates = data.results.map(({id, aspect_name}) => ({
+        if (data) {
+            const questionsTemplates = data.results.map(({ id, rating_required }: Question) => ({
                 question_id: id,
                 answer: '',
-                rating: aspect_name ? 0 : undefined 
-            }))
-
-            setForm({...form, ratings: questionsTemplates })
+                rating: rating_required ? 0 : undefined
+            }));
+            setValues(questionsTemplates)
         }
-    }, [data]) 
+    }, [data]);
+
+    const [sendForm, { isLoading, isSuccess }] = useCreateFeedbackMutation();
+
+    useEffect(() => {
+        if (isSuccess) {
+            navigate(ROUTE.THANK_FOR_FEEDBACK);
+        }
+    }, [isSuccess, navigate]);
 
 
-    const [sendForm, {isLoading, isSuccess}] = useCreateFeedbackMutation()
-
-    useEffect (() => {
-        isSuccess && navigate(ROUTE.THANK_FOR_FEEDBACK)
-    }, [isSuccess])
-
-    const handleClick = (id: number, value: number) => {
-        const newRating = form.ratings.map((oldRating) => {
-            if(oldRating.question_id === id) return {...oldRating, rating: value}
-            return oldRating
-        })
-        setForm({...form, ratings: newRating})
+    const handleClick = (index: number, value: number) => {
+        setFieldValue(`${index}.rating`, value)
+    };
+    
+    const handleChange = (index: number, value: string) => {
+        setFieldValue(`${index}.answer`, value)
+    };
+    
+  
+    const handleBlur = (index: number) => {
+        setFieldTouched(`${index}.rating`, true)
     }
 
-    const handleChange = (id: number, value: string) => {
-        const newRating = form.ratings.map((oldRating) => {
-            if(oldRating.question_id === id) return {...oldRating, answer: value}
-            return oldRating
-        })
-        setForm({...form, ratings: newRating})
-    }
+    const handleSubmit = (f: Omit<FeedbackForm, 'ratings'>) => {
+        sendForm({...f, ratings: values});
+    };
 
-    const handleSubmit = () => {
-        sendForm(form)
+    const handleNextStep = () => {
+        const isConsistErrors = !!Object.keys(errors).length
+        if(isConsistErrors){
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth' 
+              });
+            openInfo(t('check_feedback_list'), 'error')
+        }
     }
-
-    const handleChangeHeader = (fieldName: string, value: string) => {
-        setForm({...form, [fieldName]: value})
-    }
-
+ 
     return (
         <>
-        <PageContainer className={clsx({[styles.loading]: isLoading})}>
-         
-            <div className={styles.intro}>
-                <p>{t('greetting')}<span>KOLORYT!</span> </p>
-                <p>{t('ask_to_rate')}</p>
-                <p>P.S {t('ps')}</p>
-            </div>
-            <div className={styles.cardContainer}>
-                {
-                    data?.results.map(({id, aspect_name, question}, index) => (
-                        <FeedbackCard
-                            key={id}
-                            question1={`${index+1}. ${aspect_name ? aspect_name : question}`}
-                            question2={aspect_name ? question : ''}
-                            showButtons = {aspect_name ? true : false}
-                            thisRating={form.ratings.find(({question_id}) => question_id === id)?.rating}
-                            onClick={(val) => handleClick(id, val)}
-                            onChangeText={(val) => handleChange(id, val)}
-                        />
-                    ))
-                }
-            </div>
-            <div className={styles.actions}>
-                <MainButton
-                    color="blue"
-                    title={t("send")}
-                    onClick={handleOpen}
+            <PageContainer className={clsx({ [styles.loading]: isLoading })}>
+                <div className={styles.intro}>
+                    <p>{t('greetting')}<span>  KOLORYT!</span></p>
+                    <p>{t('ask_to_rate')}</p>
+                    <p>P.S {t('ps')}</p>
+                </div>
+                <form 
+                    className={styles.cardContainer}
+                    id={'feedback'}
+                    onSubmit={openPopup}
+                >
+                    {isLoadingCards ? (
+                        <MapComponent qty={7} component={<SkeletonFeedbackCard />} />
+                    ) : (
+                        data?.results.map(({ id, aspect_name_en, aspect_name_uk, question_en, question_uk, rating_required }, index) => (
+                            <FeedbackCard
+                                key={id}
+                                tabIndex={index}
+                                isError = {!!(touched[index]?.rating && errors[index]?.rating)}
+                                question1={`${index + 1}. ${rating_required ? getTranslatedAspectName(aspect_name_en ?? "", aspect_name_uk ?? "") : getTranslatedQuestion(question_en ?? "", question_uk ?? "")}`} 
+                                question2={rating_required ? getTranslatedQuestion(question_en ?? "", question_uk ?? ""): undefined}
+                                showButtons={rating_required}
+                                thisRating={values.find(({ question_id }) => question_id === id)?.rating} 
+                                onClick={(val) => handleClick(index, val)} 
+                                onChangeText={(val) => handleChange(index, val)}
+                                onBlur={handleBlur}
+                            />
+                        ))
+                    )}
+                </form>
+                <div className={styles.actions}>
+                    <MainButton
+                        type="submit"
+                        form = 'feedback'
+                        color="blue"
+                        title={t("send")}
+                        onClick={handleNextStep}
+                    />
+                    <button className={styles.button} onClick={() => navigate(ROUTE.HOME)}>{t('close_and_return')}</button>
+                </div>
+            </PageContainer>
+            <AppModal open={openStatus} onClickOutside={handleClose}>
+                <FeedbackModalForm
+                    isLoading={isLoading}
+                    onSubmit={handleSubmit}
                 />
-                <button className={styles.button} onClick={() => navigate(ROUTE.HOME)}>{t('close_and_return')}</button>
-            </div>
-        </PageContainer>
-        <AppModal
-            open = {openStatus}
-            onClickOutside={handleClose}
-        >
-            <FeedbackModalForm
-                isLoading = {isLoading}
-                onSubmit={handleSubmit}
-                onChange={handleChangeHeader}
-            />
-        </AppModal>
+            </AppModal>
         </>
-    )
-}
+    );
+};

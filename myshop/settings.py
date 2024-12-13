@@ -36,7 +36,7 @@ LOCAL_HOST = os.getenv('LOCAL_HOST')
 TELEGRAM_BOT_TOKEN=os.getenv('NOTIFICATIONS_API')
 SAYINGS_FILE_PATH = os.path.join(BASE_DIR, 'order', 'sayings.txt')
 AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400, must-revalidate'  # Cache for 1 day
+    'CacheControl': 'max-age=86400, must-revalidate'
 }
 
 
@@ -45,9 +45,12 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost:8010", # for docker
+    "http://127.0.0.1:8010", # for docker
     VERCEL_DOMAIN,
     AWS_FRONTEND_DOMAIN,    
 ]
+
 SECURE_SSL_REDIRECT = False
 SECURE_HSTS_SECONDS=0
 INTERNAL_IPS = ["127.0.0.1", "localhost", '::1']
@@ -103,6 +106,7 @@ INSTALLED_APPS = [
     'django_extensions',
       # "debug_toolbar",
     'feedback',
+    'logs',
   #  'admisortable2',
 
 ]
@@ -121,6 +125,8 @@ MIDDLEWARE = [
     #    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'myshop.middleware.CacheControlMiddleware',
+    'logs.middleware.APILogMiddleware',  
+
 ]
 # DIRS = [AWS_TEMPLATES]
 
@@ -339,29 +345,35 @@ MODELTRANSLATION_FALLBACK_LANGUAGES = ('en','uk',)
 # DEBUG_TOOLBAR_CONFIG = {
 #    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,  # Only show toolbar in DEBUG mode
 # }
+
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-REDIS_CACHE_LOCATION = os.getenv('REDIS_CACHE_LOCATION', 'redis://localhost:6379/1')
+REDIS_CACHE_LOCATION = os.getenv('REDIS_CACHE_LOCATION')
 CACHES = {
     'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"{os.getenv('REDIS_CACHE_LOCATION', 'redis://127.0.0.1:6379')}/0",
+
         'LOCATION': REDIS_CACHE_LOCATION,
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'CONNECTION_POOL_KWARGS': {
-                'max_connections': 100,  # Increase if needed
+                'max_connections': 300,  # Adjust based on load requirements
                 'retry_on_timeout': True,
             },
-            'SOCKET_CONNECT_TIMEOUT': 5,  # seconds
-            'SOCKET_TIMEOUT': 5,  # seconds
+            'SOCKET_CONNECT_TIMEOUT': 25,  # seconds
+            'SOCKET_TIMEOUT': 25,  # seconds
         },
         'KEY_PREFIX': 'imdb',
-        'TIMEOUT': 60 * 15,  # Cache timeout in seconds (e.g., 15 minutes)
+        'TIMEOUT': 60 * 15,  # Cache timeout in seconds
     }
 }
 
 # Celery configuration
-CELERY_BROKER_URL = os.getenv('REDIS_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_BROKER_URL = os.getenv('REDIS_BROKER_URL')
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 
 CELERY_IMPORTS = ('order.tasks',)
@@ -392,15 +404,21 @@ LOGGING = {
     'disable_existing_loggers': False,
     'handlers': {
         'console': {
-            'level': 'WARNING',
+            'level': 'DEBUG',  # Capture all log levels, including DEBUG
             'class': 'logging.StreamHandler',
         },
     },
     'loggers': {
         'django.db.backends': {
             'handlers': ['console'],
-            'level': 'WARNING',
+            'level': 'DEBUG',  # Capture all database-related logs
             'propagate': False,
+        },
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',  # Capture all logs for Django core (useful for debugging)
+            'propagate': True,
         },
     },
 }
+

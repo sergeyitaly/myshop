@@ -2,13 +2,13 @@ import requests
 import logging
 from datetime import datetime
 from django.conf import settings
-from django.core.cache import cache
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from django.utils.timezone import is_aware, make_aware
-from django.utils.dateparse import parse_datetime
-from .models import Order, OrderSummary, OrderItem
-from .serializers import OrderItemSerializer
+from django.utils.timezone import is_aware, make_aware, make_naive
+from django.db import transaction
+from django.core.cache import cache
+from order.models import Order, OrderSummary, OrderItem
+from order.serializers import OrderItemSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -21,153 +21,192 @@ STATUS_EMOJIS = {
 }
 
 def ensure_datetime(value):
-    """Ensures the value is a datetime object."""
+    if isinstance(value, datetime):
+        return value
     if isinstance(value, str):
-        return parse_datetime(value)
-    return value
+        try:
+            return datetime.fromisoformat(value)
+        except ValueError:
+            logger.error(f"Invalid datetime format: {value}")
+            return None
+    raise ValueError("Invalid datetime value")
 
 def make_aware_if_naive(dt):
-    """Converts a naive datetime to aware, using the current timezone."""
     if dt and not is_aware(dt):
-        return make_aware(dt)  # Converts naive to aware
+        return make_aware(dt)
     return dt
 
+def safe_make_naive(timestamp):
+    if isinstance(timestamp, str):
+        try:
+            timestamp = datetime.fromisoformat(timestamp)  # Parse string to datetime
+        except ValueError:
+            logger.error(f"Invalid timestamp format: {timestamp}")
+            return None
+    if timestamp is not None and is_aware(timestamp):
+        return make_naive(timestamp)
+    elif timestamp is not None and not is_aware(timestamp):
+        return timestamp
+    return None
+
+
+def format_timestamp(timestamp):
+    return timestamp.strftime('%Y-%m-%d %H:%M') if timestamp else None
+
 def datetime_to_str(dt):
-    """Converts a datetime object to string, ensuring it's aware."""
     dt = ensure_datetime(dt)
     if dt:
-        dt = make_aware_if_naive(dt)  # Ensure it's aware before formatting
+        dt = make_aware_if_naive(dt)
         return dt.strftime('%Y-%m-%d %H:%M')
     return None
 
-def get_order_summary(order):
-    """Generates a summary of an order."""
-    submitted_at = ensure_datetime(order.submitted_at)
-    created_at = ensure_datetime(order.created_at)
-    processed_at = ensure_datetime(order.processed_at)
-    complete_at = ensure_datetime(order.complete_at)
-    canceled_at = ensure_datetime(order.canceled_at)
-    status_fields = {
-        'submitted_at': submitted_at,
-        'created_at': created_at,
-        'processed_at': processed_at,
-        'complete_at': complete_at,
-        'canceled_at': canceled_at,
-    }
-    latest_status_key = max(
-        status_fields,
-        key=lambda k: status_fields[k] or datetime.min
-    )
-    latest_status_time = status_fields[latest_status_key]
-
-    order_items_data = OrderItemSerializer(order.order_items.all(), many=True).data
-
-    summary = {
-        'order_id': order.id,
-        'order_items': [
-            {
-                'size': item['size'],
-                'quantity': item['quantity'],
-                'total_sum': item['total_sum'],
-                'color_name': item['color_name'],
-                'item_price': item['item_price'],
-                'color_value': item['color_value'],
-                'product_name': item['product_name'],
-                'collection_name': item['collection_name'],
-            } for item in order_items_data
-        ],
-        latest_status_key: datetime_to_str(latest_status_time),  
-        'submitted_at': datetime_to_str(submitted_at),
-    }
-
-    return summary
-
-def update_order_summary(chat_id):
-    """Updates the order summary for a specific chat_id."""
-    try:
-        orders = Order.objects.filter(telegram_user__chat_id=chat_id).prefetch_related('order_items__product')
-        logger.info(f'Fetched {orders.count()} orders for chat ID: {chat_id}.')
-        grouped_orders = []
-
-        # Create summary for each order
-        for order in orders:
-            summary = get_order_summary(order)
-            grouped_orders.append(summary)
-
-        # Convert decimals if necessary
-        converted_orders = [OrderSummary._convert_decimals(order) for order in grouped_orders]
-        order_summary, created = OrderSummary.objects.update_or_create(
-            chat_id=chat_id,
-            defaults={'orders': converted_orders}
-        )
-        order_summary.orders = converted_orders  # Update orders field with converted values
-        order_summary.save()
-
-        logger.info("Order summary updated successfully for chat ID: {chat_id}.")
-
-    except Exception as e:
-        logger.error(f"Error updating order summary for chat ID {chat_id}: {str(e)}")
 
 def get_chat_id_from_phone(phone_number):
-    """Fetches the Telegram chat ID from the user's phone number."""
+    # Check if the chat_id is already cached
+    cached_chat_id = cache.get(f'chat_id_{phone_number}')
+    if cached_chat_id:
+        return cached_chat_id
+
     try:
-        response = requests.get(f'{settings.VERCEL_DOMAIN}/api/telegram_user', params={'phone': phone_number})
+        # If not cached, make the request
+        response = requests.get(
+            f'{settings.VERCEL_DOMAIN}/api/telegram_users/by-phone/',
+            params={'phone': phone_number},
+            timeout=10
+        )
         response.raise_for_status()
-        return response.json().get('chat_id')
+
+        response_data = response.json()
+        if 'chat_id' in response_data:
+            chat_id = response_data['chat_id']
+            # Cache the chat_id for 24 hours (86400 seconds)
+            cache.set(f'chat_id_{phone_number}', chat_id, timeout=86400)
+            return chat_id
+        else:
+            logger.error(f"No chat_id found for phone number {phone_number}.")
+            return None
     except requests.exceptions.RequestException as e:
-        logger.error(f"Request to /api/telegram_user failed: {e}")
+        logger.error(f"Request to /api/telegram_users/by-phone failed: {e}")
         return None
 
+    
+def get_order_summary(order):
+    try:
+        # Serialize order items
+        order_items_data = OrderItemSerializer(order.order_items.all(), many=True).data
+        order_items_en = []
+        order_items_uk = []
+
+        # Safely gather status timestamps
+        try:
+            statuses = {
+                'submitted_at': safe_make_naive(getattr(order, 'submitted_at', None)),
+                'created_at': safe_make_naive(getattr(order, 'created_at', None)),
+                'processed_at': safe_make_naive(getattr(order, 'processed_at', None)),
+                'complete_at': safe_make_naive(getattr(order, 'complete_at', None)),
+                'canceled_at': safe_make_naive(getattr(order, 'canceled_at', None)),
+            }
+        except Exception as e:
+            logger.error(f"Error initializing statuses for Order ID {order.id}: {e}")
+            statuses = {'submitted_at': None}
+
+        # Determine the latest status field and timestamp
+        latest_status_field, latest_status_timestamp = 'submitted_at', statuses.get('submitted_at')
+        if statuses:
+            latest_status_field = max(
+                statuses, key=lambda s: statuses[s] or datetime.min
+            )
+            latest_status_timestamp = statuses.get(latest_status_field)
+
+        # Process order items for English and Ukrainian views
+        for item in order_items_data:
+            order_item_common = {
+                'size': item.get('size'),
+                'quantity': item.get('quantity'),
+                'price': item.get('price'),
+                'currency': item.get('currency'),
+                'color_value': item.get('color_value'),
+            }
+            order_items_en.append({
+                **order_item_common,
+                'name': item.get('name_en'),
+                'color_name': item.get('color_name_en'),
+                'collection_name': item.get('collection_name_en'),
+            })
+            order_items_uk.append({
+                **order_item_common,
+                'name': item.get('name_uk'),
+                'color_name': item.get('color_name_uk'),
+                'collection_name': item.get('collection_name_uk'),
+            })
+
+        # Return the summary
+        return {
+            'order_id': order.id,
+            'order_items_en': order_items_en,
+            'order_items_uk': order_items_uk,
+            'submitted_at': format_timestamp(statuses.get('submitted_at')),
+            latest_status_field: format_timestamp(latest_status_timestamp),
+        }
+
+    except Exception as e:
+        logger.error(f"Error generating order summary for Order ID {order.id}: {e}")
+        return {}
+
+@transaction.atomic
+def update_order_summary():
+    try:
+        orders = Order.objects.prefetch_related(
+            'order_items__product'
+        ).select_related('telegram_user')
+
+        grouped_orders = {}
+        for order in orders:
+            if not order.telegram_user or not order.telegram_user.chat_id:
+                continue
+            summary = get_order_summary(order)
+            grouped_orders.setdefault(order.telegram_user.chat_id, []).append(summary)
+
+        bulk_update = []
+        for chat_id, summaries in grouped_orders.items():
+            summary_obj, created = OrderSummary.objects.get_or_create(
+                chat_id=chat_id,
+                defaults={'orders': summaries}
+            )
+            if not created:
+                summary_obj.orders = summaries
+                bulk_update.append(summary_obj)
+
+        if bulk_update:
+            OrderSummary.objects.bulk_update(bulk_update, ['orders'])
+            logger.info("Order summaries updated successfully.")
+
+    except Exception as e:
+        logger.exception("Error updating order summaries: %s", e)
+
 @receiver(post_save, sender=OrderItem)
-def update_order_summary_on_order_item_change(sender, instance, **kwargs):
-    """Updates the order summary when an OrderItem is changed."""
-    phone_number = instance.order.phone
+@receiver(post_save, sender=Order)
+def update_summary_on_change(sender, instance, **kwargs):
+    phone_number = getattr(instance.order, 'phone', None) if sender == OrderItem else instance.phone
     if phone_number:
         chat_id = get_chat_id_from_phone(phone_number)
         if chat_id:
-            update_order_summary(chat_id)
-            logger.debug(f"OrderItem updated for Order ID: {instance.order.id}, summary updated for chat ID: {chat_id}")
+            update_order_summary()
+            logger.debug(f"{sender.__name__} updated for chat ID: {chat_id}")
 
 @receiver(post_delete, sender=Order)
 def remove_order_from_summary(sender, instance, **kwargs):
-    """Removes an order from the summary when an order is deleted."""
     phone_number = instance.phone
     if phone_number:
         chat_id = get_chat_id_from_phone(phone_number)
         if chat_id:
             try:
                 order_summary = OrderSummary.objects.get(chat_id=chat_id)
-                updated_orders = [o for o in order_summary.orders if o['order_id'] != instance.id]
-                order_summary.orders = updated_orders
+                order_summary.orders = [o for o in order_summary.orders if o['order_id'] != instance.id]
                 order_summary.save()
                 cache.delete(f'order_summary_{chat_id}')
-                logger.debug(f"Removed order ID {instance.id} from summary for chat ID {chat_id}")
+                update_order_summary()
+
+                logger.info(f"Order ID {instance.id} removed from summary for chat ID {chat_id}")
             except OrderSummary.DoesNotExist:
-                logger.warning(f"OrderSummary for chat ID {chat_id} does not exist.")
-            except Exception as e:
-                logger.error(f"Error removing order from summary: {e}")
-
-@receiver(post_delete, sender=OrderItem)
-def update_order_summary_on_order_item_delete(sender, instance, **kwargs):
-    """Updates the order summary when an OrderItem is deleted."""
-    phone_number = instance.order.phone
-    if phone_number:
-        chat_id = get_chat_id_from_phone(phone_number)
-        if chat_id:
-            update_order_summary(chat_id)
-            logger.debug(f"OrderItem deleted for Order ID: {instance.order.id}, summary updated for chat ID: {chat_id}")
-
-@receiver(post_save, sender=Order)
-def order_post_save(sender, instance, created, **kwargs):
-    """
-    Signal that triggers after an Order instance is saved.
-    Calls update_order_summary to update the OrderSummary records.
-    """
-    phone_number = instance.phone
-    if phone_number:
-        chat_id = get_chat_id_from_phone(phone_number)
-        if chat_id:
-            # Only call update_order_summary if the Order was created
-            if created:
-                update_order_summary(chat_id)
-            logger.info(f"OrderSummary updated after Order (ID: {instance.id}) save.")
+                logger.warning(f"No summary found for chat ID {chat_id}")

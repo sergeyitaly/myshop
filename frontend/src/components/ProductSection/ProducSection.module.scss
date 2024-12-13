@@ -166,11 +166,16 @@
 
 
 
-.aaa {
+.product_section_container {
   display: flex;
   gap: 30px;
+  transition: .5s;
 
   @media (max-width: $screen-mobile) {
     flex-wrap: wrap;
   }
+}
+
+.fetching {
+  filter: blur(5px);
 }

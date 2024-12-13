@@ -1,70 +1,61 @@
-import { ChangeEvent } from "react"
-import { AppInput } from "../../../components/UI/AppInput/AppInput"
-import { MainButton } from "../../../components/UI/MainButton/MainButton"
-import styles from './FeedbackModalForm.module.scss'
-import { useFormik } from "formik"
-import {object, string} from 'yup'
-import { useAppTranslator } from "../../../hooks/useAppTranslator"
-
-
+import { AppInput } from "../../../components/UI/AppInput/AppInput";
+import { MainButton } from "../../../components/UI/MainButton/MainButton";
+import styles from './FeedbackModalForm.module.scss';
+import { useFormik } from "formik";
+import { object, string } from 'yup';
+import { useAppTranslator } from "../../../hooks/useAppTranslator";
+import { initialValues } from "./initialValue";
 
 interface FeedbackModalFormProps {
-    isLoading: boolean
-    onSubmit: () => void
-    onChange: (fieldName: string, value: string) => void
+    isLoading: boolean;
+    onSubmit: (values: { name: string; email: string; comment: string }) => void
 }
 
 export const FeedbackModalForm = ({
     isLoading,
-    onChange,
-    onSubmit
+    onSubmit,
 }: FeedbackModalFormProps) => {
 
-    const {t} = useAppTranslator()
+    const { t } = useAppTranslator();
 
     const validationSchema = object({
-        email: string().email(t("error_email")),
-    })
+        email: string().email(t("error_email")), // Only email validation
+        name: string(), // Optional field
+        comment: string() // Optional field
+    });
 
     const {
-        handleChange: handleChangeFormik,
+        errors,
+        touched,
+        handleChange,
         handleSubmit,
         handleBlur,
-        errors,
-        touched
     } = useFormik({
-        initialValues: {
-            name: '',
-            email: '',
-            comment: ''
-        },
+        initialValues,
         validationSchema: validationSchema,
-        onSubmit: () => {
-            onSubmit()
+        onSubmit: (values) => {
+            onSubmit(values); // Call the passed onSubmit function
         },
+    });
 
-    })
+    
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        handleChangeFormik(e)
-        onChange(e.target.name, e.target.value)
-    }
 
     return (
         <form 
             className={styles.modal}
             onSubmit={handleSubmit}
         >
-            <h1>Залиште свої дані для зворотнього зв'язку</h1>
+            <h1>{t('left_data')}</h1>
             <AppInput
-                label="name"
+                label={t("name")} // Use translated labels
                 name="name"
                 onChange={handleChange}
             />
             <AppInput
                 name='email'
-                label="email"
-                error = {touched.email && !!errors.email}
+                label={t('email')} // Use translated labels
+                error={touched.email && !!errors.email}
                 helperText={errors.email}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -72,7 +63,7 @@ export const FeedbackModalForm = ({
             <textarea 
                 name="comment"
                 className={styles.textarea}
-                placeholder="comment..."
+                placeholder={t("add_comment")} // Use translated labels
                 onChange={handleChange}
             />
             <MainButton
@@ -80,7 +71,6 @@ export const FeedbackModalForm = ({
                 title={isLoading ? `${t('sending')}...` : t('send')}
                 type="submit"
             />
-
         </form>
-    )
-}
+    );
+};

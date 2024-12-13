@@ -28,3 +28,24 @@
 .available {
     color: #07B118
 }
+
+.skeleton {
+    grid-area: availability;
+    height: 20px;
+  
+    @media (max-width: $screen-big) {
+        height: 18px;
+    }
+    
+    @media (max-width: $screen-laptop) {
+        height: 16px;
+    }
+   
+    @media (max-width: $screen-tablet) {
+        height: 14px;
+    }
+ 
+    @media (max-width: $screen-mobile) {
+        height: 12px;
+    }
+}

@@ -1,118 +1,125 @@
 @import "../../../../variables";
 
 .container {
-	flex-grow: 1;
-	width: 100%;
-	container-type: inline-size;
+  flex-grow: 1;
+  width: 100%;
+  container-type: inline-size;
 }
 
 .descktopMode {
-	display: flex;
-	gap: 20px;
+  display: flex;
+  gap: 20px;
 }
 
 .imageListContainer {
-	position: relative;
-	flex-basis: 100px;
-	overflow: auto;
+  position: relative;
+  flex-basis: 100px;
+  overflow: auto;
 
-	&::-webkit-scrollbar {
-		width: 0px;
-		height: 0px;
-	}
+  &::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+  }
 }
 
-
-	.img {
-		object-fit: cover;
-		width: 100%;
-		height: 100%;
-		max-height: 80vh;
-		max-width: 90vw;
-	}
+.img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  max-height: 80vh;
+  max-width: 90vw;
+}
 
 .imageList {
-	position: absolute;
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
-	top: 0;
-	left: 0;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  top: 0;
+  left: 0;
 }
 
 .previevBox {
-	width: 100px;
+  width: 100px;
 }
 
 .currentImageContainer {
-	position: relative;
+  position: relative;
 }
 
 .zoomButton {
-	position: absolute;
-	top: 10px;
-	left: 10px;
-	svg {
-		fill: $color-button;
-	}
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  svg {
+    fill: $color-button;
+  }
 }
 
 .modalContent {
-	display: block;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	max-height: 90%;
-	max-width: 90%;
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-height: 90%;
+  max-width: 90%;
 }
 
 .plug {
-	position: absolute;
-	right: 10px;
-	top: 10px;
+  position: absolute;
+  right: 10px;
+  top: 10px;
 }
 
 @container (max-width: 510px) {
-	.imageListContainer {
-		flex-basis: 90px;
-	}
+  .imageListContainer {
+    flex-basis: 90px;
+  }
 
-	.previevBox {
-		width: 90px;
-	}
+  .previevBox {
+    width: 90px;
+  }
 }
 
 @container (max-width: 490px) {
-	.imageListContainer {
-		flex-basis: 80px;
-	}
+  .imageListContainer {
+    flex-basis: 80px;
+  }
 
-	.previevBox {
-		width: 80px;
-	}
+  .previevBox {
+    width: 80px;
+  }
 }
 
 @container (max-width: 450px) {
-	.descktopMode {
-		flex-direction: column;
-	}
+  .descktopMode {
+    flex-direction: column;
+  }
 
-	.imageListContainer {
-		order: 1;
-	}
+  .imageListContainer {
+    order: 1;
+  }
 
-	.imageList {
-		flex-direction: row;
-	}
+  .imageList {
+    flex-direction: row;
+  }
 }
 
 .currentImageContainer {
-	flex-grow: 1;
+  flex-grow: 1;
 }
 
 .slider {
-	& :global(.swiper-pagination-bullet-active) {
-		background-color: $color-gray-400;
-	}
+  & :global(.swiper-pagination-bullet-active) {
+    background-color: $color-gray-400;
+  }
+}
+
+.current_image_skeleton {
+  padding-top: 70%;
+}
+
+.previev_box_skeleton {
+  height: 80px;
 }

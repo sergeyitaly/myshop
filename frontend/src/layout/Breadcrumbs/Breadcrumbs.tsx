@@ -16,7 +16,7 @@ interface Breadcrumb {
     isLoading?: boolean
 }
 
-type Pages = 'collections' | 'products' | 'order' | 'home' | 'contacts' | 'about' | 'payment_delivery' | 'privacy_policy' | 'returns_refunds';
+type Pages = 'all_collections'|'discounts'|'collections' | 'products' | 'order' | 'home' | 'contacts' | 'about' | 'payment_delivery' | 'privacy_policy' | 'returns_refunds';
 
 type ConstantRoutes = {[K in Pages]: Breadcrumb}
 
@@ -35,6 +35,8 @@ const pageDefiner = (path: string) => {
     const route = path.split('/')[1];
 
     let pages = {
+        isAllCollections: false,
+        isDiscounts: false,
         isCollections: false,
         isCollection: false,
         isProducts: false,
@@ -47,6 +49,9 @@ const pageDefiner = (path: string) => {
         isReturnsRefunds: false
     }
 
+
+    if(route === 'all-collections') pages = {...pages, isAllCollections: true}
+    if(route === 'discounts') pages = {...pages, isDiscounts: true}
     if(route === 'collections') pages = {...pages, isCollections: true }
     if(route === 'collection')  pages = {...pages, isCollection: true }
     if(route === 'products')    pages = {...pages, isProducts: true }
@@ -69,6 +74,14 @@ export const Breadcrumbs = () => {
     const { t, i18n } = useTranslation()
 
     const constantRoutes: ConstantRoutes = {
+        all_collections: {
+            title: t('allCollections'),
+            link: ROUTE.ALL_COLLECTIONS
+        },
+        discounts: {
+            title: t('discounts'),
+            link: ROUTE.DISCOUNT
+        },
         collections: {
             title: t('collections'),
             link: ROUTE.COLLECTIONS
@@ -125,10 +138,9 @@ export const Breadcrumbs = () => {
     const [activeList, setActiveList] = useState<Breadcrumb[]>([])
     const [lastItem, setLastItem] = useState<Breadcrumb | undefined>(undefined)
 
-
     const getBreadcrumbs = (): Breadcrumb[] => {
 
-        const {collections, home, order, products, about, contacts, payment_delivery, privacy_policy, returns_refunds} = constantRoutes
+        const {all_collections, discounts, collections, home, order, products, about, contacts, payment_delivery, privacy_policy, returns_refunds} = constantRoutes
 
         const list: Breadcrumb[] = [home]
 
@@ -136,10 +148,15 @@ export const Breadcrumbs = () => {
 
         const pages = pageDefiner(pathname)
 
-        const {isCollection, isCollections, isProducts, isProduct, isOrder, isAbout, isContacts, isPaymentDelivery, isPrivacyPolicy, isReturnsRefunds} = pages
+        const {isAllCollections, isDiscounts ,isCollection, isCollections, isProducts, isProduct, isOrder, isAbout, isContacts, isPaymentDelivery, isPrivacyPolicy, isReturnsRefunds} = pages
 
         
-
+        if(isAllCollections){
+            list.push(all_collections)
+        }
+        if(isDiscounts){
+            list.push(discounts)
+        }      
         if(isCollections){
             list.push(products)
             list.push(collections)
@@ -162,9 +179,9 @@ export const Breadcrumbs = () => {
             list.push(collections)
 
             if(isProductLoading || isProductFetching)
-                list.push({isLoading: true})
-            else{
+                list.push({ isLoading: true })
                 
+            else if(productResponce){     
                 list.push({
                     title: getTranslatedCollectionName(productResponce?.collection, i18n.language),
                     link: `${ROUTE.COLLECTION}${productResponce?.collection?.id}` 

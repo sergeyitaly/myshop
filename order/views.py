@@ -1,4 +1,3 @@
-from django.utils.dateformat import format
 from django.utils.timezone import localtime
 from django.conf import settings
 from django.core.mail import EmailMessage
@@ -18,143 +17,81 @@ from django.views import View
 import logging, requests, json
 from rest_framework.decorators import action
 from .notifications import update_order_status_with_notification
-from rest_framework import viewsets, status
-from rest_framework.response import Response
-from django.utils.dateformat import format as date_format
 from django.utils.timezone import make_naive, is_aware
 from datetime import datetime
-
-
+from rest_framework.generics import ListCreateAPIView, RetrieveAPIView
 
 logger = logging.getLogger(__name__)
-def health_check(request):
+def health_check(request):                                                                                                              
     return JsonResponse({'status': 'ok'})
 
+def ensure_datetime(value):
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError:
+        logger.error(f"Invalid datetime format: {value}")
+        return None
+
+def format_timestamp(timestamp):
+    return timestamp.strftime('%Y-%m-%d %H:%M') if timestamp else None
 
 class OrderSummaryViewSet(viewsets.ModelViewSet):
     queryset = OrderSummary.objects.all()
     serializer_class = OrderSummarySerializer
 
-    def format_timestamp(self, timestamp):
-        """Format timestamp to 'Y-m-d H:i'."""
-        return date_format(timestamp, 'Y-m-d H:i') if timestamp else None
-
-    def make_aware_if_naive(self, dt):
-        """Convert naive datetime to aware using Django's timezone support."""
-        if dt and isinstance(dt, datetime):
-            if timezone.is_naive(dt):
-                return timezone.make_aware(dt)
-        return dt
-
-    def ensure_datetime(self, value):
-        """Converts a value to a datetime object if it's not None."""
-        if value is None:
-            return None
-        if isinstance(value, datetime):
-            return value
-        return datetime.fromisoformat(value)
-
-    def datetime_to_str(self, value):
-        """Converts a datetime object to a string."""
-        if value is None:
-            return None
-        return value.strftime("%Y-%m-%d %H:%M")  # Adjust the format as needed
-
-    def prepare_order_summary(self, order):
-        """Generates a unified summary of an order with correct status naming."""
-        submitted_at = self.ensure_datetime(order.submitted_at)
-        processed_at = self.ensure_datetime(order.processed_at)
-        complete_at = self.ensure_datetime(order.complete_at)
-        canceled_at = self.ensure_datetime(order.canceled_at)
-
-        # Prepare a dictionary of relevant status fields
-        status_fields = {
-            'submitted_at': submitted_at,
-            'processed_at': processed_at,
-            'complete_at': complete_at,
-            'canceled_at': canceled_at,
-        }
-
-        # Determine the latest status key based on the timestamp values
-        latest_status_key = max(
-            status_fields,
-            key=lambda k: status_fields[k] or datetime.min
-        )
-
-        latest_status_time = status_fields[latest_status_key]  # Get the corresponding timestamp
-
-        # Serialize order items
-        order_items_data = OrderItemSerializer(order.order_items.all(), many=True).data
-
-        # Prepare the summary with only the two required statuses
-        summary = {
-            'order_id': order.id,
-            'order_items': [
-                {
-                    'size': item['size'],
-                    'quantity': item['quantity'],
-                    'total_sum': item['total_sum'],
-                    'color_name': item['color_name'],
-                    'item_price': item['item_price'],
-                    'color_value': item['color_value'],
-                    'product_name': item['product_name'],
-                    'collection_name': item['collection_name'],
-                } for item in order_items_data
-            ],
-            latest_status_key : self.datetime_to_str(latest_status_time), 
-            'submitted_at': self.datetime_to_str(submitted_at),
-        }
-
-        return summary
-
     def create(self, request, *args, **kwargs):
         logger.debug("Received data: %s", request.data)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
         chat_id = serializer.validated_data.get('chat_id')
         if not chat_id:
             logger.error("chat_id is missing in the request data.")
             return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Perform creation
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-
-        # Prepare formatted order summary
-        order_summary_data = self.prepare_order_summary(serializer.instance)
-        
+        order_summary_data = format_order_summary(serializer.instance)  # Directly call the updated method
         return Response(order_summary_data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        
         chat_id = request.data.get('chat_id')
         if not chat_id:
             logger.error("chat_id is missing in the request data.")
             return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Validate and update instance
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         
-        # Handle potential prefetched objects cache
-        if getattr(instance, '_prefetched_objects_cache', None):
-            instance._prefetched_objects_cache = {}
+        # Refresh the instance to reload any related fields if necessary
+        instance.refresh_from_db()
 
-        # Prepare updated order summary
-        order_summary_data = self.prepare_order_summary(instance)
-
+        # Prepare the updated order summary data
+        order_summary_data = format_order_summary(instance)  # Directly call the updated method
         return Response(order_summary_data)
 
 
 class TelegramUserViewSet(viewsets.ModelViewSet):
     queryset = TelegramUser.objects.all()
     serializer_class = TelegramUserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     authentication_classes = [TokenAuthentication]
+
+    @action(detail=False, methods=['get'], url_path='by-phone')
+    def get_by_phone(self, request):
+        phone = request.query_params.get('phone')
+        if phone:
+            try:
+                user = TelegramUser.objects.get(phone=phone)
+                serializer = self.get_serializer(user)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except TelegramUser.DoesNotExist:
+                return Response({"detail": "TelegramUser not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Phone parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
 
     def create(self, request, *args, **kwargs):
         logger.info(f"Request headers: {request.headers}")
@@ -191,12 +128,18 @@ class TelegramUserViewSet(viewsets.ModelViewSet):
                 order.telegram_user = telegram_user
                 order.save(update_fields=['telegram_user'])
 
+class TelegramMessageListCreateView(ListCreateAPIView):
+    queryset = TelegramMessage.objects.all()
+    serializer_class = TelegramMessageSerializer
+
+class TelegramMessageDetailView(RetrieveAPIView):
+    queryset = TelegramMessage.objects.all()
+    serializer_class = TelegramMessageSerializer
 
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
-    permission_classes = [IsAuthenticated]  # Ensure this matches your settings
-
+    permission_classes = [IsAuthenticated] 
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
@@ -234,7 +177,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         phone_number = request.query_params.get('phone_number', None)
         if not phone_number:
             return Response({'error': 'Phone number is required'}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             orders = Order.objects.filter(phone=phone_number)
             serializer = self.get_serializer(orders, many=True)
@@ -243,10 +185,9 @@ class OrderViewSet(viewsets.ModelViewSet):
             logger.error(f"Error fetching orders: {e}")
             return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-    
 def set_telegram_webhook():
     url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/setWebhook"
-    webhook_url = f"{settings.VERCEL_DOMAIN}/api/telegram_webhook/"  # Ensure this endpoint matches your Django webhook view
+    webhook_url = f"{settings.VERCEL_DOMAIN}/api/telegram_webhook/"  
     payload = {'url': webhook_url}
     response = requests.post(url, json=payload)
     response.raise_for_status()
@@ -259,14 +200,11 @@ class TelegramWebhook(View):
             data = json.loads(request.body)
             chat_id = data['message']['chat']['id']
             contact = data['message'].get('contact')
-
             if not contact:
                 return JsonResponse({'status': 'error', 'message': 'No contact information'}, status=400)
-            
             phone = contact.get('phone_number')
             if not phone:
                 return JsonResponse({'status': 'error', 'message': 'No phone number in contact information'}, status=400)
-            
             telegram_user, created = TelegramUser.objects.update_or_create(
                 phone=phone, defaults={'chat_id': chat_id}
             )
@@ -281,35 +219,34 @@ class TelegramWebhook(View):
 telegram_webhook = TelegramWebhook.as_view()
 
 
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_order(request):
-    logger.info(f"Order creation request data: {request.data}")
-
     try:
         serializer = OrderSerializer(data=request.data)
+        language = request.data.get('language')
+        order_data = request.data.copy()
+        order_data['language'] = language   
+  
         if serializer.is_valid():
-            # Save the order first
             order = serializer.save()
-
-            # Extract phone and get chat_id
             phone = request.data.get('phone')
+            order_items_en = serializer.get_order_items_en(order)
+            order_items_uk = serializer.get_order_items_uk(order)   
             try:
                 telegram_user = TelegramUser.objects.get(phone=phone)
                 if telegram_user:
                     order.telegram_user = telegram_user
                     order.save(update_fields=['telegram_user'])
-
-                    # Prepare order items
                     order_items = order.order_items.all()
-
-                    # Notify the user about the new order status
                     update_order_status_with_notification(
                         order.id,
                         order_items,
-                        'submitted',  # Assuming 'submitted' is the initial status
+                        'submitted',
                         'submitted_at',
-                        telegram_user.chat_id
+                        telegram_user.chat_id,
+                        language
                     )
                 else:
                     logger.warning(f"No TelegramUser found with phone: {phone}")
@@ -317,49 +254,78 @@ def create_order(request):
             except TelegramUser.DoesNotExist:
                 logger.warning(f"No TelegramUser found with phone: {phone}")
 
-
-            # Send the confirmation email
             formatted_date = localtime(order.submitted_at).strftime('%Y-%m-%d %H:%M')
-            order_items = order.order_items.all()
-            total_sum = sum(item.quantity * item.product.price for item in order_items)
-            currency = order_items.first().product.currency if order_items.exists() else "UAH"
-            order_items_rows = "".join([
-                f"""
-                <tr>
-                    <td>{index + 1}</td>
-                    <td><img src="{item.product.photo.url}" alt="{item.product.name}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
-                    <td>{item.product.name}</td>
-                    <td>{item.product.collection.name}</td>
-                    <td>{item.quantity}</td>
-                    <td>{item.product.size}</td>
-                    <td>{item.product.color_name}<br> <div style="width: 10px; height: 10px; background-color: {item.product.color_value}; display: inline-block;"></div></td>
-                    <td>{item.product.price} {currency}</td>
-                </tr>
-                """
-                for index, item in enumerate(order_items)
-            ])
 
-            order_items_table = f"""
-            <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
-                <thead>
+
+            def generate_order_items_en_table(order_items):
+                return "".join([
+                    f"""
                     <tr>
-                        <th>Номер</th>
-                        <th>Фото продукту</th>
-                        <th>Назва продукту</th>
-                        <th>Колекція</th>
-                        <th>Кількість</th>
-                        <th>Розмір</th>
-                        <th>Колір</th>
-                        <th>Ціна</th>
+                        <td>{index + 1}</td>
+                        <td><img src="{item['product']['photo']}" alt="{item['product']['name_en']}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
+                        <td>{item['product']['name_en']}</td>
+                        <td>{item['product']['collection']['name_en']}</td>
+                        <td>{item['quantity']}</td>
+                        <td>{item['product']['size']}</td>
+                        <td>{item['product']['color_name_en']}<br> <div style="width: 10px; height: 10px; background-color: {item['product']['color_value']}; display: inline-block;"></div></td>
+                        <td>{item['product']['price']} {item['product']['currency']}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    {order_items_rows}
-                </tbody>
-            </table>
+                    """
+                    for index, item in enumerate(order_items)
+                ])
+            def generate_order_items_uk_table(order_items):
+                return "".join([
+                    f"""
+                    <tr>
+                        <td>{index + 1}</td>
+                        <td><img src="{item['product']['photo']}" alt="{item['product']['name_uk']}" style="width: 50px; height: 50px; object-fit: cover;" /></td>
+                        <td>{item['product']['name_uk']}</td>
+                        <td>{item['product']['collection']['name_uk']}</td>
+                        <td>{item['quantity']}</td>
+                        <td>{item['product']['size']}</td>
+                        <td>{item['product']['color_name_uk']}<br> <div style="width: 10px; height: 10px; background-color: {item['product']['color_value']}; display: inline-block;"></div></td>
+                        <td>{item['product']['price']} {item['product']['currency']}</td>
+                    </tr>
+                    """
+                    for index, item in enumerate(order_items)
+                ])
+            email_body_en = f"""
+            <html>
+            <head>
+                <style>
+                    /* Add any CSS styling here */
+                </style>
+            </head>
+            <body>
+                <h2>Order Confirmation #{order.id} from KOLORYT</h2>
+                <p>Order Date: {formatted_date}</p>
+                <h3>Items in the order: </h3>
+                <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Photo</th>
+                            <th>Product Name</th>
+                            <th>Collection</th>
+                            <th>Quantity</th>
+                            <th>Size</th>
+                            <th>Color</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {generate_order_items_en_table(order_items_en)}
+                    </tbody>
+                </table>
+                <p><strong>Total:</strong> {sum(item['total_sum'] for item in order_items_en)} {order_items_en[0]['product']['currency'] if order_items_en else 'USD'}</p>
+                <p>If you have any questions, feel free to contact us.</p>
+                <p>Best regards,<br>
+                KOLORYT Team <a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a></p>
+                <p><a href='{settings.VERCEL_DOMAIN}'>Unsubscribe</a></p>
+            </body>
+            </html>
             """
-
-            email_body = f"""
+            email_body_uk = f"""
             <html>
             <head>
                 <style>
@@ -368,9 +334,26 @@ def create_order(request):
             </head>
             <body>
                 <h2>Підтвердження замовлення #{order.id} на сайті KOLORYT</h2>
-                {formatted_date}
-                {order_items_table}
-                <p><strong>Разом:</strong> {total_sum} {currency}</p>
+                <p>Дата замовлення: {formatted_date}</p>
+                <h3>Продукти в замовленні: </h3>
+                <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th>Номер</th>
+                            <th>Фото продукту</th>
+                            <th>Назва продукту</th>
+                            <th>Колекція</th>
+                            <th>Кількість</th>
+                            <th>Розмір</th>
+                            <th>Колір</th>
+                            <th>Ціна</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {generate_order_items_uk_table(order_items_uk)}
+                    </tbody>
+                </table>
+                <p><strong>Разом:</strong> {sum(item['total_sum'] for item in order_items_uk)} {order_items_uk[0]['product']['currency'] if order_items_uk else 'UAH'}</p>
                 <p>Якщо у вас є питання, не вагайтеся зв'язатися з нами.</p>
                 <p>З найкращими побажаннями,<br>
                 Команда <a href='{settings.VERCEL_DOMAIN}'>KOLORYT</a></p>
@@ -378,14 +361,24 @@ def create_order(request):
             </body>
             </html>
             """
-
-            email = EmailMessage(
+            if language == 'en':
+                email_body = email_body_en
+                email = EmailMessage(
+                subject=f'Order Confirmation #{order.id}',
+                body=email_body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[order.email],
+                headers={'Content-Type': 'text/html; charset=utf-8'}
+                 )
+            else:
+                email_body = email_body_uk
+                email = EmailMessage(
                 subject=f'Підтвердження замовлення #{order.id}',
                 body=email_body,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[order.email],
                 headers={'Content-Type': 'text/html; charset=utf-8'}
-            )
+                )
             email.content_subtype = "html"
             email.send(fail_silently=False)
 
@@ -396,7 +389,6 @@ def create_order(request):
     except Exception as e:
         logger.error(f"Order creation exception: {e}")
         return Response({'error': 'Internal Server Error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -434,129 +426,147 @@ def get_orders(request):
     except Exception as e:
         logger.error(f"Error fetching orders: {e}")
         return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-def safe_make_naive(dt):
-    if dt is None:
-        return None
-    return make_naive(dt) if is_aware(dt) else dt
+
+def safe_make_naive(timestamp):
+    if isinstance(timestamp, str):
+        try:
+            timestamp = datetime.fromisoformat(timestamp)  # Parse string to datetime
+        except ValueError:
+            logger.error(f"Invalid timestamp format: {timestamp}")
+            return None
+    if timestamp is not None and is_aware(timestamp):
+        return make_naive(timestamp)
+    elif timestamp is not None and not is_aware(timestamp):
+        return timestamp
+    return None
 
 def format_order_summary(order):
-    submitted_at = safe_make_naive(order.submitted_at)
-    processed_at = safe_make_naive(order.processed_at)
-    complete_at = safe_make_naive(order.complete_at)
-    canceled_at = safe_make_naive(order.canceled_at)
-
     statuses = {
-        'submitted_at': submitted_at,
-        'processed_at': processed_at,
-        'complete_at': complete_at,
-        'canceled_at': canceled_at
+        'submitted_at': safe_make_naive(order.submitted_at),
+        'created_at': safe_make_naive(order.created_at),
+        'processed_at': safe_make_naive(order.processed_at),
+        'complete_at': safe_make_naive(order.complete_at),
+        'canceled_at': safe_make_naive(order.canceled_at),
     }
-    
     latest_status_field = max(
-        statuses,
-        key=lambda s: statuses[s] or datetime.min
+        statuses, key=lambda s: statuses[s] or datetime.min
     )
     latest_status_timestamp = statuses[latest_status_field]
-
-    def datetime_to_str(dt):
-        if dt:
-            return dt.strftime('%Y-%m-%d %H:%M')
-        return None
-
-    serializer = OrderSerializer(order)
-    order_data = serializer.data
-
+    order_items_en = []
+    order_items_uk = []
+    for item in order.order_items.all():
+        product = item.product
+        order_items_en.append({
+            'name': product.name_en,
+            'size': product.size,
+            'price': float(product.price),
+            'currency': product.currency,
+            'quantity': item.quantity,
+            'color_name': product.color_name_en,
+            'color_value': product.color_value,
+            'collection_name': product.collection.name_en if product.collection else 'No Collection',
+        })
+        order_items_uk.append({
+            'name': product.name_uk,
+            'size': product.size,
+            'price': float(product.price),
+            'currency': product.currency,
+            'quantity': item.quantity,
+            'color_name': product.color_name_uk,
+            'color_value': product.color_value,
+            'collection_name': product.collection.name_uk if product.collection else 'No Collection',
+        })
     return {
         'order_id': order.id,
-        'order_items': order_data['order_items'],
-        'submitted_at': datetime_to_str(submitted_at),
-        latest_status_field: datetime_to_str(latest_status_timestamp)
+        'submitted_at': format_timestamp(statuses['submitted_at']),
+        latest_status_field: format_timestamp(latest_status_timestamp),
+        'order_items_en': order_items_en,
+        'order_items_uk': order_items_uk,
     }
 
-@api_view(['POST'])
-def update_order(request):
-    chat_id = request.data.get('chat_id')
-    orders = request.data.get('orders')
-
-    if not chat_id:
-        return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-    if not isinstance(orders, list):
-        return Response({"detail": "Orders must be a list."}, status=status.HTTP_400_BAD_REQUEST)
-
-    try:
-        # Retrieve existing orders based on the incoming order data
-        updated_orders = []
-        for order_data in orders:
-            order_id = order_data.get('order_id')
-            if not order_id:
-                return Response({"detail": "Order ID is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-            order = Order.objects.get(id=order_id)  # Adjust as needed based on your logic
-            formatted_order = format_order_summary(order)
-            updated_orders.append(formatted_order)
-
-        # Update or create the OrderSummary with the formatted orders
-        OrderSummary.objects.update_or_create(
-            chat_id=chat_id,
-            defaults={'orders': updated_orders}
-        )
-
-        return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
-
-    except Order.DoesNotExist:
-        return Response({"error": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
-    except OrderSummary.DoesNotExist:
-        return Response({"error": "Order summary not found."}, status=status.HTTP_404_NOT_FOUND)
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_order_summary_by_chat_id(request, chat_id):
     if not chat_id:
-        return Response({'error': 'Chat ID is required.'}, status=400)
+        return Response({'error': 'Chat ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
         summaries = OrderSummary.objects.filter(chat_id=chat_id)
         if not summaries.exists():
-            return Response({'error': 'No summaries found for this chat ID.'}, status=404)
+            return Response({'error': 'No summaries found for this chat ID.'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Initialize a new list to hold the summary data for the response
         summary_data = []
-
-        # Iterate over each summary for the specified chat ID
         for summary in summaries:
-            orders = summary.orders  # Assuming this is a list of order dictionaries
+            orders = summary.orders
             for order in orders:
-                # Construct a dictionary for each order
+                status_timestamps = {
+                    'created_at': safe_make_naive(order.get('created_at')),
+                    'submitted_at': safe_make_naive(order.get('submitted_at')),
+                    'processed_at': safe_make_naive(order.get('processed_at')),
+                    'complete_at': safe_make_naive(order.get('complete_at')),
+                    'canceled_at': safe_make_naive(order.get('canceled_at')),
+                }
+                latest_status_timestamp = max(
+                    (timestamp for timestamp in status_timestamps.values() if timestamp is not None),
+                    default=None
+                )
+                latest_status_field = next(
+                    (field for field, timestamp in status_timestamps.items() if timestamp == latest_status_timestamp),
+                    None
+                )
                 order_data = {
                     'order_id': order.get('order_id'),
-                    'created_at': order.get('created_at'),
-                    'submitted_at': order.get('submitted_at'),
-                    'processed_at': order.get('processed_at'),
-                    'complete_at': order.get('complete_at'),
-                    'canceled_at': order.get('canceled_at'),
-                    'order_items': [
-                        {
-                            'product_name': item.get('product_name'),
-                            'collection_name': item.get('collection_name'),
-                            'size': item.get('size'),
-                            'color_name': item.get('color_name'),
-                            'quantity': item.get('quantity'),
-                            'total_sum': float(item.get('total_sum', 0)),  
-                            'item_price': str(item.get('item_price', '0')),  
-                            'color_value': item.get('color_value')
-                        }
-                        for item in order.get('order_items', [])
-                    ]
+                    'order_items_en': order.get('order_items_en', []),
+                    'order_items_uk': order.get('order_items_uk', []),
+                    'submitted_at': status_timestamps['submitted_at'].isoformat() if status_timestamps['submitted_at'] else None,
+                    latest_status_field: latest_status_timestamp.isoformat() if latest_status_timestamp else None
                 }
-                # Append the constructed order_data to the summary_data list
                 summary_data.append(order_data)
-
-        # Return the constructed summary_data as the response
-        return Response({'results': summary_data}, status=200)
-
+        logger.debug(f"Order summary response: {summary_data}")
+        return Response({'results': summary_data}, status=status.HTTP_200_OK)
     except Exception as e:
-        return Response({'error': str(e)}, status=500)
+        logger.error(f"Error fetching order summaries: {e}")
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    
+@api_view(['POST'])
+def update_order(request):
+    chat_id = request.data.get('chat_id')
+    orders = request.data.get('orders', [])
+    
+    # Validate the input
+    if not chat_id:
+        return Response({"detail": "chat_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+    if not isinstance(orders, list):
+        return Response({"detail": "Orders must be a list."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        grouped_orders = []
+        for order_data in orders:
+            order_id = order_data.get('order_id')
+            language = order_data.get('language')
+            if not order_id:
+                return Response({"detail": "Order ID is required for each order."}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                order = Order.objects.prefetch_related('order_items__product').get(id=order_id)
+                if language:
+                    order.language = language 
+                order.save()
+
+                order_summary = format_order_summary(order)
+                grouped_orders.append(order_summary)
+
+            except Order.DoesNotExist:
+                return Response({"error": f"Order with ID {order_id} not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        OrderSummary.objects.update_or_create(
+            chat_id=chat_id,
+            defaults={'orders': grouped_orders},
+        )
+        
+        return Response({"message": "Order summary updated successfully."}, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        logger.error(f"Error updating order summary: {e}")
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

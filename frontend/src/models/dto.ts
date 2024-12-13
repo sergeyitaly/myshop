@@ -11,4 +11,5 @@ export interface OrderDTO {
 		product_id: number;
 		quantity: number;
 	}[];
+	language: string;
 }

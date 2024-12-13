@@ -171,8 +171,13 @@ export interface FeedbackForm{
     ratings: Ratings[]
 }
 
-export interface Question{
-	id: number,
-	question: string,
-	aspect_name: string | null
+export interface Question {
+	id: number;
+	aspect_name?: string | null;
+	aspect_name_en?: string | null;
+	aspect_name_uk?: string | null;
+	question: string;
+	question_en?: string;
+	question_uk?: string;
+	rating_required: boolean
 }

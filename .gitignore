@@ -1,5 +1,4 @@
 # Logs
-logs
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -17,8 +16,17 @@ site_cache/
 staticfiles_build/
 venv/
 .venv/
+*/migrations/
+
 __pycache__/
-__pycache__
+*/*/__pycache__
+*/*/*/__pycache__/
+__pycache__/**
+
+*/migrations/*.py
+!*/migrations/__init__.py
+
+!**/migrations/__init__.py
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -53,3 +61,22 @@ package.json
 data_quality_report_*
 graphviz*
 erd_graph.png
+
+koloryt-project-658aa790b0ef.json
+
+# Gradle wrapper
+/gradle/wrapper/gradle-wrapper.jar
+
+# Gradle build files
+.gradle/
+
+# Gradle user home directory
+gradle/
+android/fastlane/report.xml
+# Build output
+/build/
+
+android/build/
+koloryt-release-key.keystore
+/android/app/src/google-services.json
+android/java_pid*.hprof

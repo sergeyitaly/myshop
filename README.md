@@ -36,9 +36,11 @@
 
 Prerequsite: .env file is required.
 
-1. docker pull sergeyitaly/koloryt:serhii_test
+1.a. docker pull sergeyitaly/koloryt:serhii_test
+1.b. docker pull sergeyitaly/koloryt:serhii_dev
 2. Next command run in a directory where is .env file is located.
-3. docker run -d --name django_web --env-file .env -p 8010:8010 sergeyitaly/koloryt:serhii_test
+3.a. docker run -d --name django_web --env-file .env -p 8010:8010 sergeyitaly/koloryt:serhii_test
+3.b. docker run -d --name django_web --env-file .env -p 8010:8010 sergeyitaly/koloryt:serhii_dev
 4. visit: 127.0.0.1:8010
 
 
@@ -52,3 +54,14 @@ Prerequsite: .env file is required.
   --cleanup
 
 docker run -it --entrypoint /bin/bash sergeyitaly/koloryt:serhii_test
+
+
+6. Android
+      rm -rf ~/.gradle/caches
+      rm -rf ~/.gradle/daemon
+      rm -rf ~/.gradle/native
+      rm -rf ~/.gradle/wrapper
+      gradle wrapper
+      ./gradlew updateLintBaseline
+      ./gradlew clean build
+      ./gradlew bundleRelease

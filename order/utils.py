@@ -3,6 +3,10 @@ from order.models import Order, OrderSummary
 from .notifications import update_order_status_with_notification
 from django.utils.dateformat import format as date_format
 from django.db import transaction
+from django.utils.translation import gettext as _  # Import gettext for translation
+import requests
+from django.conf import settings
+from .models import *
 
 def update_order_statuses():
     now = timezone.now()
@@ -18,14 +22,10 @@ def update_orders(current_status, new_status, threshold_minutes, timestamp_field
             chat_id = order.telegram_user.chat_id if order.telegram_user else None
             if chat_id:
                 # Update the order status and corresponding timestamp
+                language = order.language   
                 update_order_status(order, new_status, now, timestamp_field)
-
-                # Prepare the order summary
                 order_summary = prepare_order_summary(order)
-
-                # Use a transaction to ensure atomicity
                 with transaction.atomic():
-                    # Check if the OrderSummary already exists
                     order_summary_instance, created = OrderSummary.objects.update_or_create(
                         chat_id=chat_id,
                         defaults={
@@ -34,14 +34,13 @@ def update_orders(current_status, new_status, threshold_minutes, timestamp_field
                             'latest_status_time': order_summary["latest_status_time"],  # Include latest status timestamp
                         }
                     )
-
-                    # Notify user with the updated order summary
                     update_order_status_with_notification(
                         order.id,
                         order_summary["order_items"],
                         new_status,
                         f'{new_status}_at',
-                        chat_id
+                        chat_id,
+                        language
                     )
 
 def update_order_status(order, new_status, now, timestamp_field):
@@ -50,25 +49,37 @@ def update_order_status(order, new_status, now, timestamp_field):
     order.save()
 
 def prepare_order_summary(order):
-    order_items_data = [
-        {
+    order_items_data_en = []
+    order_items_data_uk = []
+
+    for item in order.order_items.all():
+        order_items_data_en.append({
             "size": item.size,
             "quantity": item.quantity,
-            "total_sum": item.total_sum,
-            "color_name": item.color_name,
-            "item_price": str(item.item_price),
+            "color_name": item.color_name_en if item.color_name_en else _("No Color"),
+            "currency" : item.currency,
+            "item_price": float(item.item_price),
             "color_value": item.color_value,
-            "product_name": item.product_name,
-            "collection_name": item.collection_name,
-        }
-        for item in order.order_items.all()
-    ]
+            "product_name": item.product_name_en if item.product_name_en else _("No Name"),
+            "collection_name": item.collection_name_en if item.collection_name_en else _("No Collection"),
+        })
+
+        order_items_data_uk.append({
+            "size": item.size,
+            "quantity": item.quantity,
+            "color_name": item.color_name_uk if item.color_name_uk else _("No Color"),
+            "item_price": float(item.item_price),
+            "currency" : item.currency,
+            "color_value": item.color_value,
+            "product_name": item.product_name_uk if item.product_name_uk else _("No Name"),
+            "collection_name": item.collection_name_uk if item.collection_name_uk else _("No Collection"),
+        })
 
     status_mapping = {
-        'created': (order.created_at, 'Created'),
-        'processed': (order.processed_at, 'Processed'),
-        'completed': (order.complete_at, 'Completed'),
-        'canceled': (order.canceled_at, 'Canceled'),
+        'created': (order.created_at, _('Created')),
+        'processed': (order.processed_at, _('Processed')),
+        'completed': (order.complete_at, _('Completed')),
+        'canceled': (order.canceled_at, _('Canceled')),
     }
 
     latest_status = None
@@ -83,19 +94,9 @@ def prepare_order_summary(order):
     # Prepare the order summary
     summary = {
         'order_id': order.id,
-        'order_items': [
-            {
-                'size': item['size'],
-                'quantity': item['quantity'],
-                'total_sum': item['total_sum'],
-                'color_name': item['color_name'],
-                'item_price': item['item_price'],
-                'color_value': item['color_value'],
-                'product_name': item['product_name'],
-                'collection_name': item['collection_name'],
-            } for item in order_items_data
-        ],
-        latest_status: datetime_to_str(latest_status_time), 
+        'order_items_en': order_items_data_en,
+        'order_items_uk': order_items_data_uk,
+        latest_status : datetime_to_str(latest_status_time),
         'submitted_at': datetime_to_str(order.submitted_at),
     }
 
@@ -104,3 +105,32 @@ def prepare_order_summary(order):
 def datetime_to_str(dt):
     """Convert a datetime object to a formatted string."""
     return date_format(dt, 'Y-m-d H:i') if dt else None
+
+def send_mass_message_with_logging(telegram_message):
+    bot_token = settings.TELEGRAM_BOT_TOKEN
+    base_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    website_url = settings.VERCEL_DOMAIN
+
+    users = TelegramUser.objects.all()
+    sent_users = []
+
+    for user in users:
+        message_with_link = (
+            f"{telegram_message.content}\n\n"
+            f"<a href='{website_url}'>Visit our website</a>"
+        )
+
+        payload = {
+            'chat_id': user.chat_id,
+            'text': message_with_link,
+            'parse_mode': 'HTML',  # Enable HTML to render the link
+        }
+
+        try:
+            response = requests.post(base_url, json=payload)
+            response.raise_for_status()  # Raise an error for failed requests
+            sent_users.append(user)
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to send message to {user.chat_id}: {e}")
+
+    telegram_message.sent_to.add(*sent_users)  # Log the sent users

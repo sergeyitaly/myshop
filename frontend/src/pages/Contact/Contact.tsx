@@ -111,7 +111,10 @@ export const Contact = () => {
 				<p className={style.description}>
 					{t("hello_part_1")}
 					<span className={style.name}> KOLORYT,</span> <br />
-					{t("hello_part_2")}
+					<span style={{whiteSpace: "wrap"}}>
+					{t("hello_part_2")}<br />
+					</span>
+					{t("hello_part_3")}
 				</p>
 			</div>
 			<div className={style.generalContainer}>

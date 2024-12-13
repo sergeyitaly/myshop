@@ -1,0 +1,30 @@
+######## Android CONFIGURATIONS
+
+package_name = "com.koloryt"
+json_key_file = "g../../koloryt-project-658aa790b0ef.json"
+gradle_file_path = "./app/build.gradle"
+######## END Android CONFIGURATIONS
+
+default_platform(:android)
+
+platform :android do
+
+  desc "Build Android App Bundle"
+  lane :build do
+    gradle(
+      task: "clean bundleRelease"
+    )
+  end
+
+  desc "Deploy APK/AAB to Google Play Store"
+  lane :deploy do
+    gradle(
+      task: 'assemble',
+      build_type: 'Release'
+    )
+    upload_to_play_store(
+      track: "Test Closed", 
+      aab: "app/build/outputs/bundle/release/app-release.aab",
+    )
+  end
+end 

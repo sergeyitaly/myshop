@@ -21,7 +21,6 @@ def update_average_for_question(question):
     overall_avg.save()
     return overall_avg
 
-
 @receiver(post_save, sender=RatingAnswer)
 @receiver(post_delete, sender=RatingAnswer)
 def update_average_rating(sender, instance, **kwargs):
@@ -35,7 +34,6 @@ def update_average_rating(sender, instance, **kwargs):
 
         # Bulk update to improve efficiency
         OverallAverageRating.objects.bulk_update(overall_avgs, ['average_rating'])
-
 
 @receiver(post_delete, sender=RatingQuestion)
 def delete_overall_average_ratings(sender, instance, **kwargs):

@@ -5,12 +5,11 @@ from django.utils import timezone
 import logging
 import decimal
 from django.utils.translation import gettext_lazy as _
-from django.utils.timezone import is_aware, make_naive
-from django.utils.dateparse import parse_datetime
-from datetime import datetime
+from django.utils.timezone import make_naive
+import datetime
+from django.db.models.fields import Field
 
 logger = logging.getLogger(__name__)
-
 
 class TelegramUser(models.Model):
     phone = models.CharField(max_length=15, unique=True, verbose_name=_('Phone'))
@@ -18,10 +17,27 @@ class TelegramUser(models.Model):
 
     def __str__(self):
         return f'{self.phone} - {self.chat_id}'
-    
+
     class Meta:
         verbose_name = _('Telegram user')
         verbose_name_plural = _('Telegram users')
+
+class TelegramMessage(models.Model):
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    sent_to = models.ManyToManyField('TelegramUser', related_name='sent_messages', blank=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Explicitly save the many-to-many relationship after saving the instance
+        if self.sent_to.exists():
+            self.sent_to.through.objects.filter(telegrammessage=self).delete()  # Remove existing relations
+            for user in self.sent_to.all():
+                self.sent_to.through.objects.create(telegrammessage=self, telegramuser=user)
+
+    def __str__(self):
+        return f"Message sent on {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
+
 
 class Order(models.Model):
     STATUS_CHOICES = (
@@ -31,7 +47,6 @@ class Order(models.Model):
         ('complete', _('Complete')),
         ('canceled', _('Canceled')),
     )
-
 
     name = models.CharField(max_length=100, default=_('Default Name'))
     surname = models.CharField(max_length=100, default=_('Default Surname'))
@@ -49,16 +64,19 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='submitted', db_index=True, verbose_name=_('Status'))
     parent_order = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, verbose_name=_('Parent Order'))
     present = models.BooleanField(null=True, help_text=_('Package as a present'))
-    telegram_user = models.ForeignKey(TelegramUser, related_name='orders', on_delete=models.CASCADE, null=True, blank=True, verbose_name=_('telegram user'))
+    telegram_user = models.ForeignKey(TelegramUser, related_name='orders', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('Telegram user'))
+#    telegram_user = models.ForeignKey(TelegramUser, on_delete=models.SET_NULL, null=True, blank=True)
+    language = models.CharField(max_length=2, choices=[('en', 'English'), ('uk', 'Ukrainian')],default='en')
 
+    def __str__(self):
+        return f"Order #{self.id} ({self.name})"
 
-    
     @property
     def chat_id(self):
-        return self.telegram_user.chat_id if self.telegram_user else None
-    
-    def __str__(self):
-        return f"Order {self.id}"
+        # Ensure chat_id is valid and exists before returning
+        if self.telegram_user:
+            return self.telegram_user.chat_id
+        return None
 
     @property
     def last_updated(self):
@@ -87,85 +105,32 @@ class Order(models.Model):
         self.save()
 
     def save(self, *args, **kwargs):
+        if self.pk:  # If this is an update (not a new instance)
+            old_instance = Order.objects.get(pk=self.pk)
+            changes = {}
+
+            for field in self._meta.fields:
+                field_name = field.name
+                old_value = getattr(old_instance, field_name)
+                new_value = getattr(self, field_name)
+                
+                if old_value != new_value:
+                    changes[field_name] = {"old": old_value, "new": new_value}
+
+    #        if changes:
+    #            print("Changes detected:", changes)  # Replace with actual logging or handling logic
+
+        # Link Telegram user for new instances or when phone is updated
+        if not self.telegram_user and self.phone:
+            try:
+                telegram_user = TelegramUser.objects.get(phone=self.phone)
+                self.telegram_user = telegram_user
+            except TelegramUser.DoesNotExist:
+                self.telegram_user = None
+
+        # Save the instance
         super().save(*args, **kwargs)
 
-        def ensure_datetime(value):
-            """Ensures the value is a datetime object, converting strings if necessary."""
-            if isinstance(value, str):
-                return parse_datetime(value)
-            return value
-
-        def make_aware_if_naive(dt):
-            """Converts a naive datetime to aware, using the current timezone."""
-            if dt and not is_aware(dt):
-                return timezone.make_aware(dt)  # Converts naive to aware
-            return dt
-
-        def datetime_to_str(dt):
-            """Converts a datetime object to string, handling naive and aware datetimes."""
-            if dt:
-                dt = make_aware_if_naive(dt)  # Ensure it's aware before formatting
-                return dt.strftime('%Y-%m-%d %H:%M')
-            return None
-
-        if self.chat_id:
-            try:
-                # Ensure datetime fields are properly parsed and made aware if naive
-                submitted_at = make_aware_if_naive(ensure_datetime(self.submitted_at))
-                created_at = make_aware_if_naive(ensure_datetime(self.created_at))
-                processed_at = make_aware_if_naive(ensure_datetime(self.processed_at))
-                complete_at = make_aware_if_naive(ensure_datetime(self.complete_at))
-                canceled_at = make_aware_if_naive(ensure_datetime(self.canceled_at))
-
-                # Create a dictionary for status fields
-                status_fields = {
-                    'submitted_at': submitted_at,
-                    'created_at': created_at,
-                    'processed_at': processed_at,
-                    'complete_at': complete_at,
-                    'canceled_at': canceled_at,
-                }
-
-                # Determine the latest status key and time
-                latest_status_key = max(
-                    status_fields,
-                    key=lambda k: status_fields[k] or datetime.min
-                )
-                latest_status_time = status_fields[latest_status_key]
-
-                # Fetch order items details for the order
-                order_items_data = [
-                    {
-                        "quantity": item.quantity,
-                        "total_sum": float(item.total_sum),
-                        "color_name": item.color_name,
-                        "item_price": str(item.item_price),
-                        "color_value": item.color_value,
-                        "product_name": item.product.name,
-                        "collection_name": item.product.collection.name,
-                    }
-                    for item in self.order_items.all()
-                ]
-
-                # Build the order summary data
-                order_data = {
-                    "order_id": self.id,
-                    "submitted_at": datetime_to_str(submitted_at),
-                    latest_status_key: datetime_to_str(latest_status_time),
-                    "order_items": order_items_data,
-                }
-
-                # Update or create the OrderSummary for the chat_id
-                order_summary, created = OrderSummary.objects.get_or_create(chat_id=self.chat_id)
-                updated_orders = order_summary.orders or []
-                # Save updated order data back to OrderSummary
-                order_summary.orders = updated_orders
-                order_summary.save()
-
-                logger.info(f"Order summary updated for chat ID {self.chat_id}")
-
-            except Exception as e:
-                logger.error(f"Failed to update OrderSummary for chat ID {self.chat_id}: {str(e)}")
 
     class Meta:
         ordering = ('-submitted_at',)
@@ -173,17 +138,15 @@ class Order(models.Model):
         verbose_name_plural = _('Orders')
 
 
-
-
 class OrderSummary(models.Model):
-    chat_id = models.CharField(max_length=255, unique=True, null=True, blank=True, verbose_name=_('Chat ID'))  # Changed to CharField to handle string IDs
-    orders = models.JSONField(default=dict, verbose_name=_('Orders'))  # Ensures orders is not null
+    chat_id = models.CharField(max_length=255, unique=True, null=True, blank=True, verbose_name=_('Chat ID'))
+    orders = models.JSONField(default=dict, verbose_name=_('Orders'))
 
     def __str__(self):
-        return str(self.chat_id)  # Ensure it returns a string representation
+        return str(self.chat_id)
 
     def save(self, *args, **kwargs):
-        # Convert Decimal values to float
+        # Ensure the orders field is processed before saving
         self.orders = self._convert_decimals(self.orders)
         super().save(*args, **kwargs)
 
@@ -194,29 +157,44 @@ class OrderSummary(models.Model):
             return [self._convert_decimals(item) for item in data]
         elif isinstance(data, decimal.Decimal):
             return float(data)
+        elif isinstance(data, datetime.datetime):
+            return data.isoformat()  # Convert datetime to ISO format
         return data
-    
+
     class Meta:
         verbose_name = _('Order summary')
-        verbose_name_plural = _('Order summarys')
-    
+        verbose_name_plural = _('Order summaries')
+
+
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='order_items', on_delete=models.CASCADE, verbose_name=_('Order'))
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name=_('Product'))
+    product = models.ForeignKey(Product, related_name='order_items', verbose_name=_('Product'), on_delete=models.CASCADE)
+    
+#    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name=_('Product'))
+  #  product = models.ForeignKey(Product, related_name='order_items', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(verbose_name=_('Quantity'))
     total_sum = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, verbose_name=_('Total Sum'))
-
 
     def save(self, *args, **kwargs):
         if self.product:
             self.total_sum = self.quantity * self.product.price
         super().save(*args, **kwargs)
 
+        
     def __str__(self):
         return f"{self.quantity} of {self.product.name}"
+    def get_product_name(self):
+        """Get the product name in the specified language."""
+        return getattr(self.product, f'name_{self.language}', self.product.name)
+
+    def get_color_name(self):
+        """Get the color name in the specified language."""
+        return getattr(self.product, f'color_name_{self.language}', self.product.color_name)
+
+    def get_collection_name(self):
+        """Get the collection name in the specified language."""
+        return getattr(self.product, f'collection_name_{self.language}', self.product.collection_name)
 
     class Meta:
         verbose_name = _('Order Item')
         verbose_name_plural = _('Order Items')
-
-    
