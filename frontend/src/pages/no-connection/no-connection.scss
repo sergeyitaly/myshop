@@ -1,0 +1,42 @@
+.main {
+  background: rgb(11, 5, 153);
+  background: radial-gradient(
+    circle,
+    rgba(11, 5, 153, 1) 0%,
+    rgba(97, 178, 228, 1) 80%
+  );
+  color: white;
+  padding-block: 126px 131px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+}
+
+.message {
+  font-size: clamp(16px, 5vw, 32px);
+  font-family: "Fira Sans Condensed", sans-serif;
+  font-weight: 400;
+  margin-bottom: 48px;
+}
+
+.img {
+  margin-bottom: 24px;
+  width: 100%;
+  max-width: 684px;
+}
+
+.link {
+  border: 1px solid white;
+  border-radius: 5px;
+  font-weight: 400;
+  font-size: clamp(16px, 4vw, 32px);
+  padding: 10px 20px;
+
+  max-width: fit-content;
+  cursor: pointer;
+
+  &:hover {
+    background-color: white;
+    color: black;
+  }
+}

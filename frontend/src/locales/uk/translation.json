@@ -39,6 +39,8 @@
 	"contact": "Контакти",
 	"not_found_message": "Opps, ця сторінка не знайдена",
 	"return_to_home": "Повернутися на головну сторінку",
+	"no_connection_message": "Oops, ви офлайн. Перевірте своє з'єднання та спробуйте ще раз",
+	"no_connection_retry": "Повторити спробу",
 	"basket_title": "Кошик",
 	"total_price": "Загальна сума",
 	"currency": "грн",

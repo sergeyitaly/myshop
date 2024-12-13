@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { Layout } from './layout/Layout/Layout';
 import CollectionsPage from './pages/CollectionPage/CollectionsPage';
@@ -21,14 +22,32 @@ import { NewProductsPage } from './pages/NewProductsPage/NewProductsPage';
 import { AllCollectionsPage } from './pages/AllCollectionsPage/AllCollectionsPage';
 import { ProductsWithDiscountPage } from './pages/ProductsWithDiscountPage/ProductsWithDiscountPage';
 import { ThankFeedbackPage } from './pages/Thank_for_feedback/ThankFeedbackPage';
+import { NoConnectionPage } from './pages/no-connection/no-connection';
 
 function App() {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   return (
     <Routes>
       <Route element={<Layout/>}>
-        <Route index element={<Home />} />
+      {isOnline ? (
+          <Route index element={<Home />} />
+        ) : (
+          <Route path="/no-connection" element={<NoConnectionPage />} />
+        )}
         <Route path="/collections" element={<CollectionsPage/>}/>
         <Route path="/collection/:id" element={<CollectionItemsPage/>}/>
         <Route path="/product/:id" element={<ProductPage/>} />

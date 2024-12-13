@@ -39,6 +39,8 @@
 	"light": "Light",
 	"not_found_message": "Oops, this page was not found",
 	"return_to_home": "Return to the home page",
+	"no_connection_message": "Oops, you are offline. Check your connection and try again",
+	"no_connection_retry": "Retry",
 	"basket_title": "Basket",
 	"total_price": "Total Price",
 	"currency": "UAH",
