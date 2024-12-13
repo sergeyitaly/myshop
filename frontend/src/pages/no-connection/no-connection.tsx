@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"; 
-import Img404 from "./404 error.png";
+import ImgError from "./connection-error.png";
 
 
 export const NoConnectionPage = () => {
@@ -7,7 +7,7 @@ export const NoConnectionPage = () => {
 
 	return (
 		<main>
-			<img src={Img404} alt="404" />
+			<img src={ImgError} alt="No connection" />
 			<h2>{t("no_connection_message")}</h2>
 			<button
 				onClick={() => window.location.reload()}
