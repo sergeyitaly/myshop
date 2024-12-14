@@ -57,25 +57,30 @@ function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<Home />} />
-        {!isOnline && <Route path="/no-connection" element={<NoConnectionPage />} />}
-        <Route path="/collections" element={<CollectionsPage />} />
-        <Route path="/collection/:id" element={<CollectionItemsPage />} />
-        <Route path="/product/:id" element={<ProductPage />} />
-        <Route path="/order" element={<OrderPage />} />
-        <Route path="/products" element={<FilterPage />} />
-        <Route path="/test" element={<TestPage />} />
-        <Route path={ROUTE.FEEDBACK} element={<FeedbackPage />} />
-        <Route path={ROUTE.THANK_FOR_FEEDBACK} element={<ThankFeedbackPage />} />
-        <Route path={ROUTE.ABOUT} element={<About />} />
-        <Route path={ROUTE.THANK} element={<ThankPage />} />
-        <Route path={ROUTE.CONTACTS} element={<Contact />} />
-        <Route path={ROUTE.SENDCONTACTS} element={<ThankYouPage />} />
-        <Route path={ROUTE.PAYMENT_DELIVERY} element={<PaymentAndDeliveryPage />} />
-        <Route path={ROUTE.PRIVACY_POLICY} element={<PrivacyPolicyPage />} />
-        <Route path={ROUTE.RETURNS_REFUNDS} element={<ReturnsRefundsPage />} />
-        <Route path={ROUTE.NEW_ARRIVALS} element={<NewProductsPage />} />
-        <Route path={ROUTE.ALL_COLLECTIONS} element={<AllCollectionsPage />} />
-        <Route path={ROUTE.DISCOUNT} element={<ProductsWithDiscountPage />} />
+        {isOnline ? (
+          <>
+            <Route path="/collections" element={<CollectionsPage />} />
+            <Route path="/collection/:id" element={<CollectionItemsPage />} />
+            <Route path="/product/:id" element={<ProductPage />} />
+            <Route path="/order" element={<OrderPage />} />
+            <Route path="/products" element={<FilterPage />} />
+            <Route path="/test" element={<TestPage />} />
+            <Route path={ROUTE.FEEDBACK} element={<FeedbackPage />} />
+            <Route path={ROUTE.THANK_FOR_FEEDBACK} element={<ThankFeedbackPage />} />
+            <Route path={ROUTE.ABOUT} element={<About />} />
+            <Route path={ROUTE.THANK} element={<ThankPage />} />
+            <Route path={ROUTE.CONTACTS} element={<Contact />} />
+            <Route path={ROUTE.SENDCONTACTS} element={<ThankYouPage />} />
+            <Route path={ROUTE.PAYMENT_DELIVERY} element={<PaymentAndDeliveryPage />} />
+            <Route path={ROUTE.PRIVACY_POLICY} element={<PrivacyPolicyPage />} />
+            <Route path={ROUTE.RETURNS_REFUNDS} element={<ReturnsRefundsPage />} />
+            <Route path={ROUTE.NEW_ARRIVALS} element={<NewProductsPage />} />
+            <Route path={ROUTE.ALL_COLLECTIONS} element={<AllCollectionsPage />} />
+            <Route path={ROUTE.DISCOUNT} element={<ProductsWithDiscountPage />} />
+          </>
+        ) : (
+          <Route path="/no-connection" element={<NoConnectionPage />} />
+        )}
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
