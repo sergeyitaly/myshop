@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useNavigate } from 'react-router-dom';
 import { Layout } from './layout/Layout/Layout';
 import CollectionsPage from './pages/CollectionPage/CollectionsPage';
 import CollectionItemsPage from './pages/CollectionItem/CollectionItems';
@@ -26,10 +26,23 @@ import { NoConnectionPage } from './pages/no-connection/no-connection';
 
 function App() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
+      const handleOffline = () => {
+      setIsOnline(false);
+      localStorage.setItem('lastVisitedPage', window.location.pathname);
+      navigate('/no-connection', { replace: true });
+    };
+    
+      const handleOnline = () => {
+      setIsOnline(true);
+      const lastVisitedPage = localStorage.getItem('lastVisitedPage') || '/';
+      
+      setTimeout(() => {
+        navigate(lastVisitedPage, { replace: true });
+      }, 0);
+    };
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
@@ -38,17 +51,13 @@ function App() {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, []);
+  }, [navigate]);
 
   return (
     <Routes>
       <Route element={<Layout />}>
-
-        {isOnline ? (
-          <Route index element={<Home />} />
-        ) : (
-          <Route path="/no-connection" element={<NoConnectionPage />} />
-        )}
+        <Route index element={<Home />} />
+        {!isOnline && <Route path="/no-connection" element={<NoConnectionPage />} />}
         <Route path="/collections" element={<CollectionsPage />} />
         <Route path="/collection/:id" element={<CollectionItemsPage />} />
         <Route path="/product/:id" element={<ProductPage />} />
