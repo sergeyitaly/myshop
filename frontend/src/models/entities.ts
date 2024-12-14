@@ -171,6 +171,8 @@ export interface FeedbackForm{
     ratings: Ratings[]
 }
 
+
+
 export interface Question {
 	id: number;
 	aspect_name?: string | null;
@@ -180,4 +182,5 @@ export interface Question {
 	question_en?: string;
 	question_uk?: string;
 	rating_required: boolean
-}
+  }
+  

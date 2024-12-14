@@ -115,6 +115,7 @@ export const Contact = () => {
 					{t("hello_part_2")}<br />
 					</span>
 					{t("hello_part_3")}
+
 				</p>
 			</div>
 			<div className={style.generalContainer}>

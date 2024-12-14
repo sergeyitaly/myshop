@@ -13,7 +13,6 @@ import styles from './Layout.module.scss'
 import { useToggler } from '../../hooks/useToggler';
 import { InfoModal } from '../InfoModal/InfoModal';
 
-
 export const Layout = () => {
 
     const {isLoadingBasket} = useBootstrap()

@@ -26,6 +26,7 @@ export const AppRangeSlider = ({
 
     const value1 = useDebounce(value[0].toString(), 1000)
     const value2 = useDebounce(value[1].toString(), 1000)
+
     
     
     useEffect(() => {

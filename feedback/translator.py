@@ -6,3 +6,5 @@ class RatingQuestionTranslationOptions(TranslationOptions):
     fields = ('question', 'aspect_name',)
 
 translator.register(RatingQuestion, RatingQuestionTranslationOptions)
+
+

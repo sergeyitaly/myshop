@@ -56,6 +56,7 @@ export const FilterSection = ({
         setFullRangeOfPrice,
     } = useFilters(initialCollection);
 
+
     const {
         data: productsResponse,
         isLoading: isLoadingProducts,
@@ -113,6 +114,8 @@ export const FilterSection = ({
         return i18n.language === 'uk' ? product.name_uk || product.name : product.name_en || product.name;
     };
 
+
+    
     
     
     return (

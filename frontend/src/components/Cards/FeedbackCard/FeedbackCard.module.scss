@@ -1,96 +1,98 @@
-@import "../../../variables";
+@import '../../../variables';
 
 .card {
-  background: $color-gray-450;
-  padding: 10px;
+    
+    background: $color-gray-450;
+    padding: 10px;
 }
 
 .buttons {
-  position: relative;
-  margin-bottom: clamp(0.875rem, 1.064vw + 0.543rem, 1.5rem);
-  display: flex;
-  gap: 20px;
+    position: relative;
+    margin-bottom: clamp(0.875rem, 1.064vw + 0.543rem, 1.5rem);
+    display: flex;
+    gap: 20px;
 }
 
 .textarea {
-  font-family: "Inter", sans-serif;
-  font-size: clamp(0.75rem, 0.426vw + 0.617rem, 1rem);
-  max-width: 690px;
-  width: 100%;
-  height: clamp(5rem, 2.128vw + 4.335rem, 6.25rem);
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
-  resize: none;
-  background-color: $color-gray-550;
-  outline: none;
-  transition: 0.5s;
-  margin-bottom: clamp(0.5rem, 0.851vw + 0.234rem, 1rem);
-  &:focus {
-    background: $color-background;
-  }
+    font-family: "Inter", sans-serif;
+    font-size: clamp(0.75rem, 0.426vw + 0.617rem, 1rem);
+    max-width: 690px;
+    width: 100%;
+    height: clamp(5rem, 2.128vw + 4.335rem, 6.25rem);
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    resize: none;
+    background-color: $color-gray-550;
+    outline: none;
+    transition: .5s;
+    margin-bottom: clamp(0.5rem, 0.851vw + 0.234rem, 1rem);
+    &:focus {
+        background: $color-background;
+    }
 }
 
 .button {
-  background: $color-gray-100;
-  padding: 8px;
-  border-radius: 5px;
-  svg {
-    width: clamp(1.25rem, 0.851vw + 0.984rem, 1.75rem);
-    height: clamp(1.25rem, 0.851vw + 0.984rem, 1.75rem);
-  }
+    background: $color-gray-100;
+    padding: 8px;
+    border-radius: 5px;
+    svg {
+        width: clamp(1.25rem, 0.851vw + 0.984rem, 1.75rem);
+        height: clamp(1.25rem, 0.851vw + 0.984rem, 1.75rem);
+    }
+  
 }
 
 .active {
-  background: $color-button;
-  svg {
-    fill: $color-background;
-  }
+    background: $color-button;
+    svg {
+        fill: $color-background;
+    }
 }
 
 .firstQuestion {
-  font-size: clamp(1rem, 0.851vw + 0.734rem, 1.5rem);
-  font-weight: 500;
-  margin-bottom: clamp(0.875rem, 1.064vw + 0.543rem, 1.5rem);
+    font-size: clamp(1rem, 0.851vw + 0.734rem, 1.5rem);
+    font-weight: 500;
+    margin-bottom: clamp(0.875rem, 1.064vw + 0.543rem, 1.5rem);
 }
 
 .secondQusetion {
-  font-size: clamp(0.875rem, 0.638vw + 0.676rem, 1.25rem);
-  font-weight: 500;
-  margin-bottom: 10px;
+    font-size: clamp(0.875rem, 0.638vw + 0.676rem, 1.25rem);
+    font-weight: 500;
+    margin-bottom: 10px;
 }
 
 .commentText {
-  height: clamp(0.875rem, 0.638vw + 0.676rem, 1.25rem);
-  margin-bottom: 10px;
-  max-width: 400px;
+    height: clamp(0.875rem, 0.638vw + 0.676rem, 1.25rem);
+    margin-bottom: 10px;
+    max-width: 400px;
 }
 
 .buttonSkeleton {
-  width: clamp(2.5rem, 0.319vw + 2.4rem, 2.688rem);
-  height: clamp(2.5rem, 0.319vw + 2.4rem, 2.688rem);
+    width: clamp(2.5rem, 0.319vw + 2.4rem, 2.688rem);
+    height: clamp(2.5rem, 0.319vw + 2.4rem, 2.688rem);
 }
 
 .skeletonTitle {
-  height: clamp(1rem, 0.851vw + 0.734rem, 1.5rem);
-  margin-bottom: clamp(0.875rem, 1.064vw + 0.543rem, 1.5rem);
-  max-width: 300px;
+    height: clamp(1rem, 0.851vw + 0.734rem, 1.5rem);
+    margin-bottom: clamp(0.875rem, 1.064vw + 0.543rem, 1.5rem);
+    max-width: 300px;
 }
 
 .error_plug {
-  position: absolute;
-  top: 8px;
-  left: clamp(14.438rem, 2.553vw + 13.64rem, 15.938rem);
-  font-size: clamp(0.75rem, 0.426vw + 0.617rem, 1rem);
-  background: $color-background;
-  padding: 5px;
-  border: 1px solid $color-error;
-  border-radius: 5px;
-  color: $color-error;
+    position: absolute;
+    top: 8px;
+    left: clamp(14.438rem, 2.553vw + 13.64rem, 15.938rem);
+    font-size: clamp(0.75rem, 0.426vw + 0.617rem, 1rem);
+    background: $color-background;
+    padding: 5px;
+    border: 1px solid $color-error;
+    border-radius: 5px;
+    color: $color-error;
 
-  @media (max-width: $screen-smallMobile) {
-    top: 35px;
-    left: 10px;
-    padding: 1px 5px;
-  }
+    @media (max-width: $screen-smallMobile) {
+        top: 35px;
+        left: 10px;
+        padding: 1px 5px;
+    }
 }

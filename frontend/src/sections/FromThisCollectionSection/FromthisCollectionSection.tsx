@@ -24,6 +24,7 @@ export const FromThisCollectionSection = ({
 	const [currentPage, setCurrentPage] = useState<number>(1);
 	const [totalPages, setTotalPages] = useState(0);
 	const { t, getTranslatedProductName } = useAppTranslator();
+
 	const { data, isLoading, isFetching } =
 		useGetProductsFromCollectionByProductFilterQuery(
 			collectionId !== undefined

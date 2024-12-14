@@ -13,7 +13,6 @@ export const technologybrandSettings: SwiperOptions = {
 	},
 	spaceBetween: 20,
 	speed: 1200,
-
 	modules: [Grid, Pagination, Autoplay],
 	breakpoints: {
 		740: {

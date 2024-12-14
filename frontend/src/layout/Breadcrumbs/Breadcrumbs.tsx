@@ -156,7 +156,7 @@ export const Breadcrumbs = () => {
         }
         if(isDiscounts){
             list.push(discounts)
-        }      
+        }
         if(isCollections){
             list.push(products)
             list.push(collections)
@@ -179,9 +179,9 @@ export const Breadcrumbs = () => {
             list.push(collections)
 
             if(isProductLoading || isProductFetching)
-                list.push({ isLoading: true })
+                list.push({isLoading: true})
+            else if(productResponce){
                 
-            else if(productResponce){     
                 list.push({
                     title: getTranslatedCollectionName(productResponce?.collection, i18n.language),
                     link: `${ROUTE.COLLECTION}${productResponce?.collection?.id}` 

@@ -23,16 +23,16 @@ export const PreviewItemsContainer = ({
 
     let isNotEmpty = false
 
+   
+    
 
-    
-    
     const isArray = Array.isArray(children)
 
 
     if(isArray){
         isNotEmpty = !!children.length
     }
-
+    
     if(isLoading) {
         return (
             <div className={styles.container}>

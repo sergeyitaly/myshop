@@ -1,50 +1,53 @@
-@import "../../../variables";
+
+@import '../../../variables';
 
 .menuContainer {
-  position: relative;
-  max-width: 170px;
+    position: relative;
+    max-width: 170px;
+
 }
 
 .menuList {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  border-radius: 5px;
-  bottom: 100%;
-  background: $color-background;
-  padding: 5px;
-  box-shadow: $shadow-main;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-radius: 5px;
+    bottom: 100%;
+    background: $color-background;
+    padding: 5px;
+    box-shadow: $shadow-main;
 }
 
 .flag {
-  width: 15px;
-  height: 15px;
+    width: 15px;
+    height: 15px;
 }
 
 .button {
-  padding-left: 0;
-  &:hover {
-    background: inherit;
-  }
+    padding-left: 0;
+    &:hover {
+        background: inherit;
+    }
 
-  @media (max-width: $screen-mobile) {
-    font-size: 11px;
-    font-weight: 600;
-  }
+    @media (max-width: $screen-mobile) {
+        font-size: 11px;
+        font-weight: 600;
+    }
+
 }
 
 .dropDownButton {
-  display: flex;
-  gap: 5px;
-  align-items: center;
+    display: flex;
+    gap: 5px;
+    align-items: center;
 }
 
 .arrow {
-  transform: rotate(90deg);
-  height: 15px;
-  transition: 0.2s;
-  &.active {
-    transform: rotate(-90deg);
-  }
+    transform: rotate(90deg);
+    height: 15px;
+    transition: .2s;
+    &.active {
+        transform: rotate(-90deg);
+    }
 }
