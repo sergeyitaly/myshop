@@ -25,12 +25,14 @@
   max-width: 684px;
 }
 
-.link {
+.button {
   border: 1px solid white;
   border-radius: 5px;
   font-weight: 400;
   font-size: clamp(16px, 4vw, 32px);
   padding: 10px 20px;
+  background-color: transparent;
+  color: white;
 
   max-width: fit-content;
   cursor: pointer;
