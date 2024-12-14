@@ -117,6 +117,7 @@ export const FilterSection = ({
 
     
     
+    
     return (
         <section className={clsx(styles.section, {
             [styles.blur]: !isLoadingProducts && isFetchingProducts
