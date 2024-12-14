@@ -78,8 +78,9 @@ function App() {
             <Route path={ROUTE.ALL_COLLECTIONS} element={<AllCollectionsPage />} />
             <Route path={ROUTE.DISCOUNT} element={<ProductsWithDiscountPage />} />
           </>
-        ) : (<Route path="/no-connection" element={<NoConnectionPage />} />)
-        }
+        ) : (
+            <Route path="/no-connection" element={<NoConnectionPage />} />
+          )}
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
