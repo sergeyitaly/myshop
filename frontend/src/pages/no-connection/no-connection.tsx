@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"; 
-import ImgError from "./connection-error.png";
+import ImgError from "./img-error.png";
 
 
 export const NoConnectionPage = () => {

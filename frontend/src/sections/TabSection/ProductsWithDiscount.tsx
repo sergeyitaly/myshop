@@ -24,7 +24,7 @@ export const ProductsWithDiscount = () => {
         <AppSlider
             isLoading = {isLoading}
             sliderSettings={discountSettings}
-            qtyOfPreloaderCards={isMobile ? 2 : 4}n
+            qtyOfPreloaderCards={isMobile ? 2 : 4}
         >
             {
                 products.map((product) => {
