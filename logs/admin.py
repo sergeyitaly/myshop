@@ -79,7 +79,7 @@ class EndpointFilter(admin.SimpleListFilter):
 class APILogAdmin(admin.ModelAdmin):
     list_display = ('clickable_endpoint', 'request_count', 'timestamp')
     list_filter = (TimePeriodFilter, EndpointFilter)
-    actions = [clear_logs]
+    actions = [clear_logs, 'delete_last_log', 'delete_all_logs']
     ordering = ('-timestamp',)
     search_fields = ['endpoint']
     change_list_template = 'admin/logs/apilog/change_list.html'
@@ -88,10 +88,27 @@ class APILogAdmin(admin.ModelAdmin):
         '/api/health_check', '/api/token/refresh/', '/api/telegram_users/', '/api/logs/chart-data/',
         '/auth/token/login/', '/api/token/', '/admin/api/logs/chart-data/', '/admin/', '/'
     ]
-    def delete_model(self, request, obj):
-        endpoint = obj.endpoint
-        super().delete_model(request, obj)
-        self.recalculate_request_count(endpoint)
+
+    def delete_last_log(self, request, queryset):
+        endpoints = queryset.values_list('endpoint', flat=True).distinct()
+        rows_deleted = 0
+        for endpoint in endpoints:
+            latest_log = queryset.filter(endpoint=endpoint).order_by('-timestamp').first()
+            if latest_log:
+                latest_log.delete()
+                rows_deleted += 1
+                self.recalculate_request_count(endpoint)
+        self.message_user(request, f'{rows_deleted} logs were successfully deleted.')
+
+    def delete_all_logs(self, request, queryset):
+        endpoints = queryset.values_list('endpoint', flat=True).distinct()
+        rows_deleted = 0
+        for endpoint in endpoints:
+            rows_deleted += APILog.objects.filter(endpoint=endpoint).delete()[0]
+        for endpoint in endpoints:
+            self.recalculate_request_count(endpoint)
+        self.message_user(request, f'{rows_deleted} logs were successfully deleted.')
+
     def recalculate_request_count(self, endpoint):
         count = APILog.objects.filter(endpoint=endpoint).count()
         APILog.objects.filter(endpoint=endpoint).update(request_count=count)
@@ -192,22 +209,17 @@ class APILogAdmin(admin.ModelAdmin):
         endpoint_filter = EndpointFilter(request, {}, self.model, self)
         logs = self.filter_logs_by_time_period(time_period)
         filtered_logs = endpoint_filter.queryset(request, logs)
-
-        # Separate logs by endpoints (Telegram and Vercel)
+        filtered_logs = filtered_logs.exclude(endpoint__in=self.exclude_patterns)
         telegram_logs = filtered_logs.filter(Q(endpoint__icontains='by_chat_id'))
         vercel_logs = filtered_logs.filter(~Q(endpoint__icontains='by_chat_id'))
-
-        # Prepare the labels and data
         labels = []
         telegram_values = []
         vercel_values = []
-
-        # Create a list of all timestamps in the filtered logs
         all_logs = list(telegram_logs) + list(vercel_logs)
         all_logs.sort(key=lambda log: log.timestamp)  # Sort by timestamp
+#        self.recalculate_request_count(log.endpoint)
 
         for log in all_logs:
-            # Convert timestamp to local time and format it
             local_time = timezone.localtime(log.timestamp)  # Convert to local time
             timestamp_str = local_time.strftime('%Y-%m-%d %H:%M')  # Customize the date format
             labels.append(timestamp_str)
@@ -227,6 +239,7 @@ class APILogAdmin(admin.ModelAdmin):
             },
         }
         return chart_data
+
 
     def changelist_view(self, request, extra_context=None):
         time_period = request.GET.get("time_period", "day")
@@ -263,7 +276,10 @@ class APILogAdmin(admin.ModelAdmin):
             )
             .order_by("period")
         )
-
+        # Ensure this is done after any deletions or updates
+#        endpoint_list = logs.values_list('endpoint', flat=True).distinct()
+#        for endpoint in endpoint_list:
+#            self.recalculate_request_count(endpoint)
         # Prepare data for Chart.js
         labels = []
         telegram_data = []

@@ -80,3 +80,5 @@ android/build/
 koloryt-release-key.keystore
 /android/app/src/google-services.json
 android/java_pid*.hprof
+**/__pycache__/
+**/migrations/
