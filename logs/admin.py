@@ -22,6 +22,7 @@ def clear_logs(modeladmin, request, queryset):
 clear_logs.short_description = 'Clear selected logs'
 
 class TimePeriodFilter(admin.SimpleListFilter):
+
     title = _('Time Period')
     parameter_name = 'time_period'
 
@@ -46,8 +47,6 @@ class TimePeriodFilter(admin.SimpleListFilter):
                 queryset = queryset.filter(timestamp__gte=now - timedelta(days=30))
             elif time_period == 'year':
                 queryset = queryset.filter(timestamp__gte=now - timedelta(days=365))
-            elif time_period == 'all':
-                queryset = queryset.filter(timestamp__gte=now - timedelta(years=10))
         return queryset
 
 class EndpointFilter(admin.SimpleListFilter):
@@ -84,9 +83,9 @@ class APILogAdmin(admin.ModelAdmin):
     search_fields = ['endpoint']
     change_list_template = 'admin/logs/apilog/change_list.html'
     exclude_patterns = [
-        '/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/*', '/admin/', '/admin/login/',
+        '/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/logs/','/admin/login/',
         '/api/health_check', '/api/token/refresh/', '/api/telegram_users/', '/api/logs/chart-data/',
-        '/auth/token/login/', '/api/token/', '/admin/api/logs/chart-data/',
+        '/auth/token/login/', '/api/token/', '/admin/api/logs/chart-data/', '/admin/'
     ]
 
 
@@ -118,8 +117,6 @@ class APILogAdmin(admin.ModelAdmin):
 
     request_count.short_description = "Request Count"
 
-    def get_time_period_filter(self):
-        return self.request.GET.get('time_period', 'all')
 
     def clickable_endpoint(self, obj):
         url = reverse('admin:logs_apilog_changelist') + f'?endpoint={obj.endpoint}'
@@ -157,9 +154,6 @@ class APILogAdmin(admin.ModelAdmin):
         elif time_period == 'year':
             trunc_field = TruncHour('timestamp')
             time_window = now - timedelta(days=365)
-        elif time_period == 'all':
-            trunc_field = None
-            time_window = now - timedelta(days=3650)  # Default long period
 
         logs = APILog.objects.filter(timestamp__gte=time_window).exclude(endpoint__in=self.exclude_patterns)
         if trunc_field:
@@ -238,11 +232,6 @@ class APILogAdmin(admin.ModelAdmin):
             trunc_func = TruncHour  # Truncate by month for 'year'
             start_time = now() - relativedelta(years=1)
             labels_count = 12  # 12 months in a year
-        elif time_period == "all":
-            trunc_func = TruncHour  # Default to truncating by hour for unknown periods
-            start_time = now() - relativedelta(years=10)
-            labels_count = 1  # Default to 1 day if an unknown time period is provided
-
         logs = self.model.objects.all()  # Start with all logs; adjust if needed
         logs = endpoint_filter.queryset(request, logs)
         logs = (
@@ -281,22 +270,23 @@ class APILogAdmin(admin.ModelAdmin):
 
         elif time_period == "week":
             for day in range(labels_count):
-                # Shift the date by subtracting 2 days, then calculate the day of the week (7 days)
-                current_day = (now() - relativedelta(weeks=0, days=(labels_count - day +1))).strftime('%Y-%m-%d')
+                # Calculate the current day, starting from today and going back 'labels_count' days
+                current_day = (now() - relativedelta(days=labels_count - day - 1)).strftime('%Y-%m-%d')
                 labels.append(current_day)
 
-                # Adjust weekday calculation for the 2-day right shift
+                # Filter logs for the correct day of the week (current_day)
                 telegram_data.append(
-                    logs.filter(period__week_day=(now() - relativedelta(weeks=0, days=(labels_count - day))).weekday() + 1 ).aggregate(
+                    logs.filter(period__date=(now() - relativedelta(days=labels_count - day - 1)).date()).aggregate(
                         telegram_count=Count("id", filter=Q(endpoint__icontains="by_chat_id"))
                     )["telegram_count"] or 0
                 )
 
                 vercel_data.append(
-                    logs.filter(period__week_day=(now() - relativedelta(weeks=0, days=(labels_count - day))).weekday() + 1).aggregate(
+                    logs.filter(period__date=(now() - relativedelta(days=labels_count - day - 1)).date()).aggregate(
                         vercel_count=Count("id", filter=~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
+
 
         elif time_period == "month":
             for day in range(labels_count):
@@ -330,22 +320,7 @@ class APILogAdmin(admin.ModelAdmin):
                     logs.filter(period__month=(now() - relativedelta(years=0, months=labels_count - month - 1)).month).aggregate(
                         vercel_count=Count("id", filter=~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
-                )
-        elif time_period == "all":
-            # For 'all' we need to show all API logs from the database (without time filtering)
-            labels = []  # Empty labels for this case
-            telegram_data = []
-            vercel_data = []
-
-            # Fetch all logs for 'all' time period without filtering by date or week/month/year
-            all_logs = logs.all()
-
-            # Now, let's aggregate the data for all logs in the database
-            telegram_data.append(
-                all_logs.filter(endpoint__icontains="by_chat_id").aggregate(
-                    telegram_count=Count("id")
-                )["telegram_count"] or 0
-            )
+                )                                                                   
 
         # Prepare final chart data
         chart_data = {
