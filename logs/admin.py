@@ -265,13 +265,13 @@ class APILogAdmin(admin.ModelAdmin):
                 labels.append(current_hour)
 
                 telegram_data.append(
-                    logs.filter(period__hour=(timezone.localtime(timezone.now()) - relativedelta(hours=labels_count - hour - 1)).hour).aggregate(
+                    logs.filter(period__hour=(timezone.localtime(timezone.now()) - relativedelta(hours=labels_count - hour + 1)).hour).aggregate(
                         telegram_count=Count("id", filter=Q(endpoint__icontains="by_chat_id"))
                     )["telegram_count"] or 0
                 )
 
                 vercel_data.append(
-                    logs.filter(period__hour=(timezone.localtime(timezone.now()) - relativedelta(hours=labels_count - hour - 1)).hour).aggregate(
+                    logs.filter(period__hour=(timezone.localtime(timezone.now()) - relativedelta(hours=labels_count - hour + 1)).hour).aggregate(
                         vercel_count=Count("id", filter=~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
