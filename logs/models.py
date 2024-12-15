@@ -11,7 +11,8 @@ class APILog(models.Model):
     class Meta:
         unique_together = ('endpoint', 'has_chat_id')  # Ensure uniqueness for endpoint and chat_id combo
         ordering = ['-timestamp']  # Default ordering by most recent
-
+        app_label = 'logs'  
+        
     def __str__(self):
         return f"Endpoint: {self.endpoint}, Chat ID: {self.has_chat_id}, Requests: {self.request_count}"
 
