@@ -64,11 +64,8 @@ class EndpointFilter(admin.SimpleListFilter):
         endpoint_types = request.GET.get(self.parameter_name)
         if not endpoint_types:
             return queryset
-
         endpoint_types = endpoint_types.split(',')
         filters = Q()
-
-        # Apply the filters for both 'vercel' and 'telegram'
         if 'vercel' in endpoint_types:
             filters |= ~Q(endpoint__icontains='by_chat_id')  # Vercel doesn't contain 'by_chat_id'
         if 'telegram' in endpoint_types:
@@ -86,7 +83,7 @@ class APILogAdmin(admin.ModelAdmin):
     exclude_patterns = [
         '/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/logs/','/admin/login/',
         '/api/health_check', '/api/token/refresh/', '/api/telegram_users/', '/api/logs/chart-data/',
-        '/auth/token/login/', '/api/token/', '/admin/api/logs/chart-data/', '/admin/', '/'
+        '/auth/token/login/', '/api/token/', '/admin/api/logs/chart-data/', '/', '/admin/','/admin/*', 
     ]
 
     def delete_last_log(self, request, queryset):
@@ -140,7 +137,7 @@ class APILogAdmin(admin.ModelAdmin):
 
     def request_count(self, obj):
         request = self.request
-        queryset = self.get_queryset(request)  # Use the combined get_queryset logic
+        queryset = self.get_queryset(request)
         endpoint = request.GET.get('endpoint')
         if endpoint:
             if endpoint == 'telegram':
@@ -149,6 +146,7 @@ class APILogAdmin(admin.ModelAdmin):
                 queryset = queryset.filter(~Q(endpoint__icontains='by_chat_id'))
             else:
                 queryset = queryset.filter(endpoint=endpoint)
+                
         return queryset.count()
 
     request_count.short_description = "Request Count"
@@ -202,52 +200,18 @@ class APILogAdmin(admin.ModelAdmin):
                    .values('time_period_field', 'count')
 
         return {entry['time_period_field']: entry['count'] for entry in data}
-    
-
+        
     def get_charts_data(self, request, time_period):
         selected_endpoints = request.GET.get('endpoint', '').split(',')
         endpoint_filter = EndpointFilter(request, {}, self.model, self)
         logs = self.filter_logs_by_time_period(time_period)
-        filtered_logs = endpoint_filter.queryset(request, logs)
-        filtered_logs = filtered_logs.exclude(endpoint__in=self.exclude_patterns)
-        telegram_logs = filtered_logs.filter(Q(endpoint__icontains='by_chat_id'))
-        vercel_logs = filtered_logs.filter(~Q(endpoint__icontains='by_chat_id'))
+        logs = endpoint_filter.queryset(request, logs)
+        
         labels = []
-        telegram_values = []
-        vercel_values = []
-        all_logs = list(telegram_logs) + list(vercel_logs)
-        all_logs.sort(key=lambda log: log.timestamp)  # Sort by timestamp
-#        self.recalculate_request_count(log.endpoint)
-
-        for log in all_logs:
-            local_time = timezone.localtime(log.timestamp)  # Convert to local time
-            timestamp_str = local_time.strftime('%Y-%m-%d %H:%M')  # Customize the date format
-            labels.append(timestamp_str)
-
-            if 'by_chat_id' in log.endpoint:
-                telegram_values.append(1)  # Increment for each request
-                vercel_values.append(0)
-            else:
-                telegram_values.append(0)
-                vercel_values.append(1)
-
-        chart_data = {
-            "labels": labels,
-            "data": {
-                "Telegram": telegram_values,
-                "Vercel": vercel_values,
-            },
-        }
-        return chart_data
-
-
-    def changelist_view(self, request, extra_context=None):
-        time_period = request.GET.get("time_period", "day")
-
-        # Initialize the EndpointFilter using the request and other necessary parameters
-        endpoint_filter = EndpointFilter(request, {}, self.model, self)
-
-        # Define time truncation based on the time period
+        telegram_data = []
+        vercel_data = []
+        
+        # Define trunc_func before using it
         if time_period == "day":
             trunc_func = TruncHour  # Truncate by hour for 'day'
             start_time = timezone.localtime(timezone.now()) - relativedelta(hours=24)
@@ -257,16 +221,15 @@ class APILogAdmin(admin.ModelAdmin):
             start_time = timezone.localtime(timezone.now()) - relativedelta(days=7)
             labels_count = 7  # 7 days in a week
         elif time_period == "month":
-            trunc_func = TruncHour # Truncate by day for 'month'
+            trunc_func = TruncHour  # Truncate by day for 'month'
             start_time = timezone.localtime(timezone.now()) - relativedelta(days=30)
             labels_count = 30  # Approximate 30 days in a month
         elif time_period == "year":
             trunc_func = TruncHour  # Truncate by month for 'year'
             start_time = timezone.localtime(timezone.now()) - relativedelta(years=1)
             labels_count = 12  # 12 months in a year
-
-        logs = self.model.objects.all()  # Start with all logs; adjust if needed
-        logs = endpoint_filter.queryset(request, logs)
+        
+        logs = logs.order_by('timestamp')
         logs = (
             logs.annotate(period=trunc_func("timestamp"))
             .values("period")
@@ -276,18 +239,8 @@ class APILogAdmin(admin.ModelAdmin):
             )
             .order_by("period")
         )
-        # Ensure this is done after any deletions or updates
-#        endpoint_list = logs.values_list('endpoint', flat=True).distinct()
-#        for endpoint in endpoint_list:
-#            self.recalculate_request_count(endpoint)
-        # Prepare data for Chart.js
-        labels = []
-        telegram_data = []
-        vercel_data = []
-
-        # Generate labels and data based on time period
+        
         if time_period == "day":
-            # For 'day' we need to enumerate hours (24 hours)
             for hour in range(labels_count):
                 current_hour = (timezone.localtime(timezone.now()) - relativedelta(hours=labels_count - hour - 1)).strftime('%H:%M')
                 labels.append(current_hour)
@@ -306,11 +259,8 @@ class APILogAdmin(admin.ModelAdmin):
 
         elif time_period == "week":
             for day in range(labels_count):
-                # Calculate the current day, starting from today and going back 'labels_count' days
                 current_day = (timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day - 1)).strftime('%Y-%m-%d')
                 labels.append(current_day)
-
-                # Filter logs for the correct day of the week (current_day)
                 telegram_data.append(
                     logs.filter(period__date=(timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day - 1)).date()).aggregate(
                         telegram_count=Count("id", filter=Q(endpoint__icontains="by_chat_id"))
@@ -341,7 +291,6 @@ class APILogAdmin(admin.ModelAdmin):
 
 
         elif time_period == "year":
-            # For 'year' we need to enumerate months of the year (12 months)
             for month in range(labels_count):
                 current_month = (timezone.localtime(timezone.now()) - relativedelta(years=0, months=labels_count - month - 1)).strftime('%B')
                 labels.append(current_month)
@@ -356,9 +305,8 @@ class APILogAdmin(admin.ModelAdmin):
                     logs.filter(period__month=(timezone.localtime(timezone.now()) - relativedelta(years=0, months=labels_count - month - 1)).month).aggregate(
                         vercel_count=Count("id", filter=~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
-                )                                                                   
+                )        
 
-        # Prepare final chart data
         chart_data = {
             "labels": labels,
             "data": {
@@ -366,10 +314,13 @@ class APILogAdmin(admin.ModelAdmin):
                 "Vercel": vercel_data,
             },
         }
+        return chart_data
 
+    def changelist_view(self, request, extra_context=None):
+        time_period = request.GET.get("time_period", "day")
+        chart_data = self.get_charts_data(request, time_period)
         extra_context = extra_context or {}
         extra_context["chart_js"] = chart_data
-
         return super().changelist_view(request, extra_context=extra_context)
 
 admin.site.register(APILog, APILogAdmin)
