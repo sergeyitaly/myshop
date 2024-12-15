@@ -1,27 +1,28 @@
-import logging
 from django.utils.deprecation import MiddlewareMixin
 from django.utils import timezone
 from .models import APILog
 from urllib.parse import unquote
+import logging
 
 logger = logging.getLogger(__name__)
 
 class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        # Define the paths to exclude
         excluded_paths = [
-        '/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/logs/','/admin/login/',
-        '/api/health_check', '/api/token/refresh/', '/api/telegram_users/', '/api/logs/chart-data/',
-        '/auth/token/login/', '/api/token/', '/admin/api/logs/chart-data/', '/admin/'
+            '/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/logs/', '/admin/login/',
+            '/api/health_check', '/api/token/refresh/', '/api/telegram_users/', '/api/logs/chart-data/',
+            '/auth/token/login/', '/api/token/', '/admin/api/logs/chart-data/', '/admin/'
         ]
-
         if any(request.path.startswith(path) for path in excluded_paths):
-            return None  # Skip logging for excluded paths
-        
+            return None
+        if request.method == 'DELETE':
+            endpoint = unquote(request.path)
+            remaining_logs = APILog.objects.filter(endpoint=endpoint).count()
+            APILog.objects.filter(endpoint=endpoint).update(request_count=remaining_logs)
+            logger.info(f"Recalculated request count for endpoint {endpoint}: {remaining_logs}")
+            return None  # Continue with the response after handling
         endpoint = unquote(request.path)
         has_chat_id = 'by_chat_id' in request.GET or 'by_chat_id' in request.POST
-
-        # Log the request if it's not excluded
         log_entry = APILog.objects.create(
             endpoint=endpoint,
             has_chat_id=has_chat_id,

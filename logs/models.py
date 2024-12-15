@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 
 class APILog(models.Model):
     endpoint = models.CharField(max_length=255)
@@ -12,3 +14,9 @@ class APILog(models.Model):
 
     def __str__(self):
         return f"Endpoint: {self.endpoint}, Chat ID: {self.has_chat_id}, Requests: {self.request_count}"
+
+@receiver(post_delete, sender=APILog)
+def recalculate_request_count(sender, instance, **kwargs):
+    endpoint = instance.endpoint
+    request_count = APILog.objects.filter(endpoint=endpoint).count()
+    APILog.objects.filter(endpoint=endpoint).update(request_count=request_count)

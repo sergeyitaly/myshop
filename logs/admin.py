@@ -87,7 +87,13 @@ class APILogAdmin(admin.ModelAdmin):
         '/api/health_check', '/api/token/refresh/', '/api/telegram_users/', '/api/logs/chart-data/',
         '/auth/token/login/', '/api/token/', '/admin/api/logs/chart-data/', '/admin/'
     ]
-
+    def delete_model(self, request, obj):
+        endpoint = obj.endpoint
+        super().delete_model(request, obj)
+        self.recalculate_request_count(endpoint)
+    def recalculate_request_count(self, endpoint):
+        count = APILog.objects.filter(endpoint=endpoint).count()
+        APILog.objects.filter(endpoint=endpoint).update(request_count=count)
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
