@@ -27,7 +27,7 @@ class APILogMiddleware(MiddlewareMixin):
             endpoint=endpoint,
             has_chat_id=has_chat_id,
             request_count=1,
-            timestamp=timezone.now()
+            timestamp=timezone.localtime(timezone.now())  # Convert to local time
         )
         logger.info(
             f"Logged request for endpoint: {endpoint}, has_chat_id: {has_chat_id}, "

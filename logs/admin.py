@@ -195,7 +195,9 @@ class APILogAdmin(admin.ModelAdmin):
         all_logs.sort(key=lambda log: log.timestamp)  # Sort by timestamp
 
         for log in all_logs:
-            timestamp_str = log.timestamp.strftime('%Y-%m-%d %H:%M')  # Customize the date format
+            # Convert timestamp to local time and format it
+            local_time = timezone.localtime(log.timestamp)  # Convert to local time
+            timestamp_str = local_time.strftime('%Y-%m-%d %H:%M')  # Customize the date format
             labels.append(timestamp_str)
 
             if 'by_chat_id' in log.endpoint:
@@ -214,7 +216,6 @@ class APILogAdmin(admin.ModelAdmin):
         }
         return chart_data
 
-
     def changelist_view(self, request, extra_context=None):
         time_period = request.GET.get("time_period", "day")
 
@@ -224,20 +225,21 @@ class APILogAdmin(admin.ModelAdmin):
         # Define time truncation based on the time period
         if time_period == "day":
             trunc_func = TruncHour  # Truncate by hour for 'day'
-            start_time = now() - relativedelta(hours=24)
+            start_time = timezone.localtime(timezone.now()) - relativedelta(hours=24)
             labels_count = 24  # 24 hours in a day
         elif time_period == "week":
             trunc_func = TruncHour  # Truncate by day for 'week'
-            start_time = now() - relativedelta(days=7)
+            start_time = timezone.localtime(timezone.now()) - relativedelta(days=7)
             labels_count = 7  # 7 days in a week
         elif time_period == "month":
             trunc_func = TruncHour # Truncate by day for 'month'
-            start_time = now() - relativedelta(days=30)
+            start_time = timezone.localtime(timezone.now()) - relativedelta(days=30)
             labels_count = 30  # Approximate 30 days in a month
         elif time_period == "year":
             trunc_func = TruncHour  # Truncate by month for 'year'
-            start_time = now() - relativedelta(years=1)
+            start_time = timezone.localtime(timezone.now()) - relativedelta(years=1)
             labels_count = 12  # 12 months in a year
+
         logs = self.model.objects.all()  # Start with all logs; adjust if needed
         logs = endpoint_filter.queryset(request, logs)
         logs = (
@@ -259,17 +261,17 @@ class APILogAdmin(admin.ModelAdmin):
         if time_period == "day":
             # For 'day' we need to enumerate hours (24 hours)
             for hour in range(labels_count):
-                current_hour = (now() - relativedelta(hours=labels_count - hour - 1)).strftime('%H:%M')
+                current_hour = (timezone.localtime(timezone.now()) - relativedelta(hours=labels_count - hour - 1)).strftime('%H:%M')
                 labels.append(current_hour)
 
                 telegram_data.append(
-                    logs.filter(period__hour=(now() - relativedelta(hours=labels_count - hour - 1)).hour).aggregate(
+                    logs.filter(period__hour=(timezone.localtime(timezone.now()) - relativedelta(hours=labels_count - hour - 1)).hour).aggregate(
                         telegram_count=Count("id", filter=Q(endpoint__icontains="by_chat_id"))
                     )["telegram_count"] or 0
                 )
 
                 vercel_data.append(
-                    logs.filter(period__hour=(now() - relativedelta(hours=labels_count - hour - 1)).hour).aggregate(
+                    logs.filter(period__hour=(timezone.localtime(timezone.now()) - relativedelta(hours=labels_count - hour - 1)).hour).aggregate(
                         vercel_count=Count("id", filter=~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
@@ -277,18 +279,18 @@ class APILogAdmin(admin.ModelAdmin):
         elif time_period == "week":
             for day in range(labels_count):
                 # Calculate the current day, starting from today and going back 'labels_count' days
-                current_day = (now() - relativedelta(days=labels_count - day - 1)).strftime('%Y-%m-%d')
+                current_day = (timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day - 1)).strftime('%Y-%m-%d')
                 labels.append(current_day)
 
                 # Filter logs for the correct day of the week (current_day)
                 telegram_data.append(
-                    logs.filter(period__date=(now() - relativedelta(days=labels_count - day - 1)).date()).aggregate(
+                    logs.filter(period__date=(timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day - 1)).date()).aggregate(
                         telegram_count=Count("id", filter=Q(endpoint__icontains="by_chat_id"))
                     )["telegram_count"] or 0
                 )
 
                 vercel_data.append(
-                    logs.filter(period__date=(now() - relativedelta(days=labels_count - day - 1)).date()).aggregate(
+                    logs.filter(period__date=(timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day - 1)).date()).aggregate(
                         vercel_count=Count("id", filter=~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
@@ -296,15 +298,15 @@ class APILogAdmin(admin.ModelAdmin):
 
         elif time_period == "month":
             for day in range(labels_count):
-                current_day = (now() - relativedelta(days=labels_count - day - 1)).strftime('%Y-%m-%d')
+                current_day = (timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day - 1)).strftime('%Y-%m-%d')
                 labels.append(current_day)
                 telegram_data.append(
-                    logs.filter(period__day=(now() - relativedelta(days=labels_count - day - 1)).day).aggregate(
+                    logs.filter(period__day=(timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day - 1)).day).aggregate(
                         telegram_count=Count("id", filter=Q(endpoint__icontains="by_chat_id"))
                     )["telegram_count"] or 0
                 )
                 vercel_data.append(
-                    logs.filter(period__day=(now() - relativedelta(days=labels_count - day - 1)).day).aggregate(
+                    logs.filter(period__day=(timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day - 1)).day).aggregate(
                         vercel_count=Count("id", filter=~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
@@ -313,17 +315,17 @@ class APILogAdmin(admin.ModelAdmin):
         elif time_period == "year":
             # For 'year' we need to enumerate months of the year (12 months)
             for month in range(labels_count):
-                current_month = (now() - relativedelta(years=0, months=labels_count - month - 1)).strftime('%B')
+                current_month = (timezone.localtime(timezone.now()) - relativedelta(years=0, months=labels_count - month - 1)).strftime('%B')
                 labels.append(current_month)
 
                 telegram_data.append(
-                    logs.filter(period__month=(now() - relativedelta(years=0, months=labels_count - month - 1)).month).aggregate(
+                    logs.filter(period__month=(timezone.localtime(timezone.now()) - relativedelta(years=0, months=labels_count - month - 1)).month).aggregate(
                         telegram_count=Count("id", filter=Q(endpoint__icontains="by_chat_id"))
                     )["telegram_count"] or 0
                 )
 
                 vercel_data.append(
-                    logs.filter(period__month=(now() - relativedelta(years=0, months=labels_count - month - 1)).month).aggregate(
+                    logs.filter(period__month=(timezone.localtime(timezone.now()) - relativedelta(years=0, months=labels_count - month - 1)).month).aggregate(
                         vercel_count=Count("id", filter=~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )                                                                   
