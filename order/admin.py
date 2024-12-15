@@ -9,7 +9,6 @@ from .models import *
 from .notifications import update_order_status_with_notification
 from django.contrib.admin import SimpleListFilter
 import json
-import requests
 from .utils import send_mass_message_with_logging 
 
 @admin.register(TelegramMessage)
