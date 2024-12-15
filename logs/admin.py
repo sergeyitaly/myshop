@@ -79,21 +79,23 @@ class APILogAdmin(admin.ModelAdmin):
     list_display = ('clickable_endpoint', 'request_count', 'timestamp')
     list_filter = (TimePeriodFilter, EndpointFilter)
     actions = [clear_logs]
-    ordering = ('-request_count',)
+    ordering = ('-timestamp',)
     search_fields = ['endpoint']
     change_list_template = 'admin/logs/apilog/change_list.html'
     exclude_patterns = [
         '/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/logs/','/admin/login/',
         '/api/health_check', '/api/token/refresh/', '/api/telegram_users/', '/api/logs/chart-data/',
-        '/auth/token/login/', '/api/token/', '/admin/api/logs/chart-data/', '/admin/'
+        '/auth/token/login/', '/api/token/', '/admin/api/logs/chart-data/', '/admin/' ,'/'
     ]
     def delete_model(self, request, obj):
         endpoint = obj.endpoint
         super().delete_model(request, obj)
         self.recalculate_request_count(endpoint)
+
     def recalculate_request_count(self, endpoint):
         count = APILog.objects.filter(endpoint=endpoint).count()
         APILog.objects.filter(endpoint=endpoint).update(request_count=count)
+
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
@@ -123,19 +125,31 @@ class APILogAdmin(admin.ModelAdmin):
 
     request_count.short_description = "Request Count"
 
-
     def clickable_endpoint(self, obj):
-        url = reverse('admin:logs_apilog_changelist') + f'?endpoint={obj.endpoint}'
+        endpoint = obj.endpoint.lstrip('/') if obj.endpoint else None
+        url = reverse('admin:logs_apilog_endpoint_timestamps', args=[endpoint])
         return format_html('<a href="{}">{}</a>', url, obj.endpoint)
+
     clickable_endpoint.allow_tags = True
     clickable_endpoint.short_description = "Endpoint"
 
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
-            path('clear_logs/', self.admin_site.admin_view(self.clear_all_logs), name="clear_all_logs")
+            path('clear_logs/', self.admin_site.admin_view(self.clear_all_logs), name="clear_all_logs"),
+            # Update the URL pattern to allow slashes in the endpoint
+            path('endpoint_timestamps/<path:endpoint>/', self.admin_site.admin_view(self.endpoint_timestamps_view), name="logs_apilog_endpoint_timestamps")
         ]
         return custom_urls + urls
+
+    def endpoint_timestamps_view(self, request, endpoint):
+        logs = APILog.objects.filter(endpoint=endpoint).order_by('timestamp')
+        timestamps = [{'timestamp': log.timestamp} for log in logs]
+        context = {
+            'title': f'Timestamps for {endpoint}',
+            'timestamps': timestamps,
+        }
+        return self.render_change_form(request, context=context)
 
     def clear_all_logs(self, request):
         try:
