@@ -70,13 +70,17 @@
 .totalPrice {
     display: flex;
     justify-content: space-between;
-    font-size: clamp(1rem, 0vw + 1rem, 1rem);
+    //font-size: clamp(1rem, 0vw + 1rem, 1rem);
+    font-weight: 400;
+    font-size: 20px;
 }
 
 .actions{
     display: flex;
     flex-direction: column;
-    //gap: 10px
+    gap: 10px;
+    font-size: 24px;
+    font-weight: 500;
 }
 
 .item {
@@ -86,4 +90,9 @@
 
 .control {
     font-weight: 400;
+}
+
+.noBorder {
+    border: none;
+    color: $color-border;
 }
