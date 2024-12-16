@@ -15,7 +15,7 @@ from django.db.models import Count, Q
 from django.utils.timezone import now
 from dateutil.relativedelta import relativedelta
 from django.utils.html import format_html
-from django.db.models import Max, F, OuterRef, Subquery
+from django.db.models import Min, Max, F, OuterRef, Subquery
 
 def clear_logs(modeladmin, request, queryset):
     count, _ = queryset.delete()
@@ -119,14 +119,37 @@ class APILogAdmin(admin.ModelAdmin):
             queryset = TimePeriodFilter(request, {}, self.model, self).queryset(request, queryset)
         if self.exclude_patterns:
             queryset = queryset.exclude(endpoint__in=self.exclude_patterns)
+        latest_timestamps = queryset.values('endpoint') \
+            .annotate(latest_timestamp=Max('timestamp')) \
+            .order_by('-latest_timestamp')
+
+        # Subquery to filter the queryset to only include the latest log for each endpoint
+        queryset = queryset.filter(
+            endpoint__in=Subquery(latest_timestamps.values('endpoint'))
+        ).filter(
+            timestamp=Subquery(latest_timestamps.filter(endpoint=OuterRef('endpoint')).values('latest_timestamp')[:1])
+        )
+
         return queryset
 
+    def get_chart_queryset(self, request):
+        queryset = super().get_queryset(request)
+        endpoint_filter = EndpointFilter(request, {}, self.model, self)
+        queryset = endpoint_filter.queryset(request, queryset)
+        time_period = request.GET.get('time_period', None)
+        if time_period:
+            queryset = TimePeriodFilter(request, {}, self.model, self).queryset(request, queryset)
+        return queryset
 
     def request_count(self, obj):
         request = self.request
-        queryset = self.get_queryset(request)
+        queryset = self.get_queryset(request)                
         return queryset.count()
-
+    
+    def chart_request_count(self, obj):
+        request = self.request
+        queryset = self.get_chart_queryset(request)                
+        return queryset.count()
     request_count.short_description = "Request Count"
     
     def clickable_endpoint(self, obj):
@@ -178,7 +201,7 @@ class APILogAdmin(admin.ModelAdmin):
         return {entry['time_period_field']: entry['count'] for entry in data}
         
     def get_charts_data(self, request, time_period):
-        logs = self.get_queryset(request)
+        logs = self.get_chart_queryset(request)
         labels = []
         telegram_data = []
         vercel_data = []
