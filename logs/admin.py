@@ -112,8 +112,6 @@ class APILogAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
-        if queryset is None:
-            queryset = self.model.objects.none()
         endpoint_filter = EndpointFilter(request, {}, self.model, self)
         queryset = endpoint_filter.queryset(request, queryset)
         time_period = request.GET.get('time_period', None)
@@ -121,28 +119,12 @@ class APILogAdmin(admin.ModelAdmin):
             queryset = TimePeriodFilter(request, {}, self.model, self).queryset(request, queryset)
         if self.exclude_patterns:
             queryset = queryset.exclude(endpoint__in=self.exclude_patterns)
-        latest_timestamps = queryset.values('endpoint') \
-            .annotate(latest_timestamp=Max('timestamp')) \
-            .order_by('-latest_timestamp')
-        queryset = queryset.filter(
-            endpoint__in=Subquery(latest_timestamps.values('endpoint'))
-        ).filter(
-            timestamp=Subquery(latest_timestamps.filter(endpoint=OuterRef('endpoint')).values('latest_timestamp')[:1])
-        )
         return queryset
+
 
     def request_count(self, obj):
         request = self.request
         queryset = self.get_queryset(request)
-        endpoint = request.GET.get('endpoint')
-        if endpoint:
-            if endpoint == 'telegram':
-                queryset = queryset.filter(Q(endpoint__icontains='by_chat_id'))
-            elif endpoint == 'vercel':
-                queryset = queryset.filter(~Q(endpoint__icontains='by_chat_id'))
-            else:
-                queryset = queryset.filter(endpoint=endpoint)
-                
         return queryset.count()
 
     request_count.short_description = "Request Count"
@@ -228,7 +210,7 @@ class APILogAdmin(admin.ModelAdmin):
                 labels.append(current_hour)
 
                 telegram_data.append(
-                    logs.filter(period__hour=(timezone.localtime(timezone.now()) - relativedelta(hours=labels_count - hour - 1)).hour).aggregate(
+                    logs.filter(period__hour=(timezone.localtime(timezone.now()) - relativedelta(hours=labels_count - hour)).hour).aggregate(
                         telegram_count=Count("id", filter=Q(endpoint__icontains="by_chat_id"))
                     )["telegram_count"] or 0
                 )
