@@ -16,7 +16,7 @@ export const AllCollections = () => {
 
     const collections = data?.results || []
 
-    const {getCollectionName} = useAppTranslator()
+    const { getCategoryName, getCollectionName } = useAppTranslator()
 
     return (
         <AppSlider 
@@ -33,7 +33,7 @@ export const AllCollections = () => {
                             key={id}
                             photoSrc={photo}
                             previewSrc={photo_thumbnail_url}
-                            subTitle={category?.name}
+                            subTitle={category ? getCategoryName(category) : ''}
                             title={getCollectionName(collection)}
                             onClick={() => navigate(`${ROUTE.COLLECTION}${id}`)}
                         />

@@ -21,7 +21,7 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 [bundle exec] fastlane android build
 ```
 
-Build Android APK
+Build Android App Bundle
 
 ### android deploy
 
@@ -29,7 +29,7 @@ Build Android APK
 [bundle exec] fastlane android deploy
 ```
 
-Deploy APK to Google Play Store
+Deploy APK/AAB to Google Play Store
 
 ----
 

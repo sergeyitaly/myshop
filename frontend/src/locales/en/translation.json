@@ -39,6 +39,8 @@
 	"light": "Light",
 	"not_found_message": "Oops, this page was not found",
 	"return_to_home": "Return to the home page",
+	"no_connection_message": "Oops, no internet connection detected",
+	"no_connection_retry": "Retry",
 	"basket_title": "Basket",
 	"total_price": "Total Price",
 	"currency": "UAH",
@@ -197,7 +199,7 @@
 	"thank_you_text_part3": "We are always happy to help!",
 	"pay_attantion": "Pay attention!",
 	"training_project": "This site is a training project.",
-	"left_rewiew": "Please write your review",
+	"left_rewiew": "Leave your feedback",
 	"here": "here",
 	"rate_us": "Rate us",
 	"field_required": "Field required!",
@@ -217,5 +219,6 @@
 	"close_and_return": "Close and return back to the main display",
 	"already_in_the_basket": "Product was added to the basket",
 	"left_data": "Left your data for feedback",
-	"check_feedback_list":"Check if you have filled in all the cards"
+	"check_feedback_list":"Check if you have filled in all the cards",
+	"change_rating": "Please select a rating"
 }

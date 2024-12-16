@@ -1,30 +1,90 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-}
+    id 'com.github.johnrengelman.processes' version '0.5.0'
+    id 'com.google.gms.google-services'
+    }
 
 android {
-    namespace 'com.example.myshop'
-    compileSdk 34
+    namespace 'com.koloryt'
+    compileSdk 35
 
     defaultConfig {
-        applicationId "com.example.myshop"
+        applicationId "com.koloryt"
         minSdk 21
-        targetSdk 34
-        versionCode 1
+        targetSdk 35
+        versionCode Integer.parseInt(new java.text.SimpleDateFormat("ddMMyyHHmm").format(new Date()))
         versionName "1.0"
+
+    }
+    
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
+
+signingConfigs {
+    release {
+        storeFile file("../../koloryt-release-key.keystore")
+        storePassword "000000"
+        keyAlias "koloryt-key-alias"
+        keyPassword "000000"
+    }
+}
+
+
+
+    sourceSets {
+        main {
+            java.srcDirs = ['src/main/java']
+        }
     }
 
     buildTypes {
         release {
+            signingConfig signingConfigs.release 
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = "17" 
+    }
+
+    testOptions {
+        unitTests.all {
+            useJUnitPlatform() // Enable JUnit 5
+        }
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += '-Xlint:deprecation'  // Add deprecation warnings
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.11.0'
+    // Core libraries
+    implementation libs.coreKtx
+    implementation libs.appCompat
+    implementation libs.material
+    implementation 'io.github.cdimascio:dotenv-java:3.0.2'
+    implementation "androidx.core:core-splashscreen:1.2.0-alpha02"
+    // JUnit 5 for unit testing
+    testImplementation libs.junitJupiterApi
+    testRuntimeOnly libs.junitJupiterEngine
+
+    // Optional: Mockito for mocking in tests
+    testImplementation libs.mockitoCore
+
+    // Optional: Android test dependencies
+    androidTestImplementation libs.androidxTestJunit
+    androidTestImplementation libs.espressoCore
+    implementation platform('com.google.firebase:firebase-bom:33.7.0')
+    implementation 'com.google.firebase:firebase-analytics'
+
 }

@@ -47,7 +47,10 @@ export const InfoModal = ({
                     <header>{t('pay_attantion')}</header>
                     <div className={styles.info}>
                         <p>{t('training_project')}</p>
-                        <p>{t('left_rewiew')} <button onClick={move}>{t('here')}</button></p> 
+                        <button 
+                            className={styles.link}
+                            onClick={move}
+                        >{t('left_rewiew')}</button> 
                     </div>
                     <Logo className={styles.logo}/>
                 </div>

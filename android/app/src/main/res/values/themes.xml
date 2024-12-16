@@ -1,0 +1,12 @@
+<resources>
+    <style name="SplashTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Splash screen configurations -->
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+        <item name="android:windowSplashScreenBackground">@color/splash_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/logo</item>
+        <item name="android:windowSplashScreenAnimationDuration">100</item>
+
+        <!-- Disable dark mode (if needed) -->
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+</resources>

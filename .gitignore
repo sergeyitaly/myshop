@@ -72,8 +72,13 @@ koloryt-project-658aa790b0ef.json
 
 # Gradle user home directory
 gradle/
-
+android/fastlane/report.xml
 # Build output
 /build/
 
 android/build/
+koloryt-release-key.keystore
+/android/app/src/google-services.json
+android/java_pid*.hprof
+**/__pycache__/
+**/migrations/
