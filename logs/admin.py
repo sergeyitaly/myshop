@@ -110,7 +110,6 @@ class APILogAdmin(admin.ModelAdmin):
         count = APILog.objects.filter(endpoint=endpoint).count()
         APILog.objects.filter(endpoint=endpoint).update(request_count=count)
 
-
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         if queryset is None:
@@ -125,15 +124,12 @@ class APILogAdmin(admin.ModelAdmin):
         latest_timestamps = queryset.values('endpoint') \
             .annotate(latest_timestamp=Max('timestamp')) \
             .order_by('-latest_timestamp')
-
-        # Subquery to get the log entry with the latest timestamp for each endpoint
         queryset = queryset.filter(
             endpoint__in=Subquery(latest_timestamps.values('endpoint'))
         ).filter(
             timestamp=Subquery(latest_timestamps.filter(endpoint=OuterRef('endpoint')).values('latest_timestamp')[:1])
         )
         return queryset
-
 
     def request_count(self, obj):
         request = self.request
@@ -150,7 +146,7 @@ class APILogAdmin(admin.ModelAdmin):
         return queryset.count()
 
     request_count.short_description = "Request Count"
-
+    
     def clickable_endpoint(self, obj):
         url = reverse('admin:logs_apilog_changelist') + f'?endpoint={obj.endpoint}'
         return format_html('<a href="{}">{}</a>', url, obj.endpoint)
@@ -187,12 +183,10 @@ class APILogAdmin(admin.ModelAdmin):
         elif time_period == 'year':
             trunc_field = TruncHour('timestamp')
             time_window = now - timedelta(days=365)
-
         logs = APILog.objects.filter(timestamp__gte=time_window).exclude(endpoint__in=self.exclude_patterns)
         if trunc_field:
             logs = logs.annotate(time_period_field=trunc_field)
         return logs
-
 
     def get_endpoint_data(self, logs, endpoint_filter, time_period):
         data = logs.filter(endpoint__icontains=endpoint_filter) \
@@ -202,11 +196,7 @@ class APILogAdmin(admin.ModelAdmin):
         return {entry['time_period_field']: entry['count'] for entry in data}
         
     def get_charts_data(self, request, time_period):
-        selected_endpoints = request.GET.get('endpoint', '').split(',')
-        endpoint_filter = EndpointFilter(request, {}, self.model, self)
-        logs = self.filter_logs_by_time_period(time_period)
-        logs = endpoint_filter.queryset(request, logs)
-        
+        logs = self.get_queryset(request)
         labels = []
         telegram_data = []
         vercel_data = []
@@ -228,31 +218,23 @@ class APILogAdmin(admin.ModelAdmin):
             trunc_func = TruncHour  # Truncate by month for 'year'
             start_time = timezone.localtime(timezone.now()) - relativedelta(years=1)
             labels_count = 12  # 12 months in a year
-        
-        logs = logs.order_by('timestamp')
         logs = (
             logs.annotate(period=trunc_func("timestamp"))
-            .values("period")
-            .annotate(
-                Telegram=Count("id", filter=Q(endpoint__icontains="by_chat_id")),
-                Vercel=Count("id", filter=~Q(endpoint__icontains="by_chat_id")),
-            )
-            .order_by("period")
         )
         
         if time_period == "day":
             for hour in range(labels_count):
-                current_hour = (timezone.localtime(timezone.now()) - relativedelta(hours=labels_count - hour - 1)).strftime('%H:%M')
+                current_hour = (timezone.localtime(timezone.now()) - relativedelta(hours=labels_count - hour - 2)).strftime('%H:%M')
                 labels.append(current_hour)
 
                 telegram_data.append(
-                    logs.filter(period__hour=(timezone.localtime(timezone.now()) - relativedelta(hours=labels_count - hour + 1)).hour).aggregate(
+                    logs.filter(period__hour=(timezone.localtime(timezone.now()) - relativedelta(hours=labels_count - hour - 1)).hour).aggregate(
                         telegram_count=Count("id", filter=Q(endpoint__icontains="by_chat_id"))
                     )["telegram_count"] or 0
                 )
 
                 vercel_data.append(
-                    logs.filter(period__hour=(timezone.localtime(timezone.now()) - relativedelta(hours=labels_count - hour + 1)).hour).aggregate(
+                    logs.filter(period__hour=(timezone.localtime(timezone.now()) - relativedelta(hours=labels_count - hour)).hour).aggregate(
                         vercel_count=Count("id", filter=~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
@@ -268,7 +250,7 @@ class APILogAdmin(admin.ModelAdmin):
                 )
 
                 vercel_data.append(
-                    logs.filter(period__date=(timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day - 1)).date()).aggregate(
+                    logs.filter(period__date=(timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day)).date()).aggregate(
                         vercel_count=Count("id", filter=~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
@@ -284,7 +266,7 @@ class APILogAdmin(admin.ModelAdmin):
                     )["telegram_count"] or 0
                 )
                 vercel_data.append(
-                    logs.filter(period__day=(timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day - 1)).day).aggregate(
+                    logs.filter(period__day=(timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day)).day).aggregate(
                         vercel_count=Count("id", filter=~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
