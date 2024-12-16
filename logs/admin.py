@@ -122,14 +122,11 @@ class APILogAdmin(admin.ModelAdmin):
         latest_timestamps = queryset.values('endpoint') \
             .annotate(latest_timestamp=Max('timestamp')) \
             .order_by('-latest_timestamp')
-
-        # Subquery to filter the queryset to only include the latest log for each endpoint
         queryset = queryset.filter(
             endpoint__in=Subquery(latest_timestamps.values('endpoint'))
         ).filter(
             timestamp=Subquery(latest_timestamps.filter(endpoint=OuterRef('endpoint')).values('latest_timestamp')[:1])
         )
-
         return queryset
 
     def get_chart_queryset(self, request):
@@ -139,6 +136,8 @@ class APILogAdmin(admin.ModelAdmin):
         time_period = request.GET.get('time_period', None)
         if time_period:
             queryset = TimePeriodFilter(request, {}, self.model, self).queryset(request, queryset)
+        if self.exclude_patterns:
+            queryset = queryset.exclude(endpoint__in=self.exclude_patterns)
         return queryset
 
     def request_count(self, obj):
