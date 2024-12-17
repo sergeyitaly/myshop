@@ -1,77 +1,72 @@
-@import '../../variables';
+@import "../../variables";
 
 .container {
-    z-index: 20;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    backdrop-filter: blur(10px);
-    background: #00000066;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  z-index: 20;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  backdrop-filter: blur(10px);
+  background: #00000066;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .modal {
-    position: relative;
-    background: $color-background;
-    min-height: clamp(13.813rem, 36.383vw + 2.443rem, 35.188rem);
-    width: clamp(23.438rem, 78.936vw - 1.23rem, 69.813rem);
-    padding-top: clamp(2.375rem, 6.596vw + 0.314rem, 6.25rem);
-    padding-left: clamp(1.875rem, 28.723vw - 7.101rem, 18.75rem);
-    padding-right: clamp(1.875rem, 28.723vw - 7.101rem, 18.75rem);
-    padding-bottom: clamp(1.563rem, 9.043vw - 1.263rem, 6.875rem);
+  position: relative;
+  background: $color-background;
+  min-height: clamp(13.813rem, 36.383vw + 2.443rem, 35.188rem);
+  width: clamp(23.438rem, 78.936vw - 1.23rem, 69.813rem);
+  padding-top: clamp(2.375rem, 6.596vw + 0.314rem, 6.25rem);
+  padding-left: clamp(1.875rem, 28.723vw - 7.101rem, 18.75rem);
+  padding-right: clamp(1.875rem, 28.723vw - 7.101rem, 18.75rem);
+  padding-bottom: clamp(1.563rem, 9.043vw - 1.263rem, 6.875rem);
 }
 
 .button {
-    position: absolute;
-    right: 20px;
-    top: 20px;
+  position: absolute;
+  right: 20px;
+  top: 20px;
 }
 
 .content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    gap: clamp(1.75rem, 4.894vw + 0.221rem, 4.625rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: clamp(1.75rem, 4.894vw + 0.221rem, 4.625rem);
 
-    header {
-        font-size: clamp(1.25rem, 1.277vw + 0.851rem, 2rem);
-        // margin-bottom: clamp(3.125rem, 5.319vw + 1.463rem, 6.25rem) ;
-    }
-    
-   
-    
-  
+  header {
+    font-size: clamp(1.25rem, 1.277vw + 0.851rem, 2rem);
+    // margin-bottom: clamp(3.125rem, 5.319vw + 1.463rem, 6.25rem) ;
+  }
 }
 
 .logo {
-    max-width: clamp(8.125rem, 7.447vw + 5.798rem, 12.5rem);
+  max-width: clamp(8.125rem, 7.447vw + 5.798rem, 12.5rem);
 }
 
 .info {
-    text-align: center;
-    p {
-        flex-grow: 1;
-        font-size: clamp(1rem, 0.851vw + 0.734rem, 1.5rem);
-        &:first-child {
-            margin-bottom: clamp(1.563rem, 2.872vw + 0.665rem, 3.25rem);
-        }
+  text-align: center;
+  p {
+    flex-grow: 1;
+    font-size: clamp(1rem, 0.851vw + 0.734rem, 1.5rem);
+    &:first-child {
+      margin-bottom: clamp(1.563rem, 2.872vw + 0.665rem, 3.25rem);
     }
+  }
 
-    .link{
+  .link {
     text-align: center;
-    font-size: clamp(1rem, 0.851vw + 0.734rem, 1.5rem);;
+    font-size: clamp(1rem, 0.851vw + 0.734rem, 1.5rem);
     color: var(--blue);
     transition: 0.3s;
     border-bottom: 1px solid transparent;
-        &:hover {
-            border-bottom: 1px solid $color-blue;
-        }
+    &:hover {
+      border-bottom: 1px solid $color-blue;
     }
+  }
 }
-

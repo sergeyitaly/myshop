@@ -20,24 +20,45 @@ pipeline {
                     echo "Checking out the repository..."
                     git branch: 'main', credentialsId: 'github-credentials-id', url: 'https://github.com/sergeyitaly/myshop.git'
                     sh "ls -lat"
+<<<<<<< HEAD
+=======
                 }
             }
         }
 
-        stage('Setup') {
+        stage('Install Dependencies') {
             steps {
                 script {
+                    // Navigate to the Android project directory and install dependencies
+                    dir("${ANDROID_WORKDIR}") {
+                        sh './gradlew dependencies'
+                    }
+>>>>>>> f87e3f73d56e94df3bf9cce8fc9f81fbf1736503
+                }
+            }
+        }
+
+        stage('Build APK') {
+            steps {
+                script {
+<<<<<<< HEAD
                     // Navigate to the Android project directory
                     dir("${ANDROID_WORKDIR}") {
                         sh 'chmod +x ./gradlew'
+=======
+                    // Navigate to the Android project directory and build the APK
+                    dir("${ANDROID_WORKDIR}") {
+                        sh './gradlew assembleRelease'
+>>>>>>> f87e3f73d56e94df3bf9cce8fc9f81fbf1736503
                     }
                 }
             }
         }
 
-        stage('Build') {
+        stage('Run Tests') {
             steps {
                 script {
+<<<<<<< HEAD
                     // Navigate to the Android project directory and build the APK
                     dir("${ANDROID_WORKDIR}") {
                         sh './gradlew build'
@@ -49,6 +70,8 @@ pipeline {
         stage('Run tests') {
             steps {
                 script {
+=======
+>>>>>>> f87e3f73d56e94df3bf9cce8fc9f81fbf1736503
                     // Navigate to the Android project directory and run tests
                     dir("${ANDROID_WORKDIR}") {
                         sh './gradlew test'
@@ -62,8 +85,16 @@ pipeline {
                 script {
                     withCredentials([file(credentialsId: 'play-store-json-key', variable: 'GOOGLE_PLAY_CREDENTIALS_JSON')]) {
                         sh '''
+<<<<<<< HEAD
                         gcloud auth activate-service-account --key-file=$GOOGLE_PLAY_CREDENTIALS_JSON
                         gcloud firebase appdistribution releases upload ./app-release.apk --app <firebase-app-id> --groups <distribution-group>
+=======
+                        # Authenticate with Google Play using the service account JSON key
+                        gcloud auth activate-service-account --key-file=$GOOGLE_PLAY_CREDENTIALS_JSON
+                        
+                        # Deploy the release APK to Google Play
+                        gcloud play android publish-apk --apk=./app/build/outputs/apk/release/app-release.apk --track=production
+>>>>>>> f87e3f73d56e94df3bf9cce8fc9f81fbf1736503
                         '''
                     }
                 }

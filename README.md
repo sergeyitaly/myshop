@@ -54,3 +54,14 @@ Prerequsite: .env file is required.
   --cleanup
 
 docker run -it --entrypoint /bin/bash sergeyitaly/koloryt:serhii_test
+
+
+6. Android
+      rm -rf ~/.gradle/caches
+      rm -rf ~/.gradle/daemon
+      rm -rf ~/.gradle/native
+      rm -rf ~/.gradle/wrapper
+      gradle wrapper
+      ./gradlew updateLintBaseline
+      ./gradlew clean build
+      ./gradlew bundleRelease

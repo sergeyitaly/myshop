@@ -161,6 +161,7 @@ export const Basket = (): JSX.Element => {
 							<MainButton
 								title={t("continue_shopping")}
 								onClick={closeBasket}
+								className={clsx(styles.noBorder)}
 							/>
 						</div>
 					</motion.div>

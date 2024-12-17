@@ -9,6 +9,24 @@ from .models import *
 from .notifications import update_order_status_with_notification
 from django.contrib.admin import SimpleListFilter
 import json
+from .utils import send_mass_message_with_logging 
+
+@admin.register(TelegramMessage)
+class TelegramMessageAdmin(admin.ModelAdmin):
+    list_display = ('content', 'created_at', 'get_sent_users')
+    actions = ['send_mass_message_with_logging_action']
+
+    # Display the users that the message was sent to
+    def get_sent_users(self, obj):
+        return ", ".join([user.phone for user in obj.sent_to.all()]) or "No users"
+    get_sent_users.short_description = "Sent to"
+
+    # Define the custom action to send mass messages with logging
+    def send_mass_message_with_logging_action(self, request, queryset):
+        for message in queryset:
+            send_mass_message_with_logging(message)  # Call the function for each selected message
+        self.message_user(request, "Mass message sent successfully!")
+    send_mass_message_with_logging_action.short_description = "Send mass message to selected Telegram messages"
 
 class OrderSummaryAdmin(admin.ModelAdmin):
     list_display = ('chat_id',)
@@ -198,6 +216,9 @@ class OrderAdmin(admin.ModelAdmin):
                     logger.warning(f"Telegram user or chat_id is missing for order {obj.id}")
 
         super().save_model(request, obj, form, change)
+
+
+
 
 # Register the Order model
 admin.site.register(Order, OrderAdmin)
