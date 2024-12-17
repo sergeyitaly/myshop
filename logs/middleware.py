@@ -8,9 +8,9 @@ logger = logging.getLogger(__name__)
 
 class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        excluded_paths = ['/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/logs/','/admin/login/',
-        '/api/health_check', '/api/token/refresh/', '/api/telegram_users/', '/api/logs/chart-data/',
-        '/auth/token/login/', '/api/token/', '/admin/api/logs/chart-data/', '/', '/admin/','/admin/*']
+        excluded_paths = [        '/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/logs/','/admin/login/',
+        '/api/health_check', '/api/token/refresh/', '/api/telegram_users','/api/telegram_users/', '/api/telegram_user/',
+        '/api/logs/chart-data/', '/auth/token/login/', '/api/token/', '/admin/api/logs/chart-data/', '/', '/admin/']
         if any(request.path.startswith(path) for path in excluded_paths):
             return None
         endpoint = unquote(request.path)

@@ -82,8 +82,8 @@ class APILogAdmin(admin.ModelAdmin):
     change_list_template = 'admin/logs/apilog/change_list.html'
     exclude_patterns = [
         '/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/logs/','/admin/login/',
-        '/api/health_check', '/api/token/refresh/', '/api/telegram_users/', '/api/logs/chart-data/',
-        '/auth/token/login/', '/api/token/', '/admin/api/logs/chart-data/', '/', '/admin/','/admin/*', 
+        '/api/health_check', '/api/token/refresh/', '/api/telegram_users','/api/telegram_users/', '/api/telegram_user/',
+        '/api/logs/chart-data/', '/auth/token/login/', '/api/token/', '/admin/api/logs/chart-data/', '/', '/admin/'
     ]
 
     def delete_last_log(self, request, queryset):
@@ -117,8 +117,11 @@ class APILogAdmin(admin.ModelAdmin):
         time_period = request.GET.get('time_period', None)
         if time_period:
             queryset = TimePeriodFilter(request, {}, self.model, self).queryset(request, queryset)
+        
         if self.exclude_patterns:
-            queryset = queryset.exclude(endpoint__in=self.exclude_patterns)
+            exclude_q = ~Q(endpoint__in=self.exclude_patterns)
+            queryset = queryset.filter(exclude_q)
+
         latest_timestamps = queryset.values('endpoint') \
             .annotate(latest_timestamp=Max('timestamp')) \
             .order_by('-latest_timestamp')
@@ -128,16 +131,16 @@ class APILogAdmin(admin.ModelAdmin):
             timestamp=Subquery(latest_timestamps.filter(endpoint=OuterRef('endpoint')).values('latest_timestamp')[:1])
         )
         return queryset
-
+    
     def get_chart_queryset(self, request):
         queryset = super().get_queryset(request)
-        endpoint_filter = EndpointFilter(request, {}, self.model, self)
-        queryset = endpoint_filter.queryset(request, queryset)
-        time_period = request.GET.get('time_period', None)
-        if time_period:
-            queryset = TimePeriodFilter(request, {}, self.model, self).queryset(request, queryset)
+        #print("Queryset before exclusion:", queryset.count())
         if self.exclude_patterns:
-            queryset = queryset.exclude(endpoint__in=self.exclude_patterns)
+            exclude_q = ~Q(endpoint__in=self.exclude_patterns)
+            queryset = queryset.filter(exclude_q)
+        #for record in queryset:
+        #    print(f"Remaining Endpoint: {record.endpoint}")
+
         return queryset
 
     def request_count(self, obj):
@@ -254,7 +257,7 @@ class APILogAdmin(admin.ModelAdmin):
                 )
 
                 vercel_data.append(
-                    logs.filter(period__date=(timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day)).date()).aggregate(
+                    logs.filter(period__date=(timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day - 1)).date()).aggregate(
                         vercel_count=Count("id", filter=~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
@@ -270,7 +273,7 @@ class APILogAdmin(admin.ModelAdmin):
                     )["telegram_count"] or 0
                 )
                 vercel_data.append(
-                    logs.filter(period__day=(timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day)).day).aggregate(
+                    logs.filter(period__day=(timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day -1)).day).aggregate(
                         vercel_count=Count("id", filter=~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
