@@ -6,11 +6,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        excluded_paths = [        '/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/logs/','/admin/login/',
-        '/api/health_check', '/api/token/refresh/', '/api/telegram_users','/api/telegram_users/', '/api/telegram_user/',
-        '/api/logs/chart-data/', '/auth/token/login/', '/api/token/', '/admin/api/logs/chart-data/', '/', '/admin/']
+        excluded_paths = ['/admin/']
         if any(request.path.startswith(path) for path in excluded_paths):
             return None
         endpoint = unquote(request.path)
@@ -22,5 +21,13 @@ class APILogMiddleware(MiddlewareMixin):
             timestamp=timezone.localtime(timezone.now())
         )
 
+        logger.info(
+            f"Logged request: Endpoint={endpoint}, "
+            f"HasChatID={has_chat_id}, LogID={log_entry.id}"
+        )
+
     def process_response(self, request, response):
+        logger.debug(
+            f"Response for {request.path} returned with status code {response.status_code}"
+        )
         return response

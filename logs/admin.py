@@ -15,7 +15,7 @@ from django.db.models import Count, Q
 from django.utils.timezone import now
 from dateutil.relativedelta import relativedelta
 from django.utils.html import format_html
-from django.db.models import Min, Max, F, OuterRef, Subquery
+from django.db.models import Min, Max, F, OuterRef, Subquery, Sum
 
 def clear_logs(modeladmin, request, queryset):
     count, _ = queryset.delete()
@@ -74,7 +74,7 @@ class EndpointFilter(admin.SimpleListFilter):
         return queryset.filter(filters)
 
 class APILogAdmin(admin.ModelAdmin):
-    list_display = ('clickable_endpoint', 'request_count', 'timestamp')
+    list_display = ('clickable_endpoint', 'request_sum', 'timestamp')
     list_filter = (TimePeriodFilter, EndpointFilter)
     actions = [clear_logs, 'delete_last_log', 'delete_all_logs']
     ordering = ('-timestamp',)
@@ -86,6 +86,57 @@ class APILogAdmin(admin.ModelAdmin):
         '/api/logs/chart-data/', '/auth/token/login/', '/api/token/', '/admin/api/logs/chart-data/', '/', '/admin/'
     ]
 
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        
+        # Apply the filters
+        endpoint_filter = EndpointFilter(request, {}, self.model, self)
+        queryset = endpoint_filter.queryset(request, queryset)
+        
+        time_period_filter = TimePeriodFilter(request, {}, self.model, self)
+        queryset = time_period_filter.queryset(request, queryset)
+        
+        # Exclude specified patterns
+        if self.exclude_patterns:
+            exclude_q = ~Q(endpoint__in=self.exclude_patterns)
+            queryset = queryset.filter(exclude_q)
+
+        # Get the latest timestamp for each endpoint
+        latest_timestamps = queryset.values('endpoint') \
+            .annotate(latest_timestamp=Max('timestamp')) \
+            .order_by('-latest_timestamp')
+        
+        # Now annotate the total requests and use Subquery to filter by latest timestamp
+        queryset = queryset.annotate(total_requests=Count('id'))  # Count total requests per endpoint
+        
+        # Filter by the latest timestamp for each endpoint
+        queryset = queryset.filter(
+            endpoint__in=Subquery(latest_timestamps.values('endpoint'))
+        ).filter(
+            timestamp=Subquery(latest_timestamps.filter(endpoint=OuterRef('endpoint')).values('latest_timestamp')[:1])
+        )
+        
+        return queryset
+
+    def request_sum(self, obj): 
+        return obj.total_requests
+    
+    def get_chart_queryset(self, request):
+        queryset = super().get_queryset(request)
+        time_period = request.GET.get('time_period', None)
+        if time_period:
+            queryset = TimePeriodFilter(request, {}, self.model, self).queryset(request, queryset)
+        if self.exclude_patterns:
+            exclude_q = ~Q(endpoint__in=self.exclude_patterns)
+            queryset = queryset.filter(exclude_q)
+        queryset = queryset.annotate(
+            total_requests=Sum('request_count'),
+            latest_timestamp=Max('timestamp')
+        ).order_by('-latest_timestamp')
+        endpoint_filter = EndpointFilter(request, {}, self.model, self)
+        filtered_queryset = endpoint_filter.queryset(request, queryset)
+        return filtered_queryset
+    
     def delete_last_log(self, request, queryset):
         endpoints = queryset.values_list('endpoint', flat=True).distinct()
         rows_deleted = 0
@@ -110,50 +161,6 @@ class APILogAdmin(admin.ModelAdmin):
         count = APILog.objects.filter(endpoint=endpoint).count()
         APILog.objects.filter(endpoint=endpoint).update(request_count=count)
 
-    def get_queryset(self, request):
-        queryset = super().get_queryset(request)
-        endpoint_filter = EndpointFilter(request, {}, self.model, self)
-        queryset = endpoint_filter.queryset(request, queryset)
-        time_period = request.GET.get('time_period', None)
-        if time_period:
-            queryset = TimePeriodFilter(request, {}, self.model, self).queryset(request, queryset)
-        
-        if self.exclude_patterns:
-            exclude_q = ~Q(endpoint__in=self.exclude_patterns)
-            queryset = queryset.filter(exclude_q)
-
-        latest_timestamps = queryset.values('endpoint') \
-            .annotate(latest_timestamp=Max('timestamp')) \
-            .order_by('-latest_timestamp')
-        queryset = queryset.filter(
-            endpoint__in=Subquery(latest_timestamps.values('endpoint'))
-        ).filter(
-            timestamp=Subquery(latest_timestamps.filter(endpoint=OuterRef('endpoint')).values('latest_timestamp')[:1])
-        )
-        return queryset
-    
-    def get_chart_queryset(self, request):
-        queryset = super().get_queryset(request)
-        #print("Queryset before exclusion:", queryset.count())
-        if self.exclude_patterns:
-            exclude_q = ~Q(endpoint__in=self.exclude_patterns)
-            queryset = queryset.filter(exclude_q)
-        #for record in queryset:
-        #    print(f"Remaining Endpoint: {record.endpoint}")
-
-        return queryset
-
-    def request_count(self, obj):
-        request = self.request
-        queryset = self.get_queryset(request)                
-        return queryset.count()
-    
-    def chart_request_count(self, obj):
-        request = self.request
-        queryset = self.get_chart_queryset(request)                
-        return queryset.count()
-    request_count.short_description = "Request Count"
-    
     def clickable_endpoint(self, obj):
         url = reverse('admin:logs_apilog_changelist') + f'?endpoint={obj.endpoint}'
         return format_html('<a href="{}">{}</a>', url, obj.endpoint)
@@ -201,100 +208,99 @@ class APILogAdmin(admin.ModelAdmin):
                    .values('time_period_field', 'count')
 
         return {entry['time_period_field']: entry['count'] for entry in data}
-        
+    
     def get_charts_data(self, request, time_period):
         logs = self.get_chart_queryset(request)
-        labels = []
-        telegram_data = []
-        vercel_data = []
-        
-        # Define trunc_func before using it
+        labels, telegram_data, vercel_data = [], [], []
+        now = timezone.localtime(timezone.now())
+
         if time_period == "day":
-            trunc_func = TruncHour  # Truncate by hour for 'day'
-            start_time = timezone.localtime(timezone.now()) - relativedelta(hours=24)
+            trunc_func = TruncDay  # Truncate by hour for 'day'
+            start_time = now - relativedelta(hours=24)
             labels_count = 24  # 24 hours in a day
         elif time_period == "week":
-            trunc_func = TruncHour  # Truncate by day for 'week'
-            start_time = timezone.localtime(timezone.now()) - relativedelta(days=7)
+            trunc_func = TruncHour  # Truncate by date for 'week'
+            start_time = now - relativedelta(weeks=1)
             labels_count = 7  # 7 days in a week
         elif time_period == "month":
-            trunc_func = TruncHour  # Truncate by day for 'month'
-            start_time = timezone.localtime(timezone.now()) - relativedelta(days=30)
+            trunc_func = TruncHour  # Truncate by date for 'month'
+            start_time = now - relativedelta(days=30)  # Approximate 30 days in a month
             labels_count = 30  # Approximate 30 days in a month
         elif time_period == "year":
             trunc_func = TruncHour  # Truncate by month for 'year'
-            start_time = timezone.localtime(timezone.now()) - relativedelta(years=1)
+            start_time = now - relativedelta(years=1)
             labels_count = 12  # 12 months in a year
-        logs = (
-            logs.annotate(period=trunc_func("timestamp"))
-        )
+        logs = logs.annotate(period=trunc_func("timestamp"))
         
         if time_period == "day":
             for hour in range(labels_count):
-                current_hour = (timezone.localtime(timezone.now()) - relativedelta(hours=labels_count - hour - 2)).strftime('%H:%M')
+                current_hour = (now - timedelta(hours=labels_count - hour - 1)).strftime('%H:%M')
                 labels.append(current_hour)
 
+                # Filter logs by hour for Telegram data
                 telegram_data.append(
-                    logs.filter(period__hour=(timezone.localtime(timezone.now()) - relativedelta(hours=labels_count - hour)).hour).aggregate(
+                    logs.filter(
+                        timestamp__gte=start_time,
+                        timestamp__hour=(now - timedelta(hours=labels_count - hour - 1)).hour
+                    ).aggregate(
                         telegram_count=Count("id", filter=Q(endpoint__icontains="by_chat_id"))
                     )["telegram_count"] or 0
                 )
-
                 vercel_data.append(
-                    logs.filter(period__hour=(timezone.localtime(timezone.now()) - relativedelta(hours=labels_count - hour)).hour).aggregate(
+                    logs.filter(
+                        timestamp__gte=start_time,
+                        timestamp__hour=(now - timedelta(hours=labels_count - hour - 1)).hour
+                    ).aggregate(
                         vercel_count=Count("id", filter=~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
 
         elif time_period == "week":
             for day in range(labels_count):
-                current_day = (timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day - 1)).strftime('%Y-%m-%d')
+                current_day = (now - relativedelta(days=labels_count - day - 1)).strftime('%Y-%m-%d')
                 labels.append(current_day)
+
+                # Filter logs by day for Telegram data
                 telegram_data.append(
-                    logs.filter(period__date=(timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day - 1)).date()).aggregate(
+                    logs.filter(period__date=(now - relativedelta(days=labels_count - day - 1)).date()).aggregate(
                         telegram_count=Count("id", filter=Q(endpoint__icontains="by_chat_id"))
                     )["telegram_count"] or 0
                 )
-
                 vercel_data.append(
-                    logs.filter(period__date=(timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day - 1)).date()).aggregate(
+                    logs.filter(period__date=(now - relativedelta(days=labels_count - day - 1)).date()).aggregate(
                         vercel_count=Count("id", filter=~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
-
 
         elif time_period == "month":
             for day in range(labels_count):
-                current_day = (timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day - 1)).strftime('%Y-%m-%d')
+                current_day = (now - relativedelta(days=labels_count - day - 1)).strftime('%Y-%m-%d')
                 labels.append(current_day)
                 telegram_data.append(
-                    logs.filter(period__day=(timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day - 1)).day).aggregate(
+                    logs.filter(period__day=(now - relativedelta(days=labels_count - day - 1)).day).aggregate(
                         telegram_count=Count("id", filter=Q(endpoint__icontains="by_chat_id"))
                     )["telegram_count"] or 0
                 )
                 vercel_data.append(
-                    logs.filter(period__day=(timezone.localtime(timezone.now()) - relativedelta(days=labels_count - day -1)).day).aggregate(
+                    logs.filter(period__day=(now - relativedelta(days=labels_count - day - 1)).day).aggregate(
                         vercel_count=Count("id", filter=~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
-
 
         elif time_period == "year":
             for month in range(labels_count):
-                current_month = (timezone.localtime(timezone.now()) - relativedelta(years=0, months=labels_count - month - 1)).strftime('%B')
+                current_month = (now - relativedelta(months=labels_count - month - 1)).strftime('%B')
                 labels.append(current_month)
-
                 telegram_data.append(
-                    logs.filter(period__month=(timezone.localtime(timezone.now()) - relativedelta(years=0, months=labels_count - month - 1)).month).aggregate(
+                    logs.filter(period__month=(now - relativedelta(months=labels_count - month - 1)).month).aggregate(
                         telegram_count=Count("id", filter=Q(endpoint__icontains="by_chat_id"))
                     )["telegram_count"] or 0
                 )
-
                 vercel_data.append(
-                    logs.filter(period__month=(timezone.localtime(timezone.now()) - relativedelta(years=0, months=labels_count - month - 1)).month).aggregate(
+                    logs.filter(period__month=(now - relativedelta(months=labels_count - month - 1)).month).aggregate(
                         vercel_count=Count("id", filter=~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
-                )        
+                )
 
         chart_data = {
             "labels": labels,
@@ -304,6 +310,7 @@ class APILogAdmin(admin.ModelAdmin):
             },
         }
         return chart_data
+
 
     def changelist_view(self, request, extra_context=None):
         time_period = request.GET.get("time_period", "day")
