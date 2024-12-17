@@ -88,36 +88,26 @@ class APILogAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
-        
-        # Apply the filters
         endpoint_filter = EndpointFilter(request, {}, self.model, self)
         queryset = endpoint_filter.queryset(request, queryset)
-        
         time_period_filter = TimePeriodFilter(request, {}, self.model, self)
         queryset = time_period_filter.queryset(request, queryset)
-        
-        # Exclude specified patterns
         if self.exclude_patterns:
             exclude_q = ~Q(endpoint__in=self.exclude_patterns)
             queryset = queryset.filter(exclude_q)
-
-        # Get the latest timestamp for each endpoint
-        latest_timestamps = queryset.values('endpoint') \
-            .annotate(latest_timestamp=Max('timestamp')) \
-            .order_by('-latest_timestamp')
-        
-        # Now annotate the total requests and use Subquery to filter by latest timestamp
-        queryset = queryset.annotate(total_requests=Count('id'))  # Count total requests per endpoint
-        
-        # Filter by the latest timestamp for each endpoint
-        queryset = queryset.filter(
-            endpoint__in=Subquery(latest_timestamps.values('endpoint'))
-        ).filter(
-            timestamp=Subquery(latest_timestamps.filter(endpoint=OuterRef('endpoint')).values('latest_timestamp')[:1])
-        )
+        latest_timestamps = APILog.objects.filter(
+            endpoint=OuterRef('endpoint')
+        ).order_by('-timestamp')
+        queryset = queryset.annotate(
+            total_requests=Sum('request_count'),
+            latest_timestamp=Subquery(latest_timestamps.values('timestamp')[:1]),
+            max_timestamp=Max('timestamp')
+        ).order_by('endpoint') 
         
         return queryset
 
+    def latest_timestamp(self, obj):
+        return obj.latest_timestamp
     def request_sum(self, obj): 
         return obj.total_requests
     
@@ -210,7 +200,7 @@ class APILogAdmin(admin.ModelAdmin):
         return {entry['time_period_field']: entry['count'] for entry in data}
     
     def get_charts_data(self, request, time_period):
-        logs = self.get_chart_queryset(request)
+        logs = self.get_queryset(request)
         labels, telegram_data, vercel_data = [], [], []
         now = timezone.localtime(timezone.now())
 
