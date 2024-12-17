@@ -56,7 +56,7 @@ export const useFilters = (initialCollection?: Collection ) => {
 
         list = [...categoryTags, ...collectionTags];
 
-        if (price.min !== fullRangeOfPrice[0] || price.max !== fullRangeOfPrice[1]) {
+        if (price.min > fullRangeOfPrice[0] && price.max < fullRangeOfPrice[1] &&( price.min !== fullRangeOfPrice[0] || price.max !== fullRangeOfPrice[1]) ) {
             list.push({
                 type: 'price',
                 value: `${formatNumber(price.min)} - ${formatNumber(price.max)} ${formatCurrency('UAH')}`
