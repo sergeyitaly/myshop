@@ -103,6 +103,7 @@ class APILogAdmin(admin.ModelAdmin):
             latest_timestamp=Subquery(latest_timestamps.values('timestamp')[:1]),
             max_timestamp=Max('timestamp')
         ).order_by('endpoint') 
+
         
         return queryset
 
