@@ -121,7 +121,7 @@ class IgnoreEndpointAdmin(admin.ModelAdmin):
 class APILogAdmin(admin.ModelAdmin):
     list_display = ('clickable_endpoint', 'request_sum', 'timestamp')
     list_filter = (TimePeriodFilter, EndpointFilter)
-    actions = [clear_logs, 'delete_last_log', 'delete_all_logs']
+    actions = [clear_logs, 'add_to_ignore_list','delete_last_log', 'delete_all_logs']
     ordering = ('-timestamp',)
     change_list_template = 'admin/logs/apilog/change_list.html'
 
@@ -150,7 +150,21 @@ class APILogAdmin(admin.ModelAdmin):
     def request_sum(self, obj): 
         return obj.total_requests
     
-    
+    def add_to_ignore_list(self, request, queryset):
+        # Get the distinct endpoints from the selected logs
+        endpoints = queryset.values_list('endpoint', flat=True).distinct()
+        added_endpoints = 0
+
+        # Loop through the endpoints and add each one to IgnoreEndpoint if it isn't already there
+        for endpoint in endpoints:
+            if not IgnoreEndpoint.objects.filter(name=endpoint).exists():
+                IgnoreEndpoint.objects.create(name=endpoint, is_active=True)
+                added_endpoints += 1
+
+        self.message_user(request, f'{added_endpoints} endpoints were successfully added to the Ignore list.')
+
+    add_to_ignore_list.short_description = "Add selected endpoints to Ignore list"
+
     def delete_last_log(self, request, queryset):
         endpoints = queryset.values_list('endpoint', flat=True).distinct()
         rows_deleted = 0
