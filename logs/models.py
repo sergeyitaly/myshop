@@ -5,17 +5,15 @@ from django.db.models import Count
 
 class APILog(models.Model):
     endpoint = models.CharField(max_length=255)
-    has_chat_id = models.BooleanField(default=False)
     request_count = models.IntegerField(default=0)
     timestamp = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ('endpoint', 'has_chat_id')
         ordering = ['-timestamp']
         app_label = 'logs'  
 
     def __str__(self):
-        return f"Endpoint: {self.endpoint}, Chat ID: {self.has_chat_id}, Requests: {self.request_count}"
+        return f"Endpoint: {self.endpoint}, Requests: {self.request_count}"
 
     @classmethod
     def update_request_count(cls, endpoint):

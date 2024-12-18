@@ -120,14 +120,13 @@ class IgnoreEndpointAdmin(admin.ModelAdmin):
 
 class APILogAdmin(admin.ModelAdmin):
     list_display = ('clickable_endpoint', 'request_sum', 'timestamp')
-    list_filter = ('has_chat_id',TimePeriodFilter, EndpointFilter)
+    list_filter = (TimePeriodFilter, EndpointFilter)
     actions = [clear_logs, 'delete_last_log', 'delete_all_logs']
     ordering = ('-timestamp',)
     change_list_template = 'admin/logs/apilog/change_list.html'
 
     def get_queryset(self, request):
         exclude_patterns = list(IgnoreEndpoint.objects.filter(is_active=True).values_list('name', flat=True))
-
         queryset = super().get_queryset(request)
         endpoint_filter = EndpointFilter(request, {}, self.model, self)
         queryset = endpoint_filter.queryset(request, queryset)
