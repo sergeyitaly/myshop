@@ -75,7 +75,7 @@ class EndpointFilter(admin.SimpleListFilter):
 class IgnoreEndpointAdmin(admin.ModelAdmin):
     list_display = ('name', 'is_active_display')  # Display name and a clickable "is_active" toggle
     search_fields = ('name',)
-    
+
     def is_active_display(self, obj):
         """Displays the is_active field as clickable toggle links."""
         if obj.is_active:
@@ -117,12 +117,13 @@ class IgnoreEndpointAdmin(admin.ModelAdmin):
             )
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/admin/'))
 
+
 class APILogAdmin(admin.ModelAdmin):
     list_display = ('clickable_endpoint', 'request_sum', 'timestamp')
-    list_filter = (TimePeriodFilter, EndpointFilter)
+    list_filter = ('has_chat_id',TimePeriodFilter, EndpointFilter)
     actions = [clear_logs, 'delete_last_log', 'delete_all_logs']
     ordering = ('-timestamp',)
-    search_fields = ['endpoint']
+#    search_fields = ( 'has_chat_id')
     change_list_template = 'admin/logs/apilog/change_list.html'
 #    exclude_patterns = [
 #        '/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/logs/','/admin/login/',
@@ -131,7 +132,7 @@ class APILogAdmin(admin.ModelAdmin):
 #    ]
 
     def get_queryset(self, request):
-        exclude_patterns = list(IgnoreEndpoint.objects.values_list('endpoint', flat=True))
+        exclude_patterns = list(IgnoreEndpoint.objects.values_list('name', flat=True))
 
         queryset = super().get_queryset(request)
         endpoint_filter = EndpointFilter(request, {}, self.model, self)
@@ -161,21 +162,6 @@ class APILogAdmin(admin.ModelAdmin):
     def request_sum(self, obj): 
         return obj.total_requests
     
-    def get_chart_queryset(self, request):
-        queryset = super().get_queryset(request)
-        time_period = request.GET.get('time_period', None)
-        if time_period:
-            queryset = TimePeriodFilter(request, {}, self.model, self).queryset(request, queryset)
-        if self.exclude_patterns:
-            exclude_q = ~Q(endpoint__in=self.exclude_patterns)
-            queryset = queryset.filter(exclude_q)
-        queryset = queryset.annotate(
-            total_requests=Sum('request_count'),
-            latest_timestamp=Max('timestamp')
-        ).order_by('-latest_timestamp')
-        endpoint_filter = EndpointFilter(request, {}, self.model, self)
-        filtered_queryset = endpoint_filter.queryset(request, queryset)
-        return filtered_queryset
     
     def delete_last_log(self, request, queryset):
         endpoints = queryset.values_list('endpoint', flat=True).distinct()
