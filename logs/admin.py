@@ -139,7 +139,7 @@ class APILogAdmin(admin.ModelAdmin):
             endpoint=OuterRef('endpoint')
         ).order_by('-timestamp')
         queryset = queryset.annotate(
-            total_requests=Sum('request_count'),
+ #           total_requests=Sum('request_count'),
             latest_timestamp=Subquery(latest_timestamps.values('timestamp')[:1]),
             max_timestamp=Max('timestamp')
         ).order_by('endpoint')         
@@ -148,7 +148,8 @@ class APILogAdmin(admin.ModelAdmin):
     def latest_timestamp(self, obj):
         return obj.latest_timestamp
     def request_sum(self, obj): 
-        return obj.total_requests
+#        return obj.total_requests
+        return obj.request_count
     
     def add_to_ignore_list(self, request, queryset):
         # Get the distinct endpoints from the selected logs

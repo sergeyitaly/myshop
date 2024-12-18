@@ -27,7 +27,7 @@ class APILogMiddleware(MiddlewareMixin):
             )
         else:
             # If the log exists, update the request_count and timestamp
-            existing_log.request_count = 1  # the request count
+            existing_log.request_count += 1  # Increment the request count
             existing_log.timestamp = timezone.localtime(timezone.now())  # Update timestamp
             existing_log.save()  # Save the changes to the log entry
             logger.info(
