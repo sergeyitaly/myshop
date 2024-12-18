@@ -11,6 +11,8 @@ from django.core.files.images import get_image_dimensions
 from django.utils.html import format_html
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from logs.models import APILog
+from django.utils import timezone
 
 # Load environment variables
 load_dotenv()
@@ -74,6 +76,11 @@ class Intro(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+        if self.link:
+            log_entry = APILog.objects.get(endpoint=self.link)
+            log_entry.request_count = 1
+            log_entry.timestamp = timezone.localtime(timezone.now())
+            log_entry.save()
 
     def delete(self, *args, **kwargs):
         if self.photo:

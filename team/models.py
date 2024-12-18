@@ -11,7 +11,8 @@ from django.core.files.images import get_image_dimensions
 from django.utils.html import format_html
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
+from logs.models import APILog
+from django.utils import timezone
 # Load environment variables
 load_dotenv()
 
@@ -84,6 +85,25 @@ class TeamMember(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+        if self.linkedin or self.github or self.behance:
+            log_entry = APILog.objects.get(endpoint=self.link)
+            log_entry.request_count = 1
+            log_entry.timestamp = timezone.localtime(timezone.now())
+            log_entry.save()
+
+
+        super().save(*args, **kwargs)
+        if self.link:
+            # Use get_or_create to find or create a log entry for the link
+            log_entry, created = APILog.objects.get_or_create(
+                endpoint=self.link,
+                defaults={'request_count': 1, 'timestamp': timezone.localtime(timezone.now())}  # Only set defaults on creation
+            )
+            if not created:
+                # If the log entry already exists, increment the count
+                log_entry.request_count += 1
+                log_entry.timestamp = timezone.localtime(timezone.now())  # Update timestamp
+                log_entry.save()
 
     def delete(self, *args, **kwargs):
         if self.photo:
