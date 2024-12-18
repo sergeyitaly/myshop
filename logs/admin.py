@@ -123,16 +123,10 @@ class APILogAdmin(admin.ModelAdmin):
     list_filter = ('has_chat_id',TimePeriodFilter, EndpointFilter)
     actions = [clear_logs, 'delete_last_log', 'delete_all_logs']
     ordering = ('-timestamp',)
-#    search_fields = ( 'has_chat_id')
     change_list_template = 'admin/logs/apilog/change_list.html'
-#    exclude_patterns = [
-#        '/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/logs/','/admin/login/',
-#        '/api/health_check', '/api/token/refresh/', '/api/telegram_users','/api/telegram_users/', '/api/telegram_user/',
-#        '/api/logs/chart-data/', '/auth/token/login/', '/api/token/', '/admin/api/logs/chart-data/', '/', '/admin/'
-#    ]
 
     def get_queryset(self, request):
-        exclude_patterns = list(IgnoreEndpoint.objects.values_list('name', flat=True))
+        exclude_patterns = list(IgnoreEndpoint.objects.filter(is_active=True).values_list('name', flat=True))
 
         queryset = super().get_queryset(request)
         endpoint_filter = EndpointFilter(request, {}, self.model, self)
@@ -142,9 +136,6 @@ class APILogAdmin(admin.ModelAdmin):
         if exclude_patterns:
             exclude_q = ~Q(endpoint__in=exclude_patterns)
             queryset = queryset.filter(exclude_q)
-#        if self.exclude_patterns:
-#            exclude_q = ~Q(endpoint__in=self.exclude_patterns)
-#            queryset = queryset.filter(exclude_q)
         latest_timestamps = APILog.objects.filter(
             endpoint=OuterRef('endpoint')
         ).order_by('-timestamp')
@@ -152,9 +143,7 @@ class APILogAdmin(admin.ModelAdmin):
             total_requests=Sum('request_count'),
             latest_timestamp=Subquery(latest_timestamps.values('timestamp')[:1]),
             max_timestamp=Max('timestamp')
-        ).order_by('endpoint') 
-
-        
+        ).order_by('endpoint')         
         return queryset
 
     def latest_timestamp(self, obj):
