@@ -27,8 +27,7 @@ class APILogMiddleware(MiddlewareMixin):
         return response
 
     def is_external_request(self, request):
-        return request.is_ajax() or request.path.startswith('http')
-
+        return request.path.startswith('http') 
     def log_external_request(self, request):
         external_url = request.path
         logger.debug(f"Logging outgoing external request: {external_url}")
