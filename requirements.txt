@@ -44,12 +44,13 @@ django-svg-image-form-field==1.0.1
 django-templated-mail==1.1.1
 djangorestframework==3.15.2
 djangorestframework-simplejwt==5.3.1
-djoser==2.3.0
+djoser==2.2.2
 drf-spectacular==0.27.2
 drf-yasg==1.21.7
 exceptiongroup==1.2.2
 filelock==3.15.4
 flower==2.0.1
+git-filter-repo==2.47.0
 graphviz==0.20.3
 gunicorn==23.0.0
 h11==0.14.0

@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from django.db.models import Count
 
 class APILog(models.Model):
-    endpoint = models.CharField(max_length=255)
+    endpoint = models.URLField()
     request_count = models.IntegerField(default=0)
     timestamp = models.DateTimeField(auto_now=True)
 

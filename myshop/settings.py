@@ -398,27 +398,30 @@ BROKER_TRANSPORT_OPTIONS = {
     'max_connections': 50,  # Increase if needed
     'socket_keepalive': True,
 }
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
         'console': {
-            'level': 'DEBUG',  # Capture all log levels, including DEBUG
+            'level': 'DEBUG',  
             'class': 'logging.StreamHandler',
         },
     },
     'loggers': {
         'django.db.backends': {
             'handlers': ['console'],
-            'level': 'DEBUG',  # Capture all database-related logs
+            'level': 'DEBUG',  
             'propagate': False,
         },
         'django': {
             'handlers': ['console'],
-            'level': 'DEBUG',  # Capture all logs for Django core (useful for debugging)
+            'level': 'DEBUG',  
             'propagate': True,
+        },
+        'django.request': {  
+            'handlers': ['console'],
+            'level': 'DEBUG',  
+            'propagate': False,
         },
     },
 }
-
