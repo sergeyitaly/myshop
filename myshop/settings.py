@@ -126,7 +126,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'myshop.middleware.CacheControlMiddleware',
     'logs.middleware.APILogMiddleware',  
-    'team.middleware.TeamMemberLoggingMiddleware',
+
 ]
 # DIRS = [AWS_TEMPLATES]
 
