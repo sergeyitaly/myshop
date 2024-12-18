@@ -260,6 +260,7 @@ class APILogAdmin(admin.ModelAdmin):
         logs = self.get_chart_queryset(request)
         labels, telegram_data, vercel_data = [], [], []
         now = timezone.localtime(timezone.now())
+        endpoint_filter = request.GET.get('endpoint', '')
 
         if time_period == "day":
             trunc_func = TruncDay  # Truncate by hour for 'day'
@@ -278,7 +279,11 @@ class APILogAdmin(admin.ModelAdmin):
             start_time = now - relativedelta(years=1)
             labels_count = 12  # 12 months in a year
         logs = logs.annotate(period=trunc_func("timestamp"))
-        
+        if endpoint_filter:
+            logs = logs.filter(endpoint__icontains=endpoint_filter)  # Apply endpoint filter
+        else:
+            logs = logs
+
         if time_period == "day":
             for hour in range(labels_count):
                 current_hour = (now - timedelta(hours=labels_count - hour - 1)).strftime('%H:%M')
@@ -364,6 +369,8 @@ class APILogAdmin(admin.ModelAdmin):
         chart_data = self.get_charts_data(request, time_period)
         extra_context = extra_context or {}
         extra_context["chart_js"] = chart_data
+        extra_context["selected_endpoint"] = request.GET.get("endpoint", "")  # Add selected endpoint to context
+
         return super().changelist_view(request, extra_context=extra_context)
 
 admin.site.register(APILog, APILogAdmin)
