@@ -11,8 +11,7 @@ from django.core.files.images import get_image_dimensions
 from django.utils.html import format_html
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from logs.models import APILog
-from django.utils import timezone
+
 # Load environment variables
 load_dotenv()
 
@@ -75,12 +74,6 @@ class Technology(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        if self.link:
-            # Log link click in APILog
-            log_entry, created = APILog.objects.get_or_create(endpoint=self.link)
-            log_entry.request_count = 1  # Increment the count for each click
-            log_entry.timestamp = timezone.localtime(timezone.now())  # Update timestamp
-            log_entry.save()
 
     def delete(self, *args, **kwargs):
         if self.photo:
