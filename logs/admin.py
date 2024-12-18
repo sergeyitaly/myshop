@@ -123,9 +123,30 @@ class APILogAdmin(admin.ModelAdmin):
     list_filter = (TimePeriodFilter, EndpointFilter)
     actions = [clear_logs, 'add_to_ignore_list','delete_last_log', 'delete_all_logs']
     ordering = ('-timestamp',)
+    search_fields = ('endpoint',)
     change_list_template = 'admin/logs/apilog/change_list.html'
-
+    
     def get_queryset(self, request):
+        exclude_patterns = list(IgnoreEndpoint.objects.filter(is_active=True).values_list('name', flat=True))
+        queryset = super().get_queryset(request)
+        endpoint_filter = EndpointFilter(request, {}, self.model, self)
+        queryset = endpoint_filter.queryset(request, queryset)
+        time_period_filter = TimePeriodFilter(request, {}, self.model, self)
+        queryset = time_period_filter.queryset(request, queryset)
+        if exclude_patterns:
+            exclude_q = ~Q(endpoint__in=exclude_patterns)
+            queryset = queryset.filter(exclude_q)
+        latest_timestamps = APILog.objects.filter(
+            endpoint=OuterRef('endpoint')
+        ).order_by('-timestamp')
+        queryset = queryset.annotate(
+            total_requests=Sum('request_count'),
+            latest_timestamp=Subquery(latest_timestamps.values('timestamp')[:1]),
+            max_timestamp=Max('timestamp')
+        ).order_by('endpoint')
+        return queryset.filter(timestamp=F('latest_timestamp'))
+    
+    def get_chart_queryset(self, request):
         exclude_patterns = list(IgnoreEndpoint.objects.filter(is_active=True).values_list('name', flat=True))
         queryset = super().get_queryset(request)
         endpoint_filter = EndpointFilter(request, {}, self.model, self)
@@ -152,11 +173,8 @@ class APILogAdmin(admin.ModelAdmin):
 #        return obj.request_count
     
     def add_to_ignore_list(self, request, queryset):
-        # Get the distinct endpoints from the selected logs
         endpoints = queryset.values_list('endpoint', flat=True).distinct()
         added_endpoints = 0
-
-        # Loop through the endpoints and add each one to IgnoreEndpoint if it isn't already there
         for endpoint in endpoints:
             if not IgnoreEndpoint.objects.filter(name=endpoint).exists():
                 IgnoreEndpoint.objects.create(name=endpoint, is_active=True)
@@ -239,7 +257,7 @@ class APILogAdmin(admin.ModelAdmin):
         return {entry['time_period_field']: entry['count'] for entry in data}
     
     def get_charts_data(self, request, time_period):
-        logs = self.get_queryset(request)
+        logs = self.get_chart_queryset(request)
         labels, telegram_data, vercel_data = [], [], []
         now = timezone.localtime(timezone.now())
 
