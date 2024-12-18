@@ -30,3 +30,15 @@ def recalculate_request_count_on_create(sender, instance, created, **kwargs):
 @receiver(post_delete, sender=APILog)
 def recalculate_request_count_on_delete(sender, instance, **kwargs):
     APILog.update_request_count(instance.endpoint)
+
+class IgnoreEndpoint(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['name']
+        app_label = 'logs'
+
+    def __str__(self):
+        status = "Active" if self.is_active else "Inactive"
+        return f"IgnoreEndpoint: {self.name} ({status})"

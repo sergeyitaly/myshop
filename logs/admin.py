@@ -5,9 +5,8 @@ from django.urls import path, reverse
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.utils.html import format_html
-from .models import APILog
+from logs.models import APILog, IgnoreEndpoint
 from datetime import timedelta
-import json
 from django.db.models.functions import TruncHour, TruncDate, TruncMonth, TruncYear, TruncDay, TruncWeek
 from django.utils.translation import gettext as _
 from django.utils.dateparse import parse_datetime
@@ -73,6 +72,51 @@ class EndpointFilter(admin.SimpleListFilter):
         
         return queryset.filter(filters)
 
+class IgnoreEndpointAdmin(admin.ModelAdmin):
+    list_display = ('name', 'is_active_display')  # Display name and a clickable "is_active" toggle
+    search_fields = ('name',)
+    
+    def is_active_display(self, obj):
+        """Displays the is_active field as clickable toggle links."""
+        if obj.is_active:
+            return format_html(
+                '<a href="{}" style="color: green;">Active</a>',
+                f"{obj.id}/toggle_active/"
+            )
+        else:
+            return format_html(
+                '<a href="{}" style="color: red;">Inactive</a>',
+                f"{obj.id}/toggle_active/"
+            )
+
+    is_active_display.short_description = "Active Status"
+    is_active_display.admin_order_field = 'is_active'
+
+    def get_urls(self):
+        """Add custom admin URLs for toggling the is_active status."""
+        from django.urls import path
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                '<int:pk>/toggle_active/',
+                self.admin_site.admin_view(self.toggle_active),
+                name='toggle_active',
+            ),
+        ]
+        return custom_urls + urls
+
+    def toggle_active(self, request, pk):
+        """Toggle the is_active field for a specific IgnoreEndpoint instance."""
+        obj = self.get_object(request, pk)
+        if obj:
+            obj.is_active = not obj.is_active
+            obj.save()
+            self.message_user(
+                request,
+                f"Successfully updated {obj.name}'s status to {'Active' if obj.is_active else 'Inactive'}."
+            )
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/admin/'))
+
 class APILogAdmin(admin.ModelAdmin):
     list_display = ('clickable_endpoint', 'request_sum', 'timestamp')
     list_filter = (TimePeriodFilter, EndpointFilter)
@@ -80,21 +124,26 @@ class APILogAdmin(admin.ModelAdmin):
     ordering = ('-timestamp',)
     search_fields = ['endpoint']
     change_list_template = 'admin/logs/apilog/change_list.html'
-    exclude_patterns = [
-        '/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/logs/','/admin/login/',
-        '/api/health_check', '/api/token/refresh/', '/api/telegram_users','/api/telegram_users/', '/api/telegram_user/',
-        '/api/logs/chart-data/', '/auth/token/login/', '/api/token/', '/admin/api/logs/chart-data/', '/', '/admin/'
-    ]
+#    exclude_patterns = [
+#        '/admin/logs/apilog/', '/favicon.ico', '/admin/jsi18n/', '/admin/logs/','/admin/login/',
+#        '/api/health_check', '/api/token/refresh/', '/api/telegram_users','/api/telegram_users/', '/api/telegram_user/',
+#        '/api/logs/chart-data/', '/auth/token/login/', '/api/token/', '/admin/api/logs/chart-data/', '/', '/admin/'
+#    ]
 
     def get_queryset(self, request):
+        exclude_patterns = list(IgnoreEndpoint.objects.values_list('endpoint', flat=True))
+
         queryset = super().get_queryset(request)
         endpoint_filter = EndpointFilter(request, {}, self.model, self)
         queryset = endpoint_filter.queryset(request, queryset)
         time_period_filter = TimePeriodFilter(request, {}, self.model, self)
         queryset = time_period_filter.queryset(request, queryset)
-        if self.exclude_patterns:
-            exclude_q = ~Q(endpoint__in=self.exclude_patterns)
+        if exclude_patterns:
+            exclude_q = ~Q(endpoint__in=exclude_patterns)
             queryset = queryset.filter(exclude_q)
+#        if self.exclude_patterns:
+#            exclude_q = ~Q(endpoint__in=self.exclude_patterns)
+#            queryset = queryset.filter(exclude_q)
         latest_timestamps = APILog.objects.filter(
             endpoint=OuterRef('endpoint')
         ).order_by('-timestamp')
@@ -311,3 +360,4 @@ class APILogAdmin(admin.ModelAdmin):
         return super().changelist_view(request, extra_context=extra_context)
 
 admin.site.register(APILog, APILogAdmin)
+admin.site.register(IgnoreEndpoint, IgnoreEndpointAdmin)
