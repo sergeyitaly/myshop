@@ -10,12 +10,14 @@ from datetime import timedelta
 from django.db.models.functions import TruncHour, TruncDate, TruncMonth, TruncYear, TruncDay, TruncWeek
 from django.utils.translation import gettext as _
 from django.utils.dateparse import parse_datetime
-from django.db.models import Count, Q
 from django.utils.timezone import now
 from dateutil.relativedelta import relativedelta
 from django.utils.html import format_html
 from django.db.models import Min, Max, F, OuterRef, Subquery, Sum
 from django.conf import settings
+from django.db.models import Case, When, Value, F, Q, Count
+from django.db.models.functions import Substr, Length
+
 
 def clear_logs(modeladmin, request, queryset):
     count, _ = queryset.delete()
@@ -69,13 +71,13 @@ class EndpointFilter(admin.SimpleListFilter):
         endpoint_types = endpoint_types.split(',')
         filters = Q()
         if 'vercel' in endpoint_types:
-            filters |= ~Q(endpoint__icontains=settings.VERCEL_DOMAIN)  # Vercel doesn't contain 'by_chat_id'
+            filters |= ~Q(endpoint__icontains=settings.VERCEL_DOMAIN)
         if 'localhost' in endpoint_types:
-            filters |= ~Q(endpoint__icontains=':8000')  # Vercel doesn't contain 'by_chat_id'
+            filters |= ~Q(endpoint__icontains=':8000')  
         if 'docker' in endpoint_types:
-            filters |= ~Q(endpoint__icontains=':8010')  # Vercel doesn't contain 'by_chat_id'
+            filters |= ~Q(endpoint__icontains=':8010')  
         if 'telegram' in endpoint_types:
-            filters |= Q(endpoint__icontains='by_chat_id')  # Telegram contains 'by_chat_id'
+            filters |= Q(endpoint__icontains='by_chat_id') 
         
         return queryset.filter(filters)
 
