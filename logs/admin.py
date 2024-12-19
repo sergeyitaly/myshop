@@ -71,14 +71,15 @@ class EndpointFilter(admin.SimpleListFilter):
         endpoint_types = endpoint_types.split(',')
         filters = Q()
         if 'vercel' in endpoint_types:
-            filters |= ~Q(endpoint__icontains=settings.VERCEL_DOMAIN)
+            filters |= Q(endpoint__icontains=settings.VERCEL_DOMAIN)
         if 'localhost' in endpoint_types:
-            filters |= ~Q(endpoint__icontains=':8000')  
+            filters |= Q(endpoint__icontains=':8000')  
         if 'docker' in endpoint_types:
-            filters |= ~Q(endpoint__icontains=':8010')  
+            filters |= Q(endpoint__icontains=':8010')  
         if 'telegram' in endpoint_types:
             filters |= Q(endpoint__icontains='by_chat_id') 
-        
+        if 'all' in endpoint_types:
+            filters |= Q(endpoint__icontains='/')         
         return queryset.filter(filters)
 
 class IgnoreEndpointAdmin(admin.ModelAdmin):
@@ -323,7 +324,7 @@ class APILogAdmin(admin.ModelAdmin):
                         timestamp__gte=start_time,
                         timestamp__hour=(now - timedelta(hours=labels_count - hour - 1)).hour
                     ).aggregate(
-                        vercel_count=Count("id", filter=~Q(endpoint__icontains=settings.VERCEL_DOMAIN))
+                        vercel_count=Count("id", filter=Q(endpoint__icontains=settings.VERCEL_DOMAIN))
                     )["vercel_count"] or 0
                 )
                 localhost_data.append(
@@ -331,7 +332,7 @@ class APILogAdmin(admin.ModelAdmin):
                         timestamp__gte=start_time,
                         timestamp__hour=(now - timedelta(hours=labels_count - hour - 1)).hour
                     ).aggregate(
-                        localhost_count=Count("id", filter=~Q(endpoint__icontains=":8000"))
+                        localhost_count=Count("id", filter=Q(endpoint__icontains=":8000"))
                     )["localhost_count"] or 0
                 )
                 docker_data.append(
@@ -339,7 +340,7 @@ class APILogAdmin(admin.ModelAdmin):
                         timestamp__gte=start_time,
                         timestamp__hour=(now - timedelta(hours=labels_count - hour - 1)).hour
                     ).aggregate(
-                        docker_count=Count("id", filter=~Q(endpoint__icontains=":8010"))
+                        docker_count=Count("id", filter=Q(endpoint__icontains=":8010"))
                     )["docker_count"] or 0
                 )
         elif time_period == "week":
@@ -355,17 +356,17 @@ class APILogAdmin(admin.ModelAdmin):
                 )
                 vercel_data.append(
                     logs.filter(period__date=(now - relativedelta(days=labels_count - day - 1)).date()).aggregate(
-                        vercel_count=Count("id", filter=~Q(endpoint__icontains=settings.VERCEL_DOMAIN))
+                        vercel_count=Count("id", filter=Q(endpoint__icontains=settings.VERCEL_DOMAIN))
                     )["vercel_count"] or 0
                 )
                 localhost_data.append(
                     logs.filter(period__date=(now - relativedelta(days=labels_count - day - 1)).date()).aggregate(
-                        localhost_count=Count("id", filter=~Q(endpoint__icontains=":8000"))
+                        localhost_count=Count("id", filter=Q(endpoint__icontains=":8000"))
                     )["localhost_count"] or 0
                 )
                 docker_data.append(
                     logs.filter(period__date=(now - relativedelta(days=labels_count - day - 1)).date()).aggregate(
-                        docker_count=Count("id", filter=~Q(endpoint__icontains=":8010"))
+                        docker_count=Count("id", filter=Q(endpoint__icontains=":8010"))
                     )["docker_count"] or 0
                 )
         elif time_period == "month":
@@ -379,17 +380,17 @@ class APILogAdmin(admin.ModelAdmin):
                 )
                 vercel_data.append(
                     logs.filter(period__day=(now - relativedelta(days=labels_count - day - 1)).day).aggregate(
-                        vercel_count=Count("id", filter=~Q(endpoint__icontains=settings.VERCEL_DOMAIN))
+                        vercel_count=Count("id", filter=Q(endpoint__icontains=settings.VERCEL_DOMAIN))
                     )["vercel_count"] or 0
                 )
                 localhost_data.append(
                     logs.filter(period__day=(now - relativedelta(days=labels_count - day - 1)).day).aggregate(
-                        localhost_count=Count("id", filter=~Q(endpoint__icontains=":8000"))
+                        localhost_count=Count("id", filter=Q(endpoint__icontains=":8000"))
                     )["localhost_count"] or 0
                 )
                 docker_data.append(
                     logs.filter(period__day=(now - relativedelta(days=labels_count - day - 1)).day).aggregate(
-                        docker_count=Count("id", filter=~Q(endpoint__icontains=":8010"))
+                        docker_count=Count("id", filter=Q(endpoint__icontains=":8010"))
                     )["docker_count"] or 0
                 )
         elif time_period == "year":
@@ -403,19 +404,21 @@ class APILogAdmin(admin.ModelAdmin):
                 )
                 vercel_data.append(
                     logs.filter(period__month=(now - relativedelta(months=labels_count - month - 1)).month).aggregate(
-                        vercel_count=Count("id", filter=~Q(endpoint__icontains=settings.VERCEL_DOMAIN))
+                        vercel_count=Count("id", filter=Q(endpoint__icontains=settings.VERCEL_DOMAIN))
                     )["vercel_count"] or 0
                 )
                 localhost_data.append(
                     logs.filter(period__month=(now - relativedelta(months=labels_count - month - 1)).month).aggregate(
-                        localhost_count=Count("id", filter=~Q(endpoint__icontains=":8000"))
+                        localhost_count=Count("id", filter=Q(endpoint__icontains=":8000"))
                     )["localhost_count"] or 0
                 )
                 docker_data.append(
                     logs.filter(period__month=(now - relativedelta(months=labels_count - month - 1)).month).aggregate(
-                        docker_count=Count("id", filter=~Q(endpoint__icontains=":8010"))
+                        docker_count=Count("id", filter=Q(endpoint__icontains=":8010"))
                     )["docker_count"] or 0
                 )
+
+                
         chart_data = {
             "labels": labels,
             "data": {

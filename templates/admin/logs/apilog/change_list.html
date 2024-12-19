@@ -22,49 +22,90 @@
     if (chartDataElement) {
         // Retrieve the JSON data directly from the `script` tag created by `json_script`
         const chartData = JSON.parse(chartDataElement.textContent);
-        console.log("chart_js content: ", chartData);  // Debug line
+
+        // Dynamically calculate the sum of all datasets
+        const totalData = chartData.labels.map((_, index) => {
+            return (
+                chartData.data.Telegram[index] +
+                chartData.data.Vercel[index] +
+                chartData.data.Localhost[index] +
+                chartData.data.Docker[index]
+            );
+        });
 
         // Set up the chart data
         const data = {
-            labels: chartData.labels,  // Time periods, e.g., days, weeks
-            datasets: [{
-                label: 'Telegram Requests',
-                data: chartData.data.Telegram,
-                borderColor: 'rgb(75, 192, 192)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                fill: false,
-            }, {
-                label: 'Vercel Requests',
-                data: chartData.data.Vercel,
-                borderColor: 'rgb(153, 102, 255)',
-                backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                fill: false,
-            }]
+            labels: chartData.labels, // Time periods, e.g., hours or days
+            datasets: [
+                {
+                    label: 'Telegram',
+                    data: chartData.data.Telegram,
+                    borderColor: 'rgb(75, 192, 192)', // Light green
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: false,
+                },
+                {
+                    label: 'Vercel',
+                    data: chartData.data.Vercel,
+                    borderColor: 'rgb(153, 102, 255)', // Purple
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    fill: false,
+                },
+                {
+                    label: 'Localhost',
+                    data: chartData.data.Localhost,
+                    borderColor: 'rgb(255, 159, 64)', // Orange
+                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                    fill: false,
+                },
+                {
+                    label: 'Docker',
+                    data: chartData.data.Docker,
+                    borderColor: 'rgb(255, 99, 132)', // Red
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    fill: false,
+                },
+                {
+                    label: 'Total',
+                    data: totalData,
+                    borderColor: 'rgb(54, 162, 235)', // Blue
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    fill: false,
+                },
+            ]
         };
 
         // Initialize the chart with Chart.js
         const ctx = document.getElementById('chart_canvas').getContext('2d');
         new Chart(ctx, {
-            type: 'bar',
+            type: 'bar', 
             data: data,
             options: {
                 responsive: true,
                 plugins: {
-                  legend: { position: 'top' },
+                    legend: {
+                        position: 'top',
+                    },
                 },
                 scales: {
                     x: {
                         title: {
                             display: true,
-                            text: 'Time Period'
-                        }
+                            text: 'Time Period',
+                        },
                     },
                     y: {
-                      beginAtZero: true,
-                      ticks: { stepSize: 1 },
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                        },
+                        title: {
+                            display: true,
+                            text: 'Requests',
+                        },
                     },
-                }
-            }
+                },
+            },
         });
     } else {
         console.error('chart_data element not found');
