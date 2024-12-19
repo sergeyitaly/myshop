@@ -160,8 +160,13 @@ class APILogAdmin(admin.ModelAdmin):
         time_period_filter = TimePeriodFilter(request, {}, self.model, self)
         queryset = time_period_filter.queryset(request, queryset)
         if exclude_patterns:
-            exclude_q = ~Q(endpoint__in=exclude_patterns)
-            queryset = queryset.filter(exclude_q)
+            exclude_q = Q()
+            for pattern in exclude_patterns:
+                if pattern == '/':
+                    exclude_q |= Q(endpoint='/')
+                else:
+                    exclude_q |= Q(endpoint__icontains=pattern)
+            queryset = queryset.exclude(exclude_q)
         latest_timestamps = APILog.objects.filter(
             endpoint=OuterRef('endpoint')
         ).order_by('-timestamp')
