@@ -11,7 +11,7 @@ class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         endpoint = unquote(request.path)
         if not self.is_internal_request(request):
-            endpoint = request.build_absolute_uri()
+            endpoint = unquote(request.build_absolute_uri())
         else:
             endpoint = endpoint
         logger.debug(f"Logging request for endpoint: {endpoint}")
