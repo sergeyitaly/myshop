@@ -127,7 +127,7 @@ class APILogAdmin(admin.ModelAdmin):
     change_list_template = 'admin/logs/apilog/change_list.html'
     
     def get_queryset(self, request):
-        exclude_patterns = list(IgnoreEndpoint.objects.filter(is_active=True).exclude(name='/').values_list('name', flat=True))
+        exclude_patterns = list(IgnoreEndpoint.objects.filter(is_active=True).values_list('name', flat=True))
         queryset = super().get_queryset(request)
         endpoint_filter = EndpointFilter(request, {}, self.model, self)
         queryset = endpoint_filter.queryset(request, queryset)
@@ -136,7 +136,10 @@ class APILogAdmin(admin.ModelAdmin):
         if exclude_patterns:
             exclude_q = Q()
             for pattern in exclude_patterns:
-                exclude_q |= Q(endpoint__icontains=pattern)
+                if pattern == '/':
+                    exclude_q |= Q(endpoint='/')
+                else:
+                    exclude_q |= Q(endpoint__icontains=pattern)
             queryset = queryset.exclude(exclude_q)
 
         latest_timestamps = APILog.objects.filter(
