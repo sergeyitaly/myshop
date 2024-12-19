@@ -78,8 +78,6 @@ class EndpointFilter(admin.SimpleListFilter):
             filters |= Q(endpoint__icontains=':8010')  
         if 'telegram' in endpoint_types:
             filters |= Q(endpoint__icontains='by_chat_id') 
-        if 'all' in endpoint_types:
-            filters |= Q(endpoint__icontains='/')         
         return queryset.filter(filters)
 
 class IgnoreEndpointAdmin(admin.ModelAdmin):
@@ -230,8 +228,21 @@ class APILogAdmin(admin.ModelAdmin):
         APILog.objects.filter(endpoint=endpoint).update(request_count=count)
 
     def clickable_endpoint(self, obj):
+        """Remove the base URL (hostname) and display the relative endpoint path"""
+        base_url_patterns = [
+            settings.VERCEL_DOMAIN,
+            'localhost:8000',
+            'localhost:8010',
+            '127.0.0.1:8000',
+            '127.0.0.1:8010',            
+        ]
+        endpoint = obj.endpoint
+        for base_url in base_url_patterns:
+            if endpoint.startswith(base_url):
+                endpoint = endpoint[len(base_url):]
+                break
         url = reverse('admin:logs_apilog_changelist') + f'?endpoint={obj.endpoint}'
-        return format_html('<a href="{}">{}</a>', url, obj.endpoint)
+        return format_html('<a href="{}">{}</a>', url, endpoint)
     clickable_endpoint.allow_tags = True
     clickable_endpoint.short_description = "Endpoint"
 
