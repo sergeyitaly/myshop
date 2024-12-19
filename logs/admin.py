@@ -62,6 +62,7 @@ class EndpointFilter(admin.SimpleListFilter):
             ('telegram', _('Telegram')),
             ('localhost', _('Localhost')),
             ('docker', _('Docker')),
+            ('android', _('Android')),
         )
 
     def queryset(self, request, queryset):
@@ -71,13 +72,15 @@ class EndpointFilter(admin.SimpleListFilter):
         endpoint_types = endpoint_types.split(',')
         filters = Q()
         if 'vercel' in endpoint_types:
-            filters |= Q(endpoint__icontains=settings.VERCEL_DOMAIN)
+            filters |= Q(endpoint__icontains=settings.VERCEL_DOMAIN)& ~Q(endpoint__icontains="by_chat_id")
         if 'localhost' in endpoint_types:
-            filters |= Q(endpoint__icontains=':8000')  
+            filters |= Q(endpoint__icontains=':8000')& ~Q(endpoint__icontains="by_chat_id")  
         if 'docker' in endpoint_types:
-            filters |= Q(endpoint__icontains=':8010')  
+            filters |= Q(endpoint__icontains=':8010')& ~Q(endpoint__icontains="by_chat_id")
         if 'telegram' in endpoint_types:
-            filters |= Q(endpoint__icontains='by_chat_id') 
+            filters |= Q(endpoint__icontains='by_chat_id')
+        if 'android' in endpoint_types:
+            filters |= Q(endpoint__icontains='X-Android-Client: Koloryt')& ~Q(endpoint__icontains="by_chat_id")  
         return queryset.filter(filters)
 
 class IgnoreEndpointAdmin(admin.ModelAdmin):
@@ -290,7 +293,7 @@ class APILogAdmin(admin.ModelAdmin):
     
     def get_charts_data(self, request, time_period):
         logs = self.get_chart_queryset(request)
-        labels, telegram_data, vercel_data, localhost_data, docker_data = [], [], [], [], []
+        labels, telegram_data, vercel_data, localhost_data, docker_data, android_data = [], [], [], [], [], []
         now = timezone.localtime(timezone.now())
         endpoint_filter = request.GET.get('endpoint', '')
 
@@ -335,7 +338,7 @@ class APILogAdmin(admin.ModelAdmin):
                         timestamp__gte=start_time,
                         timestamp__hour=(now - timedelta(hours=labels_count - hour - 1)).hour
                     ).aggregate(
-                        vercel_count=Count("id", filter=Q(endpoint__icontains=settings.VERCEL_DOMAIN))
+                        vercel_count=Count("id", filter=Q(endpoint__icontains=settings.VERCEL_DOMAIN)& ~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
                 localhost_data.append(
@@ -343,7 +346,7 @@ class APILogAdmin(admin.ModelAdmin):
                         timestamp__gte=start_time,
                         timestamp__hour=(now - timedelta(hours=labels_count - hour - 1)).hour
                     ).aggregate(
-                        localhost_count=Count("id", filter=Q(endpoint__icontains=":8000"))
+                        localhost_count=Count("id", filter=Q(endpoint__icontains=":8000")&~Q(endpoint__icontains="by_chat_id"))
                     )["localhost_count"] or 0
                 )
                 docker_data.append(
@@ -351,9 +354,20 @@ class APILogAdmin(admin.ModelAdmin):
                         timestamp__gte=start_time,
                         timestamp__hour=(now - timedelta(hours=labels_count - hour - 1)).hour
                     ).aggregate(
-                        docker_count=Count("id", filter=Q(endpoint__icontains=":8010"))
+                        docker_count=Count("id", filter=Q(endpoint__icontains=":8010")&~Q(endpoint__icontains="by_chat_id"))
                     )["docker_count"] or 0
                 )
+                android_data.append(
+                    logs.filter(
+                        timestamp__gte=start_time,
+                        timestamp__hour=(now - timedelta(hours=labels_count - hour - 1)).hour
+                    ).aggregate(
+                        android_count=Count("id", filter=Q(endpoint__icontains="X-Android-Client: Koloryt")&~Q(endpoint__icontains="by_chat_id"))
+                    )["android_count"] or 0
+                )
+
+
+
         elif time_period == "week":
             for day in range(labels_count):
                 current_day = (now - relativedelta(days=labels_count - day - 1)).strftime('%Y-%m-%d')
@@ -367,18 +381,23 @@ class APILogAdmin(admin.ModelAdmin):
                 )
                 vercel_data.append(
                     logs.filter(period__date=(now - relativedelta(days=labels_count - day - 1)).date()).aggregate(
-                        vercel_count=Count("id", filter=Q(endpoint__icontains=settings.VERCEL_DOMAIN))
+                        vercel_count=Count("id", filter=Q(endpoint__icontains=settings.VERCEL_DOMAIN)& ~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
                 localhost_data.append(
                     logs.filter(period__date=(now - relativedelta(days=labels_count - day - 1)).date()).aggregate(
-                        localhost_count=Count("id", filter=Q(endpoint__icontains=":8000"))
+                        localhost_count=Count("id", filter=Q(endpoint__icontains=":8000")&~Q(endpoint__icontains="by_chat_id"))
                     )["localhost_count"] or 0
                 )
                 docker_data.append(
                     logs.filter(period__date=(now - relativedelta(days=labels_count - day - 1)).date()).aggregate(
-                        docker_count=Count("id", filter=Q(endpoint__icontains=":8010"))
+                        docker_count=Count("id", filter=Q(endpoint__icontains=":8010")&~Q(endpoint__icontains="by_chat_id"))
                     )["docker_count"] or 0
+                )
+                android_data.append(
+                    logs.filter(period__date=(now - relativedelta(days=labels_count - day - 1)).date()).aggregate(
+                        android_count=Count("id", filter=Q(endpoint__icontains="X-Android-Client: Koloryt")&~Q(endpoint__icontains="by_chat_id"))
+                    )["android_count"] or 0
                 )
         elif time_period == "month":
             for day in range(labels_count):
@@ -391,18 +410,23 @@ class APILogAdmin(admin.ModelAdmin):
                 )
                 vercel_data.append(
                     logs.filter(period__day=(now - relativedelta(days=labels_count - day - 1)).day).aggregate(
-                        vercel_count=Count("id", filter=Q(endpoint__icontains=settings.VERCEL_DOMAIN))
+                        vercel_count=Count("id", filter=Q(endpoint__icontains=settings.VERCEL_DOMAIN)& ~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
                 localhost_data.append(
                     logs.filter(period__day=(now - relativedelta(days=labels_count - day - 1)).day).aggregate(
-                        localhost_count=Count("id", filter=Q(endpoint__icontains=":8000"))
+                        localhost_count=Count("id", filter=Q(endpoint__icontains=":8000")&~Q(endpoint__icontains="by_chat_id"))
                     )["localhost_count"] or 0
                 )
                 docker_data.append(
                     logs.filter(period__day=(now - relativedelta(days=labels_count - day - 1)).day).aggregate(
-                        docker_count=Count("id", filter=Q(endpoint__icontains=":8010"))
+                        docker_count=Count("id", filter=Q(endpoint__icontains=":8010")&~Q(endpoint__icontains="by_chat_id"))
                     )["docker_count"] or 0
+                )
+                android_data.append(
+                    logs.filter(period__day=(now - relativedelta(days=labels_count - day - 1)).day).aggregate(
+                        android_count=Count("id", filter=Q(endpoint__icontains="X-Android-Client: Koloryt")&~Q(endpoint__icontains="by_chat_id"))
+                    )["android_count"] or 0
                 )
         elif time_period == "year":
             for month in range(labels_count):
@@ -415,20 +439,24 @@ class APILogAdmin(admin.ModelAdmin):
                 )
                 vercel_data.append(
                     logs.filter(period__month=(now - relativedelta(months=labels_count - month - 1)).month).aggregate(
-                        vercel_count=Count("id", filter=Q(endpoint__icontains=settings.VERCEL_DOMAIN))
+                        vercel_count=Count("id", filter=Q(endpoint__icontains=settings.VERCEL_DOMAIN)&~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
                 localhost_data.append(
                     logs.filter(period__month=(now - relativedelta(months=labels_count - month - 1)).month).aggregate(
-                        localhost_count=Count("id", filter=Q(endpoint__icontains=":8000"))
+                        localhost_count=Count("id", filter=Q(endpoint__icontains=":8000")&~Q(endpoint__icontains="by_chat_id"))
                     )["localhost_count"] or 0
                 )
                 docker_data.append(
                     logs.filter(period__month=(now - relativedelta(months=labels_count - month - 1)).month).aggregate(
-                        docker_count=Count("id", filter=Q(endpoint__icontains=":8010"))
+                        docker_count=Count("id", filter=Q(endpoint__icontains=":8010")&~Q(endpoint__icontains="by_chat_id"))
                     )["docker_count"] or 0
                 )
-
+                android_data.append(
+                    logs.filter(period__month=(now - relativedelta(months=labels_count - month - 1)).month).aggregate(
+                        android_count=Count("id", filter=Q(endpoint__icontains="X-Android-Client: Koloryt")&~Q(endpoint__icontains="by_chat_id"))
+                    )["android_count"] or 0
+                )
                 
         chart_data = {
             "labels": labels,
@@ -437,6 +465,8 @@ class APILogAdmin(admin.ModelAdmin):
                 "Vercel": vercel_data,
                 "Localhost": localhost_data,
                 "Docker": docker_data,
+                "Android": android_data,
+
             },
         }
         return chart_data

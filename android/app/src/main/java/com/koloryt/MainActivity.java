@@ -21,6 +21,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.widget.Toast;
 import android.content.ActivityNotFoundException;
+import java.util.Map;
+import java.util.HashMap;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -108,10 +110,20 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 } else {
                     // Handle other URLs normally (e.g., open in the WebView or external browser)
-                    if (url.contains("example.com")) { // Adjust this condition as needed
-                        view.loadUrl(url);
-                        return false; // Stay in WebView
-                    } else {
+                                                        
+                  //  if (url.contains("example.com")) {  
+                  //      view.loadUrl(url);
+                  //      return false;
+                  //  } 
+                    
+                    if (url.contains("/")) { 
+                        Map<String, String> headers = new HashMap<>();
+                        headers.put("X-Android-Client", "Koloryt");
+                        view.loadUrl(url, headers);
+                        return false; 
+                    }
+                    
+                    else {
                         Intent intent = new Intent(Intent.ACTION_VIEW);
                         intent.setData(Uri.parse(url));
                         view.getContext().startActivity(intent);
