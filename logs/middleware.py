@@ -29,4 +29,6 @@ class APILogMiddleware(MiddlewareMixin):
 
     def is_internal_request(self, request):
         host = request.get_host()
-        return host == "localhost:8000" or "127.0.0.1:8000" or host.endswith(settings.VERCEL_DOMAIN)
+        return host
+#        return host == "localhost:8000" or "127.0.0.1:8000" or host.endswith(settings.VERCEL_DOMAIN)
+
