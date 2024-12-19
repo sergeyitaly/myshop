@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -85,50 +86,46 @@ public class MainActivity extends AppCompatActivity {
         webView.setWebViewClient(new WebViewClient() {
 
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                // Add the custom header to all outgoing requests
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    Map<String, String> headers = new HashMap<>(request.getRequestHeaders());
+                    headers.put("X-Android-Client", "Koloryt");
+                    return super.shouldInterceptRequest(view, request);
+                }
+                return super.shouldInterceptRequest(view, request);
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                String url = request.getUrl().toString();
+                
                 if (url.startsWith("mailto:")) {
-                    // Handle email links
                     Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
                     emailIntent.setData(Uri.parse(url));
                     try {
                         view.getContext().startActivity(emailIntent);
                     } catch (ActivityNotFoundException e) {
-                        // Handle case where no email app is installed
                         Toast.makeText(view.getContext(), "No email app found", Toast.LENGTH_SHORT).show();
                     }
                     return true;
                 } else if (url.startsWith("tg://")) {
-                    // Handle Telegram links
                     Intent telegramIntent = new Intent(Intent.ACTION_VIEW);
                     telegramIntent.setData(Uri.parse(url));
                     try {
                         view.getContext().startActivity(telegramIntent);
                     } catch (ActivityNotFoundException e) {
-                        // Handle case where Telegram is not installed
                         Toast.makeText(view.getContext(), "Telegram is not installed", Toast.LENGTH_SHORT).show();
                     }
                     return true;
+                } else if (url.contains("example.com")) {
+                    view.loadUrl(url);
+                    return false;
                 } else {
-                    // Handle other URLs normally (e.g., open in the WebView or external browser)
-                                                        
-                  //  if (url.contains("example.com")) {  
-                  //      view.loadUrl(url);
-                  //      return false;
-                  //  } 
-                    
-                    if (url.contains("/")) { 
-                        Map<String, String> headers = new HashMap<>();
-                        headers.put("X-Android-Client", "Koloryt");
-                        view.loadUrl(url, headers);
-                        return false; 
-                    }
-                    
-                    else {
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.setData(Uri.parse(url));
-                        view.getContext().startActivity(intent);
-                        return true; // Open in external browser
-                    }
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse(url));
+                    view.getContext().startActivity(intent);
+                    return true;
                 }
             }
 

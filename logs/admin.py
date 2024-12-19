@@ -69,19 +69,25 @@ class EndpointFilter(admin.SimpleListFilter):
         endpoint_types = request.GET.get(self.parameter_name)
         if not endpoint_types:
             return queryset
-        endpoint_types = endpoint_types.split(',')
+
+        endpoint_types = set(endpoint_types.split(','))  # Use a set for efficient checks
         filters = Q()
-        if 'vercel' in endpoint_types:
-            filters |= Q(endpoint__icontains=settings.VERCEL_DOMAIN)& ~Q(endpoint__icontains="by_chat_id")
-        if 'localhost' in endpoint_types:
-            filters |= Q(endpoint__icontains=':8000')& ~Q(endpoint__icontains="by_chat_id")  
-        if 'docker' in endpoint_types:
-            filters |= Q(endpoint__icontains=':8010')& ~Q(endpoint__icontains="by_chat_id")
-        if 'telegram' in endpoint_types:
-            filters |= Q(endpoint__icontains='by_chat_id')
-        if 'android' in endpoint_types:
-            filters |= Q(endpoint__icontains='X-Android-Client: Koloryt')& ~Q(endpoint__icontains="by_chat_id")  
+
+        type_conditions = {
+            'vercel': Q(endpoint__icontains=settings.VERCEL_DOMAIN) & ~Q(endpoint__icontains="by_chat_id"),
+            'localhost': Q(endpoint__icontains=':8000') & ~Q(endpoint__icontains="by_chat_id"),
+            'docker': Q(endpoint__icontains=':8010') & ~Q(endpoint__icontains="by_chat_id"),
+            'telegram': Q(endpoint__icontains='by_chat_id'),
+            'android': Q(endpoint__icontains='X-Android-Client: Koloryt') & ~Q(endpoint__icontains="by_chat_id"),
+        }
+
+        # Add filters for all selected endpoint types
+        for endpoint_type, condition in type_conditions.items():
+            if endpoint_type in endpoint_types:
+                filters |= condition
+
         return queryset.filter(filters)
+
 
 class IgnoreEndpointAdmin(admin.ModelAdmin):
     list_display = ('name', 'is_active_display')  # Display name and a clickable "is_active" toggle
@@ -130,13 +136,30 @@ class IgnoreEndpointAdmin(admin.ModelAdmin):
 
 
 class APILogAdmin(admin.ModelAdmin):
-    list_display = ('clickable_endpoint', 'request_sum', 'timestamp')
+    list_display = ('clickable_endpoint', 'host_type', 'request_sum', 'timestamp')
     list_filter = (TimePeriodFilter, EndpointFilter)
     actions = [clear_logs, 'add_to_ignore_list','delete_last_log', 'delete_all_logs']
     ordering = ('-timestamp',)
     search_fields = ('endpoint',)
     change_list_template = 'admin/logs/apilog/change_list.html'
-    
+
+    def host_type(self, obj):
+        endpoint = obj.endpoint.lower()
+        
+        if settings.VERCEL_DOMAIN in endpoint and "by_chat_id" not in endpoint:
+            return 'Vercel'
+        elif 'by_chat_id' in endpoint:
+            return 'Telegram'
+        elif ':8000' in endpoint:
+            return 'Localhost'
+        elif ':8010' in endpoint:
+            return 'Docker'
+        elif 'x-android-client: koloryt' in endpoint:  # Corrected capitalization for consistency
+            return 'Android'
+        return 'Unknown'  # Default if no pattern matches
+
+    host_type.short_description = "Host Type"
+
     def get_queryset(self, request):
         exclude_patterns = list(IgnoreEndpoint.objects.filter(is_active=True).values_list('name', flat=True))
         queryset = super().get_queryset(request)
@@ -231,7 +254,6 @@ class APILogAdmin(admin.ModelAdmin):
         APILog.objects.filter(endpoint=endpoint).update(request_count=count)
 
     def clickable_endpoint(self, obj):
-        """Remove the base URL (hostname) and display the relative endpoint path"""
         base_url_patterns = [
             settings.VERCEL_DOMAIN,
             'localhost:8000',
@@ -246,7 +268,7 @@ class APILogAdmin(admin.ModelAdmin):
                 break
         url = reverse('admin:logs_apilog_changelist') + f'?endpoint={obj.endpoint}'
         return format_html('<a href="{}">{}</a>', url, endpoint)
-    clickable_endpoint.allow_tags = True
+
     clickable_endpoint.short_description = "Endpoint"
 
     def get_urls(self):
