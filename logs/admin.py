@@ -17,6 +17,7 @@ from django.db.models import Min, Max, F, OuterRef, Subquery, Sum
 from django.conf import settings
 from django.db.models import Case, When, Value, F, Q, Count
 from django.db.models.functions import Substr, Length
+import re
 
 
 def clear_logs(modeladmin, request, queryset):
@@ -74,11 +75,11 @@ class EndpointFilter(admin.SimpleListFilter):
         filters = Q()
 
         type_conditions = {
-            'vercel': Q(endpoint__icontains=settings.VERCEL_DOMAIN) & ~Q(endpoint__icontains="by_chat_id"),
+            'vercel': Q(endpoint__icontains="https://") & ~Q(endpoint__icontains="by_chat_id"),
             'localhost': Q(endpoint__icontains=':8000') & ~Q(endpoint__icontains="by_chat_id"),
             'docker': Q(endpoint__icontains=':8010') & ~Q(endpoint__icontains="by_chat_id"),
             'telegram': Q(endpoint__icontains='by_chat_id'),
-            'android': Q(endpoint__icontains='X-Android-Client: Koloryt') & ~Q(endpoint__icontains="by_chat_id"),
+            'android': Q(endpoint__icontains=settings.VERCEL_DOMAIN) & ~Q(endpoint__icontains="by_chat_id")&~Q(endpoint__icontains="https://"),
         }
 
         # Add filters for all selected endpoint types
@@ -143,22 +144,26 @@ class APILogAdmin(admin.ModelAdmin):
     search_fields = ('endpoint',)
     change_list_template = 'admin/logs/apilog/change_list.html'
 
+
     def host_type(self, obj):
         endpoint = obj.endpoint.lower()
-        
-        if settings.VERCEL_DOMAIN in endpoint and "by_chat_id" not in endpoint:
+        # Remove protocol prefix (if any) from VERCEL_DOMAIN
+#        vercel_domain = re.sub(r'^https?://', '', settings.VERCEL_DOMAIN).lower()
+
+        if 'https://' in endpoint and 'by_chat_id' not in endpoint:
             return 'Vercel'
         elif 'by_chat_id' in endpoint:
             return 'Telegram'
-        elif ':8000' in endpoint:
+        elif ':8000' in endpoint and 'by_chat_id' not in endpoint:
             return 'Localhost'
-        elif ':8010' in endpoint:
+        elif ':8010' in endpoint and 'by_chat_id' not in endpoint:
             return 'Docker'
-        elif 'x-android-client: koloryt' in endpoint:  # Corrected capitalization for consistency
-            return 'Android'
-        return 'Unknown'  # Default if no pattern matches
+        return 'Android'
+    #   return 'Unknown'  # Default if no pattern matches
 
     host_type.short_description = "Host Type"
+
+
 
     def get_queryset(self, request):
         exclude_patterns = list(IgnoreEndpoint.objects.filter(is_active=True).values_list('name', flat=True))
@@ -254,8 +259,11 @@ class APILogAdmin(admin.ModelAdmin):
         APILog.objects.filter(endpoint=endpoint).update(request_count=count)
 
     def clickable_endpoint(self, obj):
+        android_domain = re.sub(r'^https?://', '', settings.VERCEL_DOMAIN).lower()
+
         base_url_patterns = [
             settings.VERCEL_DOMAIN,
+            android_domain,
             'localhost:8000',
             'localhost:8010',
             '127.0.0.1:8000',
@@ -360,7 +368,7 @@ class APILogAdmin(admin.ModelAdmin):
                         timestamp__gte=start_time,
                         timestamp__hour=(now - timedelta(hours=labels_count - hour - 1)).hour
                     ).aggregate(
-                        vercel_count=Count("id", filter=Q(endpoint__icontains=settings.VERCEL_DOMAIN)& ~Q(endpoint__icontains="by_chat_id"))
+                        vercel_count=Count("id", filter=Q(endpoint__icontains="https://")& ~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
                 localhost_data.append(
@@ -384,7 +392,7 @@ class APILogAdmin(admin.ModelAdmin):
                         timestamp__gte=start_time,
                         timestamp__hour=(now - timedelta(hours=labels_count - hour - 1)).hour
                     ).aggregate(
-                        android_count=Count("id", filter=Q(endpoint__icontains="X-Android-Client: Koloryt")&~Q(endpoint__icontains="by_chat_id"))
+                        android_count=Count("id", filter=Q(endpoint__icontains=settings.VERCEL_DOMAIN)&~Q(endpoint__icontains="https://")&~Q(endpoint__icontains="by_chat_id"))
                     )["android_count"] or 0
                 )
 
@@ -403,7 +411,7 @@ class APILogAdmin(admin.ModelAdmin):
                 )
                 vercel_data.append(
                     logs.filter(period__date=(now - relativedelta(days=labels_count - day - 1)).date()).aggregate(
-                        vercel_count=Count("id", filter=Q(endpoint__icontains=settings.VERCEL_DOMAIN)& ~Q(endpoint__icontains="by_chat_id"))
+                        vercel_count=Count("id", filter=Q(endpoint__icontains="https://")& ~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
                 localhost_data.append(
@@ -418,7 +426,7 @@ class APILogAdmin(admin.ModelAdmin):
                 )
                 android_data.append(
                     logs.filter(period__date=(now - relativedelta(days=labels_count - day - 1)).date()).aggregate(
-                        android_count=Count("id", filter=Q(endpoint__icontains="X-Android-Client: Koloryt")&~Q(endpoint__icontains="by_chat_id"))
+                        android_count=Count("id", filter=Q(endpoint__icontains=settings.VERCEL_DOMAIN)&~Q(endpoint__icontains="https://")&~Q(endpoint__icontains="by_chat_id"))
                     )["android_count"] or 0
                 )
         elif time_period == "month":
@@ -432,7 +440,7 @@ class APILogAdmin(admin.ModelAdmin):
                 )
                 vercel_data.append(
                     logs.filter(period__day=(now - relativedelta(days=labels_count - day - 1)).day).aggregate(
-                        vercel_count=Count("id", filter=Q(endpoint__icontains=settings.VERCEL_DOMAIN)& ~Q(endpoint__icontains="by_chat_id"))
+                        vercel_count=Count("id", filter=Q(endpoint__icontains="https://")& ~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
                 localhost_data.append(
@@ -447,7 +455,7 @@ class APILogAdmin(admin.ModelAdmin):
                 )
                 android_data.append(
                     logs.filter(period__day=(now - relativedelta(days=labels_count - day - 1)).day).aggregate(
-                        android_count=Count("id", filter=Q(endpoint__icontains="X-Android-Client: Koloryt")&~Q(endpoint__icontains="by_chat_id"))
+                        android_count=Count("id", filter=Q(endpoint__icontains=settings.VERCEL_DOMAIN)&~Q(endpoint__icontains="https://")&~Q(endpoint__icontains="by_chat_id"))
                     )["android_count"] or 0
                 )
         elif time_period == "year":
@@ -461,7 +469,7 @@ class APILogAdmin(admin.ModelAdmin):
                 )
                 vercel_data.append(
                     logs.filter(period__month=(now - relativedelta(months=labels_count - month - 1)).month).aggregate(
-                        vercel_count=Count("id", filter=Q(endpoint__icontains=settings.VERCEL_DOMAIN)&~Q(endpoint__icontains="by_chat_id"))
+                        vercel_count=Count("id", filter=Q(endpoint__icontains="https://")& ~Q(endpoint__icontains="by_chat_id"))
                     )["vercel_count"] or 0
                 )
                 localhost_data.append(
@@ -476,7 +484,7 @@ class APILogAdmin(admin.ModelAdmin):
                 )
                 android_data.append(
                     logs.filter(period__month=(now - relativedelta(months=labels_count - month - 1)).month).aggregate(
-                        android_count=Count("id", filter=Q(endpoint__icontains="X-Android-Client: Koloryt")&~Q(endpoint__icontains="by_chat_id"))
+                        android_count=Count("id", filter=Q(endpoint__icontains=settings.VERCEL_DOMAIN)&~Q(endpoint__icontains="https://")&~Q(endpoint__icontains="by_chat_id"))
                     )["android_count"] or 0
                 )
                 

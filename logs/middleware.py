@@ -11,18 +11,26 @@ class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         endpoint = unquote(request.path)
 
-        # Check if the request is coming from the Android app
+        # Android-specific logic
         if self.is_android_request(request):
             host = request.get_host()
             endpoint = f"{host}{endpoint}"
+            # Avoid logging Android requests containing 'https://'
+            if endpoint.startswith("https://"):
+                logger.debug(f"Skipping logging for Android request with endpoint: {endpoint}")
+                return  # Skip logging entirely for Android requests with `https://`
             logger.debug(f"Logging Android request for endpoint: {endpoint}")
+
+        # Internal request logic
         elif self.is_internal_request(request):
-            # Handle internal requests differently if needed
             host = request.get_host()
             endpoint = f"{host}{endpoint}"
+
+        # External request logic
         else:
             endpoint = unquote(request.build_absolute_uri())
 
+        # Log the request
         log_entry = APILog.objects.create(
             endpoint=endpoint,
             request_count=1,  # Start with count = 1 for each request
