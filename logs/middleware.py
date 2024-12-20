@@ -20,7 +20,8 @@ class APILogMiddleware(MiddlewareMixin):
 
         # Check if the request contains the Android header
         is_android_request = self.is_android_request(request)
-
+        # Check if there is an existing log entry for the same endpoint at the same timestamp
+        existing_log = APILog.objects.filter(endpoint=endpoint, timestamp=rounded_timestamp).first()
         # Check if this timestamp has any Android request logged
         if is_android_request:
             # If this request has the Android header, remove the https:// or http:// from all requests
@@ -30,12 +31,11 @@ class APILogMiddleware(MiddlewareMixin):
         else:
             # For non-Android requests, log normally
             #host = request.get_host()
-            host = request.get_host().replace('https://', '').replace('http://', '')
+            if existing_log:
+                host = request.get_host().replace('https://', '').replace('http://', '')
+            else:
+                host = request.get_host()
             endpoint = f"{host}{endpoint}"
-
-        # Check if there is an existing log entry for the same endpoint at the same timestamp
-        existing_log = APILog.objects.filter(endpoint=endpoint, timestamp=rounded_timestamp).first()
-
         if not existing_log:
             # Log the request only if there is no existing log entry for the same endpoint at the same timestamp
             log_entry = APILog.objects.create(
