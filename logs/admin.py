@@ -259,21 +259,25 @@ class APILogAdmin(admin.ModelAdmin):
         APILog.objects.filter(endpoint=endpoint).update(request_count=count)
 
     def clickable_endpoint(self, obj):
-        android_domain = re.sub(r'^https?://', '', settings.VERCEL_DOMAIN).lower()
-
+        # Normalize the domain from settings (remove scheme like http:// or https://)
+        android_domain = re.sub(r'^https?://', '', settings.VERCEL_DOMAIN).lower() if hasattr(settings, "VERCEL_DOMAIN") else ""
         base_url_patterns = [
-            settings.VERCEL_DOMAIN,
+            settings.VERCEL_DOMAIN if hasattr(settings, "VERCEL_DOMAIN") else "",
             android_domain,
             'localhost:8000',
             'localhost:8010',
             '127.0.0.1:8000',
             '127.0.0.1:8010',            
         ]
+
+        # Normalize the endpoint by stripping the base URL
         endpoint = obj.endpoint
         for base_url in base_url_patterns:
-            if endpoint.startswith(base_url):
-                endpoint = endpoint[len(base_url):]
+            if base_url and endpoint.startswith(base_url):  # Ensure base_url is not empty
+                endpoint = endpoint[len(base_url):]  # Strip the base URL from the endpoint
                 break
+
+        # Generate the admin URL with a query filter for the endpoint
         url = reverse('admin:logs_apilog_changelist') + f'?endpoint={obj.endpoint}'
         return format_html('<a href="{}">{}</a>', url, endpoint)
 
