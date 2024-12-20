@@ -28,21 +28,24 @@ class APILogMiddleware(MiddlewareMixin):
             # For non-Android requests, log the full absolute URI
             endpoint = unquote(request.build_absolute_uri())
 
-        # Check if there is an existing log entry for the same endpoint at the same timestamp
-        existing_log = APILog.objects.filter(endpoint=endpoint, timestamp=current_timestamp).first()
+        # Round timestamp to the nearest second (ignore microseconds)
+        rounded_timestamp = current_timestamp.replace(microsecond=0)
+
+        # Check if there is an existing log entry for the same endpoint at the same rounded timestamp
+        existing_log = APILog.objects.filter(endpoint=endpoint, timestamp=rounded_timestamp).first()
 
         if not existing_log:
-            # Log the request only if there is no existing log entry for the same endpoint at the same timestamp
+            # Log the request only if there is no existing log entry for the same endpoint at the same rounded timestamp
             log_entry = APILog.objects.create(
                 endpoint=endpoint,
                 request_count=1,  # Always set request_count to 1 for each request
-                timestamp=current_timestamp  # Store the exact timestamp
+                timestamp=rounded_timestamp  # Store the rounded timestamp (no microseconds)
             )
 
             logger.info(f"Logged request: Endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
         else:
             # If the log entry already exists, do nothing (no duplication)
-            logger.debug(f"Duplicate request detected for {endpoint} at timestamp {current_timestamp}. Skipping duplicate logging.")
+            logger.debug(f"Duplicate request detected for {endpoint} at timestamp {rounded_timestamp}. Skipping duplicate logging.")
 
     def process_response(self, request, response):
         logger.debug(f"Response for {request.path} returned with status code {response.status_code}")
@@ -62,4 +65,3 @@ class APILogMiddleware(MiddlewareMixin):
 
     def is_android_request(self, request):
         return request.headers.get('X-Android-Client') == 'Koloryt'
-# here we handle to make android reuests are made at the same timestamp without https:// 
