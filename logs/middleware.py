@@ -9,19 +9,12 @@ logger = logging.getLogger(__name__)
 
 class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        # Unquote the request path
         raw_endpoint = unquote(request.path)
-        normalized_endpoint = raw_endpoint.replace('https://', '')  # Normalize the endpoint by removing https://
-
-        # Skip logging if it's a duplicate request with 'https://'
+        normalized_endpoint = self.normalize_endpoint(request)
         if self.is_duplicate_request_with_https(raw_endpoint, normalized_endpoint):
             logger.debug(f"Skipping duplicate request with 'https://' for endpoint: {raw_endpoint}")
             return
-
-        # Determine the full endpoint for logging
         endpoint = self.get_full_endpoint(request, normalized_endpoint)
-
-        # Log the request
         log_entry = APILog.objects.create(
             endpoint=endpoint,
             request_count=1,
@@ -33,6 +26,12 @@ class APILogMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
         logger.debug(f"Response for {request.path} returned with status code {response.status_code}")
         return response
+
+    def normalize_endpoint(self, request):
+        endpoint = unquote(request.build_absolute_uri())
+        if endpoint.startswith('https://'):
+            endpoint = endpoint.replace('https://', '', 1)
+        return endpoint
 
     def get_full_endpoint(self, request, normalized_endpoint):
         if self.is_internal_request(request):
