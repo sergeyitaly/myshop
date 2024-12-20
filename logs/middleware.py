@@ -10,23 +10,19 @@ logger = logging.getLogger(__name__)
 class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         endpoint = unquote(request.path)
-        normalized_endpoint = endpoint.replace('https://', '')
-
-        # If the request contains 'https://', we skip logging for the first occurrence
+        normalized_endpoint = endpoint.replace('https://', '')  # Remove https:// for Android WebView requests
         if self.is_duplicate_request_with_https(endpoint, normalized_endpoint):
             logger.debug(f"Skipping duplicate request with 'https://' for endpoint: {endpoint}")
-            return 
-
-        # Log the second request (without 'https://')
+            return
         if self.is_internal_request(request):
             host = request.get_host()
-            endpoint = f"{host}{endpoint}"
+            endpoint = f"{host}{normalized_endpoint}"  # Append host for internal requests
         else:
-            endpoint = unquote(request.build_absolute_uri())
-
+            vercel_domain = getattr(settings, "VERCEL_DOMAIN", "")
+            endpoint = f"{vercel_domain}{normalized_endpoint}" if vercel_domain else normalized_endpoint
         log_entry = APILog.objects.create(
             endpoint=endpoint,
-            request_count=1,  
+            request_count=1,
             timestamp=timezone.localtime(timezone.now())
         )
 
@@ -49,12 +45,11 @@ class APILogMiddleware(MiddlewareMixin):
         return any(host == internal_host or host.endswith(f".{internal_host}") for internal_host in internal_hosts)
 
     def is_duplicate_request_with_https(self, endpoint, normalized_endpoint):
-        if hasattr(self, 'processed_urls_https'):
-            if endpoint.startswith('https://') and normalized_endpoint in self.processed_urls_https:
-                return True
-            if endpoint.startswith('https://'):
-                self.processed_urls_https.add(normalized_endpoint)
-        else:
-            self.processed_urls_https = {normalized_endpoint}
-        
+        if not hasattr(self, 'processed_urls_https'):
+            self.processed_urls_https = set()
+        if endpoint.startswith('https://') and normalized_endpoint in self.processed_urls_https:
+            return True
+        if endpoint.startswith('https://'):
+            self.processed_urls_https.add(normalized_endpoint)
+
         return False
