@@ -11,30 +11,27 @@ class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         # Get the current timestamp at the start of request processing
         current_timestamp = timezone.localtime(timezone.now())
-        
         # Round timestamp to the nearest second (ignore microseconds)
-        rounded_timestamp = current_timestamp.replace(microsecond=0)
-
+        rounded_timestamp = current_timestamp.replace(microsecond=1000)
         # Determine the endpoint
         endpoint = unquote(request.path)
-
         # Check if the request contains the Android header
         is_android_request = self.is_android_request(request)
-        # Check if there is an existing log entry for the same endpoint at the same timestamp
-        existing_log = APILog.objects.filter(endpoint=endpoint, timestamp=rounded_timestamp).first()
+
         # Check if this timestamp has any Android request logged
         if is_android_request:
             # If this request has the Android header, remove the https:// or http:// from all requests
             host = request.get_host().replace('https://', '').replace('http://', '')
             endpoint = f"{host}{endpoint}"
             logger.debug(f"Android request detected. Stripping https:// from endpoint: {endpoint}")
-        elif existing_log and is_android_request==False:
-            host = request.get_host().replace('https://', '').replace('http://', '')
-            endpoint = f"{host}{endpoint}"
         else:
             # For non-Android requests, log normally
             host = request.get_host()
             endpoint = f"{host}{endpoint}"
+
+        # Check if there is an existing log entry for the same endpoint at the same timestamp
+        existing_log = APILog.objects.filter(endpoint=endpoint, timestamp=rounded_timestamp).first()
+
         if not existing_log:
             # Log the request only if there is no existing log entry for the same endpoint at the same timestamp
             log_entry = APILog.objects.create(
