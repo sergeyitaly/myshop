@@ -232,7 +232,8 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',
         'rest_framework.throttling.ScopedRateThrottle',
-    ],
+        'myshop.RequestsThrottle.DropDuplicateRequestsThrottle',
+         ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': '3/s',
         'user': '10/minute',
