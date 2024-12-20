@@ -29,7 +29,8 @@ class APILogMiddleware(MiddlewareMixin):
             logger.debug(f"Android request detected. Stripping https:// from endpoint: {endpoint}")
         else:
             # For non-Android requests, log normally
-            host = request.get_host()
+            #host = request.get_host()
+            host = request.get_host().replace('https://', '').replace('http://', '')
             endpoint = f"{host}{endpoint}"
 
         # Check if there is an existing log entry for the same endpoint at the same timestamp
