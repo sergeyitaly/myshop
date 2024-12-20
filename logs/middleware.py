@@ -12,13 +12,15 @@ class APILogMiddleware(MiddlewareMixin):
         endpoint = unquote(request.path)
 
         if self.is_android_request(request):
-            host = request.get_host()
+            # Remove the "https://" part from the host
+            host = request.get_host().replace('https://', '').replace('http://', '')
             endpoint = f"{host}{endpoint}"
             logger.debug(f"Logging Android request for endpoint: {endpoint}")
         elif self.is_internal_request(request):
             host = request.get_host()
             endpoint = f"{host}{endpoint}"
         else:
+            # For other requests, log the full absolute URI
             endpoint = unquote(request.build_absolute_uri())
 
         log_entry = APILog.objects.create(
