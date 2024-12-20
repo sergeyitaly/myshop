@@ -10,25 +10,24 @@ logger = logging.getLogger(__name__)
 class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         endpoint = unquote(request.path)
-        # Normalize endpoint by removing https:// for comparison
         normalized_endpoint = endpoint.replace('https://', '')
-        if self.is_duplicate_request(normalized_endpoint, endpoint):
-            logger.debug(f"Skipping duplicate request for endpoint: {normalized_endpoint}")
-            return  # Skip logging for the duplicate requests
 
-        if self.is_android_request(request):
-            host = request.get_host()
-            endpoint = f"{host}{endpoint}"
-            logger.debug(f"Logging Android request for endpoint: {endpoint}")
-        elif self.is_internal_request(request):
+        # If the request contains 'https://', we skip logging for the first occurrence
+        if self.is_duplicate_request_with_https(endpoint, normalized_endpoint):
+            logger.debug(f"Skipping duplicate request with 'https://' for endpoint: {endpoint}")
+            return 
+
+        # Log the second request (without 'https://')
+        if self.is_internal_request(request):
             host = request.get_host()
             endpoint = f"{host}{endpoint}"
         else:
             endpoint = unquote(request.build_absolute_uri())
+
         log_entry = APILog.objects.create(
             endpoint=endpoint,
-            request_count=1,  # Start with count = 1 for each request
-            timestamp=timezone.localtime(timezone.now())  # Store the exact timestamp
+            request_count=1,  
+            timestamp=timezone.localtime(timezone.now())
         )
 
         logger.info(f"Logged request: Endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
@@ -49,18 +48,13 @@ class APILogMiddleware(MiddlewareMixin):
             internal_hosts.append(settings.VERCEL_DOMAIN)
         return any(host == internal_host or host.endswith(f".{internal_host}") for internal_host in internal_hosts)
 
-    def is_android_request(self, request):
-        return request.headers.get('X-Android-Client') == 'Koloryt'
-
-    def is_duplicate_request(self, normalized_endpoint, endpoint):
-        if hasattr(self, 'processed_urls'):
-            if normalized_endpoint in self.processed_urls:
-                if endpoint.startswith('https://'):
-                    logger.debug(f"Skipping duplicate request for https:// version: {endpoint}")
-                    return True
-            else:
-                self.processed_urls.add(normalized_endpoint)
+    def is_duplicate_request_with_https(self, endpoint, normalized_endpoint):
+        if hasattr(self, 'processed_urls_https'):
+            if endpoint.startswith('https://') and normalized_endpoint in self.processed_urls_https:
+                return True
+            if endpoint.startswith('https://'):
+                self.processed_urls_https.add(normalized_endpoint)
         else:
-            self.processed_urls = {normalized_endpoint}
+            self.processed_urls_https = {normalized_endpoint}
         
         return False
