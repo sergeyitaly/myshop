@@ -1,7 +1,7 @@
 from django.utils.deprecation import MiddlewareMixin
 from django.utils import timezone
 from .models import APILog
-from urllib.parse import urlparse
+from urllib.parse import unquote
 import logging
 
 logger = logging.getLogger(__name__)
@@ -11,11 +11,12 @@ class APILogMiddleware(MiddlewareMixin):
         current_timestamp = timezone.localtime(timezone.now()).replace(microsecond=0)
         is_android = self.is_android_request(request)
         is_vercel = self.is_vercel_request(request)
-        endpoint = request.build_absolute_uri().replace('http://','',1)
-        if is_vercel and is_android:
-            endpoint = endpoint.replace('https://', '', 1)
-            logger.debug(f"Modified endpoint for Vercel Android WebView: {endpoint}")
+        endpoint = unquote(request.build_absolute_uri())
+        endpoint = endpoint.replace('http://', '', 1)
+        if is_android:
+            logger.debug(f"Android WebView request detected for {endpoint}")
         if is_vercel and self.is_android_origin(request):
+            endpoint = endpoint.replace('https://', '', 1)
             logger.debug(f"Skipping Vercel request for endpoint {endpoint} since it's caused by Android WebView.")
             return
         time_window_start = current_timestamp - timezone.timedelta(seconds=2)
@@ -24,6 +25,7 @@ class APILogMiddleware(MiddlewareMixin):
             timestamp__gte=time_window_start,
             timestamp__lte=current_timestamp
         ).exists()
+
         if not existing_log:
             log_entry = APILog.objects.create(
                 endpoint=endpoint,
@@ -39,6 +41,7 @@ class APILogMiddleware(MiddlewareMixin):
         return response
 
     def is_android_request(self, request):
+        # Check if the request has the Android-specific header or User-Agent
         if request.headers.get('X-Android-Client') == 'Koloryt':
             return True
         user_agent = request.headers.get('User-Agent', '').lower()
@@ -47,9 +50,11 @@ class APILogMiddleware(MiddlewareMixin):
         return False
 
     def is_vercel_request(self, request):
+        # Identify requests served by Vercel
         if request.headers.get('X-Vercel-Client'):
             return True
         return request.META.get('SERVER_NAME', '').endswith('.vercel.app')
 
     def is_android_origin(self, request):
+        # Check if the request originates from Android WebView (via headers or meta data)
         return request.headers.get('X-Android-Origin') == 'True'
