@@ -12,26 +12,9 @@ class APILogMiddleware(MiddlewareMixin):
         # Get the current timestamp at the start of request processing
         current_timestamp = timezone.localtime(timezone.now())
         rounded_timestamp = current_timestamp.replace(microsecond=0)
-        endpoint = unquote(request.path)
-        session_id = request.session.get('android_request_session_id', None)
 
-        # Check if this is an Android request
-        is_android = self.is_android_request(request)
-        if is_android:
-            # Set a session-level flag for Android requests
-            if not session_id:
-                session_id = timezone.now().timestamp()  # Generate a unique session ID
-                request.session['android_request_session_id'] = session_id
-
-        # Handle Android-specific endpoint processing
-        if is_android or session_id:
-            # Remove "https://" part for Android requests
-            host = request.get_host().replace('https://', '').replace('http://', '')
-            endpoint = f"{host}{endpoint}"
-            logger.debug(f"Logging Android request for endpoint: {endpoint}")
-        else:
-            # For non-Android requests, log the full absolute URI
-            endpoint = unquote(request.build_absolute_uri())
+        # Determine the endpoint
+        endpoint = self.normalize_endpoint(request)
 
         # Avoid duplicate logging
         existing_log = APILog.objects.filter(endpoint=endpoint, timestamp=rounded_timestamp).exists()
@@ -52,14 +35,20 @@ class APILogMiddleware(MiddlewareMixin):
         return response
 
     def normalize_endpoint(self, request):
+        """
+        Normalize the endpoint by removing the `https://` or `http://` prefix,
+        regardless of whether it's an Android or non-Android request.
+        """
         is_android = self.is_android_request(request)
         session_id = request.session.get('android_request_session_id', None)
+
         if is_android:
             # Ensure Android requests have a session ID
             if not session_id:
                 session_id = timezone.now().timestamp()  # Generate a unique session ID
                 request.session['android_request_session_id'] = session_id
             logger.debug(f"Android request detected for path: {request.path}")
+
         # Normalize the endpoint
         endpoint = unquote(request.build_absolute_uri())
         endpoint = endpoint.replace('https://', '').replace('http://', '')
@@ -67,6 +56,9 @@ class APILogMiddleware(MiddlewareMixin):
         return endpoint
 
     def is_android_request(self, request):
+        """
+        Determine if the request is from an Android WebView.
+        """
         # Check for the custom header
         if request.headers.get('X-Android-Client') == 'Koloryt':
             return True
