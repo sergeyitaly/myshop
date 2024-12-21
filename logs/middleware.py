@@ -11,14 +11,14 @@ class APILogMiddleware(MiddlewareMixin):
         current_timestamp = timezone.localtime(timezone.now()).replace(microsecond=0)
         is_android = self.is_android_request(request)
         is_vercel = self.is_vercel_request(request)
-        endpoint = urlparse(request.build_absolute_uri()).path
+        endpoint = request.build_absolute_uri().replace('http://','',1)
         if is_vercel and is_android:
             endpoint = endpoint.replace('https://', '', 1)
             logger.debug(f"Modified endpoint for Vercel Android WebView: {endpoint}")
         if is_vercel and self.is_android_origin(request):
             logger.debug(f"Skipping Vercel request for endpoint {endpoint} since it's caused by Android WebView.")
             return
-        time_window_start = current_timestamp - timezone.timedelta(seconds=7)
+        time_window_start = current_timestamp - timezone.timedelta(seconds=2)
         existing_log = APILog.objects.filter(
             endpoint=endpoint,
             timestamp__gte=time_window_start,
