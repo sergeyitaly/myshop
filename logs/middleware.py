@@ -1,7 +1,7 @@
 from django.utils.deprecation import MiddlewareMixin
 from django.utils import timezone
 from .models import APILog
-from urllib.parse import unquote
+from urllib.parse import urlparse
 import logging
 
 logger = logging.getLogger(__name__)
@@ -11,15 +11,22 @@ class APILogMiddleware(MiddlewareMixin):
         current_timestamp = timezone.localtime(timezone.now()).replace(microsecond=0)
         is_android = self.is_android_request(request)
         is_vercel = self.is_vercel_request(request)
-        endpoint = unquote(request.build_absolute_uri())
-        endpoint = endpoint.replace('http://', '', 1)
 
-        # Vercel requests originating from Android WebView: Skip logging
+        # Use urlparse to clean the endpoint by removing protocol (https:// or http://)
+        parsed_url = urlparse(request.build_absolute_uri())
+        endpoint = parsed_url.path + ('?' + parsed_url.query if parsed_url.query else '')
+
+        # If the request is from Vercel and Android WebView, remove 'https://'
+        if is_vercel and is_android:
+            endpoint = endpoint.replace('https://', '', 1)
+            logger.debug(f"Modified endpoint for Vercel Android WebView: {endpoint}")
+
+        # Skip logging for Vercel requests from Android WebView
         if is_vercel and self.is_android_origin(request):
             logger.debug(f"Skipping Vercel request for endpoint {endpoint} since it's caused by Android WebView.")
             return
 
-        # Check for duplicates: same endpoint and timestamp
+        # Check for duplicates (same endpoint and timestamp)
         existing_log = APILog.objects.filter(
             endpoint=endpoint,
             timestamp=current_timestamp
@@ -40,11 +47,9 @@ class APILogMiddleware(MiddlewareMixin):
 
     def is_android_request(self, request):
         if request.headers.get('X-Android-Client') == 'Koloryt':
-            endpoint = endpoint.replace('https://', '', 1)
             return True
         user_agent = request.headers.get('User-Agent', '').lower()
         if "android" in user_agent and "webview" in user_agent:
-            endpoint = endpoint.replace('https://', '', 1)
             return True
         return False
 
