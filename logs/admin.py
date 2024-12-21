@@ -167,14 +167,22 @@ class APILogAdmin(admin.ModelAdmin):
     host_type.short_description = "Host Type"
 
 
-
     def get_queryset(self, request):
+        # Get a list of endpoint patterns to exclude (active ignore patterns)
         exclude_patterns = list(IgnoreEndpoint.objects.filter(is_active=True).values_list('name', flat=True))
+
+        # Get the initial queryset
         queryset = super().get_queryset(request)
+
+        # Apply any endpoint filters
         endpoint_filter = EndpointFilter(request, {}, self.model, self)
         queryset = endpoint_filter.queryset(request, queryset)
+
+        # Apply time period filters
         time_period_filter = TimePeriodFilter(request, {}, self.model, self)
         queryset = time_period_filter.queryset(request, queryset)
+
+        # Apply exclusions based on the ignore patterns
         if exclude_patterns:
             exclude_q = Q()
             for pattern in exclude_patterns:
@@ -183,6 +191,7 @@ class APILogAdmin(admin.ModelAdmin):
                 else:
                     exclude_q |= Q(endpoint__icontains=pattern)
             queryset = queryset.exclude(exclude_q)
+        #queryset.values('endpoint').distinct('endpoint').order_by('endpoint', '-timestamp')
         return queryset
     
     def get_chart_queryset(self, request):

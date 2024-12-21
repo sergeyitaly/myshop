@@ -16,7 +16,6 @@ class APILogMiddleware(MiddlewareMixin):
 
         # Vercel requests originating from Android WebView: Skip logging
         if is_vercel and self.is_android_origin(request):
-            endpoint = endpoint.replace('https://', '', 1)
             logger.debug(f"Skipping Vercel request for endpoint {endpoint} since it's caused by Android WebView.")
             return
 
@@ -41,9 +40,11 @@ class APILogMiddleware(MiddlewareMixin):
 
     def is_android_request(self, request):
         if request.headers.get('X-Android-Client') == 'Koloryt':
+            endpoint = endpoint.replace('https://', '', 1)
             return True
         user_agent = request.headers.get('User-Agent', '').lower()
         if "android" in user_agent and "webview" in user_agent:
+            endpoint = endpoint.replace('https://', '', 1)
             return True
         return False
 
