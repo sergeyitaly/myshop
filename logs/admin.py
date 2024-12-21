@@ -149,8 +149,6 @@ class APILogAdmin(admin.ModelAdmin):
 
     def host_type(self, obj):
         endpoint = obj.endpoint.lower()
-        # Remove protocol prefix (if any) from VERCEL_DOMAIN
-#        vercel_domain = re.sub(r'^https?://', '', settings.VERCEL_DOMAIN).lower()
         android_domain = re.sub(r'^https?://', '', settings.VERCEL_DOMAIN).lower() if hasattr(settings, "VERCEL_DOMAIN") else ""
         vercel_domain = settings.VERCEL_DOMAIN if hasattr(settings, "VERCEL_DOMAIN") else ""
 
@@ -185,16 +183,7 @@ class APILogAdmin(admin.ModelAdmin):
                 else:
                     exclude_q |= Q(endpoint__icontains=pattern)
             queryset = queryset.exclude(exclude_q)
-
-        latest_timestamps = APILog.objects.filter(
-            endpoint=OuterRef('endpoint')
-        ).order_by('-timestamp')
-        queryset = queryset.annotate(
-            total_requests=Sum('request_count'),
-            latest_timestamp=Subquery(latest_timestamps.values('timestamp')[:1]),
-            max_timestamp=Max('timestamp')
-        ).order_by('endpoint')
-        return queryset.filter(timestamp=F('latest_timestamp'))
+        return queryset
     
     def get_chart_queryset(self, request):
         exclude_patterns = list(IgnoreEndpoint.objects.filter(is_active=True).values_list('name', flat=True))
@@ -223,8 +212,8 @@ class APILogAdmin(admin.ModelAdmin):
 
     def latest_timestamp(self, obj):
         return obj.latest_timestamp
-    def request_sum(self, obj): 
-        return obj.total_requests
+#    def request_sum(self, obj): 
+#        return obj.total_requests
 #        return obj.request_count
     
     def add_to_ignore_list(self, request, queryset):
@@ -247,16 +236,21 @@ class APILogAdmin(admin.ModelAdmin):
             if latest_log:
                 latest_log.delete()
                 rows_deleted += 1
+                self.recalculate_request_count(endpoint)
         self.message_user(request, f'{rows_deleted} logs were successfully deleted.')
-
 
     def delete_all_logs(self, request, queryset):
         endpoints = queryset.values_list('endpoint', flat=True).distinct()
         rows_deleted = 0
         for endpoint in endpoints:
             rows_deleted += APILog.objects.filter(endpoint=endpoint).delete()[0]
+        for endpoint in endpoints:
+            self.recalculate_request_count(endpoint)
         self.message_user(request, f'{rows_deleted} logs were successfully deleted.')
 
+    def recalculate_request_count(self, endpoint):
+        count = APILog.objects.filter(endpoint=endpoint).count()
+        APILog.objects.filter(endpoint=endpoint).update(request_sum=count)
 
     def clickable_endpoint(self, obj):
         # Normalize the domain from settings (remove scheme like http:// or https://)

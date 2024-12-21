@@ -16,6 +16,7 @@ class APILogMiddleware(MiddlewareMixin):
 
         # Vercel requests originating from Android WebView: Skip logging
         if is_vercel and self.is_android_origin(request):
+            endpoint = endpoint.replace('https://', '', 1)
             logger.debug(f"Skipping Vercel request for endpoint {endpoint} since it's caused by Android WebView.")
             return
 
