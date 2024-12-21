@@ -11,25 +11,18 @@ class APILogMiddleware(MiddlewareMixin):
         current_timestamp = timezone.localtime(timezone.now()).replace(microsecond=0)
         is_android = self.is_android_request(request)
         is_vercel = self.is_vercel_request(request)
-
-        # Use urlparse to clean the endpoint by removing protocol (https:// or http://)
-        parsed_url = urlparse(request.build_absolute_uri())
-        endpoint = parsed_url.path + ('?' + parsed_url.query if parsed_url.query else '')
-
-        # If the request is from Vercel and Android WebView, remove 'https://'
+        endpoint = urlparse(request.build_absolute_uri()).path
         if is_vercel and is_android:
             endpoint = endpoint.replace('https://', '', 1)
             logger.debug(f"Modified endpoint for Vercel Android WebView: {endpoint}")
-
-        # Skip logging for Vercel requests from Android WebView
         if is_vercel and self.is_android_origin(request):
             logger.debug(f"Skipping Vercel request for endpoint {endpoint} since it's caused by Android WebView.")
             return
-
-        # Check for duplicates (same endpoint and timestamp)
+        time_window_start = current_timestamp - timezone.timedelta(seconds=7)
         existing_log = APILog.objects.filter(
             endpoint=endpoint,
-            timestamp=current_timestamp
+            timestamp__gte=time_window_start,
+            timestamp__lte=current_timestamp
         ).exists()
         if not existing_log:
             log_entry = APILog.objects.create(
