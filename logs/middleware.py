@@ -10,8 +10,10 @@ logger = logging.getLogger(__name__)
 class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         current_timestamp = timezone.localtime(timezone.now())
-        rounded_timestamp = current_timestamp.replace(microsecond=2000)
-        endpoint = self.normalize_endpoint(request)
+        rounded_timestamp = current_timestamp.replace(microsecond=3000)  # Round timestamp
+        endpoint = self.normalize_endpoint(request)  # Normalize the endpoint URL
+
+        # Check for existing logs for this endpoint and timestamp (to avoid duplicates)
         existing_log = APILog.objects.filter(endpoint=endpoint, timestamp=rounded_timestamp).exists()
         if not existing_log:
             log_entry = APILog.objects.create(
@@ -37,14 +39,11 @@ class APILogMiddleware(MiddlewareMixin):
                 request.session['android_request_session_id'] = session_id
             logger.debug(f"Android request detected for path: {request.path}")
 
-            # Strip protocol only for Android requests
-            endpoint = unquote(request.build_absolute_uri())
-            endpoint = endpoint.replace('https://', '').replace('http://', '')
-            logger.debug(f"Normalized endpoint (Android): {endpoint}")
-        else:
-            # Keep protocol intact for non-Android requests
-            endpoint = unquote(request.build_absolute_uri())
-            logger.debug(f"Normalized endpoint (Non-Android): {endpoint}")
+        # Normalize the endpoint by removing 'http://' or 'https://' and any other unwanted parts
+        endpoint = unquote(request.build_absolute_uri())
+        # Remove both 'http://' and 'https://' from the beginning of the URL
+        endpoint = endpoint.replace('https://', '').replace('http://', '')
+        logger.debug(f"Normalized endpoint (after stripping protocol): {endpoint}")
 
         return endpoint
 
@@ -54,5 +53,4 @@ class APILogMiddleware(MiddlewareMixin):
         user_agent = request.headers.get('User-Agent', '').lower()
         if "android" in user_agent and "webview" in user_agent:
             return True
-
         return False
