@@ -16,31 +16,16 @@ class APILogMiddleware(MiddlewareMixin):
 
         if is_android and is_vercel:
             logger.debug(f"Android request detected for {endpoint}")
+            endpoint = endpoint.replace('https://', '', 1)
 
         if is_vercel:
             logger.debug(f"Request processed by Vercel detected for {endpoint}")
-
-        # Define a strict 2-second time window for duplicates
-        time_window_start = current_timestamp - timezone.timedelta(seconds=2)
-
-        # Filter logs within the time window for the same endpoint
-        existing_log = APILog.objects.filter(
-            endpoint=endpoint.replace('https://', '', 1),
-            timestamp__gte=time_window_start,
-            timestamp__lte=current_timestamp
-        ).first()  # Retrieve the first matching log (if any)
-
-        if not existing_log:
-            # Create a new log only if no matching log exists
-            log_entry = APILog.objects.create(
-                endpoint=endpoint,
-                request_count=1,  # Always set to 1
-                timestamp=current_timestamp
-            )
-            logger.info(f"Logged request: Endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
-        else:
-            # Log the detection of a duplicate without creating a new entry
-            logger.debug(f"Duplicate request detected for {endpoint} at {current_timestamp}. Skipping duplicate logging.")
+        log_entry = APILog.objects.create(
+            endpoint=endpoint,
+            request_count=1,  # Always set to 1
+            timestamp=current_timestamp
+        )
+        logger.info(f"Logged request: Endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
 
     def process_response(self, request, response):
         logger.debug(f"Response for {request.path} returned with status code {response.status_code}")
