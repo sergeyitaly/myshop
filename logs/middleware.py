@@ -11,7 +11,7 @@ class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         # Get the current timestamp at the start of request processing
         current_timestamp = timezone.localtime(timezone.now())
-        rounded_timestamp = current_timestamp.replace(microsecond=1000)
+        rounded_timestamp = current_timestamp.replace(microsecond=0)
         endpoint = unquote(request.path)
         session_id = request.session.get('android_request_session_id', None)
 
@@ -47,22 +47,33 @@ class APILogMiddleware(MiddlewareMixin):
             logger.debug(f"Duplicate request detected for {endpoint} at timestamp {rounded_timestamp}. Skipping duplicate logging.")
 
     def process_response(self, request, response):
+        # Optional: Log the response status
         logger.debug(f"Response for {request.path} returned with status code {response.status_code}")
         return response
 
-    def is_internal_request(self, request):
-        host = request.get_host()
-        internal_hosts = [
-            "localhost:8000",
-            "127.0.0.1:8000",
-            "localhost:8010",
-            "127.0.0.1:8010"
-        ]
-        return any(host == internal_host or host.endswith(f".{internal_host}") for internal_host in internal_hosts)
-
-    def is_vercel_request(self, request):
-        host = request.get_host()
-        return hasattr(settings, "VERCEL_DOMAIN") and host in settings.VERCEL_DOMAIN
+    def normalize_endpoint(self, request):
+        is_android = self.is_android_request(request)
+        session_id = request.session.get('android_request_session_id', None)
+        if is_android:
+            # Ensure Android requests have a session ID
+            if not session_id:
+                session_id = timezone.now().timestamp()  # Generate a unique session ID
+                request.session['android_request_session_id'] = session_id
+            logger.debug(f"Android request detected for path: {request.path}")
+        # Normalize the endpoint
+        endpoint = unquote(request.build_absolute_uri())
+        endpoint = endpoint.replace('https://', '').replace('http://', '')
+        logger.debug(f"Normalized endpoint: {endpoint}")
+        return endpoint
 
     def is_android_request(self, request):
-        return request.headers.get('X-Android-Client') == 'Koloryt'
+        # Check for the custom header
+        if request.headers.get('X-Android-Client') == 'Koloryt':
+            return True
+
+        # Check for Android WebView-specific User-Agent patterns
+        user_agent = request.headers.get('User-Agent', '').lower()
+        if "android" in user_agent and "webview" in user_agent:
+            return True
+
+        return False
