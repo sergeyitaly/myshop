@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         current_timestamp = timezone.localtime(timezone.now())
-        rounded_timestamp = current_timestamp.replace(seconds=3)
+        rounded_timestamp = current_timestamp.replace(microsecond=0)
         is_android = self.is_android_request(request)
         endpoint = unquote(request.build_absolute_uri())
 
