@@ -12,8 +12,6 @@ class APILogMiddleware(MiddlewareMixin):
         current_timestamp = timezone.localtime(timezone.now())
         rounded_timestamp = current_timestamp.replace(microsecond=3000)  # Round timestamp
         endpoint = self.normalize_endpoint(request)  # Normalize the endpoint URL
-
-        # Check for existing logs for this endpoint and timestamp (to avoid duplicates)
         existing_log = APILog.objects.filter(endpoint=endpoint, timestamp=rounded_timestamp).exists()
         if not existing_log:
             log_entry = APILog.objects.create(
@@ -32,19 +30,16 @@ class APILogMiddleware(MiddlewareMixin):
     def normalize_endpoint(self, request):
         is_android = self.is_android_request(request)
         session_id = request.session.get('android_request_session_id', None)
+        endpoint = unquote(request.build_absolute_uri())
+        endpoint = endpoint.replace('http://', '')
 
         if is_android:
             if not session_id:
                 session_id = timezone.now().timestamp()  # Generate a unique session ID
+        else:
+            if session_id:
                 request.session['android_request_session_id'] = session_id
-            logger.debug(f"Android request detected for path: {request.path}")
-
-        # Normalize the endpoint by removing 'http://' or 'https://' and any other unwanted parts
-        endpoint = unquote(request.build_absolute_uri())
-        # Remove both 'http://' and 'https://' from the beginning of the URL
-        endpoint = endpoint.replace('https://', '').replace('http://', '')
-        logger.debug(f"Normalized endpoint (after stripping protocol): {endpoint}")
-
+                endpoint = endpoint.replace('https://', '')
         return endpoint
 
     def is_android_request(self, request):
