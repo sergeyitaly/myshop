@@ -11,7 +11,7 @@ class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         # Get the current timestamp at the start of request processing
         current_timestamp = timezone.localtime(timezone.now())
-        rounded_timestamp = current_timestamp.replace(microsecond=0)
+        rounded_timestamp = current_timestamp.replace(microsecond=1000)
         endpoint = unquote(request.path)
         session_id = request.session.get('android_request_session_id', None)
 
