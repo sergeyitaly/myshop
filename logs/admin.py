@@ -247,21 +247,16 @@ class APILogAdmin(admin.ModelAdmin):
             if latest_log:
                 latest_log.delete()
                 rows_deleted += 1
-                self.recalculate_request_count(endpoint)
         self.message_user(request, f'{rows_deleted} logs were successfully deleted.')
+
 
     def delete_all_logs(self, request, queryset):
         endpoints = queryset.values_list('endpoint', flat=True).distinct()
         rows_deleted = 0
         for endpoint in endpoints:
             rows_deleted += APILog.objects.filter(endpoint=endpoint).delete()[0]
-        for endpoint in endpoints:
-            self.recalculate_request_count(endpoint)
         self.message_user(request, f'{rows_deleted} logs were successfully deleted.')
 
-    def recalculate_request_count(self, endpoint):
-        count = APILog.objects.filter(endpoint=endpoint).count()
-        APILog.objects.filter(endpoint=endpoint).update(request_count=count)
 
     def clickable_endpoint(self, obj):
         # Normalize the domain from settings (remove scheme like http:// or https://)
