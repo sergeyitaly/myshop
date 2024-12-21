@@ -24,7 +24,7 @@ class APILogMiddleware(MiddlewareMixin):
 
         time_window_start = current_timestamp - timezone.timedelta(seconds=2)
         existing_log = APILog.objects.filter(
-            endpoint=endpoint,
+            endpoint=endpoint.replace('https://', '', 1),
             timestamp__gte=time_window_start,
             timestamp__lte=current_timestamp
         ).exists()
