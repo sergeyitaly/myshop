@@ -10,8 +10,15 @@ logger = logging.getLogger(__name__)
 class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         current_timestamp = timezone.localtime(timezone.now())
-        rounded_timestamp = current_timestamp.replace(microsecond=3000)  # Round timestamp
-        endpoint = self.normalize_endpoint(request)  # Normalize the endpoint URL
+        rounded_timestamp = current_timestamp.replace(seconds=3)
+        is_android = self.is_android_request(request)
+        endpoint = unquote(request.build_absolute_uri())
+
+        if is_android:
+            logger.debug(f"Response for {endpoint} returned {request.path}")
+            endpoint = endpoint.replace('https://', '')
+        else:
+            endpoint = endpoint.replace('http://', '')
         existing_log = APILog.objects.filter(endpoint=endpoint, timestamp=rounded_timestamp).exists()
         if not existing_log:
             log_entry = APILog.objects.create(
@@ -26,21 +33,6 @@ class APILogMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
         logger.debug(f"Response for {request.path} returned with status code {response.status_code}")
         return response
-
-    def normalize_endpoint(self, request):
-        is_android = self.is_android_request(request)
-        session_id = request.session.get('android_request_session_id', None)
-        endpoint = unquote(request.build_absolute_uri())
-        endpoint = endpoint.replace('http://', '')
-
-        if is_android:
-            if not session_id:
-                session_id = timezone.now().timestamp()  # Generate a unique session ID
-        else:
-            if session_id:
-                request.session['android_request_session_id'] = session_id
-                endpoint = endpoint.replace('https://', '')
-        return endpoint
 
     def is_android_request(self, request):
         if request.headers.get('X-Android-Client') == 'Koloryt':
