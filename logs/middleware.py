@@ -9,10 +9,10 @@ logger = logging.getLogger(__name__)
 class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
+        endpoint = unquote(request.build_absolute_uri()).replace('http://', '', 1)
+
         is_android = self.is_android_request(request)
         is_vercel = self.is_vercel_request(request)
-        endpoint = unquote(request.build_absolute_uri())
-        endpoint = endpoint.replace('http://', '', 1)
 
         if is_android and is_vercel:
             logger.debug(f"Android request detected for {endpoint}")
@@ -21,20 +21,22 @@ class APILogMiddleware(MiddlewareMixin):
         if is_vercel:
             logger.debug(f"Request processed by Vercel detected for {endpoint}")
 
-        # Check for an existing log entry
-        if not APILog.objects.filter(
+        # Check for and remove duplicate logs within 10 seconds
+        ten_seconds_ago = timezone.now() - timezone.timedelta(seconds=10)
+        duplicates = APILog.objects.filter(
+            endpoint=endpoint.replace('https://', '', 1), 
+            timestamp__gte=ten_seconds_ago)
+        if duplicates.exists():
+            duplicates.delete()
+            logger.info(f"Deleted {duplicates.count()} duplicate logs for Endpoint={endpoint} within 10 seconds.")
+
+        # Log the current request
+        log_entry = APILog.objects.create(
             endpoint=endpoint,
+            request_count=1,
             timestamp=current_timestamp
-        ).exists():
-            # Create a new log entry only if it doesn't already exist
-            log_entry = APILog.objects.create(
-                endpoint=endpoint,
-                request_count=1,  # Always set to 1
-                timestamp=current_timestamp
-            )
-            logger.info(f"Logged request: Endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
-        else:
-            logger.debug(f"Duplicate log skipped for Endpoint={endpoint}, Timestamp={current_timestamp}")
+        )
+        logger.info(f"Logged request: Endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
 
     def process_response(self, request, response):
         logger.debug(f"Response for {request.path} returned with status code {response.status_code}")

@@ -139,7 +139,7 @@ class IgnoreEndpointAdmin(admin.ModelAdmin):
 
 
 class APILogAdmin(admin.ModelAdmin):
-    list_display = ('clickable_endpoint', 'host_type', 'request_sum', 'timestamp')
+    list_display = ('id','clickable_endpoint', 'host_type', 'request_sum', 'timestamp')
     list_filter = (TimePeriodFilter, EndpointFilter)
     actions = [clear_logs, 'add_to_ignore_list','delete_last_log', 'delete_all_logs']
     ordering = ('-timestamp',)
