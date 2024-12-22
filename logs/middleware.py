@@ -22,10 +22,10 @@ class APILogMiddleware(MiddlewareMixin):
             logger.debug(f"Request processed by Vercel detected for {endpoint}")
 
         # Check for and remove duplicate logs within 10 seconds
-        ten_seconds_ago = timezone.now() - timezone.timedelta(seconds=10)
+        some_seconds_ago = timezone.now() - timezone.timedelta(seconds=7)
         duplicates = APILog.objects.filter(
             endpoint=endpoint.replace('https://', '', 1), 
-            timestamp__gte=ten_seconds_ago)
+            timestamp__gte=some_seconds_ago)
         if duplicates.exists():
             duplicates.delete()
             logger.info(f"Deleted {duplicates.count()} duplicate logs for Endpoint={endpoint} within 10 seconds.")
