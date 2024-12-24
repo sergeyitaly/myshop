@@ -11,10 +11,10 @@ class APILogMiddleware(MiddlewareMixin):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
         endpoint = unquote(request.build_absolute_uri())
         is_android_webview = self.is_android_webview_request(request)
-        is_vercel = self.is_vercel_request(request)
-        cleaned_endpoint = endpoint.replace('http://', '')
+        is_vercel_production = self.is_vercel_production_request(request)
+        cleaned_endpoint = endpoint.replace('http://', '').replace('https://', '')
         some_seconds_ago = timezone.now() - timezone.timedelta(seconds=10)
-        duplicate = APILog.objects.filter(endpoint=cleaned_endpoint.replace('https://', ''), timestamp__gte=some_seconds_ago).first()
+        duplicate = APILog.objects.filter(endpoint=cleaned_endpoint, timestamp__gte=some_seconds_ago).first()
 
         if is_android_webview:
             if duplicate:
@@ -28,18 +28,17 @@ class APILogMiddleware(MiddlewareMixin):
             logger.info(f"Logged Android WebView request: Endpoint={cleaned_endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
             return None
 
-        if is_vercel:
+        if is_vercel_production:
             if duplicate:
-                logger.debug(f"Vercel request triggered by Android WebView detected for {cleaned_endpoint}. Skipping log.")
+                logger.debug(f"Duplicate Vercel request detected for {cleaned_endpoint}. Skipping log.")
                 return None
-
-            else:
-                log_entry = APILog.objects.create(
-                    endpoint=cleaned_endpoint,
-                    request_count=1,
-                    timestamp=current_timestamp
-                )
-                logger.info(f"Logged Vercel request: Endpoint={cleaned_endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
+            log_entry = APILog.objects.create(
+                endpoint=endpoint,  # Keep original endpoint with https:// for Vercel logs
+                request_count=1,
+                timestamp=current_timestamp
+            )
+            logger.info(f"Logged Vercel request: Endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
+            return None
 
     def process_response(self, request, response):
         logger.debug(f"Response for {request.path} returned with status code {response.status_code}")
@@ -53,5 +52,8 @@ class APILogMiddleware(MiddlewareMixin):
             return True
         return False
 
-    def is_vercel_request(self, request):
-        return request.META.get('SERVER_NAME', '').endswith('.vercel.app')
+    def is_vercel_production_request(self, request):
+        return (
+            request.META.get('SERVER_NAME', '').endswith('.vercel.app')
+            and request.is_secure()  # Ensures the request is over HTTPS
+        )
