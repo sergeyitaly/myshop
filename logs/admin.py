@@ -13,17 +13,25 @@ from django.utils.dateparse import parse_datetime
 from django.utils.timezone import now
 from dateutil.relativedelta import relativedelta
 from django.utils.html import format_html
-from django.db.models import Min, Max, F, OuterRef, Subquery, Sum
+from django.db.models import Min, Max, F, OuterRef, Subquery, Sum, Func, CharField
 from django.conf import settings
+from django.db import connection
 from django.db.models import Case, When, Value, F, Q, Count
 from django.db.models.functions import Substr, Length
 import re
+from django.utils.timezone import localtime
 
 
 def clear_logs(modeladmin, request, queryset):
     count, _ = queryset.delete()
     modeladmin.message_user(request, f'{count} log(s) cleared.')
 clear_logs.short_description = 'Clear selected logs'
+
+
+class TimestampToChar(Func):
+    function = 'strftime' if connection.vendor == 'sqlite' else 'to_char'
+    template = "%(function)s(%(expressions)s, 'YYYY-MM-DD HH24:MI:SS')"
+    output_field = CharField()
 
 class TimePeriodFilter(admin.SimpleListFilter):
 
@@ -139,7 +147,7 @@ class IgnoreEndpointAdmin(admin.ModelAdmin):
 
 
 class APILogAdmin(admin.ModelAdmin):
-    list_display = ('id','clickable_endpoint', 'host_type', 'request_sum', 'timestamp')
+    list_display = ('id','clickable_endpoint', 'host_type', 'request_sum', 'formatted_timestamp')
     list_filter = (TimePeriodFilter, EndpointFilter)
     actions = [clear_logs, 'add_to_ignore_list','delete_last_log', 'delete_all_logs']
     ordering = ('-timestamp',)
@@ -192,6 +200,7 @@ class APILogAdmin(admin.ModelAdmin):
                     exclude_q |= Q(endpoint__icontains=pattern)
             queryset = queryset.exclude(exclude_q)
         #queryset.values('endpoint').distinct('endpoint').order_by('endpoint', '-timestamp')
+
         return queryset
     
     def get_chart_queryset(self, request):
@@ -218,7 +227,11 @@ class APILogAdmin(admin.ModelAdmin):
             max_timestamp=Max('timestamp')
         ).order_by('endpoint')         
         return queryset
-
+ #   def formatted_timestamp(self, obj):
+ #       return obj.formatted_timestamp
+    def formatted_timestamp(self, obj):
+        # Format the timestamp in HH:MM:SS
+        return localtime(obj.timestamp).strftime('%H:%M:%S')
     def latest_timestamp(self, obj):
         return obj.latest_timestamp
 #    def request_sum(self, obj): 
