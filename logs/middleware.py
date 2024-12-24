@@ -5,7 +5,6 @@ from urllib.parse import unquote
 import logging
 
 logger = logging.getLogger(__name__)
-
 class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
@@ -14,12 +13,15 @@ class APILogMiddleware(MiddlewareMixin):
         is_vercel_production = self.is_vercel_production_request(request)
         cleaned_endpoint = endpoint.replace('http://', '').replace('https://', '')
         some_seconds_ago = timezone.now() - timezone.timedelta(seconds=10)
-        duplicate = APILog.objects.filter(endpoint=cleaned_endpoint, timestamp__gte=some_seconds_ago).exists()
+
+        # Check for duplicate logs within the 10-second window
+        duplicate = APILog.objects.filter(endpoint=cleaned_endpoint, timestamp__gte=some_seconds_ago)
 
         if is_android_webview:
-            if duplicate:
-                logger.debug(f"Duplicate Android WebView request detected for {cleaned_endpoint}. Skipping log.")
-                return None
+            if duplicate.exists():
+                # Delete the older duplicate logs if they exist within the time frame
+                duplicate.delete()
+                logger.debug(f"Duplicate Android WebView request detected for {cleaned_endpoint}. Previous logs deleted.")
             log_entry = APILog.objects.create(
                 endpoint=cleaned_endpoint,
                 request_count=1,
@@ -29,8 +31,10 @@ class APILogMiddleware(MiddlewareMixin):
             return None
 
         if is_vercel_production:
-            if duplicate:
-                logger.debug(f"Duplicate Vercel request detected for {cleaned_endpoint}. Skipping log.")
+            if duplicate.exists():
+                # Delete the older duplicate logs if they exist within the time frame
+                #duplicate.delete()
+                logger.debug(f"Duplicate Vercel request detected for {cleaned_endpoint}. Previous logs deleted.")
                 return None
             log_entry = APILog.objects.create(
                 endpoint=endpoint,  # Keep original endpoint with https:// for Vercel logs
@@ -41,12 +45,11 @@ class APILogMiddleware(MiddlewareMixin):
             return None
         else:
             log_entry = APILog.objects.create(
-                endpoint=cleaned_endpoint,  
+                endpoint=cleaned_endpoint,
                 request_count=1,
                 timestamp=current_timestamp
             )
             logger.info(f"Logged Localhost request: Endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
-
 
     def process_response(self, request, response):
         logger.debug(f"Response for {request.path} returned with status code {response.status_code}")
