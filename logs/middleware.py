@@ -10,14 +10,14 @@ class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
         endpoint = unquote(request.build_absolute_uri()).replace('http://', '')
-        if self.is_android_request(request):
-            logger.debug(f"Android WebView request detected for {endpoint}. Dropping the request.")
-            return None  # Skip logging for Android requests with the header
         if self.is_vercel_request(request) and self.is_android_webview_request(request):
-            logger.debug(f"Vercel request caused by Android WebView detected for {endpoint}")
-            endpoint = endpoint.replace('https://', '')
+            logger.debug(f"Vercel request caused by Android WebView detected for {endpoint}. Dropping the request.")
+            return None  # Drop the request if it's a Vercel request caused by Android WebView
+        if self.is_vercel_request(request):
+            logger.debug(f"Regular Vercel request detected for {endpoint}")
             some_seconds_ago = timezone.now() - timezone.timedelta(seconds=10)
             duplicate = APILog.objects.filter(endpoint=endpoint, timestamp__gte=some_seconds_ago).first()
+
             if duplicate:
                 logger.debug(f"Duplicate request detected for {endpoint}. Skipping log.")
                 return None  # Skip logging duplicate requests
@@ -27,7 +27,7 @@ class APILogMiddleware(MiddlewareMixin):
                     request_count=1,
                     timestamp=current_timestamp
                 )
-                logger.info(f"Logged Vercel request (Android WebView): Endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
+                logger.info(f"Logged Vercel request: Endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
                 return None  # Allow the request to proceed after logging
 
     def process_response(self, request, response):
@@ -36,10 +36,10 @@ class APILogMiddleware(MiddlewareMixin):
 
     def is_android_request(self, request):
         if request.headers.get('X-Android-Client') == 'Koloryt':
-            return True
+            return True  # This is a known Android client request
         user_agent = request.headers.get('User-Agent', '').lower()
         if "android" in user_agent and "webview" in user_agent:
-            return True
+            return True  # It's an Android WebView request
         return False
 
     def is_vercel_request(self, request):
