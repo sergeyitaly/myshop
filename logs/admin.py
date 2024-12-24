@@ -231,7 +231,8 @@ class APILogAdmin(admin.ModelAdmin):
  #       return obj.formatted_timestamp
     def formatted_timestamp(self, obj):
         # Format the timestamp in HH:MM:SS
-        return localtime(obj.timestamp).strftime('%H:%M:%S')
+        return localtime(obj.timestamp).strftime('%Y-%m-%d %H:%M:%S')
+    
     def latest_timestamp(self, obj):
         return obj.latest_timestamp
 #    def request_sum(self, obj): 
