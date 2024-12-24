@@ -14,7 +14,7 @@ class APILogMiddleware(MiddlewareMixin):
         is_vercel_production = self.is_vercel_production_request(request)
         cleaned_endpoint = endpoint.replace('http://', '').replace('https://', '')
         some_seconds_ago = timezone.now() - timezone.timedelta(seconds=10)
-        duplicate = APILog.objects.filter(endpoint=cleaned_endpoint, timestamp__gte=some_seconds_ago).first()
+        duplicate = APILog.objects.filter(endpoint=cleaned_endpoint, timestamp__gte=some_seconds_ago).exists()
 
         if is_android_webview:
             if duplicate:
@@ -39,6 +39,14 @@ class APILogMiddleware(MiddlewareMixin):
             )
             logger.info(f"Logged Vercel request: Endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
             return None
+        else:
+            log_entry = APILog.objects.create(
+                endpoint=cleaned_endpoint,  
+                request_count=1,
+                timestamp=current_timestamp
+            )
+            logger.info(f"Logged Localhost request: Endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
+
 
     def process_response(self, request, response):
         logger.debug(f"Response for {request.path} returned with status code {response.status_code}")
