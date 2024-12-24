@@ -220,6 +220,21 @@ telegram_webhook = TelegramWebhook.as_view()
 
 
 
+
+def calculate_popularity(sales_count, stock):
+    # Define a max sales_count to normalize the popularity
+    max_sales_count = 1000  # Set this to a realistic max sales count for your system
+    max_stock = 100  # Define a maximum stock limit
+
+    # Normalize sales count and stock to a 1-10 scale
+    sales_popularity = min(10, (sales_count / max_sales_count) * 10)
+    stock_popularity = min(10, (stock / max_stock) * 10)
+    popularity = int((sales_popularity + stock_popularity) / 2)
+    
+    # Ensure popularity is between 1 and 10
+    return max(1, min(10, popularity))
+
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_order(request):
@@ -233,7 +248,22 @@ def create_order(request):
             order = serializer.save()
             phone = request.data.get('phone')
             order_items_en = serializer.get_order_items_en(order)
-            order_items_uk = serializer.get_order_items_uk(order)   
+            order_items_uk = serializer.get_order_items_uk(order)
+
+            # Update popularity of products in the order
+            for item in order_items_en:
+                product = item['product']
+                sales_count = product.sales_count + item['quantity']
+                stock = product.stock - item['quantity']
+                
+                # Calculate the new popularity
+                product.popularity = calculate_popularity(sales_count, stock)
+                product.sales_count = sales_count
+                product.stock = stock
+                
+                # Save the product with updated fields
+                product.save()
+
             try:
                 telegram_user = TelegramUser.objects.get(phone=phone)
                 if telegram_user:
