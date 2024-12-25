@@ -18,7 +18,7 @@ class APILogMiddleware(MiddlewareMixin):
             return None
         is_vercel_production = self.is_vercel_production_request(request)
         if is_vercel_production:
-            self.log_request(cleaned_endpoint, 'Vercel', current_timestamp, some_seconds_ago)
+            self.log_request(endpoint, 'Vercel', current_timestamp, some_seconds_ago)
             return None
         self.log_request(cleaned_endpoint, 'Local', current_timestamp, some_seconds_ago)
 
