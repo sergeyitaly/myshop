@@ -41,7 +41,7 @@ class APILogMiddleware(MiddlewareMixin):
 
     def clean_endpoint(self, endpoint):
         cleaned = endpoint.replace('http://', '').replace('https://', '')
-        cleaned = cleaned.split('?')[0]  # Remove query parameters
+        #cleaned = cleaned.split('?')[0]  # Remove query parameters
         return cleaned.strip()
 
     def log_request(self, endpoint, request_type, current_timestamp, some_seconds_ago):

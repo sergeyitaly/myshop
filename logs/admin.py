@@ -20,6 +20,7 @@ from django.db.models import Case, When, Value, F, Q, Count
 from django.db.models.functions import Substr, Length
 import re
 from django.utils.timezone import localtime
+#from semantic_admin import SemanticModelAdmin, SemanticStackedInline, SemanticTabularInline
 
 
 def clear_logs(modeladmin, request, queryset):

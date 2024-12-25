@@ -8,7 +8,7 @@ class APILog(models.Model):
     request_count = models.IntegerField(default=0)
     timestamp = models.DateTimeField(auto_now=True)
     request_sum = models.IntegerField(default=0)
-    
+
     class Meta:
         ordering = ['-timestamp']
         app_label = 'logs'  
