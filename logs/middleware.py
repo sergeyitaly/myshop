@@ -9,15 +9,17 @@ logger = logging.getLogger(__name__)
 class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
-        endpoint = unquote(request.build_absolute_uri())
-        cleaned_endpoint = self.clean_endpoint(endpoint)
+        endpoint = unquote(request.build_absolute_uri()).replace('https://', '')
         some_seconds_ago = timezone.now() - timezone.timedelta(seconds=10)
         if self.is_android_webview_request(request, endpoint):
+            cleaned_endpoint = self.clean_endpoint(endpoint, is_webview=True)
             self.log_request(cleaned_endpoint, 'Android WebView', current_timestamp, some_seconds_ago)
             return None
         if self.is_vercel_production_request(request, endpoint):
-            self.log_request(endpoint, 'Vercel', current_timestamp, some_seconds_ago)
+            cleaned_endpoint = self.clean_endpoint(endpoint, is_webview=False)
+            self.log_request(cleaned_endpoint, 'Vercel', current_timestamp, some_seconds_ago)
             return None
+        self.log_request(cleaned_endpoint, 'LOcalhost', current_timestamp, some_seconds_ago)
         return None
 
     def process_response(self, request, response):
@@ -25,18 +27,16 @@ class APILogMiddleware(MiddlewareMixin):
         return response
 
     def is_android_webview_request(self, request, endpoint):
-        if "https://" not in endpoint and request.headers.get('X-Android-Client') == 'Koloryt':
-            return True
-        return False
+        return "https://" not in endpoint and request.headers.get('X-Android-Client') == 'Koloryt'
 
     def is_vercel_production_request(self, request, endpoint):
-        if "https://" in endpoint and request.META.get('SERVER_NAME', '').endswith('.vercel.app') and request.is_secure():
-            return True
-        return False
+        return "https://" in endpoint and request.META.get('SERVER_NAME', '').endswith('.vercel.app') and request.is_secure()
 
-    def clean_endpoint(self, endpoint):
-        cleaned = endpoint.replace('http://', '').replace('https://', '')
-        return cleaned.strip()
+    def clean_endpoint(self, endpoint, is_webview):
+        if is_webview:
+            return endpoint.replace('https://', '').strip()
+        else:
+            return endpoint.strip()
 
     def log_request(self, endpoint, request_type, current_timestamp, some_seconds_ago):
         duplicate = APILog.objects.filter(endpoint=endpoint, timestamp__gte=some_seconds_ago)
