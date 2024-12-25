@@ -12,36 +12,30 @@ class APILogMiddleware(MiddlewareMixin):
         endpoint = unquote(request.build_absolute_uri())
         cleaned_endpoint = self.clean_endpoint(endpoint)
         some_seconds_ago = timezone.now() - timezone.timedelta(seconds=10)
-        is_android_webview = self.is_android_webview_request(request, endpoint)
-        if is_android_webview:
+        if self.is_android_webview_request(request, endpoint):
             self.log_request(cleaned_endpoint, 'Android WebView', current_timestamp, some_seconds_ago)
             return None
-        is_vercel_production = self.is_vercel_production_request(request)
-        if is_vercel_production:
+        if self.is_vercel_production_request(request, endpoint):
             self.log_request(endpoint, 'Vercel', current_timestamp, some_seconds_ago)
             return None
-        self.log_request(cleaned_endpoint, 'Local', current_timestamp, some_seconds_ago)
+        return None
 
     def process_response(self, request, response):
         logger.debug(f"Response for {request.path} returned with status code {response.status_code}")
         return response
 
     def is_android_webview_request(self, request, endpoint):
-        if request.headers.get('X-Android-Client') == 'Koloryt':
-            return True
-        if "https://" not in endpoint:
+        if "https://" not in endpoint and request.headers.get('X-Android-Client') == 'Koloryt':
             return True
         return False
 
-    def is_vercel_production_request(self, request):
-        return (
-            request.META.get('SERVER_NAME', '').endswith('.vercel.app')
-            and request.is_secure()  # Ensures the request is over HTTPS
-        )
+    def is_vercel_production_request(self, request, endpoint):
+        if "https://" in endpoint and request.META.get('SERVER_NAME', '').endswith('.vercel.app') and request.is_secure():
+            return True
+        return False
 
     def clean_endpoint(self, endpoint):
         cleaned = endpoint.replace('http://', '').replace('https://', '')
-        #cleaned = cleaned.split('?')[0]  # Remove query parameters
         return cleaned.strip()
 
     def log_request(self, endpoint, request_type, current_timestamp, some_seconds_ago):
@@ -55,5 +49,4 @@ class APILogMiddleware(MiddlewareMixin):
             )
             logger.info(f"Logged {request_type} request: Endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
         else:
-            # Skip logging if duplicate is found
             logger.debug(f"Duplicate {request_type} request detected for {endpoint}. Skipping log.")
