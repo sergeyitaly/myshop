@@ -250,18 +250,21 @@ def create_order(request):
             order_items_en = serializer.get_order_items_en(order)
             order_items_uk = serializer.get_order_items_uk(order)
 
-            # Update popularity of products in the order
-            for item in order_items_en:
-                product = item['product']
-                sales_count = product.sales_count + item['quantity']
-                stock = product.stock - item['quantity']
-                
-                # Calculate the new popularity
-                product.popularity = calculate_popularity(sales_count, stock)
-                product.sales_count = sales_count
-                product.stock = stock
-                
-                # Save the product with updated fields
+            for item_data in request.data.get('order_items', []):
+                product_id = item_data.get('product_id')
+                quantity = item_data.get('quantity')
+                if not product_id:
+                    raise ValidationError("product_id is required for order items.")
+
+                try:
+                    product = Product.objects.get(id=product_id)
+                except Product.DoesNotExist:
+                    raise ValidationError(f"Product with id {product_id} does not exist.")
+
+                # Update product fields
+                product.sales_count += quantity
+                product.stock -= quantity
+                product.popularity = calculate_popularity(product.sales_count, product.stock)
                 product.save()
 
             try:
