@@ -10,15 +10,15 @@ class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
         endpoint = unquote(request.build_absolute_uri())
-        cleaned_endpoint = endpoint.replace('http://', '').replace('https://', '')
+        cleaned_endpoint = self.clean_endpoint(endpoint)
         some_seconds_ago = timezone.now() - timezone.timedelta(seconds=10)
         is_android_webview = self.is_android_webview_request(request, endpoint)
         if is_android_webview:
-            self.log_request(cleaned_endpoint, 'Android', current_timestamp, some_seconds_ago)
+            self.log_request(cleaned_endpoint, 'Android WebView', current_timestamp, some_seconds_ago)
             return None
         is_vercel_production = self.is_vercel_production_request(request)
         if is_vercel_production:
-            self.log_request(endpoint, 'Vercel', current_timestamp, some_seconds_ago)
+            self.log_request(cleaned_endpoint, 'Vercel', current_timestamp, some_seconds_ago)
             return None
         self.log_request(cleaned_endpoint, 'Local', current_timestamp, some_seconds_ago)
 
@@ -39,6 +39,11 @@ class APILogMiddleware(MiddlewareMixin):
             and request.is_secure()  # Ensures the request is over HTTPS
         )
 
+    def clean_endpoint(self, endpoint):
+        cleaned = endpoint.replace('http://', '').replace('https://', '')
+        cleaned = cleaned.split('?')[0]  # Remove query parameters
+        return cleaned.strip()
+
     def log_request(self, endpoint, request_type, current_timestamp, some_seconds_ago):
         duplicate = APILog.objects.filter(endpoint=endpoint, timestamp__gte=some_seconds_ago)
 
@@ -50,4 +55,5 @@ class APILogMiddleware(MiddlewareMixin):
             )
             logger.info(f"Logged {request_type} request: Endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
         else:
+            # Skip logging if duplicate is found
             logger.debug(f"Duplicate {request_type} request detected for {endpoint}. Skipping log.")
