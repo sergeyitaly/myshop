@@ -6,64 +6,48 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
 class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
         endpoint = unquote(request.build_absolute_uri())
         cleaned_endpoint = endpoint.replace('http://', '').replace('https://', '')
         some_seconds_ago = timezone.now() - timezone.timedelta(seconds=10)
-        is_android_webview = self.is_android_webview_request(request)
-        is_vercel_production = self.is_vercel_production_request(request)
-        duplicate = APILog.objects.filter(endpoint=cleaned_endpoint, timestamp__gte=some_seconds_ago)
-
+        is_android_webview = self.is_android_webview_request(request, endpoint)
         if is_android_webview:
-            if not duplicate.exists():
-                log_entry = APILog.objects.create(
-                    endpoint=cleaned_endpoint,
-                    request_count=1,
-                    timestamp=current_timestamp
-                )
-                logger.info(f"Logged Android WebView request: Endpoint={cleaned_endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
-            else:
-                logger.debug(f"Duplicate Android WebView request detected for {cleaned_endpoint}. Skipping log.")
+            self.log_request(cleaned_endpoint, 'Android', current_timestamp, some_seconds_ago)
             return None
-
+        is_vercel_production = self.is_vercel_production_request(request)
         if is_vercel_production:
-            if not duplicate.exists():
-                log_entry = APILog.objects.create(
-                    endpoint=endpoint,  # Keep original endpoint with https:// for Vercel logs
-                    request_count=1,
-                    timestamp=current_timestamp
-                )
-                logger.info(f"Logged Vercel request: Endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
-            else:
-                logger.debug(f"Duplicate Vercel request detected for {endpoint}. Skipping log.")
+            self.log_request(endpoint, 'Vercel', current_timestamp, some_seconds_ago)
             return None
-
-        # Default logging for other requests
-        if not duplicate.exists():
-            log_entry = APILog.objects.create(
-                endpoint=cleaned_endpoint,
-                request_count=1,
-                timestamp=current_timestamp
-            )
-            logger.info(f"Logged Localhost request: Endpoint={cleaned_endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
-        else:
-            logger.debug(f"Duplicate Localhost request detected for {cleaned_endpoint}. Skipping log.")
+        self.log_request(cleaned_endpoint, 'Local', current_timestamp, some_seconds_ago)
 
     def process_response(self, request, response):
         logger.debug(f"Response for {request.path} returned with status code {response.status_code}")
         return response
 
-    def is_android_webview_request(self, request):
+    def is_android_webview_request(self, request, endpoint):
         if request.headers.get('X-Android-Client') == 'Koloryt':
             return True
-        user_agent = request.headers.get('User-Agent', '').lower()
-        return "android" in user_agent and "webview" in user_agent
+        if "https://" not in endpoint:
+            return True
+        return False
 
     def is_vercel_production_request(self, request):
         return (
             request.META.get('SERVER_NAME', '').endswith('.vercel.app')
             and request.is_secure()  # Ensures the request is over HTTPS
         )
+
+    def log_request(self, endpoint, request_type, current_timestamp, some_seconds_ago):
+        duplicate = APILog.objects.filter(endpoint=endpoint, timestamp__gte=some_seconds_ago)
+
+        if not duplicate.exists():
+            log_entry = APILog.objects.create(
+                endpoint=endpoint,
+                request_count=1,
+                timestamp=current_timestamp,
+            )
+            logger.info(f"Logged {request_type} request: Endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
+        else:
+            logger.debug(f"Duplicate {request_type} request detected for {endpoint}. Skipping log.")
