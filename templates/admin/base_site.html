@@ -2,14 +2,15 @@
 
 {% load i18n %}
 {% load static %}
-{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:pgettext("site title", "Django site admin") }}
+{% endblock %}
 
 {% block branding %}
 <h1 id="KOLORYT">
     <a href="{% url 'admin:index' %}">
         <img src="{% static 'assets/img/logo.svg' %}" alt="{{ site_header|default:_('Logo') }}" style="height: 25px; vertical-align: middle; margin-right: 10px;" />
 
-        {{ site_header|default:_('Django administration') }}
+        {{ site_header|default:pgettext("branding header", "Django administration") }}
     </a>
 </h1>
 {% if user.is_anonymous %}
