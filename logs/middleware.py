@@ -13,8 +13,7 @@ class APILogMiddleware(MiddlewareMixin):
         some_seconds_ago = current_timestamp - timezone.timedelta(seconds=10)
         
         is_android_webview = (
-            "https://" not in endpoint
-            and request.headers.get('X-Android-Client', '').lower() == 'koloryt'
+            "https://" in endpoint and request.headers.get('X-Android-Client', '').lower() == 'koloryt'
         )
         is_vercel_request = (
             "https://" in endpoint
@@ -45,20 +44,18 @@ class APILogMiddleware(MiddlewareMixin):
         return response
 
     def log_request(self, endpoint, current_timestamp, some_seconds_ago, request_type):
-        # Normalize the endpoint: for Vercel requests, keep "https://", for others remove "http://" and "https://"
-        if "https://" in endpoint and "vercel" in request_type.lower():
-            endpoint_normalized = endpoint.strip()  # Keep "https://" for Vercel requests
-            is_vercel = True
+        # Normalize the endpoint
+        if "http://" in endpoint:
+            endpoint_normalized = endpoint.replace("http://", "").strip()  # Remove "http://" for local requests
+        elif "https://" in endpoint and "koloryt" in request_type.lower():
+            endpoint_normalized = endpoint.replace("https://", "").strip()  # Remove "https://" for Android WebView requests
         else:
-            endpoint_normalized = endpoint.replace("http://", "").replace("https://", "").strip()  # Remove both for others
-            is_vercel = False
+            endpoint_normalized = endpoint.strip()  # Keep "https://" for Vercel requests and others
 
         # Check for and delete duplicates within the last 10 seconds
         duplicates = APILog.objects.filter(endpoint=endpoint_normalized, timestamp__gte=some_seconds_ago)
         if duplicates.exists():
             logger.info(f"Deleting {duplicates.count()} duplicate logs for endpoint={endpoint_normalized}")
-            if is_vercel==True:
-                duplicates = APILog.objects.filter(endpoint=endpoint.replace("https://", "").strip(), timestamp__gte=some_seconds_ago)
             duplicates.delete()
 
         log_entry = APILog.objects.create(
