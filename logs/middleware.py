@@ -12,15 +12,7 @@ class APILogMiddleware(MiddlewareMixin):
         endpoint = unquote(request.build_absolute_uri())
         cleaned_endpoint = endpoint.replace('http://', '')
         some_seconds_ago = timezone.now() - timezone.timedelta(seconds=10)
-        if self.is_android_webview_request(request, endpoint):
-            cleaned_endpoint = self.clean_endpoint(endpoint, is_webview=True)
-            self.log_request(cleaned_endpoint, 'Android WebView', current_timestamp, some_seconds_ago)
-            return None
-        if self.is_vercel_production_request(request, endpoint):
-            cleaned_endpoint = self.clean_endpoint(endpoint, is_webview=False)
-            self.log_request(cleaned_endpoint, 'Vercel', current_timestamp, some_seconds_ago)
-            return None
-        self.log_request(cleaned_endpoint, 'Localhost', current_timestamp, some_seconds_ago)
+        self.log_request(cleaned_endpoint, current_timestamp, some_seconds_ago)
         return None
 
     def process_response(self, request, response):
@@ -33,21 +25,30 @@ class APILogMiddleware(MiddlewareMixin):
     def is_vercel_production_request(self, request, endpoint):
         return "https://" in endpoint and request.META.get('SERVER_NAME', '').endswith('.vercel.app') and request.is_secure()
 
-    def clean_endpoint(self, endpoint, is_webview):
-        if is_webview:
-            return endpoint.replace('https://', '').strip()
-        else:
-            return endpoint.strip()
-
-    def log_request(self, endpoint, request_type, current_timestamp, some_seconds_ago):
+    def log_request(self, endpoint, current_timestamp, some_seconds_ago):
         duplicate = APILog.objects.filter(endpoint=endpoint, timestamp__gte=some_seconds_ago)
 
-        if not duplicate.exists():
+        if not duplicate.exists() and self.is_vercel_production_request:
+            log_entry = APILog.objects.create(
+                endpoint=endpoint.replace('https://', ''),
+                request_count=1,
+                timestamp=current_timestamp,
+            )
+            logger.info(f"Logged endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
+        elif not duplicate.exists() and self.is_android_webview_request:
+            log_entry = APILog.objects.create(
+                endpoint=endpoint.replace('https://', ''),
+                request_count=1,
+                timestamp=current_timestamp,
+            )
+            logger.info(f"Logged endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
+        elif not duplicate.exists():
             log_entry = APILog.objects.create(
                 endpoint=endpoint,
                 request_count=1,
                 timestamp=current_timestamp,
             )
-            logger.info(f"Logged {request_type} request: Endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
+            logger.info(f"Logged endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")        
+        
         else:
-            logger.debug(f"Duplicate {request_type} request detected for {endpoint}. Skipping log.")
+            logger.debug(f"Duplicate request detected for {endpoint}. Skipping log.")
