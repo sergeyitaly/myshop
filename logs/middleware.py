@@ -10,8 +10,8 @@ class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
         endpoint = unquote(request.build_absolute_uri())
-        endpoint = endpoint.replace("http://", "").strip()
         some_seconds_ago = current_timestamp - timezone.timedelta(seconds=10)
+        
         is_android_webview = (
             "https://" not in endpoint
             and request.headers.get('X-Android-Client', '').lower() == 'koloryt'
@@ -22,6 +22,7 @@ class APILogMiddleware(MiddlewareMixin):
             and request.is_secure()
         )
         is_local_request = "http://" in endpoint
+        
         logger.debug(
             f"Processing request: {endpoint}, "
             f"is_android_webview={is_android_webview}, "
@@ -44,24 +45,26 @@ class APILogMiddleware(MiddlewareMixin):
         return response
 
     def log_request(self, endpoint, current_timestamp, some_seconds_ago, request_type):
-        # Normalize endpoint, but preserve "https://" for vercel requests
-        endpoint_normalized = endpoint.replace("https://", "").strip()
+        # Normalize the endpoint: for Vercel requests, keep "https://", for others remove "http://" and "https://"
+        if "https://" in endpoint and "vercel" in request_type.lower():
+            endpoint_normalized = endpoint.strip()  # Keep "https://" for Vercel requests
+        else:
+            endpoint_normalized = endpoint.replace("http://", "").replace("https://", "").strip()  # Remove both for others
 
         # Check for and delete duplicates within the last 10 seconds
         duplicates = APILog.objects.filter(endpoint=endpoint_normalized, timestamp__gte=some_seconds_ago)
         if duplicates.exists():
             logger.info(f"Deleting {duplicates.count()} duplicate logs for endpoint={endpoint_normalized}")
             duplicates.delete()
-            endpoint = endpoint_normalized
 
-        # Log new request
+        # Log the new request
         log_entry = APILog.objects.create(
-            endpoint=endpoint,
+            endpoint=endpoint_normalized,
             request_count=1,
             timestamp=current_timestamp,
         )
         logger.info(
-            f"Logged endpoint={endpoint}, LogID={log_entry.id}, "
+            f"Logged endpoint={endpoint_normalized}, LogID={log_entry.id}, "
             f"RequestType={request_type}, Timestamp={log_entry.timestamp}"
         )
 
