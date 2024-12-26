@@ -11,23 +11,24 @@ class APILogMiddleware(MiddlewareMixin):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
         endpoint = unquote(request.build_absolute_uri())
         some_seconds_ago = timezone.now() - timezone.timedelta(seconds=10)
-        self.log_request(endpoint, current_timestamp, some_seconds_ago)
+        self.log_request(request, endpoint, current_timestamp, some_seconds_ago)
         return None
 
     def process_response(self, request, response):
         logger.debug(f"Response for {request.path} returned with status code {response.status_code}")
         return response
 
-    def is_android_webview_request(self, request, endpoint):
+    def is_android_webview_request(self, request):
         return request.headers.get('X-Android-Client') == 'Koloryt'
-    
-    def log_request(self, endpoint, current_timestamp, some_seconds_ago):
+
+    def log_request(self, request, endpoint, current_timestamp, some_seconds_ago):
         duplicate = APILog.objects.filter(endpoint=endpoint, timestamp__gte=some_seconds_ago)
         if not duplicate.exists():
-            if self.is_android_webview_request:
-                endpoint=endpoint.replace('https://', ''),
+            if self.is_android_webview_request(request):
+                endpoint = endpoint.replace('https://', '').replace('http://', '')
             else:
-                endpoint=endpoint.replace('http://', '')
+                endpoint = endpoint.replace('http://', '')
+
             log_entry = APILog.objects.create(
                 endpoint=endpoint,
                 request_count=1,
