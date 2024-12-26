@@ -12,4 +12,6 @@ export interface OrderDTO {
 		quantity: number;
 	}[];
 	language: string;
+	delivery: string; 
+	payment: string;
 }
