@@ -259,6 +259,8 @@ def create_order(request):
                 # Update product fields
                 product.sales_count += quantity
                 product.stock -= quantity
+                if product.stock <=0:
+                    product.available = False
                 product.popularity = calculate_popularity(product.sales_count, product.stock)
                 product.save()
 
