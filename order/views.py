@@ -559,7 +559,7 @@ def get_order_summary_by_chat_id(request, chat_id):
         logger.error(f"Error fetching order summaries: {e}")
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-    
+
 @api_view(['POST'])
 def update_order(request):
     chat_id = request.data.get('chat_id')
@@ -583,6 +583,13 @@ def update_order(request):
                 if language:
                     order.language = language 
                 order.save()
+
+                # Update product availability based on stock
+                for order_item in order.order_items.all():
+                    product = order_item.product
+                    if product.stock <= 0:
+                        product.available = False
+                        product.save()
 
                 order_summary = format_order_summary(order)
                 grouped_orders.append(order_summary)
