@@ -47,7 +47,13 @@ class Order(models.Model):
         ('complete', _('Complete')),
         ('canceled', _('Canceled')),
     )
-
+    DELIVERY_CHOICES = ( 
+        ('self_pickup', _('Self Pickup')), 
+        ('nova_poshta', _('Nova Poshta')), 
+        ('ukr_poshta', _('Ukr Poshta')), ) 
+    PAYMENT_CHOICES = ( 
+        ('cash_on_delivery', _('Cash on Delivery')), 
+        ('card_online', _('Online Card Payment')), )    
     name = models.CharField(max_length=100, default=_('Default Name'))
     surname = models.CharField(max_length=100, default=_('Default Surname'))
     phone = models.CharField(max_length=20, help_text=_('Contact phone number'))
@@ -67,6 +73,9 @@ class Order(models.Model):
     telegram_user = models.ForeignKey(TelegramUser, related_name='orders', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('Telegram user'))
 #    telegram_user = models.ForeignKey(TelegramUser, on_delete=models.SET_NULL, null=True, blank=True)
     language = models.CharField(max_length=2, choices=[('en', 'English'), ('uk', 'Ukrainian')],default='en')
+    delivery = models.CharField(max_length=20, choices=DELIVERY_CHOICES, default='self_pickup', verbose_name=_('Delivery Method')) 
+    payment = models.CharField(max_length=20, choices=PAYMENT_CHOICES, default='cash_on_delivery', verbose_name=_('Payment Method'))
+
 
     def __str__(self):
         return f"Order #{self.id} ({self.name})"

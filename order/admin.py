@@ -149,7 +149,7 @@ class OrderAdmin(admin.ModelAdmin):
     fields = [
         'id', 'language','name', 'surname', 'phone', 'email', 'address', 'receiver', 
         'receiver_comments', 'congrats', 'present', 'status', 'total_quantity', 
-        'total_price', 'submitted_at', 'created_at', 'processed_at', 
+        'total_price', 'delivery','payment','submitted_at', 'created_at', 'processed_at', 
         'complete_at', 'canceled_at'
     ]
 

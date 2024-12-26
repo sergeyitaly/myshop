@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-26 14:32+0200\n"
+"POT-Creation-Date: 2024-12-26 16:26+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -61,7 +61,7 @@ msgstr "Коментар"
 msgid "Comments"
 msgstr "Коментарі"
 
-#: feedback/admin.py:71 feedback/models.py:28 order/models.py:60
+#: feedback/admin.py:71 feedback/models.py:28 order/models.py:66
 #: order/order/models.py:68
 msgid "Created At"
 msgstr "cтворено"
@@ -94,7 +94,7 @@ msgstr "Пошта"
 msgid "Ratings"
 msgstr "Рейтинги"
 
-#: feedback/models.py:41 order/models.py:64 order/order/models.py:72
+#: feedback/models.py:41 order/models.py:70 order/order/models.py:72
 msgid "Status"
 msgstr "Статус"
 
@@ -278,6 +278,26 @@ msgstr "Загальна кількість"
 msgid "Total Price"
 msgstr "Загальна ціна"
 
+#: order/forms.py:9 order/models.py:51 order/order/models.py:51
+msgid "Self Pickup"
+msgstr "Самостійно"
+
+#: order/forms.py:10 order/models.py:52 order/order/models.py:52
+msgid "Nova Poshta"
+msgstr "Нова Пошта"
+
+#: order/forms.py:11 order/models.py:53 order/order/models.py:53
+msgid "Ukr Poshta"
+msgstr "Укр Пошта"
+
+#: order/forms.py:13 order/models.py:55 order/order/models.py:56
+msgid "Cash on Delivery"
+msgstr "Оплата при отриманні"
+
+#: order/forms.py:14 order/models.py:56 order/order/models.py:57
+msgid "Online Card Payment"
+msgstr "Оплата картою онлайн"
+
 #: order/management/commands/generate_order_summaries.py:97
 #: order/management/commands/generate_order_summaries.py:109
 #: order/order/management/commands/generate_order_summaries.py:97
@@ -293,12 +313,12 @@ msgstr "Коллекція"
 msgid "Phone"
 msgstr "Телефон"
 
-#: order/models.py:16 order/models.py:142 order/order/models.py:16
+#: order/models.py:16 order/models.py:151 order/order/models.py:16
 #: order/order/models.py:152
 msgid "Chat ID"
 msgstr "Чат ІД"
 
-#: order/models.py:22 order/models.py:67 order/order/models.py:22
+#: order/models.py:22 order/models.py:73 order/order/models.py:22
 #: order/order/models.py:75
 msgid "Telegram user"
 msgstr "користувач Телеграм"
@@ -330,128 +350,108 @@ msgstr "Завершено"
 msgid "Canceled"
 msgstr "Скасовано"
 
-#: order/models.py:51 order/order/models.py:59
+#: order/models.py:57 order/order/models.py:59
 msgid "Default Name"
 msgstr "Назва за замовчуванням"
 
-#: order/models.py:52 order/order/models.py:60
+#: order/models.py:58 order/order/models.py:60
 msgid "Default Surname"
 msgstr "Прізвищє"
 
-#: order/models.py:53 order/order/models.py:61
+#: order/models.py:59 order/order/models.py:61
 msgid "Contact phone number"
 msgstr "Контактний номер телефону"
 
-#: order/models.py:55 order/order/models.py:63
+#: order/models.py:61 order/order/models.py:63
 msgid "Address"
 msgstr "Адресса"
 
-#: order/models.py:56 order/order/models.py:64
+#: order/models.py:62 order/order/models.py:64
 msgid "Other person"
 msgstr "Інша особа"
 
-#: order/models.py:57 order/order/models.py:65
+#: order/models.py:63 order/order/models.py:65
 msgid "Comments about the receiver"
 msgstr "Коментар про отримувача"
 
-#: order/models.py:58 order/order/models.py:66
+#: order/models.py:64 order/order/models.py:66
 msgid "Congrats"
 msgstr "Привітання!"
 
-#: order/models.py:59 order/order/models.py:67
+#: order/models.py:65 order/order/models.py:67
 msgid "Submitted At"
 msgstr "оформлено"
 
-#: order/models.py:61 order/order/models.py:69
+#: order/models.py:67 order/order/models.py:69
 msgid "Processed At"
 msgstr "оброблено"
 
-#: order/models.py:62 order/order/models.py:70
+#: order/models.py:68 order/order/models.py:70
 msgid "Complete At"
 msgstr "завершено"
 
-#: order/models.py:63 order/order/models.py:71
+#: order/models.py:69 order/order/models.py:71
 msgid "Canceled At"
 msgstr "скасовано"
 
-#: order/models.py:65 order/order/models.py:73
+#: order/models.py:71 order/order/models.py:73
 msgid "Parent Order"
 msgstr "Батьківське замовлення"
 
-#: order/models.py:66 order/order/models.py:74
+#: order/models.py:72 order/order/models.py:74
 msgid "Package as a present"
 msgstr "Пакування як подарунок"
 
-#: order/models.py:137 order/models.py:170 order/order/models.py:147
+#: order/models.py:76 order/order/models.py:78
+msgid "Delivery Method"
+msgstr ""
+
+#: order/models.py:77 order/order/models.py:79
+msgid "Payment Method"
+msgstr ""
+
+#: order/models.py:146 order/models.py:179 order/order/models.py:147
 #: order/order/models.py:180
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:484
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:491
 msgid "Order"
 msgstr "Замовлення"
 
-#: order/models.py:138 order/models.py:143 order/order/models.py:148
+#: order/models.py:147 order/models.py:152 order/order/models.py:148
 #: order/order/models.py:153
 msgid "Orders"
 msgstr "Замовлення"
 
-#: order/models.py:165 order/order/models.py:175
+#: order/models.py:174 order/order/models.py:175
 msgid "Order summary"
 msgstr "JSON замовлення"
 
-#: order/models.py:166 order/order/models.py:176
+#: order/models.py:175 order/order/models.py:176
 #, fuzzy
 #| msgid "Order summarys"
 msgid "Order summaries"
 msgstr "JSON замовлень"
 
-#: order/models.py:171 order/order/models.py:181 shop/admin.py:143
+#: order/models.py:180 order/order/models.py:181 shop/admin.py:143
 #: shop/models.py:188 shop/models.py:227
 msgid "Product"
 msgstr "Продукт"
 
-#: order/models.py:175 order/order/models.py:185
+#: order/models.py:184 order/order/models.py:185
 msgid "Quantity"
 msgstr "Кількість"
 
-#: order/models.py:176 order/order/models.py:186
+#: order/models.py:185 order/order/models.py:186
 msgid "Total Sum"
 msgstr "Загальна сума"
 
-#: order/models.py:199 order/order/models.py:209
+#: order/models.py:208 order/order/models.py:209
 msgid "Order Item"
 msgstr "Елемент замовлення"
 
-#: order/models.py:200 order/order/models.py:210
+#: order/models.py:209 order/order/models.py:210
 msgid "Order Items"
 msgstr "Елементи замовлення"
-
-#: order/order/models.py:51
-msgid "Self Pickup"
-msgstr ""
-
-#: order/order/models.py:52
-msgid "Nova Poshta"
-msgstr ""
-
-#: order/order/models.py:53
-msgid "Ukr Poshta"
-msgstr ""
-
-#: order/order/models.py:56
-msgid "Cash on Delivery"
-msgstr ""
-
-#: order/order/models.py:57
-msgid "Online Card Payment"
-msgstr ""
-
-#: order/order/models.py:78
-msgid "Delivery Method"
-msgstr ""
-
-#: order/order/models.py:79
-msgid "Payment Method"
-msgstr ""
 
 #: order/order/utils.py:59 order/order/utils.py:70 order/utils.py:59
 #: order/utils.py:70
@@ -639,9 +639,17 @@ msgstr "Технологія"
 msgid "Technologies"
 msgstr "Технології"
 
-#: templates/admin/base_site.html:11
+#: templates/admin/base_site.html:5
+msgid "Django site admin"
+msgstr "Сайт адмін Джаного"
+
+#: templates/admin/base_site.html:10
 msgid "Logo"
 msgstr "Лого"
+
+#: templates/admin/base_site.html:12
+msgid "Django administration"
+msgstr "Адмін панель Джанго"
 
 #: venv/lib/python3.9/site-packages/click/_termui_impl.py:518
 #, python-brace-format
@@ -3488,12 +3496,6 @@ msgstr ""
 msgctxt "stick"
 msgid "club"
 msgstr ""
-
-#~ msgid "Django site admin"
-#~ msgstr "Сайт адмін Джаного"
-
-#~ msgid "Django administration"
-#~ msgstr "Адмін панель Джанго"
 
 #, fuzzy
 #~| msgid "Telegram user"

@@ -42,15 +42,16 @@ class APILogMiddleware(MiddlewareMixin):
     def log_request(self, endpoint, current_timestamp, some_seconds_ago):
         endpoint_clean = endpoint.replace('http://', '').strip()
         endpoint_duplicate = endpoint.replace('https://', '').strip()
+        duplicates = APILog.objects.filter(endpoint=endpoint_duplicate, timestamp__gte=some_seconds_ago)
+        duplicates_delete = APILog.objects.filter(endpoint=endpoint_clean, timestamp__gte=some_seconds_ago)
 
-        duplicate = APILog.objects.filter(endpoint=endpoint_duplicate, timestamp__gte=some_seconds_ago).exists()
+        if duplicates.exists():
+            duplicates_delete.delete()
+            logger.info(f"Deleted {duplicates.count()} duplicate logs for endpoint={endpoint_duplicate}")
 
-        if not duplicate:
-            log_entry = APILog.objects.create(
-                endpoint=endpoint_clean,
-                request_count=1,
-                timestamp=current_timestamp,
-            )
-            logger.info(f"Logged endpoint={endpoint_clean}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
-        else:
-            logger.debug(f"Duplicate detected for {endpoint_clean}. Skipping log.")
+        log_entry = APILog.objects.create(
+            endpoint=endpoint_clean,
+            request_count=1,
+            timestamp=current_timestamp,
+        )
+        logger.info(f"Logged endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
