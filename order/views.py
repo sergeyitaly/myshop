@@ -222,16 +222,11 @@ telegram_webhook = TelegramWebhook.as_view()
 
 
 def calculate_popularity(sales_count, stock):
-    # Define a max sales_count to normalize the popularity
-    max_sales_count = 1000  # Set this to a realistic max sales count for your system
-    max_stock = 100  # Define a maximum stock limit
-
-    # Normalize sales count and stock to a 1-10 scale
+    max_sales_count = 1000
+    max_stock = 100
     sales_popularity = min(10, (sales_count / max_sales_count) * 10)
     stock_popularity = min(10, (stock / max_stock) * 10)
     popularity = int((sales_popularity + stock_popularity) / 2)
-    
-    # Ensure popularity is between 1 and 10
     return max(1, min(10, popularity))
 
 
