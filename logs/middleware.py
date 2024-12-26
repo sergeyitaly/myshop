@@ -10,6 +10,7 @@ class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
         endpoint = unquote(request.build_absolute_uri())
+        endpoint = endpoint.replace("http://", "").strip()
         some_seconds_ago = current_timestamp - timezone.timedelta(seconds=10)
         is_android_webview = (
             "https://" not in endpoint
@@ -44,7 +45,6 @@ class APILogMiddleware(MiddlewareMixin):
 
     def log_request(self, endpoint, current_timestamp, some_seconds_ago, request_type):
         # Normalize endpoint, but preserve "https://" for vercel requests
-        endpoint = endpoint.replace("http://", "").strip()
         endpoint_normalized = endpoint.replace("https://", "").strip()
 
         # Check for and delete duplicates within the last 10 seconds
