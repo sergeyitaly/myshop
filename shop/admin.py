@@ -73,9 +73,9 @@ class ProductAdmin(TranslationAdmin):
         super().save_model(request, obj, form, change)
 
         # Generate id_name only if the product has an ID and name
-        if obj.id and obj.name:
+        if obj.id and obj.name_en:
             # Replace spaces with underscores in the name
-            name_with_underscores = obj.name.replace(' ', '_')
+            name_with_underscores = obj.name_en.replace(' ', '_')
             obj.id_name = f"{obj.id}_{name_with_underscores}"
             # Save the product instance again to update id_name
             obj.save(update_fields=['id_name'])
