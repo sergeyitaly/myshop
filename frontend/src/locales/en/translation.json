@@ -22,7 +22,17 @@
 	"payment_delivery": "Payment & Delivery",
 	"returns_refunds": "Returns & Refunds",
 	"privacy_policy": "Privacy Policy",
-	"payment": "Payment",
+	"payment": {
+		"label": "Payment",
+		"cash_on_delivery": "Cash on delivery",
+		"card_online": "Card online"
+	},
+	"delivery": {
+		"label": "Delivery",
+		"self_pickup": "Self pickup",
+		"nova_poshta": "Nova Poshta",
+		"ukr_poshta": "Ukrposhta"
+	},
 	"hide": "Hide",
 	"price": "Price",
 	"sale": "Sale",
