@@ -11,12 +11,10 @@ class APILogMiddleware(MiddlewareMixin):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
         endpoint = unquote(request.build_absolute_uri())
         some_seconds_ago = current_timestamp - timezone.timedelta(seconds=10)
-        # Check if it's an Android WebView request (no https:// part)
         is_android_webview = (
-            "https://" not in endpoint and request.headers.get('X-Android-Client', '').lower() == 'koloryt'
+            request.headers.get('X-Android-Client', '').lower() == 'koloryt'
         )
         
-        # Check if it's a Vercel request (has https:// part)
         is_vercel_request = (
             "https://" in endpoint
             and request.META.get('SERVER_NAME', '').endswith('.vercel.app')
@@ -51,12 +49,13 @@ class APILogMiddleware(MiddlewareMixin):
         return response
 
     def log_request(self, endpoint, current_timestamp, some_seconds_ago, is_android_webview, is_vercel_request):
+        endpoint = endpoint.replace("http://", "")
+
         if is_android_webview:
             endpoint_normalized = endpoint.replace("https://", "").strip() if "https://" in endpoint else endpoint
         elif is_vercel_request:
             endpoint_normalized = endpoint.replace("https://", "").strip()
-        else:
-            endpoint_normalized = endpoint.replace("http://", "")
+        
 
 
         duplicates = APILog.objects.filter(endpoint=endpoint_normalized, timestamp__gte=some_seconds_ago)
