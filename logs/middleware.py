@@ -9,7 +9,8 @@ logger = logging.getLogger(__name__)
 class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
-        endpoint = unquote(request.build_absolute_uri()).replace('http://', '')
+        endpoint = unquote(request.build_absolute_uri())
+        cleaned_endpoint = endpoint.replace('http://', '')
         some_seconds_ago = timezone.now() - timezone.timedelta(seconds=10)
         if self.is_android_webview_request(request, endpoint):
             cleaned_endpoint = self.clean_endpoint(endpoint, is_webview=True)
