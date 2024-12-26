@@ -44,20 +44,19 @@ class APILogMiddleware(MiddlewareMixin):
 
     def log_request(self, endpoint, current_timestamp, some_seconds_ago, request_type):
         # Normalize endpoint, but preserve "https://" for vercel requests
-        if "https://" in endpoint:
-            endpoint_normalized = endpoint.replace("http://", "").replace("https://", "").strip()
-        else:
-            endpoint_normalized = endpoint.replace("https://", "").replace("http://", "").strip()
+        endpoint = endpoint.replace("http://", "").strip()
+        endpoint_normalized = endpoint.replace("https://", "").strip()
 
         # Check for and delete duplicates within the last 10 seconds
         duplicates = APILog.objects.filter(endpoint=endpoint_normalized, timestamp__gte=some_seconds_ago)
         if duplicates.exists():
             logger.info(f"Deleting {duplicates.count()} duplicate logs for endpoint={endpoint_normalized}")
             duplicates.delete()
+            endpoint = endpoint_normalized
 
         # Log new request
         log_entry = APILog.objects.create(
-            endpoint=endpoint_normalized,
+            endpoint=endpoint,
             request_count=1,
             timestamp=current_timestamp,
         )
