@@ -370,8 +370,20 @@ class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
 class ProductView(APIView):
     def get(self, request, pk, format=None):
         product = self.get_object(pk)
+        # Ensure product availability is updated
+        if product.stock == 0:
+            product.available = False
+        else:
+            product.available = True
+        product.save(update_fields=["available"]) 
+        
         serializer = ProductSerializer(product)
-        response = Response(serializer.data)
+        response_data = serializer.data
+        response_data["availability_message"] = (
+            "Out of stock" if not product.available else "In stock"
+        )
+        
+        response = Response(response_data)
         add_never_cache_headers(response)
         return response
     
