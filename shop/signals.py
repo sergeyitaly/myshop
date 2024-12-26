@@ -9,14 +9,10 @@ from order.models import OrderItem
 def update_product_availability(sender, instance, **kwargs):
     if sender == Product:
         if instance.stock <= 0:
-            instance.available = False
+            if instance.available:
+                instance.available = False
+                instance.save(update_fields=["available"])
         else:
-            instance.available = True
-        instance.save()
-    elif sender == OrderItem:
-        product = instance.product
-        if product.stock <= 0:
-            product.available = False
-        else:
-            product.available = True
-        product.save()
+            if not instance.available:
+                instance.available = True
+                instance.save(update_fields=["available"])
