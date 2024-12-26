@@ -9,10 +9,12 @@ logger = logging.getLogger(__name__)
 class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
-        endpoint = unquote(request.build_absolute_uri().replace('http://', '').strip())
+        endpoint = unquote(request.build_absolute_uri())
         some_seconds_ago = current_timestamp - timezone.timedelta(seconds=10)
+
         logger.debug(f"Processing request: {endpoint}")
         logger.debug(f"Headers: {request.headers}")
+
         if self.should_log_request(request, endpoint):
             self.log_request(endpoint, current_timestamp=current_timestamp, some_seconds_ago=some_seconds_ago)
         return None
@@ -32,15 +34,20 @@ class APILogMiddleware(MiddlewareMixin):
             and request.is_secure()
         )
 
-        logger.debug(f"is_android_webview={is_android_webview}, is_vercel_request={is_vercel_request}")
-        return is_android_webview or is_vercel_request
+        is_local_request = "http://" in endpoint
+
+        logger.debug(f"is_android_webview={is_android_webview}, is_vercel_request={is_vercel_request}, is_local_request={is_local_request}")
+        return is_android_webview or is_vercel_request or is_local_request
 
     def log_request(self, endpoint, current_timestamp, some_seconds_ago):
-        endpoint_clean = endpoint.replace('https://', '').strip()
-        duplicate = APILog.objects.filter(endpoint=endpoint_clean, timestamp__gte=some_seconds_ago).exists()
+        endpoint_clean = endpoint.replace('http://', '').strip()
+        endpoint_duplicate = endpoint.replace('https://', '').strip()
+
+        duplicate = APILog.objects.filter(endpoint=endpoint_duplicate, timestamp__gte=some_seconds_ago).exists()
+
         if not duplicate:
             log_entry = APILog.objects.create(
-                endpoint=endpoint,
+                endpoint=endpoint_clean,
                 request_count=1,
                 timestamp=current_timestamp,
             )
