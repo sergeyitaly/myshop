@@ -35,7 +35,10 @@ class APILogMiddleware(MiddlewareMixin):
         return is_android_webview or is_vercel_request or is_local_request
 
     def log_request(self, endpoint, current_timestamp, some_seconds_ago):
-        duplicate = APILog.objects.filter(endpoint=endpoint.replace('https://', '').strip(), timestamp__gte=some_seconds_ago).exists()
+
+        endpoint = endpoint.replace('http://', '').strip()
+        endpoint_for_duplicate = endpoint.replace('https://', '').strip()
+        duplicate = APILog.objects.filter(endpoint=endpoint_for_duplicate, timestamp__gte=some_seconds_ago).exists()
         if not duplicate:
             log_entry = APILog.objects.create(
                 endpoint=endpoint,
