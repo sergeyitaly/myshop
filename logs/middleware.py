@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 class APILogMiddleware(MiddlewareMixin):
     def process_request(self, request):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
-        endpoint = unquote(request.build_absolute_uri())
+        endpoint = unquote(request.build_absolute_uri().replace('http://', '').strip())
         some_seconds_ago = current_timestamp - timezone.timedelta(seconds=10)
         logger.debug(f"Processing request: {endpoint}")
         logger.debug(f"Headers: {request.headers}")
@@ -32,16 +32,15 @@ class APILogMiddleware(MiddlewareMixin):
             and request.is_secure()
         )
 
-        is_local_request = "http://" in endpoint
-        logger.debug(f"is_android_webview={is_android_webview}, is_vercel_request={is_vercel_request}, is_local_request={is_local_request}")
-        return is_android_webview or is_vercel_request or is_local_request
+        logger.debug(f"is_android_webview={is_android_webview}, is_vercel_request={is_vercel_request}")
+        return is_android_webview or is_vercel_request
 
     def log_request(self, endpoint, current_timestamp, some_seconds_ago):
-        endpoint_clean = endpoint.replace('http://', '').replace('https://', '').strip()
+        endpoint_clean = endpoint.replace('https://', '').strip()
         duplicate = APILog.objects.filter(endpoint=endpoint_clean, timestamp__gte=some_seconds_ago).exists()
         if not duplicate:
             log_entry = APILog.objects.create(
-                endpoint=endpoint_clean,
+                endpoint=endpoint,
                 request_count=1,
                 timestamp=current_timestamp,
             )
