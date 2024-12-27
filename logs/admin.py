@@ -298,12 +298,12 @@ class APILogAdmin(admin.ModelAdmin):
             '127.0.0.1:8010',            
         ]
 
-        # Normalize the endpoint by stripping the base URL
         endpoint = obj.endpoint
         for base_url in base_url_patterns:
-            if base_url and endpoint.startswith(base_url):  # Ensure base_url is not empty
-                endpoint = endpoint[len(base_url):]  # Strip the base URL from the endpoint
-                break
+            if base_url in endpoint:
+                endpoint = re.sub(r'^https?://', '', endpoint)
+                endpoint = endpoint.replace(base_url, '')
+
 
         # Generate the admin URL with a query filter for the endpoint
         url = reverse('admin:logs_apilog_changelist') + f'?endpoint={obj.endpoint}'

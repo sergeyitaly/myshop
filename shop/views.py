@@ -89,6 +89,7 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
     search_fields = ['name_en', 'name_uk']
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'search'
+    ordering_fields = ['id_name'] 
     
     def get_queryset(self):
         cache_key = 'product_list'
@@ -127,7 +128,7 @@ class ProductListFilter(generics.ListCreateAPIView, CachedQueryMixin):
     pagination_class = CustomPageNumberPagination 
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'products'  # Use the defined throttle scope
-
+    ordering_fields = ['id_name']
     def get_queryset(self):
         queryset = Product.objects.all().annotate(
             discounted_price=ExpressionWrapper(
@@ -255,6 +256,7 @@ class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
+    lookup_field = 'id_name'
     
     def get_object(self):
         id = self.kwargs.get('id')
@@ -290,7 +292,7 @@ class CollectionList(generics.ListCreateAPIView, CachedQueryMixin):
 #    ordering_fields = ['name_en', 'name_uk']
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'collections'  # Use the defined throttle scope
-
+    ordering_fields = ['name_en', 'name_uk']
 #    def get_queryset(self):
 #        queryset = Collection.objects.only('name')  # Optimize data fetching
 #        search_query = self.request.query_params.get('search', None)

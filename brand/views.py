@@ -3,6 +3,7 @@ from .models import Brand
 from .serializers import BrandSerializer
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
+from rest_framework import filters
 
 class BrandPagination(PageNumberPagination):
     page_size = 15
@@ -14,7 +15,9 @@ class BrandListView(generics.ListAPIView):
     serializer_class = BrandSerializer
     pagination_class = BrandPagination
     permission_classes = [AllowAny]
-
+    filter_backends = (filters.OrderingFilter,)
+    ordering_fields = ['name']
+    
 class BrandDetailAPIView(generics.RetrieveAPIView):
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer

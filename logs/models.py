@@ -3,9 +3,9 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
 class APILog(models.Model):
-    endpoint = models.URLField()
+    endpoint = models.URLField(db_index=True)
     request_count = models.IntegerField(default=1)  # Always 1 for each request
-    timestamp = models.DateTimeField(auto_now=True)
+    timestamp = models.DateTimeField(auto_now=True,db_index=True)
     request_sum = models.IntegerField(default=0)
 
     class Meta:

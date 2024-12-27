@@ -3,6 +3,7 @@ from .models import *
 from .serializers import *
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
+from rest_framework import filters
 
 class TechnologyPagination(PageNumberPagination):
     page_size = 20                
@@ -14,6 +15,8 @@ class TechnologyListView(generics.ListAPIView):
     serializer_class = TechnologySerializer
     pagination_class = TechnologyPagination
     permission_classes = [AllowAny]
+    filter_backends = (filters.OrderingFilter,)
+    ordering_fields = ['name']
 
 class TechnologyDetailAPIView(generics.RetrieveAPIView):
     queryset = Technology.objects.all()

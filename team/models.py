@@ -44,9 +44,9 @@ def validate_svg(value):
         raise ValidationError('Unsupported file extension.')
 
 class TeamMember(models.Model):
-    name = models.CharField(max_length=100,  verbose_name=_('Name'))
+    name = models.CharField(max_length=100,  verbose_name=_('Name'), db_index=True)
     surname = models.CharField(max_length=100, verbose_name=_('Surname'))
-    role = models.CharField(max_length=100, default='developer', verbose_name=_('Role'))
+    role = models.CharField(max_length=100, default='developer', verbose_name=_('Role'), db_index=True)
     experience = models.TextField(null=True, blank=True, verbose_name=_('Experience'))
 
     mobile = models.CharField(max_length=15, blank=True, null=True)
@@ -85,25 +85,29 @@ class TeamMember(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        if self.linkedin or self.github or self.behance:
-            log_entry = APILog.objects.get(endpoint=self.link)
+        if self.linkedin:
+            log_entry = APILog.objects.get(endpoint=self.linkedin)
+            log_entry.request_count = 1
+            log_entry.timestamp = timezone.localtime(timezone.now())
+            log_entry.save()
+        if self.link_to_telegram:
+            log_entry = APILog.objects.get(endpoint=self.link_to_telegram)
+            log_entry.request_count = 1
+            log_entry.timestamp = timezone.localtime(timezone.now())
+            log_entry.save()
+        if self.github:
+            log_entry = APILog.objects.get(endpoint=self.behance)
+            log_entry.request_count = 1
+            log_entry.timestamp = timezone.localtime(timezone.now())
+            log_entry.save()
+        if self.behance:
+            log_entry = APILog.objects.get(endpoint=self.behance)
             log_entry.request_count = 1
             log_entry.timestamp = timezone.localtime(timezone.now())
             log_entry.save()
 
 
-        super().save(*args, **kwargs)
-        if self.link:
-            # Use get_or_create to find or create a log entry for the link
-            log_entry, created = APILog.objects.get_or_create(
-                endpoint=self.link,
-                defaults={'request_count': 1, 'timestamp': timezone.localtime(timezone.now())}  # Only set defaults on creation
-            )
-            if not created:
-                # If the log entry already exists, increment the count
-                log_entry.request_count += 1
-                log_entry.timestamp = timezone.localtime(timezone.now())  # Update timestamp
-                log_entry.save()
+
 
     def delete(self, *args, **kwargs):
         if self.photo:

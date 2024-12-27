@@ -45,7 +45,7 @@ def validate_svg(value):
 
     
 class Brand(models.Model):
-    name = models.CharField(max_length=100,  verbose_name=_('Name'))
+    name = models.CharField(max_length=100,  verbose_name=_('Name'), db_index=True)
     link = models.URLField(blank=True, null=True)
     
     if USE_S3:

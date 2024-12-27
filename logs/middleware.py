@@ -12,7 +12,7 @@ class APILogMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
-        endpoint = self.clean_endpoint(unquote(request.build_absolute_uri()))
+        endpoint = unquote(request.build_absolute_uri())  
         cache_key = f"api_log:{endpoint}:{current_timestamp}"
 
         # Check cache to avoid duplicate writes
@@ -37,6 +37,3 @@ class APILogMiddleware(MiddlewareMixin):
         )
         log_type = "Android WebView" if is_android else "Non-Android"
         logger.info(f"Logged {log_type} request: endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
-
-    def clean_endpoint(self, endpoint):
-        return endpoint.replace('http://', '')
