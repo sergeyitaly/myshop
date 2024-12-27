@@ -12,8 +12,7 @@ class APILogMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
-    
-        endpoint = unquote(request.build_absolute_uri())  
+        endpoint = unquote(request.build_absolute_uri())
         cache_key = f"api_log:{endpoint}:{current_timestamp}"
 
         if not cache.get(cache_key):
@@ -22,7 +21,7 @@ class APILogMiddleware(MiddlewareMixin):
             
             ignore_endpoint = IgnoreEndpoint.objects.filter(name=endpoint, is_active=True).first()
             if ignore_endpoint:
-                self.handle_excluded_log(endpoint, current_timestamp, is_android, is_vercel, ignore_endpoint)
+                self.handle_excluded_log(endpoint, current_timestamp, is_android, is_vercel)
             else:
                 self.log_request(endpoint, current_timestamp, is_android, is_vercel)
 
@@ -45,26 +44,16 @@ class APILogMiddleware(MiddlewareMixin):
             endpoint=endpoint,
             timestamp=current_timestamp,
         )
-        if is_android:
-            log_type = "Android WebView"
-        elif is_vercel:
-            log_type = "Vercel"
-        else:
-            log_type = "Other"
-        
+        APILog.update_request_sum(endpoint)  # Update request_sum for APILog
+
+        log_type = "Android WebView" if is_android else "Vercel" if is_vercel else "Other"
         logger.info(f"Logged {log_type} request: endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
 
-    def handle_excluded_log(self, endpoint, current_timestamp, is_android, is_vercel, ignore_endpoint):
-        log_entry = APILog.objects.create(
+    def handle_excluded_log(self, endpoint, current_timestamp, is_android, is_vercel):
+        excluded_log_entry = APILogExcluded.objects.create(
             endpoint=endpoint,
             timestamp=current_timestamp,
         )
-        
-        APILogExcluded.objects.create(
-            apilog=log_entry,
-            exclusion_reason=f"Excluded due to IgnoreEndpoint: {ignore_endpoint.name}"
-        )
-        
-        log_entry.delete()
+        APILogExcluded.update_request_sum(endpoint)  # Update request_sum for APILogExcluded
 
-        logger.info(f"Excluded {log_entry.id} from APILog and moved to APILogExcluded: endpoint={endpoint}, Timestamp={log_entry.timestamp}")
+        logger.info(f"Excluded request moved to APILogExcluded: endpoint={endpoint}, Timestamp={excluded_log_entry.timestamp}")
