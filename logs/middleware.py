@@ -31,15 +31,12 @@ class APILogMiddleware(MiddlewareMixin):
         return request.headers.get('X-Android-Client') == 'Koloryt'
 
     def log_request(self, endpoint, current_timestamp, is_android):
-        # Create a new log entry with request_count=1
         log_entry = APILog.objects.create(
             endpoint=endpoint,
-            request_count=1,
             timestamp=current_timestamp,
         )
         log_type = "Android WebView" if is_android else "Non-Android"
         logger.info(f"Logged {log_type} request: endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
 
     def clean_endpoint(self, endpoint):
-        # Normalize endpoint efficiently
-        return endpoint.replace('https://', '').replace('http://', '').strip('/')
+        return endpoint.replace('http://', '')

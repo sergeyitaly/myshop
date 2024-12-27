@@ -93,6 +93,7 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
     def get_queryset(self):
         cache_key = 'product_list'
         queryset = self.get_cached_queryset(cache_key, Product.objects.all())
+        queryset = queryset.select_related('collection').prefetch_related('productimage_set')
 
         search_query = self.request.query_params.get('search')
         if search_query:
@@ -134,6 +135,9 @@ class ProductListFilter(generics.ListCreateAPIView, CachedQueryMixin):
                 output_field=FloatField()
             )
         )        
+
+        queryset = queryset.select_related('collection').prefetch_related('productimage_set')
+
         # Explicitly filter by collections if provided
         collection_ids = self.request.query_params.get('collection', None)
         if collection_ids:
