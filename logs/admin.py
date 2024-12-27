@@ -177,21 +177,12 @@ class APILogAdmin(admin.ModelAdmin):
 
 
     def get_queryset(self, request):
-        # Get a list of endpoint patterns to exclude (active ignore patterns)
         exclude_patterns = list(IgnoreEndpoint.objects.filter(is_active=True).values_list('name', flat=True))
-
-        # Get the initial queryset
         queryset = super().get_queryset(request)
-
-        # Apply any endpoint filters
         endpoint_filter = EndpointFilter(request, {}, self.model, self)
         queryset = endpoint_filter.queryset(request, queryset)
-
-        # Apply time period filters
         time_period_filter = TimePeriodFilter(request, {}, self.model, self)
         queryset = time_period_filter.queryset(request, queryset)
-
-        # Apply exclusions based on the ignore patterns
         if exclude_patterns:
             exclude_q = Q()
             for pattern in exclude_patterns:
@@ -206,11 +197,9 @@ class APILogAdmin(admin.ModelAdmin):
             .order_by('-timestamp')
             .values('timestamp')[:1]
         )
-
-        # Get the queryset with the most recent log for each unique endpoint
         queryset = (
             queryset.filter(timestamp=Subquery(latest_timestamps))
-            .order_by('endpoint')  # Ensure it's ordered by endpoint
+            .order_by('endpoint')
         )
         return queryset
     
@@ -233,22 +222,16 @@ class APILogAdmin(admin.ModelAdmin):
             endpoint=OuterRef('endpoint')
         ).order_by('-timestamp')
         queryset = queryset.annotate(
-            total_requests=Sum('request_count'),
+            total_requests=F('request_sum'),
             latest_timestamp=Subquery(latest_timestamps.values('timestamp')[:1]),
             max_timestamp=Max('timestamp')
-        ).order_by('endpoint')         
+        ).order_by('endpoint')       
         return queryset
- #   def formatted_timestamp(self, obj):
- #       return obj.formatted_timestamp
     def formatted_timestamp(self, obj):
-        # Format the timestamp in HH:MM:SS
         return localtime(obj.timestamp).strftime('%Y-%m-%d %H:%M:%S')
     
     def latest_timestamp(self, obj):
         return obj.latest_timestamp
-#    def request_sum(self, obj): 
-#        return obj.total_requests
-#        return obj.request_count
     
     def add_to_ignore_list(self, request, queryset):
         endpoints = queryset.values_list('endpoint', flat=True).distinct()

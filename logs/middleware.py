@@ -12,6 +12,7 @@ class APILogMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
+    
         endpoint = unquote(request.build_absolute_uri())  
         cache_key = f"api_log:{endpoint}:{current_timestamp}"
 
@@ -31,7 +32,7 @@ class APILogMiddleware(MiddlewareMixin):
         return request.headers.get('X-Android-Client', '').lower() == 'koloryt'
 
     def is_vercel_request(self, request):
-        return 'x-vercel-id' in request.headers
+        return request.META.get('SERVER_NAME', '').endswith('.vercel.app')
 
     def log_request(self, endpoint, current_timestamp, is_android, is_vercel):
         log_entry = APILog.objects.create(

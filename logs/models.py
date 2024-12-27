@@ -4,7 +4,7 @@ from django.dispatch import receiver
 
 class APILog(models.Model):
     endpoint = models.URLField(db_index=True)
-    request_count = models.IntegerField(default=1)  # Always 1 for each request
+   # request_count = models.IntegerField(default=1)  # Always 1 for each request
     timestamp = models.DateTimeField(auto_now=True,db_index=True)
     request_sum = models.IntegerField(default=0)
 
@@ -13,11 +13,10 @@ class APILog(models.Model):
         app_label = 'logs'
 
     def __str__(self):
-        return f"Endpoint: {self.endpoint}, Requests: {self.request_count}"
+        return f"Endpoint: {self.endpoint}, Total Requests: {self.request_sum}"
 
     @classmethod
     def update_request_sum(cls, endpoint):
-        # Efficient aggregation using `annotate`
         total_requests = cls.objects.filter(endpoint=endpoint).count()
         cls.objects.filter(endpoint=endpoint).update(request_sum=total_requests)
 
