@@ -94,7 +94,8 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
     def get_queryset(self):
         cache_key = 'product_list'
         queryset = self.get_cached_queryset(cache_key, Product.objects.all())
-        queryset = queryset.select_related('collection').prefetch_related('productimage_set')
+        queryset = queryset.select_related('collection') \
+                       .prefetch_related('productimage_set')
 
         search_query = self.request.query_params.get('search')
         if search_query:
@@ -251,30 +252,33 @@ class CollectionItemsFilterPage(generics.ListAPIView):
         collection_id = self.kwargs.get('pk')
         queryset = Product.objects.filter(collection__id=collection_id)
         return queryset
+    
 
+    
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
     lookup_field = 'id_name'
-    
+
     def get_object(self):
         id = self.kwargs.get('id')
         id_name = self.kwargs.get('id_name')
 
-        # Attempt to retrieve by ID first
         if id is not None:
-            product = Product.objects.filter(id=id).first()
+            product = Product.objects.prefetch_related('productimage_set').filter(id=id).first()
             if product:
                 return product
 
-        # Then attempt to retrieve by ID name
         if id_name:
-            product = Product.objects.filter(id_name=id_name).first()
+            product = Product.objects.prefetch_related('productimage_set').filter(id_name=id_name).first()
             if product:
                 return product
 
         raise Http404("Product not found")
+
+    
+
     def perform_update(self, serializer):
         instance = serializer.save()
         # Invalidate the cache when a collection is updated
@@ -328,6 +332,9 @@ class CollectionItemsPage(generics.ListAPIView):
     def get_queryset(self):
         try:
             collection_id = self.kwargs.get('pk')
+            queryset = Product.objects.filter(collection__id=collection_id) \
+                .select_related('collection') \
+                .prefetch_related('productimage_set')
             if collection_id is not None:
                 collection = Collection.objects.get(pk=collection_id)
                 queryset = collection.product_set.only('name_en', 'name_uk')

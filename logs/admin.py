@@ -207,9 +207,10 @@ class APILogAdmin(admin.ModelAdmin):
             .values('timestamp')[:1]
         )
 
+        # Get the queryset with the most recent log for each unique endpoint
         queryset = (
             queryset.filter(timestamp=Subquery(latest_timestamps))
-            .order_by('endpoint')
+            .order_by('endpoint')  # Ensure it's ordered by endpoint
         )
         return queryset
     
@@ -303,6 +304,9 @@ class APILogAdmin(admin.ModelAdmin):
             if base_url in endpoint:
                 endpoint = re.sub(r'^https?://', '', endpoint)
                 endpoint = endpoint.replace(base_url, '')
+        if 'X-Android-Client' in obj.endpoint:
+            endpoint = endpoint.replace(vercel_domain, '')
+
 
 
         # Generate the admin URL with a query filter for the endpoint

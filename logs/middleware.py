@@ -4,6 +4,7 @@ from .models import APILog
 from urllib.parse import unquote
 from django.core.cache import cache
 import logging
+from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +13,12 @@ class APILogMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
-        endpoint = unquote(request.build_absolute_uri())  
+        endpoint = unquote(request.build_absolute_uri())
+
+        # Ensure that the endpoint always contains the scheme (https:// if possible)
+        if not endpoint.startswith(('http://', 'https://')):
+            endpoint = f'https://{request.get_host()}{request.path}'
+
         cache_key = f"api_log:{endpoint}:{current_timestamp}"
 
         # Check cache to avoid duplicate writes
@@ -31,6 +37,7 @@ class APILogMiddleware(MiddlewareMixin):
         return request.headers.get('X-Android-Client') == 'Koloryt'
 
     def log_request(self, endpoint, current_timestamp, is_android):
+        # Log the Android WebView requests
         log_entry = APILog.objects.create(
             endpoint=endpoint,
             timestamp=current_timestamp,
