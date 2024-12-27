@@ -187,31 +187,30 @@ public class MainActivity extends AppCompatActivity {
             }
 
 
-    //        @Override
-    //        public void onReceivedError(WebView view, WebResourceRequest request, android.webkit.WebResourceError error) {
-    //            super.onReceivedError(view, request, error);
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, android.webkit.WebResourceError error) {
+                super.onReceivedError(view, request, error);
 
                 // Check if this is a main frame error (not iframe or secondary resource errors)
-    //            if (request.isForMainFrame()) {
-    //                String customErrorPage = "<html><body style='text-align:center; margin-top: 50%;'>" +
-    //                        "<h2>No Internet Connection</h2>" +
-    //                        "<p>Please check your internet connection and try again.</p>" +
-    //                        "<br>"+
-    //                        "<button onclick='goToHomePage()'> Reload </button>" +
-    //                        "<script>" +
-    //                        "function goToHomePage() {" +
-    //                        "   Android.goToHomePage();" +
-    //                        "}" +
-    //                        "</script>" +
-    //                        "</body></html>";
-    //                        //style='background-color: #0b0599; color: #fff; border: 1px solid #0b0599; padding: 10px 20px; font-size: 16px; cursor: pointer;
-    //                view.loadData(customErrorPage, "text/html", "UTF-8");
-    //            }
-    //        }
+                if (request.isForMainFrame()) {
+                    String customErrorPage = "<html><body style='text-align:center; margin-top: 50%;'>" +
+                            "<h2>No Internet Connection</h2>" +
+                            "<p>Please check your internet connection and try again.</p>" +
+                            "<br>"+
+                            "<button onclick='goToHomePage()'> Reload </button>" +
+                            "<script>" +
+                            "function goToHomePage() {" +
+                            "   Android.goToHomePage();" +
+                            "}" +
+                            "</script>" +
+                            "</body></html>";
+                            //style='background-color: #0b0599; color: #fff; border: 1px solid #0b0599; padding: 10px 20px; font-size: 16px; cursor: pointer;
+                    view.loadData(customErrorPage, "text/html", "UTF-8");
+                }
+            }
 
         });
     }
-
 
     private void initializeFullScreenMode(int systemBarsType, int behavior) {
         Window window = getWindow();
@@ -253,25 +252,16 @@ public class MainActivity extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-private class WebAppInterface {
-    @JavascriptInterface
-    public void reloadWebView() {
-        runOnUiThread(() -> {
-            if (webView != null) {
-                webView.reload(); // Reload the WebView content
+        // JavaScript Interface class
+        private class WebAppInterface {
+            @JavascriptInterface
+            public void goToHomePage() {
+                runOnUiThread(() -> {
+                    if (webView != null) {
+                        webView.loadUrl("https://myshop-topaz-five.vercel.app/"); // Navigate to the home page
+                    }
+                });
             }
-        });
-    }
-
-    @JavascriptInterface
-    public void goToHomePage() {
-        runOnUiThread(() -> {
-            if (webView != null) {
-                webView.loadUrl("https://myshop-topaz-five.vercel.app/"); // Navigate to the home page
-            }
-        });
-    }
-}
-
+        }
 
 }
