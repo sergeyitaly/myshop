@@ -1,6 +1,6 @@
 from django.utils.deprecation import MiddlewareMixin
 from django.utils import timezone
-from .models import APILog
+from .models import APILog, IgnoreEndpoint, APILogExcluded
 from urllib.parse import unquote
 from django.core.cache import cache
 import logging
@@ -19,7 +19,13 @@ class APILogMiddleware(MiddlewareMixin):
         if not cache.get(cache_key):
             is_android = self.is_android_webview_request(request)
             is_vercel = self.is_vercel_request(request)
-            self.log_request(endpoint, current_timestamp, is_android, is_vercel)
+            
+            ignore_endpoint = IgnoreEndpoint.objects.filter(name=endpoint, is_active=True).first()
+            if ignore_endpoint:
+                self.handle_excluded_log(endpoint, current_timestamp, is_android, is_vercel, ignore_endpoint)
+            else:
+                self.log_request(endpoint, current_timestamp, is_android, is_vercel)
+
             cache.set(cache_key, True, self.CACHE_TIMEOUT)
 
         return None
@@ -47,3 +53,18 @@ class APILogMiddleware(MiddlewareMixin):
             log_type = "Other"
         
         logger.info(f"Logged {log_type} request: endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
+
+    def handle_excluded_log(self, endpoint, current_timestamp, is_android, is_vercel, ignore_endpoint):
+        log_entry = APILog.objects.create(
+            endpoint=endpoint,
+            timestamp=current_timestamp,
+        )
+        
+        APILogExcluded.objects.create(
+            apilog=log_entry,
+            exclusion_reason=f"Excluded due to IgnoreEndpoint: {ignore_endpoint.name}"
+        )
+        
+        log_entry.delete()
+
+        logger.info(f"Excluded {log_entry.id} from APILog and moved to APILogExcluded: endpoint={endpoint}, Timestamp={log_entry.timestamp}")

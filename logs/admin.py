@@ -5,7 +5,7 @@ from django.urls import path, reverse
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.utils.html import format_html
-from logs.models import APILog, IgnoreEndpoint
+from logs.models import APILog, IgnoreEndpoint, APILogExcluded
 from datetime import timedelta
 from django.db.models.functions import TruncHour, TruncDate, TruncMonth, TruncYear, TruncDay, TruncWeek
 from django.utils.translation import gettext as _
@@ -21,13 +21,14 @@ from django.db import models
 import re
 from django.utils.timezone import localtime
 #from semantic_admin import SemanticModelAdmin, SemanticStackedInline, SemanticTabularInline
-
+from django.core.cache import cache
+from django.db import transaction
+from .management.commands.endpoint_toggle import Command
 
 def clear_logs(modeladmin, request, queryset):
     count, _ = queryset.delete()
     modeladmin.message_user(request, f'{count} log(s) cleared.')
 clear_logs.short_description = 'Clear selected logs'
-
 
 class TimestampToChar(Func):
     function = 'strftime' if connection.vendor == 'sqlite' else 'to_char'
@@ -123,7 +124,6 @@ class IgnoreEndpointAdmin(admin.ModelAdmin):
 
     def get_urls(self):
         """Add custom admin URLs for toggling the is_active status."""
-        from django.urls import path
         urls = super().get_urls()
         custom_urls = [
             path(
@@ -135,15 +135,15 @@ class IgnoreEndpointAdmin(admin.ModelAdmin):
         return custom_urls + urls
 
     def toggle_active(self, request, pk):
-        """Toggle the is_active field for a specific IgnoreEndpoint instance."""
         obj = self.get_object(request, pk)
         if obj:
             obj.is_active = not obj.is_active
             obj.save()
-            self.message_user(
-                request,
-                f"Successfully updated {obj.name}'s status to {'Active' if obj.is_active else 'Inactive'}."
-            )
+
+            # Move logs based on the active status
+            command = Command()
+            command.move_logs_to_excluded(obj.name) if obj.is_active else command.move_logs_back_to_apilog(obj.name)
+
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/admin/'))
 
 
