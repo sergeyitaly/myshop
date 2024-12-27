@@ -15,10 +15,10 @@ class APILogMiddleware(MiddlewareMixin):
         endpoint = unquote(request.build_absolute_uri())  
         cache_key = f"api_log:{endpoint}:{current_timestamp}"
 
-        # Check cache to avoid duplicate writes
         if not cache.get(cache_key):
             is_android = self.is_android_webview_request(request)
-            self.log_request(endpoint, current_timestamp, is_android)
+            is_vercel = self.is_vercel_request(request)
+            self.log_request(endpoint, current_timestamp, is_android, is_vercel)
             cache.set(cache_key, True, self.CACHE_TIMEOUT)
 
         return None
@@ -28,12 +28,21 @@ class APILogMiddleware(MiddlewareMixin):
         return response
 
     def is_android_webview_request(self, request):
-        return request.headers.get('X-Android-Client') == 'Koloryt'
+        return request.headers.get('X-Android-Client', '').lower() == 'koloryt'
 
-    def log_request(self, endpoint, current_timestamp, is_android):
+    def is_vercel_request(self, request):
+        return 'x-vercel-id' in request.headers
+
+    def log_request(self, endpoint, current_timestamp, is_android, is_vercel):
         log_entry = APILog.objects.create(
             endpoint=endpoint,
             timestamp=current_timestamp,
         )
-        log_type = "Android WebView" if is_android else "Non-Android"
+        if is_android:
+            log_type = "Android WebView"
+        elif is_vercel:
+            log_type = "Vercel"
+        else:
+            log_type = "Other"
+        
         logger.info(f"Logged {log_type} request: endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")

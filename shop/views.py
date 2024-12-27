@@ -273,20 +273,15 @@ class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     def get_object(self):
         id = self.kwargs.get('id')
         id_name = self.kwargs.get('id_name')
-
         if id is not None:
-            product = Product.objects.prefetch_related('productimage_set').filter(id=id).first()
+            product = Product.objects.filter(id=id).first()
             if product:
                 return product
-
         if id_name:
-            product = Product.objects.prefetch_related('productimage_set').filter(id_name=id_name).first()
+            product = Product.objects.filter(id_name=id_name).first()
             if product:
                 return product
-
         raise Http404("Product not found")
-
-    
 
     def perform_update(self, serializer):
         instance = serializer.save()
