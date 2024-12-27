@@ -118,22 +118,22 @@ class Product(models.Model):
         format='JPEG',
         options={'quality': 60}
     )
-    collection = models.ForeignKey(Collection, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('Collection'))
+    collection = models.ForeignKey(Collection, on_delete=models.SET_NULL, null=True, blank=True, db_index=True, verbose_name=_('Collection'))
     name = models.CharField(max_length=255, verbose_name=_('Name'), db_index=True)
     id_name = models.CharField(max_length=255, verbose_name=_('ID Name'), db_index=True, null=True, blank=True)
     description = models.TextField(null=True, blank=True, verbose_name=_('Description'))
-    price = models.DecimalField(max_digits=10, decimal_places=1, verbose_name=_('Price'), default=0.0)
+    price = models.DecimalField(max_digits=10, decimal_places=1, verbose_name=_('Price'), default=0.0, db_index=True)
     stock = models.PositiveIntegerField(default=0, verbose_name=_('Stock'))
     available = models.BooleanField(default=True, verbose_name=_('Available'))
     created = models.DateTimeField(auto_now_add=True, verbose_name=_('Created'))
     updated = models.DateTimeField(auto_now=True, verbose_name=_('Updated'))
-    sales_count = models.PositiveIntegerField(default=0, verbose_name=_('Sales Count'))
-    popularity = models.PositiveIntegerField(default=0, verbose_name=_('Popularity'))
+    sales_count = models.PositiveIntegerField(default=0, verbose_name=_('Sales Count'), db_index=True)
+    popularity = models.PositiveIntegerField(default=0, verbose_name=_('Popularity'), db_index=True)
     slug = models.SlugField(unique=True, verbose_name=_('Slug'))
     color_name = models.CharField(max_length=50, null=True, blank=True, help_text=_("Enter the color name, e.g., magenta or purple"), verbose_name=_('Color Name'))
     color_value = ColorField(default='#RRGGBB', null=True, blank=True, help_text=_("Enter the color value in the format #RRGGBB"), verbose_name=_('Color Value'))
     size = models.CharField(max_length=50, null=True, blank=True, help_text=_("Format: LxHxD (in mm or specify cm)"), verbose_name=_('Size'))
-    discount = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, null=True, blank=True, help_text=_("Discount percentage (e.g., 10.00 for 10%)"), verbose_name=_('Discount'))
+    discount = models.DecimalField(max_digits=5, decimal_places=2, db_index=True, default=0.00, null=True, blank=True, help_text=_("Discount percentage (e.g., 10.00 for 10%)"), verbose_name=_('Discount'))
 
     CURRENCY_CHOICES = (
         ('UAH', 'UAH (грн)'),

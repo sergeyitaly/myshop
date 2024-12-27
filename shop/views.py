@@ -195,13 +195,15 @@ class ProductListFilter(generics.ListCreateAPIView, CachedQueryMixin):
         queryset = self.get_queryset()
         
         # Paginate the queryset
-        paginator = PageNumberPagination()
-        page = paginator.paginate_queryset(queryset, request)
+#        paginator = PageNumberPagination()
+#        page = paginator.paginate_queryset(queryset, request)
         
         # Calculate minimum and maximum price considering discount
         discounted_price_min = queryset.aggregate(min_price=Min('discounted_price'))['min_price']
         discounted_price_max = queryset.aggregate(max_price=Max('discounted_price'))['max_price']
-        
+        overall_discounted_price_min = cache.get('overall_discounted_price_min')
+        overall_discounted_price_max = cache.get('overall_discounted_price_max')
+
         # Overall price range calculation
         overall_discounted_price_min = Product.objects.annotate(
             discounted_price=ExpressionWrapper(
@@ -216,6 +218,13 @@ class ProductListFilter(generics.ListCreateAPIView, CachedQueryMixin):
                 output_field=FloatField()
             )
         ).aggregate(max_price=Max('discounted_price'))['max_price']
+
+        cache.set('overall_discounted_price_min', overall_discounted_price_min, timeout=60*15)
+        cache.set('overall_discounted_price_max', overall_discounted_price_max, timeout=60*15)
+
+        # Paginate the queryset
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset(queryset, request)
 
         # Serialize the data
         if page is not None:
