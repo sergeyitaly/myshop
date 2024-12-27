@@ -212,6 +212,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
     private void initializeFullScreenMode(int systemBarsType, int behavior) {
         Window window = getWindow();
         WindowCompat.setDecorFitsSystemWindows(window, false); // Disable fitting system windows
@@ -252,16 +253,25 @@ public class MainActivity extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-        // JavaScript Interface class
-        private class WebAppInterface {
-            @JavascriptInterface
-            public void goToHomePage() {
-                runOnUiThread(() -> {
-                    if (webView != null) {
-                        webView.loadUrl("https://myshop-topaz-five.vercel.app/"); // Navigate to the home page
-                    }
-                });
+private class WebAppInterface {
+    @JavascriptInterface
+    public void reloadWebView() {
+        runOnUiThread(() -> {
+            if (webView != null) {
+                webView.reload(); // Reload the WebView content
             }
-        }
+        });
+    }
+
+    @JavascriptInterface
+    public void goToHomePage() {
+        runOnUiThread(() -> {
+            if (webView != null) {
+                webView.loadUrl("https://myshop-topaz-five.vercel.app/"); // Navigate to the home page
+            }
+        });
+    }
+}
+
 
 }
