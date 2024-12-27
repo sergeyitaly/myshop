@@ -177,20 +177,20 @@ class APILogAdmin(admin.ModelAdmin):
 
 
     def get_queryset(self, request):
-        exclude_patterns = list(IgnoreEndpoint.objects.filter(is_active=True).values_list('name', flat=True))
+    #    exclude_patterns = list(IgnoreEndpoint.objects.filter(is_active=True).values_list('name', flat=True))
         queryset = super().get_queryset(request)
         endpoint_filter = EndpointFilter(request, {}, self.model, self)
         queryset = endpoint_filter.queryset(request, queryset)
         time_period_filter = TimePeriodFilter(request, {}, self.model, self)
         queryset = time_period_filter.queryset(request, queryset)
-        if exclude_patterns:
-            exclude_q = Q()
-            for pattern in exclude_patterns:
-                if pattern == '/':
-                    exclude_q |= Q(endpoint='/')
-                else:
-                    exclude_q |= Q(endpoint__icontains=pattern)
-            queryset = queryset.exclude(exclude_q)
+    #    if exclude_patterns:
+    #        exclude_q = Q()
+    #        for pattern in exclude_patterns:
+    #            if pattern == '/':
+    #                exclude_q |= Q(endpoint='/')
+    #            else:
+    #                exclude_q |= Q(endpoint__icontains=pattern)
+    #        queryset = queryset.exclude(exclude_q)
         #queryset.values('endpoint').distinct('endpoint').order_by('endpoint', '-timestamp')
         latest_timestamps = (
             queryset.filter(endpoint=OuterRef('endpoint'))
@@ -204,20 +204,20 @@ class APILogAdmin(admin.ModelAdmin):
         return queryset
     
     def get_chart_queryset(self, request):
-        exclude_patterns = list(IgnoreEndpoint.objects.filter(is_active=True).values_list('name', flat=True))
+    #    exclude_patterns = list(IgnoreEndpoint.objects.filter(is_active=True).values_list('name', flat=True))
         queryset = super().get_queryset(request)
         endpoint_filter = EndpointFilter(request, {}, self.model, self)
         queryset = endpoint_filter.queryset(request, queryset)
         time_period_filter = TimePeriodFilter(request, {}, self.model, self)
         queryset = time_period_filter.queryset(request, queryset)
-        if exclude_patterns:
-            exclude_q = Q()
-            for pattern in exclude_patterns:
-                if pattern == '/':
-                    exclude_q |= Q(endpoint='/')
-                else:
-                    exclude_q |= Q(endpoint__icontains=pattern)
-            queryset = queryset.exclude(exclude_q)
+    #    if exclude_patterns:
+    #        exclude_q = Q()
+    #        for pattern in exclude_patterns:
+    #            if pattern == '/':
+    #                exclude_q |= Q(endpoint='/')
+    #            else:
+    #                exclude_q |= Q(endpoint__icontains=pattern)
+    #        queryset = queryset.exclude(exclude_q)
         latest_timestamps = APILog.objects.filter(
             endpoint=OuterRef('endpoint')
         ).order_by('-timestamp')
