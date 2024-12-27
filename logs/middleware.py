@@ -14,12 +14,14 @@ class APILogMiddleware(MiddlewareMixin):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
         endpoint = unquote(request.build_absolute_uri())
         cache_key = f"api_log:{endpoint}:{current_timestamp}"
+        if self.should_exclude_request(request):
+            return None
 
         if not cache.get(cache_key):
             is_android = self.is_android_webview_request(request)
             is_vercel = self.is_vercel_request(request)
             
-            ignore_endpoint = IgnoreEndpoint.objects.filter(name=endpoint, is_active=True).first()
+            ignore_endpoint = IgnoreEndpoint.objects.filter(name__icontains=request.path, is_active=True).first()
             if ignore_endpoint:
                 self.handle_excluded_log(endpoint, current_timestamp, is_android, is_vercel)
             else:
@@ -33,6 +35,11 @@ class APILogMiddleware(MiddlewareMixin):
         logger.debug(f"Response for {request.path} returned with status code {response.status_code}")
         return response
 
+    def should_exclude_request(self, request):
+        host = request.get_host()
+        excluded_domains = ['myshop-six-wheat'] 
+        return any(excluded_domain in host for excluded_domain in excluded_domains)
+
     def is_android_webview_request(self, request):
         return request.headers.get('X-Android-Client', '').lower() == 'koloryt'
 
@@ -44,7 +51,6 @@ class APILogMiddleware(MiddlewareMixin):
             endpoint=endpoint,
             timestamp=current_timestamp,
         )
-        APILog.update_request_sum(endpoint)  # Update request_sum for APILog
 
         log_type = "Android WebView" if is_android else "Vercel" if is_vercel else "Other"
         logger.info(f"Logged {log_type} request: endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
@@ -54,6 +60,4 @@ class APILogMiddleware(MiddlewareMixin):
             endpoint=endpoint,
             timestamp=current_timestamp,
         )
-        APILogExcluded.update_request_sum(endpoint)  # Update request_sum for APILogExcluded
-
         logger.info(f"Excluded request moved to APILogExcluded: endpoint={endpoint}, Timestamp={excluded_log_entry.timestamp}")
