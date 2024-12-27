@@ -13,11 +13,11 @@ from django.utils.dateparse import parse_datetime
 from django.utils.timezone import now
 from dateutil.relativedelta import relativedelta
 from django.utils.html import format_html
-from django.db.models import Min, Max, F, OuterRef, Subquery, Sum, Func, CharField
+from django.db.models import Min, Max, F, OuterRef, Subquery, Sum, Func, CharField, Q, Count
 from django.conf import settings
 from django.db import connection
-from django.db.models import Case, When, Value, F, Q, Count
-from django.db.models.functions import Substr, Length
+from django.db.models.functions import Cast
+from django.db import models
 import re
 from django.utils.timezone import localtime
 #from semantic_admin import SemanticModelAdmin, SemanticStackedInline, SemanticTabularInline
@@ -201,7 +201,16 @@ class APILogAdmin(admin.ModelAdmin):
                     exclude_q |= Q(endpoint__icontains=pattern)
             queryset = queryset.exclude(exclude_q)
         #queryset.values('endpoint').distinct('endpoint').order_by('endpoint', '-timestamp')
+        latest_timestamps = (
+            queryset.filter(endpoint=OuterRef('endpoint'))
+            .order_by('-timestamp')
+            .values('timestamp')[:1]
+        )
 
+        queryset = (
+            queryset.filter(timestamp=Subquery(latest_timestamps))
+            .order_by('endpoint')
+        )
         return queryset
     
     def get_chart_queryset(self, request):

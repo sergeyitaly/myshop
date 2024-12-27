@@ -14,8 +14,8 @@ android {
         minSdk 21
         targetSdk 35
     //def dynamicVersionCode = Integer.parseInt(new java.text.SimpleDateFormat("yyMMddHHmm").format(new Date()))
-    versionCode 2012241501 
-        versionName "1.1.2"
+    versionCode 2012241502 
+        versionName "1.1.3"
 
     }
     

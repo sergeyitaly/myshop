@@ -4,7 +4,7 @@
     <issue
         id="HighAppVersionCode"
         message="The &apos;versionCode&apos; is very high and close to the max allowed value"
-        errorLine1="    versionCode 2012241500 "
+        errorLine1="    versionCode 2012241502 "
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="build.gradle"
