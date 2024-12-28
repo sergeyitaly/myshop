@@ -104,11 +104,12 @@ class EndpointFilter(admin.SimpleListFilter):
 class APILogExcludedAdmin(admin.ModelAdmin):
     list_display = ('endpoint', 'timestamp', 'request_sum')
     search_fields = ('endpoint',)
-    list_filter = ('-timestamp',)
-    actions = [clear_logs]  # Add the clear_logs action
+    list_filter = ('timestamp',)
+    actions = [clear_logs] 
+    ordering = ('-timestamp',)
 
 class IgnoreEndpointAdmin(admin.ModelAdmin):
-    list_display = ('name', 'is_active_display')  # Display name and a clickable "is_active" toggle
+    list_display = ('name', 'is_active_display')
     search_fields = ('name',)
 
     def is_active_display(self, obj):
