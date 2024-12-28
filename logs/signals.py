@@ -46,3 +46,19 @@ def recalculate_request_sum_on_create(sender, instance, created, **kwargs):
 def recalculate_request_sum_on_delete(sender, instance, **kwargs):
     total_requests = APILog.objects.filter(endpoint=instance.endpoint).count()
     APILog.objects.filter(endpoint=instance.endpoint).update(request_sum=total_requests)
+
+
+
+
+
+@receiver(post_save, sender=APILogExcluded)
+def recalculate_request_sum_on_create(sender, instance, created, **kwargs):
+    if created:
+        total_requests = APILogExcluded.objects.filter(endpoint=instance.endpoint).count()
+        APILogExcluded.objects.filter(endpoint=instance.endpoint).update(request_sum=total_requests)
+
+
+@receiver(post_delete, sender=APILogExcluded)
+def recalculate_request_sum_on_delete(sender, instance, **kwargs):
+    total_requests = APILogExcluded.objects.filter(endpoint=instance.endpoint).count()
+    APILogExcluded.objects.filter(endpoint=instance.endpoint).update(request_sum=total_requests)

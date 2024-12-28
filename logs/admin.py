@@ -101,6 +101,11 @@ class EndpointFilter(admin.SimpleListFilter):
 
         return queryset.filter(filters)
 
+class APILogExcludedAdmin(admin.ModelAdmin):
+    list_display = ('endpoint', 'timestamp', 'request_sum')
+    search_fields = ('endpoint',)
+    list_filter = ('-timestamp',)
+    actions = [clear_logs]  # Add the clear_logs action
 
 class IgnoreEndpointAdmin(admin.ModelAdmin):
     list_display = ('name', 'is_active_display')  # Display name and a clickable "is_active" toggle
@@ -264,6 +269,8 @@ class APILogAdmin(admin.ModelAdmin):
         for endpoint in endpoints:
             self.recalculate_request_count(endpoint)
         self.message_user(request, f'{rows_deleted} logs were successfully deleted.')
+
+
 
     def recalculate_request_count(self, endpoint):
         count = APILog.objects.filter(endpoint=endpoint).count()
@@ -533,4 +540,6 @@ class APILogAdmin(admin.ModelAdmin):
         return super().changelist_view(request, extra_context=extra_context)
 
 admin.site.register(APILog, APILogAdmin)
+admin.site.register(APILogExcluded, APILogExcludedAdmin)
+
 admin.site.register(IgnoreEndpoint, IgnoreEndpointAdmin)

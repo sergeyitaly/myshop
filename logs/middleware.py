@@ -14,24 +14,25 @@ class APILogMiddleware(MiddlewareMixin):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
         endpoint = unquote(request.build_absolute_uri())
         cache_key = f"api_log:{endpoint}:{current_timestamp}"
+        is_android = self.is_android_webview_request(request)
+
+        if is_android:
+            endpoint = endpoint.replace('https://', '')
+
         if self.should_exclude_request(request):
             return None
 
+        # Check for duplicates
         if not cache.get(cache_key):
-            is_android = self.is_android_webview_request(request)
             is_vercel = self.is_vercel_request(request)
-            
             ignore_endpoint = IgnoreEndpoint.objects.filter(name__icontains=request.path, is_active=True).first()
-
             if ignore_endpoint:
                 self.handle_excluded_log(endpoint, current_timestamp, is_android, is_vercel)
             else:
                 self.log_request(endpoint, current_timestamp, is_android, is_vercel)
 
             cache.set(cache_key, True, self.CACHE_TIMEOUT)
-
         return None
-    
 
     def process_response(self, request, response):
         logger.debug(f"Response for {request.path} returned with status code {response.status_code}")
@@ -53,11 +54,11 @@ class APILogMiddleware(MiddlewareMixin):
             endpoint=endpoint,
             timestamp=current_timestamp,
         )
-
         log_type = "Android WebView" if is_android else "Vercel" if is_vercel else "Other"
         logger.info(f"Logged {log_type} request: endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
 
     def handle_excluded_log(self, endpoint, current_timestamp, is_android, is_vercel):
+        # Log excluded requests to APILogExcluded
         excluded_log_entry = APILogExcluded.objects.create(
             endpoint=endpoint,
             timestamp=current_timestamp,
