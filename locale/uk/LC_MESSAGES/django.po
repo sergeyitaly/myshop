@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-26 16:26+0200\n"
+"POT-Creation-Date: 2024-12-28 14:40+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -161,49 +161,49 @@ msgstr "Вступ"
 msgid "Intros"
 msgstr "Вступи"
 
-#: logs/admin.py:39
+#: logs/admin.py:40
 msgid "Time Period"
-msgstr ""
-
-#: logs/admin.py:44
-msgid "Day"
-msgstr ""
+msgstr "Період часу"
 
 #: logs/admin.py:45
-msgid "Week"
-msgstr ""
+msgid "Day"
+msgstr "День"
 
 #: logs/admin.py:46
-msgid "Month"
-msgstr ""
+msgid "Week"
+msgstr "Тиждень"
 
 #: logs/admin.py:47
+msgid "Month"
+msgstr "Місяць"
+
+#: logs/admin.py:48
 msgid "Year"
-msgstr ""
+msgstr "Рік"
 
-#: logs/admin.py:66
+#: logs/admin.py:67
 msgid "Endpoint Type"
-msgstr ""
+msgstr "Тип ендпоїнту"
 
-#: logs/admin.py:71
+#: logs/admin.py:72
 msgid "Vercel"
 msgstr ""
 
-#: logs/admin.py:72
+#: logs/admin.py:73
 #, fuzzy
 #| msgid "Telegram user"
 msgid "Telegram"
 msgstr "користувач Телеграм"
 
-#: logs/admin.py:73
+#: logs/admin.py:74
 msgid "Localhost"
 msgstr ""
 
-#: logs/admin.py:74
+#: logs/admin.py:75
 msgid "Docker"
 msgstr ""
 
-#: logs/admin.py:75
+#: logs/admin.py:76
 msgid "Android"
 msgstr ""
 
@@ -404,11 +404,11 @@ msgstr "Пакування як подарунок"
 
 #: order/models.py:76 order/order/models.py:78
 msgid "Delivery Method"
-msgstr ""
+msgstr "Метод доставки"
 
 #: order/models.py:77 order/order/models.py:79
 msgid "Payment Method"
-msgstr ""
+msgstr "Метод платежу"
 
 #: order/models.py:146 order/models.py:179 order/order/models.py:147
 #: order/order/models.py:180
@@ -599,7 +599,7 @@ msgstr "картинкі"
 
 #: shop/models.py:224
 msgid "name"
-msgstr ""
+msgstr "Назва"
 
 #: shop/models.py:225
 msgid "value"
@@ -623,11 +623,11 @@ msgstr "Досвід"
 msgid "Link to the Telegram"
 msgstr "Посилання на Телеграм"
 
-#: team/models.py:115
+#: team/models.py:119
 msgid "TeamMember"
 msgstr "Член команди"
 
-#: team/models.py:116
+#: team/models.py:120
 msgid "TeamMembers"
 msgstr "Члени команди"
 
@@ -1226,7 +1226,7 @@ msgstr ""
 
 #: venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py:1793
 msgid "Duration"
-msgstr ""
+msgstr "Тривалість"
 
 #: venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py:1845
 msgid "Email address"
@@ -1234,7 +1234,7 @@ msgstr ""
 
 #: venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py:1870
 msgid "File path"
-msgstr ""
+msgstr "Шлях до файлу"
 
 #: venv/lib/python3.9/site-packages/django/db/models/fields/__init__.py:1948
 #, python-format
@@ -1546,7 +1546,7 @@ msgstr ""
 
 #: venv/lib/python3.9/site-packages/django/forms/widgets.py:463
 msgid "Clear"
-msgstr ""
+msgstr "Очистити"
 
 #: venv/lib/python3.9/site-packages/django/forms/widgets.py:464
 msgid "Currently"
@@ -1554,19 +1554,19 @@ msgstr "Обрано"
 
 #: venv/lib/python3.9/site-packages/django/forms/widgets.py:465
 msgid "Change"
-msgstr ""
+msgstr "Змінити"
 
 #: venv/lib/python3.9/site-packages/django/forms/widgets.py:794
 msgid "Unknown"
-msgstr ""
+msgstr "Невідомий"
 
 #: venv/lib/python3.9/site-packages/django/forms/widgets.py:795
 msgid "Yes"
-msgstr ""
+msgstr "Так"
 
 #: venv/lib/python3.9/site-packages/django/forms/widgets.py:796
 msgid "No"
-msgstr ""
+msgstr "Ні"
 
 #. Translators: Please do not add spaces around commas.
 #: venv/lib/python3.9/site-packages/django/template/defaultfilters.py:874
@@ -1633,37 +1633,37 @@ msgstr ""
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:7
 #: venv/lib/python3.9/site-packages/tornado/locale.py:295
 msgid "Monday"
-msgstr ""
+msgstr "Понеділок"
 
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:8
 #: venv/lib/python3.9/site-packages/tornado/locale.py:296
 msgid "Tuesday"
-msgstr ""
+msgstr "Вівторок"
 
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:9
 #: venv/lib/python3.9/site-packages/tornado/locale.py:297
 msgid "Wednesday"
-msgstr ""
+msgstr "Середа"
 
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:10
 #: venv/lib/python3.9/site-packages/tornado/locale.py:298
 msgid "Thursday"
-msgstr ""
+msgstr "Четвер"
 
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:11
 #: venv/lib/python3.9/site-packages/tornado/locale.py:299
 msgid "Friday"
-msgstr ""
+msgstr "Пятниця"
 
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:12
 #: venv/lib/python3.9/site-packages/tornado/locale.py:300
 msgid "Saturday"
-msgstr ""
+msgstr "Субота"
 
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:13
 #: venv/lib/python3.9/site-packages/tornado/locale.py:301
 msgid "Sunday"
-msgstr ""
+msgstr "Неділя"
 
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:16
 msgid "Mon"
@@ -1696,62 +1696,62 @@ msgstr ""
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:25
 #: venv/lib/python3.9/site-packages/tornado/locale.py:281
 msgid "January"
-msgstr ""
+msgstr "Січень"
 
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:26
 #: venv/lib/python3.9/site-packages/tornado/locale.py:282
 msgid "February"
-msgstr ""
+msgstr "Лютий"
 
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:27
 #: venv/lib/python3.9/site-packages/tornado/locale.py:283
 msgid "March"
-msgstr ""
+msgstr "Березень"
 
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:28
 #: venv/lib/python3.9/site-packages/tornado/locale.py:284
 msgid "April"
-msgstr ""
+msgstr "Квітень"
 
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:29
 #: venv/lib/python3.9/site-packages/tornado/locale.py:285
 msgid "May"
-msgstr ""
+msgstr "Травень"
 
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:30
 #: venv/lib/python3.9/site-packages/tornado/locale.py:286
 msgid "June"
-msgstr ""
+msgstr "Червень"
 
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:31
 #: venv/lib/python3.9/site-packages/tornado/locale.py:287
 msgid "July"
-msgstr ""
+msgstr "Липень"
 
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:32
 #: venv/lib/python3.9/site-packages/tornado/locale.py:288
 msgid "August"
-msgstr ""
+msgstr "Серпень"
 
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:33
 #: venv/lib/python3.9/site-packages/tornado/locale.py:289
 msgid "September"
-msgstr ""
+msgstr "Вересень"
 
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:34
 #: venv/lib/python3.9/site-packages/tornado/locale.py:290
 msgid "October"
-msgstr ""
+msgstr "Жовтень"
 
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:35
 #: venv/lib/python3.9/site-packages/tornado/locale.py:291
 msgid "November"
-msgstr ""
+msgstr "Листопад"
 
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:36
 #: venv/lib/python3.9/site-packages/tornado/locale.py:292
 msgid "December"
-msgstr ""
+msgstr "Грудень"
 
 #: venv/lib/python3.9/site-packages/django/utils/dates.py:39
 msgid "jan"

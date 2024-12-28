@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-26 16:25+0200\n"
+"POT-Creation-Date: 2024-12-28 14:39+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -140,47 +140,47 @@ msgstr ""
 msgid "Intros"
 msgstr ""
 
-#: logs/admin.py:39
+#: logs/admin.py:40
 msgid "Time Period"
 msgstr ""
 
-#: logs/admin.py:44
+#: logs/admin.py:45
 msgid "Day"
 msgstr ""
 
-#: logs/admin.py:45
+#: logs/admin.py:46
 msgid "Week"
 msgstr ""
 
-#: logs/admin.py:46
+#: logs/admin.py:47
 msgid "Month"
 msgstr ""
 
-#: logs/admin.py:47
+#: logs/admin.py:48
 msgid "Year"
 msgstr ""
 
-#: logs/admin.py:66
+#: logs/admin.py:67
 msgid "Endpoint Type"
 msgstr ""
 
-#: logs/admin.py:71
+#: logs/admin.py:72
 msgid "Vercel"
 msgstr ""
 
-#: logs/admin.py:72
+#: logs/admin.py:73
 msgid "Telegram"
 msgstr ""
 
-#: logs/admin.py:73
+#: logs/admin.py:74
 msgid "Localhost"
 msgstr ""
 
-#: logs/admin.py:74
+#: logs/admin.py:75
 msgid "Docker"
 msgstr ""
 
-#: logs/admin.py:75
+#: logs/admin.py:76
 msgid "Android"
 msgstr ""
 
@@ -578,11 +578,11 @@ msgstr ""
 msgid "Link to the Telegram"
 msgstr ""
 
-#: team/models.py:115
+#: team/models.py:119
 msgid "TeamMember"
 msgstr ""
 
-#: team/models.py:116
+#: team/models.py:120
 msgid "TeamMembers"
 msgstr ""
 
