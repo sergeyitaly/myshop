@@ -34,31 +34,19 @@ def move_logs_to_excluded_on_ignore_update(sender, instance, created, **kwargs):
                 except Exception as e:
                     print(f'Error moving logs to APILogExcluded for pattern "{exclude_pattern}": {e}')
 
-
 @receiver(post_save, sender=APILog)
-def recalculate_request_sum_on_create(sender, instance, created, **kwargs):
-    if created:
-        total_requests = APILog.objects.filter(endpoint=instance.endpoint).count()
-        APILog.objects.filter(endpoint=instance.endpoint).update(request_sum=total_requests)
-
+def update_request_sum_on_save(sender, instance, **kwargs):
+    sender.update_request_sum(instance.endpoint)
 
 @receiver(post_delete, sender=APILog)
-def recalculate_request_sum_on_delete(sender, instance, **kwargs):
-    total_requests = APILog.objects.filter(endpoint=instance.endpoint).count()
-    APILog.objects.filter(endpoint=instance.endpoint).update(request_sum=total_requests)
-
-
-
+def update_request_sum_on_delete(sender, instance, **kwargs):
+    sender.update_request_sum(instance.endpoint)
 
 
 @receiver(post_save, sender=APILogExcluded)
-def recalculate_request_sum_on_create(sender, instance, created, **kwargs):
-    if created:
-        total_requests = APILogExcluded.objects.filter(endpoint=instance.endpoint).count()
-        APILogExcluded.objects.filter(endpoint=instance.endpoint).update(request_sum=total_requests)
-
+def update_excluded_request_sum_on_save(sender, instance, **kwargs):
+    sender.update_request_sum(instance.endpoint)
 
 @receiver(post_delete, sender=APILogExcluded)
-def recalculate_request_sum_on_delete(sender, instance, **kwargs):
-    total_requests = APILogExcluded.objects.filter(endpoint=instance.endpoint).count()
-    APILogExcluded.objects.filter(endpoint=instance.endpoint).update(request_sum=total_requests)
+def update_excluded_request_sum_on_delete(sender, instance, **kwargs):
+    sender.update_request_sum(instance.endpoint)

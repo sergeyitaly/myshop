@@ -14,10 +14,10 @@ class APILogMiddleware(MiddlewareMixin):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
         endpoint = unquote(request.build_absolute_uri())
         cache_key = f"api_log:{endpoint}:{current_timestamp}"
-        is_android = self.is_android_webview_request(request)
+        is_android = self.is_android_webview_request(request)        
 
-        if is_android:
-            endpoint = endpoint.replace('https://', '')
+        # Normalize the endpoint (remove https:// for Android requests)
+        endpoint = self.normalize_endpoint(endpoint, is_android)
 
         if self.should_exclude_request(request):
             return None
@@ -58,9 +58,13 @@ class APILogMiddleware(MiddlewareMixin):
         logger.info(f"Logged {log_type} request: endpoint={endpoint}, LogID={log_entry.id}, Timestamp={log_entry.timestamp}")
 
     def handle_excluded_log(self, endpoint, current_timestamp, is_android, is_vercel):
-        # Log excluded requests to APILogExcluded
         excluded_log_entry = APILogExcluded.objects.create(
             endpoint=endpoint,
             timestamp=current_timestamp,
         )
         logger.info(f"Excluded request moved to APILogExcluded: endpoint={endpoint}, Timestamp={excluded_log_entry.timestamp}")
+
+    def normalize_endpoint(self, endpoint, is_android):
+        if is_android:
+            endpoint = endpoint.replace('https://', '').replace('http://', '')
+        return endpoint
