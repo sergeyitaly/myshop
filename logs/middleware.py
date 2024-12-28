@@ -1,6 +1,6 @@
 from django.utils.deprecation import MiddlewareMixin
 from django.utils import timezone
-from .models import APILog, APILogExcluded
+from .models import APILog, IgnoreEndpoint, APILogExcluded
 from urllib.parse import unquote
 from django.core.cache import cache
 import logging
@@ -14,12 +14,16 @@ class APILogMiddleware(MiddlewareMixin):
         current_timestamp = timezone.localtime(timezone.now()).replace(second=0, microsecond=0)
         endpoint = unquote(request.build_absolute_uri())
         cache_key = f"api_log:{endpoint}:{current_timestamp}"
+        if self.should_exclude_request(request):
+            return None
 
         if not cache.get(cache_key):
             is_android = self.is_android_webview_request(request)
             is_vercel = self.is_vercel_request(request)
-            ignore_endpoints = cache.get('ignore_endpoints', [])
-            if any(pattern in endpoint for pattern in ignore_endpoints):
+            
+            ignore_endpoint = IgnoreEndpoint.objects.filter(name__icontains=request.path, is_active=True).first()
+
+            if ignore_endpoint:
                 self.handle_excluded_log(endpoint, current_timestamp, is_android, is_vercel)
             else:
                 self.log_request(endpoint, current_timestamp, is_android, is_vercel)
@@ -27,10 +31,16 @@ class APILogMiddleware(MiddlewareMixin):
             cache.set(cache_key, True, self.CACHE_TIMEOUT)
 
         return None
+    
 
     def process_response(self, request, response):
         logger.debug(f"Response for {request.path} returned with status code {response.status_code}")
         return response
+
+    def should_exclude_request(self, request):
+        host = request.get_host()
+        excluded_domains = ['myshop-six-wheat'] 
+        return any(excluded_domain in host for excluded_domain in excluded_domains)
 
     def is_android_webview_request(self, request):
         return request.headers.get('X-Android-Client', '').lower() == 'koloryt'
