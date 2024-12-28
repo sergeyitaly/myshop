@@ -9,7 +9,7 @@ from .models import IgnoreEndpoint, APILog, APILogExcluded
 @receiver(post_delete, sender=IgnoreEndpoint)
 def update_ignore_cache(sender, instance, **kwargs):
     ignore_endpoints = IgnoreEndpoint.objects.filter(is_active=True).values_list('name', flat=True)
-#    cache.set('ignore_endpoints', list(ignore_endpoints))
+    #cache.set('ignore_endpoints', list(ignore_endpoints))
 
 
 @receiver(post_save, sender=IgnoreEndpoint)
@@ -22,7 +22,11 @@ def move_logs_to_excluded_on_ignore_update(sender, instance, created, **kwargs):
                 try:
                     with transaction.atomic():
                         apilog_excluded_entries = [
-                            APILogExcluded(endpoint=log.endpoint, timestamp=log.timestamp, request_sum=log.request_sum)
+                            APILogExcluded(
+                                endpoint=log.endpoint,
+                                timestamp=log.timestamp,  # Preserve the original timestamp
+                                request_sum=log.request_sum
+                            )
                             for log in logs_to_move
                         ]
                         APILogExcluded.objects.bulk_create(apilog_excluded_entries)
