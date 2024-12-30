@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import Http404
-from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer
+from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer, ProductListSerializer
 from .models import Product, Collection, Category
 from .filters import ProductFilter, ProductsFilter
 from django.db.models import F, FloatField, ExpressionWrapper, Min, Max, Q
@@ -81,7 +81,7 @@ class CachedQueryMixin:
         return cached_data
     
 class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
-    serializer_class = ProductSerializer
+    serializer_class = ProductListSerializer
     permission_classes = [AllowAny]
     filterset_class = ProductsFilter
     pagination_class = ListPageNumberPagination
@@ -95,7 +95,7 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
         cache_key = 'product_list'
         queryset = self.get_cached_queryset(cache_key, Product.objects.all())
 
-        queryset = queryset.select_related('collection').prefetch_related('productimage_set').defer('additionalfield','description','created', 'updated', 'slug')
+        queryset = queryset.select_related('collection').prefetch_related('productimage_set').defer('additionalfield','description', 'slug')
 
         search_query = self.request.query_params.get('search')
         if search_query:
@@ -120,7 +120,7 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
 class ProductListFilter(generics.ListCreateAPIView, CachedQueryMixin):
     permission_classes = [AllowAny]
     pagination_class = CustomPageNumberPagination
-    serializer_class = ProductSerializer
+    serializer_class = ProductListSerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     filterset_class = ProductFilter
     search_fields = ['name_en', 'name_uk']
@@ -136,7 +136,7 @@ class ProductListFilter(generics.ListCreateAPIView, CachedQueryMixin):
                 output_field=FloatField()
             )
         )
-        queryset = queryset.select_related('collection', 'collection__category').prefetch_related('productimage_set').defer('additionalfield','description','created', 'updated', 'slug')
+        queryset = queryset.select_related('collection', 'collection__category').prefetch_related('productimage_set').defer('additionalfield','description', 'slug')
 
         # Apply filters
         collection_ids = self.request.query_params.get('collection', None)
