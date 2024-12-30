@@ -137,7 +137,7 @@ class ProductListFilter(generics.ListCreateAPIView, CachedQueryMixin):
             )
         )
         queryset = queryset.select_related('collection', 'collection__category').prefetch_related('productimage_set').defer('additionalfield','description', 'slug')
-
+        #queryset = queryset.select_related('collection')
         # Apply filters
         collection_ids = self.request.query_params.get('collection', None)
         if collection_ids:
@@ -161,10 +161,7 @@ class ProductListFilter(generics.ListCreateAPIView, CachedQueryMixin):
         if price_min and price_max:
             queryset = queryset.filter(discounted_price__gte=price_min, discounted_price__lte=price_max)
 
-        # Apply filters from filterset_class
-        if any(param in self.request.query_params for param in ['collection', 'category', 'has_discount', 'price_min', 'price_max']):
-            queryset = self.filter_queryset(queryset)
-        # Handle ordering
+        queryset = self.filter_queryset(queryset)
         ordering = self.request.query_params.get('ordering', None)
         if ordering:
             ordering_fields = ordering.split(',')
@@ -275,20 +272,9 @@ class CollectionList(generics.ListCreateAPIView, CachedQueryMixin):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['category']
     search_fields = ['name']
-#    ordering_fields = ['name_en', 'name_uk']
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'collections'  # Use the defined throttle scope
     ordering_fields = ['name_en', 'name_uk']
-#    def get_queryset(self):
-#        queryset = Collection.objects.only('name')  # Optimize data fetching
-#        search_query = self.request.query_params.get('search', None)
-#        if search_query:
-#            search_query = urllib.parse.unquote(search_query)
-#            queryset = queryset.filter(
-#                Q(name_en__icontains=search_query) |
-#                Q(name_uk__icontains=search_query)
-#            )
-#        return queryset       
     
     def perform_create(self, serializer):
         instance = serializer.save()

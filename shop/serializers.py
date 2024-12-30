@@ -109,11 +109,6 @@ class ProductListSerializer(serializers.ModelSerializer):
     name_uk = serializers.CharField(required=False)
     id_name = serializers.CharField(read_only=True)
     id = serializers.IntegerField(read_only=True)
-#    additional_fields = AdditionalFieldSerializer(source='additionalfield_set',many=True, read_only=True)
-
-#    description = serializers.CharField(required=False)
-#    description_en = serializers.CharField(required=False)
-#    description_uk = serializers.CharField(required=False)
 
     def get_photo_url(self, obj):
         return obj.photo.url if obj.photo else None
@@ -124,21 +119,18 @@ class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         request = self.context.get('request')
         if request and request.method == 'GET':
-            representation.pop('description', None)
-            representation.pop('description_en', None)
-            representation.pop('description_uk', None)
-            representation.pop('additional_fields', None)
-            representation.pop('stock', None)
-            representation.pop('slug', None)
-            representation.pop('color_value', None)
-            representation.pop('color_name', None)
-            representation.pop('color_name_en', None)
-            representation.pop('color_name_uk', None)
-            representation.pop('brandimage', None)
-            representation.pop('created', None)
-            representation.pop('updated', None)
+            # Remove fields not needed for the list view
+            fields_to_remove = [
+                'description', 'description_en', 'description_uk', 'additional_fields',
+                'stock', 'slug', 'color_value', 'color_name', 'color_name_en', 
+                'color_name_uk', 'brandimage', 'images', 'created', 'updated'
+            ]
+            for field in fields_to_remove:
+                representation.pop(field, None)
         return representation
+
