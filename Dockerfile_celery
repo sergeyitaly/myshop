@@ -10,4 +10,6 @@ RUN pip install -r requirements.txt
 COPY . /app/
 RUN python manage.py collectstatic --noinput
 EXPOSE 8000
-CMD ["celery", "-A", "myshop", "worker", "--loglevel=info"]
+COPY celeryentrypoint.sh /app/celeryentrypoint.sh
+RUN chmod +x /app/celeryentrypoint.sh
+ENTRYPOINT ["/app/celeryentrypoint.sh"]

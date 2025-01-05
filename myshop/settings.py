@@ -111,6 +111,7 @@ INSTALLED_APPS = [
     'feedback',
     'logs',
   #  'admisortable2',
+    'django_celery_beat',
 
 ]
 

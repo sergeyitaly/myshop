@@ -18,6 +18,7 @@ click==8.1.7
 click-didyoumean==0.3.1
 click-plugins==1.1.1
 click-repl==0.3.0
+cron-descriptor==1.4.5
 cryptography==43.0.1
 cssselect2==0.7.0
 defusedxml==0.8.0rc2
@@ -27,6 +28,7 @@ django-admin-interface==0.28.6
 django-allauth==0.63.6
 django-anymail==11.0
 django-appconf==1.0.6
+django-celery-beat==2.7.0
 django-colorfield==0.11.0
 django-cors-headers==4.3.1
 django-extensions==3.2.3
@@ -42,6 +44,7 @@ django-rosetta==0.10.0
 django-storages==1.14.2
 django-svg-image-form-field==1.0.1
 django-templated-mail==1.1.1
+django-timezone-field==7.0
 djangorestframework==3.15.2
 djangorestframework-simplejwt==5.3.1
 djoser==2.2.2
@@ -89,6 +92,7 @@ PyJWT==2.8.0
 pymemcache==4.0.0
 pyparsing==3.1.4
 pyproject_hooks==1.1.0
+python-crontab==3.2.0
 python-dateutil==2.9.0.post0
 python-decouple==3.8
 python-dotenv==1.0.1
