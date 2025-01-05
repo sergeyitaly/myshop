@@ -1,0 +1,14 @@
+# fly.toml file
+app = "myshop" 
+primary_region = "fra"  
+
+[build]
+  image = "sergeyitaly/koloryt:serhii_celery" 
+
+[[services]]
+  internal_port = 80
+  protocol = "tcp"
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
