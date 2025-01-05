@@ -14,3 +14,5 @@ DJANGO_SETTINGS_MODULE = "myshop.settings"
   [[services.ports]]
     handlers = ["http"]
     port = 80
+[resources]
+memory = 2048
