@@ -1,12 +1,14 @@
-# fly.toml file
 app = "myshop" 
 primary_region = "fra"  
+
+[env]
+DJANGO_SETTINGS_MODULE = "myshop.settings"
 
 [build]
   image = "sergeyitaly/koloryt:serhii_celery" 
 
 [[services]]
-  internal_port = 80
+  internal_port = 8000
   protocol = "tcp"
 
   [[services.ports]]
