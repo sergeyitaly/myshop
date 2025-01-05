@@ -205,6 +205,7 @@ class ProductImage(models.Model):
     )
 
     product = models.ForeignKey(Product, default=None, on_delete=models.CASCADE)
+#    product = models.ForeignKey(Product, default=None, on_delete=models.CASCADE, related_name='product_images')
 
     def __str__(self):
         return self.product.name

@@ -158,10 +158,16 @@ class ProductListFilter(generics.ListCreateAPIView, CachedQueryMixin):
 
         price_min = self.request.query_params.get('price_min')
         price_max = self.request.query_params.get('price_max')
+#        if price_min and price_max:
+#            queryset = queryset.filter(discounted_price__gte=price_min, discounted_price__lte=price_max)
         if price_min and price_max:
-            queryset = queryset.filter(discounted_price__gte=price_min, discounted_price__lte=price_max)
+            queryset = queryset.filter(
+                price__gte=float(price_min) / (1 - F('discount') / 100),
+                price__lte=float(price_max) / (1 - F('discount') / 100)
+    )
 
         queryset = self.filter_queryset(queryset)
+        # Handle ordering
         ordering = self.request.query_params.get('ordering', None)
         if ordering:
             ordering_fields = ordering.split(',')

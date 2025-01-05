@@ -14,8 +14,6 @@ class Command(BaseCommand):
             if not exclude_pattern:
                 self.stdout.write(f'No exclude pattern for {ignore_endpoint.name}. Skipping...')
                 continue
-            
-            # Based on the active status, either move logs to APILogExcluded or back to APILog
             if ignore_endpoint.is_active:
                 self.move_logs_to_excluded(exclude_pattern)
             else:
@@ -24,7 +22,6 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('Log move operation completed successfully!'))
 
     def move_logs_to_excluded(self, pattern):
-        """Move logs from APILog to APILogExcluded based on the active IgnoreEndpoint."""
         exclude_pattern = pattern.strip()
         if not exclude_pattern:
             return
@@ -43,7 +40,6 @@ class Command(BaseCommand):
                 self.stdout.write(f'Error moving logs to APILogExcluded: {e}')
 
     def move_logs_back_to_apilog(self, pattern):
-        """Move logs from APILogExcluded back to APILog based on the inactive IgnoreEndpoint."""
         exclude_pattern = pattern.strip()
         if not exclude_pattern:
             return
