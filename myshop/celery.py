@@ -19,7 +19,7 @@ app.conf.timezone = 'UTC'
 # Beat schedule configuration
 app.conf.beat_schedule = {
     'update-order-statuses-every-minute': {
-        'task': 'order.tasks.update_order_statuses_task',
+        'task': 'order.tasks.update_order_statuses',
         'schedule': crontab(minute='*/1'), 
     },
 }
