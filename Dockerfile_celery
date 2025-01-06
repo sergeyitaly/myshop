@@ -1,15 +1,9 @@
 FROM python:3.11
-
-# Set working directory
 WORKDIR /app
-
-# Install dependencies
 RUN pip install --upgrade pip
 COPY requirements.txt /app/
 RUN pip install -r requirements.txt
 COPY . /app/
 RUN python manage.py collectstatic --noinput
 EXPOSE 8000
-COPY celeryentrypoint.sh /app/celeryentrypoint.sh
-RUN chmod +x /app/celeryentrypoint.sh
-ENTRYPOINT ["/app/celeryentrypoint.sh"]
+CMD ["sh", "-c", "celery -A myshop worker --loglevel=info & celery -A myshop beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler"]
