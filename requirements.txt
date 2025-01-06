@@ -70,7 +70,7 @@ jmespath==1.0.1
 jsonfield==3.1.0
 jsonschema==4.23.0
 jsonschema-specifications==2023.12.1
-kombu==5.4.0
+kombu==5.4.2
 load-dotenv==0.1.0
 mailchimp-marketing==3.0.80
 mailersend==0.5.8
