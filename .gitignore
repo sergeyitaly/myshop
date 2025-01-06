@@ -83,3 +83,5 @@ android/java_pid*.hprof
 **/__pycache__/
 **/migrations/
 android/app/lint-baseline.xml
+
+celerybeat-schedule.db.bak
