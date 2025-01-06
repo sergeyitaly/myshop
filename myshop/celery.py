@@ -7,27 +7,24 @@ from celery.schedules import crontab
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myshop.settings')
 app = Celery('myshop')
 app.config_from_object('django.conf:settings', namespace='CELERY')
-
-# Celery-specific configurations
 app.conf.broker_connection_retry_on_startup = True
 app.conf.task_serializer = 'json'
 app.conf.result_serializer = 'json'
 app.conf.accept_content = ['json']
 app.conf.timezone = 'UTC'
-
-# Beat schedule configuration
+app.conf.broker_url = settings.BROKER_URL
+app.conf.broker_transport = 'redis' 
 app.conf.beat_schedule = {
     'update-order-statuses-every-minute': {
         'task': 'order.tasks.update_order_statuses_task',
-        'schedule': crontab(minute='*/1'), 
+        'schedule': crontab(minute='*/1'),
     },
 }
 
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 app.conf.update(
-    BROKER_URL=settings.BROKER_URL, 
-    RESULT_BACKEND=settings.RESULT_BACKEND,  
-    BEAT_SCHEDULE_FILENAME='celerybeat-schedule', 
+    RESULT_BACKEND=settings.RESULT_BACKEND,
+    BEAT_SCHEDULE_FILENAME='celerybeat-schedule',
     IMPORTS=('order.tasks',),
     WORKER_POOL_RESTARTS=True,
     WORKER_MAX_TASKS_PER_CHILD=1000,
