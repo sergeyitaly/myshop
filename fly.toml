@@ -11,17 +11,11 @@ DJANGO_SETTINGS_MODULE = "myshop.settings"
   internal_port = 8000 
   external_port = 80    # Expose it to the internet
   force_https = true
-  [[services.ports]]
-    port = "80"
-    handlers = ["http"]
 
 [[services]]
   internal_port = 5555  # Celery worker port
-  external_port = 5555  # Expose this for internal communication, if needed
+  external_port = 80
   protocol = "tcp"
-  [[services.ports]]
-    port = "5555"
-    handlers = ["tcp"]
 
 [services]
 memory = "2GB" 
