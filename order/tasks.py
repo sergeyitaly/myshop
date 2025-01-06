@@ -14,7 +14,7 @@ def update_order_statuses():
             order_items=order.order_items.all(),
             new_status='created',
             status_field='created_at',
-            chat_id=order.customer.chat_id,
+            chat_id=order.telegram_user.chat_id,
             language=order.language,
         )
     created_to_processed = update_orders('created', 'processed', 20, 'created_at', now, Order)
@@ -24,7 +24,7 @@ def update_order_statuses():
             order_items=order.order_items.all(),
             new_status='processed',
             status_field='processed_at',
-            chat_id=order.customer.chat_id,
+            chat_id=order.telegram_user.chat_id,
             language=order.language,
         )
     processed_to_complete = update_orders('processed', 'complete', 24 * 60, 'processed_at', now, Order)
@@ -34,7 +34,7 @@ def update_order_statuses():
             order_items=order.order_items.all(),
             new_status='complete',
             status_field='completed_at',
-            chat_id=order.customer.chat_id,
+            chat_id=order.telegram_user.chat_id,
             language=order.language,
         )
 
