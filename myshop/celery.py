@@ -22,7 +22,9 @@ app.conf.beat_schedule = {
         'schedule': crontab(minute='*/1'), 
     },
 }
-app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
+#app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
+app.autodiscover_tasks()
+
 app.conf.update(
     RESULT_BACKEND=settings.RESULT_BACKEND,
     IMPORTS=('order.tasks',),
