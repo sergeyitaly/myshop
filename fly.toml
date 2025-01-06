@@ -11,6 +11,7 @@ DJANGO_SETTINGS_MODULE = "myshop.settings"
   handlers = ["http"]
   port = 80
   force_https = true
+  memory = "1Gi" 
   
 [services.concurrency]
   type = "connections"
