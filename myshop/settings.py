@@ -377,6 +377,10 @@ CACHES = {
     }
 }
 
+# Celery configuration
+CELERY_BROKER_URL = os.getenv('REDIS_BROKER_URL')
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
