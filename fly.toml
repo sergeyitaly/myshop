@@ -1,21 +1,19 @@
-app = "myshop"
-primary_region = "fra"
+app = "myshop" 
+primary_region = "fra"  
 
 [env]
 DJANGO_SETTINGS_MODULE = "myshop.settings"
 
 [build]
-  image = "sergeyitaly/koloryt:serhii_celery"
+  image = "sergeyitaly/koloryt:serhii_celery" 
 
 [[services]]
-  internal_port = 8000 
-  external_port = 80    # Expose it to the internet
-  force_https = true
-
-[[services]]
-  internal_port = 5555  # Celery worker port
-  external_port = 80
+  internal_port = 8000
   protocol = "tcp"
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
 
 [services]
 memory = "2GB" 
