@@ -8,13 +8,12 @@ DJANGO_SETTINGS_MODULE = "myshop.settings"
   image = "sergeyitaly/koloryt:serhii_celery" 
 
 [[services]]
-  internal_port = 8000
-  protocol = "tcp"
-  [services.ports]
-    http = 80
-    https = 443
+  internal_port = 8000 
+  external_port = 80    # Expose it to the internet
+  force_https = true
 
-  [services.concurrency]
-    hard_limit = 50
-    soft_limit = 25
-    grace_period = "10s"
+[[services]]
+  internal_port = 5555  # Celery worker port
+  external_port = 80
+  protocol = "tcp"
+
