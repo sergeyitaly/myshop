@@ -5,6 +5,7 @@ from django.conf import settings
 from celery.schedules import crontab
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myshop.settings')
+
 app = Celery('myshop')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.conf.broker_connection_retry_on_startup = True
@@ -13,18 +14,17 @@ app.conf.result_serializer = 'json'
 app.conf.accept_content = ['json']
 app.conf.timezone = 'UTC'
 app.conf.broker_url = settings.BROKER_URL
-app.conf.broker_transport = 'redis' 
+app.conf.broker_transport = 'redis'  # Or any other transport
+app.conf.beat_scheduler = 'django_celery_beat.schedulers:DatabaseScheduler'
 app.conf.beat_schedule = {
     'update-order-statuses-every-minute': {
         'task': 'order.tasks.update_order_statuses_task',
-        'schedule': crontab(minute='*/1'),
+        'schedule': crontab(minute='*/1'), 
     },
 }
-
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 app.conf.update(
     RESULT_BACKEND=settings.RESULT_BACKEND,
-    BEAT_SCHEDULE_FILENAME='celerybeat-schedule',
     IMPORTS=('order.tasks',),
     WORKER_POOL_RESTARTS=True,
     WORKER_MAX_TASKS_PER_CHILD=1000,
