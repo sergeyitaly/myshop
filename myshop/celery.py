@@ -17,10 +17,11 @@ app.conf.beat_schedule = {
         'schedule': crontab(minute='*/1'), 
     },
 }
+os.getenv('REDIS_BROKER_URL')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 app.conf.update(
-    BROKER_URL=settings.REDIS_BROKER_URL,
-    CELERY_RESULT_BACKEND=settings.REDIS_BROKER_URL,
+    BROKER_URL=settings.CELERY_BROKER_URL,
+    CELERY_RESULT_BACKEND=settings.CELERY_BROKER_URL,
     CELERY_IMPORTS=('order.tasks',),
     CELERY_WORKER_POOL_RESTARTS=True,
     CELERY_WORKER_MAX_TASKS_PER_CHILD=1000,
