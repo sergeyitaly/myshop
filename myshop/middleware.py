@@ -2,9 +2,9 @@ from django.conf import settings
 from django_redis import get_redis_connection
 from django.utils.deprecation import MiddlewareMixin
 import logging
+from shop.models import Product, Collection, Category
 
 logger = logging.getLogger(__name__)
-
 
 class RedisCloseMiddleware:
     def __init__(self, get_response):
@@ -48,12 +48,16 @@ class CacheFallbackMiddleware(MiddlewareMixin):
                     # Log cache miss
                     logger.info(f"Cache miss for {request.path}")
 
-                    # Simulate fetching data from database (replace with actual logic)
+                    # Fetch data from the database (replace this with your actual logic)
                     data = self.get_data_from_db(request.path)
 
-                    # Cache the data for future requests
                     if data:
+                        # Cache the data for future requests
                         redis_conn.set(key, data, ex=3600)  # Cache for 1 hour
+                    else:
+                        # Handle case where no data is found
+                        logger.error(f"No data found for {request.path}")
+
                 else:
                     # If cached data exists, attach it to the request
                     logger.info(f"Cache hit for {request.path}")
@@ -64,11 +68,13 @@ class CacheFallbackMiddleware(MiddlewareMixin):
 
     def get_data_from_db(self, path):
         """
-        Simulates fetching data from the database. Replace this with actual logic.
+        Fetches data from the database. Replace this with actual logic.
+        Example: Query your models based on the URL path.
         """
-        # Replace with actual logic to fetch the data (e.g., querying models)
         if "product" in path:
-            return "Sample product data from database"
-        elif "order" in path:
-            return "Sample order data from database"
+            products = Product.objects.all().values() 
+            return str(list(products))  
+        elif "collection" in path:
+            collections = Collection.objects.all().values()
+            return str(list(collections))
         return None
