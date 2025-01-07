@@ -14,7 +14,7 @@ DJANGO_SETTINGS_MODULE = "myshop.settings"
 
 [[services]]
   internal_port = 8000
-  processes = ["app"]
+  processes = ["app", "worker", "beat"]  # Combine all processes on fewer machines
   protocol = "tcp"
 
   [[services.ports]]
