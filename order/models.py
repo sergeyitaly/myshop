@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import make_naive
 import datetime
 from django.db.models.fields import Field
+from django.core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -208,34 +209,66 @@ class OrderItem(models.Model):
         verbose_name = _('Order Item')
         verbose_name_plural = _('Order Items')
 
-
+        
 class StatusTimePeriod(models.Model):
     STATUS_CHOICES = [
-        ('submitted', 'Submitted'),
-        ('created', 'Created'),
-        ('processed', 'Processed'),
-        ('complete', 'Complete'),
+        ('submitted', _('Submitted')),
+        ('created', _('Created')),
+        ('processed', _('Processed')),
+        ('complete', _('Complete')),
     ]
 
     status_from = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
+        verbose_name=_("Status From"),
     )
     status_to = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
+        verbose_name=_("Status To"),
     )
     time_period_in_minutes = models.PositiveIntegerField(
-        choices=[(5, '5 minutes'), (20, '20 minutes'), (24 * 60, '24 hours')],
+        choices=[
+            (5, _('5 minutes')),
+            (20, _('20 minutes')),
+            (24 * 60, _('24 hours')),
+        ],
         default=5,
-        blank=True,  # Allow blank to enable custom input
+        blank=True,
+        null=True,
+        verbose_name=_("Predefined Time Period (in minutes)"),
     )
     custom_time_period = models.PositiveIntegerField(
-        blank=True, null=True,  # Allow null if no custom time is provided
-        verbose_name="Custom Time Period (in minutes)"
+        blank=True,
+        null=True,
+        verbose_name=_("Custom Time Period (in minutes)"),
     )
+
+    class Meta:
+        verbose_name = _("Status Time Period")
+        verbose_name_plural = _("Status Time Periods")
+
+    def clean(self):
+        # Ensure at least one of the two fields is provided
+        if not self.time_period_in_minutes and not self.custom_time_period:
+            raise ValidationError(
+                _("Either a predefined time period or a custom time period must be set.")
+            )
 
     def __str__(self):
         if self.custom_time_period:
-            return f"Change from {self.status_from} to {self.status_to} in {self.custom_time_period} minutes"
-        return f"Change from {self.status_from} to {self.status_to} in {self.time_period_in_minutes} minutes"
+            return _(
+                "Change from %(status_from)s to %(status_to)s in %(time)s minutes"
+            ) % {
+                'status_from': self.status_from,
+                'status_to': self.status_to,
+                'time': self.custom_time_period,
+            }
+        return _(
+            "Change from %(status_from)s to %(status_to)s in %(time)s minutes"
+        ) % {
+            'status_from': self.status_from,
+            'status_to': self.status_to,
+            'time': self.time_period_in_minutes,
+        }

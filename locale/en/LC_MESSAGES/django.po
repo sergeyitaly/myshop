@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-28 14:39+0200\n"
+"POT-Creation-Date: 2025-01-07 21:28+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,7 +54,7 @@ msgstr ""
 msgid "Comments"
 msgstr ""
 
-#: feedback/admin.py:71 feedback/models.py:28 order/models.py:66
+#: feedback/admin.py:71 feedback/models.py:28 order/models.py:67
 #: order/order/models.py:68
 msgid "Created At"
 msgstr ""
@@ -83,7 +83,7 @@ msgstr ""
 msgid "Ratings"
 msgstr ""
 
-#: feedback/models.py:41 order/models.py:70 order/order/models.py:72
+#: feedback/models.py:41 order/models.py:71 order/order/models.py:72
 msgid "Status"
 msgstr ""
 
@@ -184,92 +184,104 @@ msgstr ""
 msgid "Android"
 msgstr ""
 
-#: myshop/myshop/settings.py:337 myshop/settings.py:341
+#: myshop/myshop/settings.py:337 myshop/settings.py:342
 msgid "English"
 msgstr ""
 
-#: myshop/myshop/settings.py:338 myshop/settings.py:342
+#: myshop/myshop/settings.py:338 myshop/settings.py:343
 msgid "Ukrainian"
 msgstr ""
 
-#: order/admin.py:39 order/order/admin.py:40
+#: order/admin.py:30
+msgid ""
+"Please choose either a predefined time period or enter a custom time period, "
+"not both."
+msgstr ""
+
+#: order/admin.py:34
+msgid ""
+"You must either select a predefined time period or enter a custom time "
+"period."
+msgstr ""
+
+#: order/admin.py:67 order/order/admin.py:40
 msgid "Order Summary (JSON)"
 msgstr ""
 
-#: order/admin.py:68 order/order/admin.py:69
+#: order/admin.py:96 order/order/admin.py:69
 msgid "Product Photo"
 msgstr ""
 
-#: order/admin.py:72 order/order/admin.py:73
+#: order/admin.py:100 order/order/admin.py:73
 msgid "Product Name"
 msgstr ""
 
-#: order/admin.py:77 order/order/admin.py:78 shop/models.py:125
+#: order/admin.py:105 order/order/admin.py:78 shop/models.py:125
 msgid "Price"
 msgstr ""
 
-#: order/admin.py:81 order/order/admin.py:82 shop/models.py:143
+#: order/admin.py:109 order/order/admin.py:82 shop/models.py:143
 msgid "Currency"
 msgstr ""
 
-#: order/admin.py:85 order/order/admin.py:86 shop/admin.py:87 shop/models.py:69
-#: shop/models.py:93 shop/models.py:121
+#: order/admin.py:113 order/order/admin.py:86 shop/admin.py:87
+#: shop/models.py:69 shop/models.py:93 shop/models.py:121
 msgid "Collection"
 msgstr ""
 
-#: order/admin.py:91 order/order/admin.py:92 shop/models.py:135
+#: order/admin.py:119 order/order/admin.py:92 shop/models.py:135
 msgid "Size"
 msgstr ""
 
-#: order/admin.py:96 order/order/admin.py:97
+#: order/admin.py:124 order/order/admin.py:97
 msgid "Color"
 msgstr ""
 
-#: order/admin.py:118 order/order/admin.py:119
+#: order/admin.py:146 order/order/admin.py:119
 msgid "Has Order Items"
 msgstr ""
 
-#: order/admin.py:119 order/order/admin.py:120
+#: order/admin.py:147 order/order/admin.py:120
 msgid "has_order_items"
 msgstr ""
 
-#: order/admin.py:123 order/order/admin.py:124
+#: order/admin.py:151 order/order/admin.py:124
 msgid "With Order Items"
 msgstr ""
 
-#: order/admin.py:124 order/order/admin.py:125
+#: order/admin.py:152 order/order/admin.py:125
 msgid "Without Order Items"
 msgstr ""
 
-#: order/admin.py:175 order/order/admin.py:176
+#: order/admin.py:203 order/order/admin.py:176
 msgid "Last Updated"
 msgstr ""
 
-#: order/admin.py:179 order/order/admin.py:180
+#: order/admin.py:207 order/order/admin.py:180
 msgid "Total Quantity"
 msgstr ""
 
-#: order/admin.py:183 order/order/admin.py:184
+#: order/admin.py:211 order/order/admin.py:184
 msgid "Total Price"
 msgstr ""
 
-#: order/forms.py:9 order/models.py:51 order/order/models.py:51
+#: order/forms.py:9 order/models.py:52 order/order/models.py:51
 msgid "Self Pickup"
 msgstr ""
 
-#: order/forms.py:10 order/models.py:52 order/order/models.py:52
+#: order/forms.py:10 order/models.py:53 order/order/models.py:52
 msgid "Nova Poshta"
 msgstr ""
 
-#: order/forms.py:11 order/models.py:53 order/order/models.py:53
+#: order/forms.py:11 order/models.py:54 order/order/models.py:53
 msgid "Ukr Poshta"
 msgstr ""
 
-#: order/forms.py:13 order/models.py:55 order/order/models.py:56
+#: order/forms.py:13 order/models.py:56 order/order/models.py:56
 msgid "Cash on Delivery"
 msgstr ""
 
-#: order/forms.py:14 order/models.py:56 order/order/models.py:57
+#: order/forms.py:14 order/models.py:57 order/order/models.py:57
 msgid "Online Card Payment"
 msgstr ""
 
@@ -277,164 +289,205 @@ msgstr ""
 #: order/management/commands/generate_order_summaries.py:109
 #: order/order/management/commands/generate_order_summaries.py:97
 #: order/order/management/commands/generate_order_summaries.py:109
-#: order/order/utils.py:64 order/order/utils.py:75 order/utils.py:64
-#: order/utils.py:75
+#: order/order/utils.py:64 order/order/utils.py:75
 msgid "No Collection"
 msgstr ""
 
-#: order/models.py:15 order/order/models.py:15
+#: order/models.py:16 order/order/models.py:15
 msgid "Phone"
 msgstr ""
 
-#: order/models.py:16 order/models.py:151 order/order/models.py:16
+#: order/models.py:17 order/models.py:152 order/order/models.py:16
 #: order/order/models.py:152
 msgid "Chat ID"
 msgstr ""
 
-#: order/models.py:22 order/models.py:73 order/order/models.py:22
+#: order/models.py:23 order/models.py:74 order/order/models.py:22
 #: order/order/models.py:75
 msgid "Telegram user"
 msgstr ""
 
-#: order/models.py:23 order/order/models.py:23
+#: order/models.py:24 order/order/models.py:23
 msgid "Telegram users"
 msgstr ""
 
-#: order/models.py:44 order/order/models.py:44
+#: order/models.py:45 order/models.py:215 order/order/models.py:44
 msgid "Submitted"
 msgstr ""
 
-#: order/models.py:45 order/order/models.py:45 order/order/utils.py:79
-#: order/utils.py:79 shop/models.py:128
+#: order/models.py:46 order/models.py:216 order/order/models.py:45
+#: order/order/utils.py:79 shop/models.py:128
 msgid "Created"
 msgstr ""
 
-#: order/models.py:46 order/order/models.py:46 order/order/utils.py:80
-#: order/utils.py:80
+#: order/models.py:47 order/models.py:217 order/order/models.py:46
+#: order/order/utils.py:80
 msgid "Processed"
 msgstr ""
 
-#: order/models.py:47 order/order/models.py:47
+#: order/models.py:48 order/models.py:218 order/order/models.py:47
 msgid "Complete"
 msgstr ""
 
-#: order/models.py:48 order/order/models.py:48 order/order/utils.py:82
-#: order/utils.py:82
+#: order/models.py:49 order/order/models.py:48 order/order/utils.py:82
 msgid "Canceled"
 msgstr ""
 
-#: order/models.py:57 order/order/models.py:59
+#: order/models.py:58 order/order/models.py:59
 msgid "Default Name"
 msgstr ""
 
-#: order/models.py:58 order/order/models.py:60
+#: order/models.py:59 order/order/models.py:60
 msgid "Default Surname"
 msgstr ""
 
-#: order/models.py:59 order/order/models.py:61
+#: order/models.py:60 order/order/models.py:61
 msgid "Contact phone number"
 msgstr ""
 
-#: order/models.py:61 order/order/models.py:63
+#: order/models.py:62 order/order/models.py:63
 msgid "Address"
 msgstr ""
 
-#: order/models.py:62 order/order/models.py:64
+#: order/models.py:63 order/order/models.py:64
 msgid "Other person"
 msgstr ""
 
-#: order/models.py:63 order/order/models.py:65
+#: order/models.py:64 order/order/models.py:65
 msgid "Comments about the receiver"
 msgstr ""
 
-#: order/models.py:64 order/order/models.py:66
+#: order/models.py:65 order/order/models.py:66
 msgid "Congrats"
 msgstr ""
 
-#: order/models.py:65 order/order/models.py:67
+#: order/models.py:66 order/order/models.py:67
 msgid "Submitted At"
 msgstr ""
 
-#: order/models.py:67 order/order/models.py:69
+#: order/models.py:68 order/order/models.py:69
 msgid "Processed At"
 msgstr ""
 
-#: order/models.py:68 order/order/models.py:70
+#: order/models.py:69 order/order/models.py:70
 msgid "Complete At"
 msgstr ""
 
-#: order/models.py:69 order/order/models.py:71
+#: order/models.py:70 order/order/models.py:71
 msgid "Canceled At"
 msgstr ""
 
-#: order/models.py:71 order/order/models.py:73
+#: order/models.py:72 order/order/models.py:73
 msgid "Parent Order"
 msgstr ""
 
-#: order/models.py:72 order/order/models.py:74
+#: order/models.py:73 order/order/models.py:74
 msgid "Package as a present"
 msgstr ""
 
-#: order/models.py:76 order/order/models.py:78
+#: order/models.py:77 order/order/models.py:78
 msgid "Delivery Method"
 msgstr ""
 
-#: order/models.py:77 order/order/models.py:79
+#: order/models.py:78 order/order/models.py:79
 msgid "Payment Method"
 msgstr ""
 
-#: order/models.py:146 order/models.py:179 order/order/models.py:147
+#: order/models.py:147 order/models.py:180 order/order/models.py:147
 #: order/order/models.py:180
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:484
 #: venv/lib/python3.9/site-packages/django/forms/formsets.py:491
 msgid "Order"
 msgstr ""
 
-#: order/models.py:147 order/models.py:152 order/order/models.py:148
+#: order/models.py:148 order/models.py:153 order/order/models.py:148
 #: order/order/models.py:153
 msgid "Orders"
 msgstr ""
 
-#: order/models.py:174 order/order/models.py:175
+#: order/models.py:175 order/order/models.py:175
 msgid "Order summary"
 msgstr ""
 
-#: order/models.py:175 order/order/models.py:176
+#: order/models.py:176 order/order/models.py:176
 msgid "Order summaries"
 msgstr ""
 
-#: order/models.py:180 order/order/models.py:181 shop/admin.py:143
-#: shop/models.py:188 shop/models.py:227
+#: order/models.py:181 order/order/models.py:181 shop/admin.py:143
+#: shop/models.py:188 shop/models.py:228
 msgid "Product"
 msgstr ""
 
-#: order/models.py:184 order/order/models.py:185
+#: order/models.py:185 order/order/models.py:185
 msgid "Quantity"
 msgstr ""
 
-#: order/models.py:185 order/order/models.py:186
+#: order/models.py:186 order/order/models.py:186
 msgid "Total Sum"
 msgstr ""
 
-#: order/models.py:208 order/order/models.py:209
+#: order/models.py:209 order/order/models.py:209
 msgid "Order Item"
 msgstr ""
 
-#: order/models.py:209 order/order/models.py:210
+#: order/models.py:210 order/order/models.py:210
 msgid "Order Items"
 msgstr ""
 
-#: order/order/utils.py:59 order/order/utils.py:70 order/utils.py:59
-#: order/utils.py:70
+#: order/models.py:224
+msgid "Status From"
+msgstr ""
+
+#: order/models.py:229
+msgid "Status To"
+msgstr ""
+
+#: order/models.py:233
+msgid "5 minutes"
+msgstr ""
+
+#: order/models.py:234
+msgid "20 minutes"
+msgstr ""
+
+#: order/models.py:235
+msgid "24 hours"
+msgstr ""
+
+#: order/models.py:240
+msgid "Predefined Time Period (in minutes)"
+msgstr ""
+
+#: order/models.py:245
+msgid "Custom Time Period (in minutes)"
+msgstr ""
+
+#: order/models.py:249
+msgid "Status Time Period"
+msgstr ""
+
+#: order/models.py:250
+msgid "Status Time Periods"
+msgstr ""
+
+#: order/models.py:256
+msgid "Either a predefined time period or a custom time period must be set."
+msgstr ""
+
+#: order/models.py:262 order/models.py:269
+#, python-format
+msgid "Change from %(status_from)s to %(status_to)s in %(time)s minutes"
+msgstr ""
+
+#: order/order/utils.py:59 order/order/utils.py:70
 msgid "No Color"
 msgstr ""
 
-#: order/order/utils.py:63 order/order/utils.py:74 order/utils.py:63
-#: order/utils.py:74
+#: order/order/utils.py:63 order/order/utils.py:74
 msgid "No Name"
 msgstr ""
 
-#: order/order/utils.py:81 order/utils.py:81
+#: order/order/utils.py:81
 msgid "Completed"
 msgstr ""
 
@@ -554,11 +607,11 @@ msgstr ""
 msgid "images"
 msgstr ""
 
-#: shop/models.py:224
+#: shop/models.py:225
 msgid "name"
 msgstr ""
 
-#: shop/models.py:225
+#: shop/models.py:226
 msgid "value"
 msgstr ""
 
@@ -3350,6 +3403,10 @@ msgstr ""
 
 #: venv/lib/python3.9/site-packages/modeltranslation/widgets.py:32
 msgid "None"
+msgstr ""
+
+#: venv/lib/python3.9/site-packages/timezone_field/rest_framework.py:10
+msgid "A valid timezone is required."
 msgstr ""
 
 #: venv/lib/python3.9/site-packages/tornado/locale.py:377

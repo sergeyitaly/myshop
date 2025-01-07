@@ -13,6 +13,7 @@ from .utils import send_mass_message_with_logging
 from django import forms
 from .models import StatusTimePeriod
 
+
 class StatusTimePeriodForm(forms.ModelForm):
     class Meta:
         model = StatusTimePeriod
@@ -25,19 +26,22 @@ class StatusTimePeriodForm(forms.ModelForm):
 
         # Ensure either a predefined value or a custom value is provided, but not both
         if time_period_in_minutes and custom_time_period:
-            raise forms.ValidationError('Please choose either a predefined time period or enter a custom time period, not both.')
+            raise forms.ValidationError(
+                _("Please choose either a predefined time period or enter a custom time period, not both.")
+            )
         if not time_period_in_minutes and not custom_time_period:
-            raise forms.ValidationError('You must either select a predefined time period or enter a custom time period.')
+            raise forms.ValidationError(
+                _("You must either select a predefined time period or enter a custom time period.")
+            )
 
         return cleaned_data
 
+@admin.register(StatusTimePeriod)
 class StatusTimePeriodAdmin(admin.ModelAdmin):
     list_display = ('status_from', 'status_to', 'time_period_in_minutes', 'custom_time_period')
     list_filter = ('status_from', 'status_to')
     search_fields = ('status_from', 'status_to')
     form = StatusTimePeriodForm
-
-admin.site.register(StatusTimePeriod, StatusTimePeriodAdmin)
 
 
 class TelegramMessageAdmin(admin.ModelAdmin):
