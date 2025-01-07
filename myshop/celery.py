@@ -36,13 +36,13 @@ app.conf.update(
     WORKER_CANCEL_LONG_RUNNING_TASKS_ON_CONNECTION_LOSS=True,  # Cancel tasks if connection is lost.
 
     # Redis connection settings
-    BROKER_POOL_LIMIT=10,  # Limit concurrent Redis connections from Celery workers to 10.
+    BROKER_POOL_LIMIT=6,  # Limit concurrent Redis connections from Celery workers to 10.
     
     # Additional Redis transport options for connection management
     BROKER_TRANSPORT_OPTIONS={
         'fanout_prefix': True,
         'fanout_patterns': True,
-        'max_connections': 10,  # Limit max connections from the broker.
+        'max_connections': 6,  # Limit max connections from the broker.
         'socket_keepalive': True,  # Keep sockets alive to prevent closing during long tasks.
         'visibility_timeout': 3600,  # Task timeout visibility (for retries).
     },
