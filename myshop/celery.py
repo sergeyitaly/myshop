@@ -18,7 +18,7 @@ app.conf.broker_transport = 'redis'  # Or any other transport
 app.conf.beat_scheduler = 'django_celery_beat.schedulers:DatabaseScheduler'
 app.conf.beat_schedule = {
     'update-order-statuses-every-minute': {
-        'task': 'order.tasks.update_order_statuses_task',
+        'task': 'order.tasks.update_order_statuses',
         'schedule': crontab(minute='*/1'), 
     },
 }
