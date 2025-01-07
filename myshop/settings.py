@@ -364,7 +364,7 @@ CACHES = {
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'CONNECTION_POOL_KWARGS': {
-                'max_connections': 24,  # Use a low connection pool to avoid hitting the limit
+                'max_connections': 12,  # Use a low connection pool to avoid hitting the limit
                 'retry_on_timeout': True,
             },
             'SOCKET_CONNECT_TIMEOUT': 10,  # Reduce socket connect timeout (lower resources)

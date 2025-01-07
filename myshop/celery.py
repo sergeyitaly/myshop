@@ -28,17 +28,16 @@ app.autodiscover_tasks()
 app.conf.update(
     RESULT_BACKEND=settings.RESULT_BACKEND,
     IMPORTS=('order.tasks',),
-    
+
     # Worker settings
     WORKER_POOL_RESTARTS=True,  # Restart workers after processing 1000 tasks to free up memory.
     WORKER_MAX_TASKS_PER_CHILD=1000,  # Max tasks per worker before restarting (memory management).
     WORKER_PREFETCH_MULTIPLIER=1,  # Reduce task prefetching (limits the number of tasks per worker).
+    WORKER_CONCURRENCY=2,  # Limit to 2 workers per machine (reduce Redis connection usage).
     WORKER_CANCEL_LONG_RUNNING_TASKS_ON_CONNECTION_LOSS=True,  # Cancel tasks if connection is lost.
 
     # Redis connection settings
-    BROKER_POOL_LIMIT=6,  # Limit concurrent Redis connections from Celery workers to 10.
-    
-    # Additional Redis transport options for connection management
+    BROKER_POOL_LIMIT=6,  # Limit concurrent Redis connections from Celery workers to 6.
     BROKER_TRANSPORT_OPTIONS={
         'fanout_prefix': True,
         'fanout_patterns': True,
@@ -47,4 +46,3 @@ app.conf.update(
         'visibility_timeout': 3600,  # Task timeout visibility (for retries).
     },
 )
-
