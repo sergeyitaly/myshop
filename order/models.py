@@ -207,3 +207,35 @@ class OrderItem(models.Model):
     class Meta:
         verbose_name = _('Order Item')
         verbose_name_plural = _('Order Items')
+
+
+class StatusTimePeriod(models.Model):
+    STATUS_CHOICES = [
+        ('submitted', 'Submitted'),
+        ('created', 'Created'),
+        ('processed', 'Processed'),
+        ('complete', 'Complete'),
+    ]
+
+    status_from = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+    )
+    status_to = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+    )
+    time_period_in_minutes = models.PositiveIntegerField(
+        choices=[(5, '5 minutes'), (20, '20 minutes'), (24 * 60, '24 hours')],
+        default=5,
+        blank=True,  # Allow blank to enable custom input
+    )
+    custom_time_period = models.PositiveIntegerField(
+        blank=True, null=True,  # Allow null if no custom time is provided
+        verbose_name="Custom Time Period (in minutes)"
+    )
+
+    def __str__(self):
+        if self.custom_time_period:
+            return f"Change from {self.status_from} to {self.status_to} in {self.custom_time_period} minutes"
+        return f"Change from {self.status_from} to {self.status_to} in {self.time_period_in_minutes} minutes"
