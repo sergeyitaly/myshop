@@ -1,24 +1,28 @@
-app = "myshop" 
-primary_region = "fra"  
+app = "myshop-qj9v4q"
+primary_region = "fra"
 
 [env]
 DJANGO_SETTINGS_MODULE = "myshop.settings"
 
 [build]
-  image = "sergeyitaly/koloryt:serhii_celery" 
+  image = "sergeyitaly/koloryt:serhii_celery"
 
 [processes]
-  app = "gunicorn myshop.wsgi"
+  app = "gunicorn myshop.wsgi:application"
   worker = "celery -A myshop worker --loglevel=info --pool=gevent --concurrency=2"
   beat = "celery -A myshop beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler"
 
-[[services.ports]]
-  handlers = ["http"]
-  port = 80
-  force_https = true
+[[services]]
+  internal_port = 8000
+  processes = ["app"]
+  protocol = "tcp"
 
-[services.concurrency]
-  type = "connections"
-  hard_limit = 25
-  soft_limit = 20
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+    force_https = true
 
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 25
+    soft_limit = 20
