@@ -7,13 +7,18 @@ DJANGO_SETTINGS_MODULE = "myshop.settings"
 [build]
   image = "sergeyitaly/koloryt:serhii_celery" 
 
+[processes]
+  app = "gunicorn myshop.wsgi"
+  worker = "celery -A myshop worker --loglevel=info --pool=gevent --concurrency=2"
+  beat = "celery -A myshop beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler"
+
 [[services.ports]]
   handlers = ["http"]
   port = 80
   force_https = true
-  memory = "1Gi" 
-  
+
 [services.concurrency]
   type = "connections"
   hard_limit = 25
   soft_limit = 20
+
