@@ -14,31 +14,37 @@ app.conf.result_serializer = 'json'
 app.conf.accept_content = ['json']
 app.conf.timezone = settings.TIME_ZONE
 app.conf.broker_url = settings.BROKER_URL
-app.conf.broker_transport = 'redis'
+app.conf.broker_transport = 'redis'  # Using Redis as broker
 app.conf.beat_scheduler = 'django_celery_beat.schedulers:DatabaseScheduler'
-
 app.conf.beat_schedule = {
     'update-order-statuses-every-minute': {
         'task': 'order.tasks.update_order_statuses',
-        'schedule': crontab(minute='*/1'),
+        'schedule': crontab(minute='*/1'),  # Update every minute
     },
 }
-
 app.autodiscover_tasks()
 
+# Celery Worker Configuration
 app.conf.update(
     RESULT_BACKEND=settings.RESULT_BACKEND,
     IMPORTS=('order.tasks',),
-    WORKER_POOL_RESTARTS=True,
-    WORKER_MAX_TASKS_PER_CHILD=1000,  # Restart worker after processing 1000 tasks to free up memory.
-    WORKER_PREFETCH_MULTIPLIER=1,  # Minimize task prefetching to reduce connection usage.
-    WORKER_CANCEL_LONG_RUNNING_TASKS_ON_CONNECTION_LOSS=True,
-    BROKER_POOL_LIMIT=10,  # Limit the number of concurrent connections from each worker to Redis.
+    
+    # Worker settings
+    WORKER_POOL_RESTARTS=True,  # Restart workers after processing 1000 tasks to free up memory.
+    WORKER_MAX_TASKS_PER_CHILD=1000,  # Max tasks per worker before restarting (memory management).
+    WORKER_PREFETCH_MULTIPLIER=1,  # Reduce task prefetching (limits the number of tasks per worker).
+    WORKER_CANCEL_LONG_RUNNING_TASKS_ON_CONNECTION_LOSS=True,  # Cancel tasks if connection is lost.
+
+    # Redis connection settings
+    BROKER_POOL_LIMIT=10,  # Limit concurrent Redis connections from Celery workers to 10.
+    
+    # Additional Redis transport options for connection management
     BROKER_TRANSPORT_OPTIONS={
         'fanout_prefix': True,
         'fanout_patterns': True,
-        'max_connections': 50,  
-        'socket_keepalive': True,
-        'visibility_timeout': 3600, 
+        'max_connections': 10,  # Limit max connections from the broker.
+        'socket_keepalive': True,  # Keep sockets alive to prevent closing during long tasks.
+        'visibility_timeout': 3600,  # Task timeout visibility (for retries).
     },
 )
+

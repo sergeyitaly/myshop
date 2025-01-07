@@ -360,22 +360,21 @@ REDIS_CACHE_LOCATION = os.getenv('REDIS_CACHE_LOCATION')
 CACHES = {
     'default': {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"{os.getenv('REDIS_CACHE_LOCATION', 'redis://127.0.0.1:6379')}/0",
-
-        'LOCATION': REDIS_CACHE_LOCATION,
+        "LOCATION": REDIS_CACHE_LOCATION,  # Redis server location
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'CONNECTION_POOL_KWARGS': {
-                'max_connections': 300,  # Adjust based on load requirements
+                'max_connections': 10,  # Use a low connection pool to avoid hitting the limit
                 'retry_on_timeout': True,
             },
-            'SOCKET_CONNECT_TIMEOUT': 25,  # seconds
-            'SOCKET_TIMEOUT': 25,  # seconds
+            'SOCKET_CONNECT_TIMEOUT': 10,  # Reduce socket connect timeout (lower resources)
+            'SOCKET_TIMEOUT': 10,  # Lower socket timeout (helps with responsiveness)
         },
-        'KEY_PREFIX': 'imdb',
-        'TIMEOUT': 60 * 15,  # Cache timeout in seconds
+        'KEY_PREFIX': 'imdb',  # Key prefix for all cache entries
+        'TIMEOUT': 60 * 5,  # Cache timeout in seconds (5 minutes)
     }
 }
+
 
 # Celery configuration
 BROKER_URL = os.getenv('REDIS_BROKER_URL')
