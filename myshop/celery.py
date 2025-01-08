@@ -19,16 +19,24 @@ app.conf.beat_scheduler = 'django_celery_beat.schedulers:DatabaseScheduler'
 app.conf.beat_schedule = {
     'update-order-statuses-every-minute': {
         'task': 'order.tasks.update_order_statuses',
-        'schedule': crontab(minute='*/1'),  # Update every minute
+        'schedule': crontab(minute='*/1'),
+    },
+    'clear-redis-cache-everyday-7am': {
+        'task': 'myshop.tasks.clear_redis_cache',
+        'schedule': crontab(hour=7, minute=0),
+    },
+    'increase-stock-everyday-7am': {
+        'task': 'shop.tasks.increase_stock_for_unavailable_products',
+        'schedule': crontab(hour=7, minute=0),
     },
 }
+
 app.autodiscover_tasks()
 
 # Celery Worker Configuration
 app.conf.update(
     RESULT_BACKEND=settings.RESULT_BACKEND,
     IMPORTS=('order.tasks',),
-
     # Worker settings
     WORKER_POOL_RESTARTS=True,  # Restart workers after processing 1000 tasks to free up memory.
     WORKER_MAX_TASKS_PER_CHILD=1000,  # Max tasks per worker before restarting (memory management).
