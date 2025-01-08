@@ -1,6 +1,7 @@
-name = "myshop"
-count = 1
+[app]
+name = "myshop-qj9v4q"
 primary_region = "ord"
+count=1
 
 [build]
 image = "sergeyitaly/koloryt:serhii_celery"
