@@ -27,3 +27,7 @@ protocol = "tcp"
   force_https = true
   handlers = [ "http" ]
   port = 80
+
+[autoscale]
+min_count = 1
+max_count = 1
