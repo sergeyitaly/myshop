@@ -9,10 +9,10 @@ class Command(BaseCommand):
     help = "Find the optimal timeout and max_connections for the /api/products/filter/ endpoint, testing different MAX_ENTRIES."
 
     def handle(self, *args, **kwargs):
-        socket_timeout_options = [200, 500]
-        connect_timeout_options = [200, 500]
+        socket_timeout_options = [100, 200, 500]
+        connect_timeout_options = [100, 200, 500]
         timeout_options = [20, 100, 180, 300, 600]
-        max_connections_options = [ 20, 30]
+        max_connections_options = [10, 20, 30]
         max_entries_options = [1000, 2000] 
         url = f"{settings.VERCEL_DOMAIN}/api/products/filter/"
         
@@ -42,7 +42,7 @@ class Command(BaseCommand):
                     'CONNECTION_POOL_CLASS': 'redis.connection.ConnectionPool',
                 },
                 'KEY_PREFIX': 'filter_api',
-                'TIMEOUT': 20,
+                'TIMEOUT': 10,
             }
 
             settings.CACHES['default'].update(cache_params)

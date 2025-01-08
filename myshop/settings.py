@@ -359,26 +359,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REDIS_CACHE_LOCATION = os.getenv('REDIS_CACHE_LOCATION')
 
 CACHES = {
-    'default': {
+    "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": REDIS_CACHE_LOCATION,  # Redis server location
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'CONNECTION_POOL_KWARGS': {
-                'max_connections': 20,  # Increase to allow for more concurrent connections
-                'retry_on_timeout': True,  # Ensure retry on timeout for better reliability
+        "LOCATION": REDIS_CACHE_LOCATION, 
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "CONNECTION_POOL_KWARGS": {
+                "max_connections": 20,
             },
-            'IGNORE_EXCEPTIONS': True,  # Avoid crashes when Redis is down
-            'SOCKET_CONNECT_TIMEOUT': 200,  # Increased socket connect timeout for improved reliability
-            'SOCKET_TIMEOUT': 200,  # Increased socket timeout for long requests
-            'MAX_ENTRIES': 2000,  # Increased entries to handle more cache data
-            'CONNECTION_POOL_CLASS': 'redis.connection.ConnectionPool',
         },
-        'KEY_PREFIX': 'product',  # Use a specific prefix for product-related cache
-        'TIMEOUT': 20,  # Adjusted timeout for product cache (100 seconds for more flexibility)
+        "TIMEOUT": 20,
+        "SOCKET_CONNECT_TIMEOUT": 100,
+        "SOCKET_TIMEOUT": 100,
+        "MAX_ENTRIES": 2000,
     }
 }
-
 
 # Celery configuration
 BROKER_URL = os.getenv('REDIS_BROKER_URL')
