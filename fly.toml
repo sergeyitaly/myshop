@@ -29,4 +29,4 @@ protocol = "tcp"
 
 [autoscale]
 min_count = 1
-max_count = 2
+max_count = 1
