@@ -357,6 +357,7 @@ SESSION_CACHE_ALIAS = "default"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REDIS_CACHE_LOCATION = os.getenv('REDIS_CACHE_LOCATION')
+
 CACHES = {
     'default': {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -364,17 +365,17 @@ CACHES = {
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'CONNECTION_POOL_KWARGS': {
-                'max_connections': 25,  # Reduce max connections to match app's scale
+                'max_connections': 200,  # Reduce max connections to match app's scale
                 'retry_on_timeout': True,
             },
             'IGNORE_EXCEPTIONS': True,  # Avoid crashes when Redis is down
-            'SOCKET_CONNECT_TIMEOUT': 2,  # Reduce socket connect timeout for faster failover
-            'SOCKET_TIMEOUT': 2,  # Lower socket timeout to improve responsiveness
-            'MAX_ENTRIES': 500,  # Adjust to limit memory usage and eviction
+            'SOCKET_CONNECT_TIMEOUT': 10,  # Reduce socket connect timeout for faster failover
+            'SOCKET_TIMEOUT': 10,  # Lower socket timeout to improve responsiveness
+            'MAX_ENTRIES': 10,  # Adjust to limit memory usage and eviction
             'CONNECTION_POOL_CLASS': 'redis.connection.ConnectionPool',
         },
         'KEY_PREFIX': 'product',  # Use a specific prefix for product-related cache
-        'TIMEOUT': 60 * 2,  # Shorter timeout for product cache (2 minutes)
+        'TIMEOUT': 20,  # Shorter timeout for product cache (2 minutes)
     }
 }
 
