@@ -19,7 +19,7 @@ app.conf.beat_scheduler = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 # Celery Beat Schedule
 app.conf.beat_schedule = {
-    'update-order-statuses-every-5-minutes': {  # Reduced frequency
+    'update-order-statuses-every-5-minutes': {  
         'task': 'order.tasks.update_order_statuses',
         'schedule': crontab(minute='*/5'),
     },

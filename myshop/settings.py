@@ -365,7 +365,7 @@ CACHES = {
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'CONNECTION_POOL_KWARGS': {
-                'max_connections': 30,  # Increase to allow for more concurrent connections
+                'max_connections': 20,  # Increase to allow for more concurrent connections
                 'retry_on_timeout': True,  # Ensure retry on timeout for better reliability
             },
             'IGNORE_EXCEPTIONS': True,  # Avoid crashes when Redis is down
@@ -375,7 +375,7 @@ CACHES = {
             'CONNECTION_POOL_CLASS': 'redis.connection.ConnectionPool',
         },
         'KEY_PREFIX': 'product',  # Use a specific prefix for product-related cache
-        'TIMEOUT': 100,  # Adjusted timeout for product cache (100 seconds for more flexibility)
+        'TIMEOUT': 20,  # Adjusted timeout for product cache (100 seconds for more flexibility)
     }
 }
 
