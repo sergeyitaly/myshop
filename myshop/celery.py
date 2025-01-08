@@ -17,7 +17,7 @@ app.conf.update(
     broker_transport_options={
         'fanout_prefix': True,
         'fanout_patterns': True,
-        'max_connections': 5,
+        'max_connections': 6,
         'socket_keepalive': True,
         'visibility_timeout': 3600,
     },
@@ -30,8 +30,8 @@ app.conf.update(
     worker_pool_restarts=True,
     worker_max_tasks_per_child=1000,
     worker_prefetch_multiplier=1,  # Reduce task prefetching to minimize Redis usage
-    worker_concurrency=2,  # Keep concurrency low
-    broker_pool_limit=10,  # Restrict connections to Redis
+    worker_concurrency=1,  # Keep concurrency low
+    broker_pool_limit=5,  # Restrict connections to Redis
 )
 
 # Beat Schedule
