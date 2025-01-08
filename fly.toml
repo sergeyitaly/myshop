@@ -1,5 +1,5 @@
-[app]
 name = "myshop"
+count = 1
 primary_region = "ord"
 
 [build]
@@ -19,15 +19,11 @@ processes = [ "app", "worker", "beat" ]
 protocol = "tcp"
 
   [services.concurrency]
-  hard_limit = 4
-  soft_limit = 3
+  hard_limit = 3
+  soft_limit = 2
   type = "connections"
 
   [[services.ports]]
   force_https = true
   handlers = [ "http" ]
   port = 80
-
-[autoscale]
-min_count = 1
-max_count = 1
