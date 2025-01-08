@@ -364,14 +364,17 @@ CACHES = {
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'CONNECTION_POOL_KWARGS': {
-                'max_connections': 10,  # Use a low connection pool to avoid hitting the limit
+                'max_connections': 25,  # Reduce max connections to match app's scale
                 'retry_on_timeout': True,
             },
-            'SOCKET_CONNECT_TIMEOUT': 10,  # Reduce socket connect timeout (lower resources)
-            'SOCKET_TIMEOUT': 10,  # Lower socket timeout (helps with responsiveness)
+            'IGNORE_EXCEPTIONS': True,  # Avoid crashes when Redis is down
+            'SOCKET_CONNECT_TIMEOUT': 2,  # Reduce socket connect timeout for faster failover
+            'SOCKET_TIMEOUT': 2,  # Lower socket timeout to improve responsiveness
+            'MAX_ENTRIES': 500,  # Adjust to limit memory usage and eviction
+            'CONNECTION_POOL_CLASS': 'redis.connection.ConnectionPool',
         },
-        'KEY_PREFIX': 'imdb',  # Key prefix for all cache entries
-        'TIMEOUT': 60 * 5,  # Cache timeout in seconds (5 minutes)
+        'KEY_PREFIX': 'product',  # Use a specific prefix for product-related cache
+        'TIMEOUT': 60 * 2,  # Shorter timeout for product cache (2 minutes)
     }
 }
 

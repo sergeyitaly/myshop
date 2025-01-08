@@ -77,4 +77,5 @@ class CacheFallbackMiddleware(MiddlewareMixin):
         elif "collection" in path:
             collections = Collection.objects.all().values()
             return str(list(collections))
+
         return None
