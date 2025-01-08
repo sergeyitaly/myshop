@@ -13,7 +13,7 @@ class Command(BaseCommand):
         connect_timeout_options = [200, 500]
         timeout_options = [20, 100, 180, 300, 600]
         max_connections_options = [ 20, 30]
-        max_entries_options = [300, 500, 1000, 2000] 
+        max_entries_options = [1000, 2000] 
         url = f"{settings.VERCEL_DOMAIN}/api/products/filter/"
         
         param_combinations = itertools.product(
