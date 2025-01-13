@@ -5,5 +5,6 @@ from shop.models import Product
 def increase_stock_for_unavailable_products():
     products = Product.objects.filter(available=False)
     for product in products:
-        product.increase_stock(amount=10)
+        product.stock = 10
+        product.save()
     return f"Updated stock for {products.count()} unavailable products."
