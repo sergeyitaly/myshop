@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils.timezone import now
-from datetime import timedelta
 from django.core.management import call_command
 import logging
 
@@ -27,14 +26,15 @@ class ScheduledTask(models.Model):
     def run_task(self):
         if self.should_run():
             try:
-                self.stdout.write(self.style.SUCCESS(f"Running task: {self.name}"))
+                # Use logger instead of stdout.write
+                logger.info(f"Running task: {self.name}")
                 call_command(self.name)  # Execute the task as a Django command
                 self.last_run_status = "Success"
             except Exception as e:
                 self.last_run_status = f"Failed: {str(e)}"
+                logger.error(f"Task {self.name} failed: {str(e)}")
             finally:
                 self.last_run_at = now()  # Update the last run timestamp
                 self.save()
-
         else:
             logger.info(f"Task {self.name} is not ready to run yet.")
