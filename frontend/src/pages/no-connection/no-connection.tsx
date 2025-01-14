@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next";
-import ImgError from "./img-error.png";
 import styles from "./no-connection.module.scss";
 
 export const NoConnectionPage = () => {
@@ -32,6 +31,8 @@ export const NoConnectionPage = () => {
 			window.location.reload();
 		}
 	};
+
+	const ImgError = new URL("./img-error.png", import.meta.url).href;
 
 	return (
 		<main className={styles.main}>
