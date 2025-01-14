@@ -55,6 +55,21 @@ class ScheduledTaskForm(forms.ModelForm):
 @admin.register(ScheduledTask)
 class ScheduledTaskAdmin(admin.ModelAdmin):
     form = ScheduledTaskForm
-    list_display = ('name','days','hours','minutes','last_run_at', 'last_run_status')
+    list_display = ('name', 'get_days', 'get_hours', 'get_minutes', 'last_run_at', 'last_run_status')
     search_fields = ('name',)
-    readonly_fields = ('max_time')
+    readonly_fields = ('max_time',)
+
+    def get_days(self, obj):
+        return obj.max_time // 1440  # Calculate days from max_time
+    get_days.admin_order_field = 'max_time'  # Allow sorting by max_time
+    get_days.short_description = 'Days'
+
+    def get_hours(self, obj):
+        return (obj.max_time % 1440) // 60  # Calculate hours from remaining minutes
+    get_hours.admin_order_field = 'max_time'
+    get_hours.short_description = 'Hours'
+
+    def get_minutes(self, obj):
+        return obj.max_time % 60  # Get remaining minutes
+    get_minutes.admin_order_field = 'max_time'
+    get_minutes.short_description = 'Minutes'
