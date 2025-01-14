@@ -113,7 +113,7 @@ INSTALLED_APPS = [
   #  'admisortable2',
     'django_celery_beat',
     'django_celery_results',
-
+    'mycelery',
 ]
 
 MIDDLEWARE = [

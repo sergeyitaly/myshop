@@ -61,7 +61,7 @@ urlpatterns = [
     path('api/', include('technologies.urls')),
     path('api/', include('feedback.urls')),
     path('api/', include('logs.urls')),
-
+    path('api/', include('mycelery.urls')),
 
     path('admin/', admin.site.urls),
     path('rosetta/', include('rosetta.urls')), 
