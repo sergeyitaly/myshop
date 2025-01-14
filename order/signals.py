@@ -9,6 +9,14 @@ from django.db import transaction
 from django.core.cache import cache
 from order.models import Order, OrderSummary, OrderItem
 from order.serializers import OrderItemSerializer
+from django_redis import get_redis_connection
+from celery.signals import task_postrun
+
+@task_postrun.connect
+def close_redis_connection(sender=None, **kwargs):
+    # Close the Redis connection after each task completes
+    redis_conn = get_redis_connection('default')
+    redis_conn.close()
 
 logger = logging.getLogger(__name__)
 

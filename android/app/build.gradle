@@ -13,8 +13,9 @@ android {
         applicationId "com.koloryt"
         minSdk 21
         targetSdk 35
-        versionCode Integer.parseInt(new java.text.SimpleDateFormat("ddMMyyHHmm").format(new Date()))
-        versionName "1.0"
+    //def dynamicVersionCode = Integer.parseInt(new java.text.SimpleDateFormat("yyMMddHHmm").format(new Date()))
+    versionCode 2012241514 
+        versionName "1.1.15"
 
     }
     
@@ -74,6 +75,7 @@ dependencies {
     implementation libs.material
     implementation 'io.github.cdimascio:dotenv-java:3.0.2'
     implementation "androidx.core:core-splashscreen:1.2.0-alpha02"
+    // implementation 'androidx.webkit:webkit:1.7.0'
     // JUnit 5 for unit testing
     testImplementation libs.junitJupiterApi
     testRuntimeOnly libs.junitJupiterEngine
@@ -86,5 +88,5 @@ dependencies {
     androidTestImplementation libs.espressoCore
     implementation platform('com.google.firebase:firebase-bom:33.7.0')
     implementation 'com.google.firebase:firebase-analytics'
-
+    implementation 'androidx.annotation:annotation:1.3.0'  
 }

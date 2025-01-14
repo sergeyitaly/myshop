@@ -9,23 +9,50 @@ from .models import *
 from .notifications import update_order_status_with_notification
 from django.contrib.admin import SimpleListFilter
 import json
-import requests
 from .utils import send_mass_message_with_logging 
+from django import forms
+from .models import StatusTimePeriod
 
-@admin.register(TelegramMessage)
+
+class StatusTimePeriodForm(forms.ModelForm):
+    class Meta:
+        model = StatusTimePeriod
+        fields = '__all__'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        time_period_in_minutes = cleaned_data.get("time_period_in_minutes")
+        custom_time_period = cleaned_data.get("custom_time_period")
+
+        # Ensure either a predefined value or a custom value is provided, but not both
+        if time_period_in_minutes and custom_time_period:
+            raise forms.ValidationError(
+                _("Please choose either a predefined time period or enter a custom time period, not both.")
+            )
+        if not time_period_in_minutes and not custom_time_period:
+            raise forms.ValidationError(
+                _("You must either select a predefined time period or enter a custom time period.")
+            )
+
+        return cleaned_data
+
+@admin.register(StatusTimePeriod)
+class StatusTimePeriodAdmin(admin.ModelAdmin):
+    list_display = ('status_from', 'status_to', 'time_period_in_minutes', 'custom_time_period')
+    list_filter = ('status_from', 'status_to')
+    search_fields = ('status_from', 'status_to')
+    form = StatusTimePeriodForm
+
+
 class TelegramMessageAdmin(admin.ModelAdmin):
     list_display = ('content', 'created_at', 'get_sent_users')
     actions = ['send_mass_message_with_logging_action']
-
-    # Display the users that the message was sent to
     def get_sent_users(self, obj):
         return ", ".join([user.phone for user in obj.sent_to.all()]) or "No users"
     get_sent_users.short_description = "Sent to"
-
-    # Define the custom action to send mass messages with logging
     def send_mass_message_with_logging_action(self, request, queryset):
         for message in queryset:
-            send_mass_message_with_logging(message)  # Call the function for each selected message
+            send_mass_message_with_logging(message)
         self.message_user(request, "Mass message sent successfully!")
     send_mass_message_with_logging_action.short_description = "Send mass message to selected Telegram messages"
 
@@ -150,7 +177,7 @@ class OrderAdmin(admin.ModelAdmin):
     fields = [
         'id', 'language','name', 'surname', 'phone', 'email', 'address', 'receiver', 
         'receiver_comments', 'congrats', 'present', 'status', 'total_quantity', 
-        'total_price', 'submitted_at', 'created_at', 'processed_at', 
+        'total_price', 'delivery','payment','submitted_at', 'created_at', 'processed_at', 
         'complete_at', 'canceled_at'
     ]
 
@@ -224,4 +251,5 @@ class OrderAdmin(admin.ModelAdmin):
 # Register the Order model
 admin.site.register(Order, OrderAdmin)
 admin.site.register(TelegramUser, TelegramUserAdmin)
+admin.site.register(TelegramMessage, TelegramMessageAdmin)
 admin.site.register(OrderSummary, OrderSummaryAdmin)

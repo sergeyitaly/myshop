@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import Http404
-from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer
+from .serializers import ProductSerializer, CollectionSerializer, CategorySerializer, ProductListSerializer
 from .models import Product, Collection, Category
 from .filters import ProductFilter, ProductsFilter
 from django.db.models import F, FloatField, ExpressionWrapper, Min, Max, Q
@@ -81,7 +81,7 @@ class CachedQueryMixin:
         return cached_data
     
 class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
-    serializer_class = ProductSerializer
+    serializer_class = ProductListSerializer
     permission_classes = [AllowAny]
     filterset_class = ProductsFilter
     pagination_class = ListPageNumberPagination
@@ -89,10 +89,13 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
     search_fields = ['name_en', 'name_uk']
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'search'
+    ordering_fields = ['id_name'] 
     
     def get_queryset(self):
         cache_key = 'product_list'
         queryset = self.get_cached_queryset(cache_key, Product.objects.all())
+
+        queryset = queryset.select_related('collection').prefetch_related('productimage_set').defer('additionalfield','description', 'slug')
 
         search_query = self.request.query_params.get('search')
         if search_query:
@@ -115,59 +118,56 @@ class ProductList(generics.ListCreateAPIView, CachedQueryMixin):
         return instance
 
 class ProductListFilter(generics.ListCreateAPIView, CachedQueryMixin):
-    #queryset = Product.objects.all()
     permission_classes = [AllowAny]
     pagination_class = CustomPageNumberPagination
-    serializer_class = ProductSerializer
+    serializer_class = ProductListSerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     filterset_class = ProductFilter
     search_fields = ['name_en', 'name_uk']
-   # filterset_fields = ['collection']
-    pagination_class = CustomPageNumberPagination 
     throttle_classes = [ScopedRateThrottle]
-    throttle_scope = 'products'  # Use the defined throttle scope
+    throttle_scope = 'products'
+    ordering_fields = ['id_name']
 
     def get_queryset(self):
-        queryset = Product.objects.all().annotate(
+        # Build the base queryset
+        queryset = Product.objects.annotate(
             discounted_price=ExpressionWrapper(
                 F('price') * (1 - F('discount') / 100.0),
                 output_field=FloatField()
             )
-        )        
-        # Explicitly filter by collections if provided
+        )
+        queryset = queryset.select_related('collection', 'collection__category').prefetch_related('productimage_set').defer('additionalfield','description', 'slug')
+        #queryset = queryset.select_related('collection')
+        # Apply filters
         collection_ids = self.request.query_params.get('collection', None)
         if collection_ids:
             collection_ids_list = [int(c) for c in collection_ids.split(',') if c.isdigit()]
-            if collection_ids_list:
-                queryset = queryset.filter(collection__id__in=collection_ids_list)
+            queryset = queryset.filter(collection__id__in=collection_ids_list)
 
-        # Explicitly filter by categories if provided
         category_ids = self.request.query_params.get('category', None)
         if category_ids:
             category_ids_list = [int(c) for c in category_ids.split(',') if c.isdigit()]
-            if category_ids_list:
-                queryset = queryset.filter(collection__category__id__in=category_ids_list)
+            queryset = queryset.filter(collection__category__id__in=category_ids_list)
 
-        # Apply the has_discount filter if provided
         has_discount = self.request.query_params.get('has_discount', None)
         if has_discount is not None:
             if has_discount.lower() in ['true', '1']:
-                queryset = queryset.filter(discount__gt=0)  # Only products with a discount
+                queryset = queryset.filter(discount__gt=0)
             elif has_discount.lower() in ['false', '0']:
-                queryset = queryset.filter(discount=0)  # Only products without a discount
-                
+                queryset = queryset.filter(discount=0)
+
         price_min = self.request.query_params.get('price_min')
         price_max = self.request.query_params.get('price_max')
+#        if price_min and price_max:
+#            queryset = queryset.filter(discounted_price__gte=price_min, discounted_price__lte=price_max)
         if price_min and price_max:
-            queryset = queryset.filter(discounted_price__gte=price_min, discounted_price__lte=price_max)
-
-        # Default behavior if no specific parameter for price_min or price_max is provided
-#        queryset = self.filterset_class(self.request.GET, queryset=queryset).qs
-
-        # Ordering logic with multiple fields
-#        ordering = self.request.query_params.get('ordering', None)
+            queryset = queryset.filter(
+                price__gte=float(price_min) / (1 - F('discount') / 100),
+                price__lte=float(price_max) / (1 - F('discount') / 100)
+    )
 
         queryset = self.filter_queryset(queryset)
+        # Handle ordering
         ordering = self.request.query_params.get('ordering', None)
         if ordering:
             ordering_fields = ordering.split(',')
@@ -177,39 +177,34 @@ class ProductListFilter(generics.ListCreateAPIView, CachedQueryMixin):
                 'sales_count', '-sales_count', 
                 'popularity', '-popularity'
             ]
-            # Validate each ordering field
             valid_ordering_fields = [field for field in ordering_fields if field in valid_ordering_fields]
             if valid_ordering_fields:
                 queryset = queryset.order_by(*valid_ordering_fields)
 
         return queryset
-    
+
     def list(self, request, *args, **kwargs):
         # Get the filtered queryset
         queryset = self.get_queryset()
-        
+
+        # Calculate the discounted price range (min/max)
+        discounted_price_min = queryset.aggregate(min_price=Min('discounted_price'))['min_price']
+        discounted_price_max = queryset.aggregate(max_price=Max('discounted_price'))['max_price']
+
+        # Cache the results for price range if not already cached
+        overall_discounted_price_min = cache.get('overall_discounted_price_min')
+        overall_discounted_price_max = cache.get('overall_discounted_price_max')
+
+        if overall_discounted_price_min is None or overall_discounted_price_max is None:
+            overall_discounted_price_min = queryset.aggregate(min_price=Min('discounted_price'))['min_price']
+            overall_discounted_price_max = queryset.aggregate(max_price=Max('discounted_price'))['max_price']
+            
+            cache.set('overall_discounted_price_min', overall_discounted_price_min, timeout=60 * 15)
+            cache.set('overall_discounted_price_max', overall_discounted_price_max, timeout=60 * 15)
+
         # Paginate the queryset
         paginator = PageNumberPagination()
         page = paginator.paginate_queryset(queryset, request)
-        
-        # Calculate minimum and maximum price considering discount
-        discounted_price_min = queryset.aggregate(min_price=Min('discounted_price'))['min_price']
-        discounted_price_max = queryset.aggregate(max_price=Max('discounted_price'))['max_price']
-        
-        # Overall price range calculation
-        overall_discounted_price_min = Product.objects.annotate(
-            discounted_price=ExpressionWrapper(
-                F('price') * (1 - F('discount') / 100.0),
-                output_field=FloatField()
-            )
-        ).aggregate(min_price=Min('discounted_price'))['min_price']
-        
-        overall_discounted_price_max = Product.objects.annotate(
-            discounted_price=ExpressionWrapper(
-                F('price') * (1 - F('discount') / 100.0),
-                output_field=FloatField()
-            )
-        ).aggregate(max_price=Max('discounted_price'))['max_price']
 
         # Serialize the data
         if page is not None:
@@ -237,6 +232,7 @@ class ProductListFilter(generics.ListCreateAPIView, CachedQueryMixin):
         }
         return Response(data)
 
+
 class CollectionItemsFilterPage(generics.ListAPIView):
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend]
@@ -246,29 +242,28 @@ class CollectionItemsFilterPage(generics.ListAPIView):
         collection_id = self.kwargs.get('pk')
         queryset = Product.objects.filter(collection__id=collection_id)
         return queryset
+    
 
+    
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
-    
+    lookup_field = 'id_name'
+
     def get_object(self):
         id = self.kwargs.get('id')
         id_name = self.kwargs.get('id_name')
-
-        # Attempt to retrieve by ID first
         if id is not None:
             product = Product.objects.filter(id=id).first()
             if product:
                 return product
-
-        # Then attempt to retrieve by ID name
         if id_name:
             product = Product.objects.filter(id_name=id_name).first()
             if product:
                 return product
-
         raise Http404("Product not found")
+
     def perform_update(self, serializer):
         instance = serializer.save()
         # Invalidate the cache when a collection is updated
@@ -283,20 +278,9 @@ class CollectionList(generics.ListCreateAPIView, CachedQueryMixin):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['category']
     search_fields = ['name']
-#    ordering_fields = ['name_en', 'name_uk']
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'collections'  # Use the defined throttle scope
-
-#    def get_queryset(self):
-#        queryset = Collection.objects.only('name')  # Optimize data fetching
-#        search_query = self.request.query_params.get('search', None)
-#        if search_query:
-#            search_query = urllib.parse.unquote(search_query)
-#            queryset = queryset.filter(
-#                Q(name_en__icontains=search_query) |
-#                Q(name_uk__icontains=search_query)
-#            )
-#        return queryset       
+    ordering_fields = ['name_en', 'name_uk']
     
     def perform_create(self, serializer):
         instance = serializer.save()
@@ -322,6 +306,9 @@ class CollectionItemsPage(generics.ListAPIView):
     def get_queryset(self):
         try:
             collection_id = self.kwargs.get('pk')
+            queryset = Product.objects.filter(collection__id=collection_id) \
+                .select_related('collection') \
+                .prefetch_related('productimage_set')
             if collection_id is not None:
                 collection = Collection.objects.get(pk=collection_id)
                 queryset = collection.product_set.only('name_en', 'name_uk')
@@ -370,8 +357,20 @@ class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
 class ProductView(APIView):
     def get(self, request, pk, format=None):
         product = self.get_object(pk)
+        # Ensure product availability is updated
+        if product.stock == 0:
+            product.available = False
+        else:
+            product.available = True
+        product.save(update_fields=["available"]) 
+        
         serializer = ProductSerializer(product)
-        response = Response(serializer.data)
+        response_data = serializer.data
+        response_data["availability_message"] = (
+            "Out of stock" if not product.available else "In stock"
+        )
+        
+        response = Response(response_data)
         add_never_cache_headers(response)
         return response
     

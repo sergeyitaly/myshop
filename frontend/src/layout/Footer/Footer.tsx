@@ -56,7 +56,7 @@ export const Footer = () => {
 							{t("privacy_policy")}
 						</Link>
 						<p className={styles.payment}>
-							{t("payment")}:
+							{t("payment.label")}:
 							<img src={VisaImg} alt="visa icon" />
 						</p>
 						<LanguageDropDown />

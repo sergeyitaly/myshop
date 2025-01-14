@@ -2,6 +2,17 @@
 <issues format="6" by="lint 8.7.2" type="baseline" client="gradle" dependencies="false" name="AGP (8.7.2)" variant="all" version="8.7.2">
 
     <issue
+        id="HighAppVersionCode"
+        message="The &apos;versionCode&apos; is very high and close to the max allowed value"
+        errorLine1="    versionCode 2012241514 "
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle"
+            line="17"
+            column="5"/>
+    </issue>
+
+    <issue
         id="ScopedStorage"
         message="READ_EXTERNAL_STORAGE is deprecated (and is not granted) when targeting Android 13+. If you need to query or interact with MediaStore or media files on the shared storage, you should instead use one or more new storage permissions: `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO` or `READ_MEDIA_AUDIO`."
         errorLine1="        &lt;uses-permission android:name=&quot;android.permission.READ_EXTERNAL_STORAGE&quot; />"
@@ -90,14 +101,36 @@
     </issue>
 
     <issue
+        id="GradleDependency"
+        message="A newer version of androidx.annotation:annotation than 1.3.0 is available: 1.9.1"
+        errorLine1="    implementation &apos;androidx.annotation:annotation:1.3.0&apos;  "
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle"
+            line="91"
+            column="20"/>
+    </issue>
+
+    <issue
         id="SetJavaScriptEnabled"
         message="Using `setJavaScriptEnabled` can introduce XSS vulnerabilities into your application, review carefully"
         errorLine1="        webView.getSettings().setJavaScriptEnabled(true); // Enable JavaScript"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/com/koloryt/MainActivity.java"
-            line="62"
+            line="83"
             column="9"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is always >= 21"
+        errorLine1="                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/koloryt/MainActivity.java"
+            line="102"
+            column="21"/>
     </issue>
 
     <issue

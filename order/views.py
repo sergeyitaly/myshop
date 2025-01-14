@@ -220,6 +220,16 @@ telegram_webhook = TelegramWebhook.as_view()
 
 
 
+
+def calculate_popularity(sales_count, stock):
+    max_sales_count = 1000
+    max_stock = 100
+    sales_popularity = min(10, (sales_count / max_sales_count) * 10)
+    stock_popularity = min(10, (stock / max_stock) * 10)
+    popularity = int((sales_popularity + stock_popularity) / 2)
+    return max(1, min(10, popularity))
+
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_order(request):
@@ -233,7 +243,27 @@ def create_order(request):
             order = serializer.save()
             phone = request.data.get('phone')
             order_items_en = serializer.get_order_items_en(order)
-            order_items_uk = serializer.get_order_items_uk(order)   
+            order_items_uk = serializer.get_order_items_uk(order)
+
+            for item_data in request.data.get('order_items', []):
+                product_id = item_data.get('product_id')
+                quantity = item_data.get('quantity')
+                if not product_id:
+                    raise ValidationError("product_id is required for order items.")
+
+                try:
+                    product = Product.objects.get(id=product_id)
+                except Product.DoesNotExist:
+                    raise ValidationError(f"Product with id {product_id} does not exist.")
+
+                # Update product fields
+                product.sales_count += quantity
+                product.stock -= quantity
+                if product.stock <=0:
+                    product.available = False
+                product.popularity = calculate_popularity(product.sales_count, product.stock)
+                product.save()
+
             try:
                 telegram_user = TelegramUser.objects.get(phone=phone)
                 if telegram_user:
@@ -529,7 +559,7 @@ def get_order_summary_by_chat_id(request, chat_id):
         logger.error(f"Error fetching order summaries: {e}")
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-    
+
 @api_view(['POST'])
 def update_order(request):
     chat_id = request.data.get('chat_id')
@@ -553,6 +583,13 @@ def update_order(request):
                 if language:
                     order.language = language 
                 order.save()
+
+                # Update product availability based on stock
+                for order_item in order.order_items.all():
+                    product = order_item.product
+                    if product.stock <= 0:
+                        product.available = False
+                        product.save()
 
                 order_summary = format_order_summary(order)
                 grouped_orders.append(order_summary)

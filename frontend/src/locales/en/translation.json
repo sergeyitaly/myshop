@@ -22,7 +22,17 @@
 	"payment_delivery": "Payment & Delivery",
 	"returns_refunds": "Returns & Refunds",
 	"privacy_policy": "Privacy Policy",
-	"payment": "Payment",
+	"payment": {
+		"label": "Payment",
+		"cash_on_delivery": "Cash on delivery",
+		"card_online": "Card online"
+	},
+	"delivery": {
+		"label": "Delivery",
+		"self_pickup": "Self pickup",
+		"nova_poshta": "Nova Poshta",
+		"ukr_poshta": "Ukrposhta"
+	},
 	"hide": "Hide",
 	"price": "Price",
 	"sale": "Sale",
@@ -118,7 +128,7 @@
 		"returns_title": "Returns",
 		"returns_content": "As for returns and exchanges, jewelry items are not eligible for exchange or return according to Ukrainian law. For other product categories, returns are accepted within <strong>14</strong> days, provided that the product has not been used and retains its original condition.",
 		"p_s_title": "P.S.",
-		"p_s_content": "This website was created exclusively for educational purposes and to gain practical skills. The site has no commercial basis, and none of the products are for sale."
+		"p_s_content": "This website was created exclusively for educational purposes and to gain practical skills. The site does not have a commercial basis, and none of the products are sold. All informational sections, such as payment, delivery, international delivery, and returns, are part of demonstration content and do not have real functionality."
 	},
 	"privacy_and_policy": {
 		"title": "Privacy and Policy",

@@ -7,3 +7,4 @@ class OrderConfig(AppConfig):
     def ready(self):
         import order.signals
         import order.translator
+        import order.tasks

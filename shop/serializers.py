@@ -34,6 +34,15 @@ class CollectionSerializer(serializers.ModelSerializer):
         model = Collection
         fields = '__all__'
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        request = self.context.get('request')
+        if request and request.method == 'GET':
+            representation.pop('created', None)
+            representation.pop('updated', None)
+        return representation
+
+
 class ProductImageSerializer(serializers.ModelSerializer):
     images_thumbnail_url = serializers.SerializerMethodField()
 
@@ -88,4 +97,40 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
+
+class ProductListSerializer(serializers.ModelSerializer):
+    photo_url = serializers.SerializerMethodField()
+    photo_thumbnail_url = serializers.SerializerMethodField()
+    collection = CollectionSerializer(required=False, allow_null=True)
+    category = CategorySerializer(required=False, allow_null=True)
+    images = ProductImageSerializer(source='productimage_set', many=True, read_only=True)
+    name = serializers.CharField()
+    name_en = serializers.CharField(required=False)
+    name_uk = serializers.CharField(required=False)
+    id_name = serializers.CharField(read_only=True)
+    id = serializers.IntegerField(read_only=True)
+
+    def get_photo_url(self, obj):
+        return obj.photo.url if obj.photo else None
+
+    def get_photo_thumbnail_url(self, obj):
+        return obj.photo_thumbnail.url if obj.photo_thumbnail else None
+
+    class Meta:
+        model = Product
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        request = self.context.get('request')
+        if request and request.method == 'GET':
+            # Remove fields not needed for the list view
+            fields_to_remove = [
+                'description', 'description_en', 'description_uk', 'additional_fields',
+                'stock', 'slug', 'color_value', 'color_name', 'color_name_en', 
+                'color_name_uk', 'brandimage', 'images', 'created', 'updated'
+            ]
+            for field in fields_to_remove:
+                representation.pop(field, None)
+        return representation
 

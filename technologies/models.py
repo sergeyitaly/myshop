@@ -43,7 +43,7 @@ def validate_svg(value):
         raise ValidationError('Unsupported file extension.')
 
 class Technology(models.Model):
-    name = models.CharField(max_length=100,  verbose_name=_('Name'))
+    name = models.CharField(max_length=100,  verbose_name=_('Name'), db_index=True)
     link = models.URLField(blank=True, null=True)
     description = models.TextField(null=True, blank=True, verbose_name=_('Description'))
 

@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from .models import Feedback, RatingAnswer, RatingQuestion, OverallAverageRating
 from .serializers import FeedbackSerializer, RatingAnswerSerializer, RatingQuestionSerializer, OverallAverageRatingSerializer
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db.models import Avg
 from django.db import transaction
 import logging
@@ -32,7 +32,12 @@ def update_all_question_averages():
 class FeedbackViewSet(viewsets.ModelViewSet):
     queryset = Feedback.objects.all()
     serializer_class = FeedbackSerializer
-    permission_classes = [AllowAny]
+    def get_permissions(self):
+        if self.action == 'create':  # POST request
+            permission_classes = [AllowAny]  # Allow any for POST requests (feedback creation)
+        else:  # GET, DELETE, etc.
+            permission_classes = [IsAuthenticated]  # Require authentication for other methods (like GET, PUT, DELETE)
+        return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -44,34 +49,23 @@ class FeedbackViewSet(viewsets.ModelViewSet):
 
             for rating_data in ratings_data:
                 question_id = rating_data.get('question_id')
-                if question_id is None:
-                    errors.append("Missing 'question_id' in rating data.")
-                    continue
-
                 question = get_object_or_404(RatingQuestion, id=question_id)
-                if question.rating_required:
-                    rating = rating_data.get('rating')
-                    if rating is None:
-                        errors.append(f"Missing 'rating' for required question (ID: {question_id})")
-                        continue
-                    rating_answers.append(
-                        RatingAnswer(feedback=feedback, question=question, rating=rating, answer=rating_data.get('answer', ''))
-                    )
-                else:
-                    logger.info(f"Skipped rating for question (ID: {question_id}): rating not required.")
+                rating_value = rating_data.get('rating')  
 
-            # Bulk create ratings only if there are valid entries
+                rating_answers.append(
+                    RatingAnswer(
+                        feedback=feedback,
+                        question=question,
+                        rating=rating_value,  
+                        answer=rating_data.get('answer', '')
+                    )
+                )
             if rating_answers:
                 RatingAnswer.objects.bulk_create(rating_answers)
-
-            # Recalculate averages for all questions
             update_all_question_averages()
-
             if errors:
                 return Response({'errors': errors}, status=status.HTTP_400_BAD_REQUEST)
-
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):

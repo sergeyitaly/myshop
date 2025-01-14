@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -17,11 +18,21 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.core.splashscreen.SplashScreen;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.widget.Toast;
 import android.content.ActivityNotFoundException;
-
+import java.util.Map;
+import java.util.HashMap;
+import java.io.IOException; 
+import java.net.URL;
+import java.util.concurrent.ExecutorService; 
+import java.util.concurrent.Executors; 
+import java.util.HashSet;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -64,6 +75,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
+
+    private final Set<String> processedUrls = new HashSet<>();
+
     private void configureWebView() {
         webView.getSettings().setJavaScriptEnabled(true); // Enable JavaScript
         webView.getSettings().setDomStorageEnabled(true); // Enable DOM storage
@@ -83,40 +98,91 @@ public class MainActivity extends AppCompatActivity {
         webView.setWebViewClient(new WebViewClient() {
 
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    String originalUrl = request.getUrl().toString();
+                    String normalizedUrl = originalUrl.replaceFirst("^https?://", ""); // Remove both "http://" and "https://"
+
+                    synchronized (processedUrls) {
+                        if (processedUrls.contains(normalizedUrl)) {
+                            return super.shouldInterceptRequest(view, request); // Skip duplicates
+                        }
+                        processedUrls.add(normalizedUrl); // Add normalized URL to the set
+                    }
+
+                    Map<String, String> headers = new HashMap<>(request.getRequestHeaders());
+                    headers.put("X-Android-Client", "Koloryt");
+
+                    // Optionally use NetworkTask or remove it
+                    ExecutorService executor = Executors.newSingleThreadExecutor();
+                    executor.execute(new NetworkTask(originalUrl, headers));
+                    return super.shouldInterceptRequest(view, request);
+                }
+                return super.shouldInterceptRequest(view, request);
+            }
+
+//The NetworkTask class in this implementation is used to execute network requests in a separate thread, fetching data from a URL.
+            private class NetworkTask implements Runnable {
+                private String urlString;
+                private Map<String, String> headers;
+
+                NetworkTask(String urlString, Map<String, String> headers) {
+                    this.urlString = urlString;
+                    this.headers = headers;
+                }
+
+                @Override
+                public void run() {
+                    HttpURLConnection connection = null;
+                    InputStream inputStream = null;
+                    try {
+                        URL url = new URL(urlString);
+                        connection = (HttpURLConnection) url.openConnection();
+                        connection.setRequestMethod("GET");
+                        for (Map.Entry<String, String> entry : headers.entrySet()) {
+                            connection.setRequestProperty(entry.getKey(), entry.getValue());
+                        }
+                        inputStream = connection.getInputStream();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        if (connection != null) {
+                            connection.disconnect();
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                String url = request.getUrl().toString();
+                
                 if (url.startsWith("mailto:")) {
-                    // Handle email links
                     Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
                     emailIntent.setData(Uri.parse(url));
                     try {
                         view.getContext().startActivity(emailIntent);
                     } catch (ActivityNotFoundException e) {
-                        // Handle case where no email app is installed
                         Toast.makeText(view.getContext(), "No email app found", Toast.LENGTH_SHORT).show();
                     }
                     return true;
                 } else if (url.startsWith("tg://")) {
-                    // Handle Telegram links
                     Intent telegramIntent = new Intent(Intent.ACTION_VIEW);
                     telegramIntent.setData(Uri.parse(url));
                     try {
                         view.getContext().startActivity(telegramIntent);
                     } catch (ActivityNotFoundException e) {
-                        // Handle case where Telegram is not installed
                         Toast.makeText(view.getContext(), "Telegram is not installed", Toast.LENGTH_SHORT).show();
                     }
                     return true;
+                } else if (url.contains("example.com")) {
+                    view.loadUrl(url);
+                    return false;
                 } else {
-                    // Handle other URLs normally (e.g., open in the WebView or external browser)
-                    if (url.contains("example.com")) { // Adjust this condition as needed
-                        view.loadUrl(url);
-                        return false; // Stay in WebView
-                    } else {
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.setData(Uri.parse(url));
-                        view.getContext().startActivity(intent);
-                        return true; // Open in external browser
-                    }
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse(url));
+                    view.getContext().startActivity(intent);
+                    return true;
                 }
             }
 

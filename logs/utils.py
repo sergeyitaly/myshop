@@ -1,7 +1,7 @@
 from logs.models import APILog
 from django.utils import timezone
 
-def log_request(endpoint, method, chat_id=None, command=None):
+def log_request(endpoint, method, command=None):
     # Determine the source based on the endpoint
     if "order_summary/by_chat_id" in endpoint:
         source = "telegram"
@@ -12,7 +12,6 @@ def log_request(endpoint, method, chat_id=None, command=None):
         endpoint=endpoint,
         method=method,
         timestamp=timezone.now(),
-        chat_id=chat_id,
         command=command,
         source=source
     )

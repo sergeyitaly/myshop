@@ -11,7 +11,8 @@ from django.core.files.images import get_image_dimensions
 from django.utils.html import format_html
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
+from logs.models import APILog
+from django.utils import timezone
 # Load environment variables
 load_dotenv()
 
@@ -43,9 +44,9 @@ def validate_svg(value):
         raise ValidationError('Unsupported file extension.')
 
 class TeamMember(models.Model):
-    name = models.CharField(max_length=100,  verbose_name=_('Name'))
+    name = models.CharField(max_length=100,  verbose_name=_('Name'), db_index=True)
     surname = models.CharField(max_length=100, verbose_name=_('Surname'))
-    role = models.CharField(max_length=100, default='developer', verbose_name=_('Role'))
+    role = models.CharField(max_length=100, default='developer', verbose_name=_('Role'), db_index=True)
     experience = models.TextField(null=True, blank=True, verbose_name=_('Experience'))
 
     mobile = models.CharField(max_length=15, blank=True, null=True)
@@ -84,6 +85,29 @@ class TeamMember(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+        if self.linkedin:
+            log_entry = APILog.objects.get(endpoint=self.linkedin)
+            log_entry.request_count = 1
+            log_entry.timestamp = timezone.localtime(timezone.now())
+            log_entry.save()
+        if self.link_to_telegram:
+            log_entry = APILog.objects.get(endpoint=self.link_to_telegram)
+            log_entry.request_count = 1
+            log_entry.timestamp = timezone.localtime(timezone.now())
+            log_entry.save()
+        if self.github:
+            log_entry = APILog.objects.get(endpoint=self.behance)
+            log_entry.request_count = 1
+            log_entry.timestamp = timezone.localtime(timezone.now())
+            log_entry.save()
+        if self.behance:
+            log_entry = APILog.objects.get(endpoint=self.behance)
+            log_entry.request_count = 1
+            log_entry.timestamp = timezone.localtime(timezone.now())
+            log_entry.save()
+
+
+
 
     def delete(self, *args, **kwargs):
         if self.photo:

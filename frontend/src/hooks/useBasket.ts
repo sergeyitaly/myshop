@@ -5,6 +5,7 @@ import { setBasketItems, setOpenStatus, setTotalPrice, resetBasket, setProducts,
 import { useAppDispatch, useAppSelector } from "../store/hooks"
 import { useSnackbar } from "./useSnackbar"
 import { useAppTranslator } from "./useAppTranslator"
+import { countDiscountPrice } from "../functions/countDiscountPrice"
 
 export const useBasket = () => {
 
@@ -40,14 +41,18 @@ export const useBasket = () => {
 
     useEffect(() => {
         let total = 0
-            const priceList = products.map(({id, price}) => {
+            const priceList = products.map(({id, price, discount}) => {
                 const matchedBasketItem = basketItems.find(({productId})=> productId === id)
+                console.log(+discount);
+                const disc = countDiscountPrice(price, discount)
                 if(matchedBasketItem){
-                    return +price*matchedBasketItem.qty
+                    return disc ? disc*matchedBasketItem.qty : +price*matchedBasketItem.qty
                 }
-                return 0
+                return 0 
             })
             total = priceList.reduce((sum, current) => sum + current, 0)
+            console.log(priceList);
+            
         dispatch(setTotalPrice(total))
     }, [products, basketItems, dispatch])
 

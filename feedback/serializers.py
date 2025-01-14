@@ -32,21 +32,13 @@ class FeedbackSerializer(serializers.ModelSerializer):
         ratings_data = validated_data.pop('ratings', [])
         logger.debug("Received feedback data: %s", validated_data)  # Log the main feedback data
         logger.debug("Received ratings data: %s", ratings_data)  # Log the ratings data
-
-        # Create the feedback instance
         feedback = Feedback.objects.create(**validated_data)
-
-        # Prepare list for bulk creation
         ratings_to_create = []
-
-        # Pre-fetch all questions that we need in a single query
         question_ids = {rating['question_id'] for rating in ratings_data if 'question_id' in rating}
         rating_questions = {question.id: question for question in RatingQuestion.objects.filter(id__in=question_ids)}
 
-        # Create RatingAnswer instances only for valid ratings
         for rating_data in ratings_data:
             question_id = rating_data.get('question_id')
-            # Check if the question requires a rating and if it exists
             if question_id in rating_questions:
                 rating_question = rating_questions[question_id]
                 if rating_question.rating_required or 'rating' in rating_data:
@@ -56,7 +48,6 @@ class FeedbackSerializer(serializers.ModelSerializer):
             else:
                 logger.error("RatingQuestion with ID %s does not exist", question_id)
 
-        # Bulk create RatingAnswer instances to reduce database hits
         if ratings_to_create:
             RatingAnswer.objects.bulk_create(ratings_to_create)
 

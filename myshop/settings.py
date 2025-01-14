@@ -67,6 +67,9 @@ INSTALLED_APPS = [
   #  'admin_interface',
     'colorfield',
     'whitenoise.runserver_nostatic',
+#    "semantic_admin",
+#    "semantic_forms",
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -108,7 +111,9 @@ INSTALLED_APPS = [
     'feedback',
     'logs',
   #  'admisortable2',
-
+    'django_celery_beat',
+    'django_celery_results',
+    'mycelery',
 ]
 
 MIDDLEWARE = [
@@ -232,7 +237,8 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',
         'rest_framework.throttling.ScopedRateThrottle',
-    ],
+        #'myshop.RequestsThrottle.DropDuplicateRequestsThrottle',
+         ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': '3/s',
         'user': '10/minute',
@@ -352,73 +358,52 @@ SESSION_CACHE_ALIAS = "default"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REDIS_CACHE_LOCATION = os.getenv('REDIS_CACHE_LOCATION')
-CACHES = {
-    'default': {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"{os.getenv('REDIS_CACHE_LOCATION', 'redis://127.0.0.1:6379')}/0",
 
-        'LOCATION': REDIS_CACHE_LOCATION,
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'CONNECTION_POOL_KWARGS': {
-                'max_connections': 300,  # Adjust based on load requirements
-                'retry_on_timeout': True,
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_CACHE_LOCATION, 
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "CONNECTION_POOL_KWARGS": {
+                "max_connections": 20,
             },
-            'SOCKET_CONNECT_TIMEOUT': 25,  # seconds
-            'SOCKET_TIMEOUT': 25,  # seconds
         },
-        'KEY_PREFIX': 'imdb',
-        'TIMEOUT': 60 * 15,  # Cache timeout in seconds
+        "TIMEOUT": 20,
+        "SOCKET_CONNECT_TIMEOUT": 100,
+        "SOCKET_TIMEOUT": 100,
+        "MAX_ENTRIES": 2000,
     }
 }
 
 # Celery configuration
-CELERY_BROKER_URL = os.getenv('REDIS_BROKER_URL')
-CELERY_RESULT_BACKEND = CELERY_BROKER_URL
-
-CELERY_IMPORTS = ('order.tasks',)
-CELERY_BEAT_SCHEDULE = {
-    'update-order-statuses-every-minute': {
-        'task': 'order.tasks.update_order_statuses_task',
-        'schedule': crontab(minute='*/1'),  # Run every minute
-    },
-}
-
-
-#CELERY_WORKER_CANCEL_LONG_RUNNING_TASKS_ON_CONNECTION_LOSS = True
-
-BROKER_POOL_LIMIT = None  # Adjust based on your needs
-CELERY_WORKER_POOL_RESTARTS = True
-CELERY_WORKER_MAX_TASKS_PER_CHILD = 1000
-CELERY_WORKER_PREFETCH_MULTIPLIER = 1
-CELERY_WORKER_CANCEL_LONG_RUNNING_TASKS_ON_CONNECTION_LOSS = True
-BROKER_TRANSPORT_OPTIONS = {
-    'fanout_prefix': True,
-    'fanout_patterns': True,
-    'max_connections': 50,  # Increase if needed
-    'socket_keepalive': True,
-}
+BROKER_URL = os.getenv('REDIS_BROKER_URL')
+RESULT_BACKEND = BROKER_URL
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
         'console': {
-            'level': 'DEBUG',  # Capture all log levels, including DEBUG
+            'level': 'DEBUG',  
             'class': 'logging.StreamHandler',
         },
     },
     'loggers': {
         'django.db.backends': {
             'handlers': ['console'],
-            'level': 'DEBUG',  # Capture all database-related logs
+            'level': 'DEBUG',  
             'propagate': False,
         },
         'django': {
             'handlers': ['console'],
-            'level': 'DEBUG',  # Capture all logs for Django core (useful for debugging)
+            'level': 'DEBUG',  
             'propagate': True,
+        },
+        'django.request': {  
+            'handlers': ['console'],
+            'level': 'DEBUG',  
+            'propagate': False,
         },
     },
 }
-

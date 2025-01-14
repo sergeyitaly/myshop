@@ -11,6 +11,8 @@ from django.core.files.images import get_image_dimensions
 from django.utils.html import format_html
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
+
 # Load environment variables
 load_dotenv()
 
@@ -43,7 +45,7 @@ def validate_svg(value):
 
     
 class Brand(models.Model):
-    name = models.CharField(max_length=100,  verbose_name=_('Name'))
+    name = models.CharField(max_length=100,  verbose_name=_('Name'), db_index=True)
     link = models.URLField(blank=True, null=True)
     
     if USE_S3:
@@ -72,6 +74,7 @@ class Brand(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+
 
     def delete(self, *args, **kwargs):
         if self.photo:
