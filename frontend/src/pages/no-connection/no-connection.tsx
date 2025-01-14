@@ -1,10 +1,11 @@
-import { useTranslation } from "react-i18next"; 
-import ImgError from "./img-error.png";
+import { useTranslation } from "react-i18next";
 import styles from "./no-connection.module.scss";
 
 
 export const NoConnectionPage = () => {
 	const { t } = useTranslation();
+
+	const ImgError = new URL("./img-error.png", import.meta.url).href;
 
 	return (
 		<main className={styles.main}>
