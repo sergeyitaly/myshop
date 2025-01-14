@@ -52,6 +52,15 @@ class ScheduledTaskForm(forms.ModelForm):
         cleaned_data['max_time'] = total_minutes
         return cleaned_data
 
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        # Save max_time explicitly to ensure it's set
+        instance.max_time = self.cleaned_data.get('max_time')
+        if commit:
+            instance.save()
+        return instance
+
+
 @admin.register(ScheduledTask)
 class ScheduledTaskAdmin(admin.ModelAdmin):
     form = ScheduledTaskForm
