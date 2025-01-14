@@ -5,6 +5,7 @@ import { apiBaseUrl } from './api'
 export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({ baseUrl: `${apiBaseUrl}/api` }),
+  tagTypes: ['Products'],
   endpoints: () => ({
     
   })
