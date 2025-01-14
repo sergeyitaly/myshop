@@ -1,9 +1,14 @@
-from django.core.management.base import BaseCommand
-from shop.tasks import increase_stock_for_unavailable_products  # Import the Celery task
+from celery import shared_task
+from shop.models import Product
+import logging
 
-class Command(BaseCommand):
-    help = "Trigger stock update for all unavailable products"
+logger = logging.getLogger(__name__)
 
-    def handle(self, *args, **kwargs):
-        increase_stock_for_unavailable_products.apply_async()
-        self.stdout.write(self.style.SUCCESS("Triggered stock update for unavailable products via Celery task"))
+@shared_task
+def increase_stock_for_unavailable_products():
+    updated_count = Product.objects.filter(available=False).update(stock=10, available=True)
+    if updated_count > 0:
+        logger.info(f"Updated stock for {updated_count} unavailable products.")
+    else:
+        logger.warning("No unavailable products found to update.")
+    return updated_count  # Return the count for further processing or reporting
