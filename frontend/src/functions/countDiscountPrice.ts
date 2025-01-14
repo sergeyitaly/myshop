@@ -9,5 +9,5 @@ export const countDiscountPrice = (price?: string, discount?: string) => {
         newPrice = +price - +price*transformedDicount/100
     }
 
-    return newPrice ? newPrice : 0
+    return newPrice
 }

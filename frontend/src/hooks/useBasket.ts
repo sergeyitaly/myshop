@@ -44,8 +44,9 @@ export const useBasket = () => {
             const priceList = products.map(({id, price, discount}) => {
                 const matchedBasketItem = basketItems.find(({productId})=> productId === id)
                 console.log(+discount);
+                const disc = countDiscountPrice(price, discount)
                 if(matchedBasketItem){
-                    return !!+discount ? countDiscountPrice(price, discount)*matchedBasketItem.qty : +price*matchedBasketItem.qty
+                    return disc ? disc*matchedBasketItem.qty : +price*matchedBasketItem.qty
                 }
                 return 0 
             })
