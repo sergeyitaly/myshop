@@ -21,8 +21,8 @@ export const defaultAppSliderOptions: SwiperOptions = {
         }
     },
     autoplay:{
-        delay: 3000,
+        delay: 4000,
         pauseOnMouseEnter: true
     },
-    speed: 2000
+    speed: 5000
 } 

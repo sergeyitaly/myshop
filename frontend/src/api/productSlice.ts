@@ -35,6 +35,7 @@ export const productApiSlice = apiSlice.injectEndpoints({
         if (search) queryParams.append('search', search);
         return `${ENDPOINTS.PRODUCTS}/?${queryParams.toString()}`;
       },
+      providesTags: ['Products']
     }),
 
     // Endpoint to fetch products by ID list
@@ -45,7 +46,8 @@ export const productApiSlice = apiSlice.injectEndpoints({
           return data;
         }));
         return { data: products };
-      }
+      },
+      providesTags: ['Products']
     }),
 
     // Endpoint to fetch products by filter with pagination
@@ -58,11 +60,13 @@ export const productApiSlice = apiSlice.injectEndpoints({
 
     // Endpoint to fetch a single product by ID
     getOneProductById: builder.query<Product, number>({
-      query: (productId) => `${ENDPOINTS.PRODUCT}/${productId}/`
+      query: (productId) => `${ENDPOINTS.PRODUCT}/${productId}/`,
+      providesTags: ['Products']
     }),
    
     getOneProductByIdName: builder.query<Product, string>({
-      query: (idName) => `${ENDPOINTS.PRODUCT}/${idName}/`
+      query: (idName) => `${ENDPOINTS.PRODUCT}/${idName}/`,
+      providesTags: ['Products']
     }),
 
     // Endpoint to fetch products by main filter with pagination
@@ -70,7 +74,8 @@ export const productApiSlice = apiSlice.injectEndpoints({
       query: (queryBuilder) => {
         const qs = queryString(queryBuilder);
         return `${ENDPOINTS.FILTER}/?${qs}`;
-      }
+      },
+      providesTags: ['Products']
     })
   })
 });

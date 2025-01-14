@@ -26,11 +26,6 @@ export const FeedbackPage = () => {
 
     const {openInfo} = useSnackbar()
 
-    
-    
-
-
-
     const {errors, touched,  values, handleSubmit: openPopup, setValues, setFieldTouched, setFieldValue} = useFormik({
         initialValues: initialFormData.ratings,
         validationSchema,

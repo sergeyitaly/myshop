@@ -20,6 +20,7 @@ export const collectionApiSlice = apiSlice.injectEndpoints({
             transformErrorResponse: (baseQueryReturnValue: CreateOrderErrorResponce) => {
                 return baseQueryReturnValue
             },
+            invalidatesTags: ['Products']
         })
     })
 })
