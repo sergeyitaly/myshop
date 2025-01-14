@@ -101,12 +101,18 @@ export const BasketItem = ({
 						</div>
 				</div>
 				<div className={styles.control}>
+					
+					{discountPrice ? (
+						<>
+							<p className={styles.discountPrice}>
+								{formatPrice(price, currency)}
+							</p>
+							<p>{formatPrice(discountPrice, currency)}</p>
+						</>
+					)
+					:
 					<p>{formatPrice(price, currency)}</p>
-					{discountPrice && (
-						<p className={styles.discountPrice}>
-							{formatPrice(discountPrice, currency)}
-						</p>
-					)}
+				}
 				</div>
 			</div>
 		</div>
