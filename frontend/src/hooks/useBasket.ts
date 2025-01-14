@@ -47,7 +47,7 @@ export const useBasket = () => {
                 if(matchedBasketItem){
                     return !!+discount ? countDiscountPrice(price, discount)*matchedBasketItem.qty : +price*matchedBasketItem.qty
                 }
-                return 0
+                return 0 
             })
             total = priceList.reduce((sum, current) => sum + current, 0)
             console.log(priceList);
