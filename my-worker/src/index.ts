@@ -117,14 +117,40 @@ addEventListener('scheduled', (event: ScheduledEvent) => {
   event.waitUntil(handleScheduled(event));
 });
 
+// crontab
+
+
 async function handleScheduled(event: ScheduledEvent): Promise<void> {
   console.log('Scheduled event triggered');
-  await updateGlobalAuthToken();
-  await performHealthCheck();
- // await updateSubmittedToCreated();
- // await updateCreatedToProcessed();
- // await updateProcessedToComplete();
+  const tasksUrl = `${VERCEL_DOMAIN}/api/mycelery/`;
+
+  try {
+    await updateGlobalAuthToken();
+    console.log('Global auth token updated');
+  } catch (err) {
+    console.error('Error updating global auth token:', err);
+  }
+
+  try {
+    await performHealthCheck();
+    console.log('Health check passed');
+  } catch (err) {
+    console.error('Health check failed:', err);
+    return; // Stop further execution if health check fails
+  }
+
+  try {
+    const response = await fetch(tasksUrl);
+    if (!response.ok) {
+      console.error(`Failed to fetch tasks from ${tasksUrl}: ${response.statusText}`);
+    } else {
+      console.log('Tasks fetched successfully');
+    }
+  } catch (err) {
+    console.error('Error fetching tasks:', err);
+  }
 }
+
 
 async function fetchChatIds(): Promise<Set<string>> {
   const vercelUrl = `${VERCEL_DOMAIN}/api/telegram_users/`;
