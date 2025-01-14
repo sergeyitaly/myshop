@@ -1,10 +1,9 @@
-# order/management/commands/update_order_statuses.py
+# mycelery/management/commands/update_order_statuses.py
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from order.utils import update_orders
-from order.notifications import update_order_status_with_notification
-from order.models import Order
-from order.models import StatusTimePeriod
+from order.notifications import update_order_status_with_notification  # Correct import
+from order.models import Order, StatusTimePeriod
 import logging
 
 logger = logging.getLogger(__name__)
@@ -34,6 +33,7 @@ class Command(BaseCommand):
         updated_orders = []  # Initialize an empty list to hold the updated orders
 
         for status_time_period in status_time_periods:
+            # Determine the time period to use for the status change
             time_period_in_minutes = status_time_period.custom_time_period if status_time_period.custom_time_period else status_time_period.time_period_in_minutes
 
             # Update statuses and send notifications if applicable
@@ -58,4 +58,3 @@ class Command(BaseCommand):
 
         # Log the result
         logger.info(f"Successfully updated statuses for {len(updated_orders)} orders.")
-
