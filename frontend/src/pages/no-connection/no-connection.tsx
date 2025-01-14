@@ -32,12 +32,14 @@ export const NoConnectionPage = () => {
 		}
 	};
 
-	const ImgError = new URL("./img-error.png", import.meta.url).href;
+	const ImgError = navigator.onLine
+		? new URL("./img-error.png", import.meta.url).href
+		: null;
 
 	return (
 		<main className={styles.main}>
 			<img
-				src={ImgError}
+				src={ImgError || "./img-error.png"}
 				alt={t("no_connection_alt")}
 				className={styles.img}
 			/>
