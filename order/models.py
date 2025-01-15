@@ -2,15 +2,41 @@ from django.db import models
 from shop.models import Product
 from phonenumber_field.modelfields import PhoneNumberField
 from django.utils import timezone
-import logging
 import decimal
 from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import make_naive
 import datetime
 from django.db.models.fields import Field
 from django.core.exceptions import ValidationError
+from django.conf import settings
+import logging, requests
 
 logger = logging.getLogger(__name__)
+
+
+def send_mass_messages(chat_ids, message):
+    bot_token = settings.TELEGRAM_BOT_TOKEN
+    url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
+    
+    for chat_id in chat_ids:
+        payload = {
+            'chat_id': chat_id,
+            'text': message,
+            'parse_mode': 'HTML'
+        }
+        
+        try:
+            response = requests.post(url, data=payload)
+            response.raise_for_status()
+            result = response.json()
+            if not result.get('ok'):
+                logger.error(f"Failed to send message to {chat_id}: {result.get('description')}")
+            else:
+                logger.info(f"Message sent to {chat_id}: {result}")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Failed to send message to {chat_id} due to request error: {e}")
+
+
 
 class TelegramUser(models.Model):
     phone = models.CharField(max_length=15, unique=True, verbose_name=_('Phone'))
@@ -22,19 +48,26 @@ class TelegramUser(models.Model):
     class Meta:
         verbose_name = _('Telegram user')
         verbose_name_plural = _('Telegram users')
-
+        
 class TelegramMessage(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     sent_to = models.ManyToManyField('TelegramUser', related_name='sent_messages', blank=True)
 
     def save(self, *args, **kwargs):
+        # Save the instance first to access the ManyToManyField
         super().save(*args, **kwargs)
-        # Explicitly save the many-to-many relationship after saving the instance
-        if self.sent_to.exists():
-            self.sent_to.through.objects.filter(telegrammessage=self).delete()  # Remove existing relations
-            for user in self.sent_to.all():
-                self.sent_to.through.objects.create(telegrammessage=self, telegramuser=user)
+
+        # Collect chat IDs from the related TelegramUser instances
+        chat_ids = list(self.sent_to.values_list('chat_id', flat=True))
+
+        # Send the message to all chat IDs
+        if chat_ids:
+            try:
+                send_mass_messages(chat_ids, self.content)
+                logger.info(f"Message sent to {len(chat_ids)} Telegram users.")
+            except Exception as e:
+                logger.error(f"Error sending Telegram messages: {e}")
 
     def __str__(self):
         return f"Message sent on {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"

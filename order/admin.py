@@ -45,16 +45,21 @@ class StatusTimePeriodAdmin(admin.ModelAdmin):
 
 
 class TelegramMessageAdmin(admin.ModelAdmin):
-    list_display = ('content', 'created_at', 'get_sent_users')
-    actions = ['send_mass_message_with_logging_action']
-    def get_sent_users(self, obj):
-        return ", ".join([user.phone for user in obj.sent_to.all()]) or "No users"
-    get_sent_users.short_description = "Sent to"
-    def send_mass_message_with_logging_action(self, request, queryset):
-        for message in queryset:
-            send_mass_message_with_logging(message)
-        self.message_user(request, "Mass message sent successfully!")
-    send_mass_message_with_logging_action.short_description = "Send mass message to selected Telegram messages"
+    list_display = ('content', 'created_at')
+    readonly_fields = ('created_at',)
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        # Get all TelegramUser instances
+        telegram_users = TelegramUser.objects.all()
+
+        # Send the message to all users and add them to the sent_to field
+        for user in telegram_users:
+            send_mass_messages(user.chat_id, obj.content)
+            obj.sent_to.add(user)
+
+        obj.save()
+
 
 class OrderSummaryAdmin(admin.ModelAdmin):
     list_display = ('chat_id',)
