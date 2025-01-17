@@ -7,7 +7,7 @@ export const FilterPage = () => {
     return (
         <main className={styles.main}>
             <FilterSection/>
-            {/* <BestSellersSection/> */}
+            <BestSellersSection/>
         </main>
     )
 }

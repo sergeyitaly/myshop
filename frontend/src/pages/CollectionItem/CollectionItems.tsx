@@ -16,7 +16,7 @@ const CollectionItemsPage: React.FC = () => {
   return (
     <main className={style.main}>
       <FilterSection initialCollection={collection} />
-      {/* <BestSellersSection/> */}
+      <BestSellersSection/>
     </main>
   );
 };
