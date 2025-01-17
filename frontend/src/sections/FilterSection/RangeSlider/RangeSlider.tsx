@@ -33,23 +33,32 @@ export const AppRangeSlider = ({
     
     
     useEffect(() => {
+        
+            if(+value1 < minValue){
+                changePrice([minValue, value[1]])
+            }
+    
+            if(+value1 > value[1]){
+                changePrice([value[1], value[1]])
+            }
 
-        if(+value1 <= minValue){
-            changePrice([minValue, value[1]])
-        }
-
-        if(+value1 > value[1]){
-            changePrice([value[1], value[1]])
-        }
         setStartValue1FromScratch(true)
-    }, [value1])
+    }, [value1, minValue])
    
     useEffect(() => {
+
         if(+value2 < value[0]){
             changePrice([value[0], value[0]])
         }
-    }, [value2])
-    
+        
+    }, [value2, maxValue])
+
+    useEffect(() => {
+        if(+value2 === 0){
+            changePrice([minValue, maxValue])
+        }
+    }, [])
+
 
     const handleChange2 = (
       _: Event,
