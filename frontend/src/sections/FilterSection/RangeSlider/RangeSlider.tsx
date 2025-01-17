@@ -27,11 +27,14 @@ export const AppRangeSlider = ({
     const value1 = useDebounce(value[0].toString(), 1000)
     const value2 = useDebounce(value[1].toString(), 1000)
 
+    console.log('min-max', minValue, maxValue);
+    console.log(value1, value2);
+    
     
     
     useEffect(() => {
 
-        if(+value1 < minValue){
+        if(+value1 <= minValue){
             changePrice([minValue, value[1]])
         }
 

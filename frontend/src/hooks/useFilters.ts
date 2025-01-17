@@ -56,7 +56,7 @@ export const useFilters = (initialCollection?: Collection ) => {
 
         list = [...categoryTags, ...collectionTags];
 
-        if (price.min > fullRangeOfPrice[0] && price.max < fullRangeOfPrice[1] &&( price.min !== fullRangeOfPrice[0] || price.max !== fullRangeOfPrice[1]) ) {
+        if ((!!price.min && price.min > fullRangeOfPrice[0]) || (!!price.max && price.max < fullRangeOfPrice[1])) {
             list.push({
                 type: 'price',
                 value: `${formatNumber(price.min)} - ${formatNumber(price.max)} ${formatCurrency('UAH')}`
@@ -89,19 +89,23 @@ export const useFilters = (initialCollection?: Collection ) => {
 
     useEffect(() => {
         // Set filters based on active states, excluding default values
+        console.log('activeCategories', activeCategories);
+        console.log('activeCollections', activeCollections);
+        console.log('activePriceValues', activePriceValues);
+
         const newFilter: MainFilter = {
             ...filter,
-            category: activeCategories.map(({ id }) => id).join(','),
-            collection: activeCollections.map(({ id }) => id).join(','),
-            price_min: activePriceValues.min,
-            price_max: activePriceValues.max,
-            ordering: sortBy,
-            has_discount: activeHasDiscount 
+            category: activeCategories.length ? activeCategories.map(({ id }) => id).join(',') : undefined,
+            collection: activeCollections.length ? activeCollections.map(({ id }) => id).join(',') : undefined,
+            price_min: activePriceValues.min || undefined,
+            price_max: activePriceValues.max || undefined,
+            ordering: sortBy || undefined,
+            has_discount: activeHasDiscount || undefined
         }
 
-        if(!activeHasDiscount) delete newFilter.has_discount
-        if(!fullRangeOfPrice[0]) delete newFilter.price_min
-        if(!fullRangeOfPrice[1]) delete newFilter.price_max
+        // if(!activeHasDiscount) delete newFilter.has_discount
+        // if(!fullRangeOfPrice[0]) delete newFilter.price_min
+        // if(!fullRangeOfPrice[1]) delete newFilter.price_max
 
         setFilter(newFilter);
     }, [activeCategories, activePriceValues, activeCollections, sortBy, activeHasDiscount]);
@@ -160,7 +164,8 @@ export const useFilters = (initialCollection?: Collection ) => {
 
     const deleteTag = (tag: Tag) => {
         if (tag.type === 'price') {
-            setActivePriceValues({ min: fullRangeOfPrice[0], max: fullRangeOfPrice[1] });
+            // setActivePriceValues({ min: fullRangeOfPrice[0], max: fullRangeOfPrice[1] });
+            setActivePriceValues({ min: 0, max: 0 });
         }
         if (tag.type === 'category') {
             setActiveCategories(activeCategories.filter((category) => getCategoryName(category) !== tag.value));
@@ -196,6 +201,6 @@ export const useFilters = (initialCollection?: Collection ) => {
         applyChanges,
         deleteTag,
         changeDiscount,
-        setFullRangeOfPrice
+        setFullRangeOfPrice,
     };
 };

@@ -52,6 +52,9 @@ export const FilterSection = ({ initialCollection }: FilterSectionProps) => {
 		setFullRangeOfPrice,
 	} = useFilters(initialCollection);
 
+	console.log(filter);
+	
+
 	const {
 		data: productsResponse,
 		isLoading: isLoadingProducts,
@@ -118,6 +121,11 @@ export const FilterSection = ({ initialCollection }: FilterSectionProps) => {
 			? product.name_uk || product.name
 			: product.name_en || product.name;
 	};
+
+	console.log(filter);
+	console.log(productsResponse);
+	
+	 
 
 	return (
 		<section
@@ -215,12 +223,7 @@ export const FilterSection = ({ initialCollection }: FilterSectionProps) => {
 						priceValue={[tempPriceValues.min, tempPriceValues.max]} // Convert to tuple
 						activeCategories={tempCategories}
 						activeCollections={tempCollections}
-						changePrice={(priceRange: [number, number]) =>
-							changePrice({
-								min: priceRange[0],
-								max: priceRange[1],
-							})
-						} // Convert tuple to object
+						changePrice={([min, max]) => changePrice({ min, max })} // Convert tuple to object
 						onClickHideFilters={handleCloseMenu}
 						onClickCategory={changeCategory}
 						onClickCollection={changeCollection}
