@@ -1,3 +1,5 @@
+@import "../../variables";
+
 .main {
   background: rgb(11, 5, 153);
   background: radial-gradient(
@@ -7,9 +9,24 @@
   );
   color: white;
   padding-block: 126px 131px;
-  display: grid;
-  place-content: center;
+  display: flex;
+  flex-direction: column;
   justify-items: center;
+  align-items: center;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-items: center;
+  align-items: center;
+}
+
+.defs {
+  display: flex;
+  flex-direction: column;
+  justify-items: center;
+  align-items: center;
 }
 
 .message {
@@ -17,9 +34,19 @@
   font-family: "Fira Sans Condensed", sans-serif;
   font-weight: 400;
   margin-bottom: 48px;
+  text-align: center;
+
+  @media (max-width: $screen-mobile) {
+    font-size: 20px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
 }
 
 .img {
+  display: flex;
+  justify-content: center;
+
   margin-bottom: 24px;
   width: 100%;
   max-width: 684px;
