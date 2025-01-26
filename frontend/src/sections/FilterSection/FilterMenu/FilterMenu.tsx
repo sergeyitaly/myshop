@@ -2,20 +2,29 @@ import { useTranslation } from "react-i18next"; // Import the useTranslation hoo
 import { Category, Collection } from "../../../models/entities";
 import { useGetCategoriesByFilterQuery } from "../../../api/categorySlice";
 import { useGetCollectionsByFilterQuery } from "../../../api/collectionSlice";
-import { TextButton } from "../../../components/UI/TextButton/TextButton";
 import { FilterDropDown } from "../FilterDropDown/FilterDropDown";
 import { FilterItem } from "../FilterItem/FilterItem";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import styles from "./FilterMenu.module.scss";
 import "react-range-slider-input/dist/style.css";
 import { AppRangeSlider } from "../RangeSlider/RangeSlider";
 import { MainButton } from "../../../components/UI/MainButton/MainButton";
 import { useEffect } from "react";
 import { TopLevelFilter } from "../TopLevelFilter/TopLevelFilter";
+import { AppIcon } from "../../../components/SvgIconComponents/AppIcon";
+import { Logo } from "../../../components/Logo/Logo";
+
+export const modal: Variants = {
+    hidden: {
+        opacity: 0,
+    },
+    visible: {
+        opacity: 1,
+    }
+}
 
 interface FilterMenuProps {
     hasDiscount: boolean;
-    initialTopPosition: number
     showCollections?: boolean;
     activeCategories?: Category[];
     activeCollections?: Collection[];
@@ -32,7 +41,6 @@ interface FilterMenuProps {
 
 export const FilterMenu = ({
     hasDiscount,
-    initialTopPosition,
     showCollections,
     activeCategories = [],
     activeCollections = [],
@@ -94,92 +102,106 @@ export const FilterMenu = ({
 
     return (
         <motion.div
-            className={styles.wrapper}
-            initial={{ x: "-100%"}}
-            animate={{ x: 0 }}
-            exit={{ x: "-100%"}}
-            transition={{ ease: "linear" }}
-            style={{top: initialTopPosition}}
+            className={styles.background}
+            variants={modal}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
         >
-            <header className={styles.header}>
-                <TextButton
-                    className={styles.button}
-                    title={t("hide")} // Localized text
-                    onClick={onClickHideFilters}
-                />
-            </header>
-            <div className={styles.container}>
-                {showCollections && (
+            <motion.div
+                className={styles.box}
+                initial={{ x: "-100%"}}
+                animate={{ x: 0 }}
+                exit={{ x: "-100%"}}
+                transition={{ ease: "linear" }}
+            >
+                <header className={styles.header}>
+                    <Logo className={styles.logo}/>
+                    <h4 className={styles.titleContainer}>
+                        <span className={styles.title}>
+                            {t("basket_title")}
+                        </span>
+                    </h4>
+                    <button onClick={onClickHideFilters}>
+                        <AppIcon iconName="cross" />
+                    </button>
+                </header>
+                <div className={styles.container}>
+                    {showCollections && (
+                        <FilterDropDown
+                            title={t("collections")} // Localized text
+                        >
+                            <div className={styles.categoryList}>
+                                {isSuccessCollections &&
+                                    collections.results.map((collection) => {
+                                        const isActive = activeCollections.some(
+                                            ({ id }) => id === collection.id
+                                        );
+
+                                        return (
+                                            <FilterItem
+                                                key={collection.id}
+                                                title={getCollectionName(collection)} // Use the function to get the collection name
+                                                isActive={isActive}
+                                                onClick={() =>
+                                                    onClickCollection(collection)
+                                                }
+                                            />
+                                        );
+                                    })}
+                            </div>
+                        </FilterDropDown>
+                    )}
                     <FilterDropDown
-                        title={t("collections")} // Localized text
+                        title={t("category")} // Localized text
                     >
                         <div className={styles.categoryList}>
-                            {isSuccessCollections &&
-                                collections.results.map((collection) => {
-                                    const isActive = activeCollections.some(
-                                        ({ id }) => id === collection.id
+                            {isSuccessCategories &&
+                                categories.results.map((category) => {
+                                    const isActive = activeCategories.some(
+                                        ({ id }) => id === category.id
                                     );
 
                                     return (
                                         <FilterItem
-                                            key={collection.id}
-                                            title={getCollectionName(collection)} // Use the function to get the collection name
+                                            key={category.id}
+                                            title={getCategoryName(category)} // Use the function to get the category name
                                             isActive={isActive}
                                             onClick={() =>
-                                                onClickCollection(collection)
+                                                onClickCategory(category)
                                             }
                                         />
                                     );
                                 })}
                         </div>
                     </FilterDropDown>
-                )}
-                <FilterDropDown
-                    title={t("category")} // Localized text
-                >
-                    <div className={styles.categoryList}>
-                        {isSuccessCategories &&
-                            categories.results.map((category) => {
-                                const isActive = activeCategories.some(
-                                    ({ id }) => id === category.id
-                                );
-
-                                return (
-                                    <FilterItem
-                                        key={category.id}
-                                        title={getCategoryName(category)} // Use the function to get the category name
-                                        isActive={isActive}
-                                        onClick={() =>
-                                            onClickCategory(category)
-                                        }
-                                    />
-                                );
-                            })}
-                    </div>
-                </FilterDropDown>
-              
-                <FilterDropDown
-                    title={t("price")} // Localized text
-                >
-                    <AppRangeSlider
-                        minValue={minValue}
-                        maxValue={maxValue}
-                        value={priceValue}
-                        changePrice={changePrice}
+                
+                    <FilterDropDown
+                        title={t("price")} // Localized text
+                    >
+                        <AppRangeSlider
+                            minValue={minValue}
+                            maxValue={maxValue}
+                            value={priceValue}
+                            changePrice={changePrice}
+                        />
+                    </FilterDropDown>
+                    <TopLevelFilter
+                        isActive = {hasDiscount}
+                        title={t('discounts')}
+                        onClick={ handleChangeSale }
                     />
-                </FilterDropDown>
-                <TopLevelFilter
-                    isActive = {hasDiscount}
-                    title={t('discounts')}
-                    onClick={ handleChangeSale }
-                />
-                <MainButton 
-                    className={styles.saveButton}
-                    title={t("save")}
-                    color="blue"
-                    onClick = {onApply}
-                />
-            </div>
+                    
+                </div>
+                <div className={styles.actions}>
+                    <MainButton 
+                        className={styles.saveButton}
+                        title={t("save")}
+                        color="blue"
+                        onClick = {onApply}
+                    />
+                </div>
+            </motion.div>
         </motion.div>
     );
 };

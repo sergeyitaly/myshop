@@ -1,20 +1,47 @@
 @import '../../../variables';
 
-.wrapper {
+.background{
+    position: fixed;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+    background: #00000066;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+}
+
+.title {
+    font-size: clamp(1rem, 0.851vw + 0.734rem, 1.5rem);
+    font-weight: 500;
+}
+
+.logo {
+    max-width: clamp(5.625rem, 3.371vw + 4.466rem, 7.5rem)
+}
+
+.box {
     position: absolute;
     z-index: 2;
     top: 0;
     left: 0;
-    bottom: 0;
-    display: flex;
-    flex-direction: column;
     width: 90vw;
     max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    height: 100vh;
+    box-shadow: $shadow-main;
+    background-color: $color-background;
+    padding: 20px;
 }
 
 .header {
     background: $color-background;
     text-align: end;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .button {
@@ -32,18 +59,19 @@
     flex-direction: column;
     flex-grow: 1;
     gap: 20px;
-    box-shadow: $shadow-main;
-    background-color: $color-background;
-    
-    padding: 20px;
     border-radius: 5px;
-
+    overflow: auto;
 }
 
 .categoryList {
     display: flex;
     flex-direction: column;
     gap: clamp(0.313rem, 0.532vw + 0.146rem, 0.625rem);
+}
+
+.actions{
+    display: flex;
+    justify-content: end;
 }
 
 @media (max-width: $screen-mobile) {

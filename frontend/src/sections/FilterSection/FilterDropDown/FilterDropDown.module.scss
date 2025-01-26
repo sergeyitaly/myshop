@@ -4,7 +4,8 @@
 
 
 .button {
-    @include topLevelButton
+    @include topLevelButton;
+    padding-right: 10px
 }
 
 .arrow {
@@ -14,7 +15,8 @@
     }
 }
 .active {
-    transform: rotate(-90deg);
+    transform: rotate(-90deg) ;
+
 }
 
 .contentContainer {
