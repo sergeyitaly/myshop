@@ -4,40 +4,31 @@ import { useToggler } from "../../../hooks/useToggler"
 import { SortMenuItem, useSortList } from "../SortList"
 import { SortMenu } from "../SortMenu/SortMenu"
 import styles from './FilterControlBar.module.scss'
-import { useEffect, useRef } from "react"
 
 interface FilterControlBarProps  {
     isOpenFilterMenu: boolean
     changeOrdering?: (orderName: string) => void
     onClickOpenFilterMenu: () => void
-    onInitRect: (rect?: DOMRect) => void
 }
 
 export const FilterControlBar = ({
     isOpenFilterMenu,
     changeOrdering,
     onClickOpenFilterMenu,
-    onInitRect
 
 }: FilterControlBarProps) => {
 
-    const ref = useRef<HTMLDivElement>(null)
 
     const sortList = useSortList()
 
     const { t } = useTranslation();
 
-    const rect = ref.current?.getBoundingClientRect()
 
     const {
         openStatus: openSort,
         handleClose: closeSortMenu,   
         handleOpen: handleClickSort
     } = useToggler();
-
-    useEffect(() => {
-        onInitRect(rect)
-    }, [rect?.top])
 
  
 
@@ -51,7 +42,7 @@ export const FilterControlBar = ({
     
     
     return (
-        <div ref = {ref} className={styles.bar} >
+        <div  className={styles.bar} >
             {
                 isOpenFilterMenu ?
                     <span />

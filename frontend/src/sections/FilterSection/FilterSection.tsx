@@ -25,7 +25,6 @@ export const FilterSection = ({ initialCollection }: FilterSectionProps) => {
 	const LIMIT = 8;
 	const [currentPage, setCurrentPage] = useState<number>(1);
 	const { t, i18n } = useTranslation();
-	const [topPosition, setTopPosition] = useState<number>(0);
 
 	const {
 		openStatus: open,
@@ -52,7 +51,9 @@ export const FilterSection = ({ initialCollection }: FilterSectionProps) => {
 		setFullRangeOfPrice,
 	} = useFilters(initialCollection);
 
-	console.log(filter);
+	useEffect(() => {
+		setCurrentPage(1)
+	}, [filter])
 	
 
 	const {
@@ -90,11 +91,7 @@ export const FilterSection = ({ initialCollection }: FilterSectionProps) => {
 		handleCloseMenu();
 	};
 
-	const handleInitRect = (rect?: DOMRect) => {
-		if (rect) {
-			setTopPosition(rect.top);
-		}
-	};
+	
 
 	const getTranslatedCategoryName = useCallback(
 		(category?: Category): string => {
@@ -128,6 +125,7 @@ export const FilterSection = ({ initialCollection }: FilterSectionProps) => {
 	 
 
 	return (
+	<>
 		<section
 			className={clsx(styles.section, {
 				[styles.blur]: !isLoadingProducts && isFetchingProducts,
@@ -138,7 +136,6 @@ export const FilterSection = ({ initialCollection }: FilterSectionProps) => {
 					isOpenFilterMenu={open}
 					changeOrdering={changeOrdering}
 					onClickOpenFilterMenu={handleOpenMenu}
-					onInitRect={handleInitRect}
 				/>
 				<div className={styles.tagContainer}>
 					{tagList.map((tag, i) => {
@@ -212,26 +209,27 @@ export const FilterSection = ({ initialCollection }: FilterSectionProps) => {
 					/>
 				)}
 			</PageContainer>
-			<AnimatePresence>
-				{open && (
-					<FilterMenu
-						hasDiscount={tempHasDiscount}
-						initialTopPosition={topPosition}
-						showCollections={!initialCollection}
-						minValue={fullRangeOfPrice[0]}
-						maxValue={fullRangeOfPrice[1]}
-						priceValue={[tempPriceValues.min, tempPriceValues.max]} // Convert to tuple
-						activeCategories={tempCategories}
-						activeCollections={tempCollections}
-						changePrice={([min, max]) => changePrice({ min, max })} // Convert tuple to object
-						onClickHideFilters={handleCloseMenu}
-						onClickCategory={changeCategory}
-						onClickCollection={changeCollection}
-						onApply={handleApply}
-						onChangeSale={changeDiscount}
-					/>
-				)}
-			</AnimatePresence>
+		
 		</section>
+		<AnimatePresence>
+			{open && (
+				<FilterMenu
+					hasDiscount={tempHasDiscount}
+					showCollections={!initialCollection}
+					minValue={fullRangeOfPrice[0]}
+					maxValue={fullRangeOfPrice[1]}
+					priceValue={[tempPriceValues.min, tempPriceValues.max]} // Convert to tuple
+					activeCategories={tempCategories}
+					activeCollections={tempCollections}
+					changePrice={([min, max]) => changePrice({ min, max })} // Convert tuple to object
+					onClickHideFilters={handleCloseMenu}
+					onClickCategory={changeCategory}
+					onClickCollection={changeCollection}
+					onApply={handleApply}
+					onChangeSale={changeDiscount}
+				/>
+			)}
+		</AnimatePresence>
+	</>
 	);
 };
