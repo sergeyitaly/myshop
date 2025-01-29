@@ -192,15 +192,15 @@ class ProductListFilter(generics.ListCreateAPIView, CachedQueryMixin):
         discounted_price_max = queryset.aggregate(max_price=Max('discounted_price'))['max_price']
 
         # Cache the results for price range if not already cached
-        overall_discounted_price_min = cache.get('overall_discounted_price_min')
-        overall_discounted_price_max = cache.get('overall_discounted_price_max')
+        #overall_discounted_price_min = cache.get('overall_discounted_price_min')
+        #overall_discounted_price_max = cache.get('overall_discounted_price_max')
 
-        if overall_discounted_price_min is None or overall_discounted_price_max is None:
-            overall_discounted_price_min = queryset.aggregate(min_price=Min('discounted_price'))['min_price']
-            overall_discounted_price_max = queryset.aggregate(max_price=Max('discounted_price'))['max_price']
+        #if overall_discounted_price_min is None or overall_discounted_price_max is None:
+        overall_discounted_price_min = queryset.aggregate(min_price=Min('discounted_price'))['min_price']
+        overall_discounted_price_max = queryset.aggregate(max_price=Max('discounted_price'))['max_price']
             
-            cache.set('overall_discounted_price_min', overall_discounted_price_min, timeout=60 * 15)
-            cache.set('overall_discounted_price_max', overall_discounted_price_max, timeout=60 * 15)
+        #cache.set('overall_discounted_price_min', overall_discounted_price_min, timeout=60 * 15)
+        #cache.set('overall_discounted_price_max', overall_discounted_price_max, timeout=60 * 15)
 
         # Paginate the queryset
         paginator = PageNumberPagination()
