@@ -119,7 +119,7 @@ export const FilterMenu = ({
                     <Logo className={styles.logo}/>
                     <h4 className={styles.titleContainer}>
                         <span className={styles.title}>
-                            {t("basket_title")}
+                            {t("filters_title")}
                         </span>
                     </h4>
                     <button onClick={onClickHideFilters}>
