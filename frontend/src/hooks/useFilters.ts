@@ -4,6 +4,8 @@ import { MainFilter } from "../models/filters";
 import { formatNumber } from "../functions/formatNumber";
 import { formatCurrency } from "../functions/formatCurrency";
 import { useAppTranslator } from "./useAppTranslator";
+import { useTranslation } from "react-i18next";
+
 
 interface Tag {
     type: 'category' | 'collection' | 'price' | 'discount';
@@ -17,6 +19,7 @@ interface PriceRange {
 
 
 export const useFilters = (initialCollection?: Collection ) => {
+    const { t } = useTranslation();
 
     const [fullRangeOfPrice, setFullRangeOfPrice] = useState<[number, number]>([0, 0])
 
@@ -67,7 +70,7 @@ console.log('fullRangeOfPrice', fullRangeOfPrice);
         if (discount) {
             list.push({
                 type: 'discount',
-                value: 'Discounted' 
+                value: t('discounts') 
             });
         }
         return list;
