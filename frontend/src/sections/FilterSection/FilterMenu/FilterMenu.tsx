@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next"; // Import the useTranslation hook
+import { useTranslation } from "react-i18next"; 
 import { Category, Collection } from "../../../models/entities";
 import { useGetCategoriesByFilterQuery } from "../../../api/categorySlice";
 import { useGetCollectionsByFilterQuery } from "../../../api/collectionSlice";
@@ -13,6 +13,7 @@ import { useEffect } from "react";
 import { TopLevelFilter } from "../TopLevelFilter/TopLevelFilter";
 import { AppIcon } from "../../../components/SvgIconComponents/AppIcon";
 import { Logo } from "../../../components/Logo/Logo";
+import { useAppTranslator } from "../../../hooks/useAppTranslator";
 
 export const modal: Variants = {
     hidden: {
@@ -54,7 +55,8 @@ export const FilterMenu = ({
     onApply,
     onChangeSale,
 }: FilterMenuProps) => {
-    const { i18n, t } = useTranslation(); // Initialize translation hook
+    const { t } = useTranslation();
+    const { getCategoryName, getCollectionName } = useAppTranslator();
 
     const { data: categories, isSuccess: isSuccessCategories } = useGetCategoriesByFilterQuery({
         page_size: 8,
@@ -71,30 +73,6 @@ export const FilterMenu = ({
             window.document.body.style.overflow = 'visible'
         }
     }, [])
-
-    // Function to get translated category name
-    const getCategoryName = (category: Category): string => {
-        switch (i18n.language) {
-            case 'uk':
-                return category.name_uk || category.name || '';
-            case 'en':
-                return category.name_en || category.name || '';
-            default:
-                return category.name_en || category.name || '';
-        }
-    };
-
-    // Function to get translated collection name
-    const getCollectionName = (collection: Collection): string => {
-        switch (i18n.language) {
-            case 'uk':
-                return collection.name_uk || collection.name || '';
-            case 'en':
-                return collection.name_en || collection.name || '';
-            default:
-                return collection.name_en || collection.name || '';
-        }
-    };
 
     const handleChangeSale = () => {
         onChangeSale(!hasDiscount)
@@ -129,7 +107,7 @@ export const FilterMenu = ({
                 <div className={styles.container}>
                     {showCollections && (
                         <FilterDropDown
-                            title={t("collections")} // Localized text
+                            title={t("collections")} 
                         >
                             <div className={styles.categoryList}>
                                 {isSuccessCollections &&
@@ -141,7 +119,7 @@ export const FilterMenu = ({
                                         return (
                                             <FilterItem
                                                 key={collection.id}
-                                                title={getCollectionName(collection)} // Use the function to get the collection name
+                                                title={getCollectionName(collection)}
                                                 isActive={isActive}
                                                 onClick={() =>
                                                     onClickCollection(collection)
@@ -153,7 +131,7 @@ export const FilterMenu = ({
                         </FilterDropDown>
                     )}
                     <FilterDropDown
-                        title={t("category")} // Localized text
+                        title={t("category")} 
                     >
                         <div className={styles.categoryList}>
                             {isSuccessCategories &&
@@ -165,7 +143,7 @@ export const FilterMenu = ({
                                     return (
                                         <FilterItem
                                             key={category.id}
-                                            title={getCategoryName(category)} // Use the function to get the category name
+                                            title={getCategoryName(category)} 
                                             isActive={isActive}
                                             onClick={() =>
                                                 onClickCategory(category)
@@ -177,7 +155,7 @@ export const FilterMenu = ({
                     </FilterDropDown>
                 
                     <FilterDropDown
-                        title={t("price")} // Localized text
+                        title={t("price")} 
                     >
                         <AppRangeSlider
                             minValue={minValue}
