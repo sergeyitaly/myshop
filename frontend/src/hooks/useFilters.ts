@@ -20,6 +20,7 @@ export const useFilters = (initialCollection?: Collection ) => {
 
     const [fullRangeOfPrice, setFullRangeOfPrice] = useState<[number, number]>([0, 0])
 
+console.log('fullRangeOfPrice', fullRangeOfPrice);
 
     const [tempCategories, setTempCategories] = useState<Category[]>([]);
     const [tempCollections, setTempCollections] = useState<Collection[]>([]);
@@ -73,6 +74,7 @@ export const useFilters = (initialCollection?: Collection ) => {
     };
 
     useEffect(() => {
+       
         setTempPriceValues({min: fullRangeOfPrice[0], max: fullRangeOfPrice[1]})
         // setActivePriceValues({min: fullRangeOfPrice[0], max: fullRangeOfPrice[1]})
     }, [fullRangeOfPrice[0], fullRangeOfPrice[1]])
@@ -102,6 +104,9 @@ export const useFilters = (initialCollection?: Collection ) => {
             ordering: sortBy || undefined,
             has_discount: activeHasDiscount || undefined
         }
+
+        if(activePriceValues.min === fullRangeOfPrice[0]) delete newFilter.price_min
+        if(activePriceValues.max === fullRangeOfPrice[1]) delete newFilter.price_max 
 
         // if(!activeHasDiscount) delete newFilter.has_discount
         // if(!fullRangeOfPrice[0]) delete newFilter.price_min

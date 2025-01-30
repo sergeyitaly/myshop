@@ -23,6 +23,7 @@ export const AppRangeSlider = ({
     const minDistance = 1000;
 
     const [startValue1FromScratch, setStartValue1FromScratch] = useState<boolean>(true) 
+    const [startValue2FromScratch, setStartValue2FromScratch] = useState<boolean>(true) 
 
     const value1 = useDebounce(value[0].toString(), 1000)
     const value2 = useDebounce(value[1].toString(), 1000)
@@ -50,6 +51,8 @@ export const AppRangeSlider = ({
         if(+value2 < value[0]){
             changePrice([value[0], value[0]])
         }
+
+        setStartValue2FromScratch(true)
         
     }, [value2, maxValue])
 
@@ -87,12 +90,16 @@ export const AppRangeSlider = ({
 
         
         let transformedValue = parseFloat(e.target.value.replace(/\s/g, '').replace(/,/g, '.'))
-
+        const nativeEvent = e.nativeEvent as InputEvent   
+        const data = nativeEvent.data
         if(startValue1FromScratch){
             
             const lastIndex = transformedValue.toString().length
             
             transformedValue = +transformedValue.toString()[lastIndex - 1]
+
+            if(!data || data === ' ') transformedValue = 0
+            
         }
         
         if(!e.target.value){
@@ -113,12 +120,25 @@ export const AppRangeSlider = ({
 
     const handleChangeInp2 = (e: ChangeEvent<HTMLInputElement>) => {
         let transformedValue = parseFloat(e.target.value.replace(/\s/g, '').replace(/,/g, '.'))
+        console.log(transformedValue);
+             const nativeEvent = e.nativeEvent as InputEvent   
+             const data = nativeEvent.data
+        if(startValue2FromScratch){
+            
+            const lastIndex = transformedValue.toString().length
+            transformedValue = +transformedValue.toString()[lastIndex - 1]
+            console.log(transformedValue);
+            if(!data || data === ' ') transformedValue = 0
+        }
+
         if(!e.target.value){
             transformedValue = 0
         }
         if(!isNaN(+transformedValue) && transformedValue <= maxValue){
             changePrice([value[0], transformedValue])
         }
+
+        setStartValue2FromScratch(false)
     }
 
     return (
