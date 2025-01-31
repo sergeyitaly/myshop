@@ -1,11 +1,14 @@
-import { AppIcon } from "../../../SvgIconComponents/AppIcon"
-import styles from './EmptyBasket.module.scss'
+import { AppIcon } from "../../../SvgIconComponents/AppIcon";
+import { useTranslation } from "react-i18next";
+import styles from "./EmptyBasket.module.scss";
 
 export const EmptyBasket = () => {
-    return (
-        <div className={styles.container}>
-            <AppIcon iconName="vase"/>
-            <p>Ваш кошик порожній</p>
-        </div>
-    )
-}
+	const { t } = useTranslation();
+
+	return (
+		<div className={styles.container}>
+			<AppIcon iconName="vase" />
+			<p>{t("empty_cart")}</p>
+		</div>
+	);
+};
