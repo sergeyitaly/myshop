@@ -95,11 +95,6 @@ export const FilterMenu = ({
             >
                 <header className={styles.header}>
                     <Logo className={styles.logo}/>
-                    <h4 className={styles.titleContainer}>
-                        <span className={styles.title}>
-                            {t("filters_title")}
-                        </span>
-                    </h4>
                     <button onClick={onClickHideFilters}>
                         <AppIcon iconName="cross" />
                     </button>
