@@ -62,11 +62,21 @@ export const TeamItem: React.FC<TeamMemberProps> = ({ member }) => {
 
 	return (
 		<div className={styles.teamItem}>
-			<AppImage
-				src={photo_url}
-				alt={translatedName}
-				className={styles.imageSize}
-			/>
+			{linkedin ? (
+				<a href={linkedin} target="_blank" rel="noopener noreferrer">
+					<AppImage
+						src={photo_url}
+						alt={translatedName}
+						className={styles.imageSize}
+					/>
+				</a>
+			) : (
+				<AppImage
+					src={photo_url}
+					alt={translatedName}
+					className={styles.imageSize}
+				/>
+			)}
 
 			<p className={styles.name}>
 				{translatedName} {translatedSurname}
