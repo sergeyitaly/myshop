@@ -21,10 +21,13 @@ COPY requirements.txt ./
 RUN /app/venv/bin/pip install --upgrade pip
 RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt
 
-# Stage 4: Final Image
+# Stage 3: Final Image
 FROM python:3.11
 
 WORKDIR /app
+
+# Install PostgreSQL client tools (including pg_dump)
+RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
 
 # Copy the virtual environment from the build stage
 COPY --from=python-build /app/venv /app/venv
@@ -42,13 +45,13 @@ RUN ls -al
 ENV PATH="/app/venv/bin:$PATH"
 
 # Run the backup command (using .env for environment variables)
-RUN python manage.py backup
+RUN python manage.py backup --output /app/backups/db_backup.dump
 
 # Copy the entrypoint script
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-# Apply Django migrations 
+# Apply Django migrations
 RUN python manage.py makemigrations
 RUN python manage.py migrate
 
@@ -68,5 +71,6 @@ EXPOSE 8010
 
 # Set the entrypoint
 ENTRYPOINT ["/app/entrypoint.sh"]
+
 # Define the entry point for the container
 CMD ["/app/venv/bin/gunicorn", "--config", "gunicorn_config.py", "myshop.wsgi:application"]
