@@ -45,7 +45,7 @@ RUN ls -al
 ENV PATH="/app/venv/bin:$PATH"
 
 # Run the backup command (using .env for environment variables)
-RUN python manage.py backup --output /app/backups/db_backup.dump
+RUN python manage.py backup
 
 # Copy the entrypoint script
 COPY entrypoint.sh /app/entrypoint.sh
