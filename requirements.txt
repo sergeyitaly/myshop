@@ -34,10 +34,12 @@ django-colorfield==0.11.0
 django-cors-headers==4.3.1
 django-extensions==3.2.3
 django-filter==24.2
+django-formtools==2.5.1
 django-imagekit==5.0.0
 django-mailersend==0.2.1
 django-mailgun-mime==0.1.7
 django-modeltranslation==0.19.6
+django-otp==1.5.4
 django-phonenumber-field==8.0.0
 django-redis==5.4.0
 django-rest-knox==4.2.0
@@ -93,7 +95,9 @@ pycparser==2.22
 pydot==3.0.2
 PyJWT==2.8.0
 pymemcache==4.0.0
+pyotp==2.9.0
 pyparsing==3.1.4
+pypng==0.20220715.0
 pyproject_hooks==1.1.0
 python-crontab==3.2.0
 python-dateutil==2.9.0.post0
@@ -105,6 +109,7 @@ python-telegram-bot==21.4
 python3-openid==3.2.0
 pytz==2024.1
 PyYAML==6.0.1
+qrcode==7.4.2
 redis==5.2.0
 referencing==0.35.1
 requests==2.32.2

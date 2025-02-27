@@ -21,6 +21,23 @@ COPY requirements.txt ./
 RUN /app/venv/bin/pip install --upgrade pip
 RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt
 
+# Stage 3: Perform Database Backup
+FROM python:3.11 AS backup-stage
+
+WORKDIR /app
+
+# Copy the virtual environment from the build stage
+COPY --from=python-build /app/venv /app/venv
+
+# Copy the rest of the project files (including .env)
+COPY . .
+
+# Activate virtual environment
+ENV PATH="/app/venv/bin:$PATH"
+
+# Run the backup command (using .env for environment variables)
+RUN python manage.py backup --output /app/backups/db_backup.dump
+
 # Stage 4: Final Image
 FROM python:3.11
 
@@ -32,11 +49,11 @@ COPY --from=python-build /app/venv /app/venv
 # Copy frontend build files from the frontend-build stage
 COPY --from=frontend-build /app/dist /app/dist
 
-# Copy the rest of the project files
-COPY . .
+# Copy the backup file from the backup-stage
+COPY --from=backup-stage /app/backups/db_backup.dump /app/backups/db_backup.dump
 
-# List directory contents for debugging
-RUN ls -al
+# Copy the rest of the project files (excluding .env for security)
+COPY . .
 
 # Activate virtual environment
 ENV PATH="/app/venv/bin:$PATH"
@@ -45,7 +62,7 @@ ENV PATH="/app/venv/bin:$PATH"
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-# Apply Django migrations 
+# Apply Django migrations
 RUN python manage.py makemigrations
 RUN python manage.py migrate
 
@@ -65,5 +82,6 @@ EXPOSE 8010
 
 # Set the entrypoint
 ENTRYPOINT ["/app/entrypoint.sh"]
+
 # Define the entry point for the container
 CMD ["/app/venv/bin/gunicorn", "--config", "gunicorn_config.py", "myshop.wsgi:application"]

@@ -6,6 +6,14 @@ from dotenv import load_dotenv
 class Command(BaseCommand):
     help = 'Backup PostgreSQL database to a local file in custom format'
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--output',
+            type=str,
+            default='db_backup.dump',
+            help='Output file name for the backup'
+        )
+
     def handle(self, *args, **kwargs):
         # Load environment variables from .env file
         load_dotenv()
@@ -16,7 +24,7 @@ class Command(BaseCommand):
         POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
         POSTGRES_HOST = os.getenv('POSTGRES_HOST')
         POSTGRES_PORT = os.getenv('POSTGRES_PORT')
-        BACKUP_FILE = 'db_backup.dump'  # Backup file name in custom format
+        BACKUP_FILE = kwargs['output']  # Backup file name in custom format
 
         if not all([POSTGRES_DATABASE, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT]):
             self.stdout.write(self.style.ERROR('Missing environment variables'))
@@ -32,8 +40,9 @@ class Command(BaseCommand):
             '--port={}'.format(POSTGRES_PORT),
             '--username={}'.format(POSTGRES_USER),
             '--no-password',
-            '--format=c',  # Custom format
+            '--format=c',  # Custom format for full backup
             '--file={}'.format(BACKUP_FILE),
+            '--verbose',  # Optional: Add verbose output for debugging
             POSTGRES_DATABASE
         ]
 
