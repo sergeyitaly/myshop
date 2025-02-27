@@ -23,7 +23,7 @@ cryptography==43.0.1
 cssselect2==0.7.0
 defusedxml==0.8.0rc2
 distlib==0.3.8
-Django==4.2.16
+Django==4.2.18
 django-admin-interface==0.28.6
 django-allauth==0.63.6
 django-anymail==11.0
