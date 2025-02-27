@@ -32,9 +32,6 @@ COPY --from=python-build /app/venv /app/venv
 # Copy frontend build files from the frontend-build stage
 COPY --from=frontend-build /app/dist /app/dist
 
-# Run the backup command (using .env for environment variables)
-RUN python manage.py backup
-
 # Copy the rest of the project files
 COPY . .
 
@@ -43,6 +40,9 @@ RUN ls -al
 
 # Activate virtual environment
 ENV PATH="/app/venv/bin:$PATH"
+
+# Run the backup command (using .env for environment variables)
+RUN python manage.py backup
 
 # Copy the entrypoint script
 COPY entrypoint.sh /app/entrypoint.sh
