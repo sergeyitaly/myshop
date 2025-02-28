@@ -85,29 +85,6 @@ class TeamMember(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        if self.linkedin:
-            log_entry = APILog.objects.get(endpoint=self.linkedin)
-            log_entry.request_count = 1
-            log_entry.timestamp = timezone.localtime(timezone.now())
-            log_entry.save()
-        if self.link_to_telegram:
-            log_entry = APILog.objects.get(endpoint=self.link_to_telegram)
-            log_entry.request_count = 1
-            log_entry.timestamp = timezone.localtime(timezone.now())
-            log_entry.save()
-        if self.github:
-            log_entry = APILog.objects.get(endpoint=self.behance)
-            log_entry.request_count = 1
-            log_entry.timestamp = timezone.localtime(timezone.now())
-            log_entry.save()
-        if self.behance:
-            log_entry = APILog.objects.get(endpoint=self.behance)
-            log_entry.request_count = 1
-            log_entry.timestamp = timezone.localtime(timezone.now())
-            log_entry.save()
-
-
-
 
     def delete(self, *args, **kwargs):
         if self.photo:
