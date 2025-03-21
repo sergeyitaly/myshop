@@ -1,5 +1,4 @@
 package com.koloryt;
-
 import android.os.Bundle;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
