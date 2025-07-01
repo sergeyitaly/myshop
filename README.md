@@ -65,3 +65,8 @@ docker run -it --entrypoint /bin/bash sergeyitaly/koloryt:serhii_test
       ./gradlew updateLintBaseline
       ./gradlew clean build
       ./gradlew bundleRelease
+
+   
+7. Claudflare worker
+ cd my-worker
+ npm run build && npm run deploy

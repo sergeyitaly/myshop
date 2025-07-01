@@ -86,3 +86,4 @@ android/app/lint-baseline.xml
 
 celerybeat-schedule.db.bak
 admin_qr_code.png
+iosWebView/

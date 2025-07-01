@@ -4,7 +4,7 @@
     <issue
         id="HighAppVersionCode"
         message="The &apos;versionCode&apos; is very high and close to the max allowed value"
-        errorLine1="    versionCode 2012241514 "
+        errorLine1="    versionCode 2012241516 "
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="build.gradle"
@@ -113,7 +113,7 @@
 
     <issue
         id="GradleDependency"
-        message="A newer version of com.google.firebase:firebase-bom than 33.7.0 is available: 33.10.0"
+        message="A newer version of com.google.firebase:firebase-bom than 33.7.0 is available: 33.11.0"
         errorLine1="    implementation platform(&apos;com.google.firebase:firebase-bom:33.7.0&apos;)"
         errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location

@@ -1,0 +1,69 @@
+pipeline {
+    agent any
+
+    environment {
+        //GITHUB_CREDENTIALS     = credentials('github-credentials-id')
+        DOCKER_IMAGE           = 'sergeyitaly/koloryt'
+        TAG                    = 'serhii_test_muiltiplatform'
+        MULTI_TAG              = "${TAG}_miltiplatform"
+        PATH                   = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${env.PATH}"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                deleteDir()
+                echo "Cleaning workspace and checking out repository…"
+                git branch: 'main',
+                    credentialsId: 'github-credentials-id',
+                    url: 'https://github.com/sergeyitaly/myshop.git'
+                sh 'ls -lat'
+            }
+        }
+
+        stage('Setup Buildx') {
+            steps {
+                echo "Initializing Docker Buildx…"
+                // create a new builder (if not already) and bootstrap it
+                sh 'docker buildx create --use --name multi_builder || docker buildx use multi_builder'
+                sh 'docker buildx inspect multi_builder --bootstrap'
+            }
+        }
+
+        stage('Build & Push Multi‑Arch Image') {
+            steps {
+                script {
+                    withCredentials([file(credentialsId: 'env-id', variable: 'ENV_ARGS_FILE'),
+                                     usernamePassword(credentialsId: 'dockerhub-credentials-id',
+                                                      usernameVariable: 'DOCKERHUB_USER',
+                                                      passwordVariable: 'DOCKERHUB_PWD')]) {
+                        echo "Copying .env into build context…"
+                        sh 'cp ${ENV_ARGS_FILE} .env'
+
+                        echo "Logging into Docker Hub…"
+                        sh 'docker login -u ${DOCKERHUB_USER} -p ${DOCKERHUB_PWD}'
+
+                        echo "Building and pushing multi-arch image…"
+                        sh """
+                            docker buildx build \\
+                              --platform linux/amd64,linux/arm64 \\
+                              --tag ${DOCKER_IMAGE}:${MULTI_TAG} \\
+                              --push \\
+                              .
+                        """
+
+                        echo "Cleaning up .env…"
+                        sh 'rm .env'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Build complete. Cleaning up old builders…"
+            sh 'docker buildx rm multi_builder || true'
+        }
+    }
+}
